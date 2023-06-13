@@ -12,7 +12,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
@@ -57,11 +57,11 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override

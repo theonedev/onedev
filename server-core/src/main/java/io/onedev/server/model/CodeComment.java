@@ -279,7 +279,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 		return gitService.hasObjects(project, objIds.toArray(new ObjectId[0]));
 	}
 	
-	public static String getWebSocketObservable(Long commentId) {
+	public static String getChangeObservable(Long commentId) {
 		return CodeComment.class.getName() + ":" + commentId;
 	}
 	

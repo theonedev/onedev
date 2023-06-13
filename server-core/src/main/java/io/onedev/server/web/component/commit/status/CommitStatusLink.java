@@ -90,8 +90,8 @@ public abstract class CommitStatusLink extends DropdownLink {
 		add(new BuildStatusIcon("icon", statusModel) {
 			
 			@Override
-			protected Collection<String> getWebSocketObservables() {
-				return CommitStatusLink.this.getWebSocketObservables();
+			protected Collection<String> getChangeObservables() {
+				return CommitStatusLink.this.getChangeObservables();
 			}
 			
 		});
@@ -119,9 +119,9 @@ public abstract class CommitStatusLink extends DropdownLink {
 		add(AttributeAppender.append("class", "commit-status text-nowrap"));
 	}
 	
-	protected Collection<String> getWebSocketObservables() {
+	protected Collection<String> getChangeObservables() {
 		if (!jobsModel.getObject().isEmpty())
-			return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
+			return Sets.newHashSet(Build.getCommitStatusChangeObservable(getProject().getId(), commitId.name()));
 		else
 			return new HashSet<>();
 	}

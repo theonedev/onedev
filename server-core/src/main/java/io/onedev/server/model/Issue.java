@@ -302,8 +302,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private transient Collection<User> authorizedUsers;
 	
-	private transient List<IssueLink> links;
-	
 	public String getState() {
 		return state;
 	}
@@ -545,11 +543,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	}
 	
 	public Collection<IssueLink> getLinks() {
-		if (links == null) {
-			links = new ArrayList<>();
-			links.addAll(sourceLinks);
-			links.addAll(targetLinks);
-		}
+		var links = new ArrayList<IssueLink>();
+		links.addAll(sourceLinks);
+		links.addAll(targetLinks);
 		return links;
 	}
 	
@@ -613,12 +609,19 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		return fieldInputs;
 	}
 	
-	public static String getWebSocketObservable(Long issueId) {
+	public static String getDetailChangeObservable(Long issueId) {
 		return Issue.class.getName() + ":" + issueId;
 	}
 	
-	public static String getListWebSocketObservable(Long projectId) {
+	public static String getListChangeObservable(Long projectId) {
 		return Issue.class.getName() + ":list:" + projectId;
+	}
+	
+	public Collection<String> getChangeObservables(boolean withList) {
+		Collection<String> observables = Sets.newHashSet(getDetailChangeObservable(getId()));
+		if (withList)
+			observables.addAll(getProject().getIssueListObservables());
+		return observables;
 	}
 
 	@Override

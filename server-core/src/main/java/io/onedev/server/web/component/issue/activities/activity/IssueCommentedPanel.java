@@ -1,16 +1,5 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -23,9 +12,20 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class IssueCommentedPanel extends GenericPanel<IssueComment> {
@@ -66,8 +66,10 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
-				IssueCommentedPanel.this.getComment().setContent(comment);
-				OneDev.getInstance(IssueCommentManager.class).update(IssueCommentedPanel.this.getComment());
+				var entity = IssueCommentedPanel.this.getComment();
+				entity.setContent(comment);
+				OneDev.getInstance(IssueCommentManager.class).update(entity);
+				notifyIssueChange(target);
 			}
 
 			@Override
@@ -102,19 +104,15 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
 			@Override
 			protected ContentVersionSupport getContentVersionSupport() {
-				return new ContentVersionSupport() {
-
-					@Override
-					public long getVersion() {
-						return 0;
-					}
-
-				};
+				return () -> 0;
 			}
 
 			@Override
 			protected DeleteCallback getDeleteCallback() {
-				return deleteCallback;
+				return target -> {
+					notifyIssueChange(target);
+					deleteCallback.onDelete(target);
+				};
 			}
 			
 		});
@@ -126,4 +124,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 		return getModelObject();
 	}
 	
+	private void notifyIssueChange(AjaxRequestTarget target) {
+		((BasePage)getPage()).notifyObservablesChange(target, getComment().getIssue().getChangeObservables(false));
+	}	
 }

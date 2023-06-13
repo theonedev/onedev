@@ -96,7 +96,7 @@ public abstract class OperationConfirmPanel extends Panel {
 				PullRequestUpdate latestUpdate = getLatestUpdate();
 				PullRequest request = latestUpdate.getRequest();
 				if (latestUpdate.equals(request.getLatestUpdate())) {
-					var errorMessage = operate();
+					var errorMessage = operate(target);
 					if (errorMessage == null) {
 						modal.close();
 					} else {
@@ -143,7 +143,7 @@ public abstract class OperationConfirmPanel extends Panel {
 	}
 
 	@Nullable
-	protected abstract String operate();
+	protected abstract String operate(AjaxRequestTarget target);
 	
 	protected final Form<?> getForm() {
 		return form;

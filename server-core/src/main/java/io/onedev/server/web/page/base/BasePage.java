@@ -65,7 +65,7 @@ import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
@@ -275,7 +275,7 @@ public abstract class BasePage extends WebPage {
 				if (message.getText().startsWith(WebSocketMessages.OBSERVABLE_CHANGED)) {
 					List<String> observables = Splitter.on('\n').splitToList(
 							message.getText().substring(WebSocketMessages.OBSERVABLE_CHANGED.length()+1));
-					for (WebSocketObserver observer: findWebSocketObservers()) {
+					for (ChangeObserver observer: findChangeObservers()) {
 						if (CollectionUtils.containsAny(observer.getObservables(), observables))
 							observer.onObservableChanged(handler);
 					}
@@ -285,6 +285,17 @@ public abstract class BasePage extends WebPage {
 			
 		});
 
+	}
+	
+	public void notifyObservablesChange(IPartialPageRequestHandler handler, Collection<String> observables) {
+		for (ChangeObserver observer: findChangeObservers()) {
+			if (CollectionUtils.containsAny(observer.getObservables(), observables))
+				observer.onObservableChanged(handler);
+		}
+	}
+
+	public void notifyObservableChange(IPartialPageRequestHandler handler, String observable) {
+		notifyObservablesChange(handler, Sets.newHashSet(observable));
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
@@ -324,23 +335,23 @@ public abstract class BasePage extends WebPage {
 		super.onAfterRender();
 	}
 	
-	private Collection<WebSocketObserver> findWebSocketObservers() {
-		Collection<WebSocketObserver> observers = new HashSet<>();
-		observers.addAll(getBehaviors(io.onedev.server.web.behavior.WebSocketObserver.class));
+	private Collection<ChangeObserver> findChangeObservers() {
+		Collection<ChangeObserver> observers = new HashSet<>();
+		observers.addAll(getBehaviors(ChangeObserver.class));
 		visitChildren(Component.class, new IVisitor<Component, Void>() {
 
 			@Override
 			public void component(Component object, IVisit<Void> visit) {
-				observers.addAll(object.getBehaviors(WebSocketObserver.class));
+				observers.addAll(object.getBehaviors(ChangeObserver.class));
 			}
 
 		});
 		return observers;
 	}
 
-	public final Collection<String> findWebSocketObservables() {
+	public final Collection<String> findChangeObservables() {
 		Collection<String> observables = new HashSet<>();
-		for (WebSocketObserver observer: findWebSocketObservers())
+		for (ChangeObserver observer: findChangeObservers())
 			observables.addAll(observer.getObservables());
 		return observables;
 	}

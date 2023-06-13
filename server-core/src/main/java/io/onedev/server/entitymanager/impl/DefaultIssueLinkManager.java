@@ -1,21 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import com.google.common.base.Preconditions;
-import org.hibernate.Hibernate;
-import org.hibernate.query.Query;
-
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.model.Issue;
@@ -25,6 +10,15 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.Hibernate;
+import org.hibernate.query.Query;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.*;
 
 @Singleton
 public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implements IssueLinkManager {
@@ -42,9 +36,12 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 	public void syncLinks(LinkSpec spec, Issue issue, Collection<Issue> linkedIssues, boolean opposite) {
 		if (spec.getOpposite() != null) {
 			Collection<IssueLink> links = opposite?issue.getSourceLinks():issue.getTargetLinks();
-			for (IssueLink link: links) {
-				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue)))
+			for (var it = links.iterator(); it.hasNext();) {
+				var link = it.next();
+				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue))) {
 					delete(link);
+					it.remove();
+				}
 			}
 			for (Issue linkedIssue: linkedIssues) {
 				boolean found = false;
@@ -65,12 +62,16 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 						link.setTarget(linkedIssue);
 					}
 					create(link);
+					links.add(link);
 				}
 			}
 		} else {			
-			for (IssueLink link: issue.getLinks()) {
-				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue)))
+			for (var link: issue.getLinks()) {
+				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue))) {
 					delete(link);
+					issue.getSourceLinks().remove(link);
+					issue.getTargetLinks().remove(link);
+				}
 			}
 			for (Issue linkedIssue: linkedIssues) {
 				boolean found = false;
@@ -86,6 +87,7 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 					link.setSource(issue);
 					link.setTarget(linkedIssue);
 					create(link);
+					issue.getTargetLinks().add(link);
 				}
 			}
 		}

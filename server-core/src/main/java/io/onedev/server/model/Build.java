@@ -855,12 +855,27 @@ public class Build extends ProjectBelonging
 		return branches;
 	}
 	
-	public static String getLogWebSocketObservable(Long buildId) {
+	public static String getLogChangeObservable(Long buildId) {
 		return "build-log:" + buildId;
 	}
 	
-	public static String getWebSocketObservable(Long buildId) {
+	public static String getDetailChangeObservable(Long buildId) {
 		return Build.class.getName() + ":" + buildId;
+	}
+	
+	public static String getCommitStatusChangeObservable(Long projectId, String commitHash) {
+		return "commit-status:" + projectId + ":" + commitHash;
+	}
+
+	public static String getJobStatusChangeObservable(Long projectId, String commitHash, String jobName) {
+		return "job-status:" + projectId + ":" + commitHash + ":" + jobName;
+	}
+	
+	public Collection<String> getChangeObservables() {
+		return Sets.newHashSet(
+				getDetailChangeObservable(getId()),
+				getCommitStatusChangeObservable(getProject().getId(), getCommitHash()),
+				getJobStatusChangeObservable(getProject().getId(), getCommitHash(), getJobName()));
 	}
 	
 	public static void push(@Nullable Build build) {

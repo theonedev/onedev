@@ -10,9 +10,10 @@ import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -113,6 +114,7 @@ public abstract class ReviewListPanel extends Panel {
 						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.PENDING);
 						OneDev.getInstance(PullRequestReviewManager.class).update(review);
+						notifyPullRequestChange(target);
 					}
 
 					@Override
@@ -159,6 +161,7 @@ public abstract class ReviewListPanel extends Panel {
 								if (eachReview.isNew())
 									reviewManager.create(eachReview);
 							}
+							notifyPullRequestChange(target);
 						} else {
 							reviewerRequired = true;
 						}
@@ -205,7 +208,7 @@ public abstract class ReviewListPanel extends Panel {
 		                                                                                                                              
 		});
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -215,7 +218,7 @@ public abstract class ReviewListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 			
 		});
@@ -229,4 +232,8 @@ public abstract class ReviewListPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new ReviewCssResourceReference()));
 	}
 
+	private void notifyPullRequestChange(AjaxRequestTarget target) {
+		((BasePage)getPage()).notifyObservableChange(target,
+				PullRequest.getChangeObservable(getPullRequest().getId()));
+	}	
 }

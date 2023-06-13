@@ -30,6 +30,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -151,6 +152,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 									bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
 							OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+							notifyObservablesChange(target);
 							close();
 						}
 						
@@ -159,9 +161,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					new DependentFieldsEditor(handler, bean, propertyNames, false, "Dependent Fields");
 				} else {
 					OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+					notifyObservablesChange(handler);					
 				}
-				
-				FieldValuesPanel.this.onUpdated(handler);
 			}
 			
 			@Override
@@ -405,8 +406,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 	
 	@Nullable
 	protected abstract Input getField();
-
-	protected void onUpdated(IPartialPageRequestHandler handler) {
-	}
 	
+	private void notifyObservablesChange(IPartialPageRequestHandler handler) {
+		((BasePage)getPage()).notifyObservablesChange(handler, getIssue().getChangeObservables(true));
+	}
 }

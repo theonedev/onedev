@@ -1,12 +1,10 @@
 package io.onedev.server.web.websocket;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Singleton
 public class BuildEventBroadcaster {
@@ -20,16 +18,7 @@ public class BuildEventBroadcaster {
 
 	@Listen
 	public void on(BuildEvent event) {
-		Project project = event.getProject();
-		Build build = event.getBuild();
-		
-		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(build.getId()));
-		
-		String observable = "commit-status:" + project.getId() + ":" + build.getCommitHash();
-		webSocketManager.notifyObservableChange(observable);
-		
-		observable = "job-status:" + project.getId() + ":" + build.getCommitHash() + ":" + build.getJobName();
-		webSocketManager.notifyObservableChange(observable);
+		webSocketManager.notifyObservablesChange(event.getBuild().getChangeObservables(), event.getSourcePage());
 	}
 
 }

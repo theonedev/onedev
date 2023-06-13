@@ -21,7 +21,7 @@ public class CommitIndexed extends ProjectEvent {
 		return commitId;
 	}
 	
-	public static String getWebSocketObservable(String commitId) {
+	public static String getChangeObservable(String commitId) {
 		return CommitIndexed.class.getName() + ":" + commitId;
 	}
 

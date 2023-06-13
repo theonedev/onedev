@@ -1,10 +1,28 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.LinkSide;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.link.IssueLinkPanel;
+import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.websocket.WebSocketManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -26,33 +44,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueLink;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.link.IssueLinkPanel;
-import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.websocket.WebSocketManager;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("serial")
 abstract class BoardCardPanel extends GenericPanel<Issue> {
@@ -81,10 +75,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected Issue getIssue() {
 				return issueModel.getObject();
-			}
-
-			@Override
-			protected void onTransited(AjaxRequestTarget target) {
 			}
 			
 		};

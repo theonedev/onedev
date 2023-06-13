@@ -23,7 +23,7 @@ import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -270,11 +270,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		WebMarkupContainer head;
 		fragment.add(head = new WebMarkupContainer("changesHead"));
-		head.add(new WebSocketObserver() {
+		head.add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override
@@ -553,11 +553,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		Component content;
 		if (isOutdated()) {
 			content = new Fragment("content", "waitingFrag", this);
-			content.add(new WebSocketObserver() {
+			content.add(new ChangeObserver() {
 
 				@Override
 				public Collection<String> getObservables() {
-					return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+					return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 				}
 
 				@Override

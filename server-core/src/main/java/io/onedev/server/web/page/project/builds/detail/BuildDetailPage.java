@@ -25,7 +25,7 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -42,6 +42,7 @@ import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
@@ -162,8 +163,8 @@ public abstract class BuildDetailPage extends ProjectPage
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 
-	private WebSocketObserver newBuildObserver(Long buildId) {
-		return new WebSocketObserver() {
+	private ChangeObserver newBuildObserver(Long buildId) {
+		return new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -173,7 +174,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(buildId));
+				return Sets.newHashSet(Build.getDetailChangeObservable(buildId));
 			}
 			
 		};
@@ -219,8 +220,8 @@ public abstract class BuildDetailPage extends ProjectPage
 		}) {
 			
 			@Override
-			protected Collection<String> getWebSocketObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+			protected Collection<String> getChangeObservables() {
+				return Sets.newHashSet(Build.getDetailChangeObservable(getBuild().getId()));
 			}
 			
 		});
@@ -296,6 +297,7 @@ public abstract class BuildDetailPage extends ProjectPage
 						getBuild().setDescription(((DescriptionBean)bean).getValue());
 						OneDev.getInstance(BuildManager.class).update(getBuild());
 						OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
+						((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());						
 						close();
 					}
 					

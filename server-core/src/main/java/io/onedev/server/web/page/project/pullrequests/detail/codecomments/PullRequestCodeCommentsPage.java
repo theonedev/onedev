@@ -21,7 +21,7 @@ import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -107,11 +107,11 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
 		});
 		
-		commentList.add(new WebSocketObserver() {
+		commentList.add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override

@@ -838,14 +838,10 @@ public class PullRequest extends ProjectBelonging
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	public static String getWebSocketObservable(Long requestId) {
+	public static String getChangeObservable(Long requestId) {
 		return PullRequest.class.getName() + ":" + requestId;
 	}
-	
-	public static String getClosedWebSocketObservable(Long requestId) {
-		return PullRequest.class.getName() + ":" + requestId + ":closed";
-	}
-	
+
 	public Collection<Long> getFixedIssueIds() {
 		if (fixedIssueIds == null) {
 			fixedIssueIds = new HashSet<>();

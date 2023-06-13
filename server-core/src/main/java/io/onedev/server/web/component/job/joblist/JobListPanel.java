@@ -1,15 +1,19 @@
 package io.onedev.server.web.component.job.joblist;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
+import io.onedev.server.web.component.job.JobDefLink;
+import io.onedev.server.web.component.job.RunJobLink;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -24,21 +28,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
-import io.onedev.server.web.component.job.JobDefLink;
-import io.onedev.server.web.component.job.RunJobLink;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import javax.annotation.Nullable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class JobListPanel extends Panel {
@@ -169,7 +160,7 @@ public abstract class JobListPanel extends Panel {
 			jobsView.add(jobItem);
 		}
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -178,14 +169,14 @@ public abstract class JobListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return getWebSocketObservables();
+				return getChangeObservables();
 			}
 			
 		});
 	}
 	
-	private Collection<String> getWebSocketObservables() {
-		return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
+	private Collection<String> getChangeObservables() {
+		return Sets.newHashSet(Build.getCommitStatusChangeObservable(getProject().getId(), commitId.name()));
 	}
 
 	@Override

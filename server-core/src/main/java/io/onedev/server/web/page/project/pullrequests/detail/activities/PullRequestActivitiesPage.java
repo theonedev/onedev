@@ -16,11 +16,12 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
@@ -249,9 +250,11 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						activitiesView.add(newSinceChangesRow(activitiesView.newChildId(), sinceDate));
 				}
 				
+				var user = SecurityUtils.getUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component row = newActivityRow(activitiesView.newChildId(), activity);
-					row.add(AttributeAppender.append("class", "new"));
+					if (user == null || !user.equals(activity.getUser()))
+						row.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(row);
 				}
 				
@@ -316,6 +319,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
 						OneDev.getInstance(PullRequestCommentManager.class).create(comment, new ArrayList<>());
+						((BasePage)getPage()).notifyObservableChange(target,
+								PullRequest.getChangeObservable(getPullRequest().getId()));
 						input.clearMarkdown();
 
 						target.add(fragment);
@@ -343,11 +348,11 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			container.add(fragment);
 		}
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override
@@ -382,10 +387,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 							
 				Collection<ObjectId> commitIds = new HashSet<>();
-				
+
+				var user = SecurityUtils.getUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-					newActivityRow.add(AttributeAppender.append("class", "new"));
+					if (user == null || !user.equals(activity.getUser()))
+						newActivityRow.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(newActivityRow);
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 

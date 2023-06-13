@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.markdown.ContentQuoted;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -35,6 +36,9 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Sets;
@@ -60,7 +64,7 @@ import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -107,7 +111,11 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getComment().isVisitedAfter(getComment().getCreateDate())?"": "new";
+				var comment = getComment();
+				if (!comment.getUser().equals(SecurityUtils.getUser()) && !comment.isVisitedAfter(getComment().getCreateDate()))
+					return "new";
+				else
+					return "";
 			}
 			
 		}));
@@ -418,7 +426,7 @@ public abstract class CodeCommentPanel extends Panel {
 		add(activitiesView);
 		add(newActionsContainer());
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			@SuppressWarnings("deprecation")
@@ -440,9 +448,11 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 				}
 
+				var user = SecurityUtils.getUser();
 				for (CodeCommentActivity activity: newActivities) {
-					Component newActivityContainer = activity.render(activitiesView.newChildId()); 
-					newActivityContainer.add(AttributeAppender.append("class", "new"));
+					Component newActivityContainer = activity.render(activitiesView.newChildId());
+					if (user == null || !user.equals(activity.getUser()))
+						newActivityContainer.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(newActivityContainer);
 
 					String script;
@@ -457,25 +467,59 @@ public abstract class CodeCommentPanel extends Panel {
 					handler.add(newActivityContainer);
 					prevActivityContainer = newActivityContainer;
 				}
-				
-				OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 			}
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(CodeComment.getWebSocketObservable(commentId));
+				return Sets.newHashSet(CodeComment.getChangeObservable(commentId));
 			}
 			
 		});
+
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+
+			@Override
+			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+			}
+
+			@Override
+			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+			}
+
+			@Override
+			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+			}
+
+			@Override
+			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+			}
+
+			@Override
+			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+			}
+
+			@Override
+			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+				return null;
+			}
+
+			@Override
+			public void onEndRequest(RequestCycle cycle) {
+				if (SecurityUtils.getUser() != null)
+					OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+			}
+
+			@Override
+			public void onDetach(RequestCycle cycle) {
+			}
+
+			@Override
+			public void onBeginRequest(RequestCycle cycle) {
+			}
+
+		});
 		
 		setOutputMarkupId(true);
-	}
-
-	@Override
-	protected void onBeforeRender() {
-		if (SecurityUtils.getUser() != null) 
-			OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
-		super.onBeforeRender();
 	}
 
 	@Override
@@ -614,6 +658,7 @@ public abstract class CodeCommentPanel extends Panel {
 					WebMarkupContainer actionsContainer = newActionsContainer();
 					editFragment.replaceWith(actionsContainer);
 					target.add(actionsContainer);
+					notifyCodeCommentChange(target, getComment());
 				}
 			}
 
@@ -928,6 +973,7 @@ public abstract class CodeCommentPanel extends Panel {
 					viewFragment.remove();
 					OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply());
 					target.appendJavaScript(String.format("$('#%s').remove();", viewFragment.getMarkupId()));
+					notifyCodeCommentChange(target, getComment());					
 				}
 
 				@Override
@@ -965,5 +1011,10 @@ public abstract class CodeCommentPanel extends Panel {
 			return getReply().getUser();
 		}
 		
-	}	
+	}
+
+	private void notifyCodeCommentChange(AjaxRequestTarget target, CodeComment comment) {
+		((BasePage) getPage()).notifyObservableChange(target, CodeComment.getChangeObservable(comment.getId()));
+	}
+	
 }

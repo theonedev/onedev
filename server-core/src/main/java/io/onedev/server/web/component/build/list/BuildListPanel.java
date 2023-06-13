@@ -29,7 +29,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -1310,8 +1310,8 @@ public abstract class BuildListPanel extends Panel {
 			return getGlobalBuildSetting().getListParams();
 	}
 	
-	private WebSocketObserver newBuildObserver(Long buildId) {
-		return new WebSocketObserver() {
+	private ChangeObserver newBuildObserver(Long buildId) {
+		return new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -1320,7 +1320,7 @@ public abstract class BuildListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(buildId));
+				return Sets.newHashSet(Build.getDetailChangeObservable(buildId));
 			}
 			
 		};

@@ -2727,7 +2727,7 @@ h6, .h6 {
     background-color: #fff;	
 }
 .badge-light {
-    color: var(dark);
+    color: var(--dark);
     background-color: var(--light);
 }
 .dark-mode .badge-light {

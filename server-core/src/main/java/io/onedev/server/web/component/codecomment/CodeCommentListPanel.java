@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -16,6 +19,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -619,6 +623,20 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		});	
 		
+		add(new AjaxLink<Void>("unresolved") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				CodeCommentListPanel.this.getFeedbackMessages().clear();
+				var criteria = new UnresolvedCriteria();
+				queryModel.setObject(new CodeCommentQuery(criteria));
+				queryStringModel.setObject(criteria.toString());
+				target.add(queryInput);
+				doQuery(target);					
+			}
+			
+		}.setVisible(getPage() instanceof PullRequestCodeCommentsPage));
+		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
@@ -755,17 +773,39 @@ public abstract class CodeCommentListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", CodeCommentListPanel.this);
-				String statusLabel;
-				if (comment.isResolved()) {
-					statusLabel = String.format(
-							"<span title='Resolved'><svg class='icon text-success mr-1'><use xlink:href='%s'/></svg></span>",
-							SpriteImage.getVersionedHref("tick-circle-o"));
-				} else {
-					statusLabel = String.format(
-							"<span title='Unresolved'><svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg></span>",
-							SpriteImage.getVersionedHref("dot"));
-				}
-				fragment.add(new Label("status", statusLabel).setEscapeModelStrings(false));
+				var commentId = comment.getId();
+				fragment.add(new Label("status", new LoadableDetachableModel<String>() {
+					@Override
+					protected String load() {
+						if (rowModel.getObject().isResolved()) {
+							return String.format(
+									"<span title='Resolved'><svg class='icon text-success mr-1'><use xlink:href='%s'/></svg></span>",
+									SpriteImage.getVersionedHref("tick-circle-o"));
+						} else {
+							return String.format(
+									"<span title='Unresolved'><svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg></span>",
+									SpriteImage.getVersionedHref("dot"));
+						}
+					}
+				}) {
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new ChangeObserver() {
+							@Override
+							public Collection<String> getObservables() {
+								return Sets.newHashSet(CodeComment.getChangeObservable(commentId));
+							}
+
+							@Override
+							public void onObservableChanged(IPartialPageRequestHandler handler) {
+								handler.add(component);
+							}
+						});
+						setOutputMarkupId(true);
+						setEscapeModelStrings(false);
+					}
+				});
 				
 				WebMarkupContainer link;
 				if (!comment.isValid()) {
@@ -811,8 +851,27 @@ public abstract class CodeCommentListPanel extends Panel {
 			protected Item<CodeComment> newRowItem(String id, int index, IModel<CodeComment> model) {
 				Item<CodeComment> item = super.newRowItem(id, index, model);
 				CodeComment comment = model.getObject();
-				item.add(AttributeAppender.append("class", 
-						comment.isVisitedAfter(comment.getLastActivity().getDate())?"comment":"comment new"));
+				item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+					@Override
+					protected String load() {
+						var comment = item.getModelObject();
+						return comment.isVisitedAfter(comment.getLastActivity().getDate()) ? "comment" : "comment new";
+					}
+				}));
+				
+				var commentId = comment.getId();
+				item.add(new ChangeObserver() {
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(CodeComment.getChangeObservable(commentId));
+					}
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);	
+					}
+				});
+				item.setOutputMarkupId(true);
 				return item;
 			}
 		});

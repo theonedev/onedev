@@ -19,7 +19,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -43,6 +43,7 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
@@ -152,7 +153,7 @@ public abstract class IssueSidePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -161,7 +162,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			
 		});
@@ -310,6 +311,7 @@ public abstract class IssueSidePanel extends Panel {
 							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
 								getIssueChangeManager().removeLink(model.getObject().getSpec(), getIssue(), 
 										linkedIssue, opposite);
+								notifyIssueChange(target, getIssue());
 							}
 							
 						};
@@ -351,6 +353,7 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Not authorized to link issue in project '" + selection.getProject() + "'");
 						} else {
 							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
+							notifyIssueChange(target, getIssue());
 						}
 					}
 					
@@ -377,8 +380,10 @@ public abstract class IssueSidePanel extends Panel {
 							@Override
 							protected void onSave(AjaxRequestTarget target, Issue issue) {
 								getIssueManager().open(issue);
+								notifyIssueChange(target, issue);
 								getIssueChangeManager().addLink(model.getObject().getSpec(), 
 										getIssue(), issue, opposite);
+								notifyIssueChange(target, getIssue());
 								modal.close();
 							}
 
@@ -462,6 +467,7 @@ public abstract class IssueSidePanel extends Panel {
 						} else {
 							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), 
 									linkedIssue, side.isOpposite());
+							notifyIssueChange(handler, getIssue());
 						}
 					}
 
@@ -497,13 +503,14 @@ public abstract class IssueSidePanel extends Panel {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-							"Do you really want to unlink this issue?"));
+							"Do you really want to remove this link?"));
 				}
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					Issue linkedIssue = getIssueManager().load(linkedIssueId);
 					deleteListener.onDelete(target, linkedIssue);
+					notifyIssueChange(target, getIssue());
 				}
 				
 			}.setVisible(deleteListener != null));
@@ -513,10 +520,6 @@ public abstract class IssueSidePanel extends Panel {
 				@Override
 				protected Issue getIssue() {
 					return getIssueManager().load(linkedIssueId);
-				}
-
-				@Override
-				protected void onTransited(AjaxRequestTarget target) {
 				}
 
 			};
@@ -620,6 +623,7 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getIssueChangeManager().removeSchedule(getIssue(), item.getModelObject());
+						notifyIssueChange(target, getIssue());
 					}
 					
 					@Override
@@ -678,6 +682,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Milestone milestone) {
 				getIssueChangeManager().addSchedule(getIssue(), milestone);
+				notifyIssueChange(target, getIssue());
 			}
 
 		});		
@@ -836,6 +841,10 @@ public abstract class IssueSidePanel extends Panel {
 
 	protected abstract Component newDeleteLink(String componentId);
 
+	private void notifyIssueChange(IPartialPageRequestHandler handler, Issue issue) {
+		((BasePage)getPage()).notifyObservablesChange(handler, issue.getChangeObservables(true));
+	}
+	
 	private static abstract class LinkDeleteListener implements Serializable {
 		
 		abstract void onDelete(AjaxRequestTarget target, Issue linkedIssue);

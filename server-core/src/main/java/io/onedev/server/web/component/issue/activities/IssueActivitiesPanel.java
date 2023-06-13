@@ -14,7 +14,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
@@ -22,6 +22,7 @@ import io.onedev.server.web.component.issue.activities.activity.IssueCommentedAc
 import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import org.apache.wicket.AttributeModifier;
@@ -48,10 +49,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
 import javax.servlet.http.Cookie;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {
@@ -85,12 +83,14 @@ public abstract class IssueActivitiesPanel extends Panel {
 		addOrReplace(activitiesView);
 		Issue issue = getIssue();
 
+		var user = SecurityUtils.getUser();
 		for (IssueActivity activity: getActivities()) {
 			if (issue.isVisitedAfter(activity.getDate())) {
 				activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
 			} else {
 				Component row = newActivityRow(activitiesView.newChildId(), activity);
-				row.add(AttributeAppender.append("class", "new"));
+				if (user == null || !user.equals(activity.getUser()))
+					row.add(AttributeAppender.append("class", "new"));
 				activitiesView.add(row);
 			}
 		}		
@@ -172,7 +172,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -189,9 +189,11 @@ public abstract class IssueActivitiesPanel extends Panel {
 						newActivities.add(activity);
 				}
 
+				var user = SecurityUtils.getUser();
 				for (IssueActivity activity: newActivities) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-					newActivityRow.add(AttributeAppender.append("class", "new"));
+					if (user == null || !user.equals(activity.getUser()))
+						newActivityRow.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(newActivityRow);
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -204,7 +206,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			
 		});
@@ -261,6 +263,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
 						OneDev.getInstance(IssueCommentManager.class).create(comment, new ArrayList<>());
+						((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 						
 						input.clearMarkdown();
 						

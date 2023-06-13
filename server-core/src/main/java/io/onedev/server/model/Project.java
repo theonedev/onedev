@@ -1682,5 +1682,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 		return builds;
 	}
-	
+
+	public Collection<String> getIssueListObservables() {
+		Collection<String> observables = new HashSet<>();
+		var current = this;
+		do {
+			observables.add(Issue.getListChangeObservable(current.getId()));
+			current = current.getParent();
+		} while (current != null);
+
+		return observables;
+	}	
 }

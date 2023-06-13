@@ -124,7 +124,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 									throw new RuntimeException(e);
 								}
 							}
-							webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId));
+							webSocketManager.notifyObservableChange(Build.getLogChangeObservable(buildId), null);
 						}
 					}
 					return null;

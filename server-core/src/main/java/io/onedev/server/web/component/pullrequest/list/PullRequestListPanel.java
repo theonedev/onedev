@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pullrequest.list;
 
+import com.google.common.collect.Sets;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -21,6 +22,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -52,6 +54,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -846,8 +849,26 @@ public abstract class PullRequestListPanel extends Panel {
 			protected Item<PullRequest> newRowItem(String id, int index, IModel<PullRequest> model) {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
 				PullRequest request = model.getObject();
-				item.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new"));
+				item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+					@Override
+					protected String load() {
+						var request = item.getModelObject();
+						return request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new";
+					}
+				}));
+				var requestId = request.getId();
+				item.add(new ChangeObserver() {
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(PullRequest.getChangeObservable(requestId));
+					}
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+				});
+				item.setOutputMarkupId(true);
 				return item;
 			}
 			

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pullrequest.assignment;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -51,10 +52,13 @@ public abstract class AssigneeChoice extends SelectToAddChoice<User> {
 		assignment.setRequest(getPullRequest());
 		assignment.setUser(user);
 
-		if (!getPullRequest().isNew())
+		if (!getPullRequest().isNew()) {
 			OneDev.getInstance(PullRequestAssignmentManager.class).create(assignment);
-		else
+			((BasePage)getPage()).notifyObservableChange(target,
+					PullRequest.getChangeObservable(getPullRequest().getId()));
+		} else {
 			getPullRequest().getAssignments().add(assignment);
+		}
 	};
 	
 	protected abstract PullRequest getPullRequest();

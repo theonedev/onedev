@@ -13,6 +13,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -49,6 +50,8 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
+				((BasePage)getPage()).notifyObservableChange(target,
+						PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override

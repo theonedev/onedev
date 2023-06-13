@@ -1,6 +1,8 @@
 package io.onedev.server.event.cluster;
 
-public abstract class ConnectionEvent {
+import io.onedev.server.event.Event;
+
+public abstract class ConnectionEvent extends Event {
 	
 	private final String server;
 	

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,7 +28,7 @@ import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
@@ -108,11 +109,13 @@ public abstract class AssignmentListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						PullRequestAssignment assignment = item.getModelObject();
+						request.getAssignments().remove(assignment);
 						if (request.isNew()) { 
-							request.getAssignments().remove(assignment);
 							target.add(AssignmentListPanel.this);
 						} else {
 							OneDev.getInstance(PullRequestAssignmentManager.class).delete(assignment);
+							((BasePage)getPage()).notifyObservableChange(target,
+									PullRequest.getChangeObservable(getPullRequest().getId()));
 						}
 						assignmentsModel.detach();
 					}
@@ -152,7 +155,7 @@ public abstract class AssignmentListPanel extends Panel {
 		                                                                                                                              
 		});
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -162,7 +165,7 @@ public abstract class AssignmentListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 			
 		});

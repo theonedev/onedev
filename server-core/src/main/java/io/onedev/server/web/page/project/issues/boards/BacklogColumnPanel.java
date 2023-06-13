@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -98,6 +99,7 @@ abstract class BacklogColumnPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target, Issue issue) {
 						getIssueManager().open(issue);
+						notifyIssueChange(target, issue);
 						modal.close();
 					}
 
@@ -157,6 +159,7 @@ abstract class BacklogColumnPanel extends Panel {
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
 				OneDev.getInstance(IssueChangeManager.class).removeSchedule(issue, getMilestone());
+				notifyIssueChange(target, issue);
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
 			}
 			
@@ -242,5 +245,9 @@ abstract class BacklogColumnPanel extends Panel {
 	protected abstract IssueQuery getBacklogQuery();
 	
 	protected abstract Milestone getMilestone();
+	
+	private void notifyIssueChange(AjaxRequestTarget target, Issue issue) {
+		((BasePage)getPage()).notifyObservablesChange(target, issue.getChangeObservables(true));
+	}
 	
 }

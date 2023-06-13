@@ -43,7 +43,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
@@ -323,7 +323,7 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 
-		general.add(new WebSocketObserver() {
+		general.add(new ChangeObserver() {
 				
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -332,7 +332,7 @@ public abstract class BuildSidePanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+				return Sets.newHashSet(Build.getDetailChangeObservable(getBuild().getId()));
 			}
 			
 		});

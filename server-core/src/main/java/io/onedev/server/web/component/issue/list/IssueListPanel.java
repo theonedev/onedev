@@ -36,9 +36,9 @@ import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -1389,10 +1389,6 @@ public abstract class IssueListPanel extends Panel {
 							protected Issue getIssue() {
 								return (Issue) fragment.getDefaultModelObject();
 							}
-
-							@Override
-							protected void onTransited(AjaxRequestTarget target) {
-							}
 							
 						};
 						
@@ -1402,10 +1398,6 @@ public abstract class IssueListPanel extends Panel {
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
 					} else {
 						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME, true) {
-
-							@Override
-							protected void onUpdated(IPartialPageRequestHandler handler) {
-							}
 
 							@SuppressWarnings("deprecation")
 							@Override
@@ -1477,7 +1469,7 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new WebSocketObserver() {
+				fragment.add(new ChangeObserver() {
 					
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -1488,7 +1480,7 @@ public abstract class IssueListPanel extends Panel {
 					
 					@Override
 					public Collection<String> getObservables() {
-						return Sets.newHashSet(Issue.getWebSocketObservable(issueId));
+						return Sets.newHashSet(Issue.getDetailChangeObservable(issueId));
 					}
 					
 				});
@@ -1505,9 +1497,26 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected Item<Issue> newRowItem(String id, int index, IModel<Issue> model) {
 				Item<Issue> item = super.newRowItem(id, index, model);
-				Issue issue = model.getObject();
-				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getLastActivity().getDate())?"issue":"issue new"));
+				item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+					@Override
+					protected String load() {
+						Issue issue = model.getObject();
+						return issue.isVisitedAfter(issue.getLastActivity().getDate())?"issue":"issue new";
+					}
+				}));
+				var issueId = model.getObject().getId();
+				item.add(new ChangeObserver() {
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(Issue.getDetailChangeObservable(issueId));
+					}
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);		
+					}
+				});
+				item.setOutputMarkupId(true);
 				return item;
 			}
 			

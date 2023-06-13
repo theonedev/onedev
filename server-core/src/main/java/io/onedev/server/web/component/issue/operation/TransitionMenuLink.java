@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -104,8 +105,8 @@ public abstract class TransitionMenuLink extends MenuLink {
 									IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
 									manager.changeState(getIssue(), transition.getToState(), fieldValues, 
 											transition.getRemoveFields(), comment);
+									((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(true));
 									modal.close();
-									TransitionMenuLink.this.onTransited(target);
 								}
 
 								@Override
@@ -126,7 +127,5 @@ public abstract class TransitionMenuLink extends MenuLink {
 	}
 
 	protected abstract Issue getIssue();
-	
-	protected abstract void onTransited(AjaxRequestTarget target);
 	
 }

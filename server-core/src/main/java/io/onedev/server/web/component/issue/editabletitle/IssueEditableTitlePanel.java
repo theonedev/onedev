@@ -8,6 +8,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.ReferenceTransformer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -68,6 +69,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 				super.onSubmit(target, form);
 				
 				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject());
+				((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);

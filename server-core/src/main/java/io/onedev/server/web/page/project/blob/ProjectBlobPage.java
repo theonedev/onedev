@@ -34,7 +34,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -246,7 +246,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		revisionIndexing.add(new WebSocketObserver() {
+		revisionIndexing.add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -258,7 +258,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			public Collection<String> getObservables() {
 				Set<String> observables = new HashSet<>();
 				if (resolvedRevision != null) 
-					observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
+					observables.add(CommitIndexed.getChangeObservable(getProject().getRevCommit(resolvedRevision, true).name()));
 				return observables;
 			}
 			

@@ -54,7 +54,7 @@ public class StateTransitionTrigger extends TransitionTrigger {
 
 	@Override
 	public String getDescription() {
-		return "state of an issue is transited to " + states;
+		return "state of other issue is transited to " + states;
 	}
 	
 }

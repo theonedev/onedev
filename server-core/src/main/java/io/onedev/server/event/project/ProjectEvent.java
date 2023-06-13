@@ -1,25 +1,25 @@
 package io.onedev.server.event.project;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
 
-public abstract class ProjectEvent implements Serializable {
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Optional;
+
+public abstract class ProjectEvent extends Event implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private final Long projectId;
 	
 	private final Long userId;

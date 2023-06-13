@@ -29,13 +29,9 @@ public class IssueCommentedActivity implements IssueActivity {
 				return getComment();
 			}
 			
-		}, new DeleteCallback() {
-			
-			@Override
-			public void onDelete(AjaxRequestTarget target) {
-				OneDev.getInstance(IssueCommentManager.class).delete(getComment());
-				deleteCallback.onDelete(target);
-			}
+		}, target -> {
+			OneDev.getInstance(IssueCommentManager.class).delete(getComment());
+			deleteCallback.onDelete(target);
 		});
 	}
 	

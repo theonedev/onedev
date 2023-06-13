@@ -1,16 +1,14 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.ChangeObserver;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import java.util.Collection;
 
 @SuppressWarnings("serial")
 abstract class CardCountLabel extends Label {
@@ -32,7 +30,7 @@ abstract class CardCountLabel extends Label {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -41,11 +39,7 @@ abstract class CardCountLabel extends Label {
 			
 			@Override
 			public Collection<String> getObservables() {
-				Set<String> observables = new HashSet<>();
-				observables.add(Issue.getListWebSocketObservable(getProject().getId()));
-				for (Project project: getProject().getDescendants())
-					observables.add(Issue.getListWebSocketObservable(project.getId()));
-				return observables;
+				return Sets.newHashSet(Issue.getListChangeObservable(getProject().getId()));
 			}
 			
 		});

@@ -8,7 +8,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
 
 import com.google.common.collect.Lists;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -182,7 +182,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			public void onInitialize() {
 				super.onInitialize();
 				
-				add(new WebSocketObserver() {
+				add(new ChangeObserver() {
 
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -191,7 +191,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					public Collection<String> getObservables() {
-						return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+						return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 					}
 
 				});

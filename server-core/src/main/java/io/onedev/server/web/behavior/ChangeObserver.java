@@ -6,8 +6,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
-public abstract class WebSocketObserver extends Behavior {
-
+public abstract class ChangeObserver extends Behavior {
+	
+	private static final long serialVersionUID = 1L;
+	
 	protected Component component;
 	
 	@Override
@@ -15,8 +17,6 @@ public abstract class WebSocketObserver extends Behavior {
 		super.bind(component);
 		this.component = component;
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	public abstract Collection<String> getObservables();
 	

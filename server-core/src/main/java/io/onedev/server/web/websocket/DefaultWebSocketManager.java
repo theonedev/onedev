@@ -1,19 +1,18 @@
 package io.onedev.server.web.websocket;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.common.collect.Sets;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
@@ -26,21 +25,15 @@ import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
-import io.onedev.server.web.page.base.BasePage;
+import static io.onedev.server.util.CollectionUtils.containsAny;
 
 @Singleton
 public class DefaultWebSocketManager implements WebSocketManager, Serializable {
@@ -92,7 +85,7 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 				registeredObservables.put(sessionId, sessionPages);
 			}
 			IKey pageKey = new PageIdKey(page.getPageId());
-			Collection<String> observables = page.findWebSocketObservables();
+			Collection<String> observables = page.findChangeObservables();
 			Collection<String> prevObservables = sessionPages.put(pageKey, observables);
 			if (prevObservables != null && !prevObservables.containsAll(observables)) {
 				IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, pageKey);
@@ -109,8 +102,8 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 	
 	@Nullable
 	private Collection<String> getRegisteredObservables(IWebSocketConnection connection) {
-		PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
 		if (connection.isOpen()) {
+			PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
 			Map<IKey, Collection<String>> sessionPages = registeredObservables.get(pageKey.getSessionId());
 			if (sessionPages != null) 
 				return sessionPages.get(pageKey.getPageId());
@@ -130,9 +123,14 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 		}
 	}
 
+	@Override
+	public void notifyObservableChange(String observable, PageKey sourcePageKey) {
+		notifyObservablesChange(Sets.newHashSet(observable), sourcePageKey);
+	}
+
 	@Sessional
 	@Override
-	public void notifyObservableChange(String observable) {
+	public void notifyObservablesChange(Collection<String> observables, @Nullable PageKey sourcePageKey) {
 		transactionManager.runAfterCommit(new ClusterRunnable() {
 
 			private static final long serialVersionUID = 1L;
@@ -140,11 +138,15 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 			@Override
 			public void run() {
 				clusterManager.submitToAllServers(() -> {
-					notifiedObservables.put(observable, new Date());
+					for (var observable: observables)
+						notifiedObservables.put(observable, new Date());
 					for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-						Collection<String> registeredObservables = getRegisteredObservables(connection); 
-						if (registeredObservables != null && registeredObservables.contains(observable))
-							notifyObservables(connection, Sets.newHashSet(observable));
+						PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+						if (sourcePageKey == null || !sourcePageKey.equals(pageKey)) {
+							Collection<String> registeredObservables = getRegisteredObservables(connection);
+							if (registeredObservables != null && containsAny(registeredObservables, observables))
+								notifyObservables(connection, observables);
+						}
 					}
 					return null;
 				});

@@ -1,18 +1,62 @@
 package io.onedev.server.web.component.diff.revision;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
+import io.onedev.server.event.project.CommitIndexed;
+import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.DiffEntryFacade;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.PathComparator;
+import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.codecomment.CodeCommentPanel;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.util.DiffPlanarRange;
+import io.onedev.server.web.util.RevisionDiff;
+import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -49,70 +93,9 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
-import io.onedev.server.event.project.CommitIndexed;
-import io.onedev.server.git.BlobChange;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.git.service.DiffEntryFacade;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.PendingSuggestionApply;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.CodeIndexManager;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.PathComparator;
-import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.codecomment.CodeCommentPanel;
-import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
-import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
-import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
-import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.RevisionDiff;
-import io.onedev.server.web.util.SuggestionUtils;
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+import java.util.*;
 
 /**
  * Make sure to add only one revision diff panel on a page
@@ -373,7 +356,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 
-				add(new WebSocketObserver() {
+				add(new ChangeObserver() {
 					
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -382,7 +365,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 					@Override
 					public Collection<String> getObservables() {
-						return getWebSocketObservables();
+						return getChangeObservables();
 					}
 				});
 				
@@ -563,23 +546,6 @@ public abstract class RevisionDiffPanel extends Panel {
 						};
 					}
 
-				});
-				
-				add(new WebSocketObserver() {
-					
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
-						Collection<String> observables = Sets.newHashSet();
-						if (getPullRequest() != null)
-							observables.add(PullRequest.getClosedWebSocketObservable(getPullRequest().getId()));
-						return observables;
-					}
-					
 				});
 			}			
 			
@@ -1439,7 +1405,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 				}));
 				
-				add(new WebSocketObserver() {
+				add(new ChangeObserver() {
 					
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -1450,7 +1416,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					public Collection<String> getObservables() {
 						Set<String> observables = new HashSet<>();
 						if (annotationSupport != null && annotationSupport.getOpenComment() != null)
-							observables.add(CodeComment.getWebSocketObservable(annotationSupport.getOpenComment().getId()));
+							observables.add(CodeComment.getChangeObservable(annotationSupport.getOpenComment().getId()));
 						return observables;
 					}
 					
@@ -1821,10 +1787,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		response.render(JavaScriptHeaderItem.forReference(new RevisionDiffResourceReference()));
 	}
 	
-	private Set<String> getWebSocketObservables() {
+	private Set<String> getChangeObservables() {
 		return Sets.newHashSet(
-				CommitIndexed.getWebSocketObservable(getProject().getObjectId(oldRev, true).name()), 
-				CommitIndexed.getWebSocketObservable(getProject().getObjectId(newRev, true).name()));
+				CommitIndexed.getChangeObservable(getProject().getObjectId(oldRev, true).name()), 
+				CommitIndexed.getChangeObservable(getProject().getObjectId(newRev, true).name()));
 	}
 	
 	protected abstract boolean isContextDifferent(CompareContext compareContext);

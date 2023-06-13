@@ -1,17 +1,5 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -25,10 +13,22 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
 import io.onedev.server.web.util.DeleteCallback;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
@@ -78,8 +78,10 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				if (comment.length() > PullRequestComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
-				PullRequestCommentedPanel.this.getComment().setContent(comment);
-				OneDev.getInstance(PullRequestCommentManager.class).update(PullRequestCommentedPanel.this.getComment());
+				var entity = PullRequestCommentedPanel.this.getComment();
+				entity.setContent(comment);
+				OneDev.getInstance(PullRequestCommentManager.class).update(entity);
+				notifyPullRequestChange(target);
 			}
 
 			@Override
@@ -114,19 +116,15 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 
 			@Override
 			protected ContentVersionSupport getContentVersionSupport() {
-				return new ContentVersionSupport() {
-
-					@Override
-					public long getVersion() {
-						return 0;
-					}
-
-				};
+				return () -> 0;
 			}
 
 			@Override
 			protected DeleteCallback getDeleteCallback() {
-				return deleteCallback;
+				return target -> {
+					notifyPullRequestChange(target);
+					deleteCallback.onDelete(target);
+				};
 			}
 			
 		});
@@ -138,4 +136,8 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 		return getModelObject();
 	}
 	
+	private void notifyPullRequestChange(AjaxRequestTarget target) {
+		((BasePage)getPage()).notifyObservableChange(target,
+				PullRequest.getChangeObservable(getComment().getRequest().getId()));
+	}
 }

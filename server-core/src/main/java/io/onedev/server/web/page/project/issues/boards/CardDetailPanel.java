@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -231,6 +232,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								((BasePage)getPage()).notifyObservablesChange(target, getProject().getIssueListObservables());
 								onDeletedIssue(target);
 							}
 							

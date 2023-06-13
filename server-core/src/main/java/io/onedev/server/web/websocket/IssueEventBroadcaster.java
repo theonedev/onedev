@@ -1,13 +1,12 @@
 package io.onedev.server.web.websocket;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Singleton
 public class IssueEventBroadcaster {
@@ -21,22 +20,15 @@ public class IssueEventBroadcaster {
 
 	@Listen
 	public void on(IssueEvent event) {
-		webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()));
-		if (event.affectsListing()) 
-			notifyIssueListObservableChange(event.getIssue().getProject());
+		webSocketManager.notifyObservablesChange(event.getIssue().getChangeObservables(event.affectsListing()), event.getSourcePage());
 	}
 
-	private void notifyIssueListObservableChange(Project project) {
-		do {
-			webSocketManager.notifyObservableChange(Issue.getListWebSocketObservable(project.getId()));
-			project = project.getParent();
-		} while (project != null);
-	}
-	
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Issue)  
-			notifyIssueListObservableChange(((Issue) event.getEntity()).getProject());
+		if (event.getEntity() instanceof Issue) {
+			var project = ((Issue) event.getEntity()).getProject();
+			webSocketManager.notifyObservablesChange(project.getIssueListObservables(), event.getSourcePage());
+		}
 	}
 	
 }

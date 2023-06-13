@@ -1,8 +1,9 @@
 package io.onedev.server.event.entity;
 
+import io.onedev.server.event.Event;
 import io.onedev.server.model.AbstractEntity;
 
-public abstract class EntityEvent {
+public abstract class EntityEvent extends Event {
 	
 	private final AbstractEntity entity;
 	

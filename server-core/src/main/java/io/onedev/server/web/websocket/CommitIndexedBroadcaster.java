@@ -18,7 +18,7 @@ public class CommitIndexedBroadcaster {
 	
 	@Listen
 	public void on(CommitIndexed event) {
-		webSocketManager.notifyObservableChange(CommitIndexed.getWebSocketObservable(event.getCommitId().name()));
+		webSocketManager.notifyObservableChange(CommitIndexed.getChangeObservable(event.getCommitId().name()), event.getSourcePage());
 	}
 
 }

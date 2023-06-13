@@ -8,7 +8,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -117,11 +117,11 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			
 		});
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getUpdate().getRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getUpdate().getRequest().getId()));
 			}
 
 			@Override

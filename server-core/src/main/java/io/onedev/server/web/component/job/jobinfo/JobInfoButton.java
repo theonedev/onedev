@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Sets;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -31,7 +32,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.asset.pipelinebutton.PipelineButtonCssResourceReference;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -124,7 +125,7 @@ public abstract class JobInfoButton extends Panel {
 		
 		detailLink.add(new Label("name", getJobName()));
 		
-		detailLink.add(new WebSocketObserver() {
+		detailLink.add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -133,7 +134,7 @@ public abstract class JobInfoButton extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Lists.newArrayList("job-status:" + getProject().getId() + ":" + getCommitId().name() + ":" + getJobName());
+				return Sets.newHashSet(Build.getJobStatusChangeObservable(getProject().getId(), getCommitId().name(), getJobName()));
 			}
 			
 		});

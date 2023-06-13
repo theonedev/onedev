@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -30,7 +31,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.transitionoption.TransitionOptionPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
@@ -116,6 +117,7 @@ public abstract class IssueOperationsPanel extends Panel {
 								manager.changeState(getIssue(), transition.getToState(), fieldValues, 
 										transition.getRemoveFields(), comment);
 								target.add(IssueOperationsPanel.this);
+								((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(true));
 							}
 
 							@Override
@@ -167,7 +169,7 @@ public abstract class IssueOperationsPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -176,7 +178,7 @@ public abstract class IssueOperationsPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			
 		});

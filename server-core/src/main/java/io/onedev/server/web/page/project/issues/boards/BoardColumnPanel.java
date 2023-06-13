@@ -33,6 +33,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ProjectAware;
 import org.apache.commons.lang3.SerializationUtils;
@@ -278,6 +279,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					protected void onSave(AjaxRequestTarget target, Issue issue) {
 						getIssueManager().open(issue);
+						notifyIssueChange(target, issue);
 						modal.close();
 					}
 
@@ -341,8 +343,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					// move a backlog issue to board 
 					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
-
 					OneDev.getInstance(IssueChangeManager.class).addSchedule(issue, getMilestone());
+					notifyIssueChange(target, issue);
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(Issue.NAME_STATE)) {
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
@@ -360,8 +362,12 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					for (String promptField: trigger.getPromptFields()) {
 						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
 						if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
-							hasPromptFields = true;
-							break;
+							Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+							Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
+							if (FieldUtils.isFieldVisible(new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
+								hasPromptFields = true;
+								break;
+							}
 						}
 					}
 					if (hasPromptFields) {
@@ -400,6 +406,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					} else {
 						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), 
 								new HashMap<>(), transitionRef.get().getRemoveFields(), null);
+						notifyIssueChange(target, issue);
 						markAccepted(target, issue, true);
 					}
 				} else {
@@ -449,10 +456,16 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							}
 
 							@Override
+							protected boolean isDirtyAware() {
+								return false;
+							}
+
+							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {
 								fieldValues.putAll(FieldUtils.getFieldValues(
 										FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 										bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
+								notifyIssueChange(target, issue);
 								close();
 								Issue issue = getIssueManager().load(issueId);
 								OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
@@ -468,6 +481,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
 					} else {
 						OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
+						notifyIssueChange(target, issue);
 						markAccepted(target, issue, true);
 					}
 				}
@@ -504,4 +518,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	@Nullable
 	protected abstract IssueQuery getBoardQuery();
 
+	private void notifyIssueChange(AjaxRequestTarget target, Issue issue) {
+		((BasePage)getPage()).notifyObservablesChange(target, issue.getChangeObservables(true));
+	}
 }

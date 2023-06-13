@@ -24,7 +24,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -51,6 +51,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -99,7 +100,6 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
-import org.unbescape.html.HtmlEscape;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
@@ -272,6 +272,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				super.onSubmit(target, form);
 				
 				OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
+				notifyPullRequestChange(target);				
 				isEditingTitle = false;
 
 				target.add(requestHead);
@@ -318,11 +319,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		};
 		
-		summaryContainer.add(new WebSocketObserver() {
+		summaryContainer.add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override
@@ -823,8 +824,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 											@Override
 											public void onClick(AjaxRequestTarget target) {
-												dropdown.close();
 												OneDev.getInstance(PullRequestChangeManager.class).changeTargetBranch(getPullRequest(), branch);
+												notifyPullRequestChange(target);
+												dropdown.close();
 											}
 											
 										};
@@ -967,7 +969,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						
 						@Override
 						protected Project getProject() {
-							return getProject();
+							return PullRequestDetailPage.this.getProject();
 						}
 						
 						@Override
@@ -1067,11 +1069,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					fragment.add(actions);
 				}				
 				
-				fragment.add(new WebSocketObserver() {
+				fragment.add(new ChangeObserver() {
 
 					@Override
 					public Collection<String> getObservables() {
-						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
 
 					@Override
@@ -1154,6 +1156,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
+				notifyPullRequestChange(target);
 			}
 			
 		});
@@ -1214,7 +1217,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onInitialize() {
 				super.onInitialize();
 
-				add(new WebSocketObserver() {
+				add(new ChangeObserver() {
 					
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -1223,7 +1226,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					public Collection<String> getObservables() {
-						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
 					
 				});
@@ -1312,11 +1315,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	
 	private WebMarkupContainer newOperationsContainer() {
 		WebMarkupContainer operationsContainer = new WebMarkupContainer("requestOperations");
-		operationsContainer.add(new WebSocketObserver() {
+		operationsContainer.add(new ChangeObserver() {
 
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override
@@ -1354,9 +1357,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							getPullRequestReviewManager().review(getPullRequest(), true, getComment());
+							notifyPullRequestChange(target);
 							Session.get().success("Approved");
 							return null;
 						} else {
@@ -1396,9 +1400,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							getPullRequestReviewManager().review(getPullRequest(), false, getComment());
+							notifyPullRequestChange(target);
 							Session.get().success("Requested For changes");
 							return null;
 						} else {
@@ -1433,18 +1438,19 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new MergeConfirmPanel(id, modal, latestUpdateId) {
 
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							var request = getPullRequest();
 							var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-							var errorMessage = branchProtection.checkCommitMessage(getCommitMessage(), 
-									request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
-							if (errorMessage != null) {
-								return errorMessage;
-							} else {
-								getPullRequestManager().merge(getPullRequest(), getCommitMessage());
-								return null;
+							if (getCommitMessage() != null) {
+								var errorMessage = branchProtection.checkCommitMessage(getCommitMessage(),
+										request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+								if (errorMessage != null) 
+									return errorMessage;
 							}
+							getPullRequestManager().merge(getPullRequest(), getCommitMessage());
+							notifyPullRequestChange(target);
+							return null;
 						} else {
 							return "Can not perform this operation now";
 						}
@@ -1472,9 +1478,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestManager().discard(getPullRequest(), getComment());			
+							getPullRequestManager().discard(getPullRequest(), getComment());
+							notifyPullRequestChange(target);
 							return null;
 						} else {
 							return "Can not perform this operation now";
@@ -1508,9 +1515,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							getPullRequestManager().reopen(getPullRequest(), getComment());
+							notifyPullRequestChange(target);
 							return null;
 						} else {
 							return "Can not perform this operation now";
@@ -1546,9 +1554,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							getPullRequestManager().deleteSourceBranch(getPullRequest(), getComment());
+							notifyPullRequestChange(target);
 							Session.get().success("Deleted source branch");
 							return null;
 						} else {
@@ -1585,9 +1594,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected String operate() {
+					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
 							getPullRequestManager().restoreSourceBranch(getPullRequest(), getComment());
+							notifyPullRequestChange(target);
 							Session.get().success("Restored source branch");
 							return null;
 						} else {
@@ -1649,11 +1659,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		public Component render(String componentId) {
 			if (getMainPageClass() == PullRequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
+				
+				// Do not show unresolved only by default as new indicator for 
+				// code comments tab may also be caused by new activities in 
+				// resolved issues
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
 						PullRequestCodeCommentsPage.class, 
-						PullRequestCodeCommentsPage.paramsOf(getPullRequest(), "unresolved"));
+						PullRequestCodeCommentsPage.paramsOf(getPullRequest()));
 				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
 					@Override
 					protected String load() {
 						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
@@ -1664,11 +1677,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				}));
-				link.add(new WebSocketObserver() {
+				link.add(new ChangeObserver() {
 
 					@Override
 					public Collection<String> getObservables() {
-						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
 
 					@Override
@@ -1714,6 +1727,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
 		else
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+	
+	private void notifyPullRequestChange(AjaxRequestTarget target) {
+		((BasePage)getPage()).notifyObservableChange(target,
+				PullRequest.getChangeObservable(getPullRequest().getId()));
 	}
 	
 }

@@ -5,6 +5,8 @@ import java.util.Collection;
 
 public class ActiveServerChanged implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final String activeServer;
 
 	private final Collection<Long> projectIds;

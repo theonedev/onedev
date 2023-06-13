@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
@@ -49,7 +49,7 @@ public class BuildStatusIcon extends SpriteImage {
 			
 		}));
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -58,7 +58,7 @@ public class BuildStatusIcon extends SpriteImage {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return getWebSocketObservables();
+				return getChangeObservables();
 			}
 			
 		});
@@ -72,7 +72,7 @@ public class BuildStatusIcon extends SpriteImage {
 		super.onDetach();
 	}
 
-	protected Collection<String> getWebSocketObservables() {
+	protected Collection<String> getChangeObservables() {
 		return Sets.newHashSet();
 	}
 	

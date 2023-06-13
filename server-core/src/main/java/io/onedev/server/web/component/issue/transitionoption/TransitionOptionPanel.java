@@ -8,6 +8,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.SettingManager;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -39,7 +42,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-public abstract class TransitionOptionPanel extends Panel {
+public abstract class TransitionOptionPanel extends Panel implements InputContext {
 
 	private String comment;
 	
@@ -146,6 +149,16 @@ public abstract class TransitionOptionPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	public List<String> getInputNames() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public InputSpec getInputSpec(String inputName) {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	protected abstract Issue getIssue();

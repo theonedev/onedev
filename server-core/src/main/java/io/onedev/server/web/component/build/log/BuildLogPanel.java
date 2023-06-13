@@ -27,7 +27,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.behavior.ChangeObserver;
 
 @SuppressWarnings("serial")
 public class BuildLogPanel extends GenericPanel<Build> {
@@ -46,7 +46,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			private void appendRecentLogEntries(IPartialPageRequestHandler handler) {
 				List<JobLogEntryEx> logEntries = getLogManager().readLogEntries(getBuild(), nextOffset, 0);
@@ -67,12 +67,12 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getLogWebSocketObservable(getBuild().getId()));
+				return Sets.newHashSet(Build.getLogChangeObservable(getBuild().getId()));
 			}
 			
 		});
 		
-		add(new WebSocketObserver() {
+		add(new ChangeObserver() {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
@@ -83,7 +83,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+				return Sets.newHashSet(Build.getDetailChangeObservable(getBuild().getId()));
 			}
 			
 		});
