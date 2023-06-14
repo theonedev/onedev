@@ -1,0 +1,55 @@
+apiVersion: {{ if .Values.oneDevServer.useStatefulSet }}{{ include "ods.statefulset.apiVersion" . }}{{- else }}{{ include "ods.deployment.apiVersion" . }}{{- end }}
+kind: {{ if .Values.oneDevServer.useStatefulSet }}StatefulSet{{- else }}Deployment{{- end }}
+metadata:
+  name: {{ include "ods.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "ods.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default "1" .Values.replicas }}
+  selector:
+    matchLabels:
+  {{- include "ods.template-labels" . | nindent 6 }}
+  {{- if .Values.oneDevServer.useStatefulSet }}
+  serviceName: {{ template "ods.fullname" . }}
+  {{- end }}
+  {{- if .Values.oneDevServer.updateStrategy}}
+  {{- if .Values.oneDevServer.useStatefulSet }}
+  updateStrategy:
+  {{- else }}
+  strategy:
+  {{- end }}
+    {{- toYaml .Values.oneDevServer.updateStrategy | nindent 4 }}
+  {{- end}}
+  template:
+    metadata:
+      labels: {{ include "ods.template-labels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+{{- if .Values.oneDevServer.trustCerts.enabled }}
+      annotations:
+        checksum/secret: {{ tpl (toYaml .Values.oneDevServer.trustCerts.path) . | sha256sum }}
+        {{- end }}
+        {{- if .Values.podAnnotations }}
+{{ tpl (toYaml .Values.podAnnotations) . | indent 8 }}
+        {{- end }}
+    spec: {{ include "ods.pod" . | nindent 6 }}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) (not .Values.oneDevServer.useStatefulSet) }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "ods.fullname" . }}
+
+{{- else if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: {{ .Values.persistence.accessModes }}
+      storageClassName: {{ .Values.persistence.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}
+      {{- if .Values.persistence.selector }}
+      selector: {{ toYaml .Values.persistence.selector | nindent 8 }}
+      {{- end }}
+{{- end }}
