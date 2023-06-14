@@ -1,20 +1,21 @@
+{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "onedev.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- define "ods.name" -}}
+{{- default .Chart.Name .Values.global.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+We truncate strings at 63 characters because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If the release name contains a chart name it will be used as a full name.
 */}}
-{{- define "onedev.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- define "ods.fullname" -}}
+{{- if .Values.global.fullnameOverride }}
+{{- .Values.global.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- $name := default .Chart.Name .Values.global.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,26 +27,116 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "onedev.chart" -}}
+{{- define "ods.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+
 {{/*
-Common labels
+Common template labels.
 */}}
-{{- define "onedev.labels" -}}
-helm.sh/chart: {{ include "onedev.chart" . }}
-{{ include "onedev.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
+{{- define "ods.template-labels" -}}
+app.kubernetes.io/name: {{ include "ods.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Selector labels
+Common labels.
 */}}
-{{- define "onedev.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "onedev.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "ods.labels" -}}
+helm.sh/chart: {{ include "ods.chart" . }}
+{{ include "ods.template-labels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Values.image.tag | quote }}
 {{- end }}
+{{- if .Values.global.commonLabels }}
+{{ toYaml .Values.global.commonLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return the ServiceAccount name
+*/}}
+{{- define "ods.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- template "ods.fullname" . }}
+{{- else }}
+{{- .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the target Kubernetes version
+*/}}
+{{- define "ods.kubeVersion" -}}
+    {{- .Capabilities.KubeVersion.Version -}}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for deployment.
+*/}}
+{{- define "ods.deployment.apiVersion" -}}
+{{- if semverCompare "<1.14-0" (include "ods.kubeVersion" .) -}}
+{{- print "extensions/v1beta1" -}}
+{{- else -}}
+{{- print "apps/v1" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for statefulset.
+*/}}
+{{- define "ods.statefulset.apiVersion" -}}
+{{- if semverCompare "<1.14-0" (include "ods.kubeVersion" .) -}}
+{{- print "apps/v1beta1" -}}
+{{- else -}}
+{{- print "apps/v1" -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Get value of host from Ingress */}}
+{{- define "ingressHost" -}}
+{{- $host := index .Values.ingress.hosts 0 }}
+{{- $host.host }}
+{{- end -}}
+
+{{/* 
+Generate URL string based on the database type
+ */}}
+{{- define "getConnectionURL" -}}
+{{- $connectionURL := "" -}}
+{{- if eq $.Values.database.dbType "mysql" }}
+{{- $connectionURL = printf "jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- else if eq $.Values.database.dbType "postgresql" }}
+{{- $connectionURL = printf "jdbc:postgresql://%s:%s/%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- else if eq $.Values.database.dbType "mariadb" }}
+{{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- else if eq $.Values.database.dbType "mssql" }}
+{{- $connectionURL = printf "sqlserver://%s:%s;databaseName=%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- else if eq $.Values.database.dbType "oracle" }}
+{{- $connectionURL = printf "jdbc:oracle:thin:@%s:%s:%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- else -}}
+Invalid database type
+{{- end -}}
+{{- trim $connectionURL -}}
+{{- end -}}
+
+{{/* 
+Set dilect and driver env variables based database type
+ */}}
+{{- define "setDatabaseEnvVars" -}}
+{{- $dbType := .Values.database.dbType -}}
+{{- $dbTypeMap := dict "mysql" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "com.mysql.cj.jdbc.Driver")
+                     "postgresql" (dict "dialect" "io.onedev.server.persistence.PostgreSQLDialect" "driver" "org.postgresql.Driver")
+                     "mariadb" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "org.mariadb.jdbc.Driver")
+                     "mssql" (dict "dialect" "org.hibernate.dialect.SQLServer2012Dialect" "driver" "com.microsoft.sqlserver.jdbc.SQLServerDriver")
+                     "oracle" (dict "dialect" "org.hibernate.dialect.Oracle10gDialect" "driver" "oracle.jdbc.driver.OracleDriver")
+   -}}
+{{- with index $dbTypeMap $dbType }}
+  - name: hibernate_dialect
+    value: {{ .dialect | quote }}
+  - name: hibernate_connection_driver_class
+    value: {{ .driver | quote }}
+{{- end }}
+{{- end -}}
