@@ -31,14 +31,8 @@ containers:
 {{- end }}
     image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{- if and .Values.command (not .Values.oneDevServer.maintenance) }}
-    command: {{ .Values.command }}
-{{- end }}
 {{- if .Values.oneDevServer.maintenance }}
     command: ["/root/bin/idle.sh"]
-{{- end }}
-{{- if .Values.args }}
-    args: {{ toYaml .Values.args | nindent 6 }}
 {{- end }}
     env:
     - name: k8s_service
@@ -82,16 +76,12 @@ containers:
     envFrom: {{ toYaml .Values.envFrom | nindent 6 }}
 {{- end }}
     ports:
-{{- if .Values.containerPorts }}
-{{ toYaml .Values.containerPorts | indent 6 }}
-{{- else }}
     - name: http
       containerPort: 6610
       protocol: TCP
-    - name: git-ssh
+    - name: ssh
       containerPort: 6611
       protocol: TCP
-{{- end }}
 {{- if .Values.livenessProbe }}
     livenessProbe: {{ toYaml .Values.livenessProbe | trim | nindent 6 }}
 {{- end }}
@@ -106,7 +96,7 @@ containers:
 {{- end }}
     volumeMounts:
       - name: data
-        mountPath: "{{ .Values.persistence.mountPath | default "/opt/onedev" }}"
+        mountPath: "/opt/onedev"
 {{- if .Values.oneDevServer.trustCerts.enabled }}
       - name: trust-certs
         mountPath: "/opt/onedev/conf/trust-certs"
