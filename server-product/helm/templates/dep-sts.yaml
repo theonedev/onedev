@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{ include "ods.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default "1" .Values.replicas }}
+  replicas: 1
   selector:
     matchLabels:
   {{- include "ods.template-labels" . | nindent 6 }}
@@ -44,7 +44,8 @@ spec:
   - metadata:
       name: data
     spec:
-      accessModes: {{ .Values.persistence.accessModes }}
+      accessModes:
+        - {{ default "ReadWriteOnce" .Values.persistence.accessModes }}
       storageClassName: {{ .Values.persistence.storageClassName }}
       resources:
         requests:
