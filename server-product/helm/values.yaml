@@ -42,7 +42,7 @@ oneDevServer:
     email: "abc@example.com"
     # oneDevServer.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
     serverUrl: ""
-    sshRootUrl: ""  
+    sshRootUrl: ""
 
 # External database configuration
 database:
@@ -78,9 +78,6 @@ image:
   # [imagePullSecrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod).
   pullSecrets: []
   #  - name: <REGISTRY_SECRET>
-
-# replicas -- # only one replica as OneDev doesn't support clustering. default set to `1`
-replicas: "1"
 
 serviceAccount:
   # serviceAccount.create -- If **true**, create a ServiceAccount.
@@ -133,9 +130,6 @@ envFrom: []
 #  - secretRef:
 #     name: <SECRET_NAME>
 
-# containerPorts -- Additional ContainerPorts array
-containerPorts: []
-
 # resources -- Specify resource requests and limits.
 resources: {}
   # requests:
@@ -181,15 +175,17 @@ service:
   annotations: {}
   # service.topologyKeys -- (array) Specify the
   # [topologyKeys](https://kubernetes.io/docs/concepts/services-networking/service-topology/#using-service-topology).
-  topologyKeys:
+  topologyKeys: []
   #  - "kubernetes.io/hostname"
   #  - "topology.kubernetes.io/zone"
   #  - "topology.kubernetes.io/region"
   #  - "*"
   # service.ports -- Manually change the ServicePorts
-  ports: {}
-    # httpPort: "6610"
-    # sshPort: "6611"
+  ports:
+    httpPort: ""
+    sshPort: ""
+  # service.nodePort -- Specify a nodePort for servcie
+  nodePort: ""  
   # service.externalTrafficPolicy -- Specify the
   # [externalTrafficPolicy](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip).
   externalTrafficPolicy: ""
@@ -202,7 +198,25 @@ service:
   # service.ipFamilies -- Configure
   # [IPv4/IPv6 dual-stack](https://kubernetes.io/docs/concepts/services-networking/dual-stack/).
   ipFamilies: []
+  # Configure sepearte SSH service
+  separateSSHService:
+  # service.separateSSHService.enabled -- If separate SSH service is enabled, a separate service is created for SSH
+    enabled: false
+    type: "ClusterIP"
+    port: 22
+    clusterIP: ""
+    loadBalancerIP: ""
+    nodePort: ""
+    externalTrafficPolicy: ""
+    externalIPs: []
+    #  - 4.2.2.1
+    ipFamilyPolicy: ""
+    ipFamilies: []
+    loadBalancerSourceRanges: []
+    annotations: {}
+    topologyKeys: []
 
+ # Configure Ingress resource
 ingress:
   # ingress.enabled -- If **true**, create an Ingress resource.
   enabled: false
@@ -251,13 +265,11 @@ persistence:
   # persistence.storageClassName -- (string) Specify the storageClassName for PersistentVolumeClaims.
   storageClassName: ""
   # persistence.accessModes -- Specify the accessModes for PersistentVolumeClaims.
-  accessModes:
-    - ReadWriteOnce
+  accessModes: "ReadWriteOnce"
   # persistence.size -- Specify the size of PersistentVolumeClaims.
   size: 10Gi
-  # persistence.mountPath -- Path inside the container where volume will be mounted
-  mountPath: "/opt/onedev"
-
+  # persistence.selector -- Specify the selectors for PersistentVolumeClaims.
+  selector: {}
 # dnsPolicy -- Specify the
 # [dnsPolicy](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy).
 dnsPolicy: ClusterFirst
