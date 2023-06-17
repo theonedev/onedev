@@ -232,11 +232,9 @@ ingress:
   # ingress.hosts.host -- Set the host name
    - host: onedev.example.com
      paths:
-       - path: /
-         pathType: ImplementationSpecific
-         # Specify the port name or number on the Service
-         # Using name requires Kubernetes >=1.19
-         port:
+      # Specify the port name or number on the Service
+      # Using name requires Kubernetes >=1.19
+       - port:
            name: "http"
            number: ""
   # ingress.tls -- Configure TLS for the Ingress.
