@@ -40,8 +40,6 @@ All-In-One DevOps Platform
 | ingress.className | string | `""` | Specify the [ingressClassName](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress), requires Kubernetes >= 1.18. |
 | ingress.enabled | bool | `false` | If **true**, create an Ingress resource. |
 | ingress.hosts.host | string | `"onedev.example.com"` | Set the host name |
-| ingress.hosts.paths.path | string | `"/"` |  |
-| ingress.hosts.paths.pathType | string | `"ImplementationSpecific"` |  |
 | ingress.hosts.paths.port.name | string | `"http"` | Specify the port name |
 | ingress.hosts.paths.port.number | string | `""` | Specify the port number |
 | ingress.tls | list | `[]` | Configure TLS for the Ingress. |
