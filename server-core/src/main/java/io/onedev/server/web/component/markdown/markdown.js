@@ -16,6 +16,43 @@ onedev.server.markdown = {
 		else
 			return "markdownEditor.normalMode";
 	},
+	getBlockPrefix: function($input) {
+		var selected = $input.range();
+		var input = $input.val();
+		var pos = selected.start;
+		if (pos == 0
+				|| pos == 1 && input.charAt(0) == '\n'	
+				|| pos >= 2 && input.charAt(pos-1) == '\n' && input.charAt(pos-2) == '\n') {
+			return ""; 
+		} else if (pos >= 2 && input.charAt(pos-1) == '\n' && input.charAt(pos-2) != '\n') {
+			return "\n";			
+		} else {
+			return "\n\n";				
+		}
+	},
+	getAtWhoPrefix: function($input) {
+		var selected = $input.range();
+		var beforeSelection = $input.val().substring(0, selected.start);
+		if (/(^|\s|\p{P})$/u.test(beforeSelection)) 
+			return "";
+		else
+			return " ";
+	},
+	getBlockSuffix: function($input) {
+		var selected = $input.range();
+		var input = $input.val();
+		var pos = selected.end;
+		var len = input.length;
+		if (pos == len
+			|| pos == len-1 && input.charAt(len-1) == '\n'
+			|| pos <= len-2 && input.charAt(pos) == '\n' && input.charAt(pos+1) == '\n') {
+			return "";
+		} else if (pos <= len-2 && input.charAt(pos) == '\n' && input.charAt(pos+1) != '\n') {
+			return "\n";
+		} else {
+			return "\n\n";
+		}
+	},
 	fireInputEvent: function($input) {
 		if(document.createEventObject) {
 			$input[0].fireEvent("input");
@@ -65,8 +102,12 @@ onedev.server.markdown = {
 				var langHint = "suggestion";
 				$input.focus();
 				var selected = $input.range();
-				document.execCommand("insertText", false, "```" + langHint + "\n" + content + "\n```\n");		
-				$input.range(selected.start+4+langHint.length+from, selected.start+4+langHint.length+to);
+				var prefix = onedev.server.markdown.getBlockPrefix($input);
+				var suffix = onedev.server.markdown.getBlockSuffix($input);
+				if (suffix == "")
+					suffix = "\n";
+				document.execCommand("insertText", false, prefix + "```" + langHint + "\n" + content + "\n```" + suffix);		
+				$input.range(selected.start + prefix.length + 4 + langHint.length + from, selected.start + prefix.length + 4 + langHint.length + to);
 				onedev.server.markdown.fireInputEvent($input);
 			});
 		}
@@ -659,10 +700,9 @@ onedev.server.markdown = {
 			var selected = $input.range();
 			if (selected.length != 0) {
 				document.execCommand("insertText", false, "**" + selected.text + "**");
-				$input.range(selected.start+2, selected.end+2);
 			} else {
-				document.execCommand("insertText", false, "**strong text**");
-				$input.range(selected.start+2, selected.end+2+"strong text".length);
+				document.execCommand("insertText", false, "****");
+				$input.caret(selected.start + 2);
 			}
 			closeMenu();
 			onedev.server.markdown.fireInputEvent($input);
@@ -673,10 +713,9 @@ onedev.server.markdown = {
 			var selected = $input.range();
 			if (selected.length != 0) {
 				document.execCommand("insertText", false, "_" + selected.text + "_");
-				$input.range(selected.start+1, selected.end+1);
 			} else {
-				document.execCommand("insertText", false, "_emphasized text_");
-				$input.range(selected.start+1, selected.end+1+"emphasized text".length);
+				document.execCommand("insertText", false, "__");
+				$input.caret(selected.start + 1);
 			}
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
@@ -685,12 +724,13 @@ onedev.server.markdown = {
 		$actionMenu.find(".do-header").click(function() {
 			$input.focus();
 			var selected = $input.range();
+			var prefix = onedev.server.markdown.getBlockPrefix($input);
+			var suffix = onedev.server.markdown.getBlockSuffix($input);
 			if (selected.length != 0) {
-				document.execCommand("insertText", false, "### " + selected.text);
-				$input.range(selected.start+4, selected.end+4);
+				document.execCommand("insertText", false, prefix + "### " + selected.text + suffix);
 			} else {
-				document.execCommand("insertText", false, "### heading text");
-				$input.range(selected.start+4, selected.end+4+"heading text".length);
+				document.execCommand("insertText", false, prefix + "### " + suffix);
+				$input.caret(selected.start + prefix.length + 4);
 			}
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
@@ -700,30 +740,28 @@ onedev.server.markdown = {
 			$input.focus();
 			var leading;
 			if ($(this).hasClass("do-list"))
-				leading = "-";
+				leading = "- ";
 			else if ($(this).hasClass("do-orderlist"))
-				leading = "1.";
+				leading = "1. ";
 			else
-				leading = "- [ ]";
+				leading = "- [ ] ";
+			var prefix = onedev.server.markdown.getBlockPrefix($input);
+			var suffix = onedev.server.markdown.getBlockSuffix($input);
 			var selected = $input.range();
 			if (selected.length != 0) {
 				var splitted = selected.text.split("\n");
 				var insert = "";
 				for (var i in splitted) {
-					if (i != 0) 
-						insert += "\n";
-					insert += leading + " " + splitted[i];
+					if (splitted[i].trim().length != 0) {
+						if (insert.length != 0)
+							insert += "\n";
+						insert += leading + " " + splitted[i];
+					}
 				}
-				document.execCommand("insertText", false, insert);
-				//$input.range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
+				document.execCommand("insertText", false, prefix + insert + suffix);
 			} else {
-				var text;
-				if ($(this).hasClass("do-tasklist"))
-					text = " task text here";
-				else
-					text = " list text here";
-				document.execCommand("insertText", false, leading + text);
-				$input.range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
+				document.execCommand("insertText", false, prefix + leading + suffix);
+				$input.caret(selected.start + prefix.length + leading.length);
 			}
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
@@ -733,12 +771,16 @@ onedev.server.markdown = {
 			$input.focus();
 			var langHint = "programming language";
 			var selected = $input.range();
+			var prefix = onedev.server.markdown.getBlockPrefix($input);
+			var suffix = onedev.server.markdown.getBlockSuffix($input);
+			if (suffix == "")
+				suffix = "\n";
 			if (selected.length != 0) {
-				document.execCommand("insertText", false, "```" + langHint + "\n" + selected.text + "\n```\n");				
-				$input.range(selected.start+3, selected.start+3+langHint.length);
+				document.execCommand("insertText", false, prefix + "```" + langHint + "\n" + selected.text + "\n```" + suffix);				
+				$input.range(selected.start + prefix.length + 3, selected.start + prefix.length + 3 + langHint.length);
 			} else {
-				document.execCommand("insertText", false, "```" + langHint + "\n```\n");				
-				$input.range(selected.start+3, selected.start+3+langHint.length);
+				document.execCommand("insertText", false, prefix + "```" + langHint + "\n```" + suffix);				
+				$input.range(selected.start + prefix.length + 3, selected.start + prefix.length + 3 + langHint.length);
 			}
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
@@ -747,12 +789,15 @@ onedev.server.markdown = {
 		$actionMenu.find(".do-quote").click(function() {
 			$input.focus();
 			var selected = $input.range();
+			var prefix = onedev.server.markdown.getBlockPrefix($input);
+			var suffix = onedev.server.markdown.getBlockSuffix($input);
 			if (selected.length != 0) {
 				document.execCommand("insertText", false, 
-					onedev.server.markdown.getQuoted(selected.text));				
+					prefix + onedev.server.markdown.getQuoted(selected.text) + suffix);				
 			} else {
-				document.execCommand("insertText", false, "> quote here");				
-				$input.range(selected.start+2, selected.start+2+"quote here".length);
+				document.execCommand("insertText", false, 
+					prefix + "> " + suffix);				
+				$input.caret(selected.start + prefix.length + 2);
 			}
 			
 			closeMenu();			
@@ -777,23 +822,18 @@ onedev.server.markdown = {
 				return;
 
 			var atChar = $(this).hasClass("do-mention")? "@": "#";	
-			var prevChar;
-			var caret = $input.caret();
-			if (caret != 0) 
-				prevChar = $input.val().charAt(caret-1);
 			
-			var prefix = $(this).data("reference");
-			if (prefix === undefined)
-				prefix = "";
+			var type = $(this).data("reference");
+			if (type === undefined)
+				type = "";
 			else 
-				prefix = prefix + " ";
+				type = type + " ";
+			
+			var prefix = onedev.server.markdown.getAtWhoPrefix($input);
 			
 			$input.focus();
-			
-			if (prevChar === undefined || prevChar === ' ' || prevChar === '\n') 
-				document.execCommand("insertText", false, prefix + atChar);
-			else 
-				document.execCommand("insertText", false, " " + prefix + atChar);
+			document.execCommand("insertText", false, prefix + type + atChar);
+
 			onedev.server.markdown.fireInputEvent($input);
 			
 			$input.atwho("run");
@@ -1159,7 +1199,8 @@ onedev.server.markdown = {
 			if (!$edit.is(":visible")) 
 				return;
 			$input.focus();
-			document.execCommand("insertText", false, ":" + $(this).attr("title") + ": ");
+			var prefix = onedev.server.markdown.getAtWhoPrefix($input);
+			document.execCommand("insertText", false, prefix + ":" + $(this).attr("title") + ": ");
 			onedev.server.markdown.fireInputEvent($input);
 		});
 	},
