@@ -49,19 +49,19 @@ All-In-One DevOps Platform
 | lifecycle | object | `{}` | Specify lifecycle hooks for Containers. |
 | livenessProbe | object | `{}` | Specify the livenessProbe [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes). |
 | nodeSelector | object | `{}` | Configure [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector). |
-| oneDevServer.enableSSL | bool | `false` | This configuration determines whether SSL should be enabled on the server. |
-| oneDevServer.initSettings.email | string | `"abc@example.com"` | admin Email address |
-| oneDevServer.initSettings.enabled | bool | `true` | Enables initial settings for deployment |
-| oneDevServer.initSettings.password | string | `"password"` | admin Password, if not specified a random password will be generated automatically |
-| oneDevServer.initSettings.serverUrl | string | `""` | Server url will be ignored if ingress.host is specified |
-| oneDevServer.initSettings.sshRootUrl | string | `""` |  |
-| oneDevServer.initSettings.user | string | `"admin"` | Admin username |
-| oneDevServer.maintenance | bool | `false` | Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore. [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details |
-| oneDevServer.trustCerts.enabled | bool | `false` | Set to **true** to provide trust certs |
-| oneDevServer.trustCerts.existingSecret | string | `""` | Existing secret name containing the cert file |
-| oneDevServer.trustCerts.path | string | `""` | Path of cert file on disk |
-| oneDevServer.updateStrategy.type | string | `"RollingUpdate"` | valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate` |
-| oneDevServer.useStatefulSet | bool | `false` | Set to true to use a StatefulSet instead of a Deployment |
+| onedev.enableSSL | bool | `false` | This configuration determines whether SSL should be enabled on the server. |
+| onedev.initSettings.email | string | `"abc@example.com"` | admin Email address |
+| onedev.initSettings.enabled | bool | `true` | Enables initial settings for deployment |
+| onedev.initSettings.password | string | `"password"` | admin Password, if not specified a random password will be generated automatically |
+| onedev.initSettings.serverUrl | string | `""` | Server url will be ignored if ingress.host is specified |
+| onedev.initSettings.sshRootUrl | string | `""` |  |
+| onedev.initSettings.user | string | `"admin"` | Admin username |
+| onedev.maintenance | bool | `false` | Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore. [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details |
+| onedev.trustCerts.enabled | bool | `false` | Set to **true** to provide trust certs |
+| onedev.trustCerts.existingSecret | string | `""` | Existing secret name containing the cert file |
+| onedev.trustCerts.path | string | `""` | Path of cert file on disk |
+| onedev.updateStrategy.type | string | `"RollingUpdate"` | valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate` |
+| onedev.useStatefulSet | bool | `false` | Set to true to use a StatefulSet instead of a Deployment |
 | persistence.accessModes | string | `"ReadWriteOnce"` | Specify the accessModes for PersistentVolumeClaims. |
 | persistence.enabled | bool | `true` | If **true**, create and use PersistentVolumeClaims. |
 | persistence.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim to use. |
