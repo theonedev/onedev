@@ -32,6 +32,8 @@ public class SSHCommandStep extends CommandStep {
 	
 	private String privateKeySecret;
 	
+	private String options;
+	
 	private List<String> commands;
 
 	@Editable(order=100, description = "Host name or ip address of remote machine to run commands via SSH")
@@ -71,6 +73,16 @@ public class SSHCommandStep extends CommandStep {
 	private static List<String> getPrivateKeySecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
+	@Editable(order=250, description = "Optionally specify options for ssh command. Multiple options need to be " +
+			"separated with space")
+	public String getOptions() {
+		return options;
+	}
+
+	public void setOptions(String options) {
+		this.options = options;
 	}
 	
 	@Editable(order=300, description="Specify commands to be executed on remote machine")
@@ -112,10 +124,15 @@ public class SSHCommandStep extends CommandStep {
 						"cat <<EOF>> /root/.ssh/id_rsa");
 				var privateKey = Build.get().getJobSecretAuthorizationContext().getSecretValue(getPrivateKeySecret());
 				commands.addAll(StringUtils.splitToLines(privateKey));
+				
+				var sshBuilder = new StringBuilder("ssh -o StrictHostKeyChecking=no ");
+				if (getOptions() != null)
+					sshBuilder.append(getOptions()).append(" ");
+				sshBuilder.append(getUserName() + "@" + getRemoteMachine() + " << EOF");
 				commands.addAll(newArrayList(
 						"EOF",
 						"chmod 600 /root/.ssh/id_rsa",
-						"ssh -o StrictHostKeyChecking=no " + getUserName() + "@" + getRemoteMachine() + " << EOF"));
+						sshBuilder.toString()));
 				commands.addAll(SSHCommandStep.this.getCommands());
 				commands.add("EOF");
 				return commands;
