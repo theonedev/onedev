@@ -37,5 +37,5 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 2. Login with the following credentials:
 
-  Username: {{ .Values.oneDevServer.initSettings.user }}
+  Username: {{ .Values.onedev.initSettings.user }}
   echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ include "ods.fullname" . }}-secrets -o jsonpath="{.data.password}" | base64 -d)

@@ -8,39 +8,39 @@ global:
   commonLabels: {}
     # dept_name: platform
 
-oneDevServer:
-  # oneDevServer.useStatefulSet -- Set to true to use a StatefulSet instead of a Deployment
+onedev:
+  # onedev.useStatefulSet -- Set to true to use a StatefulSet instead of a Deployment
   useStatefulSet: false
-  # oneDevServer.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
+  # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
   updateStrategy:
     type: RollingUpdate
-  # oneDevServer.enableSSL -- This configuration determines whether SSL should be enabled on the server.
+  # onedev.enableSSL -- This configuration determines whether SSL should be enabled on the server.
   enableSSL: false
   # trustCerts -- Specify a local directory containing certificates to be trusted in PEM format.
   trustCerts:
-    # oneDevServer.trustCerts.enabled -- Set to **true** to provide trust certs
+    # onedev.trustCerts.enabled -- Set to **true** to provide trust certs
     enabled: false
-    # oneDevServer.trustCerts.path -- Path of cert file on disk
+    # onedev.trustCerts.path -- Path of cert file on disk
     path: ""
-    # oneDevServer.trustCerts.existingSecret -- Existing secret name containing the cert file
+    # onedev.trustCerts.existingSecret -- Existing secret name containing the cert file
     ## - can be created with `kubectl create secret generic trustCerts --from-file=_local/cert.pem`
     existingSecret: ""
 
-  # oneDevServer.maintenance -- Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore.
+  # onedev.maintenance -- Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore.
   # [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details
   maintenance: false
 
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
-    # oneDevServer.initSettings.enabled -- Enables initial settings for deployment
+    # onedev.initSettings.enabled -- Enables initial settings for deployment
     enabled: true
-    # oneDevServer.initSettings.user -- Admin username
+    # onedev.initSettings.user -- Admin username
     user: "admin" 
-    # oneDevServer.initSettings.password -- admin Password, if not specified a random password will be generated automatically
+    # onedev.initSettings.password -- admin Password, if not specified a random password will be generated automatically
     password: "password"
-    # oneDevServer.initSettings.email -- admin Email address
+    # onedev.initSettings.email -- admin Email address
     email: "abc@example.com"
-    # oneDevServer.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
+    # onedev.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
     serverUrl: ""
     sshRootUrl: ""
 

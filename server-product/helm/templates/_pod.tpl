@@ -31,7 +31,7 @@ containers:
 {{- end }}
     image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{- if .Values.oneDevServer.maintenance }}
+{{- if .Values.onedev.maintenance }}
     command: ["/root/bin/idle.sh"]
 {{- end }}
     env:
@@ -43,13 +43,13 @@ containers:
           name: {{ include "ods.fullname" . }}-secrets
           key: password
     - name: initial_user
-      value: {{ .Values.oneDevServer.initSettings.user }}
+      value: {{ .Values.onedev.initSettings.user }}
     - name: initial_email
-      value: {{ .Values.oneDevServer.initSettings.email }}
+      value: {{ .Values.onedev.initSettings.email }}
     - name: initial_server_url
-      value: {{ .Values.oneDevServer.initSettings.serverUrl }}
+      value: {{ .Values.onedev.initSettings.serverUrl }}
     - name: ingress_tls
-      value:  {{ .Values.oneDevServer.enableSSL | quote }}
+      value:  {{ .Values.onedev.enableSSL | quote }}
 {{- if .Values.ingress.enabled }}
     - name: ingress_host
       value: {{ include "ingressHost" . }}
@@ -97,7 +97,7 @@ containers:
     volumeMounts:
       - name: data
         mountPath: "/opt/onedev"
-{{- if .Values.oneDevServer.trustCerts.enabled }}
+{{- if .Values.onedev.trustCerts.enabled }}
       - name: trust-certs
         mountPath: "/opt/onedev/conf/trust-certs"
 {{- end }}
@@ -121,10 +121,10 @@ tolerations: {{ toYaml .Values.tolerations | nindent 2 }}
 topologySpreadConstraints: {{ toYaml .Values.topologySpreadConstraints | nindent 2 }}
 {{- end }}
 volumes:
-{{- if .Values.oneDevServer.trustCerts.enabled }}
+{{- if .Values.onedev.trustCerts.enabled }}
   - name: trust-certs
     secret: 
-      secretName: {{ if .Values.oneDevServer.trustCerts.existingSecret }}{{ .Values.oneDevServer.trustCerts.existingSecret }}{{- else }}{{ include "ods.fullname" . }}-certs{{- end }}
+      secretName: {{ if .Values.onedev.trustCerts.existingSecret }}{{ .Values.onedev.trustCerts.existingSecret }}{{- else }}{{ include "ods.fullname" . }}-certs{{- end }}
 {{- end }}
 {{- if .Values.persistence.enabled }}
 {{- if .Values.persistence.existingClaim }}

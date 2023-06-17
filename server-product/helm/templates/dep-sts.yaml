@@ -1,5 +1,5 @@
-apiVersion: {{ if .Values.oneDevServer.useStatefulSet }}{{ include "ods.statefulset.apiVersion" . }}{{- else }}{{ include "ods.deployment.apiVersion" . }}{{- end }}
-kind: {{ if .Values.oneDevServer.useStatefulSet }}StatefulSet{{- else }}Deployment{{- end }}
+apiVersion: {{ if .Values.onedev.useStatefulSet }}{{ include "ods.statefulset.apiVersion" . }}{{- else }}{{ include "ods.deployment.apiVersion" . }}{{- end }}
+kind: {{ if .Values.onedev.useStatefulSet }}StatefulSet{{- else }}Deployment{{- end }}
 metadata:
   name: {{ include "ods.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -9,16 +9,16 @@ spec:
   selector:
     matchLabels:
   {{- include "ods.template-labels" . | nindent 6 }}
-  {{- if .Values.oneDevServer.useStatefulSet }}
+  {{- if .Values.onedev.useStatefulSet }}
   serviceName: {{ template "ods.fullname" . }}
   {{- end }}
-  {{- if .Values.oneDevServer.updateStrategy}}
-  {{- if .Values.oneDevServer.useStatefulSet }}
+  {{- if .Values.onedev.updateStrategy}}
+  {{- if .Values.onedev.useStatefulSet }}
   updateStrategy:
   {{- else }}
   strategy:
   {{- end }}
-    {{- toYaml .Values.oneDevServer.updateStrategy | nindent 4 }}
+    {{- toYaml .Values.onedev.updateStrategy | nindent 4 }}
   {{- end}}
   template:
     metadata:
@@ -26,15 +26,15 @@ spec:
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
-{{- if .Values.oneDevServer.trustCerts.enabled }}
+{{- if .Values.onedev.trustCerts.enabled }}
       annotations:
-        checksum/secret: {{ tpl (toYaml .Values.oneDevServer.trustCerts.path) . | sha256sum }}
+        checksum/secret: {{ tpl (toYaml .Values.onedev.trustCerts.path) . | sha256sum }}
         {{- end }}
         {{- if .Values.podAnnotations }}
 {{ tpl (toYaml .Values.podAnnotations) . | indent 8 }}
         {{- end }}
     spec: {{ include "ods.pod" . | nindent 6 }}
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) (not .Values.oneDevServer.useStatefulSet) }}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) (not .Values.onedev.useStatefulSet) }}
       - name: data
         persistentVolumeClaim:
           claimName: {{ include "ods.fullname" . }}

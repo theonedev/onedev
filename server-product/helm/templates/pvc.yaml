@@ -1,4 +1,4 @@
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) (not .Values.oneDevServer.useStatefulSet) }}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) (not .Values.onedev.useStatefulSet) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
