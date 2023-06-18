@@ -39,10 +39,11 @@ All-In-One DevOps Platform
 | ingress.annotations | object | `{}` | Specify annotations for the Ingress. |
 | ingress.className | string | `""` | Specify the [ingressClassName](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress), requires Kubernetes >= 1.18. |
 | ingress.enabled | bool | `false` | If **true**, create an Ingress resource. |
-| ingress.hosts.host | string | `"onedev.example.com"` | Set the host name |
-| ingress.hosts.paths.port.name | string | `"http"` | Specify the port name |
-| ingress.hosts.paths.port.number | string | `""` | Specify the port number |
-| ingress.tls | list | `[]` | Configure TLS for the Ingress. |
+| ingress.host | string | `"onedev.example.com"` | Set the host name |
+| ingress.port.name | string | `"http"` | Specify the port name |
+| ingress.port.number | string | `""` | Specify the port number |
+| ingress.tls.host | string | `nil` | Configure TLS host for the Ingress. |
+| ingress.tls.secretName | string | `nil` | Configure TLS secretName for the Ingress. |
 | initContainers | list | `[]` | Specify initContainers to be added. |
 | lifecycle | object | `{}` | Specify lifecycle hooks for Containers. |
 | livenessProbe | object | `{}` | Specify the livenessProbe [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes). |
