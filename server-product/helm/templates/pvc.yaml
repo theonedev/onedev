@@ -9,7 +9,9 @@ spec:
   resources:
     requests:
       storage: {{ .Values.persistence.size | quote }}
-  storageClassName: {{ default "" .Values.persistence.storageClassName }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
   accessModes:
     - {{ default "ReadWriteOnce" .Values.persistence.accessModes }}
   {{- if .Values.persistence.selector }}
