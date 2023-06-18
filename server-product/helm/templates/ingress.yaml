@@ -11,7 +11,6 @@ apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
-
 kind: Ingress
 metadata:
   name: {{ include "ods.fullname" . }}
@@ -28,20 +27,14 @@ spec:
   {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
+  - hosts:
+      - {{ .Values.ingress.tls.host }}
+    secretName: {{ .Values.ingress.tls.secretName }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          {{- range .paths }}
           - path: "/"
             {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: ImplementationSpecific
@@ -51,15 +44,13 @@ spec:
               service:
                 name: {{ include "ods.fullname" $ }}
                 port:
-                  {{- if .port.name }}
-                  name: {{ .port.name }}
+                  {{- if .Values.ingress.port.name }}
+                  name: {{ .Values.ingress.port.name }}
                   {{- else }}
-                  number: {{ .port.number }}
+                  number: {{ .Values.ingress.port.number }}
                   {{- end }}
               {{- else }}
               serviceName: {{ include "ods.fullname" $ }}
-              servicePort: {{ .port.number }}
+              servicePort: {{ .Values.ingress.port.number }}
               {{- end }}
-          {{- end }}
-    {{- end }}
 {{- end }}

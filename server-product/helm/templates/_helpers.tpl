@@ -95,11 +95,6 @@ Return the appropriate apiVersion for statefulset.
 {{- end -}}
 {{- end -}}
 
-{{/* Get value of host from Ingress */}}
-{{- define "ingressHost" -}}
-{{- $host := index .Values.ingress.hosts 0 }}
-{{- $host.host }}
-{{- end -}}
 
 {{/* 
 Generate URL string based on the database type

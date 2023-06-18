@@ -10,7 +10,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 1. You can access OneDev at:
 
-   http://{{ index .Values.ingress.hosts 0 "host" }}
+   http://{{ .Values.ingress.host }}
 
 {{- else }}
 

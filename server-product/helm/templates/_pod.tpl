@@ -52,7 +52,7 @@ containers:
       value:  {{ .Values.onedev.enableSSL | quote }}
 {{- if .Values.ingress.enabled }}
     - name: ingress_host
-      value: {{ include "ingressHost" . }}
+      value: {{ .Values.ingress.host }}
 {{- end }}
 {{- if .Values.database.external }}
 {{- include "setDatabaseEnvVars" . | indent 2 }}

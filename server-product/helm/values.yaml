@@ -228,20 +228,17 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  hosts:
-  # ingress.hosts.host -- Set the host name
-   - host: onedev.example.com
-     paths:
-      # Specify the port name or number on the Service
-      # Using name requires Kubernetes >=1.19
-       - port:
-           name: "http"
-           number: ""
+  # ingress.host -- Set the host name
+  host: onedev.example.com
+  # ingress.port.name -- Specify the port name or number on the Service
+  # Using name requires Kubernetes >=1.19
+  port:
+    name: "http"
+    number: ""
   # ingress.tls -- Configure TLS for the Ingress.
-  tls: []
-  #  - secretName: wildcard-tls
-  #    hosts:
-  #      - onedev.example.com
+  tls: {}
+  #  secretName: wildcard-tls
+  #  host: onedev.example.com
 
 # extraVolumes -- Specify additional Volumes to use.
 extraVolumes: []
