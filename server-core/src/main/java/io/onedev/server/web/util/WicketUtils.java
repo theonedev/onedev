@@ -1,25 +1,23 @@
 package io.onedev.server.web.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-
+import io.onedev.server.util.LongRange;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.websocket.PageKey;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
-import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import io.onedev.server.util.LongRange;
-import io.onedev.server.web.websocket.PageKey;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WicketUtils {
 	
@@ -32,14 +30,23 @@ public class WicketUtils {
 	
 	@Nullable
 	public static Page getPage() {
-		RequestCycle requestCycle = RequestCycle.get();
+		var pageRequestHandler = getPageRequestHandler();
+		if (pageRequestHandler != null)
+			return (Page) pageRequestHandler.getPage();
+		else 
+			return null;
+	}
+
+	@Nullable
+	private static IPageRequestHandler getPageRequestHandler() {
+		var requestCycle = RequestCycle.get();
 		if (requestCycle != null) {
-			IRequestHandler requestHandler = requestCycle.getActiveRequestHandler();
-			if (requestHandler instanceof IRequestHandlerDelegate) 
-				requestHandler = ((IRequestHandlerDelegate) requestHandler).getDelegateHandler();			
+			var requestHandler = requestCycle.getActiveRequestHandler();
+			if (requestHandler instanceof IRequestHandlerDelegate)
+				requestHandler = ((IRequestHandlerDelegate) requestHandler).getDelegateHandler();
 			if (requestHandler instanceof IPageRequestHandler)
-				return (Page) ((IPageRequestHandler) requestHandler).getPage();	
-		} 
+				return ((IPageRequestHandler) requestHandler);
+		}
 		return null;
 	}
 	
@@ -85,11 +92,12 @@ public class WicketUtils {
 	
 	@Nullable
 	public static PageKey getPageKey() {
-		Page page = getPage();
-		if (page != null) {
-			String sessionId = page.getSession().getId();
-			if (sessionId != null) {
-				return new PageKey(sessionId, new PageIdKey(page.getPageId()));
+		var pageRequestHandler = getPageRequestHandler();
+		if (pageRequestHandler != null) {
+			var pageId = pageRequestHandler.getPageId();
+			if (pageId != null) {
+				var session = WebSession.get();
+				return new PageKey(session.getId(), new PageIdKey(pageId));
 			}
 		}
 		return null;
