@@ -20,7 +20,7 @@ import io.onedev.server.annotation.Editable;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-@Editable(name="OpenID (Twitch)", order=200, description="")
+@Editable(name="Twitch", order=200, description = "Single sign on via twitch.tv")
 public class TwitchConnector extends OpenIdConnector {
 
 	private static final long serialVersionUID = 1L;

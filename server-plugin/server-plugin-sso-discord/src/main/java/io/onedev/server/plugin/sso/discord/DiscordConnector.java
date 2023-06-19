@@ -30,7 +30,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 
-@Editable(name="Discord", order=10100, description="Single sign on via discord.com")
+@Editable(name="Discord", order=150, description="Single sign on via discord.com")
 public class DiscordConnector extends SsoConnector {
 	
 	private static final long serialVersionUID = 1L;
