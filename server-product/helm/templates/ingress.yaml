@@ -47,10 +47,10 @@ spec:
                   {{- if .Values.ingress.port.name }}
                   name: {{ .Values.ingress.port.name }}
                   {{- else }}
-                  number: {{ .Values.ingress.port.number }}
+                  number: {{ default "6610" .Values.service.ports.httpPort }}
                   {{- end }}
               {{- else }}
               serviceName: {{ include "ods.fullname" $ }}
-              servicePort: {{ .Values.ingress.port.number }}
+              servicePort: {{ default "6610" .Values.service.ports.httpPort }}
               {{- end }}
 {{- end }}
