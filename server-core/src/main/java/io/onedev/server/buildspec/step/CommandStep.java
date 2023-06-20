@@ -13,6 +13,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -87,8 +88,8 @@ public class CommandStep extends Step {
 	}
 
 	@Override
-	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
-		return getInterpreter().getExecutable(isRunInContainer()?getImage():null, isUseTTY());
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		return getInterpreter().getExecutable(jobExecutor, isRunInContainer()?getImage():null, isUseTTY());
 	}
 	
 }

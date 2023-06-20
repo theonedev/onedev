@@ -10,6 +10,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable
 public abstract class Interpreter implements Serializable {
@@ -26,7 +27,7 @@ public abstract class Interpreter implements Serializable {
 		this.commands = commands;
 	}
 
-	public abstract CommandFacade getExecutable(@Nullable String image, boolean useTTY);
+	public abstract CommandFacade getExecutable(JobExecutor jobExecutor, @Nullable String image, boolean useTTY);
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, true);

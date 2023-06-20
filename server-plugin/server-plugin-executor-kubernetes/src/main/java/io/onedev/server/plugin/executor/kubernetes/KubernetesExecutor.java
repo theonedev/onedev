@@ -28,10 +28,7 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.RegistryLogin;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
-import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.*;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
@@ -60,7 +57,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
@@ -73,7 +69,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "settings as job pods need to access it to download source and artifacts")
 @Horizontal
-public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
+public class KubernetesExecutor extends JobExecutor implements DockerAware, Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -137,6 +133,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	@Editable(order=200, description="Specify login information of docker registries if necessary. "
 			+ "These logins will be used to create image pull secrets of the job pods")
+	@Override
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
@@ -656,18 +653,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 
-	private String createDockerConfigSecret(String namespace, TaskLogger jobLogger) {
-		String dockerConfig = buildDockerConfig(getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList()));
-		Map<Object, Object> secretDef = newLinkedHashMap(
-				"apiVersion", "v1",
-				"kind", "Secret",
-				"metadata", newLinkedHashMap(
-						"name", "docker-config",
-						"namespace", namespace),
-				"data", newLinkedHashMap("config.json", encodeBase64String(dockerConfig.getBytes(UTF_8))));
-		return createResource(secretDef, new HashSet<>(), jobLogger);
-	}
-	
 	private void startService(String namespace, JobContext jobContext, Service jobService, 
 			@Nullable String imagePullSecretName, TaskLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
@@ -880,7 +865,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}
 				
 				var trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
-				var dockerConfigSecretName = createDockerConfigSecret(namespace, jobLogger);
 				
 				osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
 				
@@ -893,8 +877,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String containerCacheHome;
 				String containerAuthInfoDir;
 				String containerTrustCertsDir;
-				String dockerSock;
-				String containerdSock;
 				String containerWorkspace;
 				if (osInfo.isWindows()) {
 					containerBuildHome = "C:\\onedev-build";
@@ -903,8 +885,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerCommandDir = containerBuildHome + "\\command";
 					containerAuthInfoDir = "C:\\Users\\ContainerAdministrator\\auth-info";
 					containerTrustCertsDir = containerBuildHome + "\\trust-certs";
-					dockerSock = "\\\\.\\pipe\\docker_engine";
-					containerdSock = "\\\\.\\pipe\\containerd-containerd";
 				} else {
 					containerBuildHome = "/onedev-build";
 					containerWorkspace = containerBuildHome +"/workspace";
@@ -912,8 +892,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerCommandDir = containerBuildHome + "/command";
 					containerAuthInfoDir = "/root/auth-info";
 					containerTrustCertsDir = containerBuildHome + "/trust-certs";
-					dockerSock = "/var/run/docker.sock";
-					containerdSock = "/run/containerd/containerd.sock";
 				}
 
 				Map<String, String> buildHomeMount = newLinkedHashMap(
@@ -934,22 +912,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				Map<String, String> trustCertsMount = newLinkedHashMap(
 						"name", "trust-certs", 
 						"mountPath", containerTrustCertsDir);
-				Map<String, String> dockerSockMount = newLinkedHashMap(
-						"name", "docker-sock", 
-						"mountPath", dockerSock);
-				Map<String, String> containerdSockMount = newLinkedHashMap(
-						"name", "containerd-sock", 
-						"mountPath", containerdSock);
 				
 				var commonVolumeMounts = Lists.newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
 				if (osInfo.isWindows())
 					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
-				var sidecarVolumeMounts = new ArrayList<>(commonVolumeMounts);
-				
-				sidecarVolumeMounts.add(dockerSockMount);
-				sidecarVolumeMounts.add(containerdSockMount);
 				
 				CompositeFacade entryFacade;
 				if (jobContext != null) {
@@ -1016,42 +984,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
 					} else if (facade instanceof RunContainerFacade) {
-						RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
-						OsContainer container = runContainerFacade.getContainer(osInfo); 
-						stepContainerSpec = newHashMap(
-								"name", containerName, 
-								"image", mapImage(container.getImage()));
-						if (runContainerFacade.isUseTTY())
-							stepContainerSpec.put("tty", true);
-						
-						List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
-						for (Map.Entry<String, String> entry: container.getVolumeMounts().entrySet()) {
-							if (entry.getKey().contains(".."))
-								throw new ExplicitException("Volume mount source path should not container '..'");
-							String subPath = StringUtils.stripStart(entry.getKey(), "/\\");
-							if (osInfo.isWindows())
-								subPath = "workspace\\" + subPath;
-							else
-								subPath = "workspace/" + subPath;
-							volumeMounts.add(newLinkedHashMap(
-									"name", "build-home", 
-									"mountPath", entry.getValue(),
-									"subPath", subPath));
-						}
-						if (runContainerFacade.isKaniko()) {
-							volumeMounts.add(newLinkedHashMap(
-									"name", "docker-config",
-									"mountPath", "/kaniko/.docker"));
-						}
-						stepContainerSpec.put("volumeMounts", volumeMounts);
-						
-						List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
-						for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
-							envs.add(newLinkedHashMap(
-									"name", entry.getKey(), 
-									"value", entry.getValue()));
-						}
-						stepContainerSpec.put("env", envs);
+						throw new ExplicitException("This step can only be executed by server docker executor or " +
+								"remote docker executor");
 					} else { 
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
@@ -1121,7 +1055,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"command", Lists.newArrayList("java"), 
 						"args", sidecarArgs, 
 						"env", commonEnvs, 
-						"volumeMounts", sidecarVolumeMounts);
+						"volumeMounts", commonVolumeMounts);
 				
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
@@ -1158,19 +1092,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							"configMap", newLinkedHashMap(
 									"name", trustCertsConfigMapName)));
 				}
-				volumes.add(newLinkedHashMap(
-						"name", "docker-config", 
-						"secret", newLinkedHashMap(
-								"secretName", dockerConfigSecretName)));
 				
-				volumes.add(newLinkedHashMap(
-						"name", "docker-sock", 
-						"hostPath", newLinkedHashMap(
-								"path", dockerSock)));
-				volumes.add(newLinkedHashMap(
-						"name", "containerd-sock", 
-						"hostPath", newLinkedHashMap(
-								"path", containerdSock)));
 				podSpec.put("volumes", volumes);
 
 				Map<Object, Object> podDef = newLinkedHashMap(

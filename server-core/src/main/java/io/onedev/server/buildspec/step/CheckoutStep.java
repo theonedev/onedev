@@ -15,6 +15,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.annotation.SafePath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {
@@ -90,7 +91,7 @@ public class CheckoutStep extends Step {
 	}
 	
 	@Override
-	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
 		return new CheckoutFacade(cloneDepth!=null?cloneDepth:0, withLfs, withSubmodules, 
 				cloneCredential.newCloneInfo(build, jobToken), checkoutPath);
 	}

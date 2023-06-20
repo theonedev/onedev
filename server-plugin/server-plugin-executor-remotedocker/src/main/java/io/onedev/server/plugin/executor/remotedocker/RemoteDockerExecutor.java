@@ -16,7 +16,7 @@ import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;

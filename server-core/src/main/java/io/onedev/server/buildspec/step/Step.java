@@ -12,6 +12,7 @@ import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable
 public abstract class Step implements Serializable {
@@ -20,7 +21,7 @@ public abstract class Step implements Serializable {
 	
 	private ExecuteCondition condition = ExecuteCondition.ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL;
 	
-	public abstract StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination);
+	public abstract StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination);
 	
 	private String name;
 
@@ -44,12 +45,12 @@ public abstract class Step implements Serializable {
 		this.condition = condition;
 	}
 
-	public Action getAction(String name, Build build, String jobToken, ParamCombination paramCombination) {
-		return new Action(name, getFacade(build, jobToken, paramCombination), condition);
+	public Action getAction(String name, Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		return new Action(name, getFacade(build, jobExecutor, jobToken, paramCombination), condition);
 	}
 	
-	public Action getAction(Build build, String jobToken, ParamCombination paramCombination) {
-		return getAction(name, build, jobToken, paramCombination);
+	public Action getAction(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		return getAction(name, build, jobExecutor, jobToken, paramCombination);
 	}
 	
 }

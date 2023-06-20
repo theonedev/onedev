@@ -507,7 +507,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			for (Step step : job.getSteps()) {
 				step = interpolator.interpolateProperties(step);
-				actions.add(step.getAction(build, jobToken, build.getParamCombination()));
+				actions.add(step.getAction(build, jobExecutor, jobToken, build.getParamCombination()));
 			}
 
 			for (CacheSpec cache : job.getCaches())

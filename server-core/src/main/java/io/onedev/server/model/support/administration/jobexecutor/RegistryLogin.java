@@ -1,4 +1,4 @@
-package io.onedev.server.model.support;
+package io.onedev.server.model.support.administration.jobexecutor;
 
 import java.io.Serializable;
 

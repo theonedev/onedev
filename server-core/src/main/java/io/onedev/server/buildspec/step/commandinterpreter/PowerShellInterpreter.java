@@ -9,6 +9,7 @@ import io.onedev.k8shelper.PowerShellFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=300, name="PowerShell")
 public class PowerShellInterpreter extends Interpreter {
@@ -35,7 +36,7 @@ public class PowerShellInterpreter extends Interpreter {
 	}
 	
 	@Override
-	public CommandFacade getExecutable(String image, boolean useTTY) {
+	public CommandFacade getExecutable(JobExecutor jobExecutor, String image, boolean useTTY) {
 		return new PowerShellFacade(image, getCommands(), useTTY);
 	}
 

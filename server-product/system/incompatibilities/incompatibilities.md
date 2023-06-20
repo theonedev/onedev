@@ -1,3 +1,7 @@
+# 8.4.0
+
+1. **[Executor]** Kubernetes executor no longer supports to execute step of type `Run Docker Container` to avoid mounting container sock into sidecar container. Put your step logic in a command step instead
+
 # 8.3.4
 
 1. **[Executor]** Kubernetes executor no longer supports to execute build image step even with docker runtime. A kaniko step is added to build image in Kubernetes cluster

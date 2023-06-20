@@ -23,7 +23,8 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
@@ -44,14 +45,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.onedev.agent.DockerExecutorUtils.*;
 import static io.onedev.k8shelper.KubernetesHelper.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
 		description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
 @Horizontal
-public class ServerDockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {
+public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -90,6 +90,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	private static volatile String hostInstallPath;
 	
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
+	@Override
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
@@ -326,7 +327,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									private int runStepContainer(String image, @Nullable String entrypoint,
 																 List<String> arguments, Map<String, String> environments,
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
-																 List<Integer> position, boolean useTTY, boolean kaniko) {
+																 List<Integer> position, boolean useTTY) {
 										image = mapImage(image);
 										// Uninstall symbol links as docker can not process it well
 										cache.uninstallSymbolinks(hostWorkspace);
@@ -342,16 +343,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 
 											docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-											
-											if (kaniko) {
-												var dockerConfigFile = new File(hostBuildHome, "kaniko/.docker/config.json");
-												FileUtils.writeFile(
-														dockerConfigFile, 
-														buildDockerConfig(getRegistryLogins().stream().map(it->it.getFacade()).collect(toList())), 
-														UTF_8.name());
-												String hostPath = getHostPath(dockerConfigFile.getAbsolutePath());
-												docker.addArgs("-v", hostPath + ":/kaniko/.docker/config.json");
-											}
 											
 											for (Map.Entry<String, String> entry : volumeMounts.entrySet()) {
 												if (entry.getKey().contains(".."))
@@ -446,7 +437,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 												int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(),
 														entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(),
-														position, commandFacade.isUseTTY(), false);
+														position, commandFacade.isUseTTY());
 
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
@@ -463,8 +454,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
 												int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(),
-														container.getWorkingDir(), container.getVolumeMounts(), position, runContainerFacade.isUseTTY(),
-														runContainerFacade.isKaniko());
+														container.getWorkingDir(), container.getVolumeMounts(), position, runContainerFacade.isUseTTY());
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
 													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Container exited with code " + exitCode);

@@ -14,6 +14,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.annotation.SafePath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker daemon. " +
 		"This step can only be executed by server docker executor or remote docker executor, and " +
@@ -87,7 +88,7 @@ public class BuildImageStep extends Step {
 	}
 	
 	@Override
-	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
 		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), getMoreOptions());
 	}
 
