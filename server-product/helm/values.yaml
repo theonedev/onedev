@@ -234,7 +234,6 @@ ingress:
   # Using name requires Kubernetes >=1.19
   port:
     name: "http"
-    number: ""
   # ingress.tls -- Configure TLS for the Ingress.
   tls: {}
   #  secretName: wildcard-tls
