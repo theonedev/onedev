@@ -27,9 +27,9 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 {{- if contains "ClusterIP"  .Values.service.type }}
 
-  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "ods.fullname" . }} {{ default "6610" .Values.service.ports.httpPort }}:6610 &
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "ods.fullname" . }} 6610:{{ default 80 .Values.service.ports.http }} &
 
-  URL: http://127.0.0.1:{{ default "6610" .Values.service.ports.httpPort }}/
+  URL: http://127.0.0.1:6610
 
 {{- else if contains "LoadBalancer" .Values.service.type }}
 
@@ -38,7 +38,11 @@ APP VERSION: {{ .Chart.AppVersion }}
 
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "ods.fullname" . }} --template "{{ "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}" }}")
 
-  echo "URL: http://$SERVICE_IP:{{ default "6610" .Values.service.ports.httpPort }}/"
+{{- if .Values.service.ports.http }}
+  echo "URL: http://$SERVICE_IP:{{ .Values.service.ports.http }}"
+{{- else }}
+  echo "URL: http://$SERVICE_IP"
+{{- end }}
 
 {{- end }}
 {{- end }}

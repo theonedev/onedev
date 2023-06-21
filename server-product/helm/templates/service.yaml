@@ -24,12 +24,12 @@ spec:
 {{- end }}
   ports:
   - name: http
-    port: {{ default "6610" .Values.service.ports.httpPort }}
+    port: {{ default "80" .Values.service.ports.http }}
     targetPort: http
     protocol: TCP
 {{- if not .Values.service.separateSSHService.enabled }}
   - name: ssh
-    port: {{ default "22" .Values.service.ports.sshPort }}
+    port: {{ default "22" .Values.service.ports.ssh }}
     targetPort: ssh
     protocol: TCP
 {{- end }}

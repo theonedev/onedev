@@ -182,8 +182,8 @@ service:
   #  - "*"
   # service.ports -- Manually change the ServicePorts
   ports:
-    httpPort: ""
-    sshPort: ""
+    http: ""
+    ssh: ""
   # service.nodePort -- Specify a nodePort for servcie
   nodePort: ""  
   # service.externalTrafficPolicy -- Specify the
