@@ -230,10 +230,6 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   # ingress.host -- Set the host name
   host: onedev.example.com
-  # ingress.port.name -- Specify the port name or number on the Service
-  # Using name requires Kubernetes >=1.19
-  port:
-    name: "http"
 
   # ingress.tls -- Configure TLS for the Ingress.
   tls:

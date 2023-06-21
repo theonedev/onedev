@@ -44,11 +44,7 @@ spec:
               service:
                 name: {{ include "ods.fullname" $ }}
                 port:
-                  {{- if .Values.ingress.port.name }}
-                  name: {{ .Values.ingress.port.name }}
-                  {{- else }}
-                  number: {{ default "80" .Values.service.ports.http }}
-                  {{- end }}
+                  name: "http"
               {{- else }}
               serviceName: {{ include "ods.fullname" $ }}
               servicePort: {{ default "80" .Values.service.ports.http }}
