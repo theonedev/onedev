@@ -235,6 +235,17 @@ ingress:
   tls:
     enabled: false
     secretName: "onedev-tls"
+    acme:
+      # ingress.tls.acme.enabled -- If **true**, create certificate issuer resource
+      enabled: false
+      # ingress.tls.acme.type -- Specify ACME type. Currently only supports letsencrypt
+      type: "letsencrypt"
+      # ingress.tls.acme.email -- Email to send certificate status notice
+      email: you@example.com
+      # ingress.tls.acme.production -- If **true**, generate a production certificate;
+      # otherwise generate staging certificate. Set this to **false** to avoid reaching
+      # rate limit while you are testing your setup
+      production: false
 
 # extraVolumes -- Specify additional Volumes to use.
 extraVolumes: []

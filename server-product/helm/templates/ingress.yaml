@@ -17,8 +17,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "ods.labels" . | indent 4 }}
-  {{- if .Values.ingress.annotations }}
   annotations:
+  {{- if $.Values.ingress.tls.acme.enabled }}
+    cert-manager.io/issuer: "{{ include "ods.fullname" . }}"
+  {{- end }}
+  {{- if .Values.ingress.annotations }}
 {{ toYaml .Values.ingress.annotations | indent 4 }}
   {{- end }}
 spec:
