@@ -1,8 +1,0 @@
-{{- if .Values.trustCerts -}}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "onedev.fullname" . }}-trust-certs
-binaryData:
-  cert.pem: {{ .Values.trustCerts | b64enc }}
-{{- end }}

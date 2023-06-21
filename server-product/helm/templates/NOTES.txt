@@ -1,13 +1,41 @@
-{{- if .Values.maintenance -}}
-Now in maintenance mode
-{{- else if .Values.ingress.host }}
-{{- if .Values.ingress.tls }}
-OneDev can be accessed at url "https://{{ .Values.ingress.host }}" when ready
+
+
+CHART NAME: {{ .Chart.Name }}
+CHART VERSION: {{ .Chart.Version }}
+APP VERSION: {{ .Chart.AppVersion }}
+
+** Please be patient while the chart is being deployed **
+
+{{- if .Values.ingress.enabled }}
+
+1. You can access OneDev at:
+
+   http://{{ .Values.ingress.host }}
+
 {{- else }}
-OneDev can be accessed at url "http://{{ .Values.ingress.host }}" when ready
+
+1. Get the OneDev URL by running:
+
+
+{{- if contains "ClusterIP"  .Values.service.type }}
+
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "ods.fullname" . }} {{ default "6610" .Values.service.ports.httpPort }}:6610 &
+
+  URL: http://127.0.0.1:{{ default "6610" .Values.service.ports.httpPort }}/
+
+{{- else if contains "LoadBalancer" .Values.service.type }}
+
+** Please ensure an external IP is associated to the {{ .Release.Namespace }} service before proceeding **
+** Watch the status using: kubectl get svc --namespace {{ .Release.Namespace }} -w {{ include "ods.fullname" . }} **
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "ods.fullname" . }} --template "{{ "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}" }}")
+
+  echo "URL: http://$SERVICE_IP:{{ default "6610" .Values.service.ports.httpPort }}/"
+
 {{- end }}
-{{- else }}
-OneDev can be accessed at url "http://<OneDev external ip>" when ready. 
-OneDev external ip can be dispalyed via below command: 
-kubectl get service {{ include "onedev.fullname" . }} -n {{ .Release.Namespace }}
 {{- end }}
+
+2. Login with the following credentials:
+
+  Username: {{ .Values.onedev.initSettings.user }}
+  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ include "ods.fullname" . }}-secrets -o jsonpath="{.data.password}" | base64 -d)

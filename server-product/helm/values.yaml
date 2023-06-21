@@ -1,98 +1,290 @@
-## Set this as true to stop OneDev server to perform various maintenance tasks such as backup, restore.
-## Check https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md for details
-maintenance: false
+# Global values
+global:
+  # global.nameOverride -- Override the name of the app.
+  nameOverride: ""
+  # global.fullnameOverride -- Override the fully qualified app name.
+  fullnameOverride: ""
+  # global.commonLabels -- To apply labels to all resources.
+  commonLabels: {}
+    # dept_name: platform
 
-nodeSelector:
-  onedev:
-    kubernetes.io/os: linux
-  mysql:
-    kubernetes.io/os: linux
+onedev:
+  # onedev.useStatefulSet -- Set to true to use a StatefulSet instead of a Deployment
+  useStatefulSet: false
+  # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
+  updateStrategy:
+    type: RollingUpdate
+  # onedev.enableSSL -- This configuration determines whether SSL should be enabled on the server.
+  enableSSL: false
+  # trustCerts -- Specify a local directory containing certificates to be trusted in PEM format.
+  trustCerts:
+    # onedev.trustCerts.enabled -- Set to **true** to provide trust certs
+    enabled: false
+    # onedev.trustCerts.path -- Path of cert file on disk
+    path: ""
+    # onedev.trustCerts.existingSecret -- Existing secret name containing the cert file
+    ## - can be created with `kubectl create secret generic trustCerts --from-file=_local/cert.pem`
+    existingSecret: ""
+
+  # onedev.maintenance -- Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore.
+  # [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details
+  maintenance: false
+
+  # Specify OneDev Server initial settings to avoid manual setup
+  initSettings:
+    # onedev.initSettings.enabled -- Enables initial settings for deployment
+    enabled: true
+    # onedev.initSettings.user -- Admin username
+    user: "admin" 
+    # onedev.initSettings.password -- admin Password, if not specified a random password will be generated automatically
+    password: "password"
+    # onedev.initSettings.email -- admin Email address
+    email: "abc@example.com"
+    # onedev.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
+    serverUrl: ""
+    sshRootUrl: ""
+
+# External database configuration
+database:
+  # database.external -- Set to **true** when using external database
+  external: false
+  # database.dbType -- Required: Set type of external database. Possible values `mysql`, `mariadb`, `postgresql`, `mssql`, `oracle`
+  # [external databases](https://docs.onedev.io/installation-guide/run-as-docker-container#use-external-database)
+  dbType: "mysql"
+  # database.dbHost -- IP address or hostname of database
+  dbHost: ""
+  # database.dbPort --  Port Number
+  dbPort: "3306"
+  # database.dbName --  Name of the database
+  dbName: "onedev"
+  # database.dbUser --  User with access to database
+  dbUser: "onedev"
+  # database.dbPassword -- Database password 
+  dbPassword: "changeme"
+  # database.dbMaximumPoolSize -- Database maximum pool size
+  dbMaximumPoolSize: "25"
+
+image:
+  # image.name -- Specify the image name to use (relative to `image.repository`).
+  name: 1dev/server
+  # image.tag -- Specify the image tag to use.
+  tag: latest
+  # image.repository -- Specify the image repository to use.
+  repository: docker.io
+  # image.pullPolicy -- Specify the
+  # [pullPolicy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy).
+  pullPolicy: IfNotPresent
+  # image.pullSecrets -- Specify the
+  # [imagePullSecrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod).
+  pullSecrets: []
+  #  - name: <REGISTRY_SECRET>
+
+serviceAccount:
+  # serviceAccount.create -- If **true**, create a ServiceAccount.
+  create: true
+  # serviceAccount.name -- Specify a pre-existing ServiceAccount to use if `serviceAccount.create` is **false**.
+  name: onedev
+  # serviceAccount.annotations -- Annotations to add to the ServiceAccount, if `serviceAccount.create` is **true**.
+  annotations: {}
+
+# podAnnotations -- Set annotations on Pods.
+podAnnotations: {}
+
+# podLabels -- Set labels on Pods.
+podLabels: {}
+
+# podPriorityClassName -- Set the
+# [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass).
+podPriorityClassName: ""
+
+# podHostNetwork -- Enable the hostNetwork option on Pods.
+podHostNetwork: false
+
+# podSecurityContext -- Allows you to overwrite the default
+# [PodSecurityContext](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/).
+podSecurityContext: {}
+
+# securityContext -- Specify securityContext for Containers.
+securityContext: {}
+
+# command -- Override default image command.
+command: []
+
+# args -- Override default image arguments.
+args: []
+
+# env -- Define additional environment variables.
+env: []
+#  - name: <ENV_VAR_NAME>
+#    value: <ENV_VAR_VALUE>
+#  - name: <ENV_VAR_NAME>
+#    valueFrom:
+#      secretKeyRef:
+#        name: <SECRET_NAME>
+#        key: <KEY_NAME>
+
+# envFrom -- Define environment variables from ConfigMap or Secret data.
+envFrom: []
+#  - configMapRef:
+#      name: <CONFIGMAP_NAME>
+#  - secretRef:
+#     name: <SECRET_NAME>
+
+# resources -- Specify resource requests and limits.
+resources: {}
+  # requests:
+  #   cpu: 200m
+  #   memory: 256Mi
+  # limits:
+  #   cpu: 200m
+  #   memory: 256Mi
+
+# lifecycle -- Specify lifecycle hooks for Containers.
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command:
+  #     - /bin/sleep
+  #     - "10"
+
+# terminationGracePeriodSeconds -- Override terminationGracePeriodSeconds.
+terminationGracePeriodSeconds: 60
+
+# nodeSelector -- Configure
+# [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector).
+nodeSelector: {}
+
+# tolerations -- Configure
+# [taints and tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).
+tolerations: []
+
+# affinity -- Configure
+# [affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity).
+affinity: {}
+
+# topologySpreadConstraints -- Configure
+# [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/).
+topologySpreadConstraints: []
 
 service:
-  main:
-    port: 80
-    #nodePort:
-    # type: ClusterIP
-    # clusterIP: None
-    #loadBalancerIP:
-    #externalTrafficPolicy:
-    #externalIPs:
-    loadBalancerSourceRanges: []
-    annotations:
-  ssh:
-    # If separateService is enabled, a separate service is created for SSH with the following options,
-    # otherwise, a port for SSH will be added in the main service with the following options.
-    separateService: false
+  # service.enabled -- If **true**, create a Service resource.
+  enabled: true
+  # service.type -- Specify the type for the Service. ClusterIP, LoadBalancer
+  type: "ClusterIP"
+  # service.annotations -- Specify annotations for the Service.
+  annotations: {}
+  # service.topologyKeys -- (array) Specify the
+  # [topologyKeys](https://kubernetes.io/docs/concepts/services-networking/service-topology/#using-service-topology).
+  topologyKeys: []
+  #  - "kubernetes.io/hostname"
+  #  - "topology.kubernetes.io/zone"
+  #  - "topology.kubernetes.io/region"
+  #  - "*"
+  # service.ports -- Manually change the ServicePorts
+  ports:
+    httpPort: ""
+    sshPort: ""
+  # service.nodePort -- Specify a nodePort for servcie
+  nodePort: ""  
+  # service.externalTrafficPolicy -- Specify the
+  # [externalTrafficPolicy](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip).
+  externalTrafficPolicy: ""
+  # service.loadBalancerIP -- Required: If service type is loadbalancer 
+  # [loadBalancerIP](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer).
+  loadBalancerIP: ""
+  # service.ipFamilyPolicy -- Configure
+  # [IPv4/IPv6 dual-stack](https://kubernetes.io/docs/concepts/services-networking/dual-stack/).
+  ipFamilyPolicy: ""
+  # service.ipFamilies -- Configure
+  # [IPv4/IPv6 dual-stack](https://kubernetes.io/docs/concepts/services-networking/dual-stack/).
+  ipFamilies: []
+  # Configure sepearte SSH service
+  separateSSHService:
+  # service.separateSSHService.enabled -- If separate SSH service is enabled, a separate service is created for SSH
+    enabled: false
+    type: "ClusterIP"
     port: 22
-    #nodePort:
-    ## The following options are only useful when separateService is set to true
-    # type: LoadBalancer
-    # clusterIP: None
-    #loadBalancerIP:
-    #externalTrafficPolicy:
-    #externalIPs:
+    clusterIP: ""
+    loadBalancerIP: ""
+    nodePort: ""
+    externalTrafficPolicy: ""
+    externalIPs: []
+    #  - 4.2.2.1
+    ipFamilyPolicy: ""
+    ipFamilies: []
     loadBalancerSourceRanges: []
-    annotations:
+    annotations: {}
+    topologyKeys: []
 
-## Ingress support, check below for more info.
-## Check https://code.onedev.io/onedev/manual/~files/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
+ # Configure Ingress resource
 ingress:
-  ## Optionally specify dns name to access OneDev via ingress controller
-  host: ""
-  ## Whether or not to enable TLS for above host
-  tls: false
-  ## Will be used as ingressClassName of ingress spec to match controller
-  class: nginx
-  ## Set to false to disable the default certificate issuer from this chart if you want to use a custom one
-  enableDefaultIssuer: true
-  ## Custom annotations for the ingress
-  annotations:
+  # ingress.enabled -- If **true**, create an Ingress resource.
+  enabled: false
+  # ingress.className -- Specify the
+  # [ingressClassName](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress),
+  # requires Kubernetes >= 1.18.
+  className: ""
+  # ingress.annotations -- Specify annotations for the Ingress.
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-    # cert-manager.io/issuer: ""
-    # cert-manager.io/cluster-issuer: ""
-    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+  # ingress.host -- Set the host name
+  host: onedev.example.com
+  # ingress.port.name -- Specify the port name or number on the Service
+  # Using name requires Kubernetes >=1.19
+  port:
+    name: "http"
+  # ingress.tls -- Configure TLS for the Ingress.
+  tls: {}
+  #  secretName: wildcard-tls
+  #  host: onedev.example.com
 
-letsencrypt:
-  ## Specify an email here to enable LetsEncrypt.
-  ## Check https://code.onedev.io/onedev./server/~files/main/pages/deploy-into-k8s-with-helm.md#letsencrypt-setup for details
-  email: ""
+# extraVolumes -- Specify additional Volumes to use.
+extraVolumes: []
 
-resources:
-  onedev:
-    memory: 1024Mi
-  mysql:
-    memory: 256Mi
+# extraVolumeMounts -- Specify Additional VolumeMounts to use.
+extraVolumeMounts: []
 
-volumes:
-  onedev:
-    ## Optionally specify storage class of persistent volume to store OneDev data including git repositories and indexes. 
-    ## Leave empty to use default storage class
-    storageClassName: ""
-    size: 100Gi
-  mysql:
-    ## Optionally specify storage class of persistent volume to store mysql data.
-    ## Leave empty to use default storage class
-    storageClassName: ""
-    size: 20Gi
+# initContainers -- Specify initContainers to be added.
+initContainers: []
 
-secrets:
-  mysql:
-    ## change mysql root password if desired
-    password: changeit
+# extraContainers -- Specify extra Containers to be added.
+extraContainers: []
 
-## Specify OneDev initial settings to avoid manual setup
-initial:
-  ## Login name of administrator
-  user: "" 
-  ## Password of administrator
-  password: "" 
-  ## Email address of adminsitrator
-  email: ""
-  ## Server url will be ignored if ingress.host is specified above
-  serverUrl: ""  
-  sshRootUrl: ""
+persistence:
+  # persistence.enabled -- If **true**, create and use PersistentVolumeClaims.
+  enabled: true
+  # persistence.existingClaim -- Name of an existing PersistentVolumeClaim to use.
+  existingClaim: ""
+  # persistence.storageClassName -- (string) Specify the storageClassName for PersistentVolumeClaims.
+  storageClassName: ""
+  # persistence.accessModes -- Specify the accessModes for PersistentVolumeClaims.
+  accessModes: "ReadWriteOnce"
+  # persistence.size -- Specify the size of PersistentVolumeClaims.
+  size: 10Gi
+  # persistence.selector -- Specify the selectors for PersistentVolumeClaims.
+  selector: {}
+# dnsPolicy -- Specify the
+# [dnsPolicy](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy).
+dnsPolicy: ClusterFirst
 
-## Specify a local directory containing certificates to be trusted.
-## Certificate should be in PEM format starting with
-## -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----
-trustCerts: ""
+# dnsConfig -- Specify the
+# [dnsConfig](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config).
+dnsConfig: {}
+#  nameservers:
+#    - 1.2.3.4
+#  searches:
+#   - ns1.svc.cluster-domain.example
+#   - my.dns.search.suffix
+#  options:
+#    - name: ndots
+#      value: "2"
+#    - name: edns0
+
+# livenessProbe -- Specify the livenessProbe
+# [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
+livenessProbe: {}
+
+# readinessProbe -- Specify the readinessProbe
+# [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
+readinessProbe: {}
