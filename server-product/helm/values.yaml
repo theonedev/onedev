@@ -261,7 +261,7 @@ persistence:
   # persistence.accessModes -- Specify the accessModes for PersistentVolumeClaims.
   accessModes: "ReadWriteOnce"
   # persistence.size -- Specify the size of PersistentVolumeClaims.
-  size: 10Gi
+  size: 100Gi
   # persistence.selector -- Specify the selectors for PersistentVolumeClaims.
   selector: {}
 # dnsPolicy -- Specify the
