@@ -25,7 +25,7 @@ spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.ingress.tls.enabled }}
   tls:
   - hosts:
       - {{ .Values.ingress.tls.host }}
@@ -47,10 +47,10 @@ spec:
                   {{- if .Values.ingress.port.name }}
                   name: {{ .Values.ingress.port.name }}
                   {{- else }}
-                  number: {{ default "6610" .Values.service.ports.http }}
+                  number: {{ default "80" .Values.service.ports.http }}
                   {{- end }}
               {{- else }}
               serviceName: {{ include "ods.fullname" $ }}
-              servicePort: {{ default "6610" .Values.service.ports.http }}
+              servicePort: {{ default "80" .Values.service.ports.http }}
               {{- end }}
 {{- end }}

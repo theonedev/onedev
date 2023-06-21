@@ -18,7 +18,11 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 1. You can access OneDev at:
 
+{{- if .Values.ingress.tls.enabled }}
+   https://{{ .Values.ingress.host }}
+{{- else }}
    http://{{ .Values.ingress.host }}
+{{- end }}
 
 {{- else }}
 

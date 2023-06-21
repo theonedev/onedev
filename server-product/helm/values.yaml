@@ -234,10 +234,12 @@ ingress:
   # Using name requires Kubernetes >=1.19
   port:
     name: "http"
+
   # ingress.tls -- Configure TLS for the Ingress.
-  tls: {}
-  #  secretName: wildcard-tls
-  #  host: onedev.example.com
+  tls:
+    enabled: false
+    secretName: "onedev-tls"
+    host: onedev.example.com
 
 # extraVolumes -- Specify additional Volumes to use.
 extraVolumes: []
