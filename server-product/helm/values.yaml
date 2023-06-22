@@ -14,8 +14,6 @@ onedev:
   # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
   updateStrategy:
     type: RollingUpdate
-  # onedev.enableSSL -- This configuration determines whether SSL should be enabled on the server.
-  enableSSL: false
   # trustCerts -- Specify a local directory containing certificates to be trusted in PEM format.
   trustCerts:
     # onedev.trustCerts.enabled -- Set to **true** to provide trust certs
@@ -106,12 +104,6 @@ podSecurityContext: {}
 
 # securityContext -- Specify securityContext for Containers.
 securityContext: {}
-
-# command -- Override default image command.
-command: []
-
-# args -- Override default image arguments.
-args: []
 
 # env -- Define additional environment variables.
 env: []
