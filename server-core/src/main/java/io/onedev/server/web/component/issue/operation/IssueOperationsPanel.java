@@ -1,13 +1,17 @@
 package io.onedev.server.web.component.issue.operation;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.transitionoption.TransitionOptionPanel;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -23,18 +27,11 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.transitionoption.TransitionOptionPanel;
-import io.onedev.server.web.page.project.issues.create.NewIssuePage;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("serial")
 public abstract class IssueOperationsPanel extends Panel {
@@ -61,14 +58,7 @@ public abstract class IssueOperationsPanel extends Panel {
 	protected void onBeforeRender() {
 		WebMarkupContainer stateContainer = new WebMarkupContainer("state");
 		addOrReplace(stateContainer);
-		stateContainer.add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
-
-			@Override
-			public Issue getObject() {
-				return getIssue();
-			}
-			
-		}));
+		stateContainer.add(new IssueStateBadge("state", getIssue().getId()));
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 

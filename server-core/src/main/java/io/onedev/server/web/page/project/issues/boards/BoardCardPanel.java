@@ -38,7 +38,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -80,14 +79,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		};
 		transitLink.setVisible(displayFields.contains(Issue.NAME_STATE));		
 		
-		transitLink.add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
-
-			@Override
-			public Issue getObject() {
-				return issueModel.getObject();
-			}
-			
-		}));
+		transitLink.add(new IssueStateBadge("state", issueModel.getObject().getId()));
 		
 		fragment.add(transitLink);
 

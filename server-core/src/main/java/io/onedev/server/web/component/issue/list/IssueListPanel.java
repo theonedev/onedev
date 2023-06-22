@@ -1392,7 +1392,7 @@ public abstract class IssueListPanel extends Panel {
 							
 						};
 						
-						transitLink.add(new IssueStateBadge("state", (IModel<Issue>) fragment.getDefaultModel()));
+						transitLink.add(new IssueStateBadge("state", ((Issue) fragment.getDefaultModelObject()).getId()));
 						stateFragment.add(transitLink);
 						
 						fieldsView.add(stateFragment.setOutputMarkupId(true));

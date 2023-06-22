@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -18,17 +19,27 @@ import java.util.Collection;
 
 @SuppressWarnings("serial")
 public class IssueStateBadge extends Label {
-
-	private IModel<Issue> issueModel;
 	
-	public IssueStateBadge(String id, IModel<Issue> issueModel) {
-		super(id, new LoadableDetachableModel<>() {
+	private final Long issueId;
+	
+	private final IModel<Issue> issueModel = new LoadableDetachableModel<Issue>() {
+		@Override
+		protected Issue load() {
+			return OneDev.getInstance(IssueManager.class).load(issueId);
+		}
+		
+	};
+	
+	public IssueStateBadge(String id, Long issueId) {
+		super(id);
+		this.issueId = issueId;
+		
+		setDefaultModel(new LoadableDetachableModel<>() {
 			@Override
 			protected Object load() {
 				return issueModel.getObject().getState();
 			}
 		});
-		this.issueModel = issueModel;
 	}
 
 	@Override

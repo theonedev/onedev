@@ -4,14 +4,14 @@ import com.google.common.base.Objects;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -24,11 +24,11 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
@@ -167,7 +167,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
-				item.add(new IssueStateBadge("state", item.getModel()));
+				item.add(new IssueStateBadge("state", item.getModel().getObject().getId()));
 				item.add(new IssueLinkPanel("numberAndTitle") {
 
 					@Override

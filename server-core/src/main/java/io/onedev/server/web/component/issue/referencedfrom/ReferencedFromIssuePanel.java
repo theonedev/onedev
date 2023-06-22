@@ -1,10 +1,5 @@
 package io.onedev.server.web.component.issue.referencedfrom;
 
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -15,6 +10,10 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.ReferenceTransformer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 @SuppressWarnings("serial")
 public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
@@ -34,7 +33,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IssueStateBadge("state", getModel()));
+		add(new IssueStateBadge("state", getModel().getObject().getId()));
 		
 		Project project = ((ProjectPage)getPage()).getProject();
 		
