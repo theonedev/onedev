@@ -67,8 +67,8 @@ database:
 image:
   # image.name -- Specify the image name to use (relative to `image.repository`).
   name: 1dev/server
-  # image.tag -- Specify the image tag to use.
-  tag: latest
+  # image.tag -- Specify the image tag to use. Leave empty to use same version as chart
+  tag: ""
   # image.repository -- Specify the image repository to use.
   repository: docker.io
   # image.pullPolicy -- Specify the
