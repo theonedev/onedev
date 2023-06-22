@@ -1,10 +1,12 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.server.entitymanager.CodeCommentTouchManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.*;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -14,7 +16,6 @@ import org.hibernate.criterion.Restrictions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import java.util.List;
 
 import static io.onedev.server.model.CodeCommentTouch.PROP_COMMENT_ID;
@@ -24,23 +25,33 @@ import static java.lang.String.format;
 public class DefaultCodeCommentTouchManager extends BaseEntityManager<CodeCommentTouch> 
 		implements CodeCommentTouchManager {
 
+	private final ProjectManager projectManager;
+
+	private final TransactionManager transactionManager;
+
 	@Inject
-    public DefaultCodeCommentTouchManager(Dao dao) {
-        super(dao);
-    }
+	public DefaultCodeCommentTouchManager(Dao dao, ProjectManager projectManager, TransactionManager transactionManager) {
+		super(dao);
+		this.projectManager = projectManager;
+		this.transactionManager = transactionManager;
+	}
 
 	@Transactional
 	@Override
 	public void touch(Project project, Long commentId) {
-		var query = getSession().createQuery(format("delete from CodeCommentTouch where project=:project and %s=:%s", PROP_COMMENT_ID, PROP_COMMENT_ID));
-		query.setParameter("project", project);
-		query.setParameter(PROP_COMMENT_ID, commentId);
-		query.executeUpdate();
-		
-		var touch = new CodeCommentTouch();
-		touch.setProject(project);
-		touch.setCommentId(commentId);
-		dao.persist(touch);
+		var projectId = project.getId();
+		transactionManager.runAfterCommit(() -> transactionManager.runAsync(() -> {
+			var innerProject = projectManager.load(projectId);
+			var query = getSession().createQuery(format("delete from CodeCommentTouch where project=:project and %s=:%s", PROP_COMMENT_ID, PROP_COMMENT_ID));
+			query.setParameter("project", innerProject);
+			query.setParameter(PROP_COMMENT_ID, commentId);
+			query.executeUpdate();
+
+			var touch = new CodeCommentTouch();
+			touch.setProject(innerProject);
+			touch.setCommentId(commentId);
+			dao.persist(touch);
+		}));		
 	}
 
 	@Sessional

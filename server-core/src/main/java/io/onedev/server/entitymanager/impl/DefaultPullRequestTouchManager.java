@@ -1,10 +1,12 @@
 package io.onedev.server.entitymanager.impl;
 
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestTouchManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.*;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -14,7 +16,6 @@ import org.hibernate.criterion.Restrictions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import java.util.List;
 
 import static io.onedev.server.model.PullRequestTouch.PROP_REQUEST_ID;
@@ -24,23 +25,34 @@ import static java.lang.String.format;
 public class DefaultPullRequestTouchManager extends BaseEntityManager<PullRequestTouch> 
 		implements PullRequestTouchManager {
 
+	private final ProjectManager projectManager;
+
+	private final TransactionManager transactionManager;
+
 	@Inject
-    public DefaultPullRequestTouchManager(Dao dao) {
-        super(dao);
-    }
+	public DefaultPullRequestTouchManager(Dao dao, ProjectManager projectManager, TransactionManager transactionManager) {
+		super(dao);
+		this.projectManager = projectManager;
+		this.transactionManager = transactionManager;
+	}
 
 	@Transactional
 	@Override
 	public void touch(Project project, Long requestId) {
-		var query = getSession().createQuery(format("delete from PullRequestTouch where project=:project and %s=:%s", PROP_REQUEST_ID, PROP_REQUEST_ID));
-		query.setParameter("project", project);
-		query.setParameter(PROP_REQUEST_ID, requestId);
-		query.executeUpdate();
+		var projectId = project.getId();
+		transactionManager.runAfterCommit(() -> transactionManager.runAsync(() -> {
+			var innerProject = projectManager.load(projectId);
+			var query = getSession().createQuery(format("delete from PullRequestTouch where project=:project and %s=:%s", PROP_REQUEST_ID, PROP_REQUEST_ID));
+			query.setParameter("project", innerProject);
+			query.setParameter(PROP_REQUEST_ID, requestId);
+			query.executeUpdate();
+
+			var touch = new PullRequestTouch();
+			touch.setProject(innerProject);
+			touch.setRequestId(requestId);
+			dao.persist(touch);
+		}));
 		
-		var touch = new PullRequestTouch();
-		touch.setProject(project);
-		touch.setRequestId(requestId);
-		dao.persist(touch);
 	}
 
 	@Sessional

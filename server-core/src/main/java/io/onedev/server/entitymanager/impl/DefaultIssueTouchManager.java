@@ -1,10 +1,12 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.server.entitymanager.IssueTouchManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.*;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -23,24 +25,34 @@ import static java.lang.String.format;
 @Singleton
 public class DefaultIssueTouchManager extends BaseEntityManager<IssueTouch> 
 		implements IssueTouchManager {
-
+	
+	private final ProjectManager projectManager;
+	
+	private final TransactionManager transactionManager;
+	
 	@Inject
-    public DefaultIssueTouchManager(Dao dao) {
+    public DefaultIssueTouchManager(Dao dao, ProjectManager projectManager, TransactionManager transactionManager) {
         super(dao);
+		this.projectManager = projectManager;
+		this.transactionManager = transactionManager;
     }
 
 	@Transactional
 	@Override
 	public void touch(Project project, Long issueId) {
-		var query = getSession().createQuery(format("delete from IssueTouch where project=:project and %s=:%s", PROP_ISSUE_ID, PROP_ISSUE_ID));
-		query.setParameter("project", project);
-		query.setParameter(PROP_ISSUE_ID, issueId);
-		query.executeUpdate();
-		
-		var touch = new IssueTouch();
-		touch.setProject(project);
-		touch.setIssueId(issueId);
-		dao.persist(touch);
+		var projectId = project.getId();
+		transactionManager.runAfterCommit(() -> transactionManager.runAsync(() -> {
+			var innerProject = projectManager.load(projectId);
+			var query = getSession().createQuery(format("delete from IssueTouch where project=:project and %s=:%s", PROP_ISSUE_ID, PROP_ISSUE_ID));
+			query.setParameter("project", innerProject);
+			query.setParameter(PROP_ISSUE_ID, issueId);
+			query.executeUpdate();
+			
+			var touch = new IssueTouch();
+			touch.setProject(innerProject);
+			touch.setIssueId(issueId);
+			dao.persist(touch);
+		}));
 	}
 
 	@Sessional
@@ -57,6 +69,7 @@ public class DefaultIssueTouchManager extends BaseEntityManager<IssueTouch>
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Issue) {
 			Issue issue = (Issue) event.getEntity();
+			
 			touch(issue.getProject(), issue.getId());
 		} else if (event.getEntity() instanceof IssueComment) {
 			IssueComment comment = (IssueComment) event.getEntity();			
