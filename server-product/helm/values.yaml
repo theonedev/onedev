@@ -60,7 +60,7 @@ database:
   # database.dbUser --  User with access to database
   dbUser: "onedev"
   # database.dbPassword -- Database password 
-  dbPassword: "changeme"
+  dbPassword: "changeit"
   # database.dbMaximumPoolSize -- Database maximum pool size
   dbMaximumPoolSize: "25"
 
