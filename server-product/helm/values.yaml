@@ -199,11 +199,11 @@ service:
   # [IPv4/IPv6 dual-stack](https://kubernetes.io/docs/concepts/services-networking/dual-stack/).
   ipFamilies: []
   # Configure sepearte SSH service
-  separateSSHService:
-  # service.separateSSHService.enabled -- If separate SSH service is enabled, a separate service is created for SSH
+  separateSSH:
+  # service.separateSSH.enabled -- If separate SSH is enabled, a separate service is created for SSH
     enabled: false
     type: "ClusterIP"
-    port: 22
+    port: ""
     clusterIP: ""
     loadBalancerIP: ""
     nodePort: ""

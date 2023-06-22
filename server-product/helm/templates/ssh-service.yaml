@@ -1,5 +1,5 @@
 ---
-{{ $ssh := .Values.service.separateSSHService }}
+{{ $ssh := .Values.service.separateSSH }}
 {{- if $ssh.enabled -}}
 apiVersion: v1
 kind: Service
@@ -42,7 +42,7 @@ spec:
 {{- end }}
   ports:
   - name: ssh
-    port: {{ default "6611" $ssh.port }}
+    port: {{ default "22" $ssh.port }}
     targetPort: ssh
     protocol: TCP
 {{- if $ssh.nodePort }}
