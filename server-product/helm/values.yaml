@@ -21,10 +21,6 @@ onedev:
     # "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
 
-  # onedev.maintenance -- Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore.
-  # [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details
-  maintenance: false
-
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
     # onedev.initSettings.enabled -- Enables initial settings for deployment

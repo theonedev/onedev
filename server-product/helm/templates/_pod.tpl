@@ -31,9 +31,6 @@ containers:
 {{- end }}
     image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{- if .Values.onedev.maintenance }}
-    command: ["/root/bin/idle.sh"]
-{{- end }}
     env:
     - name: k8s_service
       value: {{ include "ods.fullname" . }}
