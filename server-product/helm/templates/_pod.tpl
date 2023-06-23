@@ -34,17 +34,29 @@ containers:
     env:
     - name: k8s_service
       value: {{ include "ods.fullname" . }}
+{{- if .Values.onedev.initSettings.user }}
+    - name: initial_user
+      value: {{ .Values.onedev.initSettings.user }}
+{{- end }}
+{{- if .Values.onedev.initSettings.password }}
     - name: initial_password
       valueFrom:
         secretKeyRef:
           name: {{ include "ods.fullname" . }}-secrets
           key: password
-    - name: initial_user
-      value: {{ .Values.onedev.initSettings.user }}
+{{- end }}
+{{- if .Values.onedev.initSettings.email }}
     - name: initial_email
       value: {{ .Values.onedev.initSettings.email }}
+{{- end }}
+{{- if .Values.onedev.initSettings.serverUrl }}
     - name: initial_server_url
       value: {{ .Values.onedev.initSettings.serverUrl }}
+{{- end }}
+{{- if .Values.onedev.initSettings.sshRootUrl }}
+    - name: initial_ssh_root_url
+      value: {{ .Values.onedev.initSettings.sshRootUrl }}
+{{- end }}
 {{- if .Values.ingress.enabled }}
     - name: ingress_host
       value: {{ .Values.ingress.host }}

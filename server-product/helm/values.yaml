@@ -23,16 +23,15 @@ onedev:
 
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
-    # onedev.initSettings.enabled -- Enables initial settings for deployment
-    enabled: true
-    # onedev.initSettings.user -- Admin username
-    user: "admin" 
-    # onedev.initSettings.password -- admin Password, if not specified a random password will be generated automatically
-    password: "password"
-    # onedev.initSettings.email -- admin Email address
-    email: "you@example.com"
-    # onedev.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
-    serverUrl: ""
+    # onedev.initSettings.user -- Administrator username. Leave empty to prompt
+    user: ""
+    # onedev.initSettings.password -- Administrator Password. Leave empty to prompt
+    password: ""
+    # onedev.initSettings.email -- Administrator Email address. Leave empty to prompt
+    email: ""
+    # onedev.initSettings.serverUrl -- Server url. Leave empty to prompt. Will be ignored if ingress.host is specified
+    serverUrl: "http://localhost:6610"
+    # onedev.initSettings.sshRootUrl -- Root url to clone repository via SSH. Leave empty to derive from server url
     sshRootUrl: ""
 
 # External database configuration

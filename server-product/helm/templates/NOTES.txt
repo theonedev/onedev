@@ -16,7 +16,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 {{- if .Values.ingress.enabled }}
 
-1. You can access OneDev at:
+You can access OneDev at:
 
 {{- if .Values.ingress.tls.enabled }}
    https://{{ .Values.ingress.host }}
@@ -26,8 +26,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 {{- else }}
 
-1. Get the OneDev URL by running:
-
+Get the OneDev URL by running:
 
 {{- if contains "ClusterIP"  .Values.service.type }}
 
@@ -50,8 +49,3 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 {{- end }}
 {{- end }}
-
-2. Login with the following credentials:
-
-  Username: {{ .Values.onedev.initSettings.user }}
-  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ include "ods.fullname" . }}-secrets -o jsonpath="{.data.password}" | base64 -d)
