@@ -6,7 +6,8 @@ cd ../target
 
 buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
 
-rm -rf helm-chart
+rm -rf helm-chart/onedev/*
+rm -rf helm-chart/*.tgz
 mkdir -p helm-chart/onedev
 cp -r ../helm/* helm-chart/onedev
 rm helm-chart/onedev/build.sh

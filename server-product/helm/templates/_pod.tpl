@@ -95,12 +95,10 @@ containers:
     lifecycle: {{ toYaml .Values.lifecycle | nindent 6 }}
 {{- end }}
     volumeMounts:
-      - name: data
-        mountPath: "/opt/onedev"
-{{- if .Values.onedev.trustCerts.enabled }}
-      - name: trust-certs
-        mountPath: "/opt/onedev/conf/trust-certs"
-{{- end }}
+    - name: data
+      mountPath: "/opt/onedev"
+    - name: trust-certs
+      mountPath: "/opt/onedev/conf/trust-certs"
 {{- if .Values.extraVolumeMounts }}
 {{ toYaml .Values.extraVolumeMounts | indent 6 }}
 {{- end }}
@@ -121,20 +119,19 @@ tolerations: {{ toYaml .Values.tolerations | nindent 2 }}
 topologySpreadConstraints: {{ toYaml .Values.topologySpreadConstraints | nindent 2 }}
 {{- end }}
 volumes:
-{{- if .Values.onedev.trustCerts.enabled }}
-  - name: trust-certs
-    secret: 
-      secretName: {{ if .Values.onedev.trustCerts.existingSecret }}{{ .Values.onedev.trustCerts.existingSecret }}{{- else }}{{ include "ods.fullname" . }}-certs{{- end }}
-{{- end }}
+- name: trust-certs
+  secret:
+    secretName: {{ .Values.onedev.trustCerts.secretName }}
+    optional: true
 {{- if .Values.persistence.enabled }}
 {{- if .Values.persistence.existingClaim }}
-  - name: data
-    persistentVolumeClaim:
-      claimName: {{ .Values.persistence.existingClaim }}
+- name: data
+  persistentVolumeClaim:
+    claimName: {{ .Values.persistence.existingClaim }}
 {{- end }}
 {{- else }}
-  - name: data
-    emptyDir: {}
+- name: data
+  emptyDir: {}
 {{- end }}
 {{- if .Values.extraVolumes }}
 {{ toYaml .Values.extraVolumes | indent 2 }}

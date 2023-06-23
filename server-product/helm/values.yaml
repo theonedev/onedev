@@ -14,15 +14,12 @@ onedev:
   # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
   updateStrategy:
     type: RollingUpdate
-  # trustCerts -- Specify a local directory containing certificates to be trusted in PEM format.
   trustCerts:
-    # onedev.trustCerts.enabled -- Set to **true** to provide trust certs
-    enabled: false
-    # onedev.trustCerts.path -- Path of cert file on disk
-    path: ""
-    # onedev.trustCerts.existingSecret -- Existing secret name containing the cert file
-    ## - can be created with `kubectl create secret generic trustCerts --from-file=_local/cert.pem`
-    existingSecret: ""
+    # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
+    # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
+    # where /path/to/trust-certs is a directory contains all certificates to be trusted. Certificate should begin with
+    # "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
+    secretName: "onedev-trustcerts"
 
   # onedev.maintenance -- Set this as **true** to stop OneDev server and perform various maintenance tasks such as backup, restore.
   # [Check Docs](https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md) for more details
@@ -37,7 +34,7 @@ onedev:
     # onedev.initSettings.password -- admin Password, if not specified a random password will be generated automatically
     password: "password"
     # onedev.initSettings.email -- admin Email address
-    email: "abc@example.com"
+    email: "you@example.com"
     # onedev.initSettings.serverUrl -- Server url will be ignored if ingress.host is specified
     serverUrl: ""
     sshRootUrl: ""
