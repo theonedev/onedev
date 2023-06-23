@@ -7,8 +7,6 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.event.ListenerRegistry;
@@ -27,7 +25,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.schedule.TaskScheduler;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;
@@ -48,7 +45,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
@@ -250,42 +246,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	}
 	
 	public String guessServerUrl() {
-	    Url serverUrl = null;
-	    
-		String k8sService = getK8sService();
-		if (k8sService != null) { // we are running inside Kubernetes  
-			Commandline kubectl = new Commandline("kubectl");
-			kubectl.addArgs("get", "service", k8sService, "-o", 
-					"jsonpath={.status.loadBalancer.ingress[0].ip}");
-			AtomicReference<String> externalIpRef = new AtomicReference<>(null);
-			kubectl.execute(new LineConsumer() {
-
-				@Override
-				public void consume(String line) {
-					if (StringUtils.isNotBlank(line))
-						externalIpRef.set(line);
-				}
-				
-			}, new LineConsumer() {
-
-				@Override
-				public void consume(String line) {
-					logger.warn(line);
-				}
-				
-			}).checkReturnCode();
-			
-			String externalIp = externalIpRef.get();
-			
-			if (externalIp != null) 
-				serverUrl = buildServerUrl(externalIp, "http", 80);
-		} 
-		
-		if (serverUrl == null) {
-			ServerConfig serverConfig = serverConfigProvider.get();
-            serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
-		}
-		
+		ServerConfig serverConfig = serverConfigProvider.get();
+		var serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
 		return UrlUtils.toString(serverUrl);
 	}
 	
