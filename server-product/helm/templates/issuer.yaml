@@ -1,16 +1,22 @@
-{{- if and .Values.ingress.enableDefaultIssuer .Values.letsencrypt.email -}}
+{{- if .Values.ingress.tls.acme.enabled -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: {{ include "onedev.fullname" .}}
+  name: {{ include "ods.fullname" . }}
 spec:
   acme:
+{{- if eq $.Values.ingress.tls.acme.type "letsencrypt" }}
+{{- if .Values.ingress.tls.acme.production }}
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: {{ .Values.letsencrypt.email }}
+{{- else }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+{{- end }}
+{{- end }}
+    email: {{ .Values.ingress.tls.acme.email }}
     privateKeySecretRef:
-      name: {{ include "onedev.fullname" . }}-private-key
+      name: {{ include "ods.fullname" . }}-privkey
     solvers:
-    - http01:
-        ingress:
-          class: {{ .Values.ingress.class }}
+      - http01:
+          ingress:
+            class: {{ .Values.ingress.className }}
 {{- end }}

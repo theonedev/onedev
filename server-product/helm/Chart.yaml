@@ -1,7 +1,17 @@
 apiVersion: v2
 name: onedev
+version: ${buildVersion}
 description: All-In-One DevOps Platform
 type: application
-kubeVersion: ">=1.18.0-0"
-version: ${buildVersion}
+keywords:
+  - onedev
+  - devops
+  - vcs
+  - cicd
+home: https://onedev.io
+maintainers:
+  - name: Robin Shen
+    email:  robin@onedev.io
+  - name: Abdul Khaliq
+    email: a.khaliq@outlook.my
 appVersion: ${buildVersion}

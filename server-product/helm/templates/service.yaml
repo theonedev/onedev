@@ -1,119 +1,43 @@
-{{ $main := .Values.service.main }}
-{{ $ssh := .Values.service.ssh }}
-
+{{- if and .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "onedev.fullname" . }}
-  labels:
-    {{- include "onedev.labels" . | nindent 4 }}
-    tier: onedev
-  annotations:
-    {{- toYaml $main.annotations | nindent 4 }}
+  name: {{ include "ods.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "ods.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations: {{ toYaml .Values.service.annotations | nindent 4 }}
+  {{- end }}
 spec:
-  {{ $type := $main.type | default (ternary "LoadBalancer" "ClusterIP" (not .Values.ingress.host)) }}
-  type: {{ $type }}
-  {{- if eq $type "LoadBalancer" }}
-    {{- if $main.loadBalancerIP }}
-  loadBalancerIP: {{ $main.loadBalancerIP }}
-    {{- end }}
-    {{- if $main.loadBalancerSourceRanges }}
-  loadBalancerSourceRanges:
-    {{- range $main.loadBalancerSourceRanges }}
-    - {{ . }}
-    {{- end }}
-    {{- end }}
-  {{- else if eq $type "ClusterIP" }}
-    {{- if $main.clusterIP }}
-  clusterIP: {{ $main.clusterIP }}
-    {{- end }}
-  {{- end }}
-  {{- if $main.externalIPs }}
-  externalIPs:
-    {{- toYaml $main.externalIPs | nindent 4 }}
-  {{- end }}
-  {{- if $main.externalTrafficPolicy }}
-  externalTrafficPolicy: {{ $main.externalTrafficPolicy }}
-  {{- end }}
-  ports:
-    - name: http
-      port: {{ $main.port }}
-      {{- if $main.nodePort }}
-      nodePort: {{ $main.nodePort }}
-      {{- end }}
-      targetPort: 6610
-      protocol: TCP
-    {{- if not $ssh.separateService }}
-    - name: ssh
-      port: {{ $ssh.port }}
-      {{- if $ssh.nodePort }}
-      nodePort: {{ $ssh.nodePort }}
-      {{- end }}
-      targetPort: 6611
-      protocol: TCP
-    {{- end }}
-  selector:
-    {{- include "onedev.selectorLabels" . | nindent 4 }}
-    tier: onedev
----
-{{- if $ssh.separateService }}
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "onedev.fullname" . }}-ssh
-  labels:
-    {{- include "onedev.labels" . | nindent 4 }}
-    tier: onedev
-  annotations:
-    {{- toYaml $ssh.annotations | nindent 4 }}
-spec:
-  {{ $type := $ssh.type | default "ClusterIP" }}
-  type: {{ $type }}
-  {{- if eq $type "LoadBalancer" }}
-    {{ if $ssh.loadBalancerIP }}
-  loadBalancerIP: {{ $ssh.loadBalancerIP }}
-    {{- end }}
-    {{- if $ssh.loadBalancerSourceRanges }}
-  loadBalancerSourceRanges:
-    {{- range $ssh.loadBalancerSourceRanges }}
-    - {{ . }}
-    {{- end }}
-    {{- end }}
-  {{- else if eq $type "ClusterIP" }}
-    {{- if $ssh.clusterIP }}
-  clusterIP: {{ $ssh.clusterIP }}
-    {{- end }}
-  {{- end }}
-  {{- if $ssh.externalIPs }}
-  externalIPs:
-    {{- toYaml $ssh.externalIPs | nindent 4 }}
-  {{- end }}
-  {{- if $ssh.externalTrafficPolicy }}
-  externalTrafficPolicy: {{ $ssh.externalTrafficPolicy }}
-  {{- end }}
-  ports:
-    - name: ssh
-      port: {{ $ssh.port }}
-      {{- if $ssh.nodePort }}
-      nodePort: {{ $ssh.nodePort }}
-      {{- end }}
-      targetPort: 6611
-      protocol: TCP
-  selector:
-    {{- include "onedev.selectorLabels" . | nindent 4 }}
-    tier: onedev
+  type: {{ .Values.service.type }}
+{{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
 {{- end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "onedev.fullname" . }}-mysql
-  labels:
-    {{- include "onedev.labels" . | nindent 4 }}
-    tier: mysql
-spec:
+{{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+{{- end }}
+{{- if .Values.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.service.ipFamilyPolicy }}
+{{- end }}
+{{- if .Values.service.ipFamilies }}
+  ipFamilies: {{ toYaml .Values.service.ipFamilies | nindent 4 }}
+{{- end }}
   ports:
-    - port: 3306
-  selector:
-    {{- include "onedev.selectorLabels" . | nindent 4 }}
-    tier: mysql
+  - name: http
+    port: {{ default "80" .Values.service.ports.http }}
+    targetPort: http
+    protocol: TCP
+{{- if not .Values.service.separateSSH.enabled }}
+  - name: ssh
+    port: {{ default "22" .Values.service.ports.ssh }}
+    targetPort: ssh
+    protocol: TCP
+{{- end }}
+{{- if .Values.service.nodePort }}
+    nodePort: {{ .Values.service.nodePort }}
+    {{- end }}
+  selector: {{ include "ods.template-labels" . | nindent 4 }}
+  {{- if .Values.service.topologyKeys }}
+  topologyKeys: {{ toYaml .Values.service.topologyKeys | nindent 4 }}
+  {{- end }}
+{{- end -}}
