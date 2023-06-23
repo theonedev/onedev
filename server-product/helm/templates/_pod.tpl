@@ -48,11 +48,11 @@ containers:
       value: {{ .Values.onedev.initSettings.email }}
     - name: initial_server_url
       value: {{ .Values.onedev.initSettings.serverUrl }}
-    - name: ingress_tls
-      value:  {{ .Values.onedev.enableSSL | quote }}
 {{- if .Values.ingress.enabled }}
     - name: ingress_host
       value: {{ .Values.ingress.host }}
+    - name: ingress_tls
+      value: "{{ .Values.ingress.tls.enabled }}"
 {{- end }}
 {{- if .Values.database.external }}
 {{- include "setDatabaseEnvVars" . | indent 2 }}
