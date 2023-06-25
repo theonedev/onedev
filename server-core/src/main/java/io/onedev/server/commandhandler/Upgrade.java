@@ -769,7 +769,7 @@ public class Upgrade extends AbstractPlugin {
 						}
 					}
 				}
-				for (var projectDir : upgradeDir.listFiles()) {
+				for (var projectDir : projectsDir.listFiles()) {
 					if (projectDir.getName().equals(directoryVersion))
 						continue;
 					var buildsDir = new File(projectDir, "builds");
