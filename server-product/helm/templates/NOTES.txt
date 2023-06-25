@@ -6,7 +6,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 ###################################################################
 #
-# CAUTION: if you are upgrading from version <= 8.4.0, please make
+# CAUTION: if you are upgrading from version <= 8.4.2, please make
 # sure to follow https://docs.onedev.io/upgrade-guide to migrate
 # your data
 #

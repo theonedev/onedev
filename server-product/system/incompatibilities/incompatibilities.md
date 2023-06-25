@@ -1,3 +1,7 @@
+# 8.5.0
+
+**[Helm Chart]** Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [this guide](https://docs.onedev.io/upgrade-guide#comming-from-chart-v--842) to upgrade your chart from version <= 8.4.2  
+
 # 8.4.0
 
 1. **[Executor]** Kubernetes executor no longer supports to execute step of type `Run Docker Container` to avoid mounting container sock into sidecar container. Put your step logic in a command step instead
