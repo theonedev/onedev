@@ -470,7 +470,7 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(CodeComment.getChangeObservable(commentId));
 			}
 			

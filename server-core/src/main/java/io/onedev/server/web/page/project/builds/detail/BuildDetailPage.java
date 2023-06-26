@@ -5,6 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildUpdated;
@@ -16,7 +17,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -168,12 +168,12 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
+				super.onObservableChanged(handler);
 				handler.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Build.getDetailChangeObservable(buildId));
 			}
 			

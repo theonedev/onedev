@@ -156,12 +156,7 @@ public abstract class IssueSidePanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(IssueSidePanel.this);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			
@@ -524,7 +519,12 @@ public abstract class IssueSidePanel extends Panel {
 
 			};
 
-			stateLink.add(new IssueStateBadge("badge", linkedIssueId).add(AttributeAppender.append("class", "badge-sm")));
+			stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<>() {
+				@Override
+				protected Issue load() {
+					return getIssueManager().load(linkedIssueId);
+				}
+			}).add(AttributeAppender.append("class", "badge-sm")));
 			
 			fragment.add(stateLink);
 

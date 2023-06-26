@@ -22,7 +22,6 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.websocket.WebSocketManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -79,7 +78,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		};
 		transitLink.setVisible(displayFields.contains(Issue.NAME_STATE));		
 		
-		transitLink.add(new IssueStateBadge("state", issueModel.getObject().getId()));
+		transitLink.add(new IssueStateBadge("state", issueModel));
 		
 		fragment.add(transitLink);
 
@@ -163,7 +162,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe(page);
 					}
 
 					@Override
@@ -197,13 +195,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe(page);
-					}
-
-					@Override
-					protected void onAfterRender() {
-						OneDev.getInstance(WebSocketManager.class).observe(page);
-						super.onAfterRender();
 					}
 
 					@Override

@@ -66,7 +66,6 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.FileUpload;
-import io.onedev.server.web.websocket.WebSocketManager;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -250,12 +249,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(revisionIndexing);
+				super.onObservableChanged(handler);
 				resizeWindow(handler);
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				Set<String> observables = new HashSet<>();
 				if (resolvedRevision != null) 
 					observables.add(CommitIndexed.getChangeObservable(getProject().getRevCommit(resolvedRevision, true).name()));
@@ -1015,7 +1014,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		resolvedRevision = null;
 		resolvedRevision = getProject().getRevCommit(state.blobIdent.revision, true).copy();
 		
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		newRevisionPicker(target);
 		newCommitStatus(target);
 		target.add(revisionIndexing);
@@ -1222,7 +1220,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			newBuildSupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
-			OneDev.getInstance(WebSocketManager.class).observe(this);
 		} else if (state.position != null) {
 			if (get(BLOB_CONTENT_ID) instanceof Positionable) {
 				// This logic is added for performance reason, we do not want to 

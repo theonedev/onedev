@@ -32,7 +32,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.RevisionDiff;
-import io.onedev.server.web.websocket.WebSocketManager;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -273,13 +272,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		head.add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
-			}
-
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
 			}
 			
 		});
@@ -315,7 +309,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						state.oldCommitHash = commitsModel.getObject().get(index).name();
 					}
 					newRevisionDiff(target, fragment);
-					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				}
 				target.add(head);
 				pushState(target);
@@ -362,7 +355,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					index++;
 					state.newCommitHash = commitsModel.getObject().get(index).name();
 					newRevisionDiff(target, fragment);
-					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				} 
 				target.add(head);
 				pushState(target);
@@ -389,7 +381,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						state.newCommitHash = params.getParameterValue("newCommit").toString();
 						target.add(head);
 						newRevisionDiff(target, fragment);
-						OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 						pushState(target);
 						dropdown.close();
 					}
@@ -531,7 +522,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				state.newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 				target.add(head);
 				newRevisionDiff(target, fragment);
-				OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				pushState(target);
 			}
 
@@ -556,7 +546,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			content.add(new ChangeObserver() {
 
 				@Override
-				public Collection<String> getObservables() {
+				public Collection<String> findObservables() {
 					return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 				}
 
@@ -643,8 +633,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 		state = (State) data;
 		newContent(target);
-		
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
@@ -812,7 +800,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
 		state.mark = getPermanentMark(comment.getMark());
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 
@@ -820,7 +807,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public void onCommentClosed(AjaxRequestTarget target) {
 		state.commentId = null;
 		state.mark = null;
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 	
@@ -845,7 +831,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		state.commentId = null;
 		state.mark = getPermanentMark(mark);
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	@Override

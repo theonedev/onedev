@@ -74,7 +74,6 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -370,12 +369,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				add(new ChangeObserver() {
 					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						Set<String> observables = new HashSet<>();
 						if (context.getOpenComment() != null)
 							observables.add(CodeComment.getChangeObservable(context.getOpenComment().getId()));

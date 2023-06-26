@@ -1,26 +1,6 @@
 package io.onedev.server.web.component.pullrequest.assignment;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import io.onedev.server.web.page.base.BasePage;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.model.PullRequest;
@@ -31,6 +11,19 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class AssignmentListPanel extends Panel {
@@ -158,13 +151,7 @@ public abstract class AssignmentListPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				if (isVisibleInHierarchy()) 
-					handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 			

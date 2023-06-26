@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ChangeObserver;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -33,12 +32,7 @@ abstract class CardCountLabel extends Label {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Issue.getListChangeObservable(getProject().getId()));
 			}
 			

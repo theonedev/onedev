@@ -205,7 +205,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			

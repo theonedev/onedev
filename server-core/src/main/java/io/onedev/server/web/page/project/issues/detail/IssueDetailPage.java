@@ -1,45 +1,14 @@
 package io.onedev.server.web.page.project.issues.detail;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
-
 import com.google.common.collect.Lists;
-import io.onedev.server.web.behavior.ChangeObserver;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -48,6 +17,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
@@ -66,6 +36,33 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ValidationException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
@@ -185,12 +182,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				add(new ChangeObserver() {
 
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-
-					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 					}
 

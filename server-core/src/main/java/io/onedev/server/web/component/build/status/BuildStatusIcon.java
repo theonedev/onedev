@@ -1,23 +1,19 @@
 package io.onedev.server.web.component.build.status;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.svg.SpriteImage;
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 @SuppressWarnings("serial")
 public class BuildStatusIcon extends SpriteImage {
@@ -52,12 +48,7 @@ public class BuildStatusIcon extends SpriteImage {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return getChangeObservables();
 			}
 			

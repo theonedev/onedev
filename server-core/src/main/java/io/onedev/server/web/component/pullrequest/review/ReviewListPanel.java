@@ -17,7 +17,6 @@ import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -211,13 +210,7 @@ public abstract class ReviewListPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				if (isVisibleInHierarchy()) 
-					handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 			

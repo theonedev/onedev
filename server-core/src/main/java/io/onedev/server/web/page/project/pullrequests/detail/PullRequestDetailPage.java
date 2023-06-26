@@ -23,8 +23,8 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -322,15 +322,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		summaryContainer.add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
-			}
-			
 		});
 		summaryContainer.setOutputMarkupId(true);
 		add(summaryContainer);
@@ -1072,15 +1067,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.add(new ChangeObserver() {
 
 					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
 
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
 				});
 
 				fragment.setOutputMarkupId(true);
@@ -1220,12 +1210,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				add(new ChangeObserver() {
 					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
 					
@@ -1318,13 +1303,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		operationsContainer.add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
+				super.onObservableChanged(handler);
 				handler.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
@@ -1680,13 +1665,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				link.add(new ChangeObserver() {
 
 					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
-					}
-
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
 					}
 					
 				});

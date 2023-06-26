@@ -2,14 +2,12 @@ package io.onedev.server.web.component.issue;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.web.behavior.ChangeObserver;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -19,20 +17,12 @@ import java.util.Collection;
 
 @SuppressWarnings("serial")
 public class IssueStateBadge extends Label {
+
+	private final IModel<Issue> issueModel;
 	
-	private final Long issueId;
-	
-	private final IModel<Issue> issueModel = new LoadableDetachableModel<Issue>() {
-		@Override
-		protected Issue load() {
-			return OneDev.getInstance(IssueManager.class).load(issueId);
-		}
-		
-	};
-	
-	public IssueStateBadge(String id, Long issueId) {
+	public IssueStateBadge(String id, IModel<Issue> issueModel) {
 		super(id);
-		this.issueId = issueId;
+		this.issueModel = issueModel;
 		
 		setDefaultModel(new LoadableDetachableModel<>() {
 			@Override
@@ -67,13 +57,8 @@ public class IssueStateBadge extends Label {
 		add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Issue.getDetailChangeObservable(issueModel.getObject().getId()));
-			}
-
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
 			}
 
 		});

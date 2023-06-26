@@ -1392,7 +1392,7 @@ public abstract class IssueListPanel extends Panel {
 							
 						};
 						
-						transitLink.add(new IssueStateBadge("state", ((Issue) fragment.getDefaultModelObject()).getId()));
+						transitLink.add(new IssueStateBadge("state", (IModel<Issue>) fragment.getDefaultModel()));
 						stateFragment.add(transitLink);
 						
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
@@ -1479,7 +1479,7 @@ public abstract class IssueListPanel extends Panel {
 					}
 					
 					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(Issue.getDetailChangeObservable(issueId));
 					}
 					
@@ -1507,14 +1507,10 @@ public abstract class IssueListPanel extends Panel {
 				var issueId = model.getObject().getId();
 				item.add(new ChangeObserver() {
 					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(Issue.getDetailChangeObservable(issueId));
 					}
 
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);		
-					}
 				});
 				item.setOutputMarkupId(true);
 				return item;

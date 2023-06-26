@@ -1,20 +1,17 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
-import java.util.Collection;
-import java.util.Date;
-
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.Collection;
+import java.util.Date;
 
 @SuppressWarnings("serial")
 public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
@@ -60,15 +57,10 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 		add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
-			}
-			
 		});
 		
 		setOutputMarkupPlaceholderTag(true);

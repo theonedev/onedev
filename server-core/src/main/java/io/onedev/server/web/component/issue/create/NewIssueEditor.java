@@ -81,6 +81,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	
 	private String lastDescriptionTemplate;
 	
+	private String editingTitle;
+	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	public NewIssueEditor(String id) {
@@ -125,12 +127,11 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected List<Issue> load() {
-				String title = titleInput.getInput();
-				if (StringUtils.isNotBlank(title)) {
+				if (StringUtils.isNotBlank(editingTitle)) {
 					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
 					return issueTextManager.query(
-							new ProjectScope(getProject(), true, true), 
-							title, false, 0, 5);
+							new ProjectScope(getProject(), true, true),
+							editingTitle, false, 0, 5);
 				} else {
 					return new ArrayList<>();
 				}
@@ -150,12 +151,14 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				editingTitle = titleInput.getInput();
 				target.add(similarIssuesContainer);
 			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, RuntimeException e) {
 				super.onError(target, e);
+				editingTitle = null;
 				target.add(similarIssuesContainer);
 			}
 			
@@ -167,7 +170,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
-				item.add(new IssueStateBadge("state", item.getModel().getObject().getId()));
+				item.add(new IssueStateBadge("state", item.getModel()));
 				item.add(new IssueLinkPanel("numberAndTitle") {
 
 					@Override

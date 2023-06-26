@@ -18,7 +18,6 @@ import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -120,13 +119,8 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 		add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getUpdate().getRequest().getId()));
-			}
-
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
 			}
 			
 		});

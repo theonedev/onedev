@@ -66,7 +66,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Build.getLogChangeObservable(getBuild().getId()));
 			}
 			
@@ -82,7 +82,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Build.getDetailChangeObservable(getBuild().getId()));
 			}
 			

@@ -351,7 +351,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		add(new ChangeObserver() {
 
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 

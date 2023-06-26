@@ -135,7 +135,7 @@ abstract class CardListPanel extends Panel {
 			}
 			
 			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(Issue.getListChangeObservable(getProject().getId()));
 			}
 			

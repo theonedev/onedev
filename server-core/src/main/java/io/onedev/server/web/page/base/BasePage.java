@@ -276,7 +276,7 @@ public abstract class BasePage extends WebPage {
 					List<String> observables = Splitter.on('\n').splitToList(
 							message.getText().substring(WebSocketMessages.OBSERVABLE_CHANGED.length()+1));
 					for (ChangeObserver observer: findChangeObservers()) {
-						if (CollectionUtils.containsAny(observer.getObservables(), observables))
+						if (CollectionUtils.containsAny(observer.getObservables(), observables)) 
 							observer.onObservableChanged(handler);
 					}
 				} 
@@ -338,14 +338,7 @@ public abstract class BasePage extends WebPage {
 	private Collection<ChangeObserver> findChangeObservers() {
 		Collection<ChangeObserver> observers = new HashSet<>();
 		observers.addAll(getBehaviors(ChangeObserver.class));
-		visitChildren(Component.class, new IVisitor<Component, Void>() {
-
-			@Override
-			public void component(Component object, IVisit<Void> visit) {
-				observers.addAll(object.getBehaviors(ChangeObserver.class));
-			}
-
-		});
+		visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> observers.addAll(object.getBehaviors(ChangeObserver.class)));
 		return observers;
 	}
 

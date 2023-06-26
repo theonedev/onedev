@@ -54,7 +54,6 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -859,16 +858,11 @@ public abstract class PullRequestListPanel extends Panel {
 				var requestId = request.getId();
 				item.add(new ChangeObserver() {
 					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return Sets.newHashSet(PullRequest.getChangeObservable(requestId));
 					}
 
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
 				});
-				item.setOutputMarkupId(true);
 				return item;
 			}
 			

@@ -37,8 +37,8 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -65,7 +65,6 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -359,12 +358,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				add(new ChangeObserver() {
 					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						return getChangeObservables();
 					}
 				});
@@ -1408,12 +1402,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				add(new ChangeObserver() {
 					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
+					public Collection<String> findObservables() {
 						Set<String> observables = new HashSet<>();
 						if (annotationSupport != null && annotationSupport.getOpenComment() != null)
 							observables.add(CodeComment.getChangeObservable(annotationSupport.getOpenComment().getId()));

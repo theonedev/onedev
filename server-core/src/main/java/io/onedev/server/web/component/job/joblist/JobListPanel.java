@@ -15,7 +15,6 @@ import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -163,12 +162,7 @@ public abstract class JobListPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return getChangeObservables();
 			}
 			

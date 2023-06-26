@@ -1,23 +1,18 @@
 package io.onedev.server.web.component.pullrequest.build;
 
-import static io.onedev.server.model.Build.NAME_COMMIT;
-import static io.onedev.server.model.Build.NAME_JOB;
-import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.criteria.Criteria.quote;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Sets;
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import org.apache.wicket.Component;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -31,34 +26,28 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.collect.Sets;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import static io.onedev.server.model.Build.*;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.util.criteria.Criteria.quote;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInfo>> {
 
 	public PullRequestJobsPanel(String id) {
 		super(id);
-		setModel(new LoadableDetachableModel<List<JobBuildInfo>>() {
+		setModel(new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<JobBuildInfo> load() {
 				List<JobBuildInfo> listOfJobBuildInfo = new ArrayList<>();
 				PullRequest request = getPullRequest();
 				Map<String, List<Build>> map = new HashMap<>();
-				for (Build build: request.getCurrentBuilds()) {
+				for (Build build : request.getCurrentBuilds()) {
 					String jobName = build.getJobName();
 					List<Build> list = map.get(jobName);
 					if (list == null) {
@@ -67,7 +56,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 					}
 					list.add(build);
 				}
-				for (Map.Entry<String, List<Build>> entry: map.entrySet()) {
+				for (Map.Entry<String, List<Build>> entry : map.entrySet()) {
 					String jobName = entry.getKey();
 					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), jobName)) {
 						List<Build> builds = new ArrayList<>(entry.getValue());
@@ -76,17 +65,10 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 						listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
 					}
 				}
-				Collections.sort(listOfJobBuildInfo, new Comparator<JobBuildInfo>() {
-
-					@Override
-					public int compare(JobBuildInfo o1, JobBuildInfo o2) {
-						return o1.getBuilds().iterator().next().getId().compareTo(o2.getBuilds().iterator().next().getId());
-					}
-					
-				});
+				Collections.sort(listOfJobBuildInfo, (Comparator<JobBuildInfo>) (o1, o2) -> o1.getBuilds().iterator().next().getId().compareTo(o2.getBuilds().iterator().next().getId()));
 				return listOfJobBuildInfo;
 			}
-			
+
 		});
 	}
 
@@ -94,7 +76,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<JobBuildInfo>("jobs", getModel()) {
+		add(new ListView<>("jobs", getModel()) {
 
 			@Override
 			protected void populateItem(ListItem<JobBuildInfo> item) {
@@ -103,9 +85,9 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 				String jobName = jobBuilds.getJobName();
 				Status status = Status.getOverallStatus(jobBuilds.getBuilds()
 						.stream()
-						.map(it->it.getStatus())
+						.map(it -> it.getStatus())
 						.collect(Collectors.toSet()));
-				
+
 				WebMarkupContainer link = new DropdownLink("job") {
 
 					@Override
@@ -116,26 +98,26 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 							protected List<Build> load() {
 								return item.getModelObject().getBuilds();
 							}
-							
+
 						}) {
-							
+
 							@Override
 							protected Component newListLink(String componentId) {
 								MergePreview mergePreview = getPullRequest().checkMergePreview();
 								if (mergePreview != null && mergePreview.getMergeCommitHash() != null) {
-									String query = "" 
+									String query = ""
 											+ quote(NAME_PULL_REQUEST) + " " + getRuleName(Is) + " " + quote("#" + getPullRequest().getNumber())
 											+ " " + getRuleName(And) + " "
 											+ quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + quote(mergePreview.getMergeCommitHash())
 											+ " " + getRuleName(And) + " "
 											+ quote(NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
-									return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+									return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class,
 											ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
 								} else {
 									return super.newListLink(componentId);
 								}
 							}
-							
+
 						};
 					}
 
@@ -145,22 +127,22 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 						String title;
 						if (status != null) {
 							if (status != Status.SUCCESSFUL)
-								title = "Some builds are "; 
+								title = "Some builds are ";
 							else
-								title = "Builds are "; 
+								title = "Builds are ";
 							title += status.toString().toLowerCase() + ", click for details";
 						} else {
 							title = "No builds";
 						}
 						tag.put("title", title);
 					}
-					
+
 				};
-								
+
 				link.add(new BuildStatusIcon("status", Model.of(status)));
 				item.add(link);
 
-				if (jobBuilds.isRequired()) 
+				if (jobBuilds.isRequired())
 					link.add(new Label("name", HtmlEscape.escapeHtml5(jobName) + " <span class='text-danger'>*</span>").setEscapeModelStrings(false));
 				else
 					link.add(new Label("name", jobName));
@@ -172,20 +154,13 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 				super.onConfigure();
 				setVisible(!getModelObject().isEmpty());
 			}
-			
+
 		});
 		
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				component.configure();
-				if (component.isVisible())
-					handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 			

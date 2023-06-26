@@ -16,7 +16,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -58,7 +57,12 @@ public abstract class IssueOperationsPanel extends Panel {
 	protected void onBeforeRender() {
 		WebMarkupContainer stateContainer = new WebMarkupContainer("state");
 		addOrReplace(stateContainer);
-		stateContainer.add(new IssueStateBadge("state", getIssue().getId()));
+		stateContainer.add(new IssueStateBadge("state", new LoadableDetachableModel<>() {
+			@Override
+			protected Issue load() {
+				return getIssue();
+			}
+		}));
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
@@ -162,12 +166,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(IssueOperationsPanel.this);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
+			public Collection<String> findObservables() {
 				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
 			}
 			
