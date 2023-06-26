@@ -869,6 +869,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			for (Repository repository : repositoryCache.values()) {
 				repository.close();
 			}
+			repositoryCache.clear();
 		}
 	}
 
