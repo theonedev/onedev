@@ -17,8 +17,8 @@ onedev:
   trustCerts:
     # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
     # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
-    # where /path/to/trust-certs is a directory contains all certificates to be trusted. Certificate should begin with
-    # "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
+    # where /path/to/trust-certs is a local directory contains all certificates to be trusted. Certificate should be 
+    # of base64 encoded PEM format beginning with "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
 
   # Specify OneDev Server initial settings to avoid manual setup
@@ -204,14 +204,13 @@ service:
 ingress:
   # ingress.enabled -- If **true**, create an Ingress resource.
   enabled: false
-  # ingress.className -- Specify the
-  # [ingressClassName](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress),
-  # requires Kubernetes >= 1.18.
+  # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18.
+  # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
   # ingress.annotations -- Specify annotations for the Ingress.
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
   # ingress.host -- Set the host name
   host: onedev.example.com
 
