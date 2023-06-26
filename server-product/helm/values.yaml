@@ -204,9 +204,8 @@ service:
 ingress:
   # ingress.enabled -- If **true**, create an Ingress resource.
   enabled: false
-  # ingress.className -- Specify the
-  # [ingressClassName](https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress),
-  # requires Kubernetes >= 1.18.
+  # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18.
+  # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
   # ingress.annotations -- Specify annotations for the Ingress.
   annotations: {}
