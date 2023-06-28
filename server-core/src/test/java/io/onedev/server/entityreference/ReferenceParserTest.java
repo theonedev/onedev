@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,18 @@ public class ReferenceParserTest extends AppLoaderMocker {
 
 		var parser = new ReferenceParser(Issue.class);
 
-		var issueNumbers = parser.parseReferences("#1", project1);
+		assertTrue(parser.parseReferences("pull request #1", project1).isEmpty());
+		assertTrue(parser.parseReferences("pr #1", project1).isEmpty());
+		assertTrue(parser.parseReferences("build #1", project1).isEmpty());
+		assertTrue(parser.parseReferences("pull request test/project1#1", project1).isEmpty());
+		assertTrue(parser.parseReferences("pr test/project1#1", project1).isEmpty());
+		assertTrue(parser.parseReferences("build test/project1#1", project1).isEmpty());
+
+		var issueNumbers = parser.parseReferences("pull request #1 #2", project1);
+		assertEquals(1, issueNumbers.size());
+		assertEquals(2L, issueNumbers.get(0).getNumber().longValue());
+		
+		issueNumbers = parser.parseReferences("#1", project1);
 		assertEquals(1L, issueNumbers.get(0).getNumber().longValue());
 
 		issueNumbers = parser.parseReferences("#1 and issue #2", project1);

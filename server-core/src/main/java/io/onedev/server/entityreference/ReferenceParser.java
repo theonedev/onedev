@@ -21,28 +21,66 @@ public class ReferenceParser {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("code", "a");
 	
+	private final boolean issue;
+	
 	private final Pattern pattern;
 	
-	public ReferenceParser(Class<? extends AbstractEntity> referenceClass) {
-		StringBuilder builder = new StringBuilder();
-		if (referenceClass == Build.class) 
-			builder.append("(^|\\W+)((build)\\s+)(");
-		else if (referenceClass == PullRequest.class) 
-			builder.append("(^|\\W+)((pull\\s*request|pr)\\s+)(");
-		else if (referenceClass == Issue.class) 
-			builder.append("(^|\\W+)((issue)\\s+)?(");
-		else 
-			throw new RuntimeException("Unexpected reference class: " + referenceClass);
-		
-		builder.append(ProjectPathValidator.PATTERN.pattern());
-		builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
-		pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
-	}
+	private final Pattern buildPattern;
 	
+	private final Pattern pullRequestPattern;
+	
+	public ReferenceParser(Class<? extends AbstractEntity> referenceClass) {
+		issue = referenceClass == Issue.class;
+		
+		var suffix = ")?#(\\d+)(?=$|[\\W|/]+)";
+		
+		var builder = new StringBuilder("(^|\\W+)((build)\\s+)(");
+		builder.append(ProjectPathValidator.PATTERN.pattern());
+		builder.append(suffix);
+		buildPattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
+
+		builder = new StringBuilder("(^|\\W+)((pull\\s*request|pr)\\s+)(");
+		builder.append(ProjectPathValidator.PATTERN.pattern());
+		builder.append(suffix);
+		pullRequestPattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
+		
+		if (referenceClass == Build.class) {
+			pattern = buildPattern;
+		} else if (referenceClass == PullRequest.class) {
+			pattern = pullRequestPattern;
+		} else if (referenceClass == Issue.class) {
+			builder = new StringBuilder("(^|\\W+)((issue)\\s+)?(");
+			builder.append(ProjectPathValidator.PATTERN.pattern());
+			builder.append(suffix);
+			pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
+		} else {
+			throw new RuntimeException("Unexpected reference class: " + referenceClass);
+		}
+	}
+
+	private String stripBuildAndPullRequestReferences(String text) {
+		var buffer = new StringBuffer();
+		var matcher = buildPattern.matcher(text);
+		while (matcher.find())
+			matcher.appendReplacement(buffer, "");
+		matcher.appendTail(buffer);
+		text = buffer.toString();
+
+		buffer = new StringBuffer();
+		matcher = pullRequestPattern.matcher(text);
+		while (matcher.find())
+			matcher.appendReplacement(buffer, "");
+		matcher.appendTail(buffer);
+		text = buffer.toString();
+		
+		return text;
+	}
 	public List<ProjectScopedNumber> parseReferences(String text, @Nullable Project project) {
 		Collection<ProjectScopedNumber> references = new LinkedHashSet<>();
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		if (fastScan(text)) { 
+			if (issue) 
+				text = stripBuildAndPullRequestReferences(text);
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
 				try {
@@ -90,7 +128,10 @@ public class ReferenceParser {
 		
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		for (TextNode node : visitor.getMatchedNodes()) {
-			Matcher matcher = pattern.matcher(node.getWholeText());
+			var text = node.getWholeText();
+			if (issue)
+				text = stripBuildAndPullRequestReferences(text);
+			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
 				String referenceText = matcher.group(2);
 				if (referenceText == null)
