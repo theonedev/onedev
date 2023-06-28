@@ -7,6 +7,7 @@ public class ManageIssues implements Permission {
 	@Override
 	public boolean implies(Permission p) {
 		return p instanceof ManageIssues 
+				|| new AccessConfidentialIssues().implies(p)
 				|| new EditIssueField(null).implies(p) 
 				|| new EditIssueLink(null).implies(p) 
 				|| new ScheduleIssues().implies(p);
