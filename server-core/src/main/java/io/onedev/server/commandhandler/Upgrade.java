@@ -371,7 +371,7 @@ public class Upgrade extends AbstractPlugin {
 										updateProgramFiles(upgradeDir, oldAppDataVersion);
 
 										logger.info("Restoring database with new program...");
-										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
+										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath(), "false").execute(new LineConsumer() {
 
 											@Override
 											public void consume(String line) {
