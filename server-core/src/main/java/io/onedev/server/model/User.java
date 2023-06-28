@@ -72,8 +72,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_SSO_CONNECTOR = "ssoConnector";
 	
-	public static final String PROP_ACCESS_TOKEN = "accessToken";
-	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
 		@Override

@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.AccessToken;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
@@ -59,6 +61,8 @@ import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.annotation.UserName;
+
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @Api(order=5000)
 @Path("/users")
@@ -113,7 +117,7 @@ public class UserResource {
 			throw new UnauthorizedException();
 		return user.getAccessTokens();
     }
-	
+
 	@Api(order=275)
 	@Path("/{userId}/email-addresses")
     @GET
@@ -314,6 +318,23 @@ public class UserResource {
 			throw new UnauthenticatedException();
 		}
     }
+
+	@Api(order=1910, description="Create access token. This operation returns value of created access token")
+	@Path("/{userId}/access-tokens")
+	@POST
+	public String createAccessToken(@PathParam("userId") Long userId, @NotNull @Valid AccessTokenData accessTokenData) {
+		User user = userManager.load(userId);
+		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) {
+			AccessToken accessToken = new AccessToken();
+			accessToken.setDescription(accessTokenData.getDescription());
+			accessToken.setExpireDate(accessTokenData.getExpireDate());
+			user.getAccessTokens().add(accessToken);
+			userManager.update(user, null);
+			return accessToken.getValue();
+		} else {
+			throw new UnauthenticatedException();
+		}
+	}
 	
 	@Api(order=1950, description="Update user profile")
 	@Path("/{userId}")
@@ -408,6 +429,30 @@ public class UserResource {
     	return Response.ok().build();
     }
 
+	@Api(order=2400, description="Delete access token by value")
+	@Path("/{userId}/access-tokens/{accessTokenValue}")
+	@DELETE
+	public Response deleteAccessToken(@PathParam("userId") Long userId, @PathParam("accessTokenValue") @NotEmpty String accessTokenValue) {
+		User user = userManager.load(userId);
+		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) {
+			var found = false;
+			for (var it = user.getAccessTokens().iterator(); it.hasNext();) {
+				if (it.next().getValue().equals(accessTokenValue)) {
+					it.remove();
+					found = true;
+				}
+			}
+			if (found) {
+				userManager.update(user, null);
+				return Response.ok().build();
+			} else {
+				return Response.status(NOT_FOUND.getStatusCode(), "No access token found with specified value").build();
+			}
+		} else {
+			throw new UnauthenticatedException();
+		}
+	}
+
 	@EntityCreate(User.class)
 	public static class UserCreateData implements Serializable {
 
@@ -492,6 +537,35 @@ public class UserResource {
 			this.fullName = fullName;
 		}
 
+	}
+	
+	public static class AccessTokenData implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+
+		@Api(order=100, description = "Description of access token. Maybe null")
+		private String description;
+
+		@Api(order=200, description = "Expiration date of access token. Null to never expire")
+		private Date expireDate;
+
+		@Nullable
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(@Nullable String description) {
+			this.description = description;
+		}
+
+		@Nullable
+		public Date getExpireDate() {
+			return expireDate;
+		}
+
+		public void setExpireDate(@Nullable Date expireDate) {
+			this.expireDate = expireDate;
+		}
 	}
 	
 	public static class QueriesAndWatches implements Serializable {
