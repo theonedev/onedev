@@ -12,6 +12,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -259,7 +260,7 @@ public class ProjectResource {
 	
 	@Api(order=800, description="Create new project")
     @POST
-    public Long create(@NotNull Project project) {
+    public Long create(@NotNull @Valid Project project) {
 		Project parent = project.getParent();
 		
 		checkProjectCreationPermission(parent);
@@ -277,7 +278,7 @@ public class ProjectResource {
 	@Api(order=850, description="Update projecty basic info of specified id")
 	@Path("/{projectId}")
 	@POST
-	public Response updateBasicInfo(@PathParam("projectId") Long projectId, @NotNull Project project) {
+	public Response updateBasicInfo(@PathParam("projectId") Long projectId, @NotNull @Valid Project project) {
 		Project parent = project.getParent();
 		Long oldParentId;
 		if (project.getOldVersion() != null)
