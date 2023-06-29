@@ -109,6 +109,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
 		Preconditions.checkState(change.isNew());
+		change.getIssue().getChanges().add(change);
 		dao.persist(change);
 		if (note != null && change.getUser() != null) {
 			IssueComment comment = new IssueComment();

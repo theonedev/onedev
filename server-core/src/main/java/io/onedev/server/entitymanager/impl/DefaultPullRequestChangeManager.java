@@ -46,7 +46,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 	public void create(PullRequestChange change, @Nullable String note) {
 		Preconditions.checkState(change.isNew());
 		dao.persist(change);
-		
+		change.getRequest().getChanges().add(change);
 		if (note != null && change.getUser() != null) {
 			PullRequestComment comment = new PullRequestComment();
 			comment.setContent(note);
