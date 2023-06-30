@@ -217,6 +217,8 @@ onedev.server = {
 			});
 			Wicket.Event.subscribe('/ajax/call/done', function() {
 				onedev.server.ajaxRequests.count--;
+				if (onedev.server.ajaxRequests.count < 0)
+					onedev.server.ajaxRequests.count = 0;
 			});
 		}
 	},

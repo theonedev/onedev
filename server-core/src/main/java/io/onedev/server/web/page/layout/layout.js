@@ -135,8 +135,9 @@ onedev.server.layout = {
 			return false;
 		});
 		
-		if (onedev.server.util.isMac())
+		if (onedev.server.util.isMac()) {
 			$("a.command-palette").attr("title", "cmd-k to show command palette").html("<span class='keycap'>⌘</span> <span class='keycap'>k</span>");
+		}
 		else
 			$("a.command-palette").attr("title", "ctrl-k to show command palette").html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
 		$(document).keydown(function(e) {

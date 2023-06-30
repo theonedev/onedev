@@ -128,10 +128,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private final ClusterManager clusterManager;
 	
+	private final AlertManager alertManager;
+	
 	private volatile Thread thread;
 	
 	@Inject
-	public DefaultMailManager(TransactionManager transactionManager, SettingManager setingManager, 
+	public DefaultMailManager(TransactionManager transactionManager, SettingManager settingManager, 
 			UserManager userManager, ProjectManager projectManager, 
 			UserAuthorizationManager authorizationManager, IssueManager issueManager, 
 			IssueCommentManager issueCommentManager, IssueWatchManager issueWatchManager, 
@@ -139,9 +141,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 			UrlManager urlManager, EmailAddressManager emailAddressManager, 
 			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager, 
-			ClusterManager clusterManager) {
+			ClusterManager clusterManager, AlertManager alertManager) {
 		this.transactionManager = transactionManager;
-		this.settingManager = setingManager;
+		this.settingManager = settingManager;
 		this.userManager = userManager;
 		this.projectManager = projectManager;
 		this.authorizationManager = authorizationManager;
@@ -157,6 +159,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.attachmentManager = attachmentManager;
 		this.clusterManager = clusterManager;
+		this.alertManager = alertManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -360,10 +363,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 					url, message);
 
 			EmailAddress emailAddress = root.getPrimaryEmailAddress();
-			if (emailAddress != null && emailAddress.isVerified()) {
+			if (settingManager.getMailSetting() != null && emailAddress != null && emailAddress.isVerified()) {
 				sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
 						Lists.newArrayList(), "[Clustering] Server '" + server + "' can not be reached",
 						htmlBody, textBody, null, null, null);
+			} else {
+				alertManager.alert("Server '" + server + "' can not be reached");
 			}
 		}
 	}

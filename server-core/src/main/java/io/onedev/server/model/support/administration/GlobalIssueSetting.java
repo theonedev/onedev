@@ -3,7 +3,6 @@ package io.onedev.server.model.support.administration;
 import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -28,18 +27,15 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.component.issue.workflowreconcile.*;
 
 import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Editable
-@ClassValidating
-public class GlobalIssueSetting implements Serializable, Validatable {
+public class GlobalIssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -742,13 +738,6 @@ public class GlobalIssueSetting implements Serializable, Validatable {
 	
 	public int getStateOrdinal(String state) {
 		return getStateSpecs().indexOf(getStateSpec(state));
-	}
-
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		context.disableDefaultConstraintViolation();
-		context.buildConstraintViolationWithTemplate("shit").addPropertyNode("commitMessageFixPatterns").addConstraintViolation();
-		return false;
 	}
 	
 }

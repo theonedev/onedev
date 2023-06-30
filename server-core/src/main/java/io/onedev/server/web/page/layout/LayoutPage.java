@@ -1,15 +1,23 @@
 package io.onedev.server.web.page.layout;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.Plugin;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -32,9 +40,9 @@ import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
+import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
-import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
@@ -76,7 +84,13 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -90,14 +104,19 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Order;
 
 import javax.servlet.http.Cookie;
 import java.util.*;
+
+import static io.onedev.server.model.Alert.PROP_DATE;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -395,6 +414,109 @@ public abstract class LayoutPage extends BasePage {
 		
 		topbar.add(newTopbarTitle("title"));
 
+		DropdownLink alertsLink;
+		topbar.add(alertsLink = new DropdownLink("alerts") {
+
+			private AlertManager getAlertManager() {
+				return OneDev.getInstance(AlertManager.class);
+			}
+			
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment alertsFrag = new Fragment(id, "alertsFrag", LayoutPage.this);
+				List<IColumn<Alert, Void>> columns = new ArrayList<>();
+
+				columns.add(new AbstractColumn<>(Model.of("Date")) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
+						cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getDate())));						
+					}
+				});
+				columns.add(new AbstractColumn<>(Model.of("Message")) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
+						cellItem.add(new Label(componentId, rowModel.getObject().getMessage()));
+					}
+				});
+				columns.add(new AbstractColumn<>(Model.of("")) {
+
+					@Override
+					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
+						Fragment actionFrag = new Fragment(componentId, "alertActionFrag", LayoutPage.this);
+						actionFrag.add(new AjaxLink<Void>("delete") {
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								getAlertManager().delete(rowModel.getObject());
+								notifyObservableChange(target, Alert.getChangeObservable());
+							}
+						});
+						cellItem.add(actionFrag);
+					}
+				});
+
+				SortableDataProvider<Alert, Void> dataProvider = new SortableDataProvider<Alert, Void>() {
+
+					@Override
+					public Iterator<? extends Alert> iterator(long first, long count) {
+						var criteria = EntityCriteria.of(Alert.class);
+						criteria.addOrder(Order.desc(PROP_DATE));
+						return getAlertManager().query(criteria, (int)first, (int)count).iterator();
+					}
+
+					@Override
+					public long size() {
+						return getAlertManager().count();
+					}
+
+					@Override
+					public IModel<Alert> model(Alert object) {
+						Long id = object.getId();
+						return new LoadableDetachableModel<Alert>() {
+
+							@Override
+							protected Alert load() {
+								return getAlertManager().load(id);
+							}
+
+						};
+					}
+				};
+
+				alertsFrag.add(new DefaultDataTable<>("alerts", columns, dataProvider,
+						WebConstants.PAGE_SIZE, null));
+				alertsFrag.add(new ChangeObserver() {
+					@Override
+					protected Collection<String> findObservables() {
+						return Sets.newHashSet(Alert.getChangeObservable());
+					}
+				});				
+				alertsFrag.setOutputMarkupId(true);
+				return alertsFrag;
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() && getAlertManager().count(false) != 0);
+			}
+			
+		});
+		alertsLink.setOutputMarkupPlaceholderTag(true);
+		
+		topbar.add(new ChangeObserver() {
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(alertsLink);
+			}
+
+			@Override
+			protected Collection<String> findObservables() {
+				return Sets.newHashSet(Alert.getChangeObservable());
+			}
+		});
+		
 		topbar.add(new ModalLink("showCommandPalette") {
 
 			@Override

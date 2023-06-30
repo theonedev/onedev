@@ -294,6 +294,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(PullRequestTouchManager.class).to(DefaultPullRequestTouchManager.class);
 		bind(CodeCommentTouchManager.class).to(DefaultCodeCommentTouchManager.class);
+		bind(AlertManager.class).to(DefaultAlertManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -462,6 +463,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
+		bind(AlertEventBroadcaster.class);
 		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
 		bind(TerminalManager.class).to(DefaultTerminalManager.class);
 		

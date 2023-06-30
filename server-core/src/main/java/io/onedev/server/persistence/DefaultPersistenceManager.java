@@ -130,6 +130,8 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 	
 	private final TransactionManager transactionManager;
 	
+	private final AlertManager alertManager;
+	
 	private String backupTaskId;
 
 	@Inject
@@ -138,7 +140,7 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 									 SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler,
 									 PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager,
 									 EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager,
-									 TransactionManager transactionManager) {
+									 TransactionManager transactionManager, AlertManager alertManager) {
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.hibernateConfig = hibernateConfig;
 		this.validator = validator;
@@ -155,6 +157,7 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 		this.emailAddressManager = emailAddressManager;
 		this.clusterManager = clusterManager;
 		this.transactionManager = transactionManager;
+		this.alertManager = alertManager;
 	}
 
 	private Metadata getMetadata() {
@@ -977,10 +980,12 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 				url, Throwables.getStackTraceAsString(e));
 		
 		EmailAddress emailAddress = root.getPrimaryEmailAddress();
-		if (emailAddress != null && emailAddress.isVerified()) {
+		if (settingManager.getMailSetting() != null && emailAddress != null && emailAddress.isVerified()) {
 			mailManager.sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
 					Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
 					htmlBody, textBody, null, null, null);
+		} else {
+			alertManager.alert("Database auto-backup failed");
 		}
 	}
 	

@@ -1,5 +1,10 @@
 package io.onedev.server.mail;
 
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.OAuthUtils;
 
 public class OAuthAccessToken implements MailCredential {
@@ -23,7 +28,14 @@ public class OAuthAccessToken implements MailCredential {
 
 	@Override
 	public String getValue() {
-		return OAuthUtils.getAccessToken(tokenEndpoint, clientId, clientSecret, refreshToken);
+		try {
+			return OAuthUtils.getAccessToken(tokenEndpoint, clientId, clientSecret, refreshToken);
+		} catch (ExplicitException e) {
+			Long userId = SecurityUtils.getUserId();
+			if (userId.equals(0L) || userId.equals(User.SYSTEM_ID))
+				OneDev.getInstance(AlertManager.class).alert("Failed to get access token of mail server: " + e.getMessage());
+			throw e;
+		}
 	}
 
 }
