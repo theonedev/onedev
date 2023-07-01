@@ -29,6 +29,8 @@ public class RunContainerStep extends Step {
 
 	private String image;
 	 
+	private String opts;
+	
 	private String args;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
@@ -47,7 +49,7 @@ public class RunContainerStep extends Step {
 		Map<String, String> mountMap = new HashMap<>();
 		for (VolumeMount mount: getVolumeMounts())
 			mountMap.put(mount.getSourcePath(), mount.getTargetPath());
-		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
+		return new RunContainerFacade(getImage(), getOpts(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
 	}
 
 	@Editable(order=100, description="Specify container image to run")
@@ -61,7 +63,17 @@ public class RunContainerStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=200, name="Arguments", description="Specify container arguments separated by space. "
+	@Editable(order=150, name="Options", description = "Optionally specify space-separated options to run container")
+	@Interpolative(variableSuggester = "suggestVariables")
+	public String getOpts() {
+		return opts;
+	}
+
+	public void setOpts(String opts) {
+		this.opts = opts;
+	}
+
+	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. "
 			+ "Single argument containing space should be quoted")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArgs() {

@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
@@ -324,7 +325,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 								boolean successful = entryFacade.execute(new LeafHandler() {
 
-									private int runStepContainer(String image, @Nullable String entrypoint,
+									private int runStepContainer(String image, @Nullable String entrypoint, List<String> options,
 																 List<String> arguments, Map<String, String> environments,
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
 																 List<Integer> position, boolean useTTY) {
@@ -403,6 +404,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 											if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
 												docker.addArgs("--isolation=process");
 
+											docker.addArgs(options.toArray(new String[options.size()]));
+											
 											docker.addArgs(image);
 											docker.addArgs(arguments.toArray(new String[arguments.size()]));
 											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
@@ -436,8 +439,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 														hostBuildHome, commandFacade, osInfo, hostAuthInfoDir.get() != null);
 
 												int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(),
-														entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(),
-														position, commandFacade.isUseTTY());
+														new ArrayList<>(), entrypoint.arguments(), new HashMap<>(), null, 
+														new HashMap<>(), position, commandFacade.isUseTTY());
 
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
@@ -450,10 +453,15 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 											} else if (facade instanceof RunContainerFacade) {
 												RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
 												OsContainer container = runContainerFacade.getContainer(osInfo);
+												List<String> options;
+												if (container.getOpts() != null)
+													options = Splitter.on(" ").trimResults().omitEmptyStrings().splitToList(container.getOpts());
+												else 
+													options = new ArrayList<>();
 												List<String> arguments = new ArrayList<>();
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
-												int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(),
+												int exitCode = runStepContainer(container.getImage(), null, options, arguments, container.getEnvMap(),
 														container.getWorkingDir(), container.getVolumeMounts(), position, runContainerFacade.isUseTTY());
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
