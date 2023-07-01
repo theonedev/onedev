@@ -5507,5 +5507,9 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate129(File dataDir, Stack<Integer> versions) {
+		
+	}
 	
 }
