@@ -28,8 +28,6 @@ public class RunContainerStep extends Step {
 	private static final long serialVersionUID = 1L;
 
 	private String image;
-	 
-	private String opts;
 	
 	private String args;
 	
@@ -49,7 +47,7 @@ public class RunContainerStep extends Step {
 		Map<String, String> mountMap = new HashMap<>();
 		for (VolumeMount mount: getVolumeMounts())
 			mountMap.put(mount.getSourcePath(), mount.getTargetPath());
-		return new RunContainerFacade(getImage(), getOpts(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
+		return new RunContainerFacade(getImage(), null, getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
 	}
 
 	@Editable(order=100, description="Specify container image to run")
@@ -61,16 +59,6 @@ public class RunContainerStep extends Step {
 
 	public void setImage(String image) {
 		this.image = image;
-	}
-
-	@Editable(order=150, name="Options", description = "Optionally specify space-separated options to run container")
-	@Interpolative(variableSuggester = "suggestVariables")
-	public String getOpts() {
-		return opts;
-	}
-
-	public void setOpts(String opts) {
-		this.opts = opts;
 	}
 
 	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. "

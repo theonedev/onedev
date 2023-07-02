@@ -1648,5 +1648,45 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
+
+	private void migrate24_steps(SequenceNode stepsNode) {
+		for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+			MappingNode stepNode = (MappingNode) itStepNode.next();
+			if (stepNode.getTag().getValue().equals("!RunContainerStep")) {
+				for (var itStepNodeTuple = stepNode.getValue().iterator(); itStepNodeTuple.hasNext();) {
+					String stepNodeTupleKey = ((ScalarNode)itStepNodeTuple.next().getKeyNode()).getValue();
+					if (stepNodeTupleKey.equals("opts"))
+						itStepNodeTuple.remove();
+				}
+			}
+		}
+	}
+
+	private void migrate24(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps"))
+							migrate24_steps((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps"))
+							migrate24_steps((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
 	
 }
