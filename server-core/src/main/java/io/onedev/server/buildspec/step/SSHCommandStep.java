@@ -133,7 +133,9 @@ public class SSHCommandStep extends CommandStep {
 						"EOF",
 						"chmod 600 /root/.ssh/id_rsa",
 						sshBuilder.toString()));
-				commands.addAll(SSHCommandStep.this.getCommands());
+				// Fix issue #1456
+				for (var command: SSHCommandStep.this.getCommands()) 
+					commands.add(command.replace("$", "\\$"));					
 				commands.add("EOF");
 				return commands;
 			}
