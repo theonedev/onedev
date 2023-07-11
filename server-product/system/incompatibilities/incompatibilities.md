@@ -1,6 +1,6 @@
 # 8.5.0
 
-**[Helm Chart]** Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [this guide](https://docs.onedev.io/upgrade-guide#comming-from-chart-v--842) to upgrade your chart from version <= 8.4.2  
+**[Helm Chart]** Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [this guide](https://docs.onedev.io/upgrade-guide#upgrade-from-chart-v--842) to upgrade your chart from version <= 8.4.2  
 
 # 8.4.0
 
