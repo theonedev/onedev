@@ -3,7 +3,6 @@ package io.onedev.server.model.support.code;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.entitymanager.BuildManager;
@@ -59,11 +58,17 @@ public class BranchProtection implements Serializable {
 	private boolean commitSignatureRequired = false;
 
 	private boolean enforceConventionalCommits;
-
+	
 	private List<String> commitTypes = new ArrayList<>();
 
 	private List<String> commitScopes = new ArrayList<>();
 
+	private boolean checkCommitMessageFooter;
+	
+	private String commitMessageFooterPattern;
+	
+	private List<String> commitTypesForFooterCheck = new ArrayList<>();
+	
 	private Integer maxCommitMessageLineLength;
 	
 	private String reviewRequirement;
@@ -181,6 +186,44 @@ public class BranchProtection implements Serializable {
 
 	public void setCommitScopes(List<String> commitScopes) {
 		this.commitScopes = commitScopes;
+	}
+
+	@Editable(order=391)
+	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	public boolean isCheckCommitMessageFooter() {
+		return checkCommitMessageFooter;
+	}
+
+	public void setCheckCommitMessageFooter(boolean checkCommitMessageFooter) {
+		this.checkCommitMessageFooter = checkCommitMessageFooter;
+	}
+
+	private static boolean isCheckCommitMessageFooterEnabled() {
+		return (boolean) EditContext.get().getInputValue("checkCommitMessageFooter");
+	}
+	
+	@Editable(order=393, description = "A " +
+			"<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> " +
+			"to validate commit message footer")
+	@ShowCondition("isCheckCommitMessageFooterEnabled")
+	@NotEmpty
+	public String getCommitMessageFooterPattern() {
+		return commitMessageFooterPattern;
+	}
+
+	public void setCommitMessageFooterPattern(String commitMessageFooterPattern) {
+		this.commitMessageFooterPattern = commitMessageFooterPattern;
+	}
+
+	@Editable(order=394, description = "Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). " +
+			"Leave empty to all types")
+	@ShowCondition("isCheckCommitMessageFooterEnabled")
+	public List<String> getCommitTypesForFooterCheck() {
+		return commitTypesForFooterCheck;
+	}
+
+	public void setCommitTypesForFooterCheck(List<String> commitTypesForFooterCheck) {
+		this.commitTypesForFooterCheck = commitTypesForFooterCheck;
 	}
 
 	@Editable(order=395, placeholder = "No limit")
@@ -414,6 +457,15 @@ public class BranchProtection implements Serializable {
 					var scope = matcher.group(4);
 					if (scope != null && !commitScopes.isEmpty() && !commitScopes.contains(scope))
 						return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
+					if (checkCommitMessageFooter && (commitTypesForFooterCheck.isEmpty() || commitTypesForFooterCheck.contains(type))) {
+						var size = lines.size();
+						if (size < 3 || lines.get(size-1).length() == 0 
+								|| lines.get(size-2).length() != 0 || lines.get(size-3).length() == 0) {
+							return "A footer is expected as last line and exactly one blank line should precede the footer";
+						} else if (!lines.get(size-1).matches(commitMessageFooterPattern)) {
+							return "Unexpected footer format: Should match pattern '" + commitMessageFooterPattern + "'";
+						}
+					}
 				}
 			} else {
 				return "Line 1: Subject is expected of either a git revert message, or format: <type>[optional (scope)][!]: <description>";
@@ -428,6 +480,7 @@ public class BranchProtection implements Serializable {
 				break;
 			}
 		}
+		
 		if (maxCommitMessageLineLength != null) {
 			for (int i=0; i<lines.size(); i++) {
 				var line = lines.get(i);

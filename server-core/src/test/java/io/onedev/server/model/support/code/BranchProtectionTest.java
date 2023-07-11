@@ -41,6 +41,20 @@ public class BranchProtectionTest {
 		assertNotNull(branchProtection.checkCommitMessage("feat:hello world\nbody", false));
 		assertNotNull(branchProtection.checkCommitMessage("feat:hello world\n\n\nbody", false));
 		assertNotNull(branchProtection.checkCommitMessage("hello world hello world hello world hello world hello world hello world hello world hello world hello world ", true));
+	
+		branchProtection.setCheckCommitMessageFooter(true);
+		branchProtection.setCommitMessageFooterPattern("Signed By: .+");
+		assertNull(branchProtection.checkCommitMessage("hello world", true));
+		assertNotNull(branchProtection.checkCommitMessage("feat: a feature", false));
+		assertNotNull(branchProtection.checkCommitMessage("feat: a feature\n", false));
+		assertNotNull(branchProtection.checkCommitMessage("feat: a feature\nSigned By: robin", false));
+		assertNotNull(branchProtection.checkCommitMessage("feat: a feature\n\na footer", false));
+		assertNull(branchProtection.checkCommitMessage("feat: a feature\n\nSigned By: robin", false));
+		
+		branchProtection.setCommitTypesForFooterCheck(Lists.newArrayList("fix"));
+		assertNull(branchProtection.checkCommitMessage("feat: a feature", false));
+		assertNotNull(branchProtection.checkCommitMessage("fix: a bug", false));
+		assertNotNull(branchProtection.checkCommitMessage("fix: a bug\n\nSigned By: Robin Shen", false));
     }
 	
 }

@@ -5511,5 +5511,20 @@ public class DataMigrator {
 	private void migrate129(File dataDir, Stack<Integer> versions) {
 		
 	}
+
+	private void migrate130(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
+						branchProtectionElement.addElement("checkCommitMessageFooter").setText("false");
+						branchProtectionElement.addElement("commitTypesForFooterCheck");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
