@@ -74,15 +74,15 @@ public class PersistenceUtils {
 	public static boolean tableExists(Connection conn, String tableName) {
 		try {
 			var metadata = conn.getMetaData();
-			try (ResultSet resultset = metadata.getTables(null, null, tableName, null)) {
+			try (ResultSet resultset = metadata.getTables(conn.getCatalog(), conn.getSchema(), tableName, null)) {
 				if (resultset.next())
 					return true;
 			}
-			try (ResultSet resultset = metadata.getTables(null, null, tableName.toUpperCase(), null)) {
+			try (ResultSet resultset = metadata.getTables(conn.getCatalog(), conn.getSchema(), tableName.toUpperCase(), null)) {
 				if (resultset.next())
 					return true;
 			}
-			try (ResultSet resultset = metadata.getTables(null, null, tableName.toLowerCase(), null)) {
+			try (ResultSet resultset = metadata.getTables(conn.getCatalog(), conn.getSchema(), tableName.toLowerCase(), null)) {
 				if (resultset.next())
 					return true;
 			}
@@ -109,7 +109,7 @@ public class PersistenceUtils {
 					stmt.executeQuery(format("select * from %s for update", tableName));
 					break;
 				} catch (Exception e) {
-					logger.debug("Unable to get database lock, will retry", e);
+					logger.warn("Unable to get database lock, will retry", e);
 					Thread.sleep(5000);
 				}
 			}
