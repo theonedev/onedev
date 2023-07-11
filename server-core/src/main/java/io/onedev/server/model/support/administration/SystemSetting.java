@@ -168,7 +168,12 @@ public class SystemSetting implements Serializable, Validatable {
 					isValid = false;
 				}
 			} catch (MalformedURLException e) {
-				context.buildConstraintViolationWithTemplate("Malformed url")
+				String errorMessage;
+				if (!serverUrl.startsWith("http://") && !serverUrl.startsWith("https://"))
+					errorMessage = "Should start with either http:// or https://";
+				else 
+					errorMessage = "Malformed url";
+				context.buildConstraintViolationWithTemplate(errorMessage)
 						.addPropertyNode("serverUrl").addConstraintViolation();
 				isValid = false;
 			}

@@ -707,8 +707,10 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 				systemSetting = null;
 		    } else if (serverUrl != null) {
 		    	systemSetting.setServerUrl(StringUtils.stripEnd(serverUrl, "/\\"));
-		    	settingManager.saveSystemSetting(systemSetting);
-		    	systemSetting = null;
+				if (validator.validate(systemSetting).isEmpty()) {
+					settingManager.saveSystemSetting(systemSetting);
+					systemSetting = null;
+				}
 			} else {
 				systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
 			}
