@@ -264,6 +264,10 @@
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
+.markdown-rendered code {
+	word-break: break-word !important;
+	overflow-wrap: break-word !important;	
+}
 .markdown-rendered pre.code.suggestion {
 	white-space: normal;
 }
