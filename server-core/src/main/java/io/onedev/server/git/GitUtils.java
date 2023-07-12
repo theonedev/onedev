@@ -392,8 +392,8 @@ public class GitUtils {
 				refs = repository.getRefDatabase().getRefs();
 			return refs.stream()
 					.map(ref->new RefFacade(revWalk, ref))
-					.filter(refInfo->refInfo.getPeeledObj() instanceof RevCommit)
-					.collect(Collectors.toSet());
+					.filter(refFacade->refFacade.getPeeledObj() instanceof RevCommit)
+					.collect(Collectors.toList());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -126,6 +126,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
 public class DefaultProjectManager extends BaseEntityManager<Project>
@@ -594,7 +595,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			return null;
 		});
 		
-		postRefUpdatedEvents(toId);		
+		postBranchUpdatedEvents(toId);		
 	}
 
 	@Transactional
@@ -609,10 +610,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			new LfsFetchAllCommand(gitDir, repositoryUrl).run();
 			return null;
 		});
-		postRefUpdatedEvents(projectId);
+		postBranchUpdatedEvents(projectId);
 	}
 
-	private void postRefUpdatedEvents(Long projectId) {
+	private void postBranchUpdatedEvents(Long projectId) {
 		transactionManager.runAfterCommit(() -> {
 			submitToActiveServer(projectId, () -> {
 				try {
@@ -620,7 +621,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						var project = load(projectId);
 						var repository = getRepository(projectId);
 
-						for (var ref: GitUtils.getCommitRefs(repository, null)) {
+						for (var ref: GitUtils.getCommitRefs(repository, R_HEADS)) {
 							var refName = ref.getName();
 							if (RefUpdated.isValidRef(refName)) {
 								var commitId = ref.getPeeledObj().copy();

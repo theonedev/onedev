@@ -46,11 +46,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.difference;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
@@ -200,9 +200,9 @@ public class PullRepository extends SyncRepository {
 			this.proxy = proxy;
 		}
 
-		private Map<String, ObjectId> getRefCommits(Repository repository) {
+		private Map<String, ObjectId> getBranchCommits(Repository repository) {
 			Map<String, ObjectId> commitIds = new HashMap<>();
-			for (var ref: GitUtils.getCommitRefs(repository, null)) {
+			for (var ref: GitUtils.getCommitRefs(repository, R_HEADS)) {
 				boolean matches = false;
 				for (String pattern: Splitter.on(" ").omitEmptyStrings().trimResults().split(refs)) {
 					if (WildcardUtils.matchString(pattern, ref.getName())) {
@@ -223,7 +223,7 @@ public class PullRepository extends SyncRepository {
 				Repository repository = getProjectManager().getRepository(projectId);
 
 				String defaultBranch = GitUtils.getDefaultBranch(repository);
-				Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
+				Map<String, ObjectId> oldCommitIds = getBranchCommits(repository);
 
 				Commandline git = CommandUtils.newGit();
 				configureProxy(git, proxy);
@@ -257,7 +257,7 @@ public class PullRepository extends SyncRepository {
 
 				}).checkReturnCode();
 
-				Map<String, ObjectId> newCommitIds = getRefCommits(repository);
+				Map<String, ObjectId> newCommitIds = getBranchCommits(repository);
 
 				if (defaultBranch == null) {
 					logger.debug("Determining remote head branch...");
@@ -287,7 +287,7 @@ public class PullRepository extends SyncRepository {
 					}).checkReturnCode();
 
 					if (headBranch.get() != null) {
-						if (GitUtils.resolve(repository, Constants.R_HEADS + headBranch.get(), false) == null) {
+						if (GitUtils.resolve(repository, R_HEADS + headBranch.get(), false) == null) {
 							logger.debug("Remote head branch not synced, using first branch as default");
 							headBranch.set(null);
 						}
