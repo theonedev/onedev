@@ -12,6 +12,10 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 @SuppressWarnings("serial")
 public abstract class MultilineAssistBehavior extends InputAssistBehavior {
 
+	public MultilineAssistBehavior() {
+		super(true);
+	}
+
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		List<InputCompletion> completions = new ArrayList<>();

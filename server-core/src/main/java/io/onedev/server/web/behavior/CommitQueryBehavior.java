@@ -43,7 +43,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
 	public CommitQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
-		super(CommitQueryParser.class, "query", false);
+		super(CommitQueryParser.class, "query", false, true);
 		this.projectModel = projectModel;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}

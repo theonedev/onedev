@@ -32,11 +32,15 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 	private final boolean forExecutor;
 	
-	public AgentQueryBehavior(boolean forExecutor) {
-		super(AgentQueryParser.class, "query", false);
+	public AgentQueryBehavior(boolean forExecutor, boolean hideIfBlank) {
+		super(AgentQueryParser.class, "query", false, hideIfBlank);
 		this.forExecutor = forExecutor;
 	}
 
+	public AgentQueryBehavior(boolean forExecutor) {
+		this(forExecutor, false);
+	}
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {

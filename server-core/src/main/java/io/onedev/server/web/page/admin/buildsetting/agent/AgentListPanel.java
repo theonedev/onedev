@@ -715,7 +715,7 @@ class AgentListPanel extends Panel {
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.setOutputMarkupId(true);
-		queryInput.add(new AgentQueryBehavior(false) {
+		queryInput.add(new AgentQueryBehavior(false, true) {
 
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

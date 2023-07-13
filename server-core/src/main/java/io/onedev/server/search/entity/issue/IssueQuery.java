@@ -70,6 +70,8 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
 	private static final long serialVersionUID = 1L;
@@ -380,6 +382,20 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 		}
 	}
 
+	public static IssueQuery parseFuzzy(@Nullable Project project, String queryString) {
+		try {
+			EntityQuery.getProjectScopedNumber(project, queryString);
+			return new IssueQuery(new NumberCriteria(project, queryString, IssueQueryLexer.Is));
+		} catch (Exception e2) {
+			List<Criteria<Issue>> criterias = newArrayList(
+					new TitleCriteria(queryString),
+					new DescriptionCriteria(queryString),
+					new CommentCriteria(queryString)
+			);
+			return new IssueQuery(new OrCriteria<>(criterias));
+		}
+	}
+	
 	private static GlobalIssueSetting getGlobalIssueSetting() {
 		if (WicketUtils.getPage() instanceof IssueSettingPage)
 			return ((IssueSettingPage) WicketUtils.getPage()).getSetting();
@@ -578,5 +594,5 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 		}
 		return 0;
 	}
-
+	
 }

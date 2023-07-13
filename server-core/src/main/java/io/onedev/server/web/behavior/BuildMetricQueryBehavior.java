@@ -39,7 +39,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 	private final Class<? extends AbstractEntity> metricClass;
 	
 	public BuildMetricQueryBehavior(IModel<Project> projectModel, Class<? extends AbstractEntity> metricClass) {
-		super(BuildMetricQueryParser.class, "query", false);
+		super(BuildMetricQueryParser.class, "query", false, true);
 		this.projectModel = projectModel;
 		this.metricClass = metricClass;
 	}

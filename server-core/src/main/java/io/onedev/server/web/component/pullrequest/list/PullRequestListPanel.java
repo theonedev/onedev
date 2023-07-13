@@ -580,7 +580,7 @@ public abstract class PullRequestListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, true) {
+		}, true, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
@@ -593,7 +593,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on number/title/description");
+				hints.add("Free input for fuzzy query on number/title/description/comment");
 				return hints;
 			}
 			

@@ -39,11 +39,15 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 	private final boolean childQuery;
 	
-	public ProjectQueryBehavior(boolean childQuery) {
-		super(ProjectQueryParser.class, "query", false);
+	public ProjectQueryBehavior(boolean childQuery, boolean hideIfBlank) {
+		super(ProjectQueryParser.class, "query", false, hideIfBlank);
 		this.childQuery = childQuery;
 	}
 
+	public ProjectQueryBehavior(boolean childQuery) {
+		this(childQuery, false);
+	}
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {

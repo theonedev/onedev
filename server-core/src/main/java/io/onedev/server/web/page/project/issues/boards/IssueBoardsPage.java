@@ -1,14 +1,39 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.field.spec.DateField;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.IssueQueryBehavior;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.board.BoardEditPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.milestone.MilestoneDateLabel;
+import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -38,38 +63,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.DateField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.issue.board.BoardEditPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.milestone.MilestoneDateLabel;
-import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
@@ -146,8 +145,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
-			contentFrag.error(new QueryParseMessage(backlog, "Malformed issue query"));
-			return null;
+			contentFrag.info(new QueryParseMessage(backlog, "Performing fuzzy query"));
+			query = IssueQuery.parseFuzzy(getProject(), queryString);
 		}
 
 		IssueQuery baseQuery;
@@ -157,8 +156,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
-			contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query: " + e.getMessage()));
-			return null;
+			contentFrag.info(new QueryParseMessage(backlog, "Performing fuzzy query"));
+			baseQuery = IssueQuery.parseFuzzy(getProject(), queryString);
 		}
 		return IssueQuery.merge(baseQuery, query);
 	}
@@ -667,7 +666,16 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
-			queryInput.add(new IssueQueryBehavior(projectModel, option));
+			queryInput.add(new IssueQueryBehavior(projectModel, option, true) {
+
+				@Override
+				protected List<String> getHints(TerminalExpect terminalExpect) {
+					List<String> hints = super.getHints(terminalExpect);
+					hints.add("Free input for fuzzy query on number/title/description/comment");
+					return hints;
+				}
+				
+			});
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				
@@ -679,9 +687,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter and order backlog issues..."));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter/order backlog issues. Hit space to show syntax helper"));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter and order issues..."));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter/order issues. Hit space to show syntax helper"));
 				
 			form.add(queryInput);
 

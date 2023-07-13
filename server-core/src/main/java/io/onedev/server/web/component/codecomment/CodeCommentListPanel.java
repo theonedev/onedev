@@ -10,13 +10,14 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
-import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
+import io.onedev.server.search.entity.codecomment.*;
 import io.onedev.server.search.entitytext.CodeCommentTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -96,14 +97,16 @@ public abstract class CodeCommentListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
-				if (getPullRequest() != null) {
-					getFeedbackMessages().clear();
-					error("Malformed code comment query");
-					return null;
-				} else {
-					getFeedbackMessages().clear();
-					info("Performing fuzzy query");
+				getFeedbackMessages().clear();
+				info("Performing fuzzy query");
+				if (getPullRequest() == null) {
 					return queryString;
+				} else {
+					List<Criteria<CodeComment>> criterias = new ArrayList<>();
+					criterias.add(new ContentCriteria(queryString));
+					criterias.add(new ReplyCriteria(queryString));
+					criterias.add(new PathCriteria("*" + queryString + "*"));
+					return new CodeCommentQuery(new OrCriteria<CodeComment>(criterias));
 				}
 			}
 		}
@@ -631,7 +634,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, true) {
+		}, true, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
@@ -644,8 +647,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				List<String> hints = super.getHints(terminalExpect);
-				if (getPullRequest() == null)
-					hints.add("Free input for fuzzy query on path/comment");
+				hints.add("Free input for fuzzy query on path/comment/reply");
 				return hints;
 			}
 			

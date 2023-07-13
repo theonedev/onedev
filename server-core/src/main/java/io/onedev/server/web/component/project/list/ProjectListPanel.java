@@ -926,7 +926,7 @@ public class ProjectListPanel extends Panel {
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.setOutputMarkupId(true);
-		queryInput.add(new ProjectQueryBehavior(getParentProject() != null) {
+		queryInput.add(new ProjectQueryBehavior(getParentProject() != null, true) {
 
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

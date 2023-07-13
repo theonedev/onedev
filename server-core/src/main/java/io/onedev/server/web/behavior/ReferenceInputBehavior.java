@@ -26,7 +26,11 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 			Pattern.CASE_INSENSITIVE);
 	
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
-	
+
+	public ReferenceInputBehavior() {
+		super(true);
+	}
+
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		List<InputCompletion> completions = new ArrayList<>();

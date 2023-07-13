@@ -1,10 +1,17 @@
 package io.onedev.server.web.behavior.inputassist;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.RangeUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,30 +24,23 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
+import java.util.ArrayList;
+import java.util.List;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.RangeUtils;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.AlignTarget;
-import io.onedev.server.web.component.floating.Alignment;
-import io.onedev.server.web.component.floating.ComponentTarget;
-import io.onedev.server.web.component.floating.FloatingPanel;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
+	private boolean hideIfBlank;
+	
 	private FloatingPanel dropdown;
+	
+	public InputAssistBehavior(boolean hideIfBlank) {
+		this.hideIfBlank = hideIfBlank;
+	}
 	
 	@Override
 	protected void onBind() {
@@ -145,7 +145,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 				} finally {
 					ComponentContext.pop();
 				}
-				if (!suggestions.isEmpty()) {
+				if (!suggestions.isEmpty() && (inputContent.length() != 0 || !hideIfBlank)) {
 					int anchor = getAnchor(inputContent.substring(0, inputCaret));
 					if (dropdown == null) {
 						dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {

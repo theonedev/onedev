@@ -17,7 +17,7 @@ import static io.onedev.server.util.usermatch.UserMatchLexer.USER;
 public class UserMatchBehavior extends ANTLRAssistBehavior {
 	
 	public UserMatchBehavior() {
-		super(UserMatchParser.class, "userMatch", false);
+		super(UserMatchParser.class, "userMatch", false, true);
 	}
 
 	@Override

@@ -36,13 +36,19 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean withOrder;
 	
-	public CodeCommentQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, boolean withOrder) {
-		super(CodeCommentQueryParser.class, "query", false);
+	public CodeCommentQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, 
+									boolean withOrder, boolean hideIfBlank) {
+		super(CodeCommentQueryParser.class, "query", false, hideIfBlank);
 		this.projectModel = projectModel;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 		this.withOrder = withOrder;
 	}
 
+	public CodeCommentQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria,
+									boolean withOrder) {
+		this(projectModel, withCurrentUserCriteria, withOrder, false);
+	}
+	
 	@Override
 	public void detach(Component component) {
 		super.detach(component);

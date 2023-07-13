@@ -22,9 +22,9 @@ import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.issue.*;
 import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
@@ -32,6 +32,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -110,6 +112,10 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.search.entity.issue.IssueQuery.merge;
+import static io.onedev.server.search.entity.issue.IssueQuery.parseFuzzy;
+
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
@@ -171,7 +177,7 @@ public abstract class IssueListPanel extends Panel {
 		if (getProject() != null)
 			option.withCurrentProjectCriteria(true);
 		try {
-			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
+			return merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
 		} catch (Exception e) {
 			if (e instanceof ExplicitException) {
 				getFeedbackMessages().clear();
@@ -179,8 +185,8 @@ public abstract class IssueListPanel extends Panel {
 				return null;
 			} else if (getBaseQuery().toString() != null) {
 				getFeedbackMessages().clear();
-				error("Malformed issue query");
-				return null;
+				info("Performing fuzzy query");
+				return merge(getBaseQuery(), parseFuzzy(getProject(), queryString));
 			} else {
 				getFeedbackMessages().clear();
 				info("Performing fuzzy query");
@@ -382,7 +388,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, option) {
+		}, option, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
@@ -395,8 +401,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				List<String> hints = super.getHints(terminalExpect);
-				if (getBaseQuery().toString() == null)
-					hints.add("Free input for fuzzy query on number/title/description");
+				hints.add("Free input for fuzzy query on number/title/description/comment");
 				return hints;
 			}
 			
@@ -563,7 +568,7 @@ public abstract class IssueListPanel extends Panel {
 				EntitySort sort = new EntitySort();
 				sort.setField(Issue.NAME_NUMBER);
 				sort.setDirection(EntitySort.Direction.DESCENDING);
-				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
+				IssueQuery query = new IssueQuery(null, newArrayList(sort));
 				return query.toString();
 			}
 			

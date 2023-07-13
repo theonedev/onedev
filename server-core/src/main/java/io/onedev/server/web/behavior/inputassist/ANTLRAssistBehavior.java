@@ -49,19 +49,23 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	protected final String ruleName;
 	
-	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName, boolean findAllPaths) {
-		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName, findAllPaths);
+	protected final boolean hideIfBlank;
+	
+	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
+		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName, findAllPaths, hideIfBlank);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, 
-			Class<? extends Lexer> lexerClass, String ruleName, boolean findAllPaths) {
+			Class<? extends Lexer> lexerClass, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
 		this(parserClass, lexerClass, 
 				new String[]{AntlrUtils.getDefaultGrammarFile(lexerClass)}, 
-				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName, findAllPaths);
+				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName, findAllPaths, hideIfBlank);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, 
-			String grammarFiles[], String tokenFile, String ruleName, boolean findAllPaths) {
+			String grammarFiles[], String tokenFile, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
+		super(hideIfBlank);
+		
 		this.lexerClass = lexerClass;
 		this.parserClass = parserClass;
 		
@@ -84,6 +88,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 		};
 		this.ruleName = ruleName;
+		this.hideIfBlank = hideIfBlank;
 	}
 	
 	protected void validate(String value) {
@@ -215,9 +220,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	/**
 	 * Describe suggested literal
-	 * 
-	 * @param expectedElement
-	 * 			element of the literal
+	 *
 	 * @param suggestedLiteral
 	 * 			suggested literal
 	 * @return
