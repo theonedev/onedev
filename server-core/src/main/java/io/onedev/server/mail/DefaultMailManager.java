@@ -1,7 +1,6 @@
 package io.onedev.server.mail;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
@@ -15,11 +14,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -40,7 +36,6 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.validation.validator.UserNameValidator;
-import jnr.ffi.Struct;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.authz.Permission;
@@ -78,7 +73,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Setting.Key.MAIL;
 import static java.util.stream.Collectors.toList;
@@ -128,8 +122,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private final ClusterManager clusterManager;
 	
-	private final AlertManager alertManager;
-	
 	private volatile Thread thread;
 	
 	@Inject
@@ -141,7 +133,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 			UrlManager urlManager, EmailAddressManager emailAddressManager, 
 			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager, 
-			ClusterManager clusterManager, AlertManager alertManager) {
+			ClusterManager clusterManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
 		this.userManager = userManager;
@@ -159,7 +151,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.attachmentManager = attachmentManager;
 		this.clusterManager = clusterManager;
-		this.alertManager = alertManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -339,38 +330,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 						 @Nullable String senderName, @Nullable String references) {
 		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
 				senderName, references);
-	}
-	
-	@Listen
-	public void on(ConnectionLost event) {
-		if (clusterManager.isLeaderServer()) {
-			var server = event.getServer();
-			User root = userManager.getRoot();
-			String url = settingManager.getSystemSetting().getServerUrl();
-			String message = "Server '" + server + "' is part of OneDev cluster, but can not be reached for some reason";
-			String htmlBody = String.format(""
-							+ "OneDev URL: <a href='%s'>%s</a>"
-							+ "<p style='margin: 16px 0;'>"
-							+ "<b>Error detail:</b>"
-							+ "<pre style='font-family: monospace;'>%s</pre>"
-							+ "<p style='margin: 16px 0;'>"
-							+ "-- Sent by OneDev",
-					url, url, message);
-			String textBody = String.format(""
-							+ "OneDev url: %s\n\n"
-							+ "Error detail:\n"
-							+ "%s",
-					url, message);
-
-			EmailAddress emailAddress = root.getPrimaryEmailAddress();
-			if (settingManager.getMailSetting() != null && emailAddress != null && emailAddress.isVerified()) {
-				sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
-						Lists.newArrayList(), "[Clustering] Server '" + server + "' can not be reached",
-						htmlBody, textBody, null, null, null);
-			} else {
-				alertManager.alert("Server '" + server + "' can not be reached");
-			}
-		}
 	}
 	
 	@Transactional

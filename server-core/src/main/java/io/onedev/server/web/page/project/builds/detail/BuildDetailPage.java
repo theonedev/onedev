@@ -234,151 +234,158 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}));
 		
-		add(new AjaxLink<Void>("rebuild") {
-
+		add(new WebMarkupContainer("actions") {
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to rebuild?"));
-			}
-
-			private void resubmit(Serializable paramBean) {
-				OneDev.getInstance(JobManager.class).resubmit(getBuild(), "Resubmitted manually");
-				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
-			}
-			
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				resubmit(getBuild().getParamBean());
-				target.focusComponent(null);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getBuild().isFinished() && getBuild().getJob() != null 
-						&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
-			}
-			
-		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
-		
-		add(new AjaxLink<Void>("cancel") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to cancel this build?"));
-			}
-			
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				OneDev.getInstance(JobManager.class).cancel(getBuild());
-				getSession().success("Cancel request submitted");
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
-			}
-			
-		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
-		
-		add(new AjaxLink<Void>("edit") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				DescriptionBean bean = new DescriptionBean();
-				bean.setValue(getBuild().getDescription());
-				new BeanEditModalPanel<Serializable>(target, bean) {
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new AjaxLink<Void>("rebuild") {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, Serializable bean) {
-						getBuild().setDescription(((DescriptionBean)bean).getValue());
-						OneDev.getInstance(BuildManager.class).update(getBuild());
-						OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
-						((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());						
-						close();
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to rebuild?"));
 					}
-					
-				};
-			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getBuild()));
-			}
-
-		});
-		add(new AjaxLink<Void>("terminal") {
-
-			private TerminalManager getTerminalManager() {
-				return OneDev.getInstance(TerminalManager.class);
-			}
-			
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');", 
-						getTerminalManager().getTerminalUrl(getBuild())));
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				if (getTerminalManager().isTerminalSupported()) {
-					JobManager jobManager = OneDev.getInstance(JobManager.class);
-					JobContext jobContext = jobManager.getJobContext(getBuild().getId());
-					if (jobContext!= null) {
-						setVisible(SecurityUtils.isAdministrator() 
-								|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());
-					} else {
-						setVisible(false);
-					}
-				} else {
-					setVisible(false);
-				}
-			}
-			
-		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
-		
-		add(new DropdownLink("promotions") {
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, getBuild().getCommitId(),  
-						getBuild().getRefName(), promotionsModel.getObject()) {
-					
-					@Override
-					protected Project getProject() {
-						return BuildDetailPage.this.getProject();
+					private void resubmit(Serializable paramBean) {
+						OneDev.getInstance(JobManager.class).resubmit(getBuild(), "Resubmitted manually");
+						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 					}
 
 					@Override
-					protected void onRunJob(AjaxRequestTarget target) {
-						dropdown.close();
+					public void onClick(AjaxRequestTarget target) {
+						resubmit(getBuild().getParamBean());
+						target.focusComponent(null);
 					}
 
 					@Override
-					protected PullRequest getPullRequest() {
-						return getBuild().getRequest();
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getBuild().isFinished() && getBuild().getJob() != null
+								&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
+					}
+
+				}.setOutputMarkupId(true));
+
+				add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to cancel this build?"));
 					}
 
 					@Override
-					protected String getPipeline() {
-						return getBuild().getPipeline();
+					public void onClick(AjaxRequestTarget target) {
+						OneDev.getInstance(JobManager.class).cancel(getBuild());
+						getSession().success("Cancel request submitted");
 					}
-					
-				};
-			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!promotionsModel.getObject().isEmpty());
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
+					}
+
+				}.setOutputMarkupId(true));
+
+				add(new AjaxLink<Void>("edit") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						DescriptionBean bean = new DescriptionBean();
+						bean.setValue(getBuild().getDescription());
+						new BeanEditModalPanel<Serializable>(target, bean) {
+
+							@Override
+							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+								getBuild().setDescription(((DescriptionBean)bean).getValue());
+								OneDev.getInstance(BuildManager.class).update(getBuild());
+								OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
+								((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());
+								close();
+							}
+
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManage(getBuild()));
+					}
+
+				});
+				add(new AjaxLink<Void>("terminal") {
+
+					private TerminalManager getTerminalManager() {
+						return OneDev.getInstance(TerminalManager.class);
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
+								getTerminalManager().getTerminalUrl(getBuild())));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						if (getTerminalManager().isTerminalSupported()) {
+							JobManager jobManager = OneDev.getInstance(JobManager.class);
+							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
+							if (jobContext!= null) {
+								setVisible(SecurityUtils.isAdministrator()
+										|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());
+							} else {
+								setVisible(false);
+							}
+						} else {
+							setVisible(false);
+						}
+					}
+
+				}.setOutputMarkupId(true));
+
+				add(new DropdownLink("promotions") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new JobListPanel(id, getBuild().getCommitId(),
+								getBuild().getRefName(), promotionsModel.getObject()) {
+
+							@Override
+							protected Project getProject() {
+								return BuildDetailPage.this.getProject();
+							}
+
+							@Override
+							protected void onRunJob(AjaxRequestTarget target) {
+								dropdown.close();
+							}
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return getBuild().getRequest();
+							}
+
+							@Override
+							protected String getPipeline() {
+								return getBuild().getPipeline();
+							}
+
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!promotionsModel.getObject().isEmpty());
+					}
+
+				});
+				add(newBuildObserver(getBuild().getId()));
 			}
-			
 		});
 		
 		add(new SideInfoLink("moreInfo"));

@@ -1,10 +1,8 @@
 package io.onedev.server.commandhandler;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -25,16 +23,16 @@ public class CheckDataVersion extends CommandHandler {
 
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
+	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
 							HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -49,8 +47,8 @@ public class CheckDataVersion extends CommandHandler {
 				// Use system.out in case logger is suppressed by user as this output is important to 
 				// upgrade procedure
 				String dataVersion;
-				try (var conn = persistenceManager.openConnection()) {
-					dataVersion = callWithTransaction(conn, () -> persistenceManager.checkDataVersion(conn, false));
+				try (var conn = dataManager.openConnection()) {
+					dataVersion = callWithTransaction(conn, () -> dataManager.checkDataVersion(conn, false));
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				}

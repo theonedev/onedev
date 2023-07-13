@@ -1,4 +1,4 @@
-package io.onedev.server.migration;
+package io.onedev.server.data.migration;
 
 import com.google.common.base.Preconditions;
 import com.thoughtworks.xstream.core.JVM;
@@ -5525,6 +5525,9 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+	}
+
+	private void migrate131(File dataDir, Stack<Integer> versions) {
 	}
 	
 }

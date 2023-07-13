@@ -1,4 +1,4 @@
-package io.onedev.server.persistence;
+package io.onedev.server.data;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.support.administration.BackupSetting;
@@ -9,7 +9,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 
-public interface PersistenceManager {
+public interface DataManager {
 
 	String checkDataVersion(Connection conn, boolean allowEmptyDB);
 	

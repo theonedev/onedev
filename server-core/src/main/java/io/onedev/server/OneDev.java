@@ -17,7 +17,7 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
 import io.onedev.server.persistence.IdManager;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -58,7 +58,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		
 	private final SessionManager sessionManager;
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final Provider<ServerConfig> serverConfigProvider;
 	
@@ -85,14 +85,14 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
 	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler,
-				  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
-				  PersistenceManager persistenceManager, ExecutorService executorService,
-				  ListenerRegistry listenerRegistry, ClusterManager clusterManager,
-				  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
+                  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
+                  DataManager dataManager, ExecutorService executorService,
+                  ListenerRegistry listenerRegistry, ClusterManager clusterManager,
+                  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.serverConfigProvider = serverConfigProvider;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
@@ -129,9 +129,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		clusterManager.start();
 		sessionFactoryManager.start();
 		
-		try (var conn = persistenceManager.openConnection()) {
+		try (var conn = dataManager.openConnection()) {
 			callWithTransaction(conn, () -> {
-				persistenceManager.populateDatabase(conn);
+				dataManager.populateDatabase(conn);
 				return null;
 			});
 		} catch (SQLException e) {
@@ -146,7 +146,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 		var dataChecked = hazelcastInstance.getCPSubsystem().getAtomicLong("dataInited");
 		clusterManager.init(dataChecked, () -> {
-			var manualConfigs = persistenceManager.checkData();
+			var manualConfigs = dataManager.checkData();
 			if (!manualConfigs.isEmpty()) {
 				if (getIngressUrl() != null)
 					logger.warn("Please set up the server at " + getIngressUrl());
@@ -196,7 +196,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		listenerRegistry.post(new SystemStarted());
 		clusterManager.postStart();
 		thread.start();
-        logger.info("Server is ready at " + guessServerUrl() + ".");
+        logger.info("Server is ready at " + guessServerUrl());
 	}
 
 	@Override

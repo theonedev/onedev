@@ -1,9 +1,8 @@
 package io.onedev.server.web.mapper;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentBuildsPage;
@@ -11,7 +10,6 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
-import io.onedev.server.web.page.admin.clustermanagement.ClusterManagementPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
@@ -256,6 +254,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/pull-request-notification-template", 
 				PullRequestNotificationTemplatePage.class));
 		add(new BasePageMapper("~administration/labels", LabelManagementPage.class));
+		add(new BasePageMapper("~administration/settings/alert", AlertSettingPage.class));
 		add(new BasePageMapper("~administration/settings/performance", PerformanceSettingPage.class));
 		add(new BasePageMapper("~administration/settings/backup", DatabaseBackupPage.class));
 		add(new BasePageMapper("~administration/settings/authenticator", AuthenticatorPage.class));
@@ -271,9 +270,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/job-executors", JobExecutorsPage.class));
 		add(new BasePageMapper("~administration/settings/groovy-scripts", GroovyScriptListPage.class));
 
-		if (OneDev.getInstance(ClusterManager.class).isClusteringSupported()) 
-			add(new BasePageMapper("~administration/cluster", ClusterManagementPage.class));
-		
 		add(new BasePageMapper("~administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-states", IssueStateListPage.class));
 		add(new BasePageMapper("~administration/settings/state-transitions", StateTransitionListPage.class));

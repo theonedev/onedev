@@ -1,10 +1,9 @@
 package io.onedev.server.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import java.io.Serializable;
 
 /**
  * This entity stores object in serialized form, with one entity 
@@ -21,7 +20,8 @@ public class Setting extends AbstractEntity {
 	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY, AUTHENTICATOR, ISSUE, JOB_EXECUTORS, 
 		GROOVY_SCRIPTS, PULL_REQUEST, BUILD, PROJECT, SSH, GPG, SSO_CONNECTORS, 
 		NOTIFICATION_TEMPLATE_SETTING, CONTRIBUTED_SETTINGS, SERVICE_DESK_SETTING, 
-		AGENT, PERFORMANCE, BRANDING, CLUSTER_SETTING};
+		AGENT, PERFORMANCE, BRANDING, CLUSTER_SETTING, SUBSCRIPTION_DATA, ALERT
+	};
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

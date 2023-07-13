@@ -57,7 +57,7 @@ import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.StepTemplate;
-import io.onedev.server.migration.VersionedYamlDoc;
+import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Indexed;

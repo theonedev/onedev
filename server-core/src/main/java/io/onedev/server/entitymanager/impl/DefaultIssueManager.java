@@ -16,7 +16,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.migration.VersionedXmlDoc;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;

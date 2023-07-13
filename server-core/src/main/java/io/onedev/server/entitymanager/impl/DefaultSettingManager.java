@@ -71,6 +71,16 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		return (SystemSetting) getSettingValue(Key.SYSTEM);
 	}
 
+	@Override
+	public AlertSetting getAlertSetting() {
+		return (AlertSetting) getSettingValue(Key.ALERT);
+	}
+
+	@Override
+	public String getSubscriptionData() {
+		return (String) getSettingValue(Key.SUBSCRIPTION_DATA);
+	}
+	
 	@Transactional
 	protected void saveSetting(Key key, Serializable value) {
 		var setting = getSetting(key);
@@ -179,13 +189,25 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     public GpgSetting getGpgSetting() {
     	return (GpgSetting) getSettingValue(Key.GPG);
     }
-
+	
 	@Transactional
 	@Override
 	public void saveSystemSetting(SystemSetting systemSetting) {
 		saveSetting(Key.SYSTEM, systemSetting);
 	}
-	
+
+	@Transactional
+	@Override
+	public void saveAlertSetting(AlertSetting alertSetting) {
+		saveSetting(Key.ALERT, alertSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveSubscriptionData(String subscriptionData) {
+		saveSetting(Key.SUBSCRIPTION_DATA, subscriptionData);
+	}
+
 	@Transactional
 	@Override
 	public void saveMailSetting(MailSetting mailSetting) {
@@ -293,7 +315,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public void saveGpgSetting(GpgSetting gpgSetting) {
 		saveSetting(Key.GPG, gpgSetting);
 	}
-
+	
 	@Transactional
 	@Override
 	public void saveSsoConnectors(List<SsoConnector> ssoConnectors) {
@@ -473,6 +495,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		for (var groovyScript: getGroovyScripts())
 			groovyScript.onRenameUser(oldName, newName);
 		getIssueSetting().onRenameUser(oldName, newName);
+		getAlertSetting().onRenameUser(oldName, newName);
 		
 		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
 		saveSetting(Key.ISSUE, getIssueSetting());
@@ -486,8 +509,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     		usage.add(jobExecutor.onDeleteUser(userName).prefix("job executor '" + jobExecutor.getName() + "'"));
 		for (var groovyScript: getGroovyScripts()) 
 			usage.add(groovyScript.onDeleteUser(userName).prefix("groovy script '" + groovyScript.getName() + "'"));
-
 		usage.add(getIssueSetting().onDeleteUser(userName));
+		usage.add(getAlertSetting().onDeleteUser(userName));
 		
 		return usage.prefix("administration");
 	}

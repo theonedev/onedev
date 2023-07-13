@@ -2,8 +2,10 @@ package io.onedev.server.web.page.layout;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.hazelcast.cluster.Cluster;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.Plugin;
+import io.onedev.server.FeatureManager;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AlertManager;
@@ -27,12 +29,12 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.HomePage;
+import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
-import io.onedev.server.web.page.admin.clustermanagement.ClusterManagementPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
@@ -105,6 +107,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -238,6 +241,9 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates",
 							notificationTemplateSettingMenuItems));
 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Alert Settings",
+							AlertSettingPage.class, new PageParameters()));
+					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management",
 							LabelManagementPage.class, new PageParameters()));
 
@@ -246,11 +252,6 @@ public abstract class LayoutPage extends BasePage {
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts",
 							GroovyScriptListPage.class, new PageParameters()));
-
-					if (OneDev.getInstance(ClusterManager.class).isClusteringSupported()) {
-						administrationMenuItems.add(new SidebarMenuItem.Page(null, "Clustering & Replication",
-								ClusterManagementPage.class, new PageParameters()));
-					}
 
 					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
 					for (AdministrationSettingContribution contribution : OneDev.getExtensions(AdministrationSettingContribution.class)) {
@@ -289,7 +290,7 @@ public abstract class LayoutPage extends BasePage {
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
 					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup",
 							DatabaseBackupPage.class, new PageParameters()));
-					var servers = OneDev.getInstance(ClusterManager.class).getServerAddresses();
+					var servers = getClusterManager().getServerAddresses();
 					if (servers.size() > 1) {
 						List<SidebarMenuItem> serverLogMenuItems = new ArrayList<>();
 						List<SidebarMenuItem> serverInformationMenuItems = new ArrayList<>();
@@ -309,7 +310,9 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "System Maintenance", maintenanceMenuItems));
-
+					for (var contribution: OneDev.getExtensions(AdministrationMenuContribution.class)) 
+						administrationMenuItems.addAll(contribution.getAdministrationMenuItems());
+					
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", "Administration", administrationMenuItems));
 				}
 				menus.add(new SidebarMenu(null, menuItems));
@@ -407,6 +410,20 @@ public abstract class LayoutPage extends BasePage {
 		Plugin product = AppLoader.getProduct();
 		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/onedev/server")
 				.setBody(Model.of("OneDev " + product.getVersion())));
+		sidebar.add(new WebMarkupContainer("tryEE") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getFeatureManager().isEEAvailable() && !getFeatureManager().isEELicensed());
+			}
+		});
+		sidebar.add(new WebMarkupContainer("tryEEMenuItem") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getFeatureManager().isEEAvailable() && !getFeatureManager().isEELicensed());
+			}
+		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");
@@ -417,44 +434,89 @@ public abstract class LayoutPage extends BasePage {
 		DropdownLink alertsLink;
 		topbar.add(alertsLink = new DropdownLink("alerts") {
 
-			private AlertManager getAlertManager() {
-				return OneDev.getInstance(AlertManager.class);
-			}
-			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				Fragment alertsFrag = new Fragment(id, "alertsFrag", LayoutPage.this);
+				alertsFrag.add(new AjaxLink<Void>("clear") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getAlertManager().clear();
+						notifyObservableChange(target, Alert.getChangeObservable());
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.isAdministrator());
+					}
+				});
+						
 				List<IColumn<Alert, Void>> columns = new ArrayList<>();
 
-				columns.add(new AbstractColumn<>(Model.of("Date")) {
+				columns.add(new AbstractColumn<>(Model.of("When")) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
 						cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getDate())));						
+					}
+
+					@Override
+					public String getCssClass() {
+						return "text-nowrap";
 					}
 				});
 				columns.add(new AbstractColumn<>(Model.of("Message")) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getMessage()));
-					}
-				});
-				columns.add(new AbstractColumn<>(Model.of("")) {
+						var alert = rowModel.getObject();
+						var fragment = new Fragment(componentId, "alertMessageFrag", LayoutPage.this);
+						fragment.add(new Label("subject", alert.getSubject()).setEscapeModelStrings(false));
+						
+						var detail = new Label("detail", new AbstractReadOnlyModel<String>() {
+							@Override
+							public String getObject() {
+								return rowModel.getObject().getDetail();
+							}
+							
+						}).setEscapeModelStrings(false).setVisible(false);
+						
+						fragment.add(detail);
+						
+						fragment.add(new AjaxLink<Void>("showDetail") {
 
-					@Override
-					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
-						Fragment actionFrag = new Fragment(componentId, "alertActionFrag", LayoutPage.this);
-						actionFrag.add(new AjaxLink<Void>("delete") {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								getAlertManager().delete(rowModel.getObject());
-								notifyObservableChange(target, Alert.getChangeObservable());
+								setVisible(false);
+								detail.setVisible(true);
+								target.add(fragment);
 							}
-						});
-						cellItem.add(actionFrag);
+							
+						}.setVisible(alert.getDetail() != null));
+						
+						fragment.setOutputMarkupId(true);
+						cellItem.add(fragment);
 					}
 				});
+				
+				if (SecurityUtils.isAdministrator()) {
+					columns.add(new AbstractColumn<>(Model.of("")) {
+
+						@Override
+						public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
+							Fragment actionFrag = new Fragment(componentId, "alertActionFrag", LayoutPage.this);
+							actionFrag.add(new AjaxLink<Void>("delete") {
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									getAlertManager().delete(rowModel.getObject());
+									notifyObservableChange(target, Alert.getChangeObservable());
+								}
+							});
+							cellItem.add(actionFrag);
+						}
+					});
+				}
 
 				SortableDataProvider<Alert, Void> dataProvider = new SortableDataProvider<Alert, Void>() {
 
@@ -499,7 +561,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator() && getAlertManager().count(false) != 0);
+				setVisible(getAlertManager().count() != 0);
 			}
 			
 		});
@@ -508,7 +570,9 @@ public abstract class LayoutPage extends BasePage {
 		topbar.add(new ChangeObserver() {
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(alertsLink);
+				var count = getAlertManager().count();
+				if (count != 0 && !alertsLink.isVisible() || count == 0 && alertsLink.isVisible())
+					handler.add(alertsLink);
 			}
 
 			@Override
@@ -584,23 +648,18 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
 			if (loginUser.getEmailAddresses().isEmpty()) {
-				userInfo.add(new WebMarkupContainer("warningIcon"));
 				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
 				userInfo.add(new ViewStateAwarePageLink<Void>("noPrimaryAddressLink", MyEmailAddressesPage.class));
 			} else if (loginUser.getEmailAddresses().stream().anyMatch(it->!it.isVerified())) {
-				userInfo.add(new WebMarkupContainer("warningIcon"));
 				userInfo.add(new ViewStateAwarePageLink<Void>("hasUnverifiedLink", MyEmailAddressesPage.class));
 				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
 			} else {
-				userInfo.add(new WebMarkupContainer("warningIcon").setVisible(false));
 				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
 				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
 			}
 		} else {
 			userInfo.add(new WebMarkupContainer("avatar"));
 			userInfo.add(new WebMarkupContainer("name"));
-			userInfo.add(new WebMarkupContainer("warningIcon"));
-			userInfo.add(new WebMarkupContainer("warningLink"));
 		}
 		
 		WebMarkupContainer item;
@@ -684,6 +743,18 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
+	}
+
+	private AlertManager getAlertManager() {
+		return OneDev.getInstance(AlertManager.class);
+	}
+	
+	private FeatureManager getFeatureManager() {
+		return OneDev.getInstance(FeatureManager.class);
+	}
+	
+	private ClusterManager getClusterManager() {
+		return OneDev.getInstance(ClusterManager.class);
 	}
 
 	@Override

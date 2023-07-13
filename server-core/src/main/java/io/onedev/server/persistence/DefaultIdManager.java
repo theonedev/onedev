@@ -2,6 +2,7 @@ package io.onedev.server.persistence;
 
 import com.hazelcast.cp.IAtomicLong;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.model.AbstractEntity;
 
 import javax.inject.Inject;
@@ -18,7 +19,7 @@ import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 @Singleton
 public class DefaultIdManager implements IdManager {
 
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final ClusterManager clusterManager;
 	
@@ -27,9 +28,9 @@ public class DefaultIdManager implements IdManager {
 	private final Map<Class<?>, IAtomicLong> nextIds = new HashMap<>();
 	
 	@Inject
-	public DefaultIdManager(PersistenceManager persistenceManager, ClusterManager clusterManager,
+	public DefaultIdManager(DataManager dataManager, ClusterManager clusterManager,
                             SessionFactoryManager sessionFactoryManager) {
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.clusterManager = clusterManager;
 	}
@@ -38,8 +39,8 @@ public class DefaultIdManager implements IdManager {
 	private long getMaxId(Connection conn, Class<?> entityClass) {
 		try (Statement stmt = conn.createStatement()) {
 			String query = String.format("select max(%s) from %s", 
-					persistenceManager.getColumnName(AbstractEntity.PROP_ID), 
-					persistenceManager.getTableName((Class<? extends AbstractEntity>) entityClass));
+					dataManager.getColumnName(AbstractEntity.PROP_ID), 
+					dataManager.getTableName((Class<? extends AbstractEntity>) entityClass));
 			try (ResultSet resultset = stmt.executeQuery(query)) {
 				if (resultset.next()) 
 					return Math.max(resultset.getLong(1), 0);
@@ -53,7 +54,7 @@ public class DefaultIdManager implements IdManager {
 	
 	@Override
 	public void init() {
-		try (var conn = persistenceManager.openConnection()) {
+		try (var conn = dataManager.openConnection()) {
 			callWithTransaction(conn, () -> {
 				for (var persistenceClass: sessionFactoryManager.getMetadata().getEntityBindings()) {
 					Class<?> entityClass = persistenceClass.getMappedClass();

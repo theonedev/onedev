@@ -18,7 +18,7 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.replica.ProjectReplica;
 import org.eclipse.jetty.server.session.SessionData;
 
@@ -52,7 +52,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	
 	private final HibernateConfig hibernateConfig;
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -65,10 +65,10 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	private volatile HazelcastInstance hazelcastInstance;
 	
 	@Inject
-	public DefaultClusterManager(ServerConfig serverConfig, PersistenceManager persistenceManager, 
+	public DefaultClusterManager(ServerConfig serverConfig, DataManager dataManager, 
 								 ListenerRegistry listenerRegistry, HibernateConfig hibernateConfig) { 
 		this.serverConfig = serverConfig;
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.listenerRegistry = listenerRegistry;
 		this.hibernateConfig = hibernateConfig;
 	}
@@ -82,7 +82,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	public void start() {
 		var localServer = getLocalServerAddress();
 		Collection<String> servers;
-		try (var conn = persistenceManager.openConnection()) {
+		try (var conn = dataManager.openConnection()) {
 			servers = callWithLock(conn, () -> {
 				var innerServers = new HashSet<String>();
 				if (!tableExists(conn, TABLE_SERVER)) {
@@ -193,7 +193,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 			hazelcastInstance = null;
 		}
 
-		try (var conn = persistenceManager.openConnection()) {
+		try (var conn = dataManager.openConnection()) {
 			callWithTransaction(conn, () -> {
 				try (Statement stmt = conn.createStatement()) {
 					stmt.executeUpdate(String.format(

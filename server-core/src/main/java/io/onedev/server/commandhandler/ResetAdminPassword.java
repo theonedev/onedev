@@ -5,7 +5,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -25,7 +25,7 @@ public class ResetAdminPassword extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPassword.class);
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
@@ -34,11 +34,11 @@ public class ResetAdminPassword extends CommandHandler {
 	private final PasswordService passwordService;
 	
 	@Inject
-	public ResetAdminPassword(HibernateConfig hibernateConfig, PersistenceManager persistenceManager, 
+	public ResetAdminPassword(HibernateConfig hibernateConfig, DataManager dataManager, 
 							  SessionFactoryManager sessionFactoryManager, UserManager userManager, 
 							  PasswordService passwordService) {
 		super(hibernateConfig);
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.userManager = userManager;
 		this.passwordService = passwordService;
@@ -57,9 +57,9 @@ public class ResetAdminPassword extends CommandHandler {
 			doMaintenance(() -> {
 				sessionFactoryManager.start();
 
-				try (var conn = persistenceManager.openConnection()) {
+				try (var conn = dataManager.openConnection()) {
 					callWithTransaction(conn, () -> {
-						persistenceManager.checkDataVersion(conn, false);
+						dataManager.checkDataVersion(conn, false);
 						return null;
 					});
 				} catch (SQLException e) {

@@ -1,4 +1,4 @@
-package io.onedev.server.migration;
+package io.onedev.server.data.migration;
 
 public interface MigrationListener {
 	

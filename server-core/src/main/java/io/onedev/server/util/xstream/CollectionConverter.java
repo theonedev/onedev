@@ -10,7 +10,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import io.onedev.server.migration.VersionedXmlDoc;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 
 public class CollectionConverter extends com.thoughtworks.xstream.converters.collections.CollectionConverter {
 

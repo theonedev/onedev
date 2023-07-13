@@ -6,7 +6,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-import io.onedev.server.migration.VersionedXmlDoc;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 
 public class VersionedDocumentConverter implements Converter {
 

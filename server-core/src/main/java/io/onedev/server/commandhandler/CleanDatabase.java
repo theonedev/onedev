@@ -2,7 +2,7 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -21,16 +21,16 @@ public class CleanDatabase extends CommandHandler {
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public CleanDatabase(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
+	public CleanDatabase(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
 						 HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -46,10 +46,10 @@ public class CleanDatabase extends CommandHandler {
 				// when drop non-existent constraints, and we want to ignore them and 
 				// continue to execute other sql statements without rolling back whole 
 				// transaction
-				try (var conn = persistenceManager.openConnection()) {
+				try (var conn = dataManager.openConnection()) {
 					conn.setAutoCommit(true);
-					persistenceManager.checkDataVersion(conn, false);
-					persistenceManager.cleanDatabase(conn);
+					dataManager.checkDataVersion(conn, false);
+					dataManager.cleanDatabase(conn);
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				}

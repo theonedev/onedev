@@ -1,4 +1,4 @@
-package io.onedev.server.persistence;
+package io.onedev.server.data;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -20,15 +20,19 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.migration.DataMigrator;
-import io.onedev.server.migration.MigrationHelper;
-import io.onedev.server.migration.VersionedXmlDoc;
+import io.onedev.server.data.migration.DataMigrator;
+import io.onedev.server.data.migration.MigrationHelper;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceUtils;
+import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
@@ -79,12 +83,14 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Throwables.*;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
+import static org.unbescape.html.HtmlEscape.*;
 
 @Singleton
-public class DefaultPersistenceManager implements PersistenceManager, Serializable {
+public class DefaultDataManager implements DataManager, Serializable {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistenceManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultDataManager.class);
 	
 	private static final String ENV_INITIAL_USER = "initial_user";
 
@@ -135,12 +141,12 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 	private String backupTaskId;
 
 	@Inject
-	public DefaultPersistenceManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig,
-									 Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
-									 SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler,
-									 PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager,
-									 EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager,
-									 TransactionManager transactionManager, AlertManager alertManager) {
+	public DefaultDataManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig,
+							  Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
+							  SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler,
+							  PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager,
+							  EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager,
+							  TransactionManager transactionManager, AlertManager alertManager) {
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.hibernateConfig = hibernateConfig;
 		this.validator = validator;
@@ -812,6 +818,14 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
+		setting = settingManager.getSetting(Key.SUBSCRIPTION_DATA);
+		if (setting == null) {
+			settingManager.saveSubscriptionData(null);
+		}
+		setting = settingManager.getSetting(Key.ALERT);
+		if (setting == null) {
+			settingManager.saveAlertSetting(new AlertSetting());
+		}
 		setting = settingManager.getSetting(Key.AGENT);
 		if (setting == null) {
 			settingManager.saveAgentSetting(new AgentSetting());
@@ -965,34 +979,11 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 	
 	@Sessional
 	protected void notifyBackupError(Throwable e) {
-		User root = userManager.getRoot();
-		String url = settingManager.getSystemSetting().getServerUrl();
-		String htmlBody = String.format(""
-				+ "OneDev URL: <a href='%s'>%s</a>"
-				+ "<p style='margin: 16px 0;'>"
-				+ "<b>Error detail:</b>"
-				+ "<pre style='font-family: monospace;'>%s</pre>"
-				+ "<p style='margin: 16px 0;'>"
-				+ "-- Sent by OneDev", 
-				url, url, HtmlEscape.escapeHtml5(Throwables.getStackTraceAsString(e)));
-		String textBody = String.format(""
-				+ "OneDev url: %s\n\n"
-				+ "Error detail:\n"
-				+ "%s",
-				url, Throwables.getStackTraceAsString(e));
-		
-		EmailAddress emailAddress = root.getPrimaryEmailAddress();
-		if (settingManager.getMailSetting() != null && emailAddress != null && emailAddress.isVerified()) {
-			mailManager.sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
-					Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
-					htmlBody, textBody, null, null, null);
-		} else {
-			alertManager.alert("Database auto-backup failed");
-		}
+		alertManager.alert("Database auto-backup failed", escapeHtml5(getStackTraceAsString(e)), false);
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(PersistenceManager.class);
+		return new ManagedSerializedForm(DataManager.class);
 	}
 	
 }

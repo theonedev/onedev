@@ -5,7 +5,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class BackupDatabase extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BackupDatabase.class);
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
@@ -34,10 +34,10 @@ public class BackupDatabase extends CommandHandler {
 	private File backupFile;
 	
 	@Inject
-	public BackupDatabase(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager, 
-						  HibernateConfig hibernateConfig) {
+	public BackupDatabase(DataManager dataManager, SessionFactoryManager sessionFactoryManager,
+                          HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.hibernateConfig = hibernateConfig;
 	}
@@ -64,9 +64,9 @@ public class BackupDatabase extends CommandHandler {
 			doMaintenance(() -> {
 				sessionFactoryManager.start();
 
-				try (var conn = persistenceManager.openConnection()) {
+				try (var conn = dataManager.openConnection()) {
 					callWithTransaction(conn, () -> {
-						persistenceManager.checkDataVersion(conn, false);
+						dataManager.checkDataVersion(conn, false);
 						return null;
 					});
 				} catch (SQLException e) {
@@ -77,7 +77,7 @@ public class BackupDatabase extends CommandHandler {
 
 				File tempDir = FileUtils.createTempDir("backup");
 				try {
-					persistenceManager.exportData(tempDir);
+					dataManager.exportData(tempDir);
 					FileUtils.zip(tempDir, backupFile, null);
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);

@@ -177,6 +177,13 @@
 	font-weight: 500;
 	color: var(--gray);
 }
+.sidebar-footer>.try-ee {
+	background-color: var(--light-warning);
+	color: var(--warning) !important;
+}
+.sidebar-footer>.try-ee:hover {
+	color: var(--warning) !important;
+}
 .sidebar-help .dropdown-menu .dropdown-item {
 	color: var(--dark);
 }
@@ -339,10 +346,13 @@
 	.sidebar-minimized .menu-body .menu-body, .sidebar-minimized .menu-bullet,
 	.sidebar-minimized .sidebar-menu>.menu-body>.menu-item>.menu-link>.menu-text, 
 	.sidebar-minimized .sidebar-menu>.menu-body>.menu-item>.menu-link>.menu-arrow, 
-	.sidebar-minimized .sidebar-version {
+	.sidebar-minimized .sidebar-version, .sidebar-minimized .try-ee {
 		display: none;
-	} 
-	
+	}
+	.sidebar-minimized .dropdown-menu .try-ee {
+		display: inline !important;
+	}
+
 	.sidebar-minimized .menu-link .menu-icon {
 		color: var(--gray);
 	} 
@@ -427,5 +437,9 @@
 .dark-mode .sidebar-dropdown.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
 .dark-mode .sidebar-dropdown.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
     background: rgb(78, 82, 103);
+}
+
+.floating .alerts {
+	max-width: 640px;
 }
 

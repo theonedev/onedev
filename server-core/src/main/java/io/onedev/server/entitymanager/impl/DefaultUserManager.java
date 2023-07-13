@@ -332,7 +332,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	
 	@Override
 	public int count() {
-		return count(true);
+		return cache.size();
 	}
 
     @Sessional

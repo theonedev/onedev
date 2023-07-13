@@ -30,6 +30,8 @@ import io.onedev.server.cluster.DefaultClusterManager;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.commandhandler.*;
+import io.onedev.server.data.DataManager;
+import io.onedev.server.data.DefaultDataManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entitymanager.impl.*;
 import io.onedev.server.entityreference.DefaultEntityReferenceManager;
@@ -211,7 +213,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SshManager.class).to(DefaultSshManager.class);
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		bind(SettingManager.class).to(DefaultSettingManager.class);
-		bind(PersistenceManager.class).to(DefaultPersistenceManager.class);
+		bind(DataManager.class).to(DefaultDataManager.class);
 		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
@@ -295,6 +297,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestTouchManager.class).to(DefaultPullRequestTouchManager.class);
 		bind(CodeCommentTouchManager.class).to(DefaultCodeCommentTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
+		bind(FeatureManager.class).to(DefaultFeatureManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -504,7 +507,7 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configurePersistence() {
-		bind(PersistenceManager.class).to(DefaultPersistenceManager.class);
+		bind(DataManager.class).to(DefaultDataManager.class);
 		
 		bind(Session.class).toProvider(SessionProvider.class);
 		bind(EntityManager.class).toProvider(SessionProvider.class);

@@ -16,15 +16,17 @@
 		</div>
 		<div class="sidebar-footer">
 			<a wicket:id="productVersion" class="sidebar-version"></a>
+			<a wicket:id="tryEE" href="https://onedev.io/enterprise" class="try-ee badge badge-sm">Try EE</a>
 			<div class="dropdown sidebar-help">
 				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
 					<wicket:svg href="question-o" class="icon"></wicket:svg>
 				</a>
 				<div class="dropdown-menu">
 					<a href="https://docs.onedev.io" class="dropdown-item" target="_blank">Documentation</a>
-					<a href="https://code.onedev.io/onedev/server/~issues?query=%22State%22+is+%22Open%22" class="dropdown-item" target="_blank">Support &amp; Bug Report</a>
+					<a href="https://code.onedev.io/onedev/server/~issues?query=%22State%22+is+%22Open%22" class="dropdown-item" target="_blank">Support & Bug Report</a>
 					<a href="/~help/api" class="dropdown-item" target="_blank">RESTful API</a>
 					<a wicket:id="incompatibilities" class="dropdown-item">Incompatibilities</a>
+					<a wicket:id="tryEEMenuItem" href="https://onedev.io/enterprise" class="try-ee dropdown-item d-none">Try Enterprise Edition</a>
 	          	</div>  					
 			</div>
 		</div>
@@ -40,7 +42,7 @@
 			<div wicket:id="title" class="topbar-title"></div>
 		</div>
 		<div class="topbar-right text-nowrap">
-			<a wicket:id="alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon"></wicket:svg></a>
+			<a wicket:id="alerts" class="text-warning topbar-link" title="Alerts"><wicket:svg href="exclamation-circle-o" class="icon"></wicket:svg></a>
 			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
 			<a wicket:id="darkMode" class="topbar-link" title="Toggle dark mode"><svg wicket:id="icon" class="icon"/></a>
 			<a href="https://github.com/theonedev/onedev" class="github topbar-link d-none d-sm-inline" target="_blank">
@@ -51,7 +53,6 @@
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
 					<img wicket:id="avatar"> 
 					<span wicket:id="name" class="ml-2 d-none d-lg-inline"></span>
-					<span wicket:id="warningIcon"><wicket:svg href="warning-o" class="icon text-warning ml-2"/></span>
 				</a>
 				<div class="dropdown-menu">
 					<wicket:enclosure child="hasUnverifiedLink">
@@ -125,9 +126,18 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertsFrag">
-		<div class="alerts p-3">
-			<table wicket:id="alerts" class="table table-hover"></table>
+		<div class="alerts">
+			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2">Alerts</div>
+			<table wicket:id="alerts" class="table"></table>
+			<div class="px-2 pb-2">
+				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary">Delete All</a>
+			</div>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="alertMessageFrag">
+		<span wicket:id="subject"></span>
+		<a wicket:id="showDetail" class="btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="ellipsis" class="icon"/></a>
+		<pre wicket:id="detail" class="mt-2 font-size-sm"></pre>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertActionFrag">
 		<a wicket:id="delete" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>

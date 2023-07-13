@@ -2,7 +2,7 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -25,16 +25,16 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final PersistenceManager persistenceManager;
+	private final DataManager dataManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public ApplyDatabaseConstraints(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
+	public ApplyDatabaseConstraints(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
 									HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.persistenceManager = persistenceManager;
+		this.dataManager = dataManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -45,9 +45,9 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 		try {
 			if (doMaintenance(() -> {
 				sessionFactoryManager.start();
-				try (var conn = persistenceManager.openConnection()) {
+				try (var conn = dataManager.openConnection()) {
 					return callWithTransaction(conn, () -> {
-						persistenceManager.checkDataVersion(conn, false);
+						dataManager.checkDataVersion(conn, false);
 
 						logger.warn("This script is mainly used to apply database constraints after fixing database integrity issues (may happen during restore/upgrade)");
 
@@ -66,8 +66,8 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 								return false;
 						}
 
-						persistenceManager.dropConstraints(conn);
-						persistenceManager.applyConstraints(conn);
+						dataManager.dropConstraints(conn);
+						dataManager.applyConstraints(conn);
 						return true;
 					});
 				}
