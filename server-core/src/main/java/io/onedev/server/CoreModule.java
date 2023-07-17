@@ -119,9 +119,7 @@ import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exception.PageExpiredExceptionHandler;
 import io.onedev.server.web.mapper.BasePageMapper;
-import io.onedev.server.web.page.layout.AdministrationSettingContribution;
-import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
-import io.onedev.server.web.page.layout.MainMenuCustomization;
+import io.onedev.server.web.page.layout.*;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
@@ -165,6 +163,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -473,6 +472,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(TaskButton.TaskFutureManager.class);
 		
 		bind(MainMenuCustomization.class).toInstance(new DefaultMainMenuCustomization());
+		contribute(AdministrationMenuContribution.class, (AdministrationMenuContribution) ArrayList::new);
 	}
 	
 	private void configureBuild() {
