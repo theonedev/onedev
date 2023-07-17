@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<io.onedev.server.model.support.administration.emailtemplates.EmailTemplates revision="0">
+  <issueNotification>&lt;%
+    if (htmlVersion) {
+        print """
+            &lt;b&gt;${eventSummary}&lt;/b&gt;
+            &lt;br&gt;
+            &lt;br&gt;
+        """
+
+        if (eventBody != null) {
+            print """
+                ${eventBody}
+                &lt;br&gt;
+            """
+        }
+
+        if (replyable)
+            print """
+                &lt;div&gt;Reply this email to post comment, or click &lt;a href='${eventUrl}'&gt;this link&lt;/a&gt; for details&lt;/div&gt;
+            """
+        else
+            print """
+                &lt;div&gt;Click &lt;a href='${eventUrl}'&gt;this link&lt;/a&gt; for details&lt;/div&gt;
+            """
+	} else {
+        print "${eventSummary}\n\n"
+
+        if (eventBody != null)
+            print "${eventBody}\n\n"
+
+        if (replyable)
+            print "Reply this email to post comment, or visit ${eventUrl} for details"
+        else
+            print "Visit ${eventUrl} for details"
+	}
+%&gt;
+
+&lt;%
+	if (unsubscribable != null) {
+	    if (htmlVersion) {
+            print """
+                &lt;div style='border-top:1px solid #EEE; margin-top:1em; padding-top:1em; color:#666; font-size:0.9em;'&gt;You received this as you
+                are participating in this topic.
+            """
+            if (unsubscribable.getEmailAddress() != null)
+                print """
+                    Mail to &lt;a href='mailto:${unsubscribable.emailAddress}?subject=Unsubscribe&amp;body=I would like not to get any notifications from this topic'&gt;this address&lt;/a&gt; to unsubscribe
+                    &lt;/div&gt;
+                """
+            else
+                print """
+                    To stop receiving notifications of this topic, please visit detail link above and unwatch it
+                    &lt;/div&gt;
+                """
+		} else {
+            print "\n\n---------------------------------------------\n"
+            print "You received this notification as you are participating in this topic. "
+
+            if (unsubscribable.getEmailAddress() != null)
+                print "Mail to ${unsubscribable.emailAddress} with any content to unsubscribe"
+            else
+                print "To stop receiving notifications of this topic, please visit detail link above and unwatch it"
+		}
+	}
+%&gt;</issueNotification>
+  <pullRequestNotification>&lt;%
+    if (htmlVersion) {
+        print """
+            &lt;b&gt;${eventSummary}&lt;/b&gt;
+            &lt;br&gt;
+            &lt;br&gt;
+        """
+
+        if (eventBody != null) {
+            print """
+                ${eventBody}
+                &lt;br&gt;
+            """
+        }
+
+        if (replyable)
+            print """
+                &lt;div&gt;Reply this email to post comment, or click &lt;a href='${eventUrl}'&gt;this link&lt;/a&gt; for details&lt;/div&gt;
+            """
+        else
+            print """
+                &lt;div&gt;Click &lt;a href='${eventUrl}'&gt;this link&lt;/a&gt; for details&lt;/div&gt;
+            """
+	} else {
+        print "${eventSummary}\n\n"
+
+        if (eventBody != null)
+            print "${eventBody}\n\n"
+
+        if (replyable)
+            print "Reply this email to post comment, or visit ${eventUrl} for details"
+        else
+            print "Visit ${eventUrl} for details"
+	}
+%&gt;
+
+&lt;%
+	if (unsubscribable != null) {
+	    if (htmlVersion) {
+            print """
+                &lt;div style='border-top:1px solid #EEE; margin-top:1em; padding-top:1em; color:#666; font-size:0.9em;'&gt;You received this as you
+                are participating in this topic.
+            """
+            if (unsubscribable.getEmailAddress() != null)
+                print """
+                    Mail to &lt;a href='mailto:${unsubscribable.emailAddress}?subject=Unsubscribe&amp;body=I would like not to get any notifications from this topic'&gt;this address&lt;/a&gt; to unsubscribe
+                    &lt;/div&gt;
+                """
+            else
+                print """
+                    To stop receiving notifications of this topic, please visit detail link above and unwatch it
+                    &lt;/div&gt;
+                """
+		} else {
+            print "\n\n---------------------------------------------\n"
+            print "You received this notification as you are participating in this topic. "
+
+            if (unsubscribable.getEmailAddress() != null)
+                print "Mail to ${unsubscribable.emailAddress} with any content to unsubscribe"
+            else
+                print "To stop receiving notifications of this topic, please visit detail link above and unwatch it"
+		}
+	}
+%&gt;</pullRequestNotification>
+  <issueNotificationUnsubscribed>You will no longer receive notifications of issue ${issue.FQN} unless mentioned. However if you subscribed to certain issue queries, you may still get notifications of newly created issues matching those queries. In this case, you will need to login to your account and unsubscribe those queries.
+</issueNotificationUnsubscribed>
+  <pullRequestNotificationUnsubscribed>You will no longer receive notifications of pull request ${pullRequest.FQN} unless mentioned. However if you subscribed to certain pull request queries, you may still get notifications of newly submitted pull request matching those queries. In this case, you will need to login to your account and unsubscribe those queries.
+</pullRequestNotificationUnsubscribed>
+  <serviceDeskIssueOpened>&lt;%
+    if (htmlVersion)
+        print "Issue &lt;a href='${issue.url}'&gt;${issue.FQN}&lt;/a&gt; is created. You may reply this email to add more comments"
+    else
+        print "Issue ${issue.FQN} is created. You may reply this email to add more comments"
+%&gt;
+</serviceDeskIssueOpened>
+  <serviceDeskIssueOpenFailed>&lt;%
+	import org.unbescape.html.HtmlEscape
+
+    if (htmlVersion) {
+        if (exception.message != null) {
+            print """
+                ${HtmlEscape.escapeHtml5(exception.message)}
+                &lt;br&gt;
+                &lt;br&gt;
+                Contact site administrator if necessary
+            """
+        } else {
+            print """
+                Please contact site administrator
+            """
+        }
+    } else {
+        if (exception.message != null) {
+            print "${exception.message}\n\n"
+            print "Contact site administrator if necessary"
+        } else {
+            print "Please contact site administrator"
+        }
+    }
+%&gt;
+</serviceDeskIssueOpenFailed>
+  <userInvitation>&lt;%
+    if (htmlVersion) {
+		print """
+		    Hello,
+			&lt;p style='margin: 16px 0;'&gt;
+			You are invited to use OneDev, please visit below link to set up account:
+			&lt;br&gt;
+			&lt;br&gt;
+			&lt;a href='${setupAccountUrl}'&gt;${setupAccountUrl}&lt;/a&gt;
+    	"""
+    } else {
+		print "Hello,\n\n"
+		print "You are invited to use OneDev, please visit below link to set up account:\n\n"
+		print setupAccountUrl
+    }
+%&gt;
+</userInvitation>
+  <emailVerification>&lt;%
+    if (htmlVersion) {
+        print """
+            Hello,
+            &lt;p style='margin: 16px 0;'&gt;
+            OneDev account "${user.name}" tries to use email address "${emailAddress}", please visit below link to verify if this is you:
+            &lt;br&gt;&lt;br&gt;
+            &lt;a href='${verificationUrl}'&gt;${verificationUrl}&lt;/a&gt;
+        """
+    } else {
+        print "Hello,\n\n"
+        print "OneDev account \"${user.name}\" tries to use email address \"${emailAddress}\", please visit below link to verify if this is you:\n\n"
+        print verificationUrl
+    }
+%&gt;
+</emailVerification>
+  <passwordReset>&lt;%
+    if (htmlVersion) {
+        print """
+            Dear ${user.displayName},
+            &lt;p style='margin: 16px 0;'&gt;
+            Per your request, password of account \"${user.name}\" at &lt;a href='${serverUrl}'&gt;${serverUrl}&lt;/a&gt; has been reset to:
+            &lt;br&gt;&lt;br&gt;
+			${newPassword}
+			&lt;br&gt;&lt;br&gt;
+			Please login and change the password in your earliest convenience.
+        """
+    } else {
+        print "Dear ${user.displayName},\n\n"
+        print "Per your request, password of account \"${user.name}\" at \"${serverUrl}\" has been reset to:\n\n"
+        print newPassword + "\n\n"
+        print "Please login and change the password in your earliest convenience."
+    }
+%&gt;
+</passwordReset>
+  <alert>&lt;%
+	import org.unbescape.html.HtmlEscape
+
+    if (htmlVersion) {
+        print """
+            &lt;b&gt;${HtmlEscape.escapeHtml5(alert.subject)}&lt;/b&gt;
+            &lt;br&gt;&lt;br&gt;
+            OneDev URL: &lt;a href='${serverUrl}'&gt;${serverUrl}&lt;/a&gt;
+        """
+        if (alert.detail != null) {
+            print """
+                &lt;br&gt;&lt;br&gt;
+                Error detail:
+                &lt;br&gt;
+                &lt;pre style='font-family: monospace;'&gt;${HtmlEscape.escapeHtml5(alert.detail)}&lt;/pre&gt;
+            """
+        }
+    } else {
+        print "${alert.subject}\n\n"
+        print "OneDev URL: ${serverUrl}\n\n"
+
+        if (alert.detail != null) {
+            print "Error Detail:\n"
+            print alert.detail
+        }
+    }
+%&gt;
+</alert>
+</io.onedev.server.model.support.administration.emailtemplates.EmailTemplates>

@@ -29,7 +29,7 @@ public @interface Code {
 	
 	String POWER_SHELL = "PowerShell";
 	
-	String HTML_TEMPLATE = "Java Server Pages";
+	String GROOVY_TEMPLATE = "Java Server Pages";
 	
 	String language();
 	

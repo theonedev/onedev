@@ -10,6 +10,7 @@ import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.Alert;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -18,12 +19,13 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.WebSocketManager;
 import org.hibernate.criterion.Restrictions;
-import org.unbescape.html.HtmlEscape;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.onedev.server.model.Alert.PROP_SUBJECT;
 
@@ -117,24 +119,14 @@ public class DefaultAlertManager extends BaseEntityManager<Alert> implements Ale
 								}
 							}
 							if (!emailAddresses.isEmpty()) {
-								String url = settingManager.getSystemSetting().getServerUrl();
-								String htmlBody, textBody;
-								if (alert.getDetail() != null) {
-									htmlBody = String.format(""
-												+ "OneDev URL: <a href='%s'>%s</a>"
-												+ "<p style='margin: 16px 0;'>"
-												+ "<b>Error detail:</b>"
-												+ "<pre style='font-family: monospace;'>%s</pre>",
-											url, url, HtmlEscape.escapeHtml5(alert.getDetail()));
-									textBody = String.format(""
-												+ "URL: %s\n\n"
-												+ "Error detail:\n"
-												+ "%s",
-											url, alert.getDetail());
-								} else {
-									htmlBody = String.format("OneDev URL: <a href='%s'>%s</a>", url, url);
-									textBody = String.format("OneDev url: %s", url);
-								}
+								String serverUrl = settingManager.getSystemSetting().getServerUrl();
+								Map<String, Object> bindings = new HashMap<>();
+								bindings.put("alert", alert);
+								bindings.put("serverUrl", serverUrl);
+								
+								String template = settingManager.getEmailTemplates().getAlert();
+								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 								
 								mailManager.sendMail(mailSetting.getSendSetting(), emailAddresses, new ArrayList<>(), new ArrayList<>(), 
 										"[Alert] " + alert.getSubject(), htmlBody, textBody, null, null, null);

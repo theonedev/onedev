@@ -2,7 +2,6 @@ package io.onedev.server.web.page.layout;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.hazelcast.cluster.Cluster;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.Plugin;
 import io.onedev.server.FeatureManager;
@@ -36,6 +35,7 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.emailtemplates.*;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -51,8 +51,6 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
-import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
-import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -232,14 +230,33 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings",
 							ServiceDeskSettingPage.class, new PageParameters()));
 
-					List<SidebarMenuItem> notificationTemplateSettingMenuItems = new ArrayList<>();
-					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue",
+					List<SidebarMenuItem> emailTemplatesMenuItems = new ArrayList<>();
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification",
 							IssueNotificationTemplatePage.class, new PageParameters()));
-					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification",
 							PullRequestNotificationTemplatePage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates",
-							notificationTemplateSettingMenuItems));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification Unsubscribed",
+							IssueNotificationUnsubscribedTemplatePage.class, new PageParameters()));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification Unsubscribed",
+							PullRequestNotificationUnsubscribedTemplatePage.class, new PageParameters()));
+
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Opened",
+							ServiceDeskIssueOpenedTemplatePage.class, new PageParameters()));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Open Failed",
+							ServiceDeskIssueOpenFailedTemplatePage.class, new PageParameters()));
+
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "User Invitation",
+							UserInvitationTemplatePage.class, new PageParameters()));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Email Verification",
+							EmailVerificationTemplatePage.class, new PageParameters()));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Password Reset",
+							PasswordResetTemplatePage.class, new PageParameters()));
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "System Alert",
+							AlertTemplatePage.class, new PageParameters()));
+					
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Email Templates",
+							emailTemplatesMenuItems));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Alert Settings",
 							AlertSettingPage.class, new PageParameters()));

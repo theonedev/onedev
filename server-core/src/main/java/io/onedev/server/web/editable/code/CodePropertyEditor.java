@@ -1,8 +1,22 @@
 package io.onedev.server.web.editable.code;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -18,33 +32,18 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.annotation.Code;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
-public class CodePropertyEditor extends PropertyEditor<List<String>> {
+public class CodePropertyEditor extends PropertyEditor<Serializable> {
 
 	private TextArea<String> input;
 	
 	private AbstractPostAjaxBehavior behavior;
 	
-	public CodePropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
+	public CodePropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -55,7 +54,11 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		WebMarkupContainer container = new WebMarkupContainer("container");
 		add(container);
 		
-		container.add(input = new TextArea<String>("input", Model.of(StringUtils.join(getModelObject(), "\n"))));
+		if (descriptor.getPropertyClass() == String.class)
+			container.add(input = new TextArea<String>("input", Model.of((String)getModelObject())));
+		else
+			container.add(input = new TextArea<String>("input", Model.of(StringUtils.join((List<?>)getModelObject(), "\n"))));
+		
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
 		input.setOutputMarkupId(true);
 
@@ -119,10 +122,21 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 	}
 
 	@Override
-	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> convertedInput = new ArrayList<>();
-		if (input.getConvertedInput() != null)
-			convertedInput.addAll(Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(input.getConvertedInput()));
+	protected Serializable convertInputToValue() throws ConversionException {
+		Serializable convertedInput;
+		if (input.getConvertedInput() != null) {
+			if (descriptor.getPropertyClass() == String.class) {
+				convertedInput = input.getConvertedInput();
+			} else {
+				convertedInput = new ArrayList<String>();
+				((List<String>)convertedInput).addAll(Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(input.getConvertedInput()));
+			}
+		} else {
+			if (descriptor.getPropertyClass() == String.class) 
+				convertedInput = null;
+			else 
+				convertedInput = new ArrayList<>();
+		}
 		return convertedInput;
 	}
 

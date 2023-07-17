@@ -10,6 +10,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -25,6 +26,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class PasswordResetPage extends SimplePage {
@@ -87,20 +90,15 @@ public class PasswordResetPage extends SimplePage {
 							userManager.update(user, null);
 							
 							MailManager mailManager = OneDev.getInstance(MailManager.class);
-							
-							String serverUrl = settingManager.getSystemSetting().getServerUrl();
-							
-							String htmlBody = String.format("Dear %s, "
-								+ "<p style='margin: 16px 0;'>"
-								+ "Per your request, password of your login \"%s\" at <a href=\"%s\">%s</a> has been reset to:<br>"
-								+ "%s<br><br>"
-								+ "Please login and change the password in your earliest convenience.",
-								user.getDisplayName(), user.getName(), serverUrl, serverUrl, password);
-	
-							String textBody = String.format("Dear %s,\n\n"
-									+ "Per your request, password of account \"%s\" at %s has been reset to:\n"
-									+ "%s",
-									user.getDisplayName(), user.getName(), serverUrl, password);
+
+							Map<String, Object> bindings = new HashMap<>();
+							bindings.put("serverUrl", settingManager.getSystemSetting().getServerUrl());
+							bindings.put("user", user);
+							bindings.put("newPassword", password);
+
+							var template = settingManager.getEmailTemplates().getPasswordReset();
+							var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+							var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 							
 							String emailAddressValue;
 							if (loginNameOrEmail.contains("@")) { 

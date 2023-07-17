@@ -5531,10 +5531,52 @@ public class DataMigrator {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Alerts.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("mailError").setText("false");
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("NOTIFICATION_TEMPLATE_SETTING")) {
+						keyElement.setText("EMAIL_TEMPLATES");
+						Element valueElement = element.element("value");
+						
+						List<String> lines = new ArrayList<>();
+						for (var lineElement: valueElement.element("issueNotificationTemplate").elements()) 
+							lines.add(lineElement.getText());							
+						var issueNotificationTemplate = StringUtils.join(lines, "\n");
+
+						String pullRequestNotificationTemplate;
+						var pullRequestNotificationTemplateElement = valueElement.element("pullRequestNotificationTemplate");
+						if (pullRequestNotificationTemplateElement.attributeValue("reference") != null) {
+							pullRequestNotificationTemplate = issueNotificationTemplate;
+						} else {
+							lines.clear();
+							for (var lineElement: valueElement.element("pullRequestNotificationTemplate").elements())
+								lines.add(lineElement.getText());
+							pullRequestNotificationTemplate = StringUtils.join(lines, "\n");
+						}
+
+						valueElement.detach();
+						
+						Element emailTemplatesElement;
+						try (InputStream is = getClass().getResourceAsStream("migrate131_email_templates.xml")) {
+							Preconditions.checkNotNull(is);
+							var xml = IOUtils.toString(is, StandardCharsets.UTF_8.name());
+							emailTemplatesElement = VersionedXmlDoc.fromXML(xml).getRootElement();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						emailTemplatesElement.element("issueNotification").setText(issueNotificationTemplate);
+						emailTemplatesElement.element("pullRequestNotification").setText(pullRequestNotificationTemplate);
+						emailTemplatesElement.setName("value");
+						emailTemplatesElement.addAttribute("class", "io.onedev.server.model.support.administration.emailtemplates.EmailTemplates");
+						element.add(emailTemplatesElement);
+						break;
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}
-	
 }

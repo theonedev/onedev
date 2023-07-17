@@ -6,7 +6,7 @@ import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.usage.Usage;
@@ -120,9 +120,9 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveJobExecutors(List<JobExecutor> jobExecutors);
 
-	NotificationTemplateSetting getNotificationTemplateSetting();
+	EmailTemplates getEmailTemplates();
 	
-	void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting);
+	void saveEmailTemplates(EmailTemplates emailTemplates);
 	
 	@Nullable
 	ServiceDeskSetting getServiceDeskSetting();

@@ -24,6 +24,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
@@ -449,12 +450,16 @@ public class DefaultMailManager implements MailManager, Serializable {
 											watch.setWatching(false);
 											issueWatchManager.update(watch);
 											String subject = "Unsubscribed successfully from issue " + issue.getFQN(); 
-											String body = "You will no longer receive notifications of issue " + issue.getFQN() + " unless mentioned. "
-													+ "However if you subscribed to certain issue queries, you may still get notifications of newly "
-													+ "created issues matching those queries. In this case, you will need to login to your account "
-													+ "and unsubscribe those queries.";
+											String template = settingManager.getEmailTemplates().getIssueNotificationUnsubscribed();
+											
+											Map<String, Object> bindings = new HashMap<>();
+											bindings.put("issue", issue);
+											
+											String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+											String textBody = EmailTemplates.evalTemplate(false, template, bindings);
+
 											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-													subject, body, body, null, null, getMessageId(message));
+													subject, htmlBody, textBody, null, null, getMessageId(message));
 										}
 									}
 								} else {
@@ -475,12 +480,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 											watch.setWatching(false);
 											pullRequestWatchManager.update(watch);
 											String subject = "Unsubscribed successfully from pull request " + pullRequest.getFQN(); 
-											String body = "You will no longer receive notifications of pull request " + pullRequest.getFQN() 
-													+ " unless mentioned. However if you subscribed to certain pull request queries, you may still "
-													+ "get notifications of newly submitted pull request matching those queries. In this case, you "
-													+ "will need to login to your account and unsubscribe those queries.";
+											
+											String template = StringUtils.join(settingManager.getEmailTemplates().getPullRequestNotificationUnsubscribed(), "\n");
+											Map<String, Object> bindings = new HashMap<>();
+											bindings.put("pullRequest", pullRequest);
+											String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+											String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-													subject, body, body, null, null, getMessageId(message));
+													subject, htmlBody, textBody, null, null, getMessageId(message));
 										}
 									}
 								} else {
@@ -754,10 +761,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 		if (!parsedSubmitterAddress.getDomain().equalsIgnoreCase(parsedSystemAddress.getDomain()) 
 				|| !parsedSubmitterAddress.getName().toLowerCase().startsWith(parsedSystemAddress.getName().toLowerCase() + "+") 
 						&& !parsedSubmitterAddress.getName().equalsIgnoreCase(parsedSystemAddress.getName())) {
-			String htmlBody = String.format("Issue <a href='%s'>%s</a> is created. You may reply this email to add more comments", 
-					urlManager.urlFor(issue), issue.getFQN());
-			String textBody = String.format("Issue %s is created. You may reply this email to add more comments", 
-					issue.getFQN());
+			
+			String template = StringUtils.join(settingManager.getEmailTemplates().getServiceDeskIssueOpened(), "\n");
+			Map<String, Object> bindings = new HashMap<>();
+			bindings.put("issue", issue);
+			String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+			String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 			
 			sendMailAsync(Lists.newArrayList(submitter.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
 					"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
@@ -884,16 +893,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 							String[] fromHeader = message.getHeader("From");
 							if (fromHeader != null && fromHeader.length != 0) {
 								InternetAddress from = InternetAddress.parse(fromHeader[0], true)[0];
-								String textBody, htmlBody;
-								if (e.getMessage() != null) {
-									textBody = e.getMessage() + 
-											"\n\nContact site administrator if necessary";
-									htmlBody = HtmlEscape.escapeHtml5(e.getMessage()) + 
-											"<br><br>Contact site administrator if necessary";
-								} else {
-									textBody = "Please contact site administrator";
-									htmlBody = "Please contact site administrator";
-								}
+
+								String template = StringUtils.join(settingManager.getEmailTemplates().getServiceDeskIssueOpenFailed(), "\n");
+								Map<String, Object> bindings = new HashMap<>();
+								bindings.put("exception", e);
+								
+								String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+								String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 								
 								sendMailAsync(Lists.newArrayList(from.getAddress()), new ArrayList<>(), 
 										new ArrayList<>(), "OneDev is unable to process your message", 

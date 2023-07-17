@@ -4,11 +4,13 @@ import com.google.common.collect.MapMaker;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
+import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,4 +122,11 @@ public class GroovyUtils {
     	return evalScript(scriptContent, new HashMap<>());
     }
     
+	public static String evalTemplate(String template, Map<String, Object> bindings) {
+		try {
+			return new SimpleTemplateEngine().createTemplate(template).make(bindings).toString();
+		} catch (CompilationFailedException | ClassNotFoundException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}	
 }

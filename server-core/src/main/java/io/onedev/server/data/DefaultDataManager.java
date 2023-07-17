@@ -1,7 +1,6 @@
 package io.onedev.server.data;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -27,7 +26,7 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceUtils;
@@ -61,7 +60,6 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -844,9 +842,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		setting = settingManager.getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
+		setting = settingManager.getSetting(Key.EMAIL_TEMPLATES);
 		if (setting == null) {
-			settingManager.saveNotificationTemplateSetting(new NotificationTemplateSetting());
+			settingManager.saveEmailTemplates(new EmailTemplates());
 		}
 		
 		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);

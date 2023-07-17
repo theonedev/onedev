@@ -1,8 +1,8 @@
 package io.onedev.server.web.behavior.inputassist;
 
-import java.util.List;
-
-import org.apache.commons.text.StringEscapeUtils;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -10,10 +10,9 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class AssistPanel extends Panel {
@@ -91,9 +90,9 @@ abstract class AssistPanel extends Panel {
 		LinearRange match = suggestion.getMatch();
 		String label = suggestion.getLabel();
 		if (match != null) {
-			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, match.getFrom()));
-			String suffix = StringEscapeUtils.escapeHtml4(label.substring(match.getTo()));
-			String matched = StringEscapeUtils.escapeHtml4(label.substring(match.getFrom(), match.getTo()));
+			String prefix = HtmlEscape.escapeHtml5(label.substring(0, match.getFrom()));
+			String suffix = HtmlEscape.escapeHtml5(label.substring(match.getTo()));
+			String matched = HtmlEscape.escapeHtml5(label.substring(match.getFrom(), match.getTo()));
 			item.add(new Label("content", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
 		} else {
 			item.add(new Label("content", label));

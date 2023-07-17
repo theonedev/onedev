@@ -8,7 +8,7 @@ import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -134,8 +134,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	}
 
 	@Override
-	public NotificationTemplateSetting getNotificationTemplateSetting() {
-		return (NotificationTemplateSetting) getSettingValue(Key.NOTIFICATION_TEMPLATE_SETTING);
+	public EmailTemplates getEmailTemplates() {
+		return (EmailTemplates) getSettingValue(Key.EMAIL_TEMPLATES);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -258,8 +258,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 
 	@Transactional
 	@Override
-	public void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting) {
-		saveSetting(Key.NOTIFICATION_TEMPLATE_SETTING, notificationTemplateSetting);
+	public void saveEmailTemplates(EmailTemplates emailTemplates) {
+		saveSetting(Key.EMAIL_TEMPLATES, emailTemplates);
 	}
 
 	@Transactional

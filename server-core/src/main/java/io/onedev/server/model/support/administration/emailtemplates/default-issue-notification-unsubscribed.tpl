@@ -1,0 +1,1 @@
+You will no longer receive notifications of issue ${issue.FQN} unless mentioned. However if you subscribed to certain issue queries, you may still get notifications of newly created issues matching those queries. In this case, you will need to login to your account and unsubscribe those queries.

@@ -13,6 +13,7 @@ import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -26,6 +27,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -205,27 +207,26 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 				&& !emailAddress.isVerified());
 
 		User user = emailAddress.getOwner();
-		
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
-		
 		String verificationUrl = String.format("%s/~verify-email-address/%d/%s", 
 				serverUrl, emailAddress.getId(), emailAddress.getVerificationCode());
-		String htmlBody = String.format("Hello,"
-			+ "<p style='margin: 16px 0;'>"
-			+ "The account %s at %s tries to use email address %s, please visit below link to verify if this is you:<br><br>"
-			+ "<a href='%s'>%s</a>",
-			user.getName(), serverUrl, emailAddress.getValue(), verificationUrl, verificationUrl);
+		
+		var bindings = new HashMap<String, Object>();
+		bindings.put("user", user);
+		bindings.put("emailAddress", emailAddress.getValue());
+		bindings.put("serverUrl", serverUrl);
+		bindings.put("verificationUrl", verificationUrl);
+		
+		String template = settingManager.getEmailTemplates().getEmailVerification();
 
-		String textBody = String.format("Hello,\n\n"
-				+ "The account \"%s\" at \"%s\" tries to use email address \"%s\", please visit below link to verify if this is you:\n\n"
-				+ "%s",
-				user.getName(), serverUrl, emailAddress.getValue(), verificationUrl);
+		var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+		var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 		
 		mailManager.sendMail(
 				settingManager.getMailSetting().getSendSetting(), 
 				Arrays.asList(emailAddress.getValue()),
 				Lists.newArrayList(), Lists.newArrayList(), 
-				"[Verification] Please Verify Your Email Address", 
+				"[Email Verification] Please Verify Your Email Address", 
 				htmlBody, textBody, null, null, null);
 	}
 

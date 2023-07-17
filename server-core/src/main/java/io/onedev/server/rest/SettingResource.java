@@ -31,7 +31,7 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
@@ -136,10 +136,10 @@ public class SettingResource {
 	@Api(order=900)
 	@Path("/notification-template")
     @GET
-    public NotificationTemplateSetting getNotificiationTemplateSetting() {
+    public EmailTemplates getNotificiationTemplateSetting() {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return settingManager.getNotificationTemplateSetting();
+    	return settingManager.getEmailTemplates();
     }
 	
 	@Api(order=1000)
@@ -294,10 +294,10 @@ public class SettingResource {
 	@Api(order=2220)
 	@Path("/notification-template")
 	@POST
-    public Response setNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting) {
+    public Response setNotificationTemplateSetting(EmailTemplates emailTemplates) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	settingManager.saveNotificationTemplateSetting(notificationTemplateSetting);
+    	settingManager.saveEmailTemplates(emailTemplates);
     	return Response.ok().build();
     }
 	

@@ -1,7 +1,6 @@
 package io.onedev.server.web.editable.code;
 
-import java.util.List;
-
+import io.onedev.commons.utils.StringUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -9,18 +8,19 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.commons.utils.StringUtils;
+import java.io.Serializable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class CodePropertyViewer extends Panel {
 
-	private final List<String> code;
+	private final Serializable code;
 	
 	private final String language;
 	
 	private TextArea<String> input;
 	
-	public CodePropertyViewer(String id, List<String> code, String language) {
+	public CodePropertyViewer(String id, Serializable code, String language) {
 		super(id);
 		
 		this.language = language;
@@ -31,7 +31,11 @@ public class CodePropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new TextArea<>("input", Model.of(StringUtils.join(code, "\n")));
+		if (code instanceof List)
+			input = new TextArea<>("input", Model.of(StringUtils.join((List<?>)code, "\n")));
+		else
+			input = new TextArea<>("input", Model.of((String)code));
+			
 		add(input);
 		
 		input.setOutputMarkupId(true);

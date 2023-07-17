@@ -1,21 +1,12 @@
 package io.onedev.server.notification;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.server.entitymanager.CodeCommentMentionManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
@@ -23,6 +14,13 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.commenttext.MarkdownText;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class CodeCommentNotificationManager extends AbstractNotificationManager {
@@ -87,8 +85,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 
 				mailManager.sendMailAsync(emailAddresses, Lists.newArrayList(),
 						Lists.newArrayList(), subject,
-						getHtmlBody(event, summary, markdown != null ? markdown.getProcessed() : null, url, false, null),
-						getTextBody(event, summary, markdown != null ? markdown.getContent() : null, url, false, null),
+						getEmailBody(true, event, summary, markdown != null ? markdown.getProcessed() : null, url, false, null),
+						getEmailBody(false, event, summary, markdown != null ? markdown.getContent() : null, url, false, null),
 						null, event.getUser().getDisplayName(), threadingReferences);
 			}
 		}

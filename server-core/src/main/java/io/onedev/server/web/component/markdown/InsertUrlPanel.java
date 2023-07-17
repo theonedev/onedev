@@ -1,52 +1,6 @@
 package io.onedev.server.web.component.markdown;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.annotation.Nullable;
-
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.text.StringEscapeUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.image.ExternalImage;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.protocol.http.WebSession;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.util.lang.Bytes;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.javascript.JavaScriptEscape;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -72,6 +26,40 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.FileUpload;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.image.ExternalImage;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.*;
+import org.apache.wicket.protocol.http.WebSession;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.lang.Bytes;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
@@ -305,7 +293,7 @@ abstract class InsertUrlPanel extends Panel {
 							}
 
 						};
-						selectLink.add(new ExternalImage("image", StringEscapeUtils.escapeHtml4(attachmentUrl)));
+						selectLink.add(new ExternalImage("image", HtmlEscape.escapeHtml5(attachmentUrl)));
 						item.add(selectLink);
 						
 						item.add(new AjaxLink<Void>("delete") {
@@ -359,7 +347,7 @@ abstract class InsertUrlPanel extends Panel {
 							}
 
 						};
-						selectLink.add(new Label("file", StringEscapeUtils.escapeHtml4(attachmentName)));
+						selectLink.add(new Label("file", HtmlEscape.escapeHtml5(attachmentName)));
 						item.add(selectLink);
 						
 						item.add(new AjaxLink<Void>("delete") {

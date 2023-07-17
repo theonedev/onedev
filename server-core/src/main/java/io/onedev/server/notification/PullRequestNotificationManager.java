@@ -184,8 +184,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (emailAddress != null && emailAddress.isVerified()) {
 					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null),
-							getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+							getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+							getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(request.getSubmitter());
@@ -211,8 +211,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (emailAddress != null && emailAddress.isVerified()) {
 					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getHtmlBody(event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
-							getTextBody(event, assignmentSummary, event.getTextBody(), url, replyable, null),
+							getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
+							getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
 							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(assignee);
@@ -235,8 +235,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (emailAddress != null && emailAddress.isVerified()) {
 					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getHtmlBody(event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
-							getTextBody(event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
+							getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
+							getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(reviewer);
@@ -264,8 +264,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
 									Sets.newHashSet(), Sets.newHashSet(), subject,
-									getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null),
-									getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
 						notifiedUsers.add(mentionedUser);
@@ -297,8 +297,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 						request.getFQN(), (event instanceof PullRequestOpened) ? "Opened" : "Updated", request.getTitle());
 				String threadingReferences = "<" + request.getUUID() + "@onedev>";
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
-				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
-				String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
+				String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+				String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
 				mailManager.sendMailAsync(
 						Lists.newArrayList(), Lists.newArrayList(),
 						bccEmailAddresses, subject, htmlBody, textBody,

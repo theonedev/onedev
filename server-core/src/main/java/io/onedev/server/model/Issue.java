@@ -8,10 +8,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
@@ -839,6 +836,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getProject(), getNumber());
+	}
+	
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(this);
 	}
 	
 	public Collection<Milestone> getMilestones() {

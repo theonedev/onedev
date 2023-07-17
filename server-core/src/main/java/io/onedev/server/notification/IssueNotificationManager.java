@@ -166,8 +166,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					if (emailAddress != null && emailAddress.isVerified()) {
 						mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
-								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 								replyAddress, senderName, threadingReferences);
 					}
 				}
@@ -190,8 +190,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					if (emailAddress != null && emailAddress.isVerified()) {
 						mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
-								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 								replyAddress, senderName, threadingReferences);
 					}					
 				}
@@ -226,8 +226,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 									Sets.newHashSet(), Sets.newHashSet(), subject, 
-									getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-									getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
 						notifiedUsers.add(mentionedUser);
@@ -256,8 +256,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					issue.getFQN(), (event instanceof IssueOpened)?"Opened":"Updated", issue.getTitle()); 
 
 			Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
-			String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
-			String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
+			String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+			String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
 
 			String threadingReferences = issue.getEffectiveThreadingReference();
 			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 

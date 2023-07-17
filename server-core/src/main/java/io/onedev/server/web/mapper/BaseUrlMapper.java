@@ -11,6 +11,7 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.emailtemplates.*;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -28,8 +29,6 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
-import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
-import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -249,10 +248,27 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/mail", MailSettingPage.class));
 		add(new BasePageMapper("~administration/settings/service-desk-setting", 
 				ServiceDeskSettingPage.class));
-		add(new BasePageMapper("~administration/settings/issue-notification-template", 
+		add(new BasePageMapper("~administration/settings/email-templates/issue-notification", 
 				IssueNotificationTemplatePage.class));
-		add(new BasePageMapper("~administration/settings/pull-request-notification-template", 
+		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification", 
 				PullRequestNotificationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/issue-notification-unsubscribed",
+				IssueNotificationUnsubscribedTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification-unsubscribed",
+				PullRequestNotificationUnsubscribedTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/service-desk-issue-opened",
+				ServiceDeskIssueOpenedTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/service-desk-issue-open-failed",
+				ServiceDeskIssueOpenFailedTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/user-invitation",
+				UserInvitationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/email-verification",
+				EmailVerificationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/password-reset",
+				PasswordResetTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/alert",
+				AlertTemplatePage.class));
+		
 		add(new BasePageMapper("~administration/labels", LabelManagementPage.class));
 		add(new BasePageMapper("~administration/settings/alert", AlertSettingPage.class));
 		add(new BasePageMapper("~administration/settings/performance", PerformanceSettingPage.class));
