@@ -85,7 +85,9 @@ public class SSHCommandStep extends CommandStep {
 		this.options = options;
 	}
 	
-	@Editable(order=300, description="Specify commands to be executed on remote machine")
+	@Editable(order=300, description="Specify commands to be executed on remote machine. " +
+			"<b class='text-warning'>Note:</b> user environments will not be picked up when execute these " +
+			"commands, set up them explicitly in commands if necessary")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")

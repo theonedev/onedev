@@ -61,8 +61,9 @@ public class RunContainerStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. "
-			+ "Single argument containing space should be quoted")
+	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. " +
+			"Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse " +
+			"this with container options which should be specified in executor setting")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArgs() {
 		return args;
