@@ -1,0 +1,46 @@
+.pinned-issues {
+	column-gap: 0.5rem;
+}
+.card.pinned-issue>.card-body {
+	padding: 1.2rem 1.4rem;
+	min-width: 480px;
+}
+.pinned-issue .primary {
+	padding-right: 20px;
+}
+.pinned-issue .primary .number, .pinned-issue .primary .title {
+	font-size: 1.2rem;
+}
+.pinned-issue.card {
+	margin-bottom: 0.5rem;
+}
+.pinned-issue .unpin {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+.pinned-issue .state {
+	border-bottom: 2px dotted transparent;
+	cursor: pointer;
+}
+.pinned-issue .state:hover {
+	border-color: var(--gray);
+}
+
+.pinned-issue .linked-issues {
+	border-left: 2px dashed var(--secondary);
+}
+.dark-mode .pinned-issue .linked-issues {
+	border-left-color: var(--dark-mode-dark-gray);
+}
+.pinned-issue .linked-issue {
+	margin-top: 0.7rem;
+	padding-top: 1.2rem;
+	border-top: 1px solid var(--light-gray);
+}
+.dark-mode .pinned-issue .linked-issue {
+	border-top-color: var(--dark-mode-light-dark);
+}
+.pinned-issue .linked-issue .unpin {
+	display: none;
+}

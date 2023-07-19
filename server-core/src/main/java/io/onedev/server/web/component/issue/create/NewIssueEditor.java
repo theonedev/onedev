@@ -26,7 +26,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.link.IssueLinkPanel;
+import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -171,7 +171,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
 				item.add(new IssueStateBadge("state", item.getModel()));
-				item.add(new IssueLinkPanel("numberAndTitle") {
+				item.add(new IssueTitlePanel("numberAndTitle") {
 
 					@Override
 					protected Issue getIssue() {

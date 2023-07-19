@@ -1,6 +1,32 @@
 <wicket:extend>
+	<div wicket:id="pinnedIssues" class="pinned-issues d-flex flex-wrap">
+		<div wicket:id="pinnedIssues" class="card pinned-issue flex-grow-1">
+			<div wicket:id="content" class="card-body"></div>
+		</div>
+	</div>
 	<div class="side-main side-main-wrap">
 		<div wicket:id="savedQueries" class="side"></div>
 		<div wicket:id="issues" class="main"></div>
 	</div>
+	<wicket:fragment wicket:id="pinnedIssueFrag">
+		<div class="primary position-relative font-weight-bold mb-3">
+			<wicket:container wicket:id="numberAndTitle"></wicket:container>
+			<a wicket:id="copy" title="Copy issue number and title" class="copy ml-1 btn btn-icon btn-xs btn-light btn-hover-primary">
+				<wicket:svg href="copy" class="icon"/>
+			</a>
+			<span wicket:id="links" class="links ml-3"/>
+			<a wicket:id="unpin" class="unpin btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="unpin" class="icon flip-x"/></a>
+		</div>
+		<div class="secondary d-flex flex-wrap">
+			<div wicket:id="transit" class="state">
+				<span wicket:id="state" class="mb-2 mr-2"></span>
+			</div>
+			<div wicket:id="fields" class="field"></div>
+		</div>
+		<wicket:enclosure child="linkedIssues">
+			<div class="linked-issues pl-3">
+				<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
+			</div>
+		</wicket:enclosure>
+	</wicket:fragment>
 </wicket:extend>

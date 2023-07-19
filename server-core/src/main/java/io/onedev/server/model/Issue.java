@@ -129,6 +129,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final String PROP_CONFIDENTIAL = "confidential";
 	
+	public static final String PROP_PIN_DATE = "pinDate";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
@@ -261,6 +263,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private boolean confidential;
 	
+	private Date pinDate;
+	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
 	
@@ -339,6 +343,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setConfidential(boolean confidential) {
 		this.confidential = confidential;
+	}
+
+	public Date getPinDate() {
+		return pinDate;
+	}
+
+	public void setPinDate(Date pinDate) {
+		this.pinDate = pinDate;
 	}
 
 	public Project getNumberScope() {

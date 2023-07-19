@@ -47,10 +47,15 @@
 		<div class="primary d-flex mb-3">
 			<div class="mr-4 flex-grow-1">
 				<wicket:container wicket:id="numberAndTitle"></wicket:container> 
-				<a wicket:id="copy" title="Copy issue number and title" class="copy mr-3 btn btn-icon btn-xs btn-light btn-hover-primary">
-					<wicket:svg href="copy" class="icon"></wicket:svg>
-				</a>
-				<a wicket:id="links" class="link link-info d-inline-flex align-items-center mr-2"><span wicket:id="label"></span><wicket:svg href="arrow" class="icon icon-sm"/></a>
+				<span class="mr-3">
+					<a wicket:id="copy" title="Copy issue number and title" class="copy ml-1 btn btn-icon btn-xs btn-light btn-hover-primary">
+						<wicket:svg href="copy" class="icon"/>
+					</a>
+					<a wicket:id="pin" title="Pin this issue" class="pin ml-1 btn btn-icon btn-xs btn-light btn-hover-primary">
+						<wicket:svg href="pin" class="icon"/>
+					</a>
+				</span>
+				<span wicket:id="links" class="links"></span>
 			</div>
 			<div class="flex-shrink-0 d-none d-lg-block text-muted">
 				<span class="votes mr-2" title="Votes">
@@ -96,9 +101,4 @@
 			</form>
 		</div>
 	</wicket:fragment>	
-	<wicket:fragment wicket:id="unauthorizedLinkedIssueFrag">
-		<div class="mb-3">
-			<span wicket:id="number" class="mr-2"></span> <wicket:svg href="warning" class="icon"></wicket:svg> <i>You are not authorized to access this issue</i>
-		</div>
-	</wicket:fragment>
 </wicket:panel>

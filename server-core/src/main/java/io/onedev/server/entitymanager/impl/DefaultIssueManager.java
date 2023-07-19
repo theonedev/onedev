@@ -8,6 +8,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.Listen;
@@ -16,7 +17,6 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -206,6 +206,16 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		authorizationManager.create(authorization);
 		
 		listenerRegistry.post(new IssueOpened(issue));
+	}
+
+	@Transactional
+	@Override
+	public void togglePin(Issue issue) {
+		if (issue.getPinDate() != null)
+			issue.setPinDate(null);
+		else 
+			issue.setPinDate(new Date());
+		dao.persist(issue);
 	}
 
 	private List<javax.persistence.criteria.Order> getOrders(List<EntitySort> sorts, CriteriaBuilder builder, Root<Issue> root) {
@@ -1189,4 +1199,27 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		numberGenerator.removeNextSequence(numberScope);
 	}
 
+	@Sessional
+	@Override
+	public List<Issue> queryPinned(Project project) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		criteriaQuery.where(
+				builder.equal(root.get(Issue.PROP_PROJECT), project), 
+				builder.isNotNull(root.get(Issue.PROP_PIN_DATE)));
+		criteriaQuery.orderBy(builder.desc(root.get(Issue.PROP_PIN_DATE)));
+
+		Query<Issue> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(0);
+		query.setMaxResults(Integer.MAX_VALUE);
+		
+		var issues = query.getResultList();
+		for (var it = issues.iterator(); it.hasNext();) {
+			if (!SecurityUtils.canAccess(it.next()))
+				it.remove();
+		}
+		return issues;
+	}
+	
 }

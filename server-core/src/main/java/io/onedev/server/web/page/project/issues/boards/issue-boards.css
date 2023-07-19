@@ -92,9 +92,6 @@
 	margin-top: 2px;
 	margin-bottom: 0;
 }
-.issue-boards>.body .board-card .link.expanded .icon {
-	transform: rotate(90deg);
-}
 
 .issue-boards>.body .board-card .linked-issues {
 	border-left: 2px dashed var(--secondary);

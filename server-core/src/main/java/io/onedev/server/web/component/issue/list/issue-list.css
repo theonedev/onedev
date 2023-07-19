@@ -39,8 +39,8 @@
 	border-color: var(--gray);
 }
 
-.issue-list .link.expanded .icon {
-	transform: rotate(90deg);
+.issue-list .issue-link {
+	font-weight: 500;
 }
 
 .issue-list .linked-issues {

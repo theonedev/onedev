@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.link;
+package io.onedev.server.web.component.issue.title;
 
 import javax.annotation.Nullable;
 
@@ -23,9 +23,9 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
-public abstract class IssueLinkPanel extends Panel {
+public abstract class IssueTitlePanel extends Panel {
 
-	public IssueLinkPanel(String id) {
+	public IssueTitlePanel(String id) {
 		super(id);
 	}
 

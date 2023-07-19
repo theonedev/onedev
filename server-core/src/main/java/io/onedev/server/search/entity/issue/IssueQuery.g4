@@ -86,7 +86,7 @@ CommentedByMe
 Confidential
 	: 'confidential'
 	;
-	
+
 CurrentIssue
 	: 'current' WS+ 'issue'
 	;

@@ -3,7 +3,9 @@ package io.onedev.server.web.page.project.issues.boards;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
@@ -14,12 +16,12 @@ import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.link.IssueLinkPanel;
+import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
+import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import org.apache.wicket.Component;
@@ -28,10 +30,8 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -44,11 +44,10 @@ import org.hibernate.Hibernate;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("serial")
-abstract class BoardCardPanel extends GenericPanel<Issue> {
-
+public abstract class BoardCardPanel extends GenericPanel<Issue> {
+	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	public BoardCardPanel(String id, IModel<Issue> model) {
@@ -146,8 +145,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		}
 		
 		fragment.add(avatarsView);
-
-		BasePage page = (BasePage) getPage();
 		
 		fragment.add(new ModalLink("showDetail") {
 
@@ -166,7 +163,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 					@Override
 					protected CursorSupport<Issue> getCursorSupport() {
-						return new CursorSupport<Issue>() {
+						return new CursorSupport<>() {
 
 							@Override
 							public Cursor getCursor() {
@@ -182,13 +179,13 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 									protected Issue load() {
 										return OneDev.getInstance(IssueManager.class).load(issueId);
 									}
-									
+
 								}, cursor);
-								
+
 								replaceWith(cardDetail);
 								target.add(cardDetail);
 							}
-							
+
 						};
 					}
 
@@ -212,7 +209,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		});
 		
-		fragment.add(new IssueLinkPanel("numberAndTitle") {
+		fragment.add(new IssueTitlePanel("numberAndTitle") {
 
 			@Override
 			protected Issue getIssue() {
@@ -231,57 +228,36 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 		});
 		
-		AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
-		RepeatingView linksView = new RepeatingView("links");
-		
-		for (String linkName: board.getDisplayLinks()) {
-			int count = 0;
-			for (IssueLink link: issue.getTargetLinks()) {
-				LinkSpec spec = link.getSpec();
-				if (spec.getName().equals(linkName))
-					count++;
-			}
-			for (IssueLink link: issue.getSourceLinks()) {
-				LinkSpec spec = link.getSpec();
-				if (spec.getOpposite() == null || spec.getOpposite().getName().equals(linkName))
-					count++;
-			}
-			if (count != 0) {
-				AjaxLink<Void> link = new AjaxLink<Void>(linksView.newChildId()) {
+		var linksPanel = new IssueLinksPanel("links") {
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						if (linkName.equals(expandedLinkName.get()))
-							expandedLinkName.set(null);
-						else
-							expandedLinkName.set(linkName);
-						target.add(fragment);
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (linkName.equals(expandedLinkName.get()))
-							tag.put("class", tag.getAttribute("class") + " expanded");
-					}
-					
-				};
-				link.add(new Label("label", linkName));
-				linksView.add(link);
+			@Override
+			protected Issue getIssue() {
+				return BoardCardPanel.this.getIssue();
 			}
-		}
-		fragment.add(linksView);
+
+			@Override
+			protected List<String> getDisplayLinks() {
+				return board.getDisplayLinks();
+			}
+
+			@Override
+			protected void onToggleExpand(AjaxRequestTarget target) {
+				target.add(fragment);
+			}
+			
+		};
+		fragment.add(linksPanel);
 		
-		fragment.add(new ListView<Issue>("linkedIssues", new LoadableDetachableModel<List<Issue>>() {
+		fragment.add(new ListView<Issue>("linkedIssues", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<Issue> load() {
 				Issue issue = issueModel.getObject();
 				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-				LinkSide side = new LinkSide(expandedLinkName.get());
+				LinkSide side = new LinkSide(linksPanel.getExpandedLink());
 				return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite());
 			}
-			
+
 		}) {
 
 			@Override
@@ -292,7 +268,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(expandedLinkName.get() != null);
+				setVisible(linksPanel.getExpandedLink() != null);
 			}
 			
 		});

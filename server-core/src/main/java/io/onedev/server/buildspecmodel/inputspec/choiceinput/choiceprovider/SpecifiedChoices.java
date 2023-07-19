@@ -34,7 +34,7 @@ public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 	private List<Choice> choices = new ArrayList<>();
 
 	@Editable(name="Specified choices")
-	@Size(min=2, message="At least two choices need to be specified")
+	@Size(min=1, message="At least one choice need to be specified")
 	@OmitName
 	public List<Choice> getChoices() {
 		return choices;

@@ -36,9 +36,13 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue);
 	
+	void togglePin(Issue issue);
+	
 	Long getNextNumber(Project numberScope);
 	
 	void resetNextNumber(Project numberScope);
+	
+	List<Issue> queryPinned(Project project);
 	
 	List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
 			boolean loadFieldsAndLinks, int firstResult, int maxResults);
