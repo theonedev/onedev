@@ -88,7 +88,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 		if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 				&& touchedFile(request)) {
 			
-			return new TriggerMatch(request.getMergeRef(), request, getParams(), 
+			return new TriggerMatch(request.getMergeRef(), request, null, getParams(), 
 					"Pull request is opened/updated");
 		}
 		return null;

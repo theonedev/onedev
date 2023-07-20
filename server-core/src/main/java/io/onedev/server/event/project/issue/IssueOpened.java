@@ -1,11 +1,5 @@
 package io.onedev.server.event.project.issue;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -13,11 +7,19 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class IssueOpened extends IssueEvent {
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class IssueOpened extends IssueEvent implements CommitAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -72,6 +74,15 @@ public class IssueOpened extends IssueEvent {
 	@Override
 	public String getActivity() {
 		return "opened";
+	}
+
+	@Override
+	public ProjectScopedCommit getCommit() {
+		var project = getIssue().getProject();
+		if (project.getDefaultBranch() != null)
+			return new ProjectScopedCommit(project, project.getObjectId(project.getDefaultBranch(), true));
+		else
+			return null;
 	}
 
 }

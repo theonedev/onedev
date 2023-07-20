@@ -92,6 +92,15 @@ public enum JobVariable {
 				return null;
 		}
 		
+	},
+	ISSUE_NUMBER {
+		@Override
+		public String getValue(Build build) {
+			if (build.getIssue() != null)
+				return String.valueOf(build.getIssue().getNumber());
+			else
+				return null;
+		}
 	}; 
 	
 	public abstract String getValue(Build build);

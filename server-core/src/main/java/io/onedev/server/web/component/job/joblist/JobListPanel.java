@@ -147,7 +147,7 @@ public abstract class JobListPanel extends Panel {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
-							new HashMap<>(), getPipeline()));
+							null, new HashMap<>(), getPipeline()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

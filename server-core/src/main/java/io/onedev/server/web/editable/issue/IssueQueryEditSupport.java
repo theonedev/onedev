@@ -65,12 +65,14 @@ public class IssueQueryEditSupport implements EditSupport {
         			IssueQuery issueQuery = Preconditions.checkNotNull(
         					getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class));
         			IssueQueryParseOption option = new IssueQueryParseOption()
+							.withProjectCriteria(issueQuery.withProjectCriteria())
 							.withCurrentProjectCriteria(issueQuery.withCurrentProjectCriteria())
         					.withCurrentBuildCriteria(issueQuery.withCurrentBuildCriteria())
         					.withCurrentCommitCriteria(issueQuery.withCurrentCommitCriteria())
         					.withCurrentIssueCriteria(issueQuery.withCurrentIssueCriteria())
         					.withCurrentPullRequestCriteria(issueQuery.withCurrentPullRequestCriteria())
         					.withCurrentUserCriteria(issueQuery.withCurrentUserCriteria())
+							.withStateCriteria(issueQuery.withStateCriteria())
         					.withOrder(issueQuery.withOrder());
 		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
 		        		new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {

@@ -2,7 +2,9 @@ package io.onedev.server.buildspec.job;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 
 import javax.annotation.Nullable;
@@ -14,13 +16,17 @@ public class TriggerMatch {
 	
 	private final Long requestId;
 	
+	private final Long issueId;
+	
 	private final List<ParamSupply> params;
 	
 	private final String reason;
 	
-	public TriggerMatch(String refName, @Nullable PullRequest request, List<ParamSupply> params, String reason) {
+	public TriggerMatch(String refName, @Nullable PullRequest request, @Nullable Issue issue, 
+						List<ParamSupply> params, String reason) {
 		this.refName = refName;
 		requestId = PullRequest.idOf(request);
+		issueId = Issue.idOf(issue);
 		this.params = params;
 		this.reason = reason;
 	}
@@ -37,6 +43,14 @@ public class TriggerMatch {
 			return null;
 	}
 
+	@Nullable
+	public Issue getIssue() {
+		if (issueId != null)
+			return OneDev.getInstance(IssueManager.class).load(issueId);
+		else
+			return null;
+	}
+	
 	public List<ParamSupply> getParams() {
 		return params;
 	}

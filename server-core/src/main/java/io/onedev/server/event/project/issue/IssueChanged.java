@@ -11,11 +11,14 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.notification.ActivityDetail;
+import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class IssueChanged extends IssueEvent {
+public class IssueChanged extends IssueEvent implements CommitAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -77,4 +80,18 @@ public class IssueChanged extends IssueEvent {
 	public boolean isMinor() {
 		return getChange().isMinor();
 	}
+
+	@Override
+	public ProjectScopedCommit getCommit() {
+		if (getChange().getData() instanceof IssueStateChangeData) {
+			var project = getIssue().getProject();
+			if (project.getDefaultBranch() != null)
+				return new ProjectScopedCommit(project, project.getObjectId(project.getDefaultBranch(), true));
+			else
+				return null;
+		} else {
+			return null;
+		}
+	}
+
 }

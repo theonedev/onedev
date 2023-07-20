@@ -151,6 +151,8 @@ public class Build extends ProjectBelonging
 	
 	public static final String PROP_PULL_REQUEST = "request";
 	
+	public static final String PROP_ISSUE = "issue";
+	
 	public static final String NAME_LOG = "Log";
 	
 	public static final String PROP_TRIGGER_ID = "triggerId";
@@ -331,6 +333,9 @@ public class Build extends ProjectBelonging
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Issue issue;
 	
 	private transient Collection<Long> fixedIssueIds;
 	
@@ -640,6 +645,15 @@ public class Build extends ProjectBelonging
 		this.request = request;
 	}
 
+	@Nullable
+	public Issue getIssue() {
+		return issue;
+	}
+
+	public void setIssue(Issue issue) {
+		this.issue = issue;
+	}
+
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -885,7 +899,10 @@ public class Build extends ProjectBelonging
 	public static void pop() {
 		stack.get().pop();
 	}
-	
+
+	public boolean canCreateBranch(String accessTokenSecret, String branchName) {
+		return SecurityUtils.canCreateBranch(getUser(accessTokenSecret), getProject(), branchName);
+	}
 	public boolean canCreateTag(String accessTokenSecret, String tagName) {
 		return SecurityUtils.canCreateTag(getUser(accessTokenSecret), getProject(), tagName);
 	}

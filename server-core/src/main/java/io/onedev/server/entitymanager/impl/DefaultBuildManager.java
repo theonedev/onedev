@@ -251,14 +251,14 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, String pipeline) {
-		return query(project, commitId, jobName, null, null, new HashMap<>(), pipeline);
+		return query(project, commitId, jobName, null, null, null, new HashMap<>(), pipeline);
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
-			String refName, Optional<PullRequest> request, Map<String, List<String>> params, 
-			String pipeline) {
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName, String refName, 
+								   Optional<PullRequest> request, Optional<Issue> issue, 
+								   Map<String, List<String>> params, String pipeline) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -279,7 +279,14 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			else
 				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
 		}
-			
+
+		if (issue != null) {
+			if (issue.isPresent())
+				predicates.add(builder.equal(root.get(Build.PROP_ISSUE), issue.get()));
+			else
+				predicates.add(builder.isNull(root.get(Build.PROP_ISSUE)));
+		}
+		
 		predicates.addAll(getPredicates(root, builder, params));
 		
 		query.where(predicates.toArray(new Predicate[0]));
@@ -305,7 +312,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Sessional
 	@Override
 	public Collection<Build> queryUnfinished(Project project, String jobName, @Nullable String refName, 
-			@Nullable Optional<PullRequest> request, Map<String, List<String>> params) {
+											 @Nullable Optional<PullRequest> request, @Nullable Optional<Issue> issue, 
+											 Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -326,6 +334,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request.get()));
 			else
 				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
+		}
+		if (issue != null) {
+			if (issue.isPresent())
+				predicates.add(builder.equal(root.get(Build.PROP_ISSUE), issue.get()));
+			else
+				predicates.add(builder.isNull(root.get(Build.PROP_ISSUE)));
 		}
 			
 		predicates.addAll(getPredicates(root, builder, params));

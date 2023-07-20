@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.*;
 import static io.onedev.server.model.IssueSchedule.NAME_MILESTONE;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 
 @Entity
 @Table(
@@ -144,55 +146,13 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
 	
 	static {
-		ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<Issue>(PROP_VOTE_COUNT, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getVoteCount() - o1.getVoteCount();
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<Issue>(PROP_COMMENT_COUNT, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getCommentCount() - o2.getCommentCount();
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_NUMBER, new SortField<Issue>(PROP_NUMBER, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return (int)(o1.getNumber() - o2.getNumber());
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_STATE, new SortField<Issue>(PROP_STATE_ORDINAL, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getStateOrdinal() - o2.getStateOrdinal();
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<Issue>(PROP_SUBMIT_DATE, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getSubmitDate().compareTo(o2.getSubmitDate());
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_PROJECT, new SortField<Issue>(PROP_PROJECT, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getProject().getId().compareTo(o2.getProject().getId());
-			}
-			
-		}));
-		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<Issue>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, new Comparator<Issue>() {
+		ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<>(PROP_VOTE_COUNT, comparingInt(Issue::getVoteCount)));
+		ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<>(PROP_COMMENT_COUNT, comparingInt(Issue::getCommentCount)));
+		ORDER_FIELDS.put(NAME_NUMBER, new SortField<>(PROP_NUMBER, (o1, o2) -> (int)(o1.getNumber() - o2.getNumber())));
+		ORDER_FIELDS.put(NAME_STATE, new SortField<>(PROP_STATE_ORDINAL, comparingInt(Issue::getStateOrdinal)));
+		ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<>(PROP_SUBMIT_DATE, comparing(Issue::getSubmitDate)));
+		ORDER_FIELDS.put(NAME_PROJECT, new SortField<>(PROP_PROJECT, comparing(o -> o.getProject().getId())));
+		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, new Comparator<Issue>() {
 
 			@Override
 			public int compare(Issue o1, Issue o2) {
@@ -234,6 +194,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueSchedule> schedules = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<Build> builds = new ArrayList<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

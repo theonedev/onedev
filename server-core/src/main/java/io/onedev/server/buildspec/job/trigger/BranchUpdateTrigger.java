@@ -103,7 +103,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 					&& !SKIP_COMMIT.apply(event.getProject().getRevCommit(refUpdated.getNewCommitId(), true))
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
 					&& touchedFile(refUpdated)) {
-				return new TriggerMatch(refUpdated.getRefName(), null, 
+				return new TriggerMatch(refUpdated.getRefName(), null, null,
 						getParams(), "Branch '" + updatedBranch + "' is updated");
 			}
 		}

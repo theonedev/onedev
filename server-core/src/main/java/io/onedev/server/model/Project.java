@@ -1677,7 +1677,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		Collection<Build> builds = buildsCache.get(commitId);
 		if (builds == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			builds = buildManager.query(this, commitId, null, null, null, new HashMap<>(), null);
+			builds = buildManager.query(this, commitId, null, null, null, null, new HashMap<>(), null);
 			buildsCache.put(commitId, builds);
 		}
 		return builds;

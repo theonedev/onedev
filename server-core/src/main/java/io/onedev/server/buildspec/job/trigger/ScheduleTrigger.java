@@ -33,7 +33,7 @@ public class ScheduleTrigger extends JobTrigger {
 	protected TriggerMatch triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof ScheduledTimeReaches) {
 			return new TriggerMatch(GitUtils.branch2ref(event.getProject().getDefaultBranch()), 
-					null, getParams(), "Scheduled");
+					null, null, getParams(), "Scheduled");
 		} else {
 			return null;
 		}

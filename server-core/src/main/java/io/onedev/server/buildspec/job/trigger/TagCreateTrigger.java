@@ -72,7 +72,7 @@ public class TagCreateTrigger extends JobTrigger {
 			if (updatedTag != null && !commitId.equals(ObjectId.zeroId()) 
 					&& (tags == null || PatternSet.parse(tags).matches(new PathMatcher(), updatedTag))
 					&& (branches == null || project.isCommitOnBranches(commitId, PatternSet.parse(branches)))) {
-				return new TriggerMatch(refUpdated.getRefName(), null, getParams(),
+				return new TriggerMatch(refUpdated.getRefName(), null, null, getParams(),
 						"Tag '" + updatedTag + "' is created");
 			}
 		}

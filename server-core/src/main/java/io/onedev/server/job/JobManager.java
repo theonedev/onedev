@@ -4,10 +4,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
@@ -27,7 +24,7 @@ public interface JobManager {
 	Build submit(Project project, ObjectId commitId, String jobName,
 				 Map<String, List<String>> paramMap, String pipeline,
 				 String refName, User submitter, @Nullable PullRequest request,
-				 String reason);
+				 @Nullable Issue issue, String reason);
 	
 	void resubmit(Build build, String reason);
 	

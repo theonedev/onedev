@@ -33,7 +33,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 						}
 					}
 					
-					return new TriggerMatch(build.getRefName(), build.getRequest(), getParams(),
+					return new TriggerMatch(build.getRefName(), build.getRequest(), build.getIssue(), getParams(),
 							"Dependency job '" + dependency.getJobName() + "' is finished");
 				}
 			}

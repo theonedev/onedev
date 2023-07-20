@@ -103,7 +103,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 						for (String refName: selectedRefNames) {
 							builds.add(getJobManager().submit(getProject(), commitId, job.getName(), 
 									paramMap, pipeline, refName, SecurityUtils.getUser(), 
-									getPullRequest(), "Submitted manually"));
+									getPullRequest(), null, "Submitted manually"));
 						}
 						if (builds.size() == 1)
 							setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
@@ -132,7 +132,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 			} else {
 				Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
 						new HashMap<>(), getPipeline(), refNames.iterator().next(), 
-						SecurityUtils.getUser(), getPullRequest(), "Submitted manually");
+						SecurityUtils.getUser(), getPullRequest(), null, "Submitted manually");
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 				if (build.isFinished())
 					Session.get().warn("Build already fired in current pipeline");

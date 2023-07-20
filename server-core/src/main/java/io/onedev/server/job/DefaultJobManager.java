@@ -129,6 +129,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final BuildManager buildManager;
 	
 	private final PullRequestManager pullRequestManager;
+	
+	private final IssueManager issueManager;
 
 	private final ListenerRegistry listenerRegistry;
 
@@ -174,7 +176,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
 							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
 							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, PullRequestManager pullRequestManager, 
-							 GitService gitService, SSLFactory sslFactory, Dao dao) {
+							 IssueManager issueManager, GitService gitService, SSLFactory sslFactory, Dao dao) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -191,6 +193,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.codeIndexManager = codeIndexManager;
 		this.clusterManager = clusterManager;
 		this.pullRequestManager = pullRequestManager;
+		this.issueManager = issueManager;
 		this.gitService = gitService;
 		this.sslFactory = sslFactory;
 	}
@@ -214,10 +217,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Transactional
 	@Override
-	public Build submit(Project project, ObjectId commitId, String jobName,
+	public Build submit(Project project, ObjectId commitId, String jobName, 
 						Map<String, List<String>> paramMap, String pipeline,
 						String refName, User submitter, @Nullable PullRequest request,
-						String reason) {
+						@Nullable Issue issue, String reason) {
 		Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
 		transactionManager.mustRunAfterTransaction(() -> lock.unlock());
 
@@ -243,7 +246,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 
 			return doSubmit(project, commitId, jobName, paramMap, pipeline, refName, 
-					submitter, request, reason);
+					submitter, request, issue, reason);
 		} catch (Throwable e) {
 			throw ExceptionUtils.unchecked(e);
 		} finally {
@@ -253,8 +256,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private Build doSubmit(Project project, ObjectId commitId, String jobName,
 						   Map<String, List<String>> paramMap, String pipeline,
-						   String refName, User submitter, 
-						   @Nullable PullRequest request, String reason) {
+						   String refName, User submitter, @Nullable PullRequest request, 
+						   @Nullable Issue issue, String reason) {
 		if (request != null) {
 			request.setBuildCommitHash(commitId.name());
 			dao.persist(request);
@@ -270,6 +273,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setSubmitter(submitter);
 		build.setRefName(refName);
 		build.setRequest(request);
+		build.setIssue(issue);
 		build.setPipeline(pipeline);
 
 		ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
@@ -281,7 +285,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 
 		Collection<Build> builds = buildManager.query(project, commitId, jobName,
-				refName, Optional.ofNullable(request), paramMapToQuery, pipeline);
+				refName, Optional.ofNullable(request), Optional.ofNullable(issue), 
+				paramMapToQuery, pipeline);
 
 		if (builds.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
@@ -314,7 +319,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					public void run(Map<String, List<String>> paramMap) {
 						Build dependencyBuild = doSubmit(project, commitId,
 								interpolated.getJobName(), paramMap, pipeline,
-								refName, submitter, request, reason);
+								refName, submitter, request, issue, reason);
 						BuildDependence dependence = new BuildDependence();
 						dependence.setDependency(dependencyBuild);
 						dependence.setDependent(build);
@@ -373,19 +378,25 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			Long buildId = build.getId();
 			Long projectId = project.getId();
-			Long pullRequestId = PullRequest.idOf(request);
+			Long requestId = PullRequest.idOf(request);
+			Long issueId = Issue.idOf(issue);
 			sessionManager.runAsyncAfterCommit(() -> {
 				SecurityUtils.bindAsSystem();
-				Project project1 = projectManager.load(projectId);
-				PullRequest pullRequest;
-				if (pullRequestId != null)
-					pullRequest = pullRequestManager.load(pullRequestId);
+				Project innerProject = projectManager.load(projectId);
+				PullRequest innerRequest;
+				if (requestId != null)
+					innerRequest = pullRequestManager.load(requestId);
 				else
-					pullRequest = null;
-				for (Build unfinished : buildManager.queryUnfinished(project1, jobName, refName,
-						Optional.ofNullable(pullRequest), paramMapToQuery)) {
+					innerRequest = null;
+				Issue innerIssue;
+				if (issueId != null)
+					innerIssue = issueManager.load(issueId);
+				else 
+					innerIssue = null;
+				for (Build unfinished : buildManager.queryUnfinished(innerProject, jobName, refName,
+						Optional.ofNullable(innerRequest), Optional.ofNullable(innerIssue), paramMapToQuery)) {
 					if (unfinished.getId() < buildId
-							&& (pullRequest != null || gitService.isMergedInto(project1, null, unfinished.getCommitId(), commitId))) {
+							&& (innerRequest != null || gitService.isMergedInto(innerProject, null, unfinished.getCommitId(), commitId))) {
 						cancel(unfinished);
 					}
 				}
@@ -645,7 +656,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof CommitAware) {
+		if (event instanceof CommitAware && ((CommitAware) event).getCommit() != null) {
 			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
 			if (!commitId.equals(ObjectId.zeroId())) {
 				String pipeline;
@@ -684,7 +695,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												public void run(Map<String, List<String>> paramMap) {
 													submit(project, commitId, job.getName(), paramMap,
 															pipeline, match.getRefName(), SecurityUtils.getUser(),
-															match.getRequest(), match.getReason());
+															match.getRequest(), match.getIssue(), match.getReason());
 												}
 
 											}.run();
@@ -1054,8 +1065,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
-								submit(aProject, commitId, job.getName(), paramMap, pipeline,
-										refName, SecurityUtils.getUser(), null, reason);
+								submit(aProject, commitId, job.getName(), paramMap, pipeline, 
+										refName, SecurityUtils.getUser(), null, null, reason);
 							}
 
 						}.run();
