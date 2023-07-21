@@ -36,6 +36,8 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.*;
+
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
@@ -67,7 +69,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 										int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed pull request query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 
 			});
@@ -81,6 +83,16 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			if (criteriaContext != null) {
 				requestCriteria = new PullRequestQueryBaseVisitor<Criteria<PullRequest>>() {
 
+					@Override
+					public Criteria<PullRequest> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new SimpleNumberCriteria(getLongValue(ctx.number.getText()));
+					}
+
+					@Override
+					public Criteria<PullRequest> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
+						return new FuzzyCriteria(getValue(ctx.getText()));
+					}
+					
 					@Override
 					public Criteria<PullRequest> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {

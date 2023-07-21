@@ -62,7 +62,7 @@ public class BuildMetricQuery implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed metric query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 				
 			});

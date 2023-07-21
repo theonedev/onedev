@@ -32,7 +32,7 @@ public class CodeCommentQueryValidator implements ConstraintValidator<CodeCommen
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed code comment query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

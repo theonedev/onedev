@@ -20,7 +20,8 @@ public class OsCriteria extends Criteria<Agent> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
-		return builder.equal(from.get(Agent.PROP_OS_NAME), value); 
+		String normalized = value.toLowerCase().replace("*", "%");
+		return builder.like(builder.lower(from.get(Agent.PROP_OS_NAME)), normalized); 
 	}
 
 	@Override

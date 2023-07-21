@@ -248,7 +248,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	private CriteriaQuery<CodeComment> buildCriteriaQuery(Project project, Session session, 
 			PullRequest request, EntityQuery<CodeComment> commentQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class);
+		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class).distinct(true);
 		Root<CodeComment> root = query.from(CodeComment.class);
 		
 		query.where(getPredicates(project, commentQuery.getCriteria(), request, query, root, builder));
@@ -288,7 +288,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 		criteriaQuery.where(getPredicates(project, commentCriteria, request, criteriaQuery, root, builder));
 
-		criteriaQuery.select(builder.count(root));
+		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 

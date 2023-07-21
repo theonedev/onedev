@@ -33,7 +33,7 @@ public class AgentQueryValidator implements ConstraintValidator<AgentQuery, Stri
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed agent query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

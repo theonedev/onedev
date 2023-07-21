@@ -28,6 +28,7 @@ import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.Permission;
 
 import javax.annotation.Nullable;
@@ -323,6 +324,18 @@ public class SuggestionUtils {
 				linkNames.add(link.getOpposite().getName());
 		}
 		return suggest(linkNames, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestNumber(String matchWith, String suggestDescription) {
+		if (matchWith.startsWith("#"))
+			matchWith = matchWith.substring(1);
+		if (NumberUtils.isDigits(matchWith)) {
+			var suggestions = new ArrayList<InputSuggestion>();
+			suggestions.add(new InputSuggestion(matchWith, suggestDescription, null));
+			return suggestions;
+		} else {
+			return null;
+		}
 	}
 	
 	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith, int count) {

@@ -110,6 +110,20 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 				}.suggest(terminalExpect);
+			} else if (spec.getRuleName().equals("Fuzzy")) {
+				return new FenceAware(codeAssist.getGrammar(), '~', '~') {
+
+					@Override
+					protected List<InputSuggestion> match(String matchWith) {
+						return null;
+					}
+
+					@Override
+					protected String getFencingDescription() {
+						return "surround with ~ to query path/content/reply";
+					}
+
+				}.suggest(terminalExpect);
 			}
 		} 
 		return null;

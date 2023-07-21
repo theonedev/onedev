@@ -69,28 +69,17 @@ public class ServerConfig {
 			if (dbUrl.startsWith("hsqldb")) {
 				clusterIp = "127.0.0.1";
 			} else {
-				String dbHost;
+				String tempStr = StringUtils.substringAfter(dbUrl, "//");
+				String dbHost = StringUtils.substringBefore(tempStr, ":");
+				tempStr = StringUtils.substringAfter(tempStr, ":");
 				int dbPort;
-				if (dbUrl.startsWith("oracle")) {
-					List<String> fields = Splitter.on(":").splitToList(dbUrl);
-					dbHost = StringUtils.stripStart(fields.get(2), "@");
-					String dbPortString = fields.get(3);
-					if (dbPortString.contains("/"))
-						dbPort = Integer.parseInt(StringUtils.substringBefore(dbPortString, "/"));
-					else
-						dbPort = Integer.parseInt(dbPortString);
+				if (dbUrl.startsWith("sqlserver")) {
+					dbPort = Integer.parseInt(StringUtils.substringBefore(tempStr, ";"));
 				} else {
-					String tempStr = StringUtils.substringAfter(dbUrl, "//");
-					dbHost = StringUtils.substringBefore(tempStr, ":");
-					tempStr = StringUtils.substringAfter(tempStr, ":");
-					if (dbUrl.startsWith("sqlserver")) {
-						dbPort = Integer.parseInt(StringUtils.substringBefore(tempStr, ";"));
-					} else {
-						tempStr = StringUtils.substringBefore(tempStr, "/");
-						// Fix issue https://code.onedev.io/onedev/server/~issues/1086
-						tempStr = StringUtils.substringBefore(tempStr, ",");
-						dbPort = Integer.parseInt(tempStr);
-					}
+					tempStr = StringUtils.substringBefore(tempStr, "/");
+					// Fix issue https://code.onedev.io/onedev/server/~issues/1086
+					tempStr = StringUtils.substringBefore(tempStr, ",");
+					dbPort = Integer.parseInt(tempStr);
 				}
 
 				try (Socket socket = new Socket()) {

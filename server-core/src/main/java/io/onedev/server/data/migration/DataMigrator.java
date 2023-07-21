@@ -5529,7 +5529,9 @@ public class DataMigrator {
 
 	private void migrate131(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Alerts.xml")) {
+			if (file.getName().startsWith("CodeCommentTouchs.xml") || file.getName().startsWith("PullRequestTouchs.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("Alerts.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
 					element.addElement("mailError").setText("false");

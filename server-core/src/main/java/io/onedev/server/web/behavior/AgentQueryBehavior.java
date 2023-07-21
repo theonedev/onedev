@@ -107,6 +107,20 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 				}.suggest(terminalExpect);
+			} else if (spec.getRuleName().equals("Fuzzy")) {
+				return new FenceAware(codeAssist.getGrammar(), '~', '~') {
+
+					@Override
+					protected List<InputSuggestion> match(String matchWith) {
+						return null;
+					}
+
+					@Override
+					protected String getFencingDescription() {
+						return "surround with ~ to query name/ip/os";
+					}
+
+				}.suggest(terminalExpect);
 			}
 		} 
 		return null;
@@ -153,6 +167,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Agent.NAME_NAME) 
+							|| fieldName.equals(Agent.NAME_OS_NAME)
 							|| fieldName.equals(Agent.NAME_OS_ARCH)
 							|| fieldName.equals(Agent.NAME_OS_VERSION) 
 							|| fieldName.equals(Agent.NAME_IP_ADDRESS)) {

@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.pullrequest.list;
 
 import com.google.common.collect.Sets;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -15,7 +14,6 @@ import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.search.entitytext.PullRequestTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
@@ -91,13 +89,13 @@ public abstract class PullRequestListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;
 	
-	private final IModel<Object> queryModel = new LoadableDetachableModel<Object>() {
+	private final IModel<PullRequestQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
-		protected Object load() {
+		protected PullRequestQuery load() {
 			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
-		
+
 	};
 	
 	private DataTable<PullRequest, Void> requestsTable;
@@ -123,10 +121,6 @@ public abstract class PullRequestListPanel extends Panel {
 		return OneDev.getInstance(PullRequestManager.class);		
 	}
 	
-	private PullRequestTextManager getPullRequestTextManager() {
-		return OneDev.getInstance(PullRequestTextManager.class);		
-	}
-	
 	@Nullable
 	protected PagingHistorySupport getPagingHistorySupport() {
 		return null;
@@ -142,23 +136,16 @@ public abstract class PullRequestListPanel extends Panel {
 	}
 	
 	@Nullable
-	private Object parse(@Nullable String queryString, PullRequestQuery baseQuery) {
+	private PullRequestQuery parse(@Nullable String queryString, PullRequestQuery baseQuery) {
 		try {
 			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString, true));
-		} catch (ExplicitException e) {
-			getFeedbackMessages().clear();
-			error(e.getMessage());
-			return null;
 		} catch (Exception e) {
-			if (getBaseQuery().toString() != null) {
-				getFeedbackMessages().clear();
+			getFeedbackMessages().clear();
+			if (e instanceof ExplicitException)
+				error(e.getMessage());
+			else
 				error("Malformed query");
-				return null;
-			} else {
-				getFeedbackMessages().clear();
-				info("Performing fuzzy query");
-				return queryString;
-			}
+			return null;
 		}
 	}
 	
@@ -545,22 +532,22 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						Object query = parse(queryStringModel.getObject(), new PullRequestQuery());
+						var query = parse(queryStringModel.getObject(), new PullRequestQuery());
 						PullRequestListPanel.this.getFeedbackMessages().clear();
-						if (query instanceof PullRequestQuery) 
-							return ((PullRequestQuery)query).getSorts();
+						if (query != null) 
+							return query.getSorts();
 						else
 							return new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						Object query = parse(queryStringModel.getObject(), new PullRequestQuery());
+						var query = parse(queryStringModel.getObject(), new PullRequestQuery());
 						PullRequestListPanel.this.getFeedbackMessages().clear();
-						if (!(query instanceof PullRequestQuery))
+						if (query == null)
 							query = new PullRequestQuery();
-						((PullRequestQuery)query).getSorts().clear();
-						((PullRequestQuery)query).getSorts().addAll(object);
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
@@ -588,13 +575,6 @@ public abstract class PullRequestListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on number/title/description/comment");
-				return hints;
 			}
 			
 		});
@@ -794,18 +774,15 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				try {
-					Object query = queryModel.getObject();
-					if (query instanceof PullRequestQuery) {
-						return getPullRequestManager().query(getProject(), (PullRequestQuery)query, 
-								true, (int)first, (int)count).iterator();
-					} else if (query instanceof String) {
-						return getPullRequestTextManager().query(getProject(), (String)query, 
-								true, (int)first, (int)count).iterator();
+					var query = queryModel.getObject();
+					if (query != null) {
+						return getPullRequestManager().query(getProject(), query,
+								true, (int) first, (int) count).iterator();
 					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
@@ -816,11 +793,9 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				try {
-					Object query = queryModel.getObject();
-					if (query instanceof PullRequestQuery) 
-						return getPullRequestManager().count(getProject(), ((PullRequestQuery)query).getCriteria());
-					else if (query instanceof String)
-						return getPullRequestTextManager().count(getProject(), (String)query);
+					var query = queryModel.getObject();
+					if (query != null)
+						return getPullRequestManager().count(getProject(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -836,13 +811,13 @@ public abstract class PullRequestListPanel extends Panel {
 					protected PullRequest load() {
 						return getPullRequestManager().load(requestId);
 					}
-					
+
 				};
 			}
-			
+
 		};
 		
-		body.add(requestsTable = new DataTable<PullRequest, Void>("requests", columns, dataProvider, WebConstants.PAGE_SIZE) {
+		body.add(requestsTable = new DataTable<>("requests", columns, dataProvider, WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected Item<PullRequest> newRowItem(String id, int index, IModel<PullRequest> model) {
@@ -852,7 +827,7 @@ public abstract class PullRequestListPanel extends Panel {
 					@Override
 					protected String load() {
 						var request = item.getModelObject();
-						return request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new";
+						return request.isVisitedAfter(request.getLastActivity().getDate()) ? "request" : "request new";
 					}
 				}));
 				var requestId = request.getId();
@@ -865,7 +840,7 @@ public abstract class PullRequestListPanel extends Panel {
 				});
 				return item;
 			}
-			
+
 		});
 		
 		if (getPagingHistorySupport() != null)

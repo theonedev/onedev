@@ -1,24 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -27,37 +8,12 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.BooleanField;
-import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
+import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.CommitField;
-import io.onedev.server.model.support.issue.field.spec.DateField;
-import io.onedev.server.model.support.issue.field.spec.DateTimeField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
-import io.onedev.server.model.support.issue.field.spec.MilestoneChoiceField;
-import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
-import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.issue.IssueQueryParser.AndCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.FixedBetweenCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.LinkMatchCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.OrCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
-import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -69,8 +25,12 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
+import org.antlr.v4.runtime.*;
 
-import static com.google.common.collect.Lists.newArrayList;
+import javax.annotation.Nullable;
+import java.util.*;
+
+import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
@@ -113,7 +73,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 										int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed issue query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 
 			});
@@ -131,6 +91,16 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					private long getValueOrdinal(ChoiceField field, String value) {
 						List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
 						return choices.indexOf(value);
+					}
+
+					@Override
+					public Criteria<Issue> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new SimpleNumberCriteria(getLongValue(ctx.number.getText()));
+					}
+
+					@Override
+					public Criteria<Issue> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
+						return new FuzzyCriteria(getValue(ctx.getText()));
 					}
 
 					@Override
@@ -382,20 +352,6 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 		}
 	}
 
-	public static IssueQuery parseFuzzy(@Nullable Project project, String queryString) {
-		try {
-			EntityQuery.getProjectScopedNumber(project, queryString);
-			return new IssueQuery(new NumberCriteria(project, queryString, IssueQueryLexer.Is));
-		} catch (Exception e2) {
-			List<Criteria<Issue>> criterias = newArrayList(
-					new TitleCriteria(queryString),
-					new DescriptionCriteria(queryString),
-					new CommentCriteria(queryString)
-			);
-			return new IssueQuery(new OrCriteria<>(criterias));
-		}
-	}
-	
 	private static GlobalIssueSetting getGlobalIssueSetting() {
 		if (WicketUtils.getPage() instanceof IssueSettingPage)
 			return ((IssueSettingPage) WicketUtils.getPage()).getSetting();

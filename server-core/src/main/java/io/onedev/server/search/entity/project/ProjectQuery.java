@@ -6,7 +6,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.project.ProjectQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -32,6 +31,7 @@ import static io.onedev.server.search.entity.project.ProjectQueryLexer.OwnedByNo
 import static io.onedev.server.search.entity.project.ProjectQueryLexer.Roots;
 import static io.onedev.server.search.entity.project.ProjectQueryLexer.WithoutEnoughReplicas;
 import static io.onedev.server.search.entity.project.ProjectQueryLexer.ruleNames;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
@@ -73,7 +73,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed project query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 				
 			});
@@ -87,6 +87,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 			if (criteriaContext != null) {
 				projectCriteria = new ProjectQueryBaseVisitor<Criteria<Project>>() {
 
+					@Override
+					public Criteria<Project> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
+						return new FuzzyCriteria(getValue(ctx.getText()));
+					}
+					
 					@Override
 					public Criteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {

@@ -85,7 +85,8 @@ import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.DefaultCodeIndexManager;
 import io.onedev.server.search.code.DefaultCodeSearchManager;
-import io.onedev.server.search.entitytext.*;
+import io.onedev.server.search.entitytext.DefaultIssueTextManager;
+import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.*;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.*;
@@ -119,7 +120,10 @@ import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exception.PageExpiredExceptionHandler;
 import io.onedev.server.web.mapper.BasePageMapper;
-import io.onedev.server.web.page.layout.*;
+import io.onedev.server.web.page.layout.AdministrationMenuContribution;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
+import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
@@ -163,7 +167,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -278,8 +281,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(EmailAddressManager.class).to(DefaultEmailAddressManager.class);
 		bind(GpgKeyManager.class).to(DefaultGpgKeyManager.class);
 		bind(IssueTextManager.class).to(DefaultIssueTextManager.class);
-		bind(PullRequestTextManager.class).to(DefaultPullRequestTextManager.class);
-		bind(CodeCommentTextManager.class).to(DefaultCodeCommentTextManager.class);
 		bind(PendingSuggestionApplyManager.class).to(DefaultPendingSuggestionApplyManager.class);
 		bind(IssueAuthorizationManager.class).to(DefaultIssueAuthorizationManager.class);
 		bind(DashboardManager.class).to(DefaultDashboardManager.class);
@@ -293,8 +294,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(ClusterManager.class).to(DefaultClusterManager.class);
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
-		bind(PullRequestTouchManager.class).to(DefaultPullRequestTouchManager.class);
-		bind(CodeCommentTouchManager.class).to(DefaultCodeCommentTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
 		bind(FeatureManager.class).to(DefaultFeatureManager.class);
 		

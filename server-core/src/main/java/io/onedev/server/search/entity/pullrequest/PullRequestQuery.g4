@@ -10,10 +10,12 @@ criteria
 	: operator=(Open|Merged|Discarded|AssignedToMe|SubmittedByMe|CommentedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|ToBeVerifiedByBuilds|HasMergeConflicts) #OperatorCriteria
     | operator=(ToBeReviewedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | Hash? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
     | LParens WS* criteria WS* RParens #ParensCriteria
+    | Fuzzy #FuzzyCriteria
     ;
 
 order
@@ -172,8 +174,20 @@ RParens
 	: ')'
 	;
 
+Hash
+    : '#'
+    ;
+
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
+    ;
+
+Number
+    : [0-9]+
+    ;
+
+Fuzzy
+    : '~' ('\\'.|~[~])+? '~'
     ;
 
 WS

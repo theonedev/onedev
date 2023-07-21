@@ -8,7 +8,6 @@ import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.agent.AgentQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -17,10 +16,10 @@ import org.antlr.v4.runtime.*;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static io.onedev.server.model.Agent.*;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.*;
 
 public class AgentQuery extends EntityQuery<Agent> {
 
@@ -53,7 +52,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed agent query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 				
 			});
@@ -67,6 +66,11 @@ public class AgentQuery extends EntityQuery<Agent> {
 			if (criteriaContext != null) {
 				agentCriteria = new AgentQueryBaseVisitor<Criteria<Agent>>() {
 
+					@Override
+					public Criteria<Agent> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
+						return new FuzzyCriteria(getValue(ctx.getText()));
+					}
+					
 					@Override
 					public Criteria<Agent> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						if (forExecutor)

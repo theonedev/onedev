@@ -31,6 +31,7 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
@@ -82,7 +83,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Quoted")) {
+			if (spec.getRuleName().equals("Number")) {
+				return SuggestionUtils.suggestNumber(
+						terminalExpect.getUnmatchedText(), 
+						"find issue with this number");
+			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					@Override
@@ -217,6 +222,21 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 				}.suggest(terminalExpect);
+			} else if (spec.getRuleName().equals("Fuzzy")) {
+
+				return new FenceAware(codeAssist.getGrammar(), '~', '~') {
+
+					@Override
+					protected List<InputSuggestion> match(String matchWith) {
+						return null;
+					}
+
+					@Override
+					protected String getFencingDescription() {
+						return "surround with ~ to query title/description/comment";
+					}
+
+				}.suggest(terminalExpect);
 			}
 		} 
 		return null;
@@ -231,6 +251,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
+		} else if (suggestedLiteral.equals("#")) {
+			return Optional.of("Find issue by number");
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

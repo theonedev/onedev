@@ -39,7 +39,7 @@ public class BuildQueryValidator implements ConstraintValidator<BuildQuery, Stri
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed build query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

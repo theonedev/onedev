@@ -1,11 +1,28 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.model.Agent;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.AgentQueryBehavior;
+import io.onedev.server.web.component.AgentStatusBadge;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -36,36 +53,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.search.entity.agent.NameCriteria;
-import io.onedev.server.search.entity.agent.OsArchCriteria;
-import io.onedev.server.search.entity.agent.OsCriteria;
-import io.onedev.server.search.entity.agent.OsVersionCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.AgentQueryBehavior;
-import io.onedev.server.web.component.AgentStatusBadge;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class AgentListPanel extends Panel {
@@ -79,17 +70,12 @@ class AgentListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return AgentQuery.parse(queryString, false);
-			} catch (ExplicitException e) {
-				error(e.getMessage());
-				return null;
 			} catch (Exception e) {
-				info("Performing fuzzy query");
-				List<Criteria<Agent>> criterias = new ArrayList<>();
-				criterias.add(new NameCriteria("*" + queryString + "*"));
-				criterias.add(new OsCriteria("*" + queryString + "*"));
-				criterias.add(new OsVersionCriteria("*" + queryString + "*"));
-				criterias.add(new OsArchCriteria("*" + queryString + "*"));
-				return new AgentQuery(new OrCriteria<Agent>(criterias));
+				if (e instanceof ExplicitException)
+					error(e.getMessage());
+				else
+					error("Malformed query");
+				return null;
 			}
 		}
 		
@@ -723,13 +709,6 @@ class AgentListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on name/os");
-				return hints;
 			}
 			
 		});

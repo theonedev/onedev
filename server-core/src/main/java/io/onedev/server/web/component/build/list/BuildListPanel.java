@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.build.list;
 
 import com.google.common.collect.Sets;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -16,16 +15,13 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.build.*;
+import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
@@ -154,23 +150,13 @@ public abstract class BuildListPanel extends Panel {
 	private BuildQuery parse(@Nullable String queryString, BuildQuery baseQuery) {
 		try {
 			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
-		} catch (ExplicitException e) {
-			getFeedbackMessages().clear();
-			error(e.getMessage());
-			return null;
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			info("Performing fuzzy query");
-			try {
-				EntityQuery.getProjectScopedNumber(getProject(), queryString);
-				return BuildQuery.merge(baseQuery, 
-						new BuildQuery(new NumberCriteria(getProject(), queryString, BuildQueryLexer.Is)));
-			} catch (Exception e2) {
-				List<Criteria<Build>> criterias = new ArrayList<>();
-				criterias.add(new VersionCriteria("*" + queryString + "*"));
-				criterias.add(new JobCriteria("*" + queryString + "*"));
-				return BuildQuery.merge(baseQuery, new BuildQuery(new OrCriteria<Build>(criterias)));
-			}
+			if (e instanceof ExplicitException)
+				error(e.getMessage());
+			else
+				error("Malformed query");
+			return null;
 		}
 	}
 	
@@ -861,13 +847,6 @@ public abstract class BuildListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
-			}
-
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on number/version/job");
-				return hints;
 			}
 			
 		});

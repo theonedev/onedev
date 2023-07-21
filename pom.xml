@@ -298,7 +298,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>25.1-android</version>
+				<version>32.0.1-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-fileupload</groupId>
@@ -588,7 +588,7 @@
 			<dependency>
 				<groupId>com.hazelcast</groupId>
 				<artifactId>hazelcast</artifactId>
-				<version>5.1.4</version>
+				<version>5.1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>com.hazelcast</groupId>
@@ -614,8 +614,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.7.18</commons.version>
-		<agent.version>1.8.24</agent.version>
+		<commons.version>2.7.20</commons.version>
+		<agent.version>1.8.25</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

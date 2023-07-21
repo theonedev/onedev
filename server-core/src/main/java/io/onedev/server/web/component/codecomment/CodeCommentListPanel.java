@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.codecomment;
 
 import com.google.common.collect.Sets;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -10,14 +9,12 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.codecomment.*;
-import io.onedev.server.search.entitytext.CodeCommentTextManager;
+import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -85,29 +82,20 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 	private final IModel<String> queryStringModel;
 	
-	private final IModel<Object> queryModel = new LoadableDetachableModel<Object>() {
+	private final IModel<CodeCommentQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
-		protected Object load() {
+		protected CodeCommentQuery load() {
 			String queryString = queryStringModel.getObject();
 			try {
 				return CodeCommentQuery.parse(getProject(), queryString, true);
-			} catch (ExplicitException e) {
-				getFeedbackMessages().clear();
-				error(e.getMessage());
-				return null;
 			} catch (Exception e) {
 				getFeedbackMessages().clear();
-				info("Performing fuzzy query");
-				if (getPullRequest() == null) {
-					return queryString;
-				} else {
-					List<Criteria<CodeComment>> criterias = new ArrayList<>();
-					criterias.add(new ContentCriteria(queryString));
-					criterias.add(new ReplyCriteria(queryString));
-					criterias.add(new PathCriteria("*" + queryString + "*"));
-					return new CodeCommentQuery(new OrCriteria<CodeComment>(criterias));
-				}
+				if (e instanceof ExplicitException)
+					error(e.getMessage());
+				else 
+					error("Malformed query");
+				return null;
 			}
 		}
 		
@@ -134,10 +122,6 @@ public abstract class CodeCommentListPanel extends Panel {
 
 	private CodeCommentManager getCodeCommentManager() {
 		return OneDev.getInstance(CodeCommentManager.class);
-	}
-	
-	private CodeCommentTextManager getCodeCommentTextManager() {
-		return OneDev.getInstance(CodeCommentTextManager.class);
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -584,22 +568,22 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						Object query = queryModel.getObject();
+						var query = queryModel.getObject();
 						CodeCommentListPanel.this.getFeedbackMessages().clear();
-						if (query instanceof CodeCommentQuery) 
-							return ((CodeCommentQuery)query).getSorts();
+						if (query != null) 
+							return query.getSorts();
 						else
 							return new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						Object query = queryModel.getObject();
+						var query = queryModel.getObject();
 						CodeCommentListPanel.this.getFeedbackMessages().clear();
-						if (!(query instanceof CodeCommentQuery))
+						if (query == null)
 							query = new CodeCommentQuery();
-						((CodeCommentQuery)query).getSorts().clear();
-						((CodeCommentQuery)query).getSorts().addAll(object);
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
 						queryModel.setObject(query);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
@@ -644,13 +628,6 @@ public abstract class CodeCommentListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on path/comment/reply");
-				return hints;
-			}
-			
 		});
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 			
@@ -684,13 +661,10 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
-				Object query = queryModel.getObject();
-				if (query instanceof CodeCommentQuery) {
-					return getCodeCommentManager().query(getProject(), getPullRequest(), 
-							(CodeCommentQuery)query, (int)first, (int)count).iterator();
-				} else if (query instanceof String) {
-					return getCodeCommentTextManager()
-							.query(getProject(), (String)query, (int)first, (int)count).iterator();
+				var query = queryModel.getObject();
+				if (query != null) {
+					return getCodeCommentManager().query(getProject(), getPullRequest(),
+							query, (int)first, (int)count).iterator();
 				} else {
 					return new ArrayList<CodeComment>().iterator();
 				}
@@ -699,13 +673,9 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				try {
-					Object query = queryModel.getObject();
-					if (query instanceof CodeCommentQuery) {
-						return getCodeCommentManager().count(getProject(), getPullRequest(), 
-								((CodeCommentQuery)query).getCriteria());
-					} else if (query instanceof String) {
-						return getCodeCommentTextManager().count(getProject(), (String)query);
-					}
+					var query = queryModel.getObject();
+					if (query != null) 
+						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}

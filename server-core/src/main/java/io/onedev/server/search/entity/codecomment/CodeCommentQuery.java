@@ -1,28 +1,5 @@
 package io.onedev.server.search.entity.codecomment;
 
-import static io.onedev.server.model.CodeComment.NAME_CONTENT;
-import static io.onedev.server.model.CodeComment.NAME_CREATE_DATE;
-import static io.onedev.server.model.CodeComment.NAME_PATH;
-import static io.onedev.server.model.CodeComment.NAME_REPLY;
-import static io.onedev.server.model.CodeComment.NAME_REPLY_COUNT;
-import static io.onedev.server.model.CodeComment.NAME_LAST_ACTIVITY_DATE;
-import static io.onedev.server.model.CodeComment.ORDER_FIELDS;
-import static io.onedev.server.model.CodeComment.QUERY_FIELDS;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.CodeComment;
@@ -30,21 +7,20 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.AndCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
+import org.antlr.v4.runtime.*;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static io.onedev.server.model.CodeComment.*;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.*;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -78,7 +54,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 										int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed code comment query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 
 			});
@@ -91,6 +67,10 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			Criteria<CodeComment> commentCriteria;
 			if (criteriaContext != null) {
 				commentCriteria = new CodeCommentQueryBaseVisitor<Criteria<CodeComment>>() {
+					@Override
+					public Criteria<CodeComment> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
+						return new FuzzyCriteria(getValue(ctx.getText()));
+					}
 
 					@Override
 					public Criteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {

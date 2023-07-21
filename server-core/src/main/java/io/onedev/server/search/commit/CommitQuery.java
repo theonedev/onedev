@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.search.entity.project.ProjectQueryBaseVisitor;
+import io.onedev.server.util.criteria.Criteria;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -17,9 +19,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.project.RefUpdated;
@@ -27,6 +27,9 @@ import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
+
+import static io.onedev.commons.codeassist.FenceAware.*;
+import static io.onedev.commons.utils.StringUtils.*;
 
 public class CommitQuery implements Serializable {
 	
@@ -49,7 +52,7 @@ public class CommitQuery implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new RuntimeException("Malformed commit query", e);
+					throw new RuntimeException("Malformed query", e);
 				}
 				
 			});
@@ -64,6 +67,7 @@ public class CommitQuery implements Serializable {
 			List<String> afterValues = new ArrayList<>();
 			List<String> pathValues = new ArrayList<>();
 			List<String> messageValues = new ArrayList<>();
+			List<String> fuzzyValues = new ArrayList<>();
 			List<Revision> revisions = new ArrayList<>();
 			
 			for (CriteriaContext criteria: parser.query().criteria()) {
@@ -83,8 +87,10 @@ public class CommitQuery implements Serializable {
 					} else {
 						committerValues.add(getValue(criteria.committerCriteria().Value()));
 					}
-				} else if (criteria.messageCriteria() != null) { 
+				} else if (criteria.messageCriteria() != null) {
 					messageValues.add(getValue(criteria.messageCriteria().Value()));
+				} else if (criteria.fuzzyCriteria() != null) {
+					fuzzyValues.add(unescape(unfence(criteria.fuzzyCriteria().getText())));
 				} else if (criteria.pathCriteria() != null) {
 					pathValues.add(getValue(criteria.pathCriteria().Value()));
 				} else if (criteria.beforeCriteria() != null) {
@@ -137,13 +143,15 @@ public class CommitQuery implements Serializable {
 				criterias.add(new AfterCriteria(afterValues));
 			if (!revisions.isEmpty())
 				criterias.add(new RevisionCriteria(revisions));
+			if (!fuzzyValues.isEmpty())
+				criterias.add(new FuzzyCriteria(fuzzyValues));
 		}
 		
 		return new CommitQuery(criterias);
 	}
 	
 	private static String getValue(TerminalNode valueNode) {
-		return StringUtils.unescape(FenceAware.unfence(valueNode.getText())); 
+		return unescape(unfence(valueNode.getText())); 
 	}
 	
 	public boolean matches(RefUpdated event) {
@@ -173,7 +181,7 @@ public class CommitQuery implements Serializable {
 		List<String> parts = new ArrayList<>();
 		for (CommitCriteria criteria: criterias)
 			parts.add(criteria.toString());
-		return StringUtils.join(parts, " ");
+		return join(parts, " ");
 	}
 	
 }

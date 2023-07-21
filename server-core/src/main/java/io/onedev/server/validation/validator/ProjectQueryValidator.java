@@ -30,7 +30,7 @@ public class ProjectQueryValidator implements ConstraintValidator<ProjectQuery, 
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed project query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

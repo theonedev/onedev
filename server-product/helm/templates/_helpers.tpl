@@ -109,8 +109,6 @@ Generate URL string based on the database type
 {{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
 {{- else if eq $.Values.database.dbType "mssql" }}
 {{- $connectionURL = printf "sqlserver://%s:%s;databaseName=%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
-{{- else if eq $.Values.database.dbType "oracle" }}
-{{- $connectionURL = printf "jdbc:oracle:thin:@%s:%s:%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
 {{- else -}}
 Invalid database type
 {{- end -}}
@@ -126,7 +124,6 @@ Set dilect and driver env variables based database type
                      "postgresql" (dict "dialect" "io.onedev.server.persistence.PostgreSQLDialect" "driver" "org.postgresql.Driver")
                      "mariadb" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "org.mariadb.jdbc.Driver")
                      "mssql" (dict "dialect" "org.hibernate.dialect.SQLServer2012Dialect" "driver" "com.microsoft.sqlserver.jdbc.SQLServerDriver")
-                     "oracle" (dict "dialect" "org.hibernate.dialect.Oracle10gDialect" "driver" "oracle.jdbc.driver.OracleDriver")
    -}}
 {{- with index $dbTypeMap $dbType }}
   - name: hibernate_dialect

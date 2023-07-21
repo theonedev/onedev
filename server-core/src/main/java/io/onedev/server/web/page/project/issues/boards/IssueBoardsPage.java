@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -141,23 +140,23 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		IssueQuery query;
 		try {
 			query = IssueQuery.parse(getProject(), queryString, option, true);
-		} catch (ExplicitException e) {
-			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
-			return null;
 		} catch (Exception e) {
-			contentFrag.info(new QueryParseMessage(backlog, "Performing fuzzy query"));
-			query = IssueQuery.parseFuzzy(getProject(), queryString);
+			if (e instanceof ExplicitException)
+				contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
+			else
+				contentFrag.error(new QueryParseMessage(backlog, "Malformed %squery"));
+			return null;
 		}
 
 		IssueQuery baseQuery;
 		try {
 			baseQuery = IssueQuery.parse(getProject(), baseQueryString, option, true);
-		} catch (ExplicitException e) {
-			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
-			return null;
 		} catch (Exception e) {
-			contentFrag.info(new QueryParseMessage(backlog, "Performing fuzzy query"));
-			baseQuery = IssueQuery.parseFuzzy(getProject(), queryString);
+			if (e instanceof ExplicitException)
+				contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
+			else
+				contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query"));
+			return null;
 		}
 		return IssueQuery.merge(baseQuery, query);
 	}
@@ -666,16 +665,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
-			queryInput.add(new IssueQueryBehavior(projectModel, option, true) {
-
-				@Override
-				protected List<String> getHints(TerminalExpect terminalExpect) {
-					List<String> hints = super.getHints(terminalExpect);
-					hints.add("Free input for fuzzy query on number/title/description/comment");
-					return hints;
-				}
-				
-			});
+			queryInput.add(new IssueQueryBehavior(projectModel, option, true));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				

@@ -229,9 +229,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="sourceProject")
 	private Collection<PullRequest> outgoingRequests = new ArrayList<>();
-
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestTouch> requestTouches = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Issue> issues = new ArrayList<>();
@@ -268,9 +265,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentTouch> codeCommentTouches = new ArrayList<>();
-	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
 	

@@ -2,7 +2,6 @@ package io.onedev.server.web.component.issue.list;
 
 import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueLinkManager;
@@ -22,7 +21,6 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
@@ -113,7 +111,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
-import static io.onedev.server.search.entity.issue.IssueQuery.parseFuzzy;
 import static java.util.Comparator.comparingInt;
 
 @SuppressWarnings("serial")
@@ -121,10 +118,10 @@ public abstract class IssueListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;
 	
-	private final IModel<Object> queryModel = new LoadableDetachableModel<Object>() {
+	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
-		protected Object load() {
+		protected IssueQuery load() {
 			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
@@ -153,10 +150,6 @@ public abstract class IssueListPanel extends Panel {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
-	private IssueTextManager getIssueTextManager() {
-		return OneDev.getInstance(IssueTextManager.class);
-	}
-	
 	@Override
 	protected void onDetach() {
 		queryStringModel.detach();
@@ -172,26 +165,19 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 	@Nullable
-	private Object parse(@Nullable String queryString, IssueQuery baseQuery) {
+	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
 		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 		if (getProject() != null)
 			option.withCurrentProjectCriteria(true);
 		try {
 			return merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
 		} catch (Exception e) {
-			if (e instanceof ExplicitException) {
-				getFeedbackMessages().clear();
+			getFeedbackMessages().clear();
+			if (e instanceof ExplicitException)
 				error(e.getMessage());
-				return null;
-			} else if (getBaseQuery().toString() != null) {
-				getFeedbackMessages().clear();
-				info("Performing fuzzy query");
-				return merge(getBaseQuery(), parseFuzzy(getProject(), queryString));
-			} else {
-				getFeedbackMessages().clear();
-				info("Performing fuzzy query");
-				return queryString;
-			}
+			else
+				error("Malformed query");
+			return null;
 		}
 	}
 
@@ -295,22 +281,22 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						Object query = parse(queryStringModel.getObject(), new IssueQuery());
+						var query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
-						if (query instanceof IssueQuery) 
-							return ((IssueQuery)query).getSorts();
+						if (query != null) 
+							return query.getSorts();
 						else
 							return new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						Object query = parse(queryStringModel.getObject(), new IssueQuery());
+						var query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
-						if (!(query instanceof IssueQuery))
+						if (query == null)
 							query = new IssueQuery();
-						((IssueQuery)query).getSorts().clear();
-						((IssueQuery)query).getSorts().addAll(object);
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
@@ -389,13 +375,6 @@ public abstract class IssueListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on number/title/description/comment");
-				return hints;
 			}
 			
 		});
@@ -618,7 +597,7 @@ public abstract class IssueListPanel extends Panel {
 
 									@Override
 									protected IssueQuery getIssueQuery() {
-										if (queryModel.getObject() instanceof IssueQuery)
+										if (queryModel.getObject() != null)
 											return (IssueQuery) queryModel.getObject();
 										else
 											return null;
@@ -919,8 +898,8 @@ public abstract class IssueListPanel extends Panel {
 
 									@Override
 									protected IssueQuery getIssueQuery() {
-										if (queryModel.getObject() instanceof IssueQuery)
-											return (IssueQuery) queryModel.getObject();
+										if (queryModel.getObject() != null)
+											return queryModel.getObject();
 										else
 											return null;
 									}
@@ -1218,12 +1197,9 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
 				try {
-					Object query = queryModel.getObject();
-					if (query instanceof IssueQuery) {
+					var query = queryModel.getObject();
+					if (query != null) {
 						return getIssueManager().query(getProjectScope(), (IssueQuery) query,
-								true, (int) first, (int) count).iterator();
-					} else if (query instanceof String) {
-						return getIssueTextManager().query(getProjectScope(), (String) query,
 								true, (int) first, (int) count).iterator();
 					}
 				} catch (ExplicitException e) {
@@ -1235,11 +1211,9 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				try {
-					Object query = queryModel.getObject();
-					if (query instanceof IssueQuery)
+					var query = queryModel.getObject();
+					if (query != null)
 						return getIssueManager().count(getProjectScope(), ((IssueQuery) query).getCriteria());
-					else if (query instanceof String)
-						return getIssueTextManager().count(getProjectScope(), (String) query);
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}

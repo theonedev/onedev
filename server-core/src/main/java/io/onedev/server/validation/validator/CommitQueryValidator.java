@@ -31,7 +31,7 @@ public class CommitQueryValidator implements ConstraintValidator<CommitQuery, St
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed commit query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

@@ -1,22 +1,54 @@
 package io.onedev.server.web.component.project.list;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.imports.ProjectImporterContribution;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLabel;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.project.ChildrenOfCriteria;
+import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.util.ProjectBuildStats;
+import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.ProjectQueryBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.project.ProjectAvatar;
+import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
+import io.onedev.server.web.component.project.stats.build.BuildStatsPanel;
+import io.onedev.server.web.component.project.stats.code.CodeStatsPanel;
+import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
+import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.page.project.NewProjectPage;
+import io.onedev.server.web.page.project.children.ProjectChildrenPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.imports.ProjectImportPage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -50,64 +82,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Splitter;
-
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.imports.ProjectImporter;
-import io.onedev.server.imports.ProjectImporterContribution;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectLabel;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.project.ChildrenOfCriteria;
-import io.onedev.server.search.entity.project.NameCriteria;
-import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ProjectBuildStats;
-import io.onedev.server.util.ProjectIssueStats;
-import io.onedev.server.util.ProjectPullRequestStats;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.ProjectQueryBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.project.ProjectAvatar;
-import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
-import io.onedev.server.web.component.project.selector.ProjectSelector;
-import io.onedev.server.web.component.project.stats.build.BuildStatsPanel;
-import io.onedev.server.web.component.project.stats.code.CodeStatsPanel;
-import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
-import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.page.project.NewProjectPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.imports.ProjectImportPage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import javax.annotation.Nullable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
@@ -936,13 +912,6 @@ public class ProjectListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on name/path");
-				return hints;
-			}
-			
 		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
@@ -1200,42 +1169,13 @@ public class ProjectListPanel extends Panel {
 	private ProjectQuery parse(@Nullable String queryString, ProjectQuery baseQuery) {
 		try {
 			return ProjectQuery.merge(baseQuery, ProjectQuery.parse(queryString));
-		} catch (ExplicitException e) {
-			getFeedbackMessages().clear();
-			error(e.getMessage());
-			return null;
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			info("Performing fuzzy query");
-			if (getParentProject() != null) {
-				queryString = "*" + queryString.replace(" ", "*") + "*";
-				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria(queryString)));
-			} else {
-				ProjectQuery query = baseQuery;
-				for (String field: Splitter.on(' ').omitEmptyStrings().trimResults().split(queryString)) {
-					query = ProjectQuery.merge(query, new ProjectQuery(new Criteria<Project>() {
-
-						@Override
-						public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from,
-								CriteriaBuilder builder) {
-							Expression<String> attribute = from.get(Project.PROP_PATH);
-							return builder.like(builder.lower(attribute), "%" + field.toLowerCase().replace('*', '%') + "%");
-						}
-
-						@Override
-						public boolean matches(Project project) {
-							return project.getPath().toLowerCase().contains(field.toLowerCase());
-						}
-
-						@Override
-						public String toStringWithoutParens() {
-							throw new UnsupportedOperationException();
-						}
-						
-					}));
-				}
-				return query;
-			}
+			if (e instanceof ExplicitException)
+				error(e.getMessage());
+			else 
+				error("Malformed query");
+			return null;
 		}
 	}
 	

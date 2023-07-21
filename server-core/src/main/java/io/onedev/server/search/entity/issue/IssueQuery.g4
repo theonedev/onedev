@@ -12,11 +12,13 @@ criteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | Hash? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
     | scope=(Any|All) WS+ linkSpec=Quoted WS+ Matching WS* LParens WS* criteria WS* RParens #LinkMatchCriteria
     | LParens WS* criteria WS* RParens #ParensCriteria
+    | Fuzzy #FuzzyCriteria
     ;
 
 revisionCriteria
@@ -82,7 +84,7 @@ SubmittedByMe
 CommentedByMe
     : 'commented' WS+ 'by' WS+ 'me'
     ;
-	
+
 Confidential
 	: 'confidential'
 	;
@@ -120,13 +122,13 @@ IsLessThan
 	;
 
 IsAfter
-	: 'is' WS+ 'after' 
+	: 'is' WS+ 'after'
 	;
 
 IsBefore
 	: 'is' WS+ 'before'
 	;
-	
+
 IsSince
 	: 'is' WS+ 'since'
 	;
@@ -174,7 +176,7 @@ Any
 All
 	: 'all'
 	;
-	
+
 HasAny
 	: 'has' WS+ 'any'
 	;
@@ -199,8 +201,20 @@ RParens
 	: ')'
 	;
 
+Hash
+    : '#'
+    ;
+
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
+    ;
+
+Number
+    : [0-9]+
+    ;
+
+Fuzzy
+    : '~' ('\\'.|~[~])+? '~'
     ;
 
 WS

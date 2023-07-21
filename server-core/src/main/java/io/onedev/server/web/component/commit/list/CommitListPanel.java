@@ -3,7 +3,6 @@ package io.onedev.server.web.component.commit.list;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -94,20 +93,13 @@ public abstract class CommitListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString, true));
-			} catch (ExplicitException e) {
-				getFeedbackMessages().clear();
-				error(e.getMessage());
-				return null;
 			} catch (Exception e) {
 				getFeedbackMessages().clear();
-				info("Performing fuzzy query");
-				List<CommitCriteria> criterias = new ArrayList<>();
-				ObjectId commitId = getProject().getObjectId(queryString, false);
-				if (commitId != null)
-					criterias.add(new RevisionCriteria(Lists.newArrayList(new Revision(queryString, null))));
-				else
-					criterias.add(new MessageCriteria(Lists.newArrayList(queryString)));
-				return CommitQuery.merge(getBaseQuery(), new CommitQuery(criterias));
+				if (e instanceof ExplicitException)
+					error(e.getMessage());
+				else 
+					error("Malformed query");
+				return null;
 			}
 		}
 		
@@ -350,13 +342,6 @@ public abstract class CommitListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				List<String> hints = super.getHints(terminalExpect);
-				hints.add("Free input for fuzzy query on revision/message");
-				return hints;
-			}
-			
 		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
@@ -560,6 +545,12 @@ public abstract class CommitListPanel extends Panel {
 						if (criteria instanceof MessageCriteria) {
 							for (String value: ((MessageCriteria) criteria).getValues())
 								patterns.add(Pattern.compile(value, Pattern.CASE_INSENSITIVE));
+						} else if (criteria instanceof FuzzyCriteria) {
+							for (String value: ((FuzzyCriteria) criteria).getValues()) {
+								if (getProject().getObjectId(value, false) == null) {
+									patterns.add(Pattern.compile(value.replace(" ", ".*"), Pattern.CASE_INSENSITIVE));
+								}
+							}
 						}
 					}
 					return patterns;

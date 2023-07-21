@@ -302,7 +302,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	
 	private CriteriaQuery<Agent> buildCriteriaQuery(org.hibernate.Session session, EntityQuery<Agent> agentQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Agent> query = builder.createQuery(Agent.class);
+		CriteriaQuery<Agent> query = builder.createQuery(Agent.class).distinct(true);
 		Root<Agent> root = query.from(Agent.class);
 		query.select(root);
 
@@ -345,7 +345,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		if (agentCriteria != null)
 			criteriaQuery.where(agentCriteria.getPredicate(criteriaQuery, root, builder));
 
-		criteriaQuery.select(builder.count(root));
+		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 

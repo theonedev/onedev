@@ -11,10 +11,12 @@ criteria
     | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|InPipelineOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | Hash? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
     | LParens WS* criteria WS* RParens #ParensCriteria
+    | Fuzzy #FuzzyCriteria
     ;
 
 order
@@ -145,8 +147,20 @@ RParens
 	: ')'
 	;
 
+Hash
+    : '#'
+    ;
+
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
+    ;
+
+Number
+    : [0-9]+
+    ;
+
+Fuzzy
+    : '~' ('\\'.|~[~])+? '~'
     ;
 
 WS

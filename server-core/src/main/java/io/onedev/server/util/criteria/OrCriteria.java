@@ -1,12 +1,6 @@
 package io.onedev.server.util.criteria;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -24,6 +18,10 @@ public class OrCriteria<T> extends Criteria<T> {
 	private static final long serialVersionUID = 1L;
 
 	protected final List<Criteria<T>> criterias;
+
+	public OrCriteria(Criteria<T>...criterias) {
+		this(Arrays.asList(criterias));	
+	}
 	
 	public OrCriteria(List<Criteria<T>> criterias) {
 		this.criterias = criterias;

@@ -251,7 +251,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
 			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class).distinct(true);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
 		criteriaQuery.where(getPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
@@ -284,7 +284,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
 
-		criteriaQuery.select(builder.count(root));
+		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	

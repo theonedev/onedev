@@ -33,7 +33,7 @@ public class PullRequestQueryValidator implements ConstraintValidator<PullReques
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed pull request query";
+						message = "Malformed query";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
