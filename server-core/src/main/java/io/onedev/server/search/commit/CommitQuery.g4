@@ -46,10 +46,6 @@ messageCriteria
 	: MESSAGE Value
 	;
 
-fuzzyCriteria
-    : Fuzzy
-    ;
-
 SINCE
 	: 'since'
 	;
@@ -110,10 +106,6 @@ DefaultBranch
 	: 'default-branch'
 	;
 
-Fuzzy
-    : '~' ('\\'.|~[~])+? '~'
-    ;
-
 WS
 	: ' '
 	;
@@ -125,3 +117,11 @@ Value
 Identifier
 	: [a-zA-Z0-9:_/\\+\-;]+
 	;
+
+fuzzyCriteria
+    : Fuzzy
+    ;
+
+Fuzzy
+    : '~' ('\\'.|~[~])+? '~'
+    ;
