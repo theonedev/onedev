@@ -1,3 +1,7 @@
+# 8.6.0
+
+**[Database]** Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide]((https://docs.onedev.io/administration-guide/backup-restore)) 
+
 # 8.5.0
 
 **[Helm Chart]** Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [this guide](https://docs.onedev.io/upgrade-guide#upgrade-from-chart-v--842) to upgrade your chart from version <= 8.4.2  
