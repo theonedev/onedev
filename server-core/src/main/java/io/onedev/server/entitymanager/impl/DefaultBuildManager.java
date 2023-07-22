@@ -530,7 +530,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	private CriteriaQuery<Build> buildCriteriaQuery(@Nullable Project project, 
 			Session session,  EntityQuery<Build> buildQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Build> query = builder.createQuery(Build.class).distinct(true);
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
 		query.select(root);
 		
@@ -596,7 +596,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 		criteriaQuery.where(getPredicates(project, buildCriteria, criteriaQuery, root, builder));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	

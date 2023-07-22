@@ -843,7 +843,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, @Nullable Project targetProject, 
 			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class).distinct(true);
+		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
 		Root<PullRequest> root = query.from(PullRequest.class);
 		
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), query, root, builder));
@@ -894,7 +894,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 		criteriaQuery.where(getPredicates(targetProject, requestCriteria, criteriaQuery, root, builder));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	

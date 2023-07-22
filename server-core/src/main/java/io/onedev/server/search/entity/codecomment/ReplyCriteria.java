@@ -1,17 +1,13 @@
 package io.onedev.server.search.entity.codecomment;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
+
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReplyCriteria extends Criteria<CodeComment> {
 
@@ -25,10 +21,17 @@ public class ReplyCriteria extends Criteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
-		Join<?, ?> join = from.join(CodeComment.PROP_REPLIES, JoinType.LEFT);
-		Path<String> attribute = join.get(CodeCommentReply.PROP_CONTENT);
-		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%"));
-		return join.isNotNull();
+		Subquery<CodeCommentReply> replyQuery = query.subquery(CodeCommentReply.class);
+		Root<CodeCommentReply> replyRoot = replyQuery.from(CodeCommentReply.class);
+		replyQuery.select(replyRoot);
+
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(replyRoot.get(CodeCommentReply.PROP_COMMENT), from));
+		predicates.add(builder.like(
+				builder.lower(replyRoot.get(CodeCommentReply.PROP_CONTENT)),
+				"%" + value.toLowerCase() + "%"));
+
+		return builder.exists(replyQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 
 	@Override

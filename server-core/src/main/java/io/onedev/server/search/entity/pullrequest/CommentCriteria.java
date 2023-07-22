@@ -5,6 +5,8 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.util.criteria.Criteria;
 
 import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommentCriteria extends Criteria<PullRequest> {
 
@@ -18,10 +20,17 @@ public class CommentCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Join<?, ?> join = from.join(PullRequest.PROP_COMMENTS, JoinType.LEFT);
-		Path<String> attribute = join.get(PullRequestComment.PROP_CONTENT);
-		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%"));
-		return join.isNotNull();
+		Subquery<PullRequestComment> commentQuery = query.subquery(PullRequestComment.class);
+		Root<PullRequestComment> commentRoot = commentQuery.from(PullRequestComment.class);
+		commentQuery.select(commentRoot);
+
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(commentRoot.get(PullRequestComment.PROP_REQUEST), from));
+		predicates.add(builder.like(
+				builder.lower(commentRoot.get(PullRequestComment.PROP_CONTENT)),
+				"%" + value.toLowerCase() + "%"));
+
+		return builder.exists(commentQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 
 	@Override

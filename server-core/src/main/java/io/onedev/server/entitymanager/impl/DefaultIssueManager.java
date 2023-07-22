@@ -63,6 +63,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
+
 @Singleton
 public class DefaultIssueManager extends BaseEntityManager<Issue> implements IssueManager, Serializable {
 
@@ -251,7 +253,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
 			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class).distinct(true);
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
 		criteriaQuery.where(getPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
@@ -284,7 +286,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
@@ -319,7 +321,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
 			if (!projects.isEmpty()) { 
-				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toSet());
+				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(toSet());
 				predicates.add(builder.or(
 						getPredicate(builder, root, projectIds), 
 						getAuthorizationPredicate(query, builder, root, projectIds)));
