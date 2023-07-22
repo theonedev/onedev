@@ -215,7 +215,7 @@ public abstract class CommitListPanel extends Panel {
 	
 	private WebMarkupContainer body;
 	
-	private WebMarkupContainer tooMany;
+	private WebMarkupContainer foot;
 	
 	private RepeatingView commitsView;
 	
@@ -261,7 +261,7 @@ public abstract class CommitListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		page = 1;
 		target.add(body);
-		target.add(tooMany);
+		target.add(foot);
 		querySubmitted = true;
 		target.appendJavaScript(renderCommitGraph());
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
@@ -393,7 +393,10 @@ public abstract class CommitListPanel extends Panel {
 			
 		});		
 				
-		add(new AjaxLink<Void>("more") {
+		add(foot = new WebMarkupContainer("foot"));
+		foot.setOutputMarkupId(true);
+		
+		foot.add(new AjaxLink<Void>("more") {
 
 			private RunTaskBehavior taskBehavior;
 			
@@ -445,7 +448,7 @@ public abstract class CommitListPanel extends Panel {
 									body.getMarkupId(), item.getMarkupId()));
 						}
 						target.prependJavaScript(builder);
-						target.add(tooMany);
+						target.add(foot);
 						target.appendJavaScript(renderCommitGraph());
 						
 						getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
@@ -467,7 +470,7 @@ public abstract class CommitListPanel extends Panel {
 			
 		});
 		
-		add(tooMany = new WebMarkupContainer("tooMany") {
+		foot.add(new WebMarkupContainer("tooMany") {
 			
 			@Override
 			protected void onConfigure() {
@@ -476,7 +479,6 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		});
-		tooMany.setOutputMarkupPlaceholderTag(true);
 		
 		setOutputMarkupId(true);
 	}
