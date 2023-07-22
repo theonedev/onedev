@@ -462,7 +462,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Project findByServiceDeskName(String serviceDeskName) {
 		Long projectId = null;
 		for (ProjectFacade facade : cache.values()) {
-			if (serviceDeskName.equals(facade.getServiceDeskName())) {
+			if (serviceDeskName.equalsIgnoreCase(facade.getServiceDeskName())) {
 				projectId = facade.getId();
 				break;
 			}

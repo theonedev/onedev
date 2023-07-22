@@ -78,7 +78,7 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
     @Nullable
     public ProjectFacade find(String path) {
     	for (ProjectFacade project: values()) {
-    		if (project.getPath().equals(path))
+    		if (project.getPath().equalsIgnoreCase(path))
     			return project;
     	}
     	return null;
