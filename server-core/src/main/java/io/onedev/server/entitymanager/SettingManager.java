@@ -40,7 +40,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	AlertSetting getAlertSetting();
 	
 	@Nullable
-	String getSubscriptionData();
+	String getLicenseData();
 	
 	/**
 	 * Save specified system setting.
@@ -52,7 +52,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveAlertSetting(AlertSetting alertSetting);
 	
-	void saveSubscriptionData(@Nullable String subscriptionData);
+	void saveLicenseData(@Nullable String licenseData);
 	
 	/**
 	 * Get mail setting.

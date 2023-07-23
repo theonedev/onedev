@@ -13,21 +13,19 @@ public class AlertSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean trialExpireInOneWeekAlerted;
+	private boolean trialEnterpriseLicenseExpireInOneWeekAlerted;
 
-	private boolean trialExpiredAlerted;
+	private boolean trialEnterpriseLicenseExpiredAlerted;
 
-	private boolean subscriptionExpireInOneMonthAlerted;
+	private boolean enterpriseLicenseExpireInOneMonthAlerted;
 
-	private boolean subscriptionExpireInOneWeekAlerted;
+	private boolean enterpriseLicenseExpireInOneWeekAlerted;
 
-	private boolean subscriptionExpiredAlerted;
-	
-	private boolean subscriptionExpiredBeforeReleaseDateAlerted;
+	private boolean enterpriseLicenseExpiredAlerted;
 
-	private boolean userLimitApproachingAlerted;
+	private boolean enterpriseLicenseUserLimitApproachingAlerted;
 
-	private boolean userLimitExceededAlerted;
+	private boolean enterpriseLicenseUserLimitExceededAlerted;
 	
 	private List<String> notifyUsers = new ArrayList<>();
 	
@@ -42,79 +40,70 @@ public class AlertSetting implements Serializable {
 		this.notifyUsers = notifyUsers;
 	}
 	
-	public boolean isTrialExpireInOneWeekAlerted() {
-		return trialExpireInOneWeekAlerted;
+	public boolean isTrialEnterpriseLicenseExpireInOneWeekAlerted() {
+		return trialEnterpriseLicenseExpireInOneWeekAlerted;
 	}
 
-	public void setTrialExpireInOneWeekAlerted(boolean trialExpireInOneWeekAlerted) {
-		this.trialExpireInOneWeekAlerted = trialExpireInOneWeekAlerted;
+	public void setTrialEnterpriseLicenseExpireInOneWeekAlerted(boolean trialEnterpriseLicenseExpireInOneWeekAlerted) {
+		this.trialEnterpriseLicenseExpireInOneWeekAlerted = trialEnterpriseLicenseExpireInOneWeekAlerted;
 	}
 
-	public boolean isTrialExpiredAlerted() {
-		return trialExpiredAlerted;
+	public boolean isTrialEnterpriseLicenseExpiredAlerted() {
+		return trialEnterpriseLicenseExpiredAlerted;
 	}
 
-	public void setTrialExpiredAlerted(boolean trialExpiredAlerted) {
-		this.trialExpiredAlerted = trialExpiredAlerted;
+	public void setTrialEnterpriseLicenseExpiredAlerted(boolean trialEnterpriseLicenseExpiredAlerted) {
+		this.trialEnterpriseLicenseExpiredAlerted = trialEnterpriseLicenseExpiredAlerted;
 	}
 
-	public boolean isSubscriptionExpireInOneMonthAlerted() {
-		return subscriptionExpireInOneMonthAlerted;
+	public boolean isEnterpriseLicenseExpireInOneMonthAlerted() {
+		return enterpriseLicenseExpireInOneMonthAlerted;
 	}
 
-	public void setSubscriptionExpireInOneMonthAlerted(boolean subscriptionExpireInOneMonthAlerted) {
-		this.subscriptionExpireInOneMonthAlerted = subscriptionExpireInOneMonthAlerted;
+	public void setEnterpriseLicenseExpireInOneMonthAlerted(boolean enterpriseLicenseExpireInOneMonthAlerted) {
+		this.enterpriseLicenseExpireInOneMonthAlerted = enterpriseLicenseExpireInOneMonthAlerted;
 	}
 
-	public boolean isSubscriptionExpireInOneWeekAlerted() {
-		return subscriptionExpireInOneWeekAlerted;
+	public boolean isEnterpriseLicenseExpireInOneWeekAlerted() {
+		return enterpriseLicenseExpireInOneWeekAlerted;
 	}
 
-	public void setSubscriptionExpireInOneWeekAlerted(boolean subscriptionExpireInOneWeekAlerted) {
-		this.subscriptionExpireInOneWeekAlerted = subscriptionExpireInOneWeekAlerted;
+	public void setEnterpriseLicenseExpireInOneWeekAlerted(boolean enterpriseLicenseExpireInOneWeekAlerted) {
+		this.enterpriseLicenseExpireInOneWeekAlerted = enterpriseLicenseExpireInOneWeekAlerted;
 	}
 
-	public boolean isSubscriptionExpiredAlerted() {
-		return subscriptionExpiredAlerted;
+	public boolean isEnterpriseLicenseExpiredAlerted() {
+		return enterpriseLicenseExpiredAlerted;
 	}
 
-	public void setSubscriptionExpiredAlerted(boolean subscriptionExpiredAlerted) {
-		this.subscriptionExpiredAlerted = subscriptionExpiredAlerted;
+	public void setEnterpriseLicenseExpiredAlerted(boolean enterpriseLicenseExpiredAlerted) {
+		this.enterpriseLicenseExpiredAlerted = enterpriseLicenseExpiredAlerted;
 	}
 
-	public boolean isSubscriptionExpiredBeforeReleaseDateAlerted() {
-		return subscriptionExpiredBeforeReleaseDateAlerted;
+	public boolean isEnterpriseLicenseUserLimitApproachingAlerted() {
+		return enterpriseLicenseUserLimitApproachingAlerted;
 	}
 
-	public void setSubscriptionExpiredBeforeReleaseDateAlerted(boolean subscriptionExpiredBeforeReleaseDateAlerted) {
-		this.subscriptionExpiredBeforeReleaseDateAlerted = subscriptionExpiredBeforeReleaseDateAlerted;
+	public void setEnterpriseLicenseUserLimitApproachingAlerted(boolean enterpriseLicenseUserLimitApproachingAlerted) {
+		this.enterpriseLicenseUserLimitApproachingAlerted = enterpriseLicenseUserLimitApproachingAlerted;
 	}
 
-	public boolean isUserLimitApproachingAlerted() {
-		return userLimitApproachingAlerted;
+	public boolean isEnterpriseLicenseUserLimitExceededAlerted() {
+		return enterpriseLicenseUserLimitExceededAlerted;
 	}
 
-	public void setUserLimitApproachingAlerted(boolean userLimitApproachingAlerted) {
-		this.userLimitApproachingAlerted = userLimitApproachingAlerted;
-	}
-
-	public boolean isUserLimitExceededAlerted() {
-		return userLimitExceededAlerted;
-	}
-
-	public void setUserLimitExceededAlerted(boolean userLimitExceededAlerted) {
-		this.userLimitExceededAlerted = userLimitExceededAlerted;
+	public void setEnterpriseLicenseUserLimitExceededAlerted(boolean enterpriseLicenseUserLimitExceededAlerted) {
+		this.enterpriseLicenseUserLimitExceededAlerted = enterpriseLicenseUserLimitExceededAlerted;
 	}
 	
 	public void setAlerted(boolean alerted) {
-		trialExpireInOneWeekAlerted = alerted;
-		trialExpiredAlerted = alerted;
-		subscriptionExpireInOneMonthAlerted = alerted;
-		subscriptionExpireInOneWeekAlerted = alerted;
-		subscriptionExpiredAlerted = alerted;
-		subscriptionExpiredBeforeReleaseDateAlerted = alerted;
-		userLimitApproachingAlerted = alerted;
-		userLimitExceededAlerted = alerted;
+		trialEnterpriseLicenseExpireInOneWeekAlerted = alerted;
+		trialEnterpriseLicenseExpiredAlerted = alerted;
+		enterpriseLicenseExpireInOneMonthAlerted = alerted;
+		enterpriseLicenseExpireInOneWeekAlerted = alerted;
+		enterpriseLicenseExpiredAlerted = alerted;
+		enterpriseLicenseUserLimitApproachingAlerted = alerted;
+		enterpriseLicenseUserLimitExceededAlerted = alerted;
 	}
 
 	public Usage onDeleteUser(String userName) {

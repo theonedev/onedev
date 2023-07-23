@@ -816,9 +816,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
-		setting = settingManager.getSetting(Key.SUBSCRIPTION_DATA);
+		setting = settingManager.getSetting(Key.LICENSE_DATA);
 		if (setting == null) {
-			settingManager.saveSubscriptionData(null);
+			settingManager.saveLicenseData(null);
 		}
 		setting = settingManager.getSetting(Key.ALERT);
 		if (setting == null) {

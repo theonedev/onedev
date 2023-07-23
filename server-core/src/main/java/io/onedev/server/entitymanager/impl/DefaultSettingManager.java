@@ -77,8 +77,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	}
 
 	@Override
-	public String getSubscriptionData() {
-		return (String) getSettingValue(Key.SUBSCRIPTION_DATA);
+	public String getLicenseData() {
+		return (String) getSettingValue(Key.LICENSE_DATA);
 	}
 	
 	@Transactional
@@ -204,8 +204,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 
 	@Transactional
 	@Override
-	public void saveSubscriptionData(String subscriptionData) {
-		saveSetting(Key.SUBSCRIPTION_DATA, subscriptionData);
+	public void saveLicenseData(String licenseData) {
+		saveSetting(Key.LICENSE_DATA, licenseData);
 	}
 
 	@Transactional

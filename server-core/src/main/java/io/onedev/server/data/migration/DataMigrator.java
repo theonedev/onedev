@@ -5581,4 +5581,29 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate132(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("ALERT")) {
+						var valueElement = element.element("value");
+						valueElement.element("trialExpireInOneWeekAlerted").setName("trialEnterpriseLicenseExpireInOneWeekAlerted");
+						valueElement.element("trialExpiredAlerted").setName("trialEnterpriseLicenseExpiredAlerted");
+						valueElement.element("subscriptionExpireInOneMonthAlerted").setName("enterpriseLicenseExpireInOneMonthAlerted");
+						valueElement.element("subscriptionExpireInOneWeekAlerted").setName("enterpriseLicenseExpireInOneWeekAlerted");
+						valueElement.element("subscriptionExpiredAlerted").setName("enterpriseLicenseExpiredAlerted");
+						valueElement.element("subscriptionExpiredBeforeReleaseDateAlerted").detach();
+						valueElement.element("userLimitApproachingAlerted").setName("enterpriseLicenseUserLimitApproachingAlerted");
+						valueElement.element("userLimitExceededAlerted").setName("enterpriseLicenseUserLimitExceededAlerted");
+					} else if (keyElement.getTextTrim().equals("SUBSCRIPTION_DATA")) {
+						keyElement.setText("LICENSE_DATA");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }
