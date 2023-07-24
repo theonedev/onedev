@@ -1318,9 +1318,9 @@ public abstract class IssueListPanel extends Panel {
 						super.onConfigure();
 						var issue = (Issue) fragment.getDefaultModelObject();
 						setVisible(issue.getPinDate() == null
+								&& getPage() instanceof ProjectIssueListPage
 								&& SecurityUtils.canManageIssues(getProject())
-								&& issue.getProject().equals(getProject())
-								&& getPage() instanceof ProjectIssueListPage);
+								&& issue.getProject().equals(getProject()));
 					}
 				});
 
