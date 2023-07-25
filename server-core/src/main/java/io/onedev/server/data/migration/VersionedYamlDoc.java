@@ -112,6 +112,7 @@ public class VersionedYamlDoc extends MappingNode {
 	public String toYaml() {
 		StringWriter writer = new StringWriter();
 		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setSplitLines(false);
 		Serializer serializer = new Serializer(new Emitter(writer, dumperOptions), 
 				new Resolver(), dumperOptions, Tag.MAP);
 		try {
