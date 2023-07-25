@@ -34,9 +34,11 @@ public class JobLogEntryEx implements Serializable {
 	
 	// Handle ANSI escape codes according to https://en.wikipedia.org/wiki/ANSI_escape_code
 	public static JobLogEntryEx parse(String text, StyleBuilder styleBuilder) {
+		text = text.replace("\r\n", "\n");
+		
 		AtomicInteger cursor = new AtomicInteger(0);
 		List<Message> messages = new ArrayList<>();
-
+		
         Function<String, Void> textAppender = new Function<String, Void>() {
 
 			@Override

@@ -13,6 +13,16 @@ public class JobLogEntryExTest {
 	@Test
 	public void test() {
 		JobLogEntryEx entry;
+
+		entry = JobLogEntryEx.parse("a\r\nb", new StyleBuilder());
+		assertEquals(Lists.newArrayList(
+				new Message(new Style(Style.FOREGROUND_COLOR_DEFAULT, Style.BACKGROUND_COLOR_DEFAULT, false), "a\nb")
+		), entry.getMessages());
+		
+		entry = JobLogEntryEx.parse("a\nb", new StyleBuilder());
+		assertEquals(Lists.newArrayList(
+				new Message(new Style(Style.FOREGROUND_COLOR_DEFAULT, Style.BACKGROUND_COLOR_DEFAULT, false), "a\nb")
+		), entry.getMessages());
 		
 		entry = JobLogEntryEx.parse("\u001b]0;This is the window title\u0007hello\u001b]8;link\u001b\\world\u001b]P1888888just\u001b\u0020\u0020\u0030do", new StyleBuilder());
 		assertEquals(Lists.newArrayList(
