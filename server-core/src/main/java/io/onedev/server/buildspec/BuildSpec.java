@@ -1688,5 +1688,42 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
+
+	private void migrate25_steps(SequenceNode stepsNode) {
+		for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+			MappingNode stepNode = (MappingNode) itStepNode.next();
+			if (stepNode.getTag().getValue().equals("!BuildImageStep")) {
+				stepNode.getValue().add(new NodeTuple(
+						new ScalarNode(Tag.STR, "removeDanglingImages"), new ScalarNode(Tag.STR, "true")));
+			}
+		}
+	}
+
+	private void migrate25(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps"))
+							migrate25_steps((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps"))
+							migrate25_steps((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
 	
 }

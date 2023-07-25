@@ -33,6 +33,8 @@ public class BuildImageStep extends Step {
 
 	private boolean publish = true;
 	
+	private boolean removeDanglingImages = true;
+	
 	private String moreOptions;
 	
 	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
@@ -80,7 +82,16 @@ public class BuildImageStep extends Step {
 	public void setPublish(boolean publish) {
 		this.publish = publish;
 	}
-	
+
+	@Editable(order=340, name="Remove Dangling Images After Build")
+	public boolean isRemoveDanglingImages() {
+		return removeDanglingImages;
+	}
+
+	public void setRemoveDanglingImages(boolean removeDanglingImages) {
+		this.removeDanglingImages = removeDanglingImages;
+	}
+
 	@Editable(order=350, description="Optionally specify additional options to build image, " +
 			"separated by spaces")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -100,7 +111,7 @@ public class BuildImageStep extends Step {
 	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish(), getMoreOptions());
+		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish(), isRemoveDanglingImages(), getMoreOptions());
 	}
 
 }
