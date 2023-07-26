@@ -5605,5 +5605,23 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate133(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var buildSettingElement = element.element("buildSetting");
+					for (var secretElement : buildSettingElement.element("jobSecrets").elements()) {
+						secretElement.addElement("archived").setText("false");
+					}
+					for (var secretElement : buildSettingElement.element("jobProperties").elements()) {
+						secretElement.addElement("archived").setText("false");
+					}
+				}
+			}
+		}
+	}
+	
 }

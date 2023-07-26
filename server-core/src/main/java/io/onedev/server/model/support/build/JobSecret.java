@@ -19,6 +19,8 @@ public class JobSecret implements Serializable {
 	
 	private String authorization;
 	
+	private boolean archived;
+	
 	@Editable(order=100)
 	@NotEmpty
 	@SecretName
@@ -51,5 +53,15 @@ public class JobSecret implements Serializable {
 	public void setAuthorization(String authorization) {
 		this.authorization = authorization;
 	}
-	
+
+	@Editable(order=400, description = "Mark a secret archived if it is no longer used by current " +
+			"build spec, but still need to exist to reproduce old builds. Archived secrets will " +
+			"not be shown by default")
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
+	}
 }
