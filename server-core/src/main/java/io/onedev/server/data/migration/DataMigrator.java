@@ -5620,7 +5620,19 @@ public class DataMigrator {
 						secretElement.addElement("archived").setText("false");
 					}
 				}
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("ALERT")) {
+						var valueElement = element.element("value");
+						valueElement.element("enterpriseLicenseUserLimitApproachingAlerted").detach();
+						valueElement.element("enterpriseLicenseUserLimitExceededAlerted").detach();
+					}
+				}
+				dom.writeToFile(file, false);
 			}
+			
 		}
 	}
 	

@@ -22,10 +22,6 @@ public class AlertSetting implements Serializable {
 	private boolean enterpriseLicenseExpireInOneWeekAlerted;
 
 	private boolean enterpriseLicenseExpiredAlerted;
-
-	private boolean enterpriseLicenseUserLimitApproachingAlerted;
-
-	private boolean enterpriseLicenseUserLimitExceededAlerted;
 	
 	private List<String> notifyUsers = new ArrayList<>();
 	
@@ -79,22 +75,6 @@ public class AlertSetting implements Serializable {
 	public void setEnterpriseLicenseExpiredAlerted(boolean enterpriseLicenseExpiredAlerted) {
 		this.enterpriseLicenseExpiredAlerted = enterpriseLicenseExpiredAlerted;
 	}
-
-	public boolean isEnterpriseLicenseUserLimitApproachingAlerted() {
-		return enterpriseLicenseUserLimitApproachingAlerted;
-	}
-
-	public void setEnterpriseLicenseUserLimitApproachingAlerted(boolean enterpriseLicenseUserLimitApproachingAlerted) {
-		this.enterpriseLicenseUserLimitApproachingAlerted = enterpriseLicenseUserLimitApproachingAlerted;
-	}
-
-	public boolean isEnterpriseLicenseUserLimitExceededAlerted() {
-		return enterpriseLicenseUserLimitExceededAlerted;
-	}
-
-	public void setEnterpriseLicenseUserLimitExceededAlerted(boolean enterpriseLicenseUserLimitExceededAlerted) {
-		this.enterpriseLicenseUserLimitExceededAlerted = enterpriseLicenseUserLimitExceededAlerted;
-	}
 	
 	public void setAlerted(boolean alerted) {
 		trialEnterpriseLicenseExpireInOneWeekAlerted = alerted;
@@ -102,8 +82,6 @@ public class AlertSetting implements Serializable {
 		enterpriseLicenseExpireInOneMonthAlerted = alerted;
 		enterpriseLicenseExpireInOneWeekAlerted = alerted;
 		enterpriseLicenseExpiredAlerted = alerted;
-		enterpriseLicenseUserLimitApproachingAlerted = alerted;
-		enterpriseLicenseUserLimitExceededAlerted = alerted;
 	}
 
 	public Usage onDeleteUser(String userName) {
