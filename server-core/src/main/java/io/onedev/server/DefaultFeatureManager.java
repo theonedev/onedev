@@ -1,5 +1,8 @@
 package io.onedev.server;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+
 import javax.inject.Singleton;
 
 @Singleton
@@ -14,5 +17,10 @@ public class DefaultFeatureManager implements FeatureManager {
 	public boolean isEELicensed() {
 		return false;
 	}
-	
+
+	@Override
+	public Component renderSupportRequestLink(String componentId) {
+		return new WebMarkupContainer(componentId).setVisible(false);
+	}
+
 }

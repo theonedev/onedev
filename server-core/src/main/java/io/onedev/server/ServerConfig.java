@@ -1,6 +1,7 @@
 package io.onedev.server;
 
 import com.google.common.base.Splitter;
+import io.onedev.agent.Agent;
 import io.onedev.server.persistence.HibernateConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -8,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,6 +26,8 @@ public class ServerConfig {
 
 	private static final String PROP_SSH_PORT = "ssh_port";
 
+	private static final String PROP_SERVER_NAME = "server_name";
+	
 	private static final String PROP_CLUSTER_IP = "cluster_ip";
 
 	private static final String PROP_CLUSTER_PORT = "cluster_port";
@@ -31,6 +36,8 @@ public class ServerConfig {
 
 	private final int sshPort;
 
+	private final String serverName;
+	
 	private final String clusterIp;
 
 	private final int clusterPort;
@@ -59,6 +66,20 @@ public class ServerConfig {
 			sshPort = 6611;
 		}
 
+		String serverName = System.getenv(PROP_SERVER_NAME);
+		if (StringUtils.isBlank(serverName))
+			serverName = props.getProperty(PROP_SERVER_NAME);
+		if (StringUtils.isBlank(serverName)) 
+			serverName = System.getenv("HOSTNAME");
+		if (StringUtils.isBlank(serverName)) {
+			try {
+				serverName = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		this.serverName = serverName;
+		
 		String clusterIp = System.getenv(PROP_CLUSTER_IP);
 		if (StringUtils.isBlank(clusterIp))
 			clusterIp = props.getProperty(PROP_CLUSTER_IP);
@@ -116,4 +137,9 @@ public class ServerConfig {
 	public int getClusterPort() {
 		return clusterPort;
 	}
+	
+	public String getServerName() {
+		return serverName;
+	}
+	
 }

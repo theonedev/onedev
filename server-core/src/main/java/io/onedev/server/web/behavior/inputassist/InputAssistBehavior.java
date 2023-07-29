@@ -152,12 +152,10 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 							&& !inputContent.endsWith(" ") 
 							&& inputCaret == inputContent.length()) {
 						for (var suggestion: suggestions) {
-							if (suggestion.getContent().equals(inputContent + " ") && suggestion.getCaret() == inputContent.length() + 1) {
+							if (suggestion.getContent().equals(inputContent + " ") && suggestion.getCaret() == inputContent.length() + 1) 
 								hasAppendSpaceSuggestions = true;
-							} else if (!suggestion.getContent().equals(inputContent) 
-									&& (getFuzzyQueryFence() == 0 || !suggestion.getContent().equals(getFuzzyQueryFence() + inputContent + getFuzzyQueryFence()))) {
+							else if (!suggestion.getContent().equals(inputContent) && !isFuzzySuggestion(suggestion)) 
 								hasOtherSuggestions = true;
-							}
 						}
 					}
 
@@ -263,8 +261,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	 */
 	protected abstract int getAnchor(String inputContent);
 
-	protected char getFuzzyQueryFence() {
-		return 0;
+	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
+		return false;
 	}
-	
 }

@@ -9,6 +9,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -17,13 +18,13 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
 import io.onedev.server.persistence.IdManager;
-import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
+import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.schedule.TaskScheduler;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
@@ -43,6 +44,7 @@ import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -53,7 +55,7 @@ import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
-
+	
 	private final Provider<JettyLauncher> jettyLauncherProvider;
 		
 	private final SessionManager sessionManager;
@@ -143,21 +145,28 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		sessionManager.run(() -> listenerRegistry.post(new SystemStarting()));
 		jettyLauncherProvider.get().start();
 
-		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		var dataChecked = hazelcastInstance.getCPSubsystem().getAtomicLong("dataInited");
-		clusterManager.init(dataChecked, () -> {
-			var manualConfigs = dataManager.checkData();
-			if (!manualConfigs.isEmpty()) {
-				if (getIngressUrl() != null)
-					logger.warn("Please set up the server at " + getIngressUrl());
-				else
-					logger.warn("Please set up the server at " + guessServerUrl());
-				initStage = new InitStage("Server Setup", manualConfigs);
-				
-				initStage.waitForFinish();
+		var manualConfigs = checkData();
+		if (!manualConfigs.isEmpty()) {
+			if (getIngressUrl() != null)
+				logger.warn("Please set up the server at " + getIngressUrl());
+			else
+				logger.warn("Please set up the server at " + guessServerUrl());
+			initStage = new InitStage("Server Setup", manualConfigs);
+			while (true) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+				manualConfigs = checkData();
+				if (manualConfigs.isEmpty()) {
+					initStage = new InitStage("Please wait...");
+					break;
+				} else {
+					initStage = new InitStage("Server Setup", manualConfigs);
+				}
 			}
-			return 1L;
-		});
+		}
 		
 		var leadServer = clusterManager.getLeaderServerAddress();
 		if (!leadServer.equals(clusterManager.getLocalServerAddress())) {
@@ -207,6 +216,17 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		try {
 			sessionManager.run(() -> listenerRegistry.post(new SystemStopping()));
 		} catch (ServerNotReadyException ignore) {
+		}
+	}
+	
+	private List<ManualConfig> checkData() {
+		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+		var lock = hazelcastInstance.getCPSubsystem().getLock("checkData");
+		lock.lock();
+		try {
+			return dataManager.checkData();
+		} finally {
+			lock.unlock();
 		}
 	}
 

@@ -3,6 +3,7 @@ package io.onedev.server.web.behavior;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
@@ -30,6 +31,8 @@ import static java.util.Collections.sort;
 @SuppressWarnings("serial")
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	
 	private final boolean forExecutor;
 	
 	public AgentQueryBehavior(boolean forExecutor, boolean hideIfBlank) {
@@ -117,7 +120,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "surround with ~ to query name/ip/os";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query name/ip/os";
 					}
 
 				}.suggest(terminalExpect);
@@ -178,10 +181,11 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return hints;
 	}
-	
+
 	@Override
-	protected char getFuzzyQueryFence() {
-		return '~';
+	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
+		return suggestion.getDescription() != null 
+				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
 	}
 
 }

@@ -71,8 +71,9 @@ public class Office365Setting extends MailSetting {
 		this.clientSecret = clientSecret;
 	}
 
-	@Editable(order=300, description="Principal name of the account to login into office 365 mail server to "
-			+ "send/receive emails. It is normally primary email address of the account")
+	@Editable(order=300, description="Principal name of the account to login into office 365 mail server to " +
+			"send/receive emails. Make sure this account <b>owns</b> the registered application indicated by " +
+			"application id above")
 	@NotEmpty
 	public String getUserPrincipalName() {
 		return userPrincipalName;

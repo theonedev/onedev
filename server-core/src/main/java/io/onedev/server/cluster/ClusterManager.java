@@ -3,9 +3,11 @@ package io.onedev.server.cluster;
 import com.hazelcast.cluster.Member;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
+import com.hazelcast.map.IMap;
 import io.onedev.server.replica.ProjectReplica;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,6 +57,8 @@ public interface ClusterManager {
 	int getSshPort(String serverAddress);
 
 	String getServerHost(String serverAddress);
+	
+	String getServerName(String serverAddress);
 	
 	String getServerAddress(Member server);
 	

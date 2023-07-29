@@ -50,10 +50,10 @@ public class ServiceDeskSetting implements Serializable {
 		this.senderAuthorizations = senderAuthorizations;
 	}
 
-	@Editable(order=200, description="When email is sent to system email address without specifying "
-			+ "project information, OneDev will use entries defined here to decide in which "
-			+ "project to create issues. For a particular sender, the first matching entry will "
-			+ "take effect")
+	@Editable(order=200, name="Default Projects", description="When email is sent to system email " +
+			"address without specifying project information, OneDev will use entries defined here " +
+			"to decide in which project to create issues. For a particular sender, the first " +
+			"matching entry will take effect")
 	public List<ProjectDesignation> getProjectDesignations() {
 		return projectDesignations;
 	}

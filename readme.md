@@ -123,13 +123,42 @@ OneDev inspects git history of main branch to calculate trend of source lines of
 
 ## Project Hierarchy to Facilitate Setting Inheritance
 
-Organization is ideal for public service. However for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
+Organization is ideal for public service. However, for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
+
+## Ultra-Easy Clustering and Replication (Enterprise Edition)
+
+Just connect multiple OneDev instances to same database, and you will get a cluster to distribute project load to multiple 
+servers, as well as the ability to sync projects with its replicas in real time. If one server goes down, project replicas 
+on other servers will become active immediately without data loss and service interruption. 
+
+![replication](doc/images/replication.png)
+
+## Customizable Dashboard (Enterprise Edition)
+
+Arrange gadgets in custom dashboard to get important information at a glance. Share dashboard with other users or groups, 
+or make it public for everyone. 
+
+![dashboard](doc/images/dashboard.png)
+
+## Cross Project Fast Code Search (Enterprise Edition)
+
+Cross project fast code search to find information scattered in multiple projects. Support to search by symbol and regular
+expression. Works out of box without extra setup. 
+
+![xsearch](doc/images/xcode-search.png)
+
+## Web Terminal to Diagnose CI/CD Job (Enterprise Edition) 
+
+A web terminal to access environment of running CI/CD job. Used together with pause instruction, one can check 
+live environment of the job to help diagnostics, and resume the job afterwards.   
+
+![webterminal](doc/images/web-terminal.gif)
 
 ## Fast and Reliable with Moderate Resource Usage
 
-OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium sized projects. 
+OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium-sized projects. 
 It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
-normally few to no known bugs in the wild. 
+normally few to no known bugs in the wild.
 
 ----
 

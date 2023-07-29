@@ -560,7 +560,6 @@ pre>code {
 	animation-iteration-count: infinite;
 	animation-timing-function: linear;	
 }
-
 @keyframes spin {
 	from {
     	transform: rotate(0deg);
@@ -568,6 +567,16 @@ pre>code {
   	to {
     	transform: rotate(360deg);
   	}
+}
+.fade {
+	animation-name: fade;
+	animation-duration: 2000ms;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+@keyframes fade {
+	0%,100% { opacity: 0 }
+	50% { opacity: 1 }
 }
 
 .dot {

@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
 import static java.util.Comparator.comparingInt;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public abstract class ProjectInfoPanel extends Panel {
@@ -214,7 +215,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			protected void populateItem(ListItem<Map.Entry<String, ProjectReplica>> item) {
 				var server = item.getModelObject().getKey();
 				var replica = item.getModelObject().getValue();
-				var escapedServer = HtmlEscape.escapeHtml5(server);
+				var escapedServer = escapeHtml5(server + " (" + getClusterManager().getServerName(server) + ")");
 				String serverInfo;
 				if (server.equals(activeServer)) 
 					serverInfo = escapedServer + " <span class='badge badge-sm badge-info ml-1'>active</span>";

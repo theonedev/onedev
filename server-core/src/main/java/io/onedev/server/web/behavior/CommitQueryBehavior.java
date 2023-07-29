@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.onedev.commons.codeassist.InputCompletion;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
@@ -33,6 +34,8 @@ import io.onedev.server.web.util.SuggestionUtils;
 @SuppressWarnings("serial")
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	
 	private final IModel<Project> projectModel;
 	
 	private final boolean withCurrentUserCriteria;
@@ -124,7 +127,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "surround with ~ to query hash/message";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query hash/message";
 					}
 
 				}.suggest(terminalExpect);
@@ -188,8 +191,9 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected char getFuzzyQueryFence() {
-		return '~';
+	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
+		return suggestion.getDescription() != null 
+				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
 	}
 	
 }

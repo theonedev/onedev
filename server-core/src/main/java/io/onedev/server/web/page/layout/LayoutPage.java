@@ -3,7 +3,6 @@ package io.onedev.server.web.page.layout;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.Plugin;
 import io.onedev.server.FeatureManager;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -91,6 +90,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -99,7 +99,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -122,6 +121,13 @@ import static io.onedev.server.model.Alert.PROP_DATE;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
     
+	private final IModel<Boolean> eeLicensedModel = new LoadableDetachableModel<Boolean>() {
+		@Override
+		protected Boolean load() {
+			return getFeatureManager().isEELicensed();
+		}
+	};
+	
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
 	
 	public LayoutPage(PageParameters params) {
@@ -423,25 +429,58 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
-		
-		Plugin product = AppLoader.getProduct();
-		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/onedev/server")
-				.setBody(Model.of("OneDev " + product.getVersion())));
+
+		var version = AppLoader.getProduct().getVersion();
+		sidebar.add(new Label("productVersion", "OneDev " + version));
 		sidebar.add(new WebMarkupContainer("tryEE") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getFeatureManager().isEEAvailable() && !getFeatureManager().isEELicensed());
+				setVisible(getFeatureManager().isEEAvailable() && !isEELicensed());
+			}
+		});
+		
+		sidebar.add(new Label("license", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				return isEELicensed()? "Enterprise License": "Community License";
+			}
+			
+		}) {
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (isEELicensed())
+					tag.put("href", "https://onedev.io/eula#enterprise");
+				else 
+					tag.put("href", "https://onedev.io/eula#community");
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getFeatureManager().isEEAvailable());
 			}
 		});
 		sidebar.add(new WebMarkupContainer("tryEEMenuItem") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getFeatureManager().isEEAvailable() && !getFeatureManager().isEELicensed());
+				setVisible(getFeatureManager().isEEAvailable() && !isEELicensed());
 			}
 		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
+		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
+			@Override
+			protected String load() {
+				if (isEELicensed())
+					return "Bug Report";
+				else
+					return "Support & Bug Report";
+			}
+			
+		}));
+		sidebar.add(getFeatureManager().renderSupportRequestLink("supportRequest"));
 		
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");
 		add(topbar);
@@ -760,6 +799,16 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
+	}
+
+	@Override
+	protected void onDetach() {
+		eeLicensedModel.detach();
+		super.onDetach();
+	}
+	
+	private boolean isEELicensed() {
+		return eeLicensedModel.getObject();
 	}
 
 	private AlertManager getAlertManager() {

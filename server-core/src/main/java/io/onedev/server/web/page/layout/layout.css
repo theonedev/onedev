@@ -178,11 +178,11 @@
 	color: var(--gray);
 }
 .sidebar-footer>.try-ee {
-	background-color: var(--light-warning);
-	color: var(--warning) !important;
+	background-color: var(--light-info);
+	color: var(--info) !important;
 }
 .sidebar-footer>.try-ee:hover {
-	color: var(--warning) !important;
+	color: var(--info) !important;
 }
 .sidebar-help .dropdown-menu .dropdown-item {
 	color: var(--dark);
@@ -350,7 +350,7 @@
 		display: none;
 	}
 	.sidebar-minimized .dropdown-menu .try-ee {
-		display: inline !important;
+		display: inline-block !important;
 	}
 
 	.sidebar-minimized .menu-link .menu-icon {

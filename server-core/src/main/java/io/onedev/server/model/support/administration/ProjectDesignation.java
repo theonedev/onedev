@@ -35,7 +35,7 @@ public class ProjectDesignation implements Serializable {
 		this.senderEmails = senderEmails;
 	}
 	
-	@Editable(order=200)
+	@Editable(order=200, name="Default Project")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
 	public String getProject() {

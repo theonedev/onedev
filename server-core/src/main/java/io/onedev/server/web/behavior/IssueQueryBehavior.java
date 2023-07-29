@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
@@ -48,6 +49,8 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
 @SuppressWarnings("serial")
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	
 	private final IModel<Project> projectModel;
 	
 	private final IssueQueryParseOption option;
@@ -233,7 +236,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "surround with ~ to query title/description/comment";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query title/description/comment";
 					}
 
 				}.suggest(terminalExpect);
@@ -294,8 +297,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected char getFuzzyQueryFence() {
-		return '~';
+	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
+		return suggestion.getDescription() != null 
+				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
 	}
 	
 }

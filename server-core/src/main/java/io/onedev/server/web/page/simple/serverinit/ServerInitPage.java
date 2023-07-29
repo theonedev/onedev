@@ -1,15 +1,5 @@
 package io.onedev.server.web.page.simple.serverinit;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
@@ -22,44 +12,27 @@ import io.onedev.server.web.component.wizard.DefaultEndActionsPanel;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends SimplePage {
 
-	private InitStage initStage;
+	private final InitStage initStage;
 	
 	public ServerInitPage(PageParameters params) {
 		super(params);
 		
-		InitStage initStage = OneDev.getInstance().getInitStage();
-		if (initStage != null) {
-			if (!initStage.getManualConfigs().isEmpty()) {
-				List<ManualConfig> clonedConfigs = new ArrayList<ManualConfig>();
-				for (ManualConfig each: initStage.getManualConfigs())
-					clonedConfigs.add(SerializationUtils.clone(each));
-				
-				final ManualConfig lastConfig = clonedConfigs.remove(clonedConfigs.size()-1);
-				
-				clonedConfigs.add(new ManualConfig(lastConfig.getTitle(), lastConfig.getDescription(), 
-						lastConfig.getSetting(), lastConfig.getExcludeProperties(), lastConfig.isForceOrdinaryStyle()) {
-		
-					@Override
-					public void complete() {
-						lastConfig.complete();
-						InitStage initStage = OneDev.getInstance().getInitStage();
-						if (initStage != null)
-							initStage.finished();
-					}
-					
-				});
-				
-				this.initStage = new InitStage(initStage.getMessage(), clonedConfigs);
-			} else {
-				this.initStage = new InitStage(initStage.getMessage());
-			}
-		} else {
+		initStage = SerializationUtils.clone(OneDev.getInstance().getInitStage());
+		if (initStage == null) {
 			continueToOriginalDestination();
-			
 			throw new RestartResponseException(getApplication().getHomePage());
 		}
 	}
@@ -80,6 +53,18 @@ public class ServerInitPage extends SimplePage {
 						
 						@Override
 						protected void finished() {
+							while (true) {
+								var initStage = OneDev.getInstance().getInitStage();
+								if (initStage == null || initStage.getManualConfigs().isEmpty()) {
+									break;
+								} else  {
+									try {
+										Thread.sleep(10);
+									} catch (InterruptedException e) {
+										throw new RuntimeException(e);
+									}
+								}
+							}
 							WebSession.get().logout();
 							User root = OneDev.getInstance(UserManager.class).getRoot();
 							SecurityUtils.getSubject().runAs(root.getPrincipals());

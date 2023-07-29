@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.server.cluster.ClusterManager;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,6 +38,8 @@ import io.onedev.server.web.util.SuggestionUtils;
 @SuppressWarnings("serial")
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	
 	private final boolean childQuery;
 	
 	public ProjectQueryBehavior(boolean childQuery, boolean hideIfBlank) {
@@ -143,7 +146,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "surround with ~ to query name/path";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query name/path";
 					}
 
 				}.suggest(terminalExpect);
@@ -211,8 +214,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected char getFuzzyQueryFence() {
-		return '~';
+	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
+		return suggestion.getDescription() != null 
+				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
 	}
 	
 }

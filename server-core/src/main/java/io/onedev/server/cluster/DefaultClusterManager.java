@@ -14,11 +14,11 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ServerConfig;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.data.DataManager;
 import io.onedev.server.replica.ProjectReplica;
 import org.eclipse.jetty.server.session.SessionData;
 
@@ -59,6 +59,8 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	private volatile Map<String, Integer> httpPorts;
 	
 	private volatile Map<String, Integer> sshPorts;
+	
+	private volatile Map<String, String> serverNames;
 	
 	private volatile Map<String, String> runningServers;
 	
@@ -162,10 +164,12 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 		
 		httpPorts = hazelcastInstance.getMap("httpPorts");
 		sshPorts = hazelcastInstance.getMap("sshPorts");
+		serverNames = hazelcastInstance.getMap("serverNames");
 		runningServers = hazelcastInstance.getReplicatedMap("runningServers");
 		
 		httpPorts.put(getLocalServerAddress(), serverConfig.getHttpPort());
 		sshPorts.put(getLocalServerAddress(), serverConfig.getSshPort());
+		serverNames.put(getLocalServerAddress(), serverConfig.getServerName());
 	}
 
 	@Override
@@ -187,6 +191,8 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 			httpPorts.put(localServer, serverConfig.getHttpPort());
 		if (sshPorts != null)
 			sshPorts.put(localServer, serverConfig.getSshPort());
+		if (serverNames != null)
+			serverNames.put(getLocalServerAddress(), serverConfig.getServerName());
 
 		if (hazelcastInstance != null) {
 			hazelcastInstance.shutdown();
@@ -356,6 +362,10 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	@Override
 	public int getSshPort(String serverAddress) {
 		return sshPorts.get(serverAddress);
+	}
+	
+	public String getServerName(String serverAddress) {
+		return serverNames.get(serverAddress);
 	}
 	
 	@Override

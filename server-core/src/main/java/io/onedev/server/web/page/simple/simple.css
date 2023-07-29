@@ -29,10 +29,12 @@
 	text-align: left !important;
 }
 .SimplePage .main .brand-logo {
-	color: var(--primary);
 	margin-bottom: 3rem;
 	width: 100px;
 	height: 100px;
+}
+.dark-mode.SimplePage .main .brand-logo {
+	color: white;
 }
 .SimplePage .main .title {
 	margin-bottom: 5rem;

@@ -19,15 +19,14 @@ public class BackupSetting implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 	
 	private String schedule;
-	
-	@Editable(order=100, name="Backup Schedule", description=
-		"Optionally specify a cron expression to schedule database auto-backup. The cron expression format is " +
-		"<em>&lt;seconds&gt; &lt;minutes&gt; &lt;hours&gt; &lt;day-of-month&gt; &lt;month&gt; &lt;day-of-week&gt;</em>." +
-		"For example, <em>0 0 1 * * ?</em> means 1:00am every day. For details of the format, refer " +
-		"to <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz tutorial</a>." + 
-		"The backup files will be placed into <em>db-backup</em> folder under OneDev " +
-		"installation directory. Leave this property empty if you do not want to enable database " +
-		"auto backup.")
+
+	@Editable(order = 100, name = "Backup Schedule", description = "Optionally specify a cron expression to schedule database auto-backup. The cron expression format is " +
+			"<em>&lt;seconds&gt; &lt;minutes&gt; &lt;hours&gt; &lt;day-of-month&gt; &lt;month&gt; &lt;day-of-week&gt;</em>." +
+			"For example, <em>0 0 1 * * ?</em> means 1:00am every day. For details of the format, refer " +
+			"to <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz tutorial</a>." +
+			"The backup files will be placed into <em>db-backup</em> folder under OneDev " +
+			"installation directory. In case multiple servers connect to form a cluster, auto-backup takes place on the <a href='https://docs.onedev.io/concepts#lead-server'>lead server</a>. " +
+			"Leave this property empty if you do not want to enable database auto backup.")
 	@NotEmpty
 	public String getSchedule() {
 		return schedule;

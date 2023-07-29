@@ -7,7 +7,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class InitStage implements Serializable, Cloneable {
 	
-	private String message;
+	private final String message;
 	
 	private final List<ManualConfig> manualConfigs;
 	
@@ -17,7 +17,7 @@ public class InitStage implements Serializable, Cloneable {
 	}
 	
 	public InitStage(String message) {
-		this(message, new ArrayList<ManualConfig>());
+		this(message, new ArrayList<>());
 	}
 	
 	public String getMessage() {
@@ -26,22 +26,6 @@ public class InitStage implements Serializable, Cloneable {
 	
 	public List<ManualConfig> getManualConfigs() {
 		return manualConfigs;
-	}
-	
-	public synchronized void waitForFinish() {
-		if (!manualConfigs.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
-	public synchronized void finished() {
-		message = "Please wait...";
-		manualConfigs.clear();
-		notify();
 	}
 	
 }

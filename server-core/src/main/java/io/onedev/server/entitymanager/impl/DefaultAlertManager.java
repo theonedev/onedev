@@ -80,7 +80,7 @@ public class DefaultAlertManager extends BaseEntityManager<Alert> implements Ale
 	@Listen
 	public void on(ConnectionLost event) {
 		if (clusterManager.isLeaderServer()) {
-			var server = event.getServer();
+			var server = event.getServer() + " (" + clusterManager.getServerName(event.getServer()) + ")";
 			alert("Server '" + server + "' can not be reached", 
 					"Server '" + server + "' is part of OneDev cluster, but can not be reached for some reason", 
 					false);
