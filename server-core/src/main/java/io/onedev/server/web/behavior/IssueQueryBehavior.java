@@ -292,5 +292,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return hints;
 	}
+
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
 	
 }

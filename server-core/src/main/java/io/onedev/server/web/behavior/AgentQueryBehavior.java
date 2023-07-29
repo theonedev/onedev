@@ -179,4 +179,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 		return hints;
 	}
 	
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
+
 }

@@ -143,7 +143,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "surround with ~ to query name";
+						return "surround with ~ to query name/path";
 					}
 
 				}.suggest(terminalExpect);
@@ -210,4 +210,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 		return hints;
 	}
 
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
+	
 }

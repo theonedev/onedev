@@ -169,5 +169,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return hints;
 	}
+
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
 	
 }

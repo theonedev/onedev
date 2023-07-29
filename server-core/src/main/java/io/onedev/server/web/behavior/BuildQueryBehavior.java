@@ -250,5 +250,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return hints;
 	}
+
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
 	
 }

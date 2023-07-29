@@ -229,4 +229,9 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 		return hints;
 	}
 
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
+	
 }

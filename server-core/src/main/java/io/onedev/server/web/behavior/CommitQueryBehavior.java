@@ -187,4 +187,9 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		return Optional.fromNullable(description);
 	}
 
+	@Override
+	protected char getFuzzyQueryFence() {
+		return '~';
+	}
+	
 }

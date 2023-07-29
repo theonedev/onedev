@@ -114,10 +114,6 @@ Value
 	: '(' ('\\'.|~[\\()])+? ')'
 	;
 
-Identifier
-	: [a-zA-Z0-9:_/\\+\-;]+
-	;
-
 fuzzyCriteria
     : Fuzzy
     ;
@@ -125,3 +121,7 @@ fuzzyCriteria
 Fuzzy
     : '~' ('\\'.|~[~])+? '~'
     ;
+
+Identifier
+	: [a-zA-Z0-9:_/\\+\-;]+
+	;

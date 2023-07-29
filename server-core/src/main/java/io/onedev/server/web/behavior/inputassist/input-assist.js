@@ -21,7 +21,7 @@ onedev.server.inputassist = {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
 				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter
-					callback("input", value, caret);
+					callback("input", value, caret, e.type);
 			}
 			if (value.trim().length == 0)
 				onedev.server.inputassist.markErrors(inputId, []);
@@ -126,7 +126,7 @@ onedev.server.inputassist = {
 			} else {
 				tabbing = false;
 			}
-		};
+		}
 		$input.bind("keydown", "tab", function() {
 			if (!tabbing) {
 				return tab();
@@ -166,6 +166,16 @@ onedev.server.inputassist = {
 				$error.outerHeight(errorHeight);
 			}
 		}
+	},
+	
+	appendSpace: function(inputId) {
+		var $input = $("#" + inputId);
+		$input.val($input.val() + " ");
+		$input.caret($input.val().length + 1);
+		$input.blur();
+		$input.focus();
+		$input.trigger("input");
+		$input.trigger("assist");
 	},
 	
 	assistOpened: function(inputId, dropdownId, inputContent) {

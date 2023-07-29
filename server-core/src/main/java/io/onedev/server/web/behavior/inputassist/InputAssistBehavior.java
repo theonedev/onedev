@@ -146,52 +146,73 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 					ComponentContext.pop();
 				}
 				if (!suggestions.isEmpty() && (inputContent.length() != 0 || !hideIfBlank)) {
-					int anchor = getAnchor(inputContent.substring(0, inputCaret));
-					if (dropdown == null) {
-						dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {
-
-							@Override
-							protected Component newContent(String id) {
-								return new AssistPanel(id, getComponent(), suggestions, getHints(inputStatus)) {
-
-									@Override
-									protected void onClose(AjaxRequestTarget target) {
-										close();
-									}
-									
-								};
+					boolean hasOtherSuggestions = false;
+					boolean hasAppendSpaceSuggestions = false;
+					if ("assist".equals(params.getParameterValue("event").toString()) 
+							&& !inputContent.endsWith(" ") 
+							&& inputCaret == inputContent.length()) {
+						for (var suggestion: suggestions) {
+							if (suggestion.getContent().equals(inputContent + " ") && suggestion.getCaret() == inputContent.length() + 1) {
+								hasAppendSpaceSuggestions = true;
+							} else if (!suggestion.getContent().equals(inputContent) 
+									&& (getFuzzyQueryFence() == 0 || !suggestion.getContent().equals(getFuzzyQueryFence() + inputContent + getFuzzyQueryFence()))) {
+								hasOtherSuggestions = true;
 							}
+						}
+					}
 
-							@Override
-							protected void onClosed() {
-								super.onClosed();
-								dropdown = null;
-							}
-							
-						};
-						script = String.format("onedev.server.inputassist.assistOpened('%s', '%s', '%s');", 
-								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
-						target.appendJavaScript(script);
+					if (hasAppendSpaceSuggestions && !hasOtherSuggestions) {
+						target.appendJavaScript(
+								String.format("onedev.server.inputassist.appendSpace('%s');", 
+								getComponent().getMarkupId()));
 					} else {
-						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), getComponent(), suggestions, getHints(inputStatus)) {
+						int anchor = getAnchor(inputContent.substring(0, inputCaret));
+						if (dropdown == null) {
+							dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {
 
-							@Override
-							protected void onClose(AjaxRequestTarget target) {
-								close();
-							}
-							
-						};
-						content.replaceWith(newContent);
-						target.add(newContent);
+								@Override
+								protected Component newContent(String id) {
+									return new AssistPanel(id, getComponent(), suggestions, getHints(inputStatus)) {
 
-						AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
-						script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
-						target.prependJavaScript(script);
-						
-						script = String.format("onedev.server.inputassist.assistUpdated('%s', '%s', '%s');", 
-								getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
-						target.appendJavaScript(script);
+										@Override
+										protected void onClose(AjaxRequestTarget target) {
+											close();
+										}
+
+									};
+								}
+
+								@Override
+								protected void onClosed() {
+									super.onClosed();
+									dropdown = null;
+								}
+
+							};
+							script = String.format("onedev.server.inputassist.assistOpened('%s', '%s', '%s');",
+									getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
+							target.appendJavaScript(script);
+						} else {
+							Component content = dropdown.getContent();
+							Component newContent = new AssistPanel(content.getId(), getComponent(), suggestions, getHints(inputStatus)) {
+
+								@Override
+								protected void onClose(AjaxRequestTarget target) {
+									close();
+								}
+
+							};
+							content.replaceWith(newContent);
+							target.add(newContent);
+
+							AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
+							script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
+							target.prependJavaScript(script);
+
+							script = String.format("onedev.server.inputassist.assistUpdated('%s', '%s', '%s');",
+									getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
+							target.appendJavaScript(script);
+						}
 					}
 				} else if (dropdown != null) {
 					dropdown.close();
@@ -219,11 +240,11 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		
 		String script = String.format("onedev.server.inputassist.onDomReady('%s', %s);", 
 				getComponent().getMarkupId(true), 
-				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret")));
+				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret"), explicit("event")));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-
+	
 	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus);
 
 	protected List<String> getHints(InputStatus inputStatus) {
@@ -241,5 +262,9 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	 * @return
 	 */
 	protected abstract int getAnchor(String inputContent);
+
+	protected char getFuzzyQueryFence() {
+		return 0;
+	}
 	
 }
