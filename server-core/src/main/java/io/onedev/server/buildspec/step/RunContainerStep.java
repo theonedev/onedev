@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
-		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts. " +
+		+ "job workspace, either use environment variable <tt>ONEDEV_WORKSPACE</tt>, or specify volume mounts. " +
 		"<b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote " +
 		"docker executor")
 public class RunContainerStep extends Step {
@@ -45,8 +45,12 @@ public class RunContainerStep extends Step {
 		for (EnvVar var: getEnvVars())
 			envMap.put(var.getName(), var.getValue());
 		Map<String, String> mountMap = new HashMap<>();
-		for (VolumeMount mount: getVolumeMounts())
-			mountMap.put(mount.getSourcePath(), mount.getTargetPath());
+		for (VolumeMount mount: getVolumeMounts()) {
+			var sourcePath = mount.getSourcePath();
+			if (sourcePath == null)
+				sourcePath = ".";
+			mountMap.put(sourcePath, mount.getTargetPath());
+		}
 		return new RunContainerFacade(getImage(), null, getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
 	}
 
