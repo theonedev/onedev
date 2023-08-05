@@ -20,11 +20,9 @@
 
 ## Out-of-box Symbol Search and Navigation
 
-Of course IDE is good at doing this, but often we need to search in old commits (investigate issues in release versions etc), and switching commits in IDE can be troublesome and slow. 
+Just push code and you will be able to perform symbol search and navigation in arbitrary commit without any extra setup. You can also jump to symbol definition in diff while reviewing commits or pull requests. 
 
-It works by analyzing source code with ANTLR, extracting symbols for storage incrementally, fast and space efficient. Now supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. GitHub adds this feature several years ago, but seems that it only works for main branch, and GitLab has to configure CI job to generate and upload LSIF which is troublesome and can occupy considerable space if you do it for each commit.
-
-You can also jump to symbol definition in diff while reviewing commits or pull requests.
+It works by analyzing source code with ANTLR, extracting symbols for storage incrementally, fast and space efficient. Supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
 ![searchsymbol](doc/images/search-symbol.gif)
 
