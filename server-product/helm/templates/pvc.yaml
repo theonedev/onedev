@@ -5,6 +5,8 @@ metadata:
   name: {{ include "ods.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{ include "ods.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep  
 spec:
   resources:
     requests:
