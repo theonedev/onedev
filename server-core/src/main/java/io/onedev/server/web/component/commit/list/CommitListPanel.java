@@ -332,7 +332,7 @@ public abstract class CommitListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true) {
+		}, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

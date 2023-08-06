@@ -31,7 +31,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class RetryConditionBehavior extends ANTLRAssistBehavior {
 
 	public RetryConditionBehavior() {
-		super(RetryConditionParser.class, "condition", false, true);
+		super(RetryConditionParser.class, "condition", false, false);
 	}
 
 	@Override

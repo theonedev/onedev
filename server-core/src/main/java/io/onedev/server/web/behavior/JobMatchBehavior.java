@@ -33,7 +33,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 	private final boolean withJobCriteria;
 
 	public JobMatchBehavior(boolean withProjectCriteria, boolean withJobCriteria) {
-		super(JobMatchParser.class, "jobMatch", false, true);
+		super(JobMatchParser.class, "jobMatch", false, false);
 		this.withProjectCriteria = withProjectCriteria;
 		this.withJobCriteria = withJobCriteria;
 	}

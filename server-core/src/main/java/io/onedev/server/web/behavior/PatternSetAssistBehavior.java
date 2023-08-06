@@ -24,7 +24,7 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 
 	public PatternSetAssistBehavior() {
-		super(PatternSetParser.class, "patterns", false, true);
+		super(PatternSetParser.class, "patterns", false, false);
 	}
 
 	@Override

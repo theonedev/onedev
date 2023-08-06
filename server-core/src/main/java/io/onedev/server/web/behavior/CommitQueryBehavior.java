@@ -45,12 +45,16 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
-	public CommitQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
-		super(CommitQueryParser.class, "query", false, true);
+	public CommitQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, boolean hideIfBlank) {
+		super(CommitQueryParser.class, "query", false, hideIfBlank);
 		this.projectModel = projectModel;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}
 
+	public CommitQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
+		this(projectModel, withCurrentUserCriteria, false);
+	}
+	
 	@Override
 	public void detach(Component component) {
 		super.detach(component);

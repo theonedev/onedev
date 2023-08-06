@@ -19,7 +19,7 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 public abstract class InterpolativeAssistBehavior extends ANTLRAssistBehavior {
 
 	public InterpolativeAssistBehavior() {
-		super(InterpolativeParser.class, "interpolative", false, true);
+		super(InterpolativeParser.class, "interpolative", false, false);
 	}
 
 	@Override

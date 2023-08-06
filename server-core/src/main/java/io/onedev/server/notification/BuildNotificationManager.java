@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -34,6 +35,8 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
+
+import static java.util.stream.Collectors.*;
 
 @Singleton
 public class BuildNotificationManager extends AbstractNotificationManager {
@@ -69,6 +72,8 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	@Sessional
 	public void notify(BuildEvent event, Collection<String> emails) {
+		emails = emails.stream().filter(it -> !it.equals(User.SYSTEM_EMAIL_ADDRESS)).collect(toList());
+		
 		Build build = event.getBuild();
 		String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
 

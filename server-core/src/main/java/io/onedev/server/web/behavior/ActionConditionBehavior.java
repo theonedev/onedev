@@ -34,7 +34,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class ActionConditionBehavior extends ANTLRAssistBehavior {
 
 	public ActionConditionBehavior() {
-		super(ActionConditionParser.class, "condition", false, true);
+		super(ActionConditionParser.class, "condition", false, false);
 	}
 
 	@Override
