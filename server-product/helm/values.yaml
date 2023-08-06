@@ -13,7 +13,7 @@ onedev:
   useStatefulSet: false
   # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
   updateStrategy:
-    type: RollingUpdate
+    type: Recreate
   trustCerts:
     # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
     # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
