@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>8.6.5</version>
+		<version>8.6.6</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.report.coverage.CoverageModule</moduleClass>
