@@ -612,6 +612,34 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>jenkins</id>
+			<url>https://repo.jenkins-ci.org/releases/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>jetbrains</id>
+			<url>https://packages.jetbrains.team/maven/p/ij/intellij-dependencies</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
 	</repositories>
 	<properties>
 		<commons.version>2.7.21</commons.version>
