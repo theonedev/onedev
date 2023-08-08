@@ -577,6 +577,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				query = getSession().createQuery("delete from IssueWatch where issue in (select issue from Issue issue where issue.state=:state)");
 				query.setParameter("state", entry.getKey());
 				query.executeUpdate();
+
+				query = getSession().createQuery("delete from IssueAuthorization where issue in (select issue from Issue issue where issue.state=:state)");
+				query.setParameter("state", entry.getKey());
+				query.executeUpdate();
 				
 				query = getSession().createQuery("delete from Issue where state=:state");
 				query.setParameter("state", entry.getKey());
