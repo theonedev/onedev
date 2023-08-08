@@ -77,6 +77,7 @@ public class SSHCommandStep extends CommandStep {
 
 	@Editable(order=250, description = "Optionally specify options for ssh command. Multiple options need to be " +
 			"separated with space")
+	@Interpolative(variableSuggester="suggestVariables")
 	public String getOptions() {
 		return options;
 	}

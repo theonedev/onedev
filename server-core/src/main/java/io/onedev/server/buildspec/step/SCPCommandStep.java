@@ -70,6 +70,7 @@ public class SCPCommandStep extends CommandStep {
 
 	@Editable(order=500, description = "Optionally specify options for scp command. Multiple options need to be " +
 			"separated with space")
+	@Interpolative(variableSuggester="suggestVariables")
 	public String getOptions() {
 		return options;
 	}
