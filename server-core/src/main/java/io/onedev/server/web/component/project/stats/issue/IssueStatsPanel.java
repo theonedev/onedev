@@ -70,13 +70,13 @@ public class IssueStatsPanel extends Panel {
 		}));
 		add(issuesLink);
 		
-		add(new ListView<Map.Entry<Integer, Long>>("states", new LoadableDetachableModel<List<Map.Entry<Integer, Long>>>() {
+		add(new ListView<>("states", new LoadableDetachableModel<List<Map.Entry<Integer, Long>>>() {
 
 			@Override
 			protected List<Map.Entry<Integer, Long>> load() {
 				return new ArrayList<>(getStats().entrySet());
 			}
-			
+
 		}) {
 
 			@Override
@@ -93,7 +93,7 @@ public class IssueStatsPanel extends Panel {
 				stateLink.add(AttributeAppender.append("style", "color:" + stateSpec.getColor()));
 				item.add(stateLink);
 			}
-			
+
 		});
 
 	}

@@ -44,6 +44,7 @@ import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.integritycheck.CheckIssueIntegrityPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
@@ -222,6 +223,8 @@ public abstract class LayoutPage extends BasePage {
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
 							CommitMessageFixPatternsPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Check Workflow Integrity", 
+							CheckIssueIntegrityPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Settings", issueSettingMenuItems));
 

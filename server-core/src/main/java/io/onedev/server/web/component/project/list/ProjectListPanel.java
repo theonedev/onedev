@@ -1053,21 +1053,22 @@ public class ProjectListPanel extends Panel {
 					}
 					
 					if (project.isIssueManagement()) {
-						fragment.add(new IssueStatsPanel("issueStats", rowModel, new LoadableDetachableModel<Map<Integer, Long>>() {
-	
+						fragment.add(new IssueStatsPanel("issueStats", rowModel, new LoadableDetachableModel<>() {
+
 							@Override
 							protected Map<Integer, Long> load() {
 								Map<Integer, Long> stateCounts = new LinkedHashMap<>();
 								GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-								for (ProjectIssueStats stats: issueStatsModel.getObject()) {
-									if (stats.getProjectId().equals(projectId) 
+								for (ProjectIssueStats stats : issueStatsModel.getObject()) {
+									if (stats.getProjectId().equals(projectId)
+											&& stats.getStateOrdinal() >= 0
 											&& stats.getStateOrdinal() < issueSetting.getStateSpecs().size()) {
 										stateCounts.put(stats.getStateOrdinal(), stats.getStateCount());
 									}
 								}
 								return stateCounts;
 							}
-							
+
 						}));
 					} else {
 						fragment.add(new WebMarkupContainer("issueStats").setVisible(false));
