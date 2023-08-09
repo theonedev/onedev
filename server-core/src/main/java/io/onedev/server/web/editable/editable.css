@@ -102,6 +102,9 @@
 .editable table tr:first-child td {
 	border-top: 1px dashed var(--secondary);
 }
+.dark-mode .editable table tr:first-child td {
+	border-top: 1px dashed var(--dark-mode-lighter-dark);
+}
 .editable table tr:first-child td:first-child {
 	border-top-left-radius: 0.42rem;
 }

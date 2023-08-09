@@ -109,7 +109,7 @@ public class SSHCommandStep extends CommandStep {
 	@Editable
 	@Override
 	public String getImage() {
-		return "1dev/ssh-client:1.0.1";
+		return "1dev/ssh-client:1.1.0";
 	}
 
 	@Override
@@ -143,10 +143,6 @@ public class SSHCommandStep extends CommandStep {
 				return commands;
 			}
 		};
-	}
-
-	static List<InputSuggestion> suggestCommandVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false, true);
 	}
 	
 }
