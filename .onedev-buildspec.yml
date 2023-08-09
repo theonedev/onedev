@@ -1,7 +1,4 @@
-version: 21
-properties:
-- name: buildEnvironment
-  value: 1dev/build-environment:1.5
+version: 25
 jobs:
 - name: CI
   steps:
@@ -19,10 +16,8 @@ jobs:
     interpreter: !DefaultInterpreter
       commands:
       - set -e
-      - echo "Detecting project version (may require some time while downloading maven
-        dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version
-        -q -DforceStdout) > buildVersion
+      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
+      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
@@ -66,10 +61,8 @@ jobs:
     interpreter: !DefaultInterpreter
       commands:
       - set -e
-      - echo "Detecting project version (may require some time while downloading maven
-        dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
-        -q -DforceStdout) > buildVersion
+      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
+      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
@@ -91,8 +84,7 @@ jobs:
       - docker login -u robinshen -p @secrets:dockerhub-password@
       - ''
       - '# Skip test as we''ve already tested in CI build'
-      - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
-        deploy
+      - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
       - ''
       - cd $projectDir/server-product/docker
       - docker run --privileged --rm tonistiigi/binfmt --install all
@@ -111,8 +103,7 @@ jobs:
       - cd server-plugin/server-plugin-archetype
       - mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
       - cd $projectDir
-      - sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///'
-        server-plugin-archetype-${buildVersion}/pom.xml
+      - sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///' server-plugin-archetype-${buildVersion}/pom.xml
       - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
       - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
       - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
@@ -126,26 +117,19 @@ jobs:
       - git tag v$buildVersion -m "Release tag"
       - git push -f origin v$buildVersion:v$buildVersion
       - git config --global --unset http.extraHeader
-      - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
-        v$buildVersion:v$buildVersion
+      - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
       - ''
       - echo "Creating release in GitHub..."
       - ''
-      - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
-        | jq '.id')
+      - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion | jq '.id')
       - ''
-      - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
-        Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n##
-        Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
-        Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
+      - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
       - ''
       - 'acceptHeader="Accept: application/vnd.github.v3+json"'
       - if [ "$releaseId" == "null" ]; then
-      - '  curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d
-        "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases'
+      - '  curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases'
       - else
-      - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d
-        "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
+      - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
       - fi
       - ''
       - unzip onedev-${buildVersion}.zip
@@ -198,8 +182,7 @@ jobs:
     interpreter: !DefaultInterpreter
       commands:
       - git config --global --unset http.extraHeader
-      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
-        HEAD:main
+      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git HEAD:main
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
