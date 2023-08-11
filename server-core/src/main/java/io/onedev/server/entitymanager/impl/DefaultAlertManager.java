@@ -77,6 +77,11 @@ public class DefaultAlertManager extends BaseEntityManager<Alert> implements Ale
 		dao.persist(alert);
 	}
 
+	@Override
+	public void alert(String subject, String detail) {
+		alert(subject, detail, false);
+	}
+
 	@Listen
 	public void on(ConnectionLost event) {
 		if (clusterManager.isLeaderServer()) {

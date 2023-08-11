@@ -568,13 +568,13 @@ pre>code {
     	transform: rotate(360deg);
   	}
 }
-.fade {
-	animation-name: fade;
+.fade-in-out {
+	animation-name: fade-in-out;
 	animation-duration: 2000ms;
 	animation-iteration-count: infinite;
 	animation-timing-function: linear;
 }
-@keyframes fade {
+@keyframes fade-in-out {
 	0%,100% { opacity: 0 }
 	50% { opacity: 1 }
 }
