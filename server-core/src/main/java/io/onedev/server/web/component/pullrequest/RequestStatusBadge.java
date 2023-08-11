@@ -40,7 +40,7 @@ public class RequestStatusBadge extends Label {
 				case MERGED:
 					return "badge badge-success request-status";
 				default:
-					return "badge badge-danger request-status";
+					return "badge badge-secondary request-status";
 				}
 			}
 			

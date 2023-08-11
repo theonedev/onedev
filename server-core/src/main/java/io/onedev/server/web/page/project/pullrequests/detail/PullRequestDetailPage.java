@@ -1222,7 +1222,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					public String getObject() {
 						PullRequest request = getPullRequest();
 						if (request.isDiscarded())
-							return " badge-danger";
+							return " badge-secondary";
 						else if (request.isMerged())
 							return " badge-success";
 						else

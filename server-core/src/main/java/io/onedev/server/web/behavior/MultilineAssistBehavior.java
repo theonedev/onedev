@@ -13,7 +13,7 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 public abstract class MultilineAssistBehavior extends InputAssistBehavior {
 
 	public MultilineAssistBehavior() {
-		super(true);
+		super(false);
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
 
 	public ReferenceInputBehavior() {
-		super(true);
+		super(false);
 	}
 
 	@Override
