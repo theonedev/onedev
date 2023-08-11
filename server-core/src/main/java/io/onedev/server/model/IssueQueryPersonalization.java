@@ -29,6 +29,8 @@ public class IssueQueryPersonalization extends AbstractEntity implements QueryPe
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_PROJECT = "project";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;

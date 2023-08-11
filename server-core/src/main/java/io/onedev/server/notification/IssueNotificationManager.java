@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.project.issue.*;
+import io.onedev.server.util.ProjectScope;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -52,12 +53,14 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final IssueMentionManager mentionManager;
 	
+	private final IssueQueryPersonalizationManager queryPersonalizationManager;
+	
 	@Inject
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
 									IssueWatchManager watchManager, VisitInfoManager userInfoManager, 
 									UserManager userManager, SettingManager settingManager, 
-									IssueAuthorizationManager authorizationManager, 
-									IssueMentionManager mentionManager) {
+									IssueAuthorizationManager authorizationManager, IssueMentionManager mentionManager, 
+									IssueQueryPersonalizationManager queryPersonalizationManager) {
 		super(markdownManager, settingManager);
 		
 		this.mailManager = mailManager;
@@ -66,6 +69,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		this.userManager = userManager;
 		this.authorizationManager = authorizationManager;
 		this.mentionManager = mentionManager;
+		this.queryPersonalizationManager = queryPersonalizationManager;
 	}
 	
 	@Transactional
@@ -98,7 +102,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return issue.getProject().getIssueQueryPersonalizations();
+				return queryPersonalizationManager.query(new ProjectScope(issue.getProject(), true, true));
 			}
 
 			@Override
