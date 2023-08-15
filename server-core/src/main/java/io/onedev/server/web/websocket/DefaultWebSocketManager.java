@@ -13,6 +13,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
@@ -34,7 +35,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.onedev.server.util.CollectionUtils.containsAny;
+import static io.onedev.server.web.behavior.ChangeObserver.containsObservable;
+import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
 
 @Singleton
 public class DefaultWebSocketManager implements WebSocketManager, Serializable {
@@ -88,7 +90,7 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 			IKey pageKey = new PageIdKey(page.getPageId());
 			Collection<String> observables = page.findChangeObservables();
 			Collection<String> prevObservables = observablesOfSession.put(pageKey, observables);
-			if (prevObservables != null && !prevObservables.containsAll(observables)) {
+			if (prevObservables != null && !observables.stream().allMatch(it -> prevObservables.stream().anyMatch(it2 -> containsObservable(it2, it)))) {
 				IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, pageKey);
 				if (connection != null)
 					notifyPastObservables(connection);
@@ -145,8 +147,12 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 						PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
 						if (sourcePageKey == null || !sourcePageKey.equals(pageKey)) {
 							Collection<String> registeredObservables = getRegisteredObservables(connection);
-							if (registeredObservables != null && containsAny(registeredObservables, observables))
-								notifyObservables(connection, observables);
+							if (registeredObservables != null) {
+								var registeredChangedObservables = 
+										filterObservables(registeredObservables, observables);
+								if (!registeredChangedObservables.isEmpty())
+									notifyObservables(connection, registeredChangedObservables);
+							}
 						}
 					}
 					return null;
@@ -229,8 +235,8 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 			for (var entry: notifiedObservables.entrySet()) {
 				var observable = entry.getKey();
 				var sourcePageKey = entry.getValue().getLeft();
-				if (registeredObservables.contains(observable) 
-						&& (sourcePageKey == null || !sourcePageKey.equals(pageKey))) {
+				if ((sourcePageKey == null || !sourcePageKey.equals(pageKey)) 
+						&& registeredObservables.stream().anyMatch(it-> containsObservable(it, observable))) {
 					observables.add(observable);
 				}
 			}

@@ -1,9 +1,9 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -17,17 +17,23 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+
+import static java.lang.Long.parseLong;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 @SuppressWarnings("serial")
 abstract class CardListPanel extends Panel {
 
+	private RepeatingView cardsView;
+	
+	private InfiniteScrollBehavior behavior;
+	
 	public CardListPanel(String id) {
 		super(id);
 	}
@@ -38,22 +44,14 @@ abstract class CardListPanel extends Panel {
 
 		add(new FencedFeedbackPanel("feedback", this));
 		
-		RepeatingView cardsView = new RepeatingView("cards");
+		cardsView = new RepeatingView("cards");
 		int index = 0;
 		try {
 			List<Issue> issues = queryIssues(0, WebConstants.PAGE_SIZE);
 			for (Issue issue: issues) {
-				Long issueId = issue.getId();
-				IModel<Issue> model = new LoadableDetachableModel<Issue>() {
-	
-					@Override
-					protected Issue load() {
-						return OneDev.getInstance(IssueManager.class).load(issueId);
-					}
-					
-				};
 				int cardOffset = index;
-				cardsView.add(new BoardCardPanel(cardsView.newChildId(), model) {
+				var issueId = issue.getId();
+				cardsView.add(new BoardCardPanel(cardsView.newChildId(), issueId) {
 	
 					@Override
 					protected Cursor getCursor() {
@@ -68,7 +66,12 @@ abstract class CardListPanel extends Panel {
 					protected Project getProject() {
 						return CardListPanel.this.getProject();
 					}
-					
+
+					@Override
+					protected void onDeleteIssue(AjaxRequestTarget target) {
+						removeCard(target, issueId);
+					}
+
 				});
 				index++;
 			}
@@ -77,7 +80,6 @@ abstract class CardListPanel extends Panel {
 		}
 		add(cardsView);
 		
-		InfiniteScrollBehavior behavior;
 		add(behavior = new InfiniteScrollBehavior(WebConstants.PAGE_SIZE) {
 
 			@Override
@@ -89,17 +91,9 @@ abstract class CardListPanel extends Panel {
 			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
 				int index = offset;
 				for (Issue issue: queryIssues(offset, count)) {
-					Long issueId = issue.getId();
-					IModel<Issue> model = new LoadableDetachableModel<Issue>() {
-
-						@Override
-						protected Issue load() {
-							return OneDev.getInstance(IssueManager.class).load(issueId);
-						}
-						
-					};
 					int cardOffset = index;
-					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), model) {
+					var issueId = issue.getId();
+					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), issueId) {
 
 						@Override
 						protected Cursor getCursor() {
@@ -114,7 +108,12 @@ abstract class CardListPanel extends Panel {
 						protected Project getProject() {
 							return CardListPanel.this.getProject();
 						}
-						
+
+						@Override
+						protected void onDeleteIssue(AjaxRequestTarget target) {
+							removeCard(target, issueId);
+						}
+
 					};
 					cardsView.add(card);
 					String script = String.format("$('#%s').append('<div id=\"%s\"></div>');", 
@@ -130,17 +129,50 @@ abstract class CardListPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				behavior.refresh(handler);
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+				Project.push(getProject());
+				try {
+					for (var observable : changedObservables) {
+						var issueId = parseLong(substringAfterLast(observable, ":"));
+						var issue = getIssueManager().load(issueId);
+						if (getQuery() == null || getQuery().matches(issue)) {
+							boolean found = false;
+							for (var card : cardsView) {
+								if (((BoardCardPanel) card).getIssueId().equals(issueId)) {
+									handler.add(card);
+									found = true;
+									break;
+								}
+							}
+							if (!found) {
+								behavior.refresh(handler);
+								onUpdate(handler);
+							}
+						} else {
+							removeCard(handler, issueId);
+						}
+					}
+				} finally {
+					Project.pop();
+				}
 			}
 			
 			@Override
 			public Collection<String> findObservables() {
-				return Sets.newHashSet(Issue.getListChangeObservable(getProject().getId()));
+				Collection<String> observables = new HashSet<>();
+				for (var projectId: getProjectManager().getSubtreeIds(getProject().getId()))
+					observables.add(Issue.getListChangeObservable(projectId));
+				for (var ancestor: getProject().getAncestors())
+					observables.add(Issue.getListChangeObservable(ancestor.getId()));
+				return observables;
 			}
 			
 		});
 		
+	}
+	
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class); 
 	}
 	
 	private IssueManager getIssueManager() {
@@ -166,4 +198,17 @@ abstract class CardListPanel extends Panel {
 
 	protected abstract int getCardCount();
 	
+	protected abstract void onUpdate(IPartialPageRequestHandler handler);
+	
+	private void removeCard(IPartialPageRequestHandler handler, Long issueId) {
+		for (var card: cardsView) {
+			if (((BoardCardPanel)card).getIssueId().equals(issueId)) {
+				cardsView.remove(card);
+				handler.appendJavaScript(String.format("$('#%s').remove();", card.getMarkupId()));
+				behavior.check(handler);
+				onUpdate(handler);
+				break;
+			}
+		}
+	}
 }

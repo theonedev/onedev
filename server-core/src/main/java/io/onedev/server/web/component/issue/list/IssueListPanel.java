@@ -1432,7 +1432,7 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new ChangeObserver() {
 
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
+					public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 						Component detail = newIssueDetail(componentId, issueId, cursor);
 						fragment.replaceWith(detail);
 						handler.add(detail);

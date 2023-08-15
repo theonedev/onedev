@@ -29,7 +29,7 @@ onedev.server.issueBoards = {
 				scroll: false,
 				start: function(event, ui) {
 					// pretend that we are in ajax operation to prevent websocket auto-update while dragging
-					onedev.server.ajaxRequests.count++;					
+					onedev.server.ajaxRequests.count++;		
 					$card.addClass("issue-dragging");
 					$(ui.helper).outerWidth($card.outerWidth());
 					containerContentWidth = $container.prop("scrollWidth");
@@ -72,30 +72,26 @@ onedev.server.issueBoards = {
 						 * cancel the dialog and the accept flag will be set to false 
 						 */
 						function checkAccepted() {
-							var accepted = $card.data("accepted");
+							var accepted = $(".issue-boards").data("accepted");
 							if (accepted != undefined) {
 								if (!accepted) {
 									$card.removeClass("issue-dragging");
 								}
-								onedev.server.ajaxRequests.count--;					
+								onedev.server.ajaxRequests.count--;
+								$(".issue-boards").removeData("accepted");
 							} else {
-								setTimeout(checkAccepted, 10);
+								setTimeout(checkAccepted, 100);
 							}
-							$card.removeData("accepted");
 						}
 						checkAccepted();
 					} else {
 						$card.removeClass("issue-dragging");
-						onedev.server.ajaxRequests.count--;		
+						onedev.server.ajaxRequests.count--;
 					}
 					$card.removeData("droppedTo");
 					$(".issue-boards .body .body").removeClass("issue-droppable");
 				}
 			});
 		}
-	}, 
-	markAccepted: function(issueId, accepted) {
-		var $card = $(".issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
-		$card.data("accepted", accepted);
 	} 
 }

@@ -20,7 +20,7 @@ onedev.server.infiniteScroll = {
 	refresh: function(containerId) {
 		var $container = $("#" + containerId);
 		if (!$container.data("appending")) {
-			$container.data("scrollTop", $container.scrollTop());
+			$container.data("scrollTop", 0);
 			var $items = onedev.server.infiniteScroll.getItems($container);
 			$items.remove();
 			$container.scrollTop(0);
@@ -38,8 +38,8 @@ onedev.server.infiniteScroll = {
 				var tolerate = 5;
 				return $item.offset().top>$container.offset().top-tolerate
 						&& $item.offset().top+$item.outerHeight()<$container.offset().top+$container.outerHeight()+tolerate;
-			};
-	
+			}
+			
 			var $items = onedev.server.infiniteScroll.getItems($container);
 			var $lastItem = $items.last();
 			
@@ -53,14 +53,16 @@ onedev.server.infiniteScroll = {
 						$container.data("prevItems", $items.length);
 						$container.data("callback")($items.length, pageSize);
 						$container.data("appending", true);
-						if ($lastItem.is("li")) {
-							$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></li>");
-						} else if ($lastItem.is("tr")) {
-							var colspan = $lastItem.children().length;
-							$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></td></tr>");
-						} else {
-							$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></div>");
-						}		
+						if (showIndicator) {
+							if ($lastItem.is("li")) {
+								$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></li>");
+							} else if ($lastItem.is("tr")) {
+								var colspan = $lastItem.children().length;
+								$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></td></tr>");
+							} else {
+								$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></div>");
+							}
+						}
 					} else if (scrollTop) {
 						if (scrollTop > $container.scrollTop()) 
 							$container.scrollTop(scrollTop);

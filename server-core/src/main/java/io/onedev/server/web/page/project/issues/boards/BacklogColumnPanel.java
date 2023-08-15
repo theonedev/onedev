@@ -1,29 +1,5 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.web.component.issue.create.CreateIssuePanel;
-import io.onedev.server.web.page.base.BasePage;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -38,9 +14,33 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.issue.create.CreateIssuePanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.CallbackParameter;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends Panel {
@@ -63,7 +63,7 @@ abstract class BacklogColumnPanel extends Panel {
 		
 	};
 
-	private final IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
+	private final IModel<Integer> countModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected Integer load() {
@@ -77,10 +77,12 @@ abstract class BacklogColumnPanel extends Panel {
 				return 0;
 			}
 		}
-		
+
 	};
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
+	
+	private Component countLabel;
 	
 	public BacklogColumnPanel(String id) {
 		super(id);
@@ -136,19 +138,7 @@ abstract class BacklogColumnPanel extends Panel {
 			add(new WebMarkupContainer("viewAsList").setVisible(false));
 		}
 		
-		add(new CardCountLabel("count") {
-
-			@Override
-			protected Project getProject() {
-				return BacklogColumnPanel.this.getProject();
-			}
-
-			@Override
-			protected int getCount() {
-				return countModel.getObject();
-			}
-
-		});
+		add(countLabel = new Label("count", countModel).setOutputMarkupId(true));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			
@@ -158,9 +148,9 @@ abstract class BacklogColumnPanel extends Panel {
 				Issue issue = getIssueManager().load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
-				OneDev.getInstance(IssueChangeManager.class).removeSchedule(issue, getMilestone());
+				getIssueChangeManager().removeSchedule(issue, getMilestone());
 				notifyIssueChange(target, issue);
-				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
+				target.appendJavaScript("$('.issue-boards').data('accepted', true);");
 			}
 			
 		});
@@ -215,6 +205,11 @@ abstract class BacklogColumnPanel extends Panel {
 				return countModel.getObject();
 			}
 
+			@Override
+			protected void onUpdate(IPartialPageRequestHandler handler) {
+				handler.add(countLabel);
+			}
+
 		});
 		
 		super.onBeforeRender();
@@ -233,6 +228,10 @@ abstract class BacklogColumnPanel extends Panel {
 	
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
+	}
+	
+	private IssueChangeManager getIssueChangeManager() {
+		return OneDev.getInstance(IssueChangeManager.class);
 	}
 	
 	private Project getProject() {

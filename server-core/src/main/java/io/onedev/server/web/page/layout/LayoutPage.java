@@ -628,7 +628,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		topbar.add(new ChangeObserver() {
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				var count = getAlertManager().count();
 				if (count != 0 && !alertsLink.isVisible() || count == 0 && alertsLink.isVisible())
 					handler.add(alertsLink);

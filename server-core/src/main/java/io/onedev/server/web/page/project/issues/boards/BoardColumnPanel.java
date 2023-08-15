@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
 
-	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected IssueQuery load() {
@@ -82,7 +82,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (identifyField.equals(Issue.NAME_STATE)) {
 					criterias.add(new StateCriteria(getColumn(), IssueQueryLexer.Is));
 				} else if (getColumn() != null) {
-					criterias.add(new ChoiceFieldCriteria(identifyField, 
+					criterias.add(new ChoiceFieldCriteria(identifyField,
 							getColumn(), -1, IssueQueryLexer.Is, false));
 				} else {
 					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty, false));
@@ -92,7 +92,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				return null;
 			}
 		}
-		
+
 	};
 	
 	private final IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
@@ -111,6 +111,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	};
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
+	
+	private Component countLabel;
 	
 	public BoardColumnPanel(String id) {
 		super(id);
@@ -205,6 +207,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					protected int getCardCount() {
 						return countModel.getObject();
+					}
+
+					@Override
+					protected void onUpdate(IPartialPageRequestHandler handler) {
+						handler.add(countLabel);
 					}
 
 				});
@@ -312,25 +319,12 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			
 		});
 		
-		head.add(new CardCountLabel("count") {
-
-			@Override
-			protected Project getProject() {
-				return BoardColumnPanel.this.getProject();
-			}
-
-			@Override
-			protected int getCount() {
-				return countModel.getObject();
-			}
-
-		});
+		head.add(countLabel = new Label("count", countModel).setOutputMarkupId(true));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			
-			private void markAccepted(AjaxRequestTarget target, Issue issue, boolean accepted) {
-				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, %b);", 
-						issue.getId(), accepted));
+			private void markAccepted(AjaxRequestTarget target, boolean accepted) {
+				target.appendJavaScript(String.format("$('.issue-boards').data('accepted', %b);", accepted));
 			}
 
 			@Override
@@ -343,9 +337,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					// move a backlog issue to board 
 					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
-					OneDev.getInstance(IssueChangeManager.class).addSchedule(issue, getMilestone());
+					getIssueChangeManager().addSchedule(issue, getMilestone());
 					notifyIssueChange(target, issue);
-					markAccepted(target, issue, true);
+					markAccepted(target, true);
 				} else if (fieldName.equals(Issue.NAME_STATE)) {
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
 					for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
@@ -379,13 +373,13 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									
 									@Override
 									protected void onSaved(AjaxRequestTarget target) {
-										markAccepted(target, getIssue(), true);
+										markAccepted(target, true);
 										close();
 									}
 									
 									@Override
 									protected void onCancelled(AjaxRequestTarget target) {
-										markAccepted(target, getIssue(), false);
+										markAccepted(target, false);
 										close();
 									}
 									
@@ -404,10 +398,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							
 						};
 					} else {
-						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), 
+						getIssueChangeManager().changeState(issue, getColumn(), 
 								new HashMap<>(), transitionRef.get().getRemoveFields(), null);
 						notifyIssueChange(target, issue);
-						markAccepted(target, issue, true);
+						markAccepted(target, true);
 					}
 				} else {
 					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
@@ -465,24 +459,24 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								fieldValues.putAll(FieldUtils.getFieldValues(
 										FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 										bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
-								notifyIssueChange(target, issue);
 								close();
 								Issue issue = getIssueManager().load(issueId);
-								OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
-								markAccepted(target, issue, true);
+								getIssueChangeManager().changeFields(issue, fieldValues);
+								notifyIssueChange(target, issue);
+								markAccepted(target, true);
 							}
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
-								markAccepted(target, getIssueManager().load(issueId), false);
+								markAccepted(target, false);
 							}
 							
 						}
 						new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
 					} else {
-						OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
+						getIssueChangeManager().changeFields(issue, fieldValues);
 						notifyIssueChange(target, issue);
-						markAccepted(target, issue, true);
+						markAccepted(target, true);
 					}
 				}
 			}
@@ -490,6 +484,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private IssueChangeManager getIssueChangeManager() {
+		return OneDev.getInstance(IssueChangeManager.class);
 	}
 	
 	private IssueManager getIssueManager() {

@@ -119,14 +119,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	};
 	
 	private IFeedbackMessageFilter newFeedbackMessageFilter(boolean backlog) {
-		return new IFeedbackMessageFilter() {
-			
-			@Override
-			public boolean accept(FeedbackMessage message) {
-				return ((QueryParseMessage)message.getMessage()).backlog == backlog;
-			}
-			
-		};		
+		return message -> ((QueryParseMessage)message.getMessage()).backlog == backlog;		
 	}
 	
 	@Nullable
@@ -664,7 +657,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				
 			});
 			
-			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+			IssueQueryParseOption option = new IssueQueryParseOption()
+					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true);
 			queryInput.add(new IssueQueryBehavior(projectModel, option, true));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {

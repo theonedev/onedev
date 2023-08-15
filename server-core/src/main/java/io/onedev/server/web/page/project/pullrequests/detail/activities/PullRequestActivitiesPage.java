@@ -356,7 +356,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			}
 
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				@SuppressWarnings("deprecation")
 				Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
 				PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();

@@ -258,7 +258,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 						fragment.add(new ChangeObserver() {
 
 							@Override
-							public void onObservableChanged(IPartialPageRequestHandler handler) {
+							public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 								Component content = newContent(componentId, issueId);
 								fragment.replaceWith(content);
 								handler.add(content);

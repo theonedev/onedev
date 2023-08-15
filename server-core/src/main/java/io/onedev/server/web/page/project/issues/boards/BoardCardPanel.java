@@ -48,10 +48,23 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	
+	private final Long issueId;
+	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
-	public BoardCardPanel(String id, IModel<Issue> model) {
-		super(id, model);
+	public BoardCardPanel(String id, Long issueId) {
+		super(id);
+		this.issueId = issueId;
+		setModel(new LoadableDetachableModel<Issue>() {
+			@Override
+			protected Issue load() {
+				return OneDev.getInstance(IssueManager.class).load(issueId);
+			}
+		});
+	}
+	
+	public Long getIssueId() {
+		return issueId;
 	}
 
 	private Issue getIssue() {
@@ -192,6 +205,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
+						BoardCardPanel.this.onDeleteIssue(target);
 					}
 
 					@Override
@@ -315,6 +329,12 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	}
 
 	@Override
+	protected void onBeforeRender() {
+		replace(newContent("content", getModel(), getCursor()));
+		super.onBeforeRender();
+	}
+
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
@@ -327,5 +347,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	protected abstract Cursor getCursor();
 	
 	protected abstract Project getProject();
+	
+	protected abstract void onDeleteIssue(AjaxRequestTarget target);
 	
 }

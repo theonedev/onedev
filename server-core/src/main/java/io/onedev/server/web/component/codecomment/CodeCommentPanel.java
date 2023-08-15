@@ -430,7 +430,7 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			@Override
 			@SuppressWarnings("deprecation")
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				Component prevActivityContainer;
 				if (activitiesView.size() > 0)
 					prevActivityContainer = activitiesView.get(activitiesView.size()-1);

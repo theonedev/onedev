@@ -585,6 +585,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		return Issue.class.getName() + ":" + issueId;
 	}
 	
+	public static String getListChangeObservable(Long projectId, Long issueId) {
+		return Issue.class.getName() + ":list:" + projectId + ":" + issueId;
+	}
+
 	public static String getListChangeObservable(Long projectId) {
 		return Issue.class.getName() + ":list:" + projectId;
 	}
@@ -592,7 +596,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public Collection<String> getChangeObservables(boolean withList) {
 		Collection<String> observables = Sets.newHashSet(getDetailChangeObservable(getId()));
 		if (withList)
-			observables.addAll(getProject().getIssueListObservables());
+			observables.add(getListChangeObservable(getProject().getId(), getId()));
 		return observables;
 	}
 

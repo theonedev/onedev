@@ -1308,8 +1308,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				super.onObservableChanged(handler);
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+				super.onObservableChanged(handler, changedObservables);
 				handler.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			

@@ -175,7 +175,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				updateActivities(handler);
 			}
 			

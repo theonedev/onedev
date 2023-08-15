@@ -167,8 +167,8 @@ public abstract class BuildDetailPage extends ProjectPage
 		return new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				super.onObservableChanged(handler);
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+				super.onObservableChanged(handler, changedObservables);
 				handler.appendJavaScript("$(window).resize();");
 			}
 			

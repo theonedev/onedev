@@ -551,7 +551,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				}
 
 				@Override
-				public void onObservableChanged(IPartialPageRequestHandler handler) {
+				public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 					newContent(handler);
 				}
 				

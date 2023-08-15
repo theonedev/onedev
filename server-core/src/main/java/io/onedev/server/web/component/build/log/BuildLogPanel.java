@@ -61,7 +61,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				appendRecentLogEntries(handler);
 			}
 			
@@ -75,7 +75,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				handler.appendJavaScript(String.format(
 						"onedev.server.buildLog.buildUpdated('%s', %b)",
 						getMarkupId(), getBuild().isPaused()));

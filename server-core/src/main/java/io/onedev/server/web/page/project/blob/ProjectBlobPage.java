@@ -248,8 +248,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		revisionIndexing.add(new ChangeObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				super.onObservableChanged(handler);
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+				super.onObservableChanged(handler, changedObservables);
 				resizeWindow(handler);
 			}
 			
