@@ -154,8 +154,8 @@ public class GmailSetting extends MailSetting {
 	public MailSendSetting getSendSetting() {
 		MailCredential smtpCredential = new OAuthAccessToken(
 				TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
-		return new MailSendSetting("smtp.gmail.com", 587, accountName, smtpCredential, 
-				accountName, true, getTimeout());
+		return new MailSendSetting("smtp.gmail.com", new SmtpExplicitSsl(), accountName, smtpCredential, 
+				accountName, getTimeout());
 	}
 
 	@Override
@@ -164,8 +164,8 @@ public class GmailSetting extends MailSetting {
 			MailCredential imapCredential = new OAuthAccessToken(
 					TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
 			
-			return new MailCheckSetting("imap.gmail.com", 993, 
-					accountName, imapCredential, accountName, true, 
+			return new MailCheckSetting("imap.gmail.com", 
+					new ImapImplicitSsl(), accountName, imapCredential, accountName,  
 					inboxPollSetting.getPollInterval(), getTimeout());
 		} else {
 			return null;

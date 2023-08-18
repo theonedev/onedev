@@ -236,13 +236,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 		if (sendSetting != null) {
 			Properties properties = new Properties();
 	        properties.setProperty("mail.smtp.host", sendSetting.getSmtpHost());
-	        properties.setProperty("mail.smtp.port", String.valueOf(sendSetting.getSmtpPort()));
-	        properties.setProperty("mail.transport.protocol", "smtp");
+			
+			sendSetting.getSslSetting().configure(properties);
 	 
 	        properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
 	        properties.setProperty("mail.smtp.timeout", String.valueOf(sendSetting.getTimeout()*1000));
-	        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(sendSetting.isEnableStartTLS()));
-	        properties.setProperty("mail.smtp.starttls.required", "false");
 	        
 	        Authenticator authenticator;
 	        if (sendSetting.getSmtpUser() != null) {
@@ -884,8 +882,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
-				int currentMessageNumber = inbox.getMessageCount();
-				for (int i=messageNumber.get()+1; i<=currentMessageNumber; i++) {
+				int messageCount = inbox.getMessageCount();
+				for (int i=messageNumber.get()+1; i<=messageCount; i++) {
 					Message message = inbox.getMessage(i);
 					lastPosition.setUid(inbox.getUID(message));
 					logger.trace("Processing inbox messge (subject: {}, uid: {}, seq: {})", 
@@ -916,7 +914,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 						logger.error("Error processing message", e);
 					} 
 				}
-				messageNumber.set(currentMessageNumber);
+				messageNumber.set(messageCount);
 			}
 			
 			private long getUid(IMAPFolder inbox, int messageNumber) throws MessagingException {
@@ -931,12 +929,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		        Properties properties = new Properties();
 		        
 		        properties.setProperty("mail.imap.host", checkSetting.getImapHost());
-		        properties.setProperty("mail.imap.port", String.valueOf(checkSetting.getImapPort()));
-		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(checkSetting.isEnableSSL()));        
-		 
-		        properties.setProperty("mail.imap.socketFactory.fallback", "false");
-		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(checkSetting.getImapPort()));
-		        
+				checkSetting.getSslSetting().configure(properties);
 		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
 		        properties.setProperty("mail.imap.timeout", String.valueOf(checkSetting.getTimeout()*1000));
 	        	if (checkSetting.getImapCredential() instanceof OAuthAccessToken)
@@ -973,7 +966,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 						}
 					} else {
 						lastPosition.setUidValidity(uidValidity);
-						messageNumber.set(inbox.getMessageCount());
+						// Check back for 5 emails as otherwise we may not be able to receive the just sent 
+						// email when test mail check setting
+						messageNumber.set(inbox.getMessageCount() - 5);
+						if (messageNumber.get() < 0)
+							messageNumber.set(0);
 						lastPosition.setUid(getUid(inbox, messageNumber.get()));
 						logger.trace("Inbox uid validity changed (uid reset to: {})", lastPosition.getUid());
 					}

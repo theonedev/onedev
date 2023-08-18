@@ -6,6 +6,7 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.security.TrustCertsSSLSocketFactory;
 import io.onedev.server.util.EditContext;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -210,7 +211,7 @@ public class LdapAuthenticator extends Authenticator {
 
         Hashtable<String, String> ldapEnv = new Hashtable<>();
 		if (getLdapUrl().trim().startsWith("ldaps"))
-			ldapEnv.put("java.naming.ldap.factory.socket", LdapSSLSocketFactory.class.getName());
+			ldapEnv.put("java.naming.ldap.factory.socket", TrustCertsSSLSocketFactory.class.getName());
         ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         ldapEnv.put(Context.PROVIDER_URL, getLdapUrl());
         ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");

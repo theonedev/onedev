@@ -84,68 +84,58 @@ public class MailSettingPage extends AdministrationPage {
 
 			@Override
 			protected String runTask(TaskLogger logger) {
-				return OneDev.getInstance(SessionManager.class).call(new Callable<String>() {
-
-					@Override
-					public String call() {
-						MailManager mailManager = OneDev.getInstance(MailManager.class);
-						MailSetting mailSetting = mailSettingHolder.getMailSetting();
-						MailCheckSetting checkSetting = mailSetting.getCheckSetting();
-						if (checkSetting != null) {
-							String uuid = UUID.randomUUID().toString();
-							AtomicReference<Future<?>> futureRef = new AtomicReference<>(null);
-							MessageListener listener = new MessageListener() {
-								
-								@Override
-								public void onReceived(Message message) throws MessagingException {
-									if (message.getSubject().contains(uuid)) 
-										futureRef.get().cancel(true);
-								}
-								
-							};				
-
-							checkSetting = new MailCheckSetting(checkSetting.getImapHost(), checkSetting.getImapPort(), 
-									checkSetting.getImapUser(), checkSetting.getImapCredential(), checkSetting.getCheckAddress(), 
-									checkSetting.isEnableSSL(), 5, checkSetting.getTimeout());
-							futureRef.set(mailManager.monitorInbox(checkSetting, listener, new MailPosition()));
-							
-							ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-							String subAddressed = checkAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
-							logger.log("Sending test mail to " + subAddressed + "...");
-							mailManager.sendMail(mailSetting.getSendSetting(), 
-									Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 
-									"[Test] Test Email From OneDev", "This is a test email from OneDev", 
-									null, null, null);
-
-							logger.log("Waiting for test mail to come back...");
-
-							try {
-								futureRef.get().get();
-							} catch (CancellationException e) {
-							} catch (InterruptedException e) {
+				return OneDev.getInstance(SessionManager.class).call(() -> {
+					MailManager mailManager = OneDev.getInstance(MailManager.class);
+					MailSetting mailSetting = mailSettingHolder.getMailSetting();
+					MailCheckSetting checkSetting = mailSetting.getCheckSetting();
+					if (checkSetting != null) {
+						String uuid = UUID.randomUUID().toString();
+						AtomicReference<Future<?>> futureRef = new AtomicReference<>(null);
+						MessageListener listener = message -> {
+							if (message.getSubject().contains(uuid)) 
 								futureRef.get().cancel(true);
-								throw new RuntimeException(e);
-							} catch (ExecutionException e) {
-								throw new RuntimeException(e);
-							}
-							
-							logger.log("Received test mail");
-							
-							return "Great, your mail settings are working";
+						};				
+
+						checkSetting = new MailCheckSetting(checkSetting.getImapHost(), checkSetting.getSslSetting(), 
+								checkSetting.getImapUser(), checkSetting.getImapCredential(), checkSetting.getCheckAddress(), 
+								5, checkSetting.getTimeout());
+						futureRef.set(mailManager.monitorInbox(checkSetting, listener, new MailPosition()));
+						
+						ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+						String subAddressed = checkAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
+						logger.log("Sending test mail to " + subAddressed + "...");
+						mailManager.sendMail(mailSetting.getSendSetting(), 
+								Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 
+								"[Test] Test Email From OneDev", "This is a test email from OneDev", 
+								null, null, null);
+
+						logger.log("Waiting for test mail to come back...");
+
+						try {
+							futureRef.get().get();
+						} catch (CancellationException e) {
+						} catch (InterruptedException e) {
+							futureRef.get().cancel(true);
+							throw new RuntimeException(e);
+						} catch (ExecutionException e) {
+							throw new RuntimeException(e);
+						}
+						
+						logger.log("Received test mail");
+						
+						return "Great, your mail settings are working";
+					} else {
+						io.onedev.server.model.EmailAddress emailAddress = SecurityUtils.getUser().getPrimaryEmailAddress();
+						if (emailAddress != null) {
+							String body = "Great, your mail settings are working!";
+							mailManager.sendMail(mailSettingHolder.getMailSetting().getSendSetting(), Sets.newHashSet(emailAddress.getValue()), 
+									Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
+									body, body, null, null, null);
+							return "Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box";
 						} else {
-							io.onedev.server.model.EmailAddress emailAddress = SecurityUtils.getUser().getPrimaryEmailAddress();
-							if (emailAddress != null) {
-								String body = "Great, your mail settings are working!";
-								mailManager.sendMail(mailSettingHolder.getMailSetting().getSendSetting(), Sets.newHashSet(emailAddress.getValue()), 
-										Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
-										body, body, null, null, null);
-								return "Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box";
-							} else {
-								throw new ExplicitException("Primary email address of your account is not specified yet");
-							}
-						}	
-					}
-					
+							throw new ExplicitException("Primary email address of your account is not specified yet");
+						}
+					}	
 				});
 			}
 

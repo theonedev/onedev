@@ -5635,5 +5635,52 @@ public class DataMigrator {
 			
 		}
 	}
-	
+
+	private void migrate134(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							if (valueElement.attributeValue("class").contains("OtherMailSetting")) {
+								var enableStartTLSElement = valueElement.element("enableStartTLS");
+								var sslSettingElement = valueElement.addElement("sslSetting");
+								if (enableStartTLSElement.getTextTrim().equals("true")) {
+									sslSettingElement.addAttribute("class", "io.onedev.server.model.support.administration.mailsetting.SmtpExplicitSsl");
+									sslSettingElement.addElement("trustAll").setText("false");
+								} else {
+									sslSettingElement.addAttribute("class", "io.onedev.server.model.support.administration.mailsetting.SmtpWithoutSsl");
+								}
+								enableStartTLSElement.detach();
+								var portElement = valueElement.element("smtpPort");
+								portElement.detach();
+								portElement.setName("port");
+								sslSettingElement.add(portElement);
+								
+								var pollSettingElement = valueElement.element("otherInboxPollSetting");
+								if (pollSettingElement != null) {
+									var enableSSLElement = pollSettingElement.element("enableSSL");
+									sslSettingElement = pollSettingElement.addElement("sslSetting");
+									if (enableSSLElement.getTextTrim().equals("true")) {
+										sslSettingElement.addAttribute("class", "io.onedev.server.model.support.administration.mailsetting.ImapImplicitSsl");
+										sslSettingElement.addElement("trustAll").setText("false");
+									} else {
+										sslSettingElement.addAttribute("class", "io.onedev.server.model.support.administration.mailsetting.ImapWithoutSsl");
+									}
+									enableSSLElement.detach();
+									portElement = pollSettingElement.element("imapPort");
+									portElement.detach();
+									portElement.setName("port");
+									sslSettingElement.add(portElement);
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

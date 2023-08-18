@@ -1,9 +1,10 @@
 package io.onedev.server.model.support.administration.mailsetting;
 
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Editable
 public class OtherInboxPollSetting extends InboxPollSetting {
@@ -12,13 +13,11 @@ public class OtherInboxPollSetting extends InboxPollSetting {
 	
 	private String imapHost;
 	
-	private int imapPort = 993;
+	private ImapSslSetting sslSetting = new ImapImplicitSsl();
 	
 	private String imapUser;
 	
 	private String imapPassword;
-	
-	private boolean enableSSL = true;
 	
 	@Editable(order=100, name="IMAP Host")
 	@NotEmpty
@@ -30,13 +29,14 @@ public class OtherInboxPollSetting extends InboxPollSetting {
 		this.imapHost = imapHost;
 	}
 
-	@Editable(order=200, name="IMAP Port")
-	public int getImapPort() {
-		return imapPort;
+	@Editable(order=200)
+	@NotNull
+	public ImapSslSetting getSslSetting() {
+		return sslSetting;
 	}
 
-	public void setImapPort(int imapPort) {
-		this.imapPort = imapPort;
+	public void setSslSetting(ImapSslSetting sslSetting) {
+		this.sslSetting = sslSetting;
 	}
 
 	@Editable(order=300, name="IMAP User", description="Specify IMAP user name.<br>"
@@ -60,15 +60,6 @@ public class OtherInboxPollSetting extends InboxPollSetting {
 
 	public void setImapPassword(String imapPassword) {
 		this.imapPassword = imapPassword;
-	}
-
-	@Editable(order=700, name="Enable IMAP SSL", description="Whether or not to enable SSL when connect to IMAP server")
-	public boolean isEnableSSL() {
-		return enableSSL;
-	}
-
-	public void setEnableSSL(boolean enableSSL) {
-		this.enableSSL = enableSSL;
 	}
 
 }

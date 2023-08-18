@@ -1,5 +1,7 @@
 package io.onedev.server.mail;
 
+import io.onedev.server.model.support.administration.mailsetting.SmtpSslSetting;
+
 import java.io.Serializable;
 
 public class MailSendSetting implements Serializable {
@@ -8,7 +10,7 @@ public class MailSendSetting implements Serializable {
 
 	private final String smtpHost;
 	
-	private final int smtpPort;
+	private final SmtpSslSetting sslSetting;
 	
 	private final String smtpUser;
 	
@@ -16,18 +18,15 @@ public class MailSendSetting implements Serializable {
 	
 	private final String senderAddress;
 	
-	private final boolean enableStartTLS;
-	
 	private final int timeout;
 
-	public MailSendSetting(String smtpHost, int smtpPort, String smtpUser, MailCredential smtpCredential,
-			String senderAddress, boolean enableStartTLS, int timeout) {
+	public MailSendSetting(String smtpHost, SmtpSslSetting sslSetting, String smtpUser, 
+						   MailCredential smtpCredential, String senderAddress, int timeout) {
 		this.smtpHost = smtpHost;
-		this.smtpPort = smtpPort;
+		this.sslSetting = sslSetting;
 		this.smtpUser = smtpUser;
 		this.smtpCredential = smtpCredential;
 		this.senderAddress = senderAddress;
-		this.enableStartTLS = enableStartTLS;
 		this.timeout = timeout;
 	}
 
@@ -35,8 +34,8 @@ public class MailSendSetting implements Serializable {
 		return smtpHost;
 	}
 
-	public int getSmtpPort() {
-		return smtpPort;
+	public SmtpSslSetting getSslSetting() {
+		return sslSetting;
 	}
 
 	public String getSmtpUser() {
@@ -49,10 +48,6 @@ public class MailSendSetting implements Serializable {
 
 	public String getSenderAddress() {
 		return senderAddress;
-	}
-
-	public boolean isEnableStartTLS() {
-		return enableStartTLS;
 	}
 
 	public int getTimeout() {

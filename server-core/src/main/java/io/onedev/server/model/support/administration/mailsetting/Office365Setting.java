@@ -192,8 +192,8 @@ public class Office365Setting extends MailSetting {
 	public MailSendSetting getSendSetting() {
 		MailCredential smtpCredential = new OAuthAccessToken(
 				getTokenEndpoint(tenantId), clientId, clientSecret, refreshToken);
-		return new MailSendSetting("smtp.office365.com", 587, userPrincipalName, smtpCredential, 
-				emailAddress, true, getTimeout());
+		return new MailSendSetting("smtp.office365.com", new SmtpExplicitSsl(), userPrincipalName, 
+				smtpCredential, emailAddress, getTimeout());
 	}
 
 	@Override
@@ -203,8 +203,8 @@ public class Office365Setting extends MailSetting {
 			MailCredential imapCredential = new OAuthAccessToken(
 					getTokenEndpoint(tenantId), clientId, clientSecret, refreshToken);
 			
-			return new MailCheckSetting("outlook.office365.com", 993, 
-					imapUser, imapCredential, emailAddress, true, 
+			return new MailCheckSetting("outlook.office365.com", 
+					new ImapImplicitSsl(), imapUser, imapCredential, emailAddress, 
 					inboxPollSetting.getPollInterval(), getTimeout());
 		} else {
 			return null;
