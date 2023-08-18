@@ -30,6 +30,7 @@ jobs:
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
+      - export MAVEN_OPTS="-Xmx1024M"
       - mvn test
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
