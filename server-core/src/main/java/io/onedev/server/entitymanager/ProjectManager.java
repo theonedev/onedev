@@ -115,7 +115,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	void redistributeReplicas();
 	
 	void directoryModified(Long projectId, File directory);
-
+	
 	boolean hasLfsObjects(Long projectId);
 	
 	Map<String, ProjectReplica> getReplicas(Long projectId);
@@ -190,4 +190,6 @@ public interface ProjectManager extends EntityManager<Project> {
 
 	File getSubDir(Long projectId, String subdirPath);
 	
+	void updateActiveServers();
+
 }

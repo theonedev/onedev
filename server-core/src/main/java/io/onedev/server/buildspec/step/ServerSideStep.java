@@ -38,6 +38,10 @@ public abstract class ServerSideStep extends Step {
 		return new PatternSet(new HashSet<>(), new HashSet<>());
 	}
 	
+	public boolean requireCommitIndex() {
+		return false;
+	}
+	
 	@Nullable
 	public abstract Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger);
 	

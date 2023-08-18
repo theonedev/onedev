@@ -21,7 +21,7 @@ public class ProjectReplica implements Serializable {
 
 	private Type type;
 
-	private int version;
+	private long version;
 
 	public Type getType() {
 		return type;
@@ -31,11 +31,11 @@ public class ProjectReplica implements Serializable {
 		this.type = type;
 	}
 
-	public int getVersion() {
+	public long getVersion() {
 		return version;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(long version) {
 		this.version = version;
 	}
 

@@ -30,6 +30,10 @@ public class JobExecution {
 			return false;
 		}
 	}
+	
+	public boolean isCancelled() {
+		return future.isCancelled();
+	}
 
 	public boolean isTimedout() {
 		return System.currentTimeMillis() - beginTime > timeout;

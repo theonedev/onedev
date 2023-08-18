@@ -1,0 +1,122 @@
+.DashboardPage .topbar {
+    box-shadow: none;
+    border-bottom: 1px solid var(--light-gray);
+}
+.dark-mode.DashboardPage .topbar {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+
+.dashboard>.head {
+	background: white;
+	box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.1);
+}
+.dashboard>.head .feedbackPanel {
+	margin-bottom: 0;
+}
+.dark-mode .dashboard>.head {
+	background: var(--dark-mode-dark);
+	box-shadow: 0 0 12px rgb(0 0 0 / 50%);	
+	color: white;
+}
+.dark-mode .dashboard {
+	background: var(--dark-mode-darker);
+}
+
+.dashboard>.head>span.dashboard-selector>svg {
+	display: none;
+}
+.dashboard>.head {
+	padding: 0.6rem 1.2rem;
+}
+.dashboard>.head .feedbackPanelERROR {
+	background: none;
+	border: none;
+	padding: 0;
+}
+.dashboard>.body>.content>.grid {
+	width: 100%;
+}
+
+.dashboard>.body>.content>.widget {
+	border-radius: 0.42rem;
+	display: none;
+	background: white;
+	position: absolute;
+	left: 0; 
+	top: 0;
+	z-index: 1;
+	box-sizing: border-box;
+}
+
+.dark-mode .dashboard>.body>.content>.widget {
+	background: var(--dark-mode-dark);
+}
+
+.dashboard.dashboard-editor>.body>.content>.widget {
+	border: 1px solid var(--light-gray); 
+}
+.dashboard>.body>.content>.widget>.head .refresh {
+	display: none;
+}
+.dashboard>.body>.content>.widget:hover>.head .refresh {
+	display: inline;
+}
+.dark-mode .dashboard.dashboard-editor>.body>.content>.widget {
+	border-color: var(--dark-mode-light-dark);
+}
+
+.dashboard>.body>.content>.widget>.head {
+	border-bottom: 1px solid var(--light-gray); 
+	padding: 0.6rem 1.2rem;
+	font-weight: 600;
+	font-size: 1.2rem;
+}
+.dark-mode .dashboard>.body>.content>.widget>.head {
+	border-color: var(--dark-mode-light-dark);
+}
+
+.dashboard.dashboard-editor>.body>.content {
+    margin: 0.5rem;
+}
+.dashboard.dashboard-viewer>.body>.content {
+    margin: calc(0.5rem - 6px);
+	margin-bottom: 0.5rem;
+}
+@media (min-width: 576px) {
+.dashboard.dashboard-editor>.body>.content {
+    margin: 2rem;
+}
+.dashboard.dashboard-viewer>.body>.content {
+    margin: calc(2rem - 6px);
+	margin-bottom: 2rem;
+}
+}
+
+.dashboard.dashboard-editor>.body>.content>.widget {
+	cursor: move;
+}
+.dashboard.dashboard-editor>.body>.content>.widget .ui-icon-gripsmall-diagonal-se {
+	background-image: none;
+}
+.dashboard.dashboard-editor>.body>.content>.widget .ui-resizable-se {
+	width: 9px;
+	height: 9px;
+	right: -5px;
+	bottom: -5px;
+}
+.dashboard.dashboard-editor>.body>.content>.widget.ui-resizable-resizing {
+	z-index: 10;
+}
+.dashboard>.body>.content>.widget>.body {
+	padding: 1rem 1.6rem;
+}
+.dashboard.dashboard-editor>.body>.content>.widget>.head>.title {
+	margin-right: 0.4rem !important;
+}
+
+.dashboard .card {
+	box-shadow: none;
+}
+.dashboard .card-body {
+	padding: 0;
+}

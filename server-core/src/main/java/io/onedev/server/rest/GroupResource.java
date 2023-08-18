@@ -77,12 +77,8 @@ public class GroupResource {
 	@GET
     public List<Group> queryBasicInfo(@QueryParam("name") String name, @QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
-		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
 		if (name != null) 

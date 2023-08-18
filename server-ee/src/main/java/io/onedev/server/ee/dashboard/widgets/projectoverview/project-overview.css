@@ -1,0 +1,6 @@
+.project-overview>div {
+	margin-bottom: 1rem;
+}
+.project-overview>div:last-child {
+	margin-bottom: 0;
+}

@@ -838,7 +838,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 						MailPosition mailPosition = new MailPosition();
 						while (thread != null) {
 							Future<?> future = monitorInbox(checkSetting, message -> 
-									onMessage(sendSetting, checkSetting, message), mailPosition);
+									onMessage(sendSetting, checkSetting, message), mailPosition, false);
 							
 							try {
 								future.get();
@@ -878,7 +878,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	@Override
 	public Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, 
-								  MailPosition lastPosition) {
+								  MailPosition lastPosition, boolean testMode) {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
@@ -966,9 +966,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 						}
 					} else {
 						lastPosition.setUidValidity(uidValidity);
-						// Check back for 5 emails as otherwise we may not be able to receive the just sent 
-						// email when test mail check setting
-						messageNumber.set(inbox.getMessageCount() - 5);
+						if (testMode)
+							messageNumber.set(inbox.getMessageCount() - 5);
+						else
+							messageNumber.set(inbox.getMessageCount());							
 						if (messageNumber.get() < 0)
 							messageNumber.set(0);
 						lastPosition.setUid(getUid(inbox, messageNumber.get()));

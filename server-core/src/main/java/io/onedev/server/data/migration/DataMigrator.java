@@ -5658,7 +5658,7 @@ public class DataMigrator {
 								portElement.detach();
 								portElement.setName("port");
 								sslSettingElement.add(portElement);
-								
+
 								var pollSettingElement = valueElement.element("otherInboxPollSetting");
 								if (pollSettingElement != null) {
 									var enableSSLElement = pollSettingElement.element("enableSSL");
@@ -5683,4 +5683,34 @@ public class DataMigrator {
 			}
 		}
 	}
+	
+	private void migrate135(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("ALERT")) {
+						var valueElement = element.element("value");
+						valueElement.element("trialEnterpriseLicenseExpireInOneWeekAlerted").setName("trialSubscriptionExpireInOneWeekAlerted");
+						valueElement.element("trialEnterpriseLicenseExpiredAlerted").setName("trialSubscriptionExpiredAlerted");
+						valueElement.element("enterpriseLicenseExpireInOneMonthAlerted").setName("subscriptionExpireInOneMonthAlerted");
+						valueElement.element("enterpriseLicenseExpireInOneWeekAlerted").setName("subscriptionExpireInOneWeekAlerted");
+						valueElement.element("enterpriseLicenseExpiredAlerted").setName("subscriptionExpiredAlerted");
+					} else if (keyElement.getTextTrim().equals("LICENSE_DATA")) {
+						keyElement.setText("SUBSCRIPTION_DATA");
+					} else if (keyElement.getTextTrim().equals("PERFORMANCE")) {
+						var valueElement = element.element("value");
+						var cpuIntensiveTaskConcurrencyElement = valueElement.element("cpuIntensiveTaskConcurrency");
+						var cpuIntensiveTaskConcurrency = Integer.parseInt(cpuIntensiveTaskConcurrencyElement.getTextTrim()) / 2;
+						if (cpuIntensiveTaskConcurrency == 0)
+							cpuIntensiveTaskConcurrency = 1;
+						cpuIntensiveTaskConcurrencyElement.setText(String.valueOf(cpuIntensiveTaskConcurrency));																		
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

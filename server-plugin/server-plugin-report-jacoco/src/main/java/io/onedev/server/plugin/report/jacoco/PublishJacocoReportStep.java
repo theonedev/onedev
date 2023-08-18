@@ -61,6 +61,11 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 	}
 
 	@Override
+	public boolean requireCommitIndex() {
+		return true;
+	}
+
+	@Override
 	protected CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();

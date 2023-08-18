@@ -1,21 +1,36 @@
-The MIT License
+OneDev License
 
-Copyright (c) 2018-2023 onedev.io
+Copyright (c) 2023-present OneDev Pty
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. All files under folder "server-ee" recursively (EE module) are licensed under
+   "Source Available" license described below
+2. All other files (non-EE files) are licensed under the standard MIT
+   license (https://opensource.org/license/mit/)
+3. This license notice shall be included in all copies of the Software.
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE
+***********************************************************************************************
+*
+* The Source Available License
+*
+* EE module and its derived form (files with name containing "server-ee" in binary distribution)
+* are available for examination, backup, redistribution, or running together with non-EE
+* part for free. You shall not modify any part of them, or use any part of them in other work.
+* Additionally, you shall not use encryption keys contained in them to encrypt or decrypt
+* custom data.
+*
+* Functionalities offered by EE module of the software will be unlocked and shall only be used
+* with an active subscription (either trial or formal). Subscription shall only be extended with
+* a valid, exclusive, and unused subscription key (either trial or formal) issued by OneDev Pty
+* for current installation.
+*
+***********************************************************************************************
+
+
+THE SOFTWARE AND ITS RELATED DOCUMENTATION ARE PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND
+AND ONEDEV PTY EXPRESSLY DISCLAIMS ALL OTHER WARRANTIES, EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. UNDER
+NO CIRCUMSTANCES SHALL ONEDEV PTY BE LIABLE FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES
+THAT RESULT FROM THE USE OR INABILITYTO USE THE SOFTWARE OR RELATED DOCUMENTATION, EVEN IF ONEDEV
+PTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN NO EVENT SHALL ONEDEV PTY LIABILITY
+EXCEED THE SUBSCRIPTION FEE PAID, IF ANY.

@@ -70,9 +70,6 @@ public class AgentResource {
     		@QueryParam("count") @Api(example="100") int count) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	AgentQuery parsedQuery;
 		try {

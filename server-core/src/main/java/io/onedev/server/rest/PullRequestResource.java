@@ -178,8 +178,8 @@ public class PullRequestResource {
     		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
+
+		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PullRequestQuery parsedQuery;

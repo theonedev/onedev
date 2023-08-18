@@ -22,6 +22,9 @@ import io.onedev.server.ServerConfig;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.security.SecurityUtils;
 
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
+
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {
 
@@ -53,7 +56,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 				averagePriorities.put(entry.getKey(), totalPriorities/entry.getValue().size());
 			}
 			List<String> groupIds = new ArrayList<>(waitings.keySet());
-			Collections.sort(groupIds, Comparator.comparingInt(averagePriorities::get));
+			sort(groupIds, comparingInt(averagePriorities::get));
 			for (String groupId: groupIds) {
 				Collection<PrioritizedCallable<?>> runningsOfGroup = new ArrayList<>();
 				for (WorkFuture<?> future: waitings.remove(groupId)) {

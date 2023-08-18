@@ -1,0 +1,48 @@
+<wicket:extend>
+	<div id="code-search" class="m-2 m-sm-5">
+		<div class="card">
+			<div class="card-body">
+				<form wicket:id="form" class="mb-3">
+					<div wicket:id="option"></div>
+					<div wicket:id="projects"></div>
+					<div wicket:id="foot" class="d-flex align-items-center">
+						<input wicket:id="search" type="submit" class="btn btn-primary" value="Search">
+						<span wicket:id="indexing" class="text-warning ml-4"><wicket:svg href="loading" class="icon spin"/> Indexing default branches...</span>
+					</div>
+				</form>
+				<div wicket:id="result" class="mt-5"></div>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="hasMatchesFrag">
+		<ul class="blob-matches list-unstyled mb-0">
+			<h6 class="mb-0">Matches Found</h6>
+			<li wicket:id="blobMatches" class="blob-match pt-4">
+				<a wicket:id="expand" class="expand" title="Toggle matched contents"><wicket:svg href="arrow" class="icon"/></a>
+				<a wicket:id="project" class="font-size-lg mr-2" target="_blank">
+					<img wicket:id="avatar"></img>
+					<span wicket:id="label"></span>
+				</a>
+				<a wicket:id="blob" class="font-size-lg" target="_blank">
+					<wicket:svg href="file" class="icon"></wicket:svg>					
+					<span wicket:id="label"></span>
+				</a>
+				<wicket:enclosure child="contentMatches">
+					<ul class="content-matches list-unstyled pl-5 mb-0">
+						<li wicket:id="contentMatches" class="content-match pt-3">
+							<a wicket:id="link" target="_blank">
+								<img wicket:id="icon" class="mr-2"></img>
+								<span wicket:id="lineNo" class="mr-2 line-no text-monospace text-gray font-size-sm"></span>
+								<span wicket:id="content" class="text-monospace font-size-sm"></span>
+							</a>
+						</li>
+					</ul>
+				</wicket:enclosure>
+			</li>
+		</ul>
+		<a wicket:id="more" class="mt-4 btn btn-light btn-block">More</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noMatchesFrag">
+		<div class="alert alert-notice alert-light-warning mb-0">No matches</div>
+	</wicket:fragment>	
+</wicket:extend>

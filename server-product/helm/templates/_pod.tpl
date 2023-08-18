@@ -68,14 +68,14 @@ containers:
     - name: hibernate_connection_url
       value: {{ include "getConnectionURL" . | quote }}
     - name: hibernate_connection_username
-      value: {{ .Values.database.dbUser }}
+      value: {{ .Values.database.user }}
     - name: hibernate_connection_password
       valueFrom:
         secretKeyRef:
           name: {{ include "ods.fullname" . }}-secrets
           key: dbPassword
     - name: hibernate_hikari_maximumPoolSize
-      value: {{ .Values.database.dbMaximumPoolSize | quote }}
+      value: {{ .Values.database.maximumPoolSize | quote }}
 {{- end }}
 
 {{- if .Values.env }}
@@ -132,16 +132,6 @@ volumes:
   secret:
     secretName: {{ .Values.onedev.trustCerts.secretName }}
     optional: true
-{{- if .Values.persistence.enabled }}
-{{- if .Values.persistence.existingClaim }}
-- name: data
-  persistentVolumeClaim:
-    claimName: {{ .Values.persistence.existingClaim }}
-{{- end }}
-{{- else }}
-- name: data
-  emptyDir: {}
-{{- end }}
 {{- if .Values.extraVolumes }}
 {{ toYaml .Values.extraVolumes | indent 2 }}
 {{- end }}

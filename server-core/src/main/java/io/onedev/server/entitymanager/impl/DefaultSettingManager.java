@@ -6,9 +6,9 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -75,10 +75,15 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public AlertSetting getAlertSetting() {
 		return (AlertSetting) getSettingValue(Key.ALERT);
 	}
+	
+	@Override
+	public String getSystemUUID() {
+		return (String) getSettingValue(Key.SYSTEM_UUID);
+	}
 
 	@Override
-	public String getLicenseData() {
-		return (String) getSettingValue(Key.LICENSE_DATA);
+	public String getSubscriptionData() {
+		return (String) getSettingValue(Key.SUBSCRIPTION_DATA);
 	}
 	
 	@Transactional
@@ -204,8 +209,14 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 
 	@Transactional
 	@Override
-	public void saveLicenseData(String licenseData) {
-		saveSetting(Key.LICENSE_DATA, licenseData);
+	public void saveSystemUUID(String systemUUID) {
+		saveSetting(Key.SYSTEM_UUID, systemUUID);
+	}
+	
+	@Transactional
+	@Override
+	public void saveSubscriptionData(String subscriptionData) {
+		saveSetting(Key.SUBSCRIPTION_DATA, subscriptionData);
 	}
 
 	@Transactional

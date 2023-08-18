@@ -84,7 +84,7 @@ public class PullRequestStatsPanel extends Panel {
 					cssClass = "link-success";
 					break;
 				default:
-					cssClass = "link-secondary";
+					cssClass = "link-gray";
 					break;
 				}
 				statusLink.add(AttributeAppender.append("class", cssClass));

@@ -14,7 +14,7 @@ public class DefaultFeatureManager implements FeatureManager {
 	}
 
 	@Override
-	public boolean isEELicensed() {
+	public boolean isEEActivated() {
 		return false;
 	}
 

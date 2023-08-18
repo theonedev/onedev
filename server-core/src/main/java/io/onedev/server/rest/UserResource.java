@@ -280,12 +280,8 @@ public class UserResource {
     		@QueryParam("term") @Api(description="Any string in login name, full name or email address") String term, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
-		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	return userManager.query(term, offset, count);
     }

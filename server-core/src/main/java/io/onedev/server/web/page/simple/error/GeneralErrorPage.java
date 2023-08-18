@@ -4,11 +4,17 @@ import java.io.Serializable;
 
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ServerNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.http.WebResponse;
@@ -34,6 +40,8 @@ public class GeneralErrorPage extends SimplePage {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GeneralErrorPage.class);
 
+	private boolean serverNotFound;
+	
 	private String title;
 
 	private String detailMessage;
@@ -43,6 +51,8 @@ public class GeneralErrorPage extends SimplePage {
 	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
 
+		serverNotFound = ExceptionUtils.find(exception, ServerNotFoundException.class) != null;
+		
 		Response response = ExceptionUtils.buildResponse(exception);
 		if (response != null) {
 			title = response.getEntity().toString();
@@ -64,7 +74,19 @@ public class GeneralErrorPage extends SimplePage {
 		container.setOutputMarkupId(true);
 		add(container);
 
-		container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class));
+		if (serverNotFound) {
+			container.add(new Link<Void>("home") {
+
+				@Override
+				public void onClick() {
+					OneDev.getInstance(ProjectManager.class).updateActiveServers();
+					setResponsePage(HomePage.class);
+				}
+				
+			}.setBody(Model.of("Sync Replica Status and Back to Home")));
+		} else {
+			container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class));
+		}
 
 		container.add(new AjaxLink<Void>("showDetail") {
 

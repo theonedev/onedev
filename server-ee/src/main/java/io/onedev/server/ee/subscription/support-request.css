@@ -1,0 +1,27 @@
+.support-request .bean-viewer .name, .support-request .site-info>.title {
+	font-weight: 700 !important;
+}
+.support-request .site-info table {
+	width: 100%;
+	border-collapse: collapse;
+}
+.support-request .site-info table th {
+	font-weight: 500;
+}
+
+.support-request .site-info table th, .support-request .site-info table td {
+	padding: 0.8rem 1rem;
+	border: 1px solid var(--secondary);
+}
+
+.dark-mode .support-request .site-info table th, 
+.dark-mode .support-request .site-info table td {
+	border: 1px solid #323248;
+}
+
+.support-request .error-message {
+	display: none;
+}
+.support-request .is-invalid .error-message {
+	display: block;
+}

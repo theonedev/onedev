@@ -99,7 +99,7 @@ public class MailSettingPage extends AdministrationPage {
 						checkSetting = new MailCheckSetting(checkSetting.getImapHost(), checkSetting.getSslSetting(), 
 								checkSetting.getImapUser(), checkSetting.getImapCredential(), checkSetting.getCheckAddress(), 
 								5, checkSetting.getTimeout());
-						futureRef.set(mailManager.monitorInbox(checkSetting, listener, new MailPosition()));
+						futureRef.set(mailManager.monitorInbox(checkSetting, listener, new MailPosition(), true));
 						
 						ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
 						String subAddressed = checkAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);

@@ -101,7 +101,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
-		titleInput = new TextField<String>("title", Model.of("")); 
+		titleInput = new TextField<>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
 		add(titleInput);
 		add(new FencedFeedbackPanel("titleFeedback", titleInput));

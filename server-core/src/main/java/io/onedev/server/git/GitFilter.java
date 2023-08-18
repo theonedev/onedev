@@ -204,22 +204,17 @@ public class GitFilter implements Filter {
 					builder.header(HttpHeaders.AUTHORIZATION, 
 							KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 					
-					StreamingOutput os = new StreamingOutput() {
-
-						@Override
-						public void write(OutputStream output) throws IOException {
-							try {
-								byte[] buffer = new byte[BUFFER_SIZE];
-						        int length;
-					            while ((length = stdin.read(buffer)) > 0) {
-				            		output.write(buffer, 0, length);
-				            		output.flush();
-					            }
-							} finally {
-								stdin.close();
+					StreamingOutput os = output -> {
+						try {
+							byte[] buffer = new byte[BUFFER_SIZE];
+							int length;
+							while ((length = stdin.read(buffer)) > 0) {
+								output.write(buffer, 0, length);
+								output.flush();
 							}
-						}				   
-					   
+						} finally {
+							stdin.close();
+						}
 					};
 					
 					try (Response gitResponse = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {

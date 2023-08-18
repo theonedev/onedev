@@ -55,8 +55,10 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 			public int compare(ExceptionHandler<? extends Throwable> o1, ExceptionHandler<? extends Throwable> o2) {
 				if (o1.getExceptionClass().isAssignableFrom(o2.getExceptionClass()))
 					return 1;
-				else
+				else if (o2.getExceptionClass().isAssignableFrom(o1.getExceptionClass()))
 					return -1;
+				else 
+					return 0;
 			}
 			
 		});

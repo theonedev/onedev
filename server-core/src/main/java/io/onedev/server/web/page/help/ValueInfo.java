@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-class ValueInfo {
+public class ValueInfo {
 	
 	public enum Origin {REQUEST_BODY, RESPONSE_BODY, PATH_PLACEHOLDER, QUERY_PARAM};
 	

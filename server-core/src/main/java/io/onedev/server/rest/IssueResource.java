@@ -1,50 +1,12 @@
 package io.onedev.server.rest;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import io.onedev.server.util.ProjectScopedCommit;
-import org.apache.shiro.authz.UnauthorizedException;
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.IssueVote;
-import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.exception.InvalidParamException;
@@ -52,6 +14,21 @@ import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.web.page.help.ApiHelpUtils;
+import io.onedev.server.web.page.help.ValueInfo;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.*;
 
 @Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
 		+ "To get issue id of a particular issue number, use the <a href='/~help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -72,15 +49,18 @@ public class IssueResource {
 	
 	private final ProjectManager projectManager;
 	
+	private final ObjectMapper objectMapper;
+	
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
 			IssueChangeManager issueChangeManager, MilestoneManager milestoneManager, 
-			ProjectManager projectManager) {
+			ProjectManager projectManager, ObjectMapper objectMapper) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.milestoneManager = milestoneManager;
 		this.projectManager = projectManager;
+		this.objectMapper = objectMapper;
 	}
 
 	@Api(order=100)
@@ -93,14 +73,24 @@ public class IssueResource {
     	return issue;
     }
 
-	@Api(order=200)
+	@Api(order=200, exampleProvider = "getFieldsExample")
 	@Path("/{issueId}/fields")
     @GET
-    public Collection<IssueField> getFields(@PathParam("issueId") Long issueId) {
+    public Map<String, Serializable> getFields(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
-    	return issue.getFields();
+		
+		Map<String, Serializable> fields = new HashMap<>();
+		for (var field: issue.getFieldInputs().values()) {
+			if (field.getValues().isEmpty())
+				fields.put(field.getName(), null);
+			else if (field.getValues().size() == 1)
+				fields.put(field.getName(), field.getValues().iterator().next());
+			else
+				fields.put(field.getName(), (Serializable) field.getValues());
+		}
+		return fields;
     }
 	
 	@Api(order=300)
@@ -181,14 +171,15 @@ public class IssueResource {
     	return issueCommits;
     }
 	
-	@Api(order=900)
+	@Api(order=900, exampleProvider = "getIssuesExample")
 	@GET
-    public List<Issue> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    public List<Map<String, Object>> query(
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query,
+			@QueryParam("withFields") @Api(description = "Whether or not to include issue fields. Default to false", example="true") Boolean withFields, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
+    	if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
@@ -198,9 +189,25 @@ public class IssueResource {
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}
-    	
-    	return issueManager.query(null, parsedQuery, false, offset, count);
+
+		var typeReference = new TypeReference<Map<String, Object>>() {};		
+		var issues = new ArrayList<Map<String, Object>>();
+		for (var issue: issueManager.query(null, parsedQuery, false, offset, count)) {
+			var issueMap = objectMapper.convertValue(issue, typeReference);
+			if (withFields != null && withFields)
+				issueMap.put("fields", issue.getFields());
+			issues.add(issueMap);
+		}
+		
+		return issues;
     }
+	
+	private static List<Map<String, Object>> getIssuesExample() {
+		var issues = new ArrayList<Map<String, Object>>();
+		var issue = ApiHelpUtils.getExampleValue(Issue.class, ValueInfo.Origin.RESPONSE_BODY);
+		issues.add(OneDev.getInstance(ObjectMapper.class).convertValue(issue, new TypeReference<Map<String, Object>>() {}));
+		return issues;
+	}
 	
 	@Api(order=1000)
     @POST
@@ -211,40 +218,31 @@ public class IssueResource {
     	if (!SecurityUtils.canAccess(project))
 			throw new UnauthorizedException();
 
-    	if (!data.getMilestoneIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
-			throw new UnauthorizedException();
-    	
-    	Issue issue = new Issue();
-    	issue.setTitle(data.getTitle());
-    	issue.setDescription(data.getDescription());
-    	issue.setConfidential(data.isConfidential());
-    	issue.setProject(project);
-    	issue.setSubmitDate(new Date());
-    	issue.setSubmitter(user);
-		issue.setState(settingManager.getIssueSetting().getInitialStateSpec().getName());
+		if (!data.getMilestoneIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
+			throw new UnauthorizedException("No permission to schedule issue");
+
+		var issueSetting = settingManager.getIssueSetting();
 		
-    	for (Long milestoneId: data.getMilestoneIds()) {
-    		Milestone milestone = milestoneManager.load(milestoneId);
-    	    if (!milestone.getProject().isSelfOrAncestorOf(project))
-    	    	throw new InvalidParamException("Milestone is not defined in project hierarchy of the issue");
-    	    IssueSchedule schedule = new IssueSchedule();
-    	    schedule.setIssue(issue);
-    	    schedule.setMilestone(milestone);
-    	    issue.getSchedules().add(schedule);
-    	}
-    	
-    	for (Map.Entry<String, String> entry: data.fields.entrySet()) {
-    		FieldSpec fieldSpec = settingManager.getIssueSetting().getFieldSpec(entry.getKey());
-    		if (fieldSpec != null) {
-        		IssueField field = new IssueField();
-        		field.setIssue(issue);
-        		field.setName(entry.getKey());
-        		field.setValue(entry.getValue());
-        		field.setType(fieldSpec.getType());
-        		field.setOrdinal(issue.getFieldOrdinal(field.getName(), field.getValue()));
-        		issue.getFields().add(field);
-    		}
-    	}
+		Issue issue = new Issue();
+		issue.setTitle(data.getTitle());
+		issue.setDescription(data.getDescription());
+		issue.setConfidential(data.isConfidential());
+		issue.setProject(project);
+		issue.setSubmitDate(new Date());
+		issue.setSubmitter(user);
+		issue.setState(issueSetting.getInitialStateSpec().getName());
+
+		for (Long milestoneId : data.getMilestoneIds()) {
+			Milestone milestone = milestoneManager.load(milestoneId);
+			if (!milestone.getProject().isSelfOrAncestorOf(project))
+				throw new BadRequestException("Milestone is not defined in project hierarchy of the issue");
+			IssueSchedule schedule = new IssueSchedule();
+			schedule.setIssue(issue);
+			schedule.setMilestone(milestone);
+			issue.getSchedules().add(schedule);
+		}
+
+		issue.setFieldValues(getFieldObjs(issue, data.fields));		
 		issueManager.open(issue);
 		return issue.getId();
     }
@@ -288,7 +286,8 @@ public class IssueResource {
     public Response setMilestones(@PathParam("issueId") Long issueId, List<Long> milestoneIds) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canScheduleIssues(issue.getProject()))
-			throw new UnauthorizedException();
+			throw new UnauthorizedException("No permission to schedule issue");
+		
     	Collection<Milestone> milestones = new HashSet<>();
     	for (Long milestoneId: milestoneIds) {
     		Milestone milestone = milestoneManager.load(milestoneId);
@@ -305,65 +304,50 @@ public class IssueResource {
 	@Api(order=1400)
 	@Path("/{issueId}/fields")
     @POST
-    public Response setFields(@PathParam("issueId") Long issueId, @NotNull Map<String, String> fields) {
+    public Response setFields(@PathParam("issueId") Long issueId, @NotNull @Api(exampleProvider = "getFieldsExample") Map<String, Serializable> fields) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canManageIssues(issue.getProject()))
+		var issueSetting = settingManager.getIssueSetting();
+		String initialState = issueSetting.getInitialStateSpec().getName();
+		
+    	if (!SecurityUtils.canManageIssues(issue.getProject()) 
+				&& !(issue.getSubmitter().equals(SecurityUtils.getUser()) && issue.getState().equals(initialState))) {
 			throw new UnauthorizedException();
-    	
-    	Map<String, List<String>> fieldLists = new HashMap<>();
-    	for (Map.Entry<String, String> entry: fields.entrySet()) {
-    		List<String> values = fieldLists.get(entry.getKey());
-    		if (values == null) {
-    			values = new ArrayList<>();
-    			fieldLists.put(entry.getKey(), values);
-    		}
-    		values.add(entry.getValue());
-    	}
-    	
-    	Map<String, Object> fieldObjs = new HashMap<>();
-    	for (Map.Entry<String, List<String>> entry: fieldLists.entrySet()) {
-    		FieldSpec fieldSpec = settingManager.getIssueSetting().getFieldSpec(entry.getKey());
-    		if (fieldSpec != null)
-    			fieldObjs.put(entry.getKey(), fieldSpec.convertToObject(entry.getValue()));
-    	}
-    	
-		issueChangeManager.changeFields(issue, fieldObjs);
+		}
+
+		issueChangeManager.changeFields(issue, getFieldObjs(issue, fields));
 		return Response.ok().build();
     }
+
+	private static Map<String, Serializable> getFieldsExample() {
+		var example = new LinkedHashMap<String, Serializable>();
+		example.put("field1", "value1");
+		example.put("field2", new String[]{"value1", "value2"});
+		return example;
+	}
 	
 	@Api(order=1500)
 	@Path("/{issueId}/state-transitions")
     @POST
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canManageIssues(issue.getProject()))
+		var applicableTriggers = new ArrayList<PressButtonTrigger>();
+		for (var transitionSpec: settingManager.getIssueSetting().getTransitionSpecs()) {
+			if (transitionSpec.getFromStates().contains(issue.getState()) 
+					&& transitionSpec.getToState().equals(data.getState())
+					&& transitionSpec.getTrigger() instanceof PressButtonTrigger) {
+				PressButtonTrigger pressButtonTrigger = (PressButtonTrigger) transitionSpec.getTrigger();
+				applicableTriggers.add(pressButtonTrigger);
+			}
+		}
+		if (applicableTriggers.isEmpty()) 
+			throw new BadRequestException("No applicable transition spec for: " + issue.getState() + "->" + data.getState());
+		if (applicableTriggers.stream().noneMatch(it->it.isAuthorized(issue)))
 			throw new UnauthorizedException();
     	
-		issueChangeManager.changeState(issue, data.getState(), getFieldObjs(data.getFields()), 
+		issueChangeManager.changeState(issue, data.getState(), getFieldObjs(issue, data.getFields()), 
 				data.getRemoveFields(), data.getComment());
 		return Response.ok().build();
     }
-	
-	private Map<String, Object> getFieldObjs(Map<String, String> fields) {
-    	Map<String, List<String>> fieldLists = new HashMap<>();
-    	for (Map.Entry<String, String> entry: fields.entrySet()) {
-    		List<String> values = fieldLists.get(entry.getKey());
-    		if (values == null) {
-    			values = new ArrayList<>();
-    			fieldLists.put(entry.getKey(), values);
-    		}
-    		values.add(entry.getValue());
-    	}
-    	
-    	Map<String, Object> fieldObjs = new HashMap<>();
-    	for (Map.Entry<String, List<String>> entry: fieldLists.entrySet()) {
-    		FieldSpec fieldSpec = settingManager.getIssueSetting().getFieldSpec(entry.getKey());
-    		if (fieldSpec != null)
-    			fieldObjs.put(entry.getKey(), fieldSpec.convertToObject(entry.getValue()));
-    	}
-    	
-    	return fieldObjs;
-	}
 	
 	@Api(order=1600)
 	@Path("/{issueId}")
@@ -375,23 +359,51 @@ public class IssueResource {
     	issueManager.delete(issue);
     	return Response.ok().build();
     }
+
+	private Map<String, Object> getFieldObjs(Issue issue, Map<String, Serializable> fields) {
+		var issueSetting = settingManager.getIssueSetting();
+		Map<String, Object> fieldObjs = new HashMap<>();
+		for (Map.Entry<String, Serializable> entry: fields.entrySet()) {
+			var fieldName = entry.getKey();
+			var fieldSpec = issueSetting.getFieldSpec(fieldName);
+			if (fieldSpec == null)
+				throw new BadRequestException("Undefined field: " + fieldName);
+			if (!SecurityUtils.canEditIssueField(issue.getProject(), fieldName))
+				throw new UnauthorizedException("No permission to edit field: " + fieldName);
+
+			List<String> values = new ArrayList<>();
+			if (entry.getValue() instanceof String) {
+				values.add((String) entry.getValue());
+			} else if (entry.getValue() instanceof Collection) {
+				values.addAll((Collection<String>) entry.getValue());
+			}
+			fieldObjs.put(entry.getKey(), fieldSpec.convertToObject(values));
+		}
+		return fieldObjs;
+	}
 	
 	@EntityCreate(Issue.class)
 	public static class IssueOpenData implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
+		@Api(order=100)
 		private Long projectId;
 		
+		@Api(order=200)
 		private String title;
 		
+		@Api(order=300)
 		private String description;
 		
+		@Api(order=400)
 		private boolean confidential;
 		
+		@Api(order=500)
 		private List<Long> milestoneIds = new ArrayList<>();
 		
-		private Map<String, String> fields = new HashMap<>();
+		@Api(order=600, exampleProvider = "getFieldsExample")
+		private Map<String, Serializable> fields = new HashMap<>();
 
 		@NotNull
 		public Long getProjectId() {
@@ -436,26 +448,33 @@ public class IssueResource {
 		}
 
 		@NotNull
-		public Map<String, String> getFields() {
+		public Map<String, Serializable> getFields() {
 			return fields;
 		}
 
-		public void setFields(Map<String, String> fields) {
+		public void setFields(Map<String, Serializable> fields) {
 			this.fields = fields;
 		}
 		
+		private static Map<String, Serializable> getFieldsExample() {
+			return IssueResource.getFieldsExample();
+		}
 	}
 	
 	public static class StateTransitionData implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
+		@Api(order=100)
 		private String state;
 		
-		private Map<String, String> fields = new HashMap<>();
+		@Api(order=200, exampleProvider = "getFieldsExample")
+		private Map<String, Serializable> fields = new HashMap<>();
 		
+		@Api(order=300)
 		private Collection<String> removeFields = new HashSet<>();
 		
+		@Api(order=400)
 		private String comment;
 
 		@NotEmpty
@@ -468,11 +487,11 @@ public class IssueResource {
 		}
 
 		@NotNull
-		public Map<String, String> getFields() {
+		public Map<String, Serializable> getFields() {
 			return fields;
 		}
 
-		public void setFields(Map<String, String> fields) {
+		public void setFields(Map<String, Serializable> fields) {
 			this.fields = fields;
 		}
 
@@ -493,8 +512,12 @@ public class IssueResource {
 			this.comment = comment;
 		}
 		
+		private static Map<String, Serializable> getFieldsExample() {
+			return IssueResource.getFieldsExample();
+		}
+		
 	}
-	
+
 	public static class FixCommit implements Serializable {
 		
 		private static final long serialVersionUID = 1L;

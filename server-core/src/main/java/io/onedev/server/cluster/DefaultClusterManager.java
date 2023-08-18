@@ -18,6 +18,7 @@ import io.onedev.server.data.DataManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
+import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.replica.ProjectReplica;
 import org.eclipse.jetty.server.session.SessionData;
@@ -62,7 +63,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	
 	private volatile Map<String, String> serverNames;
 	
-	private volatile Map<String, String> runningServers;
+	private volatile Map<String, String> onlineServers;
 	
 	private volatile HazelcastInstance hazelcastInstance;
 	
@@ -150,14 +151,14 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 			@Override
 			public void memberAdded(MembershipEvent membershipEvent) {
 				var server = getServerAddress(membershipEvent.getMember());
-				if (runningServers.containsKey(server)) 
+				if (onlineServers.containsKey(server)) 
 					listenerRegistry.post(new ConnectionRestored(server));
 			}
 
 			@Override
 			public void memberRemoved(MembershipEvent membershipEvent) {
 				var server = getServerAddress(membershipEvent.getMember());
-				if (runningServers.containsKey(server)) 
+				if (onlineServers.containsKey(server)) 
 					listenerRegistry.post(new ConnectionLost(server));
 			}
 		});
@@ -165,7 +166,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 		httpPorts = hazelcastInstance.getMap("httpPorts");
 		sshPorts = hazelcastInstance.getMap("sshPorts");
 		serverNames = hazelcastInstance.getMap("serverNames");
-		runningServers = hazelcastInstance.getReplicatedMap("runningServers");
+		onlineServers = hazelcastInstance.getReplicatedMap("onlineServers");
 		
 		httpPorts.put(getLocalServerAddress(), serverConfig.getHttpPort());
 		sshPorts.put(getLocalServerAddress(), serverConfig.getSshPort());
@@ -175,13 +176,13 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	@Override
 	public void postStart() {
 		var localServer = getLocalServerAddress();
-		runningServers.put(localServer, localServer);
+		onlineServers.put(localServer, localServer);
 	}
 
 	@Override
 	public void preStop() {
-		if (runningServers != null)
-			runningServers.remove(getLocalServerAddress());
+		if (onlineServers != null)
+			onlineServers.remove(getLocalServerAddress());
 	}
 
 	@Override
@@ -216,8 +217,8 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	}
 	
 	@Override
-	public Collection<String> getRunningServers() {
-		return runningServers.keySet();
+	public Collection<String> getOnlineServers() {
+		return onlineServers.keySet();
 	}
 	
 	@Override
@@ -254,10 +255,12 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 			if (getServerAddress(member).equals(serverAddress))
 				return member;
 		}
-		if (mustExist)
-			throw new ExplicitException("Server not found: " + serverAddress);
-		else
+		if (mustExist) {
+			throw new ServerNotFoundException("Unable to find server '" + serverAddress + "', " +
+					"this normally happens when project replica status is out of sync with cluster");
+		} else {
 			return null;
+		}
 	}
 	
 	private <T> T getResult(Future<T> future) {

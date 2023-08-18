@@ -9,7 +9,7 @@
 		<version>1.2.1</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>8.6.13</version>
+	<version>9.0.0</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -95,6 +95,7 @@
 	<modules>
 		<module>server-core</module>
 		<module>server-plugin</module>
+		<module>server-ee</module>
 		<module>server-product</module>
 	</modules>
 	<dependencyManagement>

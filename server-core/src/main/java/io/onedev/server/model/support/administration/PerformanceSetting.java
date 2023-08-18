@@ -27,10 +27,12 @@ public class PerformanceSetting implements Serializable {
 	public PerformanceSetting() {
 		try {
 			HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
+			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount() / 2;
+			if (cpuIntensiveTaskConcurrency == 0)
+				cpuIntensiveTaskConcurrency = 1;
 		} catch (Exception e) {
 			logger.debug("Error calling oshi", e);
-			cpuIntensiveTaskConcurrency = 4;
+			cpuIntensiveTaskConcurrency = 1;
 		}
 	}
 

@@ -39,8 +39,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	AlertSetting getAlertSetting();
 	
+	String getSystemUUID();
+	
 	@Nullable
-	String getLicenseData();
+	String getSubscriptionData();
 	
 	/**
 	 * Save specified system setting.
@@ -52,7 +54,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveAlertSetting(AlertSetting alertSetting);
 	
-	void saveLicenseData(@Nullable String licenseData);
+	void saveSubscriptionData(@Nullable String subscriptionData);
 	
 	/**
 	 * Get mail setting.
@@ -148,6 +150,8 @@ public interface SettingManager extends EntityManager<Setting> {
 	AgentSetting getAgentSetting();
 	
 	void saveAgentSetting(AgentSetting agentSetting);
+	
+	void saveSystemUUID(String systemUUID);
 	
     SshSetting getSshSetting();
     

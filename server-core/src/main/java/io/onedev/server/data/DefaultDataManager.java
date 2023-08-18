@@ -745,6 +745,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
+		
+		setting = settingManager.getSetting(Key.SYSTEM_UUID);
+		if (setting == null || setting.getValue() == null) 
+			settingManager.saveSystemUUID(UUID.randomUUID().toString());
 
 		setting = settingManager.getSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
@@ -816,9 +820,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
-		setting = settingManager.getSetting(Key.LICENSE_DATA);
+		setting = settingManager.getSetting(Key.SUBSCRIPTION_DATA);
 		if (setting == null) {
-			settingManager.saveLicenseData(null);
+			settingManager.saveSubscriptionData(null);
 		}
 		setting = settingManager.getSetting(Key.ALERT);
 		if (setting == null) {

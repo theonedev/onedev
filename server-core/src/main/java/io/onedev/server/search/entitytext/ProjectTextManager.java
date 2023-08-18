@@ -99,7 +99,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	protected static final String FIELD_PROJECT_ID = "projectId";
 	
-	private static final int INDEXING_PRIORITY = 20;
+	private static final int INDEXING_PRIORITY = 100;
 	
 	private static final int BATCH_SIZE = 5000;
 	

@@ -79,8 +79,8 @@ public class CodeCommentResource {
     		@QueryParam("pullRequestId") Long pullRequestId, 
     		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in project code comments page", example="created by me") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, @QueryParam("count") @Api(example="100") int count) {
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
+
+		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	Project project;

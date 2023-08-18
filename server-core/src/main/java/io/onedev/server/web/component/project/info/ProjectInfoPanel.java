@@ -186,7 +186,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(new WebMarkupContainer("forkedFrom").setVisible(false));
 		}
 		
-		int latestVersion;
+		long latestVersion;
 		if (activeServer != null) {
 			var replica = replicasModel.getObject().get(activeServer);
 			if (replica != null)

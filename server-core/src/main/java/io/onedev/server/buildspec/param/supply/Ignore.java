@@ -9,12 +9,12 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.annotation.Editable;
 
-@Editable(name="Do not use this param")
+@Editable(name="Ignore this param")
 public class Ignore implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DISPLAY_NAME = "Do not use this param";
+	public static final String DISPLAY_NAME = "Ignore this param";
 	
 	@Override
 	public boolean equals(Object other) {

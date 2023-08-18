@@ -801,9 +801,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long buildId = build.getId();
 		JobContext jobContext = getJobContext(buildId);
 		if (jobContext != null) {
-			String jobServerUUID = jobServers.get(jobContext.getJobToken());
-			if (jobServerUUID != null) {
-				clusterManager.runOnServer(jobServerUUID, new ClusterTask<Void>() {
+			String jobServer = jobServers.get(jobContext.getJobToken());
+			if (jobServer != null) {
+				clusterManager.runOnServer(jobServer, new ClusterTask<Void>() {
 
 					private static final long serialVersionUID = 1L;
 
@@ -934,13 +934,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				execution.cancel(userId);
 			} else {
 				transactionManager.run(() -> {
-					Build build1 = buildManager.load(buildId);
-					if (!build1.isFinished()) {
-						build1.setStatus(Status.CANCELLED);
-						build1.setFinishDate(new Date());
-						build1.setCanceller(userManager.load(userId));
-						buildManager.update(build1);
-						listenerRegistry.post(new BuildFinished(build1));
+					Build innerBuild = buildManager.load(buildId);
+					if (!innerBuild.isFinished()) {
+						innerBuild.setStatus(Status.CANCELLED);
+						innerBuild.setFinishDate(new Date());
+						innerBuild.setCanceller(userManager.load(userId));
+						buildManager.update(innerBuild);
+						listenerRegistry.post(new BuildFinished(innerBuild));
 					}
 				});
 			}
@@ -1102,8 +1102,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Override
 	public void run() {
 		while (!jobExecutions.isEmpty() || thread != null) {
-			if (thread == null)
-				logger.info("Waiting for unfinished jobs...");
+			if (thread == null) {
+				if (!jobExecutions.isEmpty())
+					logger.info("Waiting for jobs to finish...");
+				for (var execution: jobExecutions.values()) {
+					if (!execution.isDone() && !execution.isCancelled())
+						execution.cancel(User.SYSTEM_ID);
+				}
+			}
 			try {
 				if (clusterManager.isLeaderServer()) {
 					Map<String, Collection<Long>> buildIds = new HashMap<>();
@@ -1111,7 +1117,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						var buildId = entry.getKey();
 						var projectId = entry.getValue();
 						String activeServer = projectManager.getActiveServer(projectId, false);
-						if (activeServer != null && clusterManager.getRunningServers().contains(activeServer)) {
+						if (activeServer != null && clusterManager.getOnlineServers().contains(activeServer)) {
 							var buildIdsOfServer = buildIds.computeIfAbsent(activeServer, k -> new ArrayList<>());
 							buildIdsOfServer.add(buildId);
 						}
@@ -1453,44 +1459,42 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											 boolean callByAgent, TaskLogger logger) {
 		String activeServer = projectManager.getActiveServer(jobContext.getProjectId(), true);
 		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			// Some steps need the commit to be indexed, for instance various 
-			// report publishing steps need to query the full blob path based 
-			// on a partial path (java package/class etc)
-			codeIndexManager.indexAsync(jobContext.getProjectId(), jobContext.getCommitId());
-			while (!codeIndexManager.isIndexed(jobContext.getProjectId(), jobContext.getCommitId())) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+			Thread thread = Thread.currentThread();
+			Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
+			if (callByAgent && threads != null) synchronized (threads) {
+				threads.add(thread);
+			}
+			try {
+				List<Action> actions = jobActions.get(jobContext.getJobToken());
+				if (actions != null) {
+					ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
+					var serverSideStep = (ServerSideStep) serverSideFacade.getStep();
+					var transformedServerSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
+
+					if (transformedServerSideStep.requireCommitIndex()) {
+						logger.log("Waiting for commit to be indexed...");
+						codeIndexManager.indexAsync(jobContext.getProjectId(), jobContext.getCommitId());
+						while (!codeIndexManager.isIndexed(jobContext.getProjectId(), jobContext.getCommitId())) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+					
+					return sessionManager.call(() -> {
+						Build build = buildManager.load(jobContext.getBuildId());
+						return transformedServerSideStep.run(build, inputDir, logger);
+					});
+				} else {
+					throw new IllegalStateException("Job actions not found");
+				}
+			} finally {
+				if (callByAgent && threads != null) synchronized (threads) {
+					threads.remove(thread);
 				}
 			}
-
-			return sessionManager.call(() -> {
-				Thread thread = Thread.currentThread();
-				Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
-				if (callByAgent && threads != null) synchronized (threads) {
-					threads.add(thread);
-				}
-				try {
-					List<Action> actions = jobActions.get(jobContext.getJobToken());
-					if (actions != null) {
-						ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
-						ServerSideStep serverSideStep = (ServerSideStep) serverSideFacade.getStep();
-
-						serverSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
-
-						Build build = buildManager.load(jobContext.getBuildId());
-						return serverSideStep.run(build, inputDir, logger);
-					} else {
-						throw new IllegalStateException("Job actions not found");
-					}
-				} finally {
-					if (callByAgent && threads != null) synchronized (threads) {
-						threads.remove(thread);
-					}
-				}
-
-			});
 		} else {
 			String serverUrl = clusterManager.getServerUrl(activeServer);
 			return KubernetesHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 

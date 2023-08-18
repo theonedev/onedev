@@ -39,8 +39,6 @@ import java.util.Map;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.lang.math.NumberUtils.isNumber;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Singleton
 public class DefaultResourceAllocator implements ResourceAllocator, Serializable, SchedulableTask {
@@ -116,38 +114,6 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	public void on(SystemStopping event) {
 		if (taskId != null)
 			taskScheduler.unschedule(taskId);
-		
-		var localServer = clusterManager.getLocalServerAddress();
-		while (true) {
-			boolean idle = true;
-			synchronized (resourceUsages) {
-				for (var entry : resourceUsages.entrySet()) {
-					if (entry.getValue() != 0) {
-						var resourceKey = entry.getKey();
-						var resourceNode = substringBeforeLast(resourceKey, ":");
-						if (resourceNode.equals(localServer)) {
-							idle = false;
-							break;
-						} else if (isNumber(resourceNode)) {
-							var agentId = Long.valueOf(resourceNode);
-							if (localServer.equals(agentManager.getAgentServer(agentId))) {
-								idle = false;
-								break;
-							}
-						}
-					}
-				}
-			}
-			if (idle) {
-				break;
-			} else {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
 	}
 	
 	@Listen
@@ -155,8 +121,14 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 		if (clusterManager.isLeaderServer()) {
 			clusterManager.submitToServer(event.getServer(), () -> {
 				try {
-					synchronized (resourceUsages) {
-						resourceUsagesCache.putAll(resourceUsages);
+					while (true) {
+						synchronized (resourceUsages) {
+							if (resourceUsagesCache != null) {
+								resourceUsagesCache.putAll(resourceUsages);
+								break;
+							}
+						}
+						Thread.sleep(100);
 					}
 				} catch (Exception e) {
 					logger.error("Error syncing resource usages cache", e);
@@ -305,7 +277,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 							 int requiredResources, ClusterRunnable runnable) {
 		while (true) {
 			var servers = clusterManager.getServerAddresses();
-			servers.retainAll(clusterManager.getRunningServers());
+			servers.retainAll(clusterManager.getOnlineServers());
 			var server = allocateResource(servers, resourceType, totalResources, requiredResources);
 			if (server != null) {
 				jobManager.runJob(server, () -> {

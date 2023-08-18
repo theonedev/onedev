@@ -6,7 +6,7 @@ public interface FeatureManager {
 	
 	boolean isEEAvailable();
 	
-	boolean isEELicensed();
+	boolean isEEActivated();
 	
 	Component renderSupportRequestLink(String componentId);
 	

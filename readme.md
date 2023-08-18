@@ -34,7 +34,7 @@ You may switch to any commit, and search code with regular expression. OneDev un
 
 ![regex](doc/images/regex-search.gif)
 
-## Annotate Source/Diff with Static Analysis Result to Facilitate Code Review
+## Annotate Source/Diff with Static Analysis Result to Facilitate Code Review
 
 Of course this can be done by many third party applications at GitHub, however they display the result on their own applications, and this makes review activities such as adding comment over analysis result difficult. Not to mention that you need to pay for these services.
 
@@ -63,7 +63,7 @@ Service desk allows your users to submit tickets via email without the need to h
 
 ![service-desk.png](doc/images/service-desk.png)
 
-## A powerful and Intuitive Query Language
+## A powerful and Intuitive Query Language
 
 Thanks to ANTLR again, OneDev ships sophisticated query languages for projects, commits, issues, builds, and pull requests, with intuitive auto-completions and hints. For instance, it enables our customers finding fixed issues between their running release and latest release, and enables us to find all commits submitted by someone touching specified modules, etc. 
 
@@ -71,7 +71,7 @@ Queries can be saved and subscribed, so that you won't miss anything interested.
 
 ![query](doc/images/query.gif)
 
-## A Full-fledge CI/CD Engine without Writing Yaml
+## A Full-fledge CI/CD Engine without Writing Yaml
 
 OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. 
 
@@ -89,7 +89,7 @@ Specify pull request review policy based on author, branch, and changed files. O
 
 ![review-policy](doc/images/review-policy.gif)
 
-## Lightweight Review without Pull Request
+## Lightweight Review without Pull Request
 
 Comment on any part of code or diff to start a lightweight review without opening pull request. Review comments live through code modification and even file rename to serve as documentation. 
 
@@ -105,7 +105,7 @@ Press cmd/ctrl-k to bring up command palette from anywhere. Search projects, fil
 
 ![command-palette.gif](doc/images/command-palette.gif)
 
-## Write Markdown Pleasantly With a Smart Editor
+## Write Markdown Pleasantly With a Smart Editor
 
 When embedding an image in a markdown file in GitHub/GitLab, you need to upload the image in a separate page, and then figure out the relative path to reference that image. With OneDev, you simply upload the image to desired folder in same editor, and the link will be generated automatically. 
 
@@ -123,7 +123,7 @@ OneDev inspects git history of main branch to calculate trend of source lines of
 
 Organization is ideal for public service. However, for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
 
-## Effortless Clustering and Replication (Enterprise Edition)
+## Effortless High Availability and Scalability (Enterprise Edition)
 
 Just connect multiple OneDev instances to same database, and you will get a cluster to distribute project load to multiple 
 servers, as well as the ability to sync projects with its replicas in real time. If one server goes down, project replicas 
@@ -157,11 +157,3 @@ live environment of the job to help diagnostics, and resume the job afterwards.
 OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium-sized projects. 
 It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
 normally few to no known bugs in the wild.
-
-----
-
-# Special Thanks
-
-![yourkit](https://www.yourkit.com/images/yklogo.png) 
-
-[YourKit](https://yourkit.com) supports this project by providing a free open source license of their excellent Java profiler

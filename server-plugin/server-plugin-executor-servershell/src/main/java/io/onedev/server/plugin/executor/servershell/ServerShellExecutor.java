@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.onedev.agent.ExecutorUtils.newInfoLogger;
+import static io.onedev.agent.ExecutorUtils.newWarningLogger;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 
@@ -201,7 +203,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										interpreter.workingDir(workspaceDir).environments(environments);
 										interpreter.addArgs(jobScriptFile.getAbsolutePath());
 
-										ExecutionResult result = interpreter.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+										ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 										if (result.getReturnCode() != 0) {
 											long duration = System.currentTimeMillis() - time;
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Command exited with code " + result.getReturnCode());
@@ -229,19 +231,19 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											File trustCertsFile = new File(buildHome, "trust-certs.pem");
 											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
 													trustCertsFile.getAbsolutePath(), 
-													ExecutorUtils.newInfoLogger(jobLogger), 
-													ExecutorUtils.newWarningLogger(jobLogger));
+													newInfoLogger(jobLogger), 
+													newWarningLogger(jobLogger));
 
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
 											cloneInfo.writeAuthData(userHome, git, false, 
-													ExecutorUtils.newInfoLogger(jobLogger), 
-													ExecutorUtils.newWarningLogger(jobLogger));
+													newInfoLogger(jobLogger), 
+													newWarningLogger(jobLogger));
 
 											int cloneDepth = checkoutFacade.getCloneDepth();
 
 											cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(), jobContext.getRefName(),
 													jobContext.getCommitId().name(), checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-													cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+													cloneDepth, newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 										} catch (Exception e) {
 											long duration = System.currentTimeMillis() - time;
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));

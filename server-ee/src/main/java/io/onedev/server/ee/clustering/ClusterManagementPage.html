@@ -1,0 +1,22 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<h6>Clustered Servers</h6>
+			<table class="table">
+				<tbody>
+					<tr wicket:id="servers">
+						<td wicket:id="server"></td>
+					</tr>
+				</tbody>
+			</table>
+			<h6>Project Replicas</h6>
+			<form wicket:id="form">
+				<div wicket:id="editor"></div>
+				<input type="submit" class="btn btn-primary" value="Save Settings & Redistribute Projects">
+			</form>
+			<div class="text-muted mt-4"><wicket:svg href="bulb" class="icon"/> Projects need to be redistributed when cluster members are added/removed. 
+				OneDev does not do this automatically as this is resource intensive, and you may only want to do it after cluster is finalized 
+				and stable.</div>
+		</div>
+	</div>
+</wicket:extend>

@@ -29,6 +29,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
@@ -136,7 +137,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	private static final String LFS_SINCE_COMMITS = "lfs/.lfs-since-commits";
 	
-	private static final int SYNC_PRIORITY = 10000;
+	private static final int SYNC_PRIORITY = 20;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
@@ -800,15 +801,21 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(ConnectionEvent event) {
 		if (clusterManager.isLeaderServer()) {
-			var newActiveServers = new HashMap<Long, String>();
-			for (var entry: replicas) {
-				var projectId = entry.getKey();
-				newActiveServers.put(projectId, updateActiveServer(projectId, entry.getValue(), true));
-			}
-			notifyActiveServerChanged(newActiveServers);
+			logger.info("Updating active servers upon cluster member change...");
+			updateActiveServers();
 		}
 	}
 
+	@Override
+	public void updateActiveServers() {
+		var newActiveServers = new HashMap<Long, String>();
+		for (var entry: replicas) {
+			var projectId = entry.getKey();
+			newActiveServers.put(projectId, updateActiveServer(projectId, entry.getValue(), true));
+		}
+		notifyActiveServerChanged(newActiveServers);
+	}
+	
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
@@ -1161,8 +1168,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		
 		String oldActiveServer, newActiveServer = null;
 		if (!effectiveReplicasOfProject.isEmpty()) {
-			int maxVersion = effectiveReplicasOfProject.values().stream()
-					.mapToInt(ProjectReplica::getVersion).max().getAsInt();
+			long maxVersion = effectiveReplicasOfProject.values().stream()
+					.mapToLong(ProjectReplica::getVersion).max().getAsLong();
 			var candidates = effectiveReplicasOfProject.entrySet().stream()
 					.filter(it -> it.getValue().getVersion() == maxVersion)
 					.collect(toList());
@@ -1544,10 +1551,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer) {
 		var directory = new File(getStorageDir(projectId), path);
 		
-		int remoteVersion = clusterManager.runOnServer(activeServer, () -> {
+		long remoteVersion = clusterManager.runOnServer(activeServer, () -> {
 			return readVersion(new File(getStorageDir(projectId), path));
 		});
-		int version = readVersion(directory);
+		long version = readVersion(directory);
 		
 		if (version < remoteVersion) {
 			Collection<String> remoteChildren = clusterManager.runOnServer(activeServer, () -> {
@@ -1580,9 +1587,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void syncDirectory(Long projectId, String path, String readLock, String activeServer) {
 		var directory = new File(getStorageDir(projectId), path);
-		int version = readVersion(directory);
+		long version = readVersion(directory);
 
-		int remoteVersion = clusterManager.runOnServer(activeServer, () -> {
+		long remoteVersion = clusterManager.runOnServer(activeServer, () -> {
 			return readVersion(new File(getStorageDir(projectId), path));
 		});
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.attachment.AttachmentStorageSupport;
@@ -273,6 +274,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public void setState(String state) {
 		this.state = state;
 		stateOrdinal = getIssueSetting().getStateOrdinal(state);
+		if (stateOrdinal == -1)
+			throw new ExplicitException("Undefined state: " + state);
 	}
 
 	public int getStateOrdinal() {

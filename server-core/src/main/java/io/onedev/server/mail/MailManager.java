@@ -42,6 +42,6 @@ public interface MailManager {
 	String toPlainText(String mailContent);
 	
 	Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, 
-						   MailPosition lastPosition);
+						   MailPosition lastPosition, boolean testMode);
 
 }
