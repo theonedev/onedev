@@ -61,6 +61,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -120,19 +122,14 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		var branchName = ref2branch(event.getRefName());
 		if (branchName != null && branchName.equals(project.getDefaultBranch())
 				&& !event.getNewCommitId().equals(ObjectId.zeroId())) {
-			batchWorkManager.submit(
-					getBatchWorker(project.getId()),
-					new IndexWork(INDEXING_PRIORITY));
+			batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, project.getId()));
 		}
 	}
-	
 
 	@Sessional
 	@Listen
 	public void on(DefaultBranchChanged event) {
-		batchWorkManager.submit(
-				getBatchWorker(event.getProject().getId()),
-				new IndexWork(INDEXING_PRIORITY));
+		batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, event.getProject().getId()));
 	}
 	
 	@Listen
@@ -154,18 +151,14 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Listen
 	public void on(SystemStarted event) {
 		for (var projectId : projectManager.getActiveIds()) {
-			batchWorkManager.submit(
-					getBatchWorker(projectId),
-					new IndexWork(INDEXING_PRIORITY));
+			batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, projectId));
 		}
 	}
 	
 	@Listen
 	public void on(ActiveServerChanged event) {
 		for (var projectId : event.getProjectIds()) {
-			batchWorkManager.submit(
-					getBatchWorker(projectId),
-					new IndexWork(INDEXING_PRIORITY));
+			batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, projectId));
 		}
 	}
 	
@@ -178,9 +171,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 				transactionManager.runAfterCommit(() -> {
 					clusterManager.submitToAllServers(() -> {
 						for (var projectId : projectManager.getActiveIds()) {
-							batchWorkManager.submit(
-									getBatchWorker(projectId),
-									new IndexWork(INDEXING_PRIORITY));
+							batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, projectId));
 						}
 						return null;
 					});
@@ -198,8 +189,8 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		});
 	}
 	
-	private BatchWorker getBatchWorker(Long projectId) {
-		return new BatchWorker("project-" + projectId + "-indexDefaultBranch", MAX_VALUE) {
+	private BatchWorker getBatchWorker() {
+		return new BatchWorker("indexDefaultBranch", MAX_VALUE) {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
@@ -210,18 +201,23 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 							try {
 								if (indexStatusChanged)
 									listenerRegistry.post(new CodeIndexStatusChanged());
-								var project = projectManager.load(projectId);
-								try (Directory directory = FSDirectory.open(getIndexDir().toPath())) {
-									if (DirectoryReader.indexExists(directory)) {
-										try (IndexReader reader = DirectoryReader.open(directory)) {
-											IndexSearcher searcher = new IndexSearcher(reader);
-											doIndex(project, writer, searcher);
+								Collection<Long> projectIds = new HashSet<>();
+								for (var work: works) 
+									projectIds.add(((IndexWork) work).projectId);
+								for (var projectId: projectIds) {
+									var project = projectManager.load(projectId);
+									try (Directory directory = FSDirectory.open(getIndexDir().toPath())) {
+										if (DirectoryReader.indexExists(directory)) {
+											try (IndexReader reader = DirectoryReader.open(directory)) {
+												IndexSearcher searcher = new IndexSearcher(reader);
+												doIndex(project, writer, searcher);
+											}
+										} else {
+											doIndex(project, writer, null);
 										}
-									} else {
-										doIndex(project, writer, null);
+									} catch (IOException e) {
+										throw new RuntimeException(e);
 									}
-								} catch (IOException e) {
-									throw new RuntimeException(e);
 								}
 							} finally {
 								if (indexings.decrementAndGet() == 0)
@@ -244,7 +240,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		return DigestUtils.md5Hex(DATA_VERSION + ";" + SymbolExtractorRegistry.getVersion() + ";" + filePatterns);
 	}
 
-	private synchronized <T> T callWithWriter(WriterCallable<T> callable) {
+	private <T> T callWithWriter(WriterCallable<T> callable) {
 		File indexDir = getIndexDir();
 		try (Directory directory = FSDirectory.open(indexDir.toPath());) {
 			var writerConfig = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
@@ -408,8 +404,11 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	
 	private static class IndexWork extends Prioritized {
 
-		public IndexWork(int priority) {
+		private final Long projectId;
+		
+		public IndexWork(int priority, Long projectId) {
 			super(priority);
+			this.projectId = projectId;
 		}
 
 	}

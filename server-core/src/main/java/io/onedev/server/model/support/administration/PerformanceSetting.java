@@ -32,7 +32,7 @@ public class PerformanceSetting implements Serializable {
 				cpuIntensiveTaskConcurrency = 1;
 		} catch (Exception e) {
 			logger.debug("Error calling oshi", e);
-			cpuIntensiveTaskConcurrency = 1;
+			cpuIntensiveTaskConcurrency = 2;
 		}
 	}
 
