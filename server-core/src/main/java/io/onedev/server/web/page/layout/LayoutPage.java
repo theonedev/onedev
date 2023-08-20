@@ -470,14 +470,17 @@ public abstract class LayoutPage extends BasePage {
 		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
-				if (isEEActivated())
+				if (isEEActivated() && SecurityUtils.isAdministrator())
 					return "Bug Report";
 				else
 					return "Support & Bug Report";
 			}
 			
 		}));
-		sidebar.add(getFeatureManager().renderSupportRequestLink("supportRequest"));
+		if (SecurityUtils.isAdministrator())
+			sidebar.add(getFeatureManager().renderSupportRequestLink("supportRequest"));
+		else
+			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));			
 		
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");
 		add(topbar);
