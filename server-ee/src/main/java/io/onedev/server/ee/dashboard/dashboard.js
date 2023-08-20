@@ -60,8 +60,9 @@ onedev.server.dashboard = {
 	
 			$widget.css({
 				left: left,
-				top: top
-			}).show();
+				top: top,
+				display: "flex"
+			});
 		});		
 	},
 	drawAlignGrid: function() {
