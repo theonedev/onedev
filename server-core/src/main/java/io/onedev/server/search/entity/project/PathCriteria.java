@@ -20,8 +20,7 @@ public class PathCriteria extends Criteria<Project> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		Path<String> attribute = from.get(Project.PROP_PATH);
-		return builder.like(builder.lower(attribute), value.toLowerCase().replace("*", "%"));
+		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, from, value);
 	}
 
 	@Override
