@@ -141,12 +141,14 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 				hasLocalhost = true;
 			else 
 				hasNonLocalhost = true;
-			config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(server);
+			if (!server.equals(localServer))
+				config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(server);
 		}
 		if (hasLocalhost && hasNonLocalhost)
 			throw new ExplicitException("Invalid servers detected in cluster: loopback address should not be used");
-
+		config.getNetworkConfig().setPublicAddress(localServer);
 		hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+
 		hazelcastInstance.getCluster().addMembershipListener(new MembershipListener() {
 			@Override
 			public void memberAdded(MembershipEvent membershipEvent) {

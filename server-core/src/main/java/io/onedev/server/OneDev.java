@@ -158,6 +158,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
+				if (thread == null)
+					return;
+				
 				manualConfigs = checkData();
 				if (manualConfigs.isEmpty()) {
 					initStage = new InitStage("Please wait...");
@@ -200,12 +203,14 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	@Sessional
 	@Override
 	public void postStart() {
+		if (thread == null) 
+			return;
 		SecurityUtils.bindAsSystem();
 		initStage = null;
 		listenerRegistry.post(new SystemStarted());
 		clusterManager.postStart();
 		thread.start();
-        logger.info("Server is ready at " + guessServerUrl());
+		logger.info("Server is ready at " + guessServerUrl());
 	}
 
 	@Override
