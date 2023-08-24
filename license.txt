@@ -13,11 +13,10 @@ Copyright (c) 2023-present OneDev Pty
 *
 * The Source Available License
 *
-* EE module and its derived form (files with name containing "server-ee" in binary distribution)
-* are available for examination, backup, redistribution, or running together with non-EE
-* part for free. You shall not modify any part of them, or use any part of them in other work.
-* Additionally, you shall not use encryption keys contained in them to encrypt or decrypt
-* custom data.
+* EE module and all its derived forms are available for examination, backup, redistribution, or
+* running together with non-EE part for free. You shall not modify any part of them, or use any
+* part of them in other work. Additionally, you shall not use encryption keys contained in them
+* to encrypt or decrypt custom data.
 *
 * Functionalities offered by EE module of the software will be unlocked and shall only be used
 * with an active subscription (either trial or formal). Subscription shall only be extended with
