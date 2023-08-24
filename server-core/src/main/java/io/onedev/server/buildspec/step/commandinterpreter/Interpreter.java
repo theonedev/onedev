@@ -30,7 +30,7 @@ public abstract class Interpreter implements Serializable {
 	public abstract CommandFacade getExecutable(JobExecutor jobExecutor, @Nullable String image, boolean useTTY);
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false, true);
+		return BuildSpec.suggestVariables(matchWith, true, false, true);
 	}
 	
 }
