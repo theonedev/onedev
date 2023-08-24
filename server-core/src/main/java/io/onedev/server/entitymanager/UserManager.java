@@ -1,17 +1,15 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.shiro.authz.Permission;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
+import org.apache.shiro.authz.Permission;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
 
 public interface UserManager extends EntityManager<User> {
 	

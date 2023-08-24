@@ -9,4 +9,6 @@ public interface SubscriptionManager {
 	@Nullable
 	String getLicensee();
 	
+	int countDevelopers();
+	
 }

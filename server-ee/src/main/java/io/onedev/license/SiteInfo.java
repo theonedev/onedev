@@ -14,6 +14,8 @@ public class SiteInfo implements Serializable {
     private String productVersion;
 
     private int totalUsers;
+	
+	private int totalDevelopers;
 
     private int totalAgents;
 
@@ -41,7 +43,16 @@ public class SiteInfo implements Serializable {
         this.totalUsers = totalUsers;
     }
 
-    @Editable(order=200)
+	@Editable(order=150)
+	public int getTotalDevelopers() {
+		return totalDevelopers;
+	}
+
+	public void setTotalDevelopers(int totalDevelopers) {
+		this.totalDevelopers = totalDevelopers;
+	}
+
+	@Editable(order=200)
     public int getTotalAgents() {
         return totalAgents;
     }

@@ -78,6 +78,7 @@ public class SupportRequestPanel extends Panel {
 		add(new Label("productVersion", siteInfo.getProductVersion()));
 		add(new Label("totalAgents", siteInfo.getTotalAgents()));
 		add(new Label("totalUsers", siteInfo.getTotalUsers()));
+		add(new Label("totalDevelopers", siteInfo.getTotalDevelopers()));
 		add(new Label("remainingUserMonths", siteInfo.getRemainingUserMonths()));
 
 		add(BeanContext.view("serversAndSubscriptionKeys", siteInfo, 
@@ -109,6 +110,7 @@ public class SupportRequestPanel extends Panel {
 		siteInfo.setProductVersion(AppLoader.getProduct().getVersion());
 		siteInfo.setTotalAgents(OneDev.getInstance(AgentManager.class).getOnlineAgents().size());
 		siteInfo.setTotalUsers(OneDev.getInstance(UserManager.class).count());
+		siteInfo.setTotalDevelopers(OneDev.getInstance(SubscriptionManager.class).countDevelopers());
 
 		var subscriptionSettingSetting = SubscriptionSetting.load();
 		siteInfo.setRemainingUserMonths(subscriptionSettingSetting.getSubscription().getUserDays()/31);

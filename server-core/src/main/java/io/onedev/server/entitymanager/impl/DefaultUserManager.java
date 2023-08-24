@@ -407,6 +407,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return query.getResultList();
 	}
 
+	@Sessional
 	@Override
 	public int count(String term) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
@@ -418,7 +419,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
-
+	
 	@Sessional
 	@Override
 	public User findByVerifiedEmailAddress(String emailAddressValue) {
