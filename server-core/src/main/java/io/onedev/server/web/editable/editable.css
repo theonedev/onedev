@@ -44,6 +44,9 @@
 	width: 100%;
 	border-collapse: separate;
 }
+.editable table.norecords {
+	border-collapse: collapse;
+}
 .editable table.norecords tfoot td {
 	border: none;
 	padding: 4px 0 0 0;
@@ -111,7 +114,8 @@
 .editable table tr:first-child td:last-child {
 	border-top-right-radius: 0.42rem;
 }
-.editable table thead+tbody tr:first-child td {
+.editable table thead+tbody tr:first-child td,
+.dark-mode .editable table thead+tbody tr:first-child td {
 	border-top: none;
 }
 .editable table thead+tbody tr:first-child td:first-child {
