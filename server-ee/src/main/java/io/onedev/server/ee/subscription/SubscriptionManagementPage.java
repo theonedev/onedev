@@ -43,7 +43,7 @@ public class SubscriptionManagementPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var developerCount = OneDev.getInstance(SubscriptionManager.class).countDevelopers();
+		var userCount = OneDev.getInstance(UserManager.class).count((String)null);
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription == null) {
@@ -76,7 +76,7 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
 			
-			var expirationDate = subscription.getExpirationDate(developerCount);
+			var expirationDate = subscription.getExpirationDate(userCount);
 			if (expirationDate != null) {
 				detail.add(new Label("expirationDate", DateUtils.formatDate(expirationDate)));
 				detail.add(new WebMarkupContainer("alert").setVisible(false));
@@ -109,11 +109,9 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
 			detail.add(new Label("userMonths", Math.ceil(subscription.getUserDays()/31.0)));
-			var expirationDate = subscription.getExpirationDate(developerCount);
+			var expirationDate = subscription.getExpirationDate(userCount);
 			if (expirationDate != null) {
-				var message = "Only developers (users with write permission to at least one " +
-						"project) are counted for user month calculation. With current number of developers " +
-						"(" + developerCount + "), subscription will be active until <b>" 
+				var message = "With current number of users (" + userCount + "), the subscription will be active until <b>" 
 						+ DateUtils.formatDate(expirationDate) + "</b>";
 				detail.add(new Label("expirationInfo", message).setEscapeModelStrings(false));
 			} else {
