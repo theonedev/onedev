@@ -29,7 +29,7 @@ public class DescriptionCriteria extends Criteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		String description = request.getDescription();
-		return description != null && WildcardUtils.matchString("*" + value.toLowerCase() + "*", description);
+		return description != null && WildcardUtils.matchString("*" + value.toLowerCase() + "*", description.toLowerCase());
 	}
 
 	@Override

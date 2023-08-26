@@ -29,7 +29,7 @@ public class DescriptionCriteria extends Criteria<Issue> {
 	@Override
 	public boolean matches(Issue issue) {
 		String description = issue.getDescription();
-		return description != null && WildcardUtils.matchString("*" + value.toLowerCase() + "*", description);
+		return description != null && WildcardUtils.matchString("*" + value.toLowerCase() + "*", description.toLowerCase());
 	}
 
 	@Override

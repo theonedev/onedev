@@ -318,6 +318,10 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 				}
 				Hibernate.initialize(issue.getFields());
 				Hibernate.initialize(issue.getSubmitter());
+				Hibernate.initialize(issue.getComments());
+				Hibernate.initialize(issue.getTargetLinks());
+				Hibernate.initialize(issue.getSourceLinks());
+				Hibernate.initialize(issue.getMentions());
 				for (Milestone milestone: issue.getMilestones())
 					Hibernate.initialize(milestone);
 				send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
