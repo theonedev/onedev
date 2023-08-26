@@ -77,7 +77,7 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 		if (subscription != null) {
 			var alertSetting = settingManager.getAlertSetting();
 			var now = new DateTime();
-			var userCount = userManager.count();
+			var userCount = userManager.cloneCache().size();
 			var userDays = subscription.getUserDays();
 			if (subscription.isTrial()) {
 				if (userDays > 0)

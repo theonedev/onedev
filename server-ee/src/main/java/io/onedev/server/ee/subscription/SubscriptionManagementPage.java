@@ -43,7 +43,7 @@ public class SubscriptionManagementPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var userCount = OneDev.getInstance(UserManager.class).count((String)null);
+		var userCount = OneDev.getInstance(UserManager.class).cloneCache().size();
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription == null) {
