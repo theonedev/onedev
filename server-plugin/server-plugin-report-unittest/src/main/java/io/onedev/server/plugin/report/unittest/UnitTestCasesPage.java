@@ -92,10 +92,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 			for (StringValue each: params.getValues(PARAM_STATUS)) 
 				state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
 			
-			if (state.statuses.isEmpty()) {
-				state.statuses.add(Status.PASSED);
-				state.statuses.add(Status.FAILED);
-			}
+			if (state.statuses.isEmpty()) 
+				state.statuses.addAll(Arrays.asList(Status.values()));
 		}
 		
 		state.longestDurationFirst = params.get(PARAM_LONGEST_DURATION_FIRST).toBoolean(false);
@@ -289,8 +287,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					for (Status status: Status.values()) {
 						int numOfTestCases = getReport().getTestCases(
 								testSuitePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
-						slices.add(new PieSlice(status.name().toLowerCase(), numOfTestCases, 
-								status.getColor(), state.statuses.contains(status)));
+						slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "), 
+								numOfTestCases, status.getColor(), state.statuses.contains(status)));
 					}
 					return slices;
 				} else {
@@ -302,7 +300,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 
 			@Override
 			protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-				Status status = Status.valueOf(sliceName.toUpperCase());
+				Status status = Status.valueOf(sliceName.toUpperCase().replace(" ", "_"));
 				if (state.statuses.contains(status))
 					state.statuses.remove(status);
 				else
@@ -384,7 +382,12 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 			protected void populateItem(ListItem<TestCase> item) {
 				TestCase testCase = item.getModelObject();
 				item.add(new TestStatusBadge("status", testCase.getStatus()));
-				item.add(new Label("name", testCase.getName() + " (" + testCase.getTestSuite().getName() + ")"));
+				
+				var name = testCase.getName() + " (" + testCase.getTestSuite().getName() + ")";
+				if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) {
+					name = "[" + testCase.getStatusText() + "] " + name;
+				}
+				item.add(new Label("name", name));
 				if (getReport().hasTestCaseDuration())
 					item.add(new Label("duration", DurationFormatUtils.formatDuration(testCase.getDuration(), "s.SSS 's'")));
 				else

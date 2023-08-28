@@ -49,9 +49,9 @@ public class JUnitReportParser {
 
 			Status status;
 			if (failures != 0 || errors != 0)
-				status = Status.FAILED;
+				status = Status.NOT_PASSED;
 			else if (skipped == tests)
-				status = Status.SKIPPED;
+				status = Status.NOT_RUN;
 			else
 				status = Status.PASSED;
 
@@ -71,7 +71,7 @@ public class JUnitReportParser {
 			for (Element testCaseElement: testSuiteElement.elements("testcase")) {
 				name = testCaseElement.attributeValue("name");
 				if (testCaseElement.element("skipped") != null) {
-					testCases.add(new TestCase(testSuite, name, Status.SKIPPED, 0, null));
+					testCases.add(new TestCase(testSuite, name, Status.NOT_RUN, "skipped", 0, null));
 				} else {
 					duration = getDouble(testCaseElement.attributeValue("time"));
 					status = Status.PASSED;
@@ -79,27 +79,27 @@ public class JUnitReportParser {
 					Element failureElement = testCaseElement.element("failure");
 					Element errorElement = testCaseElement.element("error");
 					if (failureElement != null) {
-						status = Status.FAILED;
+						status = Status.NOT_PASSED;
 						message = failureElement.getText();
 					} else if (errorElement != null) {
-						status = Status.FAILED;
+						status = Status.NOT_PASSED;
 						message = errorElement.getText();
 					}
-					testCases.add(new TestCase(testSuite, name, status, duration, message));
+					testCases.add(new TestCase(testSuite, name, status, null, duration, message));
 				}
 			}
 		}
 		return testCases;
 	}
 	
-	public static int getInt(String input) {
+	private static int getInt(String input) {
 		if (input == null) {
 			return 0;
 		}
 		return Integer.parseInt(input);
 	}
 
-	public static long getDouble(String input) {
+	private static long getDouble(String input) {
 		if (input == null) {
 			return 0;
 		}

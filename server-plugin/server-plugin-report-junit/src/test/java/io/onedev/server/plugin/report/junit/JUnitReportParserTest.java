@@ -64,8 +64,8 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 			
 			assertEquals(1, report.getTestSuites().size());
 			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.PASSED)).size());
-			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.FAILED)).size());
-			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.SKIPPED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.NOT_PASSED)).size());
+			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.NOT_RUN)).size());
 			
 		} catch (IOException|DocumentException e) {
 			throw new RuntimeException(e);
@@ -108,8 +108,8 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 
 			assertEquals(2, report.getTestSuites().size());
 			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.PASSED)).size());
-			assertEquals(4, report.getTestCases(null, null, Sets.newSet(Status.FAILED)).size());
-			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.SKIPPED)).size());
+			assertEquals(4, report.getTestCases(null, null, Sets.newSet(Status.NOT_PASSED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.NOT_RUN)).size());
 
 		} catch (IOException|DocumentException e) {
 			throw new RuntimeException(e);

@@ -28,9 +28,8 @@ public class JestReportParserTest {
 			Build build = new Build();
 			build.setJobWorkspace("/Users/robin/Projects/onedev/reports/jest-demo");
 			UnitTestReport report = new UnitTestReport(JestReportParser.parse(build, rootNode), false);
-			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.FAILED)).size());
-			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.SKIPPED)).size());
-			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.TODO)).size());
+			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_PASSED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_RUN)).size());
 			assertEquals(4, report.getTestCases(null, null, Sets.newHashSet(Status.PASSED)).size());
 			assertEquals(7, report.getTestCases(null, null, null).size());
 			assertEquals(1, report.getTestCases(
@@ -46,10 +45,9 @@ public class JestReportParserTest {
 					new PatternSet(Sets.newHashSet("src/"), new HashSet<>()), 
 					new PatternSet(Sets.newHashSet(), Sets.newHashSet("NewsContent/")), null).size());
 			
-			assertEquals(1, report.getTestSuites(null, Sets.newHashSet(Status.FAILED)).size());
-			assertEquals(0, report.getTestSuites(null, Sets.newHashSet(Status.SKIPPED)).size());
-			assertEquals(0, report.getTestSuites(null, Sets.newHashSet(Status.TODO)).size());
-			assertEquals(3, report.getTestSuites(null, Sets.newHashSet(Status.PASSED)).size());
+			assertEquals(1, report.getTestSuites(null, Sets.newHashSet(Status.NOT_PASSED)).size());
+			assertEquals(1, report.getTestSuites(null, Sets.newHashSet(Status.NOT_RUN)).size());
+			assertEquals(2, report.getTestSuites(null, Sets.newHashSet(Status.PASSED)).size());
 			assertEquals(4, report.getTestSuites(null, null).size());
 			assertEquals(4, report.getTestSuites(new PatternSet(Sets.newHashSet("**"), new HashSet<>()), null).size());
 			assertEquals(1, report.getTestSuites(new PatternSet(Sets.newHashSet("src/components/"), new HashSet<>()), null).size());

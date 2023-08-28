@@ -1,11 +1,7 @@
 package io.onedev.server.plugin.report.unittest;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -88,10 +84,8 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 			for (StringValue each: params.getValues(PARAM_STATUS)) 
 				state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
 			
-			if (state.statuses.isEmpty()) {
-				state.statuses.add(Status.PASSED);
-				state.statuses.add(Status.FAILED);
-			}
+			if (state.statuses.isEmpty()) 
+				state.statuses.addAll(Arrays.asList(Status.values()));
 		}
 	}
 	
@@ -202,8 +196,8 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 					for (Status status: Status.values()) {
 						int numOfTestSuites = getReport().getTestSuites(
 								namePatterns.orNull(), Sets.newHashSet(status)).size();
-						slices.add(new PieSlice(status.name().toLowerCase(), numOfTestSuites, 
-								status.getColor(), state.statuses.contains(status)));
+						slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "), 
+								numOfTestSuites, status.getColor(), state.statuses.contains(status)));
 					}
 					return slices;
 				} else {

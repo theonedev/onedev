@@ -52,26 +52,22 @@ public class JestReportParser {
 			
 			Status status;
 			switch(testSuiteNode.get("status").asText()) {
-			case "pending":
-				status = Status.SKIPPED;
-				break;
-			case "todo":
-				status = Status.TODO;
-				break;
-			case "failed":
-				status = Status.FAILED;
-				break;
-			default:
-				if (!testCaseDatum.isEmpty()) {
-					if (testCaseDatum.stream().allMatch(it->it.status == Status.TODO))
-						status = Status.TODO;
-					else if (testCaseDatum.stream().allMatch(it->it.status == Status.SKIPPED))
-						status = Status.SKIPPED;
-					else
+				case "pending":
+				case "todo":
+					status = Status.NOT_RUN;
+					break;
+				case "failed":
+					status = Status.NOT_PASSED;
+					break;
+				default:
+					if (!testCaseDatum.isEmpty()) {
+						if (testCaseDatum.stream().allMatch(it -> it.status == Status.NOT_RUN))
+							status = Status.NOT_RUN;
+						else
+							status = Status.PASSED;
+					} else {
 						status = Status.PASSED;
-				} else {
-					status = Status.PASSED;
-				}
+					}
 			}
 			
 			TestSuite testSuite = new TestSuite(name, status, duration, message, name) {
@@ -86,7 +82,7 @@ public class JestReportParser {
 			};
 			
 			for (TestCaseData testCaseData: testCaseDatum) {
-				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, 0, testCaseData.message) {
+				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, testCaseData.statusText, 0, testCaseData.message) {
 
 					private static final long serialVersionUID = 1L;
 
@@ -161,19 +157,21 @@ public class JestReportParser {
 		
 		if (!messages.isEmpty())
 			testCaseData.message = StringUtils.join(messages, "\n\n");
-		
+
 		switch (rootNode.get("status").asText()) {
-		case "passed":
-			testCaseData.status = Status.PASSED;
-			break;
-		case "pending":
-			testCaseData.status = Status.SKIPPED;
-			break;
-		case "todo":
-			testCaseData.status = Status.TODO;
-			break;
-		default:
-			testCaseData.status = Status.FAILED;
+			case "passed":
+				testCaseData.status = Status.PASSED;
+				break;
+			case "pending":
+				testCaseData.status = Status.NOT_RUN;
+				testCaseData.statusText = "pending";
+				break;
+			case "todo":
+				testCaseData.status = Status.NOT_RUN;
+				testCaseData.statusText = "todo";
+				break;
+			default:
+				testCaseData.status = Status.NOT_PASSED;
 		}
 
 		return testCaseData;
@@ -184,6 +182,8 @@ public class JestReportParser {
 		String name;
 		
 		Status status;
+		
+		String statusText;
 		
 		String message;
 		
