@@ -40,5 +40,6 @@ public abstract class SmtpWithSsl implements SmtpSslSetting {
 				throw new RuntimeException(e);
 			}
 		}
+		properties.setProperty("mail.smtps.localhost", "localhost.localdomain");
 	}
 }

@@ -40,5 +40,6 @@ public abstract class ImapWithSsl implements ImapSslSetting {
 				throw new RuntimeException(e);
 			}
 		}
+		properties.setProperty("mail.smtps.localhost", "localhost.localdomain");
 	}
 }

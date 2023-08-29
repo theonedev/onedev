@@ -23,6 +23,7 @@ public class SmtpWithoutSsl implements SmtpSslSetting {
 	@Override
 	public void configure(Properties properties) {
 		properties.setProperty("mail.smtp.port", String.valueOf(port));
+		properties.setProperty("mail.smtp.localhost", "localhost.localdomain");
 	}
 	
 }

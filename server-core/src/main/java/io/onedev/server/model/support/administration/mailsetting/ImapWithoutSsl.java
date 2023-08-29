@@ -23,6 +23,7 @@ public class ImapWithoutSsl implements ImapSslSetting {
 	@Override
 	public void configure(Properties properties) {
 		properties.setProperty("mail.imap.port", String.valueOf(port));
+		properties.setProperty("mail.smtp.localhost", "localhost.localdomain");
 	}
 	
 }
