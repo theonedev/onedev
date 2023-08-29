@@ -7,8 +7,8 @@ public class NamedCoverageInfo extends CoverageInfo {
 	private final String name;
 	
 	public NamedCoverageInfo(String name, 
-			Coverage statementCoverage, Coverage methodCoverage, 
-			Coverage branchCoverage, Coverage lineCoverage) {
+			int statementCoverage, int methodCoverage, 
+			int branchCoverage, int lineCoverage) {
 		super(statementCoverage, methodCoverage, branchCoverage, lineCoverage);
 		this.name = name;
 	}

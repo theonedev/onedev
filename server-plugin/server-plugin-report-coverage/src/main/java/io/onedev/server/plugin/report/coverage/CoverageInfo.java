@@ -1,50 +1,47 @@
 package io.onedev.server.plugin.report.coverage;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 
 public class CoverageInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final Coverage statementCoverage;
+	private final int statementCoverage;
 	
-	private final Coverage methodCoverage;
+	private final int methodCoverage;
 	
-	private final Coverage branchCoverage;
+	private final int branchCoverage;
 	
-	private final Coverage lineCoverage;
+	private final int lineCoverage;
 	
-	public CoverageInfo(
-			Coverage statementCoverage, Coverage methodCoverage, 
-			Coverage branchCoverage, Coverage lineCoverage) {
+	public CoverageInfo(int statementCoverage, int methodCoverage,
+						int branchCoverage, int lineCoverage) {
 		this.statementCoverage = statementCoverage;
 		this.methodCoverage = methodCoverage;
 		this.branchCoverage = branchCoverage;
 		this.lineCoverage = lineCoverage;
 	}
 
-	public Coverage getStatementCoverage() {
+	public int getStatementCoverage() {
 		return statementCoverage;
 	}
 
-	public Coverage getMethodCoverage() {
+	public int getMethodCoverage() {
 		return methodCoverage;
 	}
 
-	public Coverage getBranchCoverage() {
+	public int getBranchCoverage() {
 		return branchCoverage;
 	}
 
-	public Coverage getLineCoverage() {
+	public int getLineCoverage() {
 		return lineCoverage;
 	}
 	
-	public CoverageInfo mergeWith(CoverageInfo coverageInfo) {
-		return new CoverageInfo(
-				statementCoverage.mergeWith(coverageInfo.statementCoverage), 
-				methodCoverage.mergeWith(coverageInfo.methodCoverage), 
-				branchCoverage.mergeWith(coverageInfo.branchCoverage), 
-				lineCoverage.mergeWith(coverageInfo.lineCoverage));
+	public static int getCoverage(int total, int covered) {
+		return total != 0? covered * 100 / total: 0;
 	}
 	
 }

@@ -1,16 +1,28 @@
 package io.onedev.server.plugin.report.coverage;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
+import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -35,30 +47,15 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.StringMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
-import io.onedev.server.web.util.SuggestionUtils;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class CoverageReportPage extends BuildReportPage {
@@ -209,37 +206,55 @@ public class CoverageReportPage extends BuildReportPage {
 		
 		form.add(new MenuLink("orderBy") {
 
+			private MenuItem newMenuItem(FloatingPanel dropdown, CoverageOrderBy orderBy) {
+				return new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return orderBy.getDisplayName();
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								state.orderBy = orderBy;
+								target.add(itemsContainer);
+							}
+
+						};
+					}
+
+					@Override
+					public boolean isSelected() {
+						return orderBy == state.orderBy;
+					}
+
+				};				
+			}
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (CoverageOrderBy orderBy: CoverageOrderBy.values()) {
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return orderBy.getDisplayName();
-						}
-
-						@Override
-						public WebMarkupContainer newLink(String id) {
-							return new AjaxLink<Void>(id) {
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									dropdown.close();
-									state.orderBy = orderBy;
-									target.add(itemsContainer);
-								}
-								
-							};
-						}
-
-						@Override
-						public boolean isSelected() {
-							return orderBy == state.orderBy;
-						}
-						
-					});
+				menuItems.add(newMenuItem(dropdown, CoverageOrderBy.DEFAULT));
+				var overallCoverages = getReportData().getOverallCoverages();
+				if (overallCoverages.getMethodCoverage() >= 0) {
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_METHOD_COVERAGE));
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_METHOD_COVERAGE));
+				}
+				if (overallCoverages.getBranchCoverage() >= 0) {
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_BRANCH_COVERAGE));
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_BRANCH_COVERAGE));
+				}
+				if (overallCoverages.getStatementCoverage() >= 0) {
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_STATEMENT_COVERAGE));
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_STATEMENT_COVERAGE));
+				}
+				if (overallCoverages.getLineCoverage() >= 0) {
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_LINE_COVERAGE));
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_LINE_COVERAGE));
 				}
 				return menuItems;
 			}
@@ -277,44 +292,37 @@ public class CoverageReportPage extends BuildReportPage {
 		add(itemsContainer);
 		
 		PageableListView<NamedCoverageInfo> itemsView = 
-				new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<List<NamedCoverageInfo>>() {
+				new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<>() {
 
-			@SuppressWarnings("unchecked")
-			@Override
-			protected List<NamedCoverageInfo> load() {
-				if (filterPatterns != null) {
-					List<? extends NamedCoverageInfo> coverages;
-					if (packageName != null) {
-						Optional<PackageCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
-								.stream().filter(it->it.getName().equals(packageName)).findFirst();
-						if (packageCoverages.isPresent())
-							coverages = packageCoverages.get().getFileCoverages();
-						else
-							coverages = new ArrayList<>();
-					} else {
-						coverages = getReportData().getPackageCoverages();
-					}
-					if (filterPatterns.isPresent()) {
-						Matcher matcher = new StringMatcher();
-						coverages = coverages.stream()
-								.filter(it->filterPatterns.get().matches(matcher, it.getName()))
-								.collect(Collectors.toList());
-					}
-					coverages.sort(new Comparator<CoverageInfo>() {
-
-						@Override
-						public int compare(CoverageInfo o1, CoverageInfo o2) {
-							return state.orderBy.compare(o1, o2);
+					@SuppressWarnings("unchecked")
+					@Override
+					protected List<NamedCoverageInfo> load() {
+						if (filterPatterns != null) {
+							List<? extends NamedCoverageInfo> coverages;
+							if (packageName != null) {
+								Optional<PackageCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
+										.stream().filter(it -> it.getName().equals(packageName)).findFirst();
+								if (packageCoverages.isPresent())
+									coverages = packageCoverages.get().getFileCoverages();
+								else
+									coverages = new ArrayList<>();
+							} else {
+								coverages = getReportData().getPackageCoverages();
+							}
+							if (filterPatterns.isPresent()) {
+								Matcher matcher = new StringMatcher();
+								coverages = coverages.stream()
+										.filter(it -> filterPatterns.get().matches(matcher, it.getName()))
+										.collect(Collectors.toList());
+							}
+							coverages.sort((Comparator<CoverageInfo>) (o1, o2) -> state.orderBy.compare(o1, o2));
+							return (List<NamedCoverageInfo>) coverages;
+						} else {
+							return new ArrayList<>();
 						}
-						
-					});
-					return (List<NamedCoverageInfo>) coverages;
-				} else {
-					return new ArrayList<>();
-				}
-			}
-			
-		}, WebConstants.PAGE_SIZE) {
+					}
+
+				}, WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<NamedCoverageInfo> item) {
@@ -336,6 +344,7 @@ public class CoverageReportPage extends BuildReportPage {
 					nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);
 				}
 				nameLink.add(new Label("label", coverageInfo.getName()));
+					
 				item.add(nameLink);
 				
 				item.add(new CoverageInfoPanel<NamedCoverageInfo>("coverages", item.getModel()));

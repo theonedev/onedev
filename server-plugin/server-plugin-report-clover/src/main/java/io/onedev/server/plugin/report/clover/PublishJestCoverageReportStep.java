@@ -12,7 +12,7 @@ public class PublishJestCoverageReportStep extends PublishCloverReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify Jest coverage report file in clover format under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. "
 			+ "Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")

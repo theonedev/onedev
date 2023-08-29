@@ -25,17 +25,17 @@ public class CoverageReport implements Serializable {
 	
 	private static final String REPORT = "report.ser";
 	
-	private final CoverageInfo coverages;
+	private final CoverageInfo overallCoverages;
 	
 	private final List<PackageCoverageInfo> packageCoverages;
 	
-	public CoverageReport(CoverageInfo coverages, List<PackageCoverageInfo> packageCoverages) {
-		this.coverages = coverages;
+	public CoverageReport(CoverageInfo overallCoverages, List<PackageCoverageInfo> packageCoverages) {
+		this.overallCoverages = overallCoverages;
 		this.packageCoverages = packageCoverages;
 	}
 
 	public CoverageInfo getOverallCoverages() {
-		return coverages;
+		return overallCoverages;
 	}
 
 	public List<PackageCoverageInfo> getPackageCoverages() {

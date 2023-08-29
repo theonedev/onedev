@@ -260,7 +260,10 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							Map<String, Integer> yAxisValues = new HashMap<>();
 							for (String xAxisValue: xAxisValues) 
 								yAxisValues.put(xAxisValue, completeValues.get(xAxisValue).get(lineIndex));
-							lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
+							if ((minValue == null || minValue <= Collections.min(yAxisValues.values()))
+									&& (maxValue == null || maxValue >= Collections.max(yAxisValues.values()))) {
+								lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
+							}
 							lineIndex++;
 						}
 						

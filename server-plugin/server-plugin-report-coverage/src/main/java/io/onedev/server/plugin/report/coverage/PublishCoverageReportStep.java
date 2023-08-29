@@ -60,14 +60,10 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 			metric.setReportName(getReportName());
 			
 			CoverageInfo coverages = report.getOverallCoverages();
-			metric.setBranchCoverage(coverages.getBranchCoverage().getPercent());
-			metric.setLineCoverage(coverages.getLineCoverage().getPercent());
-			metric.setMethodCoverage(coverages.getMethodCoverage().getPercent());
-			metric.setStatementCoverage(coverages.getStatementCoverage().getPercent());
-			metric.setTotalBranches(coverages.getBranchCoverage().getTotal());
-			metric.setTotalLines(coverages.getLineCoverage().getTotal());
-			metric.setTotalMethods(coverages.getMethodCoverage().getTotal());
-			metric.setTotalStatements(coverages.getStatementCoverage().getTotal());
+			metric.setBranchCoverage(coverages.getBranchCoverage());
+			metric.setLineCoverage(coverages.getLineCoverage());
+			metric.setMethodCoverage(coverages.getMethodCoverage());
+			metric.setStatementCoverage(coverages.getStatementCoverage());
 			
 			OneDev.getInstance(Dao.class).persist(metric);
 		}	

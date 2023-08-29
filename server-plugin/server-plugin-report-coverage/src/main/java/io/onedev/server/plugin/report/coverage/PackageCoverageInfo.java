@@ -9,8 +9,8 @@ public class PackageCoverageInfo extends NamedCoverageInfo {
 	private final List<FileCoverageInfo> fileCoverages;
 	
 	public PackageCoverageInfo(String name, 
-			Coverage statementCoverage, Coverage methodCoverage, 
-			Coverage branchCoverage, Coverage lineCoverage, 
+			int statementCoverage, int methodCoverage, 
+			int branchCoverage, int lineCoverage, 
 			List<FileCoverageInfo> fileCoverages) {
 		super(name, statementCoverage, methodCoverage, branchCoverage, lineCoverage);
 		this.fileCoverages = fileCoverages;

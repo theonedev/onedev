@@ -33,7 +33,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private String file;
 	
-	@Editable(order=1100, description="Specify markdown file under job workspace to be published")
+	@Editable(order=1100, description="Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getFile() {

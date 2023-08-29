@@ -31,7 +31,7 @@ public class PublishTRXReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="Specify .net TRX test result file under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

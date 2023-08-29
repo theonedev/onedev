@@ -15,7 +15,7 @@ enum CoverageOrderBy {
 
 		@Override
 		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getMethodCoverage().getPercent() - obj2.getMethodCoverage().getPercent();
+			return obj1.getMethodCoverage() - obj2.getMethodCoverage();
 		}
 		
 	}, 
@@ -31,7 +31,7 @@ enum CoverageOrderBy {
 
 		@Override
 		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getBranchCoverage().getPercent() - obj2.getBranchCoverage().getPercent();
+			return obj1.getBranchCoverage() - obj2.getBranchCoverage();
 		}
 		
 	}, 
@@ -47,7 +47,7 @@ enum CoverageOrderBy {
 
 		@Override
 		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getStatementCoverage().getPercent() - obj2.getStatementCoverage().getPercent();
+			return obj1.getStatementCoverage() - obj2.getStatementCoverage();
 		}
 		
 	}, 
@@ -63,7 +63,7 @@ enum CoverageOrderBy {
 
 		@Override
 		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getLineCoverage().getPercent() - obj2.getLineCoverage().getPercent();
+			return obj1.getLineCoverage() - obj2.getLineCoverage();
 		}
 		
 	}, 

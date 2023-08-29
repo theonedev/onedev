@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.coverage;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -16,73 +17,77 @@ import org.apache.wicket.model.IModel;
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("methodLabel", new AbstractReadOnlyModel<String>() {
+		var methodContainer = new WebMarkupContainer("method");
+		add(methodContainer.setVisible(getCoverageInfo().getMethodCoverage() >= 0));
+		methodContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Methods " + getCoverageInfo().getMethodCoverage();
+				return "Methods " + getCoverageInfo().getMethodCoverage() + "%";
 			}
 			
 		}));
-		
-		add(new CoverageBar("methodCoverage", new AbstractReadOnlyModel<Coverage>() {
+		methodContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
-			public Coverage getObject() {
+			public Integer getObject() {
 				return getCoverageInfo().getMethodCoverage();
 			}
 			
 		}));
 		
-		add(new Label("statementLabel", new AbstractReadOnlyModel<String>() {
+		var statementContainer = new WebMarkupContainer("statement");
+		add(statementContainer.setVisible(getCoverageInfo().getStatementCoverage() >= 0));
+		statementContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Statements " + getCoverageInfo().getStatementCoverage();
+				return "Statements " + getCoverageInfo().getStatementCoverage() + "%";
 			}
 			
 		}));
-		
-		add(new CoverageBar("statementCoverage", new AbstractReadOnlyModel<Coverage>() {
+		statementContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
-			public Coverage getObject() {
+			public Integer getObject() {
 				return getCoverageInfo().getStatementCoverage();
 			}
 			
 		}));
 		
-		add(new Label("branchLabel", new AbstractReadOnlyModel<String>() {
+		var branchContainer = new WebMarkupContainer("branch");
+		add(branchContainer.setVisible(getCoverageInfo().getBranchCoverage() >= 0));
+		branchContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Branches " + getCoverageInfo().getBranchCoverage();
+				return "Branches " + getCoverageInfo().getBranchCoverage() + "%";
 			}
 			
 		}));
-		
-		add(new CoverageBar("branchCoverage", new AbstractReadOnlyModel<Coverage>() {
+		branchContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
-			public Coverage getObject() {
+			public Integer getObject() {
 				return getCoverageInfo().getBranchCoverage();
 			}
 			
 		}));
 		
-		add(new Label("lineLabel", new AbstractReadOnlyModel<String>() {
+		var lineContainer = new WebMarkupContainer("line");
+		add(lineContainer.setVisible(getCoverageInfo().getLineCoverage() >= 0));
+		lineContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Lines " + getCoverageInfo().getLineCoverage();
+				return "Lines " + getCoverageInfo().getLineCoverage() + "%";
 			}
 			
 		}));
-		
-		add(new CoverageBar("lineCoverage", new AbstractReadOnlyModel<Coverage>() {
+		lineContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
-			public Coverage getObject() {
+			public Integer getObject() {
 				return getCoverageInfo().getLineCoverage();
 			}
 			
