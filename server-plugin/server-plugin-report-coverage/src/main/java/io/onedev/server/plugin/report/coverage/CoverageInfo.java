@@ -1,7 +1,5 @@
 package io.onedev.server.plugin.report.coverage;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 
 public class CoverageInfo implements Serializable {

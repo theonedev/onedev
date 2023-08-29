@@ -75,14 +75,20 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	protected abstract CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
 
 	protected void writeLineCoverages(Build build, String blobPath, Map<Integer, CoverageStatus> lineCoverages) {
-		File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
-		File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
-		FileUtils.createDir(lineCoverageFile.getParentFile());
-		try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
-			SerializationUtils.serialize((Serializable) lineCoverages, os);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		};
+		for (var it = lineCoverages.entrySet().iterator(); it.hasNext();) {
+			if (it.next().getValue() == CoverageStatus.NOT_COVERED)
+				it.remove();
+		}
+		if (!lineCoverages.isEmpty()) {
+			File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
+			File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
+			FileUtils.createDir(lineCoverageFile.getParentFile());
+			try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
+				SerializationUtils.serialize((Serializable) lineCoverages, os);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			};
+		}
 	}
 	
 }

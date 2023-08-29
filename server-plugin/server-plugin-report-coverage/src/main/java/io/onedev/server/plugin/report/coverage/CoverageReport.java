@@ -27,9 +27,9 @@ public class CoverageReport implements Serializable {
 	
 	private final CoverageInfo overallCoverages;
 	
-	private final List<PackageCoverageInfo> packageCoverages;
+	private final List<CategoryCoverageInfo> packageCoverages;
 	
-	public CoverageReport(CoverageInfo overallCoverages, List<PackageCoverageInfo> packageCoverages) {
+	public CoverageReport(CoverageInfo overallCoverages, List<CategoryCoverageInfo> packageCoverages) {
 		this.overallCoverages = overallCoverages;
 		this.packageCoverages = packageCoverages;
 	}
@@ -38,7 +38,7 @@ public class CoverageReport implements Serializable {
 		return overallCoverages;
 	}
 
-	public List<PackageCoverageInfo> getPackageCoverages() {
+	public List<CategoryCoverageInfo> getPackageCoverages() {
 		return packageCoverages;
 	}
 	

@@ -72,7 +72,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 		int totalLines = 0;
 		int coveredLines = 0;
 		
-		List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
+		List<CategoryCoverageInfo> packageCoverages = new ArrayList<>();
 		
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
@@ -110,7 +110,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 						int packageTotalLines = 0;
 						int packageCoveredLines = 0;
 					
-						List<FileCoverageInfo> fileCoverages = new ArrayList<>();
+						List<ItemCoverageInfo> fileCoverages = new ArrayList<>();
 						for (Element fileElement: packageElement.elements("file")) {
 							String fileName = fileElement.attributeValue("name");
 							String blobPath = fileElement.attributeValue("path");
@@ -154,10 +154,9 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 								packageTotalLines += fileTotalLines;
 								packageCoveredLines += fileCoveredLines;
 								
-								if (!lineCoverages.isEmpty())
-									writeLineCoverages(build, blobPath, lineCoverages);
+								writeLineCoverages(build, blobPath, lineCoverages);
 								
-								fileCoverages.add(new FileCoverageInfo(fileName, 
+								fileCoverages.add(new ItemCoverageInfo(fileName, 
 										fileStatementCoverage, fileMethodCoverage, fileBranchCoverage, fileLineCoverage, 
 										blobPath));
 							}
@@ -165,7 +164,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 						
 						int packageLineCoverage = getCoverage(packageTotalLines, packageCoveredLines);
 						
-						packageCoverages.add(new PackageCoverageInfo(
+						packageCoverages.add(new CategoryCoverageInfo(
 								packageName, packageStatementCoverage, packageMethodCoverage, 
 								packageBranchCoverage, packageLineCoverage, fileCoverages));
 						

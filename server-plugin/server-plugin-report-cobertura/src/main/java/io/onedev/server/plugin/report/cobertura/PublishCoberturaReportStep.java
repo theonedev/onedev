@@ -76,7 +76,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 		int totalLines = 0;
 		int coveredLines = 0;
 		
-		List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
+		List<CategoryCoverageInfo> packageCoverages = new ArrayList<>();
 		
 		var searchManager = OneDev.getInstance(CodeSearchManager.class);
 		for (File file: getPatternSet().listFiles(inputDir)) {
@@ -85,6 +85,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 			Document doc;
 			try {
 				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				xml = StringUtils.removeBOM(xml);
 				doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				var coverageElement = doc.getRootElement();
 				
@@ -97,19 +98,14 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 					String packageName = packageElement.attributeValue("name");
 					if (packageName.length() == 0)
 						packageName = "[default]";
-					List<FileCoverageInfo> fileCoverages = new ArrayList<>();
-					
+					List<ItemCoverageInfo> classCoverages = new ArrayList<>();
+
+					Map<String, Map<Integer, CoverageStatus>> lineCoverages = new HashMap<>();
 					for (var classElement: packageElement.element("classes").elements()) {
 						var className = classElement.attributeValue("name");
-						var filePath = classElement.attributeValue("filename").replace('\\', '/');
-						String fileName;
-						if (filePath.contains("/"))
-							fileName = StringUtils.substringAfterLast(filePath, "/");
-						else 
-							fileName = filePath;
-						var blobPath = searchManager.findBlobPath(build.getProject(), build.getCommitId(), fileName, filePath);
+						var blobPath = searchManager.findBlobPathBySymbol(build.getProject(), build.getCommitId(), className, ".");
 						if (blobPath != null) {
-							Map<Integer, CoverageStatus> lineCoverages = new HashMap<>();
+							Map<Integer, CoverageStatus> lineCoveragesOfFile = lineCoverages.computeIfAbsent(blobPath, it -> new HashMap<>());
 							for (var lineElement: classElement.element("lines").elements()) {
 								var lineNum = parseInt(lineElement.attributeValue("number")) - 1;
 								var lineHits = parseInt(lineElement.attributeValue("hits"));
@@ -128,27 +124,28 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 										status = COVERED;
 									}
 								}
-								lineCoverages.put(lineNum, status);
+								if (status != NOT_COVERED)
+									lineCoveragesOfFile.put(lineNum, status);
 							}
-
-							if (!lineCoverages.isEmpty())
-								writeLineCoverages(build, blobPath, lineCoverages);
 
 							int fileLineCoverage = (int)(parseDouble(classElement.attributeValue("line-rate")) * 100);
 							int fileBranchCoverage = (int)(parseDouble(classElement.attributeValue("branch-rate")) * 100);
-							fileCoverages.add(new FileCoverageInfo(
+							classCoverages.add(new ItemCoverageInfo(
 									className,
 									-1, -1, 
 									fileBranchCoverage, fileLineCoverage,
 									blobPath));
 						}
 					}
-					
+
+					for (var entry: lineCoverages.entrySet()) 
+						writeLineCoverages(build, entry.getKey(), entry.getValue());
+
 					int packageLineCoverage = (int)(parseDouble(packageElement.attributeValue("line-rate")) * 100);
 					int packageBranchCoverage = (int)(parseDouble(packageElement.attributeValue("branch-rate")) * 100);
-					packageCoverages.add(new PackageCoverageInfo(
+					packageCoverages.add(new CategoryCoverageInfo(
 							packageName, -1, -1, 
-							packageBranchCoverage, packageLineCoverage, fileCoverages));
+							packageBranchCoverage, packageLineCoverage, classCoverages));
 				}
 			} catch (DocumentException e) {
 				logger.warning("Ignored cobertura report '" + relativePath + "' as it is not a valid XML");

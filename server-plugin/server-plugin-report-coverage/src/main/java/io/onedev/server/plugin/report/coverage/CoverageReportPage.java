@@ -126,9 +126,9 @@ public class CoverageReportPage extends BuildReportPage {
 			@Override
 			public String getObject() {
 				if (packageName != null) 
-					return "Files";
+					return "Items";
 				else
-					return "Packages";
+					return "Categories";
 			}
 			
 		}));
@@ -157,9 +157,9 @@ public class CoverageReportPage extends BuildReportPage {
 			@Override
 			public String getObject() {
 				if (packageName != null)
-					return "Filter files...";
+					return "Filter items...";
 				else
-					return "Filter packages...";
+					return "Filter categories...";
 			}
 			
 		}));
@@ -169,10 +169,10 @@ public class CoverageReportPage extends BuildReportPage {
 			protected List<InputSuggestion> suggest(String matchWith) {
 				List<String> names;
 				if (packageName != null) {
-					Optional<PackageCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
+					Optional<CategoryCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
 							.stream().filter(it->it.getName().equals(packageName)).findFirst();
 					if (packageCoverages.isPresent())
-						names = packageCoverages.get().getFileCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
+						names = packageCoverages.get().getItemCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
 					else
 						names = new ArrayList<>();
 				} else {
@@ -300,10 +300,10 @@ public class CoverageReportPage extends BuildReportPage {
 						if (filterPatterns != null) {
 							List<? extends NamedCoverageInfo> coverages;
 							if (packageName != null) {
-								Optional<PackageCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
+								Optional<CategoryCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
 										.stream().filter(it -> it.getName().equals(packageName)).findFirst();
 								if (packageCoverages.isPresent())
-									coverages = packageCoverages.get().getFileCoverages();
+									coverages = packageCoverages.get().getItemCoverages();
 								else
 									coverages = new ArrayList<>();
 							} else {
@@ -329,7 +329,7 @@ public class CoverageReportPage extends BuildReportPage {
 				NamedCoverageInfo coverageInfo = item.getModelObject();
 				
 				Link<Void> nameLink;
-				if (coverageInfo instanceof PackageCoverageInfo) {
+				if (coverageInfo instanceof CategoryCoverageInfo) {
 					State state = new State();
 					state.orderBy = CoverageReportPage.this.state.orderBy;
 					PageParameters params = paramsOf(getBuild(), getReportName(), 
@@ -338,7 +338,7 @@ public class CoverageReportPage extends BuildReportPage {
 				} else {
 					ProjectBlobPage.State state = new ProjectBlobPage.State();
 					state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
-							((FileCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
+							((ItemCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
 					state.coverageReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 					nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);

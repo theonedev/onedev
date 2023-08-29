@@ -65,7 +65,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
-		List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
+		List<CategoryCoverageInfo> packageCoverages = new ArrayList<>();
 		var totalAndCoveredInfo = new TotalAndCoveredInfo(0, 0, 0, 0, 0, 0, 0, 0);
 		
 		CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
@@ -80,15 +80,15 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 				for (Element packageElement: doc.getRootElement().elements("package")) {
 					String packageName = packageElement.attributeValue("name");
 					var packageTotalAndCoveredInfo = getTotalAndCoveredInfo(packageElement);
-					List<FileCoverageInfo> fileCoverages = new ArrayList<>();
+					List<ItemCoverageInfo> fileCoverages = new ArrayList<>();
 					
 					for (Element fileElement: packageElement.elements("sourcefile")) {
 						String fileName = fileElement.attributeValue("name");
 						var fileTotalAndCoveredInfo = getTotalAndCoveredInfo(fileElement);
-						String blobPath = searchManager.findBlobPath(build.getProject(), build.getCommitId(), 
-								fileName, packageName + "/" + fileName);
+						String blobPath = searchManager.findBlobPathBySuffix(build.getProject(), build.getCommitId(), 
+								packageName + "/" + fileName);
 						if (blobPath != null) {
-							fileCoverages.add(new FileCoverageInfo(fileName, fileTotalAndCoveredInfo.getCoverageInfo(), blobPath));
+							fileCoverages.add(new ItemCoverageInfo(fileName, fileTotalAndCoveredInfo.getCoverageInfo(), blobPath));
 							Map<Integer, CoverageStatus> lineCoverages = new HashMap<>();
 							for (Element lineElement: fileElement.elements("line")) {
 								int lineNum = Integer.parseInt(lineElement.attributeValue("nr")) - 1;
@@ -112,7 +112,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 						}
 					}
 					
-					packageCoverages.add(new PackageCoverageInfo(packageName, packageTotalAndCoveredInfo.getCoverageInfo(), fileCoverages));
+					packageCoverages.add(new CategoryCoverageInfo(packageName, packageTotalAndCoveredInfo.getCoverageInfo(), fileCoverages));
 				}
 				totalAndCoveredInfo = totalAndCoveredInfo.mergeWith(getTotalAndCoveredInfo(doc.getRootElement()));
 			} catch (DocumentException e) {

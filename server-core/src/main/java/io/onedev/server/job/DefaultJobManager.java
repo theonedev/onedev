@@ -1392,7 +1392,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			buildManager.update(build);
 		});
 	}
-
+	
 	@Sessional
 	@Override
 	public void copyDependencies(JobContext jobContext, File tempDir) {

@@ -8,19 +8,16 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.hit.SymbolHit;
-import io.onedev.server.search.code.query.SymbolQuery;
-import io.onedev.server.search.code.query.SymbolQueryOption;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.Status.getOverallStatus;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 public class TRXReportParser {
 
@@ -87,19 +84,7 @@ public class TRXReportParser {
 		for (var entry: testCaseDatum.entrySet()) {
 			Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
 			var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
-			var queryOption = new SymbolQueryOption(substringAfterLast(entry.getKey(), "."), 
-					true, null);
-			var query = new SymbolQuery.Builder(queryOption).primary(true).count(10).build();
-			String blobPath = null;
-			for (var hit: searchManager.search(build.getProject(), build.getCommitId(), query)) {
-				SymbolHit symbolHit = (SymbolHit) hit;
-				if (entry.getKey().equals(symbolHit.getSymbol().getFQN())) {
-					if (blobPath == null)
-						blobPath = symbolHit.getBlobPath();
-					else 
-						blobPath = null;
-				}
-			}
+			var blobPath = searchManager.findBlobPathBySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
 			var testSuite = new TestSuite(entry.getKey(), status, duration, null, blobPath);
 			for (var testCaseData: entry.getValue()) {
 				var name = testCaseData.name;

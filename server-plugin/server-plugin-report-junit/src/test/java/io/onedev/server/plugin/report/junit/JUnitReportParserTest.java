@@ -16,6 +16,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -50,7 +51,13 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				}
 
 				@Override
-				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+				public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
+					return "Test.java";
+				}
+
+				@Nullable
+				@Override
+				public String findBlobPathBySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
 					return "Test.java";
 				}
 
@@ -94,7 +101,13 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				}
 
 				@Override
-				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+				public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
+					return "Test.java";
+				}
+
+				@Nullable
+				@Override
+				public String findBlobPathBySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
 					return "Test.java";
 				}
 

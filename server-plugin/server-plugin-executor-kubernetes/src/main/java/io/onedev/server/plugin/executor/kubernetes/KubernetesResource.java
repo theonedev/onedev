@@ -1,36 +1,5 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
-import static io.onedev.k8shelper.KubernetesHelper.readInt;
-import static io.onedev.k8shelper.KubernetesHelper.readString;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.lang.SerializationUtils;
-
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -43,6 +12,28 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.commons.lang.SerializationUtils;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.onedev.k8shelper.KubernetesHelper.readInt;
+import static io.onedev.k8shelper.KubernetesHelper.readString;
 
 @Api(internal=true)
 @Path("/k8s")

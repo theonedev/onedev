@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -227,7 +226,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											git.environments(environments);
 
 											checkoutFacade.setupWorkingDir(git, workspaceDir);
-
+											
 											File trustCertsFile = new File(buildHome, "trust-certs.pem");
 											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
 													trustCertsFile.getAbsolutePath(), 

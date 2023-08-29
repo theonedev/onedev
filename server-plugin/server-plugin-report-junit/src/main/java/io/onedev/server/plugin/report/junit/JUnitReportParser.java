@@ -54,17 +54,9 @@ public class JUnitReportParser {
 				status = Status.NOT_RUN;
 			else
 				status = Status.PASSED;
-
-			String fileName;
-			if (name.contains("."))
-				fileName = StringUtils.substringAfterLast(name, ".") + ".java";
-			else
-				fileName = name + ".java";
-
-			String partialBlobPath = name.replace('.', '/') + ".java";
-
-			String blobPath = OneDev.getInstance(CodeSearchManager.class)
-					.findBlobPath(build.getProject(), build.getCommitId(), fileName, partialBlobPath);
+			
+			String blobPath = OneDev.getInstance(CodeSearchManager.class).findBlobPathBySymbol(
+					build.getProject(), build.getCommitId(), name, ".");
 
 			TestSuite testSuite = new TestSuite(name, status, duration, null, blobPath);
 

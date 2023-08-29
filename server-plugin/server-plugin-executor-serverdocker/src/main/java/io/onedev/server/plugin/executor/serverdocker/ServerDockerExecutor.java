@@ -480,6 +480,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 													git.environments().put("HOME", hostAuthInfoDir.get().getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
+
 													if (!Bootstrap.isInDocker()) {
 														checkoutFacade.setupSafeDirectory(git, containerWorkspace,
 																newInfoLogger(jobLogger), newErrorLogger(jobLogger));
