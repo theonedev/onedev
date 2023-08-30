@@ -157,7 +157,10 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 		
 		if (!packageCoverages.isEmpty()) {
 			CoverageInfo coverageInfo = new CoverageInfo(
-					MIN_VALUE, 
+					// in coverage stats page, metrics from multiple builds and reports of same day 
+					// will be averaged for display. MIN_VALUE here makes sure that the average is 
+					// still less than 0 so that it is not displayed if this report is included 
+					MIN_VALUE,  
 					MIN_VALUE,
 					getCoverage(totalBranches, coveredBranches), 
 					getCoverage(totalLines, coveredLines));
