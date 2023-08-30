@@ -27,6 +27,7 @@ public class JestReportParserTest {
 			
 			Build build = new Build();
 			build.setJobWorkspace("/Users/robin/Projects/onedev/reports/jest-demo");
+			build.getCheckoutPaths().add(null);
 			UnitTestReport report = new UnitTestReport(JestReportParser.parse(build, rootNode), false);
 			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_PASSED)).size());
 			assertEquals(2, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_RUN)).size());

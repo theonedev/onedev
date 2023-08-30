@@ -52,6 +52,8 @@ import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
+import static java.util.Comparator.*;
+
 @SuppressWarnings("serial")
 public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends ProjectPage {
 
@@ -151,33 +153,26 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 		add(content = new WebMarkupContainer("content"));
 		content.setOutputMarkupId(true);
 		
-		content.add(new ListView<LineSeries>("charts", new LoadableDetachableModel<List<LineSeries>>() {
+		content.add(new ListView<>("charts", new LoadableDetachableModel<List<LineSeries>>() {
 
 			@Override
 			protected List<LineSeries> load() {
 				List<LineSeries> serieses = new ArrayList<>();
 				if (parsedQuery != null) {
 					List<Pair<Method, Integer>> metricGetters = new ArrayList<>();
-					for (Method getter: BeanUtils.findGetters(metricClass)) {
+					for (Method getter : BeanUtils.findGetters(metricClass)) {
 						MetricIndicator indicator = getter.getAnnotation(MetricIndicator.class);
-						if (indicator != null) 
+						if (indicator != null)
 							metricGetters.add(new Pair<>(getter, indicator.order()));
 					}
-					Collections.sort(metricGetters, new Comparator<Pair<Method, Integer>>() {
+					metricGetters.sort(comparingInt(Pair::getRight));
 
-						@Override
-						public int compare(Pair<Method, Integer> o1, Pair<Method, Integer> o2) {
-							return o1.getRight() - o2.getRight();
-						}
-						
-					});
-					
 					List<List<Method>> groupedMetricGetters = new ArrayList<>();
-					metricGetters.stream().map(it->it.getLeft()).forEach(it-> {
+					metricGetters.stream().map(it -> it.getLeft()).forEach(it -> {
 						MetricIndicator indicator = Preconditions.checkNotNull(it.getAnnotation(MetricIndicator.class));
 						if (indicator.group().length() != 0) {
 							List<Method> metricGettersOfGroup = null;
-							for (List<Method> each: groupedMetricGetters) {
+							for (List<Method> each : groupedMetricGetters) {
 								if (each.get(0).getAnnotation(MetricIndicator.class).group().equals(indicator.group())) {
 									metricGettersOfGroup = each;
 									break;
@@ -192,17 +187,17 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							groupedMetricGetters.add(Lists.newArrayList(it));
 						}
 					});
-					
+
 					Map<Integer, T> stats = OneDev.getInstance(BuildMetricManager.class)
 							.queryStats(getProject(), metricClass, parsedQuery);
 
-					for (List<Method> group: groupedMetricGetters) {
+					for (List<Method> group : groupedMetricGetters) {
 						MetricIndicator indicator = group.get(0).getAnnotation(MetricIndicator.class);
-						
+
 						String groupName = indicator.group();
 						if (groupName.length() == 0)
 							groupName = null;
-						
+
 						Integer maxValue = indicator.maxValue();
 						if (maxValue == Integer.MIN_VALUE)
 							maxValue = null;
@@ -214,51 +209,52 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 						String valueFormatter = indicator.valueFormatter();
 						if (valueFormatter.length() == 0)
 							valueFormatter = null;
-						
+
 						Map<Integer, List<Integer>> discreteValues = new HashMap<>();
-						for (Map.Entry<Integer, T> entry: stats.entrySet()) {
+						for (Map.Entry<Integer, T> entry : stats.entrySet()) {
 							List<Integer> lineValues = new ArrayList<>();
-							for (Method getter: group) {
+							for (Method getter : group) {
 								try {
 									lineValues.add((int) getter.invoke(entry.getValue()));
-								} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+								} catch (IllegalAccessException | IllegalArgumentException |
+										 InvocationTargetException e) {
 									throw new RuntimeException(e);
 								}
 							}
 							discreteValues.put(entry.getKey(), lineValues);
 						}
-						
+
 						Map<String, List<Integer>> completeValues = new LinkedHashMap<>();
 						if (!discreteValues.isEmpty()) {
 							int minDayValue = Collections.min(discreteValues.keySet());
 							int maxDayValue = Collections.max(discreteValues.keySet());
 							List<Integer> lastValues = null;
 							int currentDayValue = minDayValue;
-							while (currentDayValue<=maxDayValue) {
+							while (currentDayValue <= maxDayValue) {
 								List<Integer> currentValues = discreteValues.get(currentDayValue);
 								if (currentValues == null)
 									currentValues = lastValues;
-								else 
+								else
 									lastValues = currentValues;
 								Day currentDay = new Day(currentDayValue);
-								String currentDayLabel = String.format("%02d-%02d-%02d", 
-										currentDay.getYear()%100, currentDay.getMonthOfYear()+1, currentDay.getDayOfMonth());
+								String currentDayLabel = String.format("%02d-%02d-%02d",
+										currentDay.getYear() % 100, currentDay.getMonthOfYear() + 1, currentDay.getDayOfMonth());
 								completeValues.put(currentDayLabel, currentValues);
 								currentDayValue = new Day(currentDay.getDate().plusDays(1)).getValue();
 							}
-						} 
-						
+						}
+
 						List<String> xAxisValues = new ArrayList<>(completeValues.keySet());
 						List<Line> lines = new ArrayList<>();
-						
+
 						int lineIndex = 0;
-						for (Method getter: group) {
+						for (Method getter : group) {
 							indicator = getter.getAnnotation(MetricIndicator.class);
 							String name = indicator.name();
-							if (name.length() == 0) 
+							if (name.length() == 0)
 								name = BeanUtils.getDisplayName(getter);
 							Map<String, Integer> yAxisValues = new HashMap<>();
-							for (String xAxisValue: xAxisValues) 
+							for (String xAxisValue : xAxisValues)
 								yAxisValues.put(xAxisValue, completeValues.get(xAxisValue).get(lineIndex));
 							if ((minValue == null || minValue <= Collections.min(yAxisValues.values()))
 									&& (maxValue == null || maxValue >= Collections.max(yAxisValues.values()))) {
@@ -266,20 +262,20 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							}
 							lineIndex++;
 						}
-						
+
 						serieses.add(new LineSeries(groupName, xAxisValues, lines, valueFormatter, minValue, maxValue));
 					}
-				} 
+				}
 				return serieses;
 			}
-			
+
 		}) {
 
 			@Override
 			protected void populateItem(ListItem<LineSeries> item) {
 				item.add(new LineChartPanel("chart", item.getModel()));
 			}
-			
+
 		});
 	}
 
@@ -298,9 +294,9 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, metricClass).isEmpty()) 
-			return new ViewStateAwarePageLink<Void>(componentId, getPageClass(), paramsOf(project));
+			return new ViewStateAwarePageLink<>(componentId, getPageClass(), paramsOf(project));
 		else 
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

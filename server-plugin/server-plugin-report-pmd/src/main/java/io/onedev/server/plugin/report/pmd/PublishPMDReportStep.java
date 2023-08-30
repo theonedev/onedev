@@ -1,23 +1,12 @@
 package io.onedev.server.plugin.report.pmd;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import javax.validation.constraints.NotEmpty;
-import org.unbescape.html.HtmlEscape;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
@@ -27,9 +16,19 @@ import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.unbescape.html.HtmlEscape;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable(order=8020, group=StepGroup.PUBLISH_REPORTS, name="PMD")
 public class PublishPMDReportStep extends PublishProblemReportStep {
@@ -73,9 +72,8 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 
 				for (Element fileElement: doc.getRootElement().elements("file")) {
-					String filePath = fileElement.attributeValue("name");
-					if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) {
-						String blobPath = filePath.substring(build.getJobWorkspace().length()+1);
+					String blobPath = build.getBlobPath(fileElement.attributeValue("name"));
+					if (blobPath != null) {
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
 							List<CodeProblem> problemsOfFile = new ArrayList<>();

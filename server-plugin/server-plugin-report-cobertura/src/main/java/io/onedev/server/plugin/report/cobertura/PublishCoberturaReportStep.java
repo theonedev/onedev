@@ -33,6 +33,7 @@ import static io.onedev.server.codequality.CoverageStatus.*;
 import static io.onedev.server.plugin.report.coverage.CoverageInfo.getCoverage;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Double.parseDouble;
+import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Integer.parseInt;
 
 @Editable(order=9950, group=StepGroup.PUBLISH_REPORTS, name="Cobertura Coverage")
@@ -132,7 +133,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 							int fileBranchCoverage = (int)(parseDouble(classElement.attributeValue("branch-rate")) * 100);
 							classCoverages.add(new ItemCoverageInfo(
 									className,
-									-1, -1, 
+									MIN_VALUE, MIN_VALUE, 
 									fileBranchCoverage, fileLineCoverage,
 									blobPath));
 						}
@@ -144,7 +145,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 					int packageLineCoverage = (int)(parseDouble(packageElement.attributeValue("line-rate")) * 100);
 					int packageBranchCoverage = (int)(parseDouble(packageElement.attributeValue("branch-rate")) * 100);
 					packageCoverages.add(new CategoryCoverageInfo(
-							packageName, -1, -1, 
+							packageName, MIN_VALUE, MIN_VALUE, 
 							packageBranchCoverage, packageLineCoverage, classCoverages));
 				}
 			} catch (DocumentException e) {
@@ -156,8 +157,8 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 		
 		if (!packageCoverages.isEmpty()) {
 			CoverageInfo coverageInfo = new CoverageInfo(
-					-1, 
-					-1,
+					MIN_VALUE, 
+					MIN_VALUE,
 					getCoverage(totalBranches, coveredBranches), 
 					getCoverage(totalLines, coveredLines));
 			

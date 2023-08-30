@@ -538,6 +538,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
+		CompositeFacade entryFacade = new CompositeFacade(actions);
+		entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
+			if (executable instanceof CheckoutFacade) {
+				CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
+				build.getCheckoutPaths().add(checkoutFacade.getCheckoutPath());
+			}
+			return null;
+		}, new ArrayList<>());
+		
 		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
 		executionRef.set(new JobExecution(executorService.submit(() -> {
 			AtomicInteger retried = new AtomicInteger(0);

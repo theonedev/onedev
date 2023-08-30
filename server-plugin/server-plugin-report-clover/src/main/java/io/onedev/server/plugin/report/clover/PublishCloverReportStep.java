@@ -113,10 +113,8 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 						List<ItemCoverageInfo> fileCoverages = new ArrayList<>();
 						for (Element fileElement: packageElement.elements("file")) {
 							String fileName = fileElement.attributeValue("name");
-							String blobPath = fileElement.attributeValue("path");
-							if (build.getJobWorkspace() != null && blobPath.startsWith(build.getJobWorkspace())) { 
-								blobPath = blobPath.substring(build.getJobWorkspace().length()+1);
-
+							String blobPath = build.getBlobPath(fileElement.attributeValue("path"));
+							if (blobPath != null) { 
 								metricsElement = fileElement.element("metrics");
 								
 								int fileStatementCoverage = getCoverage(

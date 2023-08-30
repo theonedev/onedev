@@ -77,14 +77,13 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				
 				Element projectElement = doc.getRootElement().element("Project");
-				String srcPath = projectElement.elementText("SrcDir");
-				if (build.getJobWorkspace() != null && srcPath.startsWith(build.getJobWorkspace())) {
-					srcPath = srcPath.substring(build.getJobWorkspace().length()+1);
-					if (srcPath.startsWith("/"))
-						srcPath = srcPath.substring(1);
+				String blobDir = build.getBlobPath(projectElement.elementText("SrcDir"));
+				if (blobDir != null) {
 					for (Element bugElement: doc.getRootElement().elements("BugInstance")) {
 						Element sourceElement = bugElement.element("SourceLine");
-						String blobPath = srcPath + "/" + sourceElement.attributeValue("sourcepath");
+						String blobPath = sourceElement.attributeValue("sourcepath");
+						if (blobDir.length() != 0)
+							blobPath = blobDir + "/" + blobPath;
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
 							String type = bugElement.attributeValue("type");

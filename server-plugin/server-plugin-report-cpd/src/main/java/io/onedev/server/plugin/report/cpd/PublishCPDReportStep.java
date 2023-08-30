@@ -1,29 +1,13 @@
 package io.onedev.server.plugin.report.cpd;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import javax.validation.constraints.NotEmpty;
-import org.unbescape.html.HtmlEscape;
-
 import com.google.common.base.Splitter;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
@@ -33,11 +17,25 @@ import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.unbescape.html.HtmlEscape;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Editable(order=8030, group=StepGroup.PUBLISH_REPORTS, name="CPD")
 public class PublishCPDReportStep extends PublishProblemReportStep {
@@ -82,9 +80,8 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 				for (Element duplicationElement: doc.getRootElement().elements("duplication")) {
 					List<CodeDuplication> duplications = new ArrayList<>();
 					for (Element fileElement: duplicationElement.elements("file")) {
-						String filePath = fileElement.attributeValue("path");
-						if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) {
-							String blobPath = filePath.substring(build.getJobWorkspace().length()+1);
+						String blobPath = build.getBlobPath(fileElement.attributeValue("path"));
+						if (blobPath != null) {
 							BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 							if (build.getProject().getBlob(blobIdent, false) != null) {
 								int beginLine = Integer.parseInt(fileElement.attributeValue("line"));

@@ -73,9 +73,8 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				for (Element fileElement: doc.getRootElement().elements("file")) {
-					String blobPath = fileElement.attributeValue("name");
-					if (build.getJobWorkspace() != null && blobPath.startsWith(build.getJobWorkspace())) { 
-						blobPath = blobPath.substring(build.getJobWorkspace().length()+1);
+					String blobPath = build.getBlobPath(fileElement.attributeValue("name"));
+					if (blobPath != null) { 
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
 							List<CodeProblem> problemsOfFile = new ArrayList<>();

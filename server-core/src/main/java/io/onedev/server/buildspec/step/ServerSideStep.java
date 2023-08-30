@@ -48,14 +48,7 @@ public abstract class ServerSideStep extends Step {
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();
 		
-		new EditableStringVisitor(new Consumer<String>() {
-
-			@Override
-			public void accept(String t) {
-				placeholders.addAll(KubernetesHelper.parsePlaceholders(t));
-			}
-			
-		}).visitProperties(this, Interpolative.class);
+		new EditableStringVisitor(t -> placeholders.addAll(KubernetesHelper.parsePlaceholders(t))).visitProperties(this, Interpolative.class);
 		
 		return placeholders;
 	}

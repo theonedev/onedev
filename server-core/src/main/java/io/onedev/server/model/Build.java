@@ -52,6 +52,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -154,8 +155,6 @@ public class Build extends ProjectBelonging
 	public static final String PROP_ISSUE = "issue";
 	
 	public static final String NAME_LOG = "Log";
-	
-	public static final String PROP_TRIGGER_ID = "triggerId";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_LABEL, NAME_STATUS, NAME_SUBMITTER, 
@@ -268,6 +267,10 @@ public class Build extends ProjectBelonging
 	private String jobName;
 	
 	private String jobWorkspace;
+	
+	@Lob
+	@Column(nullable=false)
+	private ArrayList<String> checkoutPaths = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String refName;
@@ -418,6 +421,10 @@ public class Build extends ProjectBelonging
 
 	public void setJobWorkspace(@Nullable String jobWorkspace) {
 		this.jobWorkspace = jobWorkspace;
+	}
+
+	public Collection<String> getCheckoutPaths() {
+		return checkoutPaths;
 	}
 
 	@Nullable
@@ -1001,4 +1008,25 @@ public class Build extends ProjectBelonging
 		return rootArtifacts;
 	}
 	
+	@Nullable
+	public String getBlobPath(String filePath) {
+		if (jobWorkspace == null || checkoutPaths == null)
+			throw new ExplicitException("Job workspace or checkout paths unknown");
+		filePath = filePath.replace('\\', '/');
+		filePath = Paths.get(filePath).normalize().toString();
+		filePath = filePath.replace('\\', '/');
+		for (var checkoutPath: checkoutPaths) {
+			var absoluteCheckoutPath = jobWorkspace;
+			if (checkoutPath != null)
+				absoluteCheckoutPath += "/" + checkoutPath;
+			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
+			absoluteCheckoutPath = Paths.get(absoluteCheckoutPath).normalize().toString();
+			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
+			if (filePath.startsWith(absoluteCheckoutPath + "/")) 
+				return filePath.substring(absoluteCheckoutPath.length() + 1);
+			else if (filePath.equals(absoluteCheckoutPath))
+				return "";
+		}
+		return null;
+	}
 }

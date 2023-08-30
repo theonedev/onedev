@@ -146,14 +146,6 @@ public class ServerSocket {
 					if (jobContext != null)
 						getJobManager().reportJobWorkspace(jobContext, jobWorkspace);
 					break;
-				case REPORT_CHECKOUT_PATH:
-					dataString = new String(messageData, StandardCharsets.UTF_8);
-					jobToken = StringUtils.substringBefore(dataString, ":");
-					String checkoutPath = StringUtils.substringAfter(dataString, ":");
-					jobContext = getJobManager().getJobContext(jobToken, false);
-					if (jobContext != null)
-						getJobManager().reportCheckoutPath(jobContext, checkoutPath);
-					break;
 				case SHELL_OUTPUT:
 					dataString = new String(messageData, StandardCharsets.UTF_8);
 					String sessionId = StringUtils.substringBefore(dataString, ":");
