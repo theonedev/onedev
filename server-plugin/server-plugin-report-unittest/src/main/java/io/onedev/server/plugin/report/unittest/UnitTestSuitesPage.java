@@ -21,6 +21,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -109,218 +110,224 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		form = new Form<Void>("form");
-		TextField<String> nameFilter = new TextField<String>("name", new IModel<String>() {
+		if (getReport() != null) {
+			var fragment = new Fragment("report", "validFrag", this);
+			form = new Form<Void>("form");
+			TextField<String> nameFilter = new TextField<String>("name", new IModel<String>() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return state.name;
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.name = object;
-			}
-			
-		});
-		nameFilter.add(new PatternSetAssistBehavior() {
-			
-			@Override
-			protected List<InputSuggestion> suggest(String matchWith) {
-				return SuggestionUtils.suggest(
-						getReport().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
-						matchWith);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				return Lists.newArrayList(
-						"Path containing spaces or starting with dash needs to be quoted",
-						"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-						);
-			}
-			
-		});
-		form.add(nameFilter);
-		
-		nameFilter.add(new AjaxFormComponentUpdatingBehavior("clear") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				parseNamePatterns();
-				target.add(feedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		form.add(feedback = new FencedFeedbackPanel("feedback", form));
-		feedback.setOutputMarkupPlaceholderTag(true);
-
-		form.add(new AjaxButton("submit") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-			}
-			
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				pushState(target);
-				parseNamePatterns();
-				target.add(feedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		add(form);
-		
-		parseNamePatterns();
-		
-		add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
-
-			@Override
-			protected List<PieSlice> load() {
-				if (namePatterns != null) {
-					List<PieSlice> slices = new ArrayList<>();
-					for (Status status: Status.values()) {
-						int numOfTestSuites = getReport().getTestSuites(
-								namePatterns.orNull(), Sets.newHashSet(status)).size();
-						slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "), 
-								numOfTestSuites, status.getColor(), state.statuses.contains(status)));
-					}
-					return slices;
-				} else {
-					return null;
+				@Override
+				public void detach() {
 				}
-			}
-			
-		}) {
 
-			@Override
-			protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-				Status status = Status.valueOf(sliceName.toUpperCase());
-				if (state.statuses.contains(status))
-					state.statuses.remove(status);
-				else
-					state.statuses.add(status);
-				pushState(target);
-				target.add(detail);
-			}
-			
-		});
-		
-		add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
+				@Override
+				public String getObject() {
+					return state.name;
+				}
 
-			@Override
-			public void detach() {
-			}
+				@Override
+				public void setObject(String object) {
+					state.name = object;
+				}
 
-			@Override
-			public Boolean getObject() {
-				return state.longestDurationFirst;
-			}
+			});
+			nameFilter.add(new PatternSetAssistBehavior() {
 
-			@Override
-			public void setObject(Boolean object) {
-				state.longestDurationFirst = object;
-			}
-			
-		}) {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				target.add(detail);
-			}
-			
-		});
-		
-		detail = new WebMarkupContainer("detail");
-		detail.setOutputMarkupId(true);
-		add(detail);
+				@Override
+				protected List<InputSuggestion> suggest(String matchWith) {
+					return SuggestionUtils.suggest(
+							getReport().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()),
+							matchWith);
+				}
 
-		PageableListView<TestSuite> testSuitesView;
-		detail.add(testSuitesView = new PageableListView<TestSuite>("testSuites", 
-				new LoadableDetachableModel<List<TestSuite>>() {
+				@Override
+				protected List<String> getHints(TerminalExpect terminalExpect) {
+					return Lists.newArrayList(
+							"Path containing spaces or starting with dash needs to be quoted",
+							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+					);
+				}
 
-			@Override
-			protected List<TestSuite> load() {
-				if (namePatterns != null) {
-					List<TestSuite> testSuites = getReport().getTestSuites(namePatterns.orNull(), state.statuses);
-					if (state.longestDurationFirst) {
-						testSuites.sort(new Comparator<TestSuite>() {
+			});
+			form.add(nameFilter);
 
-							@Override
-							public int compare(TestSuite o1, TestSuite o2) {
-								if (o1.getDuration() < o2.getDuration())
-									return 1;
-								else if (o1.getDuration() > o2.getDuration())
-									return -1;
-								else 
-									return 0;
+			nameFilter.add(new AjaxFormComponentUpdatingBehavior("clear") {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					parseNamePatterns();
+					target.add(feedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			form.add(feedback = new FencedFeedbackPanel("feedback", form));
+			feedback.setOutputMarkupPlaceholderTag(true);
+
+			form.add(new AjaxButton("submit") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+				}
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					pushState(target);
+					parseNamePatterns();
+					target.add(feedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			fragment.add(form);
+
+			parseNamePatterns();
+
+			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
+
+				@Override
+				protected List<PieSlice> load() {
+					if (namePatterns != null) {
+						List<PieSlice> slices = new ArrayList<>();
+						for (Status status: Status.values()) {
+							int numOfTestSuites = getReport().getTestSuites(
+									namePatterns.orNull(), Sets.newHashSet(status)).size();
+							slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "),
+									numOfTestSuites, status.getColor(), state.statuses.contains(status)));
+						}
+						return slices;
+					} else {
+						return null;
+					}
+				}
+
+			}) {
+
+				@Override
+				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
+					Status status = Status.valueOf(sliceName.toUpperCase());
+					if (state.statuses.contains(status))
+						state.statuses.remove(status);
+					else
+						state.statuses.add(status);
+					pushState(target);
+					target.add(detail);
+				}
+
+			});
+
+			fragment.add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public Boolean getObject() {
+					return state.longestDurationFirst;
+				}
+
+				@Override
+				public void setObject(Boolean object) {
+					state.longestDurationFirst = object;
+				}
+
+			}) {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					target.add(detail);
+				}
+
+			});
+
+			detail = new WebMarkupContainer("detail");
+			detail.setOutputMarkupId(true);
+			fragment.add(detail);
+
+			PageableListView<TestSuite> testSuitesView;
+			detail.add(testSuitesView = new PageableListView<TestSuite>("testSuites",
+					new LoadableDetachableModel<List<TestSuite>>() {
+
+						@Override
+						protected List<TestSuite> load() {
+							if (namePatterns != null) {
+								List<TestSuite> testSuites = getReport().getTestSuites(namePatterns.orNull(), state.statuses);
+								if (state.longestDurationFirst) {
+									testSuites.sort(new Comparator<TestSuite>() {
+
+										@Override
+										public int compare(TestSuite o1, TestSuite o2) {
+											if (o1.getDuration() < o2.getDuration())
+												return 1;
+											else if (o1.getDuration() > o2.getDuration())
+												return -1;
+											else
+												return 0;
+										}
+
+									});
+								}
+								return testSuites;
+							} else {
+								return new ArrayList<>();
 							}
-							
-						});
-					}
-					return testSuites;
-				} else {
-					return new ArrayList<>();
-				}
-			}
+						}
 
-		}, WebConstants.PAGE_SIZE) {
+					}, WebConstants.PAGE_SIZE) {
 
-			@Override
-			protected void populateItem(ListItem<TestSuite> item) {
-				TestSuite testSuite = item.getModelObject();
-				item.add(new TestStatusBadge("status", testSuite.getStatus()));
-				
-				UnitTestCasesPage.State state = new UnitTestCasesPage.State();
-				state.testSuite = testSuite.getName();
-				state.statuses = UnitTestSuitesPage.this.state.statuses;
-				PageParameters params = UnitTestCasesPage.paramsOf(getBuild(), getReportName(), state);
-				Link<Void> link = new ViewStateAwarePageLink<Void>("testCases", 
-						UnitTestCasesPage.class, params);
-				link.add(new Label("label", testSuite.getName()));
-				
-				if (testSuite.getBlobPath() != null) {
-					BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath(), 
-							FileMode.REGULAR_FILE.getBits());
-					if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
-						item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 
-								ProjectBlobPage.paramsOf(getProject(), blobIdent)));
+				@Override
+				protected void populateItem(ListItem<TestSuite> item) {
+					TestSuite testSuite = item.getModelObject();
+					item.add(new TestStatusBadge("status", testSuite.getStatus()));
+
+					UnitTestCasesPage.State state = new UnitTestCasesPage.State();
+					state.testSuite = testSuite.getName();
+					state.statuses = UnitTestSuitesPage.this.state.statuses;
+					PageParameters params = UnitTestCasesPage.paramsOf(getBuild(), getReportName(), state);
+					Link<Void> link = new ViewStateAwarePageLink<Void>("testCases",
+							UnitTestCasesPage.class, params);
+					link.add(new Label("label", testSuite.getName()));
+
+					if (testSuite.getBlobPath() != null) {
+						BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath(),
+								FileMode.REGULAR_FILE.getBits());
+						if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
+							item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class,
+									ProjectBlobPage.paramsOf(getProject(), blobIdent)));
+						} else {
+							item.add(new WebMarkupContainer("viewSource").setVisible(false));
+						}
 					} else {
 						item.add(new WebMarkupContainer("viewSource").setVisible(false));
 					}
-				} else {
-					item.add(new WebMarkupContainer("viewSource").setVisible(false));
+
+					item.add(new Label("duration", DurationFormatUtils.formatDuration(testSuite.getDuration(), "s.SSS 's'")));
+					item.add(link);
+
+					Component messageViewer = testSuite.renderMessage("message", getBuild());
+					if (messageViewer != null)
+						item.add(messageViewer);
+					else
+						item.add(new WebMarkupContainer("message").setVisible(false));
 				}
-									
-				item.add(new Label("duration", DurationFormatUtils.formatDuration(testSuite.getDuration(), "s.SSS 's'")));
-				item.add(link);
 
-				Component messageViewer = testSuite.renderMessage("message", getBuild());
-				if (messageViewer != null)
-					item.add(messageViewer);
-				else
-					item.add(new WebMarkupContainer("message").setVisible(false));
-			}
-			
-		});
+			});
 
-		detail.add(new OnePagingNavigator("pagingNavigator", testSuitesView, null));
-		detail.add(new NoRecordsPlaceholder("noRecords", testSuitesView));
+			detail.add(new OnePagingNavigator("pagingNavigator", testSuitesView, null));
+			detail.add(new NoRecordsPlaceholder("noRecords", testSuitesView));			
+			add(fragment);
+		} else {
+			add(new Fragment("report", "invalidFrag", this));
+		}
 	}
 	
 	private void parseNamePatterns() {

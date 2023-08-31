@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import org.apache.commons.lang.SerializationUtils;
 
@@ -55,9 +56,12 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 		});
 		
 		if (report != null) {
-			CoverageMetric metric = new CoverageMetric();
-			metric.setBuild(build);
-			metric.setReportName(getReportName());
+			var metric = OneDev.getInstance(BuildMetricManager.class).find(CoverageMetric.class, build, getReportName());
+			if (metric == null) {
+				metric = new CoverageMetric();
+				metric.setBuild(build);
+				metric.setReportName(getReportName());
+			}
 			
 			CoverageInfo coverages = report.getOverallCoverages();
 			metric.setBranchCoverage(coverages.getBranchCoverage());

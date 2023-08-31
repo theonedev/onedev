@@ -5712,5 +5712,33 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate136(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.addElement("checkoutPaths");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CoverageMetrics.xml")
+					|| file.getName().startsWith("UnitTestMetrics.xml")
+					|| file.getName().startsWith("ProblemMetrics.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				var buildAndReports = new HashSet<String>();
+				for (Element element: dom.getRootElement().elements()) {
+					if (file.getName().startsWith("CoverageMetrics.xml")) {
+						element.element("totalMethods").detach();
+						element.element("totalStatements").detach();
+						element.element("totalBranches").detach();
+						element.element("totalLines").detach();
+					}
+					var buildId = element.elementText("build").trim();
+					var reportName = element.elementText("reportName").trim();
+					if (!buildAndReports.add(buildId + ":" + reportName))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

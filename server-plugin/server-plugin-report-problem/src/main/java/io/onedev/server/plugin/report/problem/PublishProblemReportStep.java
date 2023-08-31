@@ -1,28 +1,24 @@
 package io.onedev.server.plugin.report.problem;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
-import io.onedev.server.entitymanager.ProjectManager;
-import org.apache.commons.lang3.SerializationUtils;
-
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.annotation.Editable;
+import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 @Editable
 public abstract class PublishProblemReportStep extends PublishReportStep {
@@ -55,10 +51,13 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		if (report != null) {
 			FileUtils.createDir(reportDir);
 			report.writeTo(reportDir);
-			
-			ProblemMetric metric = new ProblemMetric();
-			metric.setBuild(build);
-			metric.setReportName(getReportName());
+
+			var metric = OneDev.getInstance(BuildMetricManager.class).find(ProblemMetric.class, build, getReportName());
+			if (metric == null) {
+				metric = new ProblemMetric();
+				metric.setBuild(build);
+				metric.setReportName(getReportName());
+			}
 			metric.setHighSeverities((int) report.getProblems().stream()
 					.filter(it->it.getSeverity()==Severity.HIGH)
 					.count());

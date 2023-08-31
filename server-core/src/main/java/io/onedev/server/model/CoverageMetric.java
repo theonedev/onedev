@@ -5,8 +5,13 @@ import io.onedev.server.util.MetricIndicator;
 
 import javax.persistence.*;
 
+import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
+
 @Entity
-@Table(indexes={@Index(columnList="o_build_id"), @Index(columnList=BuildMetric.PROP_REPORT)})
+@Table(
+		indexes={@Index(columnList="o_build_id"), @Index(columnList= PROP_REPORT)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", PROP_REPORT})}
+)
 public class CoverageMetric extends AbstractEntity implements BuildMetric {
 
 	private static final long serialVersionUID = 1L;

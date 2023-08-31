@@ -1,5 +1,6 @@
 <wicket:extend>
-	<div class="coverage-report">
+	<div wicket:id="report" class="coverage-report"></div>
+	<wicket:fragment wicket:id="validFrag">
 		<div wicket:id="coverageTitle" class="title h4 mb-3 text-break"></div>
 		<div wicket:id="coverages" class="coverages mb-5"></div>
 		<div class="items">
@@ -8,7 +9,7 @@
 				<div class="operations d-flex flex-nowrap">
 					<div class="clearable-wrapper flex-grow-1 mr-3">
 						<div class="input-group">
-	                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off">
+							<input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off">
 							<span class="input-group-append">
 								<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 							</span>
@@ -27,5 +28,10 @@
 				<div wicket:id="noRecords"></div>
 			</div>
 		</div>
-	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="invalidFrag">
+		<div class="alert alert-notice alert-light-warning">
+			Report format changed. You may re-run this build to generate the report in new format
+		</div>
+	</wicket:fragment>
 </wicket:extend>

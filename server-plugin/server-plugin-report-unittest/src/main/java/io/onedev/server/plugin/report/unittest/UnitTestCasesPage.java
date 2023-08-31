@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -121,289 +122,295 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		testSuiteForm = new Form<Void>("testSuiteForm");
-		
-		TextField<String> input = new TextField<String>("input", new IModel<String>() {
+		if (getReport() != null) {
+			var fragment = new Fragment("report", "validFrag", this);
+			testSuiteForm = new Form<Void>("testSuiteForm");
 
-			@Override
-			public void detach() {
-			}
+			TextField<String> input = new TextField<String>("input", new IModel<String>() {
 
-			@Override
-			public String getObject() {
-				return state.testSuite;
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.testSuite = object;
-			}
-			
-		});
-		input.add(new PatternSetAssistBehavior() {
-			
-			@Override
-			protected List<InputSuggestion> suggest(String matchWith) {
-				return SuggestionUtils.suggest(
-						getReport().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
-						matchWith);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				return Lists.newArrayList(
-						"Path containing spaces or starting with dash needs to be quoted",
-						"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-						);
-			}
-			
-		});
-		testSuiteForm.add(input);
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("clear") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				parseTestSuitePatterns();
-				target.add(testSuiteFeedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		testSuiteForm.add(testSuiteFeedback = new FencedFeedbackPanel("feedback", testSuiteForm));
-		testSuiteFeedback.setOutputMarkupPlaceholderTag(true);
-
-		testSuiteForm.add(new AjaxButton("submit") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-			}
-			
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				pushState(target);
-				parseTestSuitePatterns();
-				target.add(testSuiteFeedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		add(testSuiteForm);
-		
-		nameForm = new Form<Void>("nameForm");
-		
-		input = new TextField<String>("input", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return state.name;
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.name = object;
-			}
-			
-		});
-		input.add(new PatternSetAssistBehavior() {
-			
-			@Override
-			protected List<InputSuggestion> suggest(String matchWith) {
-				return SuggestionUtils.suggest(
-						getReport().getTestCases(null, null, null).stream().map(it->it.getName()).distinct().collect(Collectors.toList()), 
-						matchWith);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				return Lists.newArrayList(
-						"Path containing spaces or starting with dash needs to be quoted",
-						"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-						);
-			}
-			
-		});
-		nameForm.add(input);
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("clear") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				parseNamePatterns();
-				target.add(nameFeedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		nameForm.add(nameFeedback = new FencedFeedbackPanel("feedback", nameForm));
-		nameFeedback.setOutputMarkupPlaceholderTag(true);
-
-		nameForm.add(new AjaxButton("submit") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-			}
-			
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				pushState(target);
-				parseNamePatterns();
-				target.add(nameFeedback);
-				target.add(summary);
-				target.add(detail);
-			}
-			
-		});
-		
-		add(nameForm);
-		
-		parseTestSuitePatterns();
-		parseNamePatterns();
-		
-		add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
-
-			@Override
-			protected List<PieSlice> load() {
-				if (testSuitePatterns != null && namePatterns != null) {
-					List<PieSlice> slices = new ArrayList<>();
-					for (Status status: Status.values()) {
-						int numOfTestCases = getReport().getTestCases(
-								testSuitePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
-						slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "), 
-								numOfTestCases, status.getColor(), state.statuses.contains(status)));
-					}
-					return slices;
-				} else {
-					return null;
+				@Override
+				public void detach() {
 				}
-			}
-			
-		}) {
 
-			@Override
-			protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-				Status status = Status.valueOf(sliceName.toUpperCase().replace(" ", "_"));
-				if (state.statuses.contains(status))
-					state.statuses.remove(status);
-				else
-					state.statuses.add(status);
-				pushState(target);
-				target.add(detail);
-			}
-			
-		});
-		
-		add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
+				@Override
+				public String getObject() {
+					return state.testSuite;
+				}
 
-			@Override
-			public void detach() {
-			}
+				@Override
+				public void setObject(String object) {
+					state.testSuite = object;
+				}
 
-			@Override
-			public Boolean getObject() {
-				return state.longestDurationFirst;
-			}
+			});
+			input.add(new PatternSetAssistBehavior() {
 
-			@Override
-			public void setObject(Boolean object) {
-				state.longestDurationFirst = object;
-			}
-			
-		}) {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				target.add(detail);
-			}
+				@Override
+				protected List<InputSuggestion> suggest(String matchWith) {
+					return SuggestionUtils.suggest(
+							getReport().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()),
+							matchWith);
+				}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getReport().hasTestCaseDuration());
-			}
-			
-		});
-		
-		detail = new WebMarkupContainer("detail");
-		detail.setOutputMarkupId(true);
-		add(detail);
-		
-		PageableListView<TestCase> testCasesView;
-		detail.add(testCasesView = new PageableListView<TestCase>("testCases", 
-				new LoadableDetachableModel<List<TestCase>>() {
+				@Override
+				protected List<String> getHints(TerminalExpect terminalExpect) {
+					return Lists.newArrayList(
+							"Path containing spaces or starting with dash needs to be quoted",
+							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+					);
+				}
 
-			@Override
-			protected List<TestCase> load() {
-				List<TestCase> testCases;
-				if (testSuitePatterns != null && namePatterns != null)
-					testCases = getReport().getTestCases(testSuitePatterns.orNull(), namePatterns.orNull(), state.statuses);
-				else
-					testCases = new ArrayList<>();
-				if (state.longestDurationFirst) {
-					testCases.sort(new Comparator<TestCase>() {
+			});
+			testSuiteForm.add(input);
+
+			input.add(new AjaxFormComponentUpdatingBehavior("clear") {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					parseTestSuitePatterns();
+					target.add(testSuiteFeedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			testSuiteForm.add(testSuiteFeedback = new FencedFeedbackPanel("feedback", testSuiteForm));
+			testSuiteFeedback.setOutputMarkupPlaceholderTag(true);
+
+			testSuiteForm.add(new AjaxButton("submit") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+				}
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					pushState(target);
+					parseTestSuitePatterns();
+					target.add(testSuiteFeedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			fragment.add(testSuiteForm);
+
+			nameForm = new Form<Void>("nameForm");
+
+			input = new TextField<String>("input", new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return state.name;
+				}
+
+				@Override
+				public void setObject(String object) {
+					state.name = object;
+				}
+
+			});
+			input.add(new PatternSetAssistBehavior() {
+
+				@Override
+				protected List<InputSuggestion> suggest(String matchWith) {
+					return SuggestionUtils.suggest(
+							getReport().getTestCases(null, null, null).stream().map(it->it.getName()).distinct().collect(Collectors.toList()),
+							matchWith);
+				}
+
+				@Override
+				protected List<String> getHints(TerminalExpect terminalExpect) {
+					return Lists.newArrayList(
+							"Path containing spaces or starting with dash needs to be quoted",
+							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+					);
+				}
+
+			});
+			nameForm.add(input);
+
+			input.add(new AjaxFormComponentUpdatingBehavior("clear") {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					parseNamePatterns();
+					target.add(nameFeedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			nameForm.add(nameFeedback = new FencedFeedbackPanel("feedback", nameForm));
+			nameFeedback.setOutputMarkupPlaceholderTag(true);
+
+			nameForm.add(new AjaxButton("submit") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+				}
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					pushState(target);
+					parseNamePatterns();
+					target.add(nameFeedback);
+					target.add(summary);
+					target.add(detail);
+				}
+
+			});
+
+			fragment.add(nameForm);
+
+			parseTestSuitePatterns();
+			parseNamePatterns();
+
+			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
+
+				@Override
+				protected List<PieSlice> load() {
+					if (testSuitePatterns != null && namePatterns != null) {
+						List<PieSlice> slices = new ArrayList<>();
+						for (Status status: Status.values()) {
+							int numOfTestCases = getReport().getTestCases(
+									testSuitePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
+							slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "),
+									numOfTestCases, status.getColor(), state.statuses.contains(status)));
+						}
+						return slices;
+					} else {
+						return null;
+					}
+				}
+
+			}) {
+
+				@Override
+				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
+					Status status = Status.valueOf(sliceName.toUpperCase().replace(" ", "_"));
+					if (state.statuses.contains(status))
+						state.statuses.remove(status);
+					else
+						state.statuses.add(status);
+					pushState(target);
+					target.add(detail);
+				}
+
+			});
+
+			fragment.add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public Boolean getObject() {
+					return state.longestDurationFirst;
+				}
+
+				@Override
+				public void setObject(Boolean object) {
+					state.longestDurationFirst = object;
+				}
+
+			}) {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					target.add(detail);
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(getReport().hasTestCaseDuration());
+				}
+
+			});
+
+			detail = new WebMarkupContainer("detail");
+			detail.setOutputMarkupId(true);
+			fragment.add(detail);
+
+			PageableListView<TestCase> testCasesView;
+			detail.add(testCasesView = new PageableListView<TestCase>("testCases",
+					new LoadableDetachableModel<List<TestCase>>() {
 
 						@Override
-						public int compare(TestCase o1, TestCase o2) {
-							if (o1.getDuration() < o2.getDuration())
-								return 1;
-							else if (o1.getDuration() > o2.getDuration())
-								return -1;
-							else 
-								return 0;
-						}
-						
-					});
-				}
-				return testCases;
-			}
-			
-		}, WebConstants.PAGE_SIZE) {
+						protected List<TestCase> load() {
+							List<TestCase> testCases;
+							if (testSuitePatterns != null && namePatterns != null)
+								testCases = getReport().getTestCases(testSuitePatterns.orNull(), namePatterns.orNull(), state.statuses);
+							else
+								testCases = new ArrayList<>();
+							if (state.longestDurationFirst) {
+								testCases.sort(new Comparator<TestCase>() {
 
-			@Override
-			protected void populateItem(ListItem<TestCase> item) {
-				TestCase testCase = item.getModelObject();
-				item.add(new TestStatusBadge("status", testCase.getStatus()));
-				
-				var name = testCase.getName() + " (" + testCase.getTestSuite().getName() + ")";
-				if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) {
-					name = "[" + testCase.getStatusText() + "] " + name;
+									@Override
+									public int compare(TestCase o1, TestCase o2) {
+										if (o1.getDuration() < o2.getDuration())
+											return 1;
+										else if (o1.getDuration() > o2.getDuration())
+											return -1;
+										else
+											return 0;
+									}
+
+								});
+							}
+							return testCases;
+						}
+
+					}, WebConstants.PAGE_SIZE) {
+
+				@Override
+				protected void populateItem(ListItem<TestCase> item) {
+					TestCase testCase = item.getModelObject();
+					item.add(new TestStatusBadge("status", testCase.getStatus()));
+
+					var name = testCase.getName() + " (" + testCase.getTestSuite().getName() + ")";
+					if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) {
+						name = "[" + testCase.getStatusText() + "] " + name;
+					}
+					item.add(new Label("name", name));
+					if (getReport().hasTestCaseDuration())
+						item.add(new Label("duration", DurationFormatUtils.formatDuration(testCase.getDuration(), "s.SSS 's'")));
+					else
+						item.add(new WebMarkupContainer("duration").setVisible(false));
+
+					Component messageViewer = testCase.renderMessage("message", getBuild());
+					if (messageViewer != null)
+						item.add(messageViewer);
+					else
+						item.add(new WebMarkupContainer("message").setVisible(false));
 				}
-				item.add(new Label("name", name));
-				if (getReport().hasTestCaseDuration())
-					item.add(new Label("duration", DurationFormatUtils.formatDuration(testCase.getDuration(), "s.SSS 's'")));
-				else
-					item.add(new WebMarkupContainer("duration").setVisible(false));
-				
-				Component messageViewer = testCase.renderMessage("message", getBuild()); 
-				if (messageViewer != null)
-					item.add(messageViewer);
-				else
-					item.add(new WebMarkupContainer("message").setVisible(false));
-			}
-			
-		});
-		
-		detail.add(new OnePagingNavigator("pagingNavigator", testCasesView, null));
-		detail.add(new NoRecordsPlaceholder("noRecords", testCasesView));
+
+			});
+
+			detail.add(new OnePagingNavigator("pagingNavigator", testCasesView, null));
+			detail.add(new NoRecordsPlaceholder("noRecords", testCasesView));
+			add(fragment);
+		} else {
+			add(new Fragment("report", "invalidFrag", this));
+		}
 	}
 	
 	private void parseTestSuitePatterns() {

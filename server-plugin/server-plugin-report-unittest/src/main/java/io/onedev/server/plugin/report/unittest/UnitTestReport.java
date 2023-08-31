@@ -1,11 +1,10 @@
 package io.onedev.server.plugin.report.unittest;
 
-import com.google.common.collect.Lists;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
@@ -94,11 +93,10 @@ public class UnitTestReport implements Serializable {
 		return hasTestCaseDuration;
 	}
 
-	@Nullable
 	public static UnitTestReport readFrom(File reportDir) {
 		File reportFile = new File(reportDir, REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(reportFile))) {
-			return (UnitTestReport) SerializationUtils.deserialize(is);
+			return SerializationUtils.deserialize(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

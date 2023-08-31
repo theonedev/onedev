@@ -7,6 +7,8 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.ExceptionUtils;
+import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -36,9 +38,16 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 
 		@Override
 		protected UnitTestReport load() {
-			Long projectId = getProject().getId();
-			Long buildNumber = getBuild().getNumber();
-			return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
+			try {
+				Long projectId = getProject().getId();
+				Long buildNumber = getBuild().getNumber();
+				return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
+			} catch (Exception e) {
+				if (ExceptionUtils.find(e, SerializationException.class) != null)
+					return null;
+				else 
+					throw ExceptionUtils.unchecked(e);
+			}
 		}
 		
 	};
@@ -124,14 +133,9 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		
 		@Override
 		public UnitTestReport call() throws Exception {
-			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), new Callable<UnitTestReport>() {
-
-				@Override
-				public UnitTestReport call() throws Exception {
-					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
-					return UnitTestReport.readFrom(reportDir);
-				}
-				
+			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), () -> {
+				File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
+				return UnitTestReport.readFrom(reportDir);
 			});
 		}
 		

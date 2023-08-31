@@ -9,6 +9,7 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -23,6 +24,7 @@ import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -41,6 +43,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -82,8 +85,15 @@ public class CoverageReportPage extends BuildReportPage {
 
 		@Override
 		protected CoverageReport load() {
-			Long projectId = getProject().getId();
-			return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
+			try {
+				Long projectId = getProject().getId();
+				return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
+			} catch (Exception e) {
+				if (ExceptionUtils.find(e, SerializationException.class) != null)
+					return null;
+				else 
+					throw ExceptionUtils.unchecked(e);
+			}
 		}
 		
 	};
@@ -102,258 +112,265 @@ public class CoverageReportPage extends BuildReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (packageName != null)
-			add(new Label("coverageTitle", packageName));
-		else
-			add(new Label("coverageTitle", "Overall"));
-		
-		add(new CoverageInfoPanel<CoverageInfo>("coverages", new LoadableDetachableModel<CoverageInfo>() {
+		if (getReportData() != null) {
+			var fragment = new Fragment("report", "validFrag", this);
+			add(fragment);
 
-			@Override
-			protected CoverageInfo load() {
-				if (packageName != null) {
-					return getReportData().getPackageCoverages().stream()
-							.filter(it->it.getName().equals(packageName)).findFirst().get();
-				} else {
-					return getReportData().getOverallCoverages();
+			if (packageName != null)
+				fragment.add(new Label("coverageTitle", packageName));
+			else
+				fragment.add(new Label("coverageTitle", "Overall"));
+
+			fragment.add(new CoverageInfoPanel<>("coverages", new LoadableDetachableModel<CoverageInfo>() {
+
+				@Override
+				protected CoverageInfo load() {
+					if (packageName != null) {
+						return getReportData().getCategoryCoverages().stream()
+								.filter(it -> it.getName().equals(packageName)).findFirst().get();
+					} else {
+						return getReportData().getOverallCoverages();
+					}
 				}
-			}
-			
-		}));
 
-		add(new Label("itemsTitle", new AbstractReadOnlyModel<String>() {
+			}));
 
-			@Override
-			public String getObject() {
-				if (packageName != null) 
-					return "Items";
-				else
-					return "Categories";
-			}
-			
-		}));
-		
-		form = new Form<Void>("form");
-		
-		TextField<String> input = new TextField<String>("input", new IModel<String>() {
+			fragment.add(new Label("itemsTitle", new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return state.filter;
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.filter = object;
-			}
-			
-		});
-		input.add(AttributeAppender.append("placeholder", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (packageName != null)
-					return "Filter items...";
-				else
-					return "Filter categories...";
-			}
-			
-		}));
-		input.add(new PatternSetAssistBehavior() {
-			
-			@Override
-			protected List<InputSuggestion> suggest(String matchWith) {
-				List<String> names;
-				if (packageName != null) {
-					Optional<CategoryCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
-							.stream().filter(it->it.getName().equals(packageName)).findFirst();
-					if (packageCoverages.isPresent())
-						names = packageCoverages.get().getItemCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
+				@Override
+				public String getObject() {
+					if (packageName != null)
+						return "Items";
 					else
-						names = new ArrayList<>();
-				} else {
-					names = getReportData().getPackageCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
+						return "Categories";
 				}
-				return SuggestionUtils.suggest(names, matchWith);
-			}
-			
-			@Override
-			protected List<String> getHints(TerminalExpect terminalExpect) {
-				return Lists.newArrayList(
-						"Name containing spaces or starting with dash needs to be quoted",
-						"Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
-						);
-			}
-			
-		});
-		form.add(input);
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("clear") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				pushState(target);
-				parseFilterPatterns();
-				target.add(feedback);
-				target.add(itemsContainer);
-			}
-			
-		});
-		
-		form.add(new MenuLink("orderBy") {
 
-			private MenuItem newMenuItem(FloatingPanel dropdown, CoverageOrderBy orderBy) {
-				return new MenuItem() {
+			}));
 
-					@Override
-					public String getLabel() {
-						return orderBy.getDisplayName();
+			form = new Form<Void>("form");
+
+			TextField<String> input = new TextField<String>("input", new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return state.filter;
+				}
+
+				@Override
+				public void setObject(String object) {
+					state.filter = object;
+				}
+
+			});
+			input.add(AttributeAppender.append("placeholder", new AbstractReadOnlyModel<String>() {
+
+				@Override
+				public String getObject() {
+					if (packageName != null)
+						return "Filter items...";
+					else
+						return "Filter categories...";
+				}
+
+			}));
+			input.add(new PatternSetAssistBehavior() {
+
+				@Override
+				protected List<InputSuggestion> suggest(String matchWith) {
+					List<String> names;
+					if (packageName != null) {
+						Optional<CategoryCoverageInfo> packageCoverages = getReportData().getCategoryCoverages()
+								.stream().filter(it->it.getName().equals(packageName)).findFirst();
+						if (packageCoverages.isPresent())
+							names = packageCoverages.get().getItemCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
+						else
+							names = new ArrayList<>();
+					} else {
+						names = getReportData().getCategoryCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
 					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								state.orderBy = orderBy;
-								target.add(itemsContainer);
-							}
-
-						};
-					}
-
-					@Override
-					public boolean isSelected() {
-						return orderBy == state.orderBy;
-					}
-
-				};				
-			}
-			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				List<MenuItem> menuItems = new ArrayList<>();
-				menuItems.add(newMenuItem(dropdown, CoverageOrderBy.DEFAULT));
-				var overallCoverages = getReportData().getOverallCoverages();
-				if (overallCoverages.getMethodCoverage() >= 0) {
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_METHOD_COVERAGE));
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_METHOD_COVERAGE));
+					return SuggestionUtils.suggest(names, matchWith);
 				}
-				if (overallCoverages.getBranchCoverage() >= 0) {
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_BRANCH_COVERAGE));
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_BRANCH_COVERAGE));
+
+				@Override
+				protected List<String> getHints(TerminalExpect terminalExpect) {
+					return Lists.newArrayList(
+							"Name containing spaces or starting with dash needs to be quoted",
+							"Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
+					);
 				}
-				if (overallCoverages.getStatementCoverage() >= 0) {
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_STATEMENT_COVERAGE));
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_STATEMENT_COVERAGE));
+
+			});
+			form.add(input);
+
+			input.add(new AjaxFormComponentUpdatingBehavior("clear") {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					pushState(target);
+					parseFilterPatterns();
+					target.add(feedback);
+					target.add(itemsContainer);
 				}
-				if (overallCoverages.getLineCoverage() >= 0) {
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_LINE_COVERAGE));
-					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_LINE_COVERAGE));
-				}
-				return menuItems;
-			}
 
-		});
-		
-		form.add(feedback = new FencedFeedbackPanel("feedback", form));
-		feedback.setOutputMarkupPlaceholderTag(true);
+			});
 
-		form.add(new AjaxButton("submit") {
+			form.add(new MenuLink("orderBy") {
 
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-			}
-			
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				pushState(target);
-				parseFilterPatterns();
-				target.add(feedback);
-				target.add(itemsContainer);
-			}
-			
-		});
-		form.setOutputMarkupId(true);
-		add(form);		
-		
-		parseFilterPatterns();
-		
-		itemsContainer = new WebMarkupContainer("itemsContainer");
-		itemsContainer.setOutputMarkupId(true);
-		add(itemsContainer);
-		
-		PageableListView<NamedCoverageInfo> itemsView = 
-				new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<>() {
+				private MenuItem newMenuItem(FloatingPanel dropdown, CoverageOrderBy orderBy) {
+					return new MenuItem() {
 
-					@SuppressWarnings("unchecked")
-					@Override
-					protected List<NamedCoverageInfo> load() {
-						if (filterPatterns != null) {
-							List<? extends NamedCoverageInfo> coverages;
-							if (packageName != null) {
-								Optional<CategoryCoverageInfo> packageCoverages = getReportData().getPackageCoverages()
-										.stream().filter(it -> it.getName().equals(packageName)).findFirst();
-								if (packageCoverages.isPresent())
-									coverages = packageCoverages.get().getItemCoverages();
-								else
-									coverages = new ArrayList<>();
-							} else {
-								coverages = getReportData().getPackageCoverages();
-							}
-							if (filterPatterns.isPresent()) {
-								Matcher matcher = new StringMatcher();
-								coverages = coverages.stream()
-										.filter(it -> filterPatterns.get().matches(matcher, it.getName()))
-										.collect(Collectors.toList());
-							}
-							coverages.sort((Comparator<CoverageInfo>) (o1, o2) -> state.orderBy.compare(o1, o2));
-							return (List<NamedCoverageInfo>) coverages;
-						} else {
-							return new ArrayList<>();
+						@Override
+						public String getLabel() {
+							return orderBy.getDisplayName();
 						}
-					}
 
-				}, WebConstants.PAGE_SIZE) {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
 
-			@Override
-			protected void populateItem(ListItem<NamedCoverageInfo> item) {
-				NamedCoverageInfo coverageInfo = item.getModelObject();
-				
-				Link<Void> nameLink;
-				if (coverageInfo instanceof CategoryCoverageInfo) {
-					State state = new State();
-					state.orderBy = CoverageReportPage.this.state.orderBy;
-					PageParameters params = paramsOf(getBuild(), getReportName(), 
-							coverageInfo.getName(), state);
-					nameLink = new BookmarkablePageLink<Void>("name", CoverageReportPage.class, params);
-				} else {
-					ProjectBlobPage.State state = new ProjectBlobPage.State();
-					state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
-							((ItemCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
-					state.coverageReport = getReportName();
-					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
-					nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									state.orderBy = orderBy;
+									target.add(itemsContainer);
+								}
+
+							};
+						}
+
+						@Override
+						public boolean isSelected() {
+							return orderBy == state.orderBy;
+						}
+
+					};
 				}
-				nameLink.add(new Label("label", coverageInfo.getName()));
-					
-				item.add(nameLink);
-				
-				item.add(new CoverageInfoPanel<NamedCoverageInfo>("coverages", item.getModel()));
-			}
-			
-		};
-		itemsContainer.add(itemsView);
-		itemsContainer.add(new OnePagingNavigator("pagingNavigator", itemsView, null));
-		itemsContainer.add(new NoRecordsPlaceholder("noRecords", itemsView));
+				@Override
+				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+					List<MenuItem> menuItems = new ArrayList<>();
+					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.DEFAULT));
+					var overallCoverages = getReportData().getOverallCoverages();
+					if (overallCoverages.getMethodCoverage() >= 0) {
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_METHOD_COVERAGE));
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_METHOD_COVERAGE));
+					}
+					if (overallCoverages.getBranchCoverage() >= 0) {
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_BRANCH_COVERAGE));
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_BRANCH_COVERAGE));
+					}
+					if (overallCoverages.getStatementCoverage() >= 0) {
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_STATEMENT_COVERAGE));
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_STATEMENT_COVERAGE));
+					}
+					if (overallCoverages.getLineCoverage() >= 0) {
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_LINE_COVERAGE));
+						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_LINE_COVERAGE));
+					}
+					return menuItems;
+				}
+
+			});
+
+			form.add(feedback = new FencedFeedbackPanel("feedback", form));
+			feedback.setOutputMarkupPlaceholderTag(true);
+
+			form.add(new AjaxButton("submit") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+				}
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					pushState(target);
+					parseFilterPatterns();
+					target.add(feedback);
+					target.add(itemsContainer);
+				}
+
+			});
+			form.setOutputMarkupId(true);
+			fragment.add(form);
+
+			parseFilterPatterns();
+
+			itemsContainer = new WebMarkupContainer("itemsContainer");
+			itemsContainer.setOutputMarkupId(true);
+			fragment.add(itemsContainer);
+
+			PageableListView<NamedCoverageInfo> itemsView =
+					new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<>() {
+
+						@SuppressWarnings("unchecked")
+						@Override
+						protected List<NamedCoverageInfo> load() {
+							if (filterPatterns != null) {
+								List<? extends NamedCoverageInfo> coverages;
+								if (packageName != null) {
+									Optional<CategoryCoverageInfo> packageCoverages = getReportData().getCategoryCoverages()
+											.stream().filter(it -> it.getName().equals(packageName)).findFirst();
+									if (packageCoverages.isPresent())
+										coverages = packageCoverages.get().getItemCoverages();
+									else
+										coverages = new ArrayList<>();
+								} else {
+									coverages = getReportData().getCategoryCoverages();
+								}
+								if (filterPatterns.isPresent()) {
+									Matcher matcher = new StringMatcher();
+									coverages = coverages.stream()
+											.filter(it -> filterPatterns.get().matches(matcher, it.getName()))
+											.collect(Collectors.toList());
+								}
+								coverages.sort((Comparator<CoverageInfo>) (o1, o2) -> state.orderBy.compare(o1, o2));
+								return (List<NamedCoverageInfo>) coverages;
+							} else {
+								return new ArrayList<>();
+							}
+						}
+
+					}, WebConstants.PAGE_SIZE) {
+
+						@Override
+						protected void populateItem(ListItem<NamedCoverageInfo> item) {
+							NamedCoverageInfo coverageInfo = item.getModelObject();
+
+							Link<Void> nameLink;
+							if (coverageInfo instanceof CategoryCoverageInfo) {
+								State state = new State();
+								state.orderBy = CoverageReportPage.this.state.orderBy;
+								PageParameters params = paramsOf(getBuild(), getReportName(),
+										coverageInfo.getName(), state);
+								nameLink = new BookmarkablePageLink<Void>("name", CoverageReportPage.class, params);
+							} else {
+								ProjectBlobPage.State state = new ProjectBlobPage.State();
+								state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
+										((ItemCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
+								state.coverageReport = getReportName();
+								PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
+								nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);
+							}
+							nameLink.add(new Label("label", coverageInfo.getName()));
+
+							item.add(nameLink);
+
+							item.add(new CoverageInfoPanel<NamedCoverageInfo>("coverages", item.getModel()));
+						}
+
+					};
+			itemsContainer.add(itemsView);
+			itemsContainer.add(new OnePagingNavigator("pagingNavigator", itemsView, null));
+			itemsContainer.add(new NoRecordsPlaceholder("noRecords", itemsView));			
+		} else {
+			add(new Fragment("report", "invalidFrag", this));
+		}
 	}
 
 	private void parseFilterPatterns() {
@@ -369,6 +386,7 @@ public class CoverageReportPage extends BuildReportPage {
 		}
 	}
 	
+	@Nullable
 	private CoverageReport getReportData() {
 		return reportDataModel.getObject();
 	}

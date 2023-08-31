@@ -762,6 +762,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setSubmitReason(reason);
 				build.setCanceller(null);
 				build.setAgent(null);
+				build.setJobWorkspace(null);
+				build.getCheckoutPaths().clear();
 
 				buildParamManager.deleteParams(build);
 				for (Map.Entry<String, List<String>> entry : build.getParamMap().entrySet()) {

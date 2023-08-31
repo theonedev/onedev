@@ -13,6 +13,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuildReports;
@@ -21,10 +22,12 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.MetricIndicator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
@@ -60,7 +63,17 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		this.transactionManager = transactionManager;
 		this.clusterManager = clusterManager;
 	}
-	
+
+	@Nullable
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> T find(Class<T> metricClass, Build build, String reportName) {
+		var criteria = EntityCriteria.of(metricClass);
+		criteria.add(Restrictions.eq(PROP_BUILD, build));
+		criteria.add(Restrictions.eq(PROP_REPORT, reportName));
+		return dao.find(criteria);
+	}
+
 	@SuppressWarnings("resource")
 	@Sessional
 	@Override

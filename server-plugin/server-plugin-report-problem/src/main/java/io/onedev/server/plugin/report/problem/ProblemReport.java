@@ -15,10 +15,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.SerializationUtils;
-
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
+import org.apache.commons.lang3.SerializationUtils;
 
 public class ProblemReport implements Serializable {
 
