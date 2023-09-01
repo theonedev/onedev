@@ -4,10 +4,7 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
@@ -28,6 +25,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
@@ -55,6 +53,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
@@ -112,6 +111,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
@@ -547,91 +547,12 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
-				
+
 				menuItems.add(new MenuItem() {
 
 					@Override
 					public String getLabel() {
-						return "Batch Edit Selected Issues";
-					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new ModalLink(id) {
-
-							@Override
-							protected Component newContent(String id, ModalPanel modal) {
-								dropdown.close();
-								
-								return new BatchEditPanel(id) {
-
-									@Override
-									protected Project getProject() {
-										return IssueListPanel.this.getProject();
-									}
-
-									@Override
-									protected void onCancel(AjaxRequestTarget target) {
-										modal.close();
-									}
-
-									@Override
-									protected void onUpdated(AjaxRequestTarget target) {
-										modal.close();
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-
-									@Override
-									protected Iterator<Issue> getIssueIterator() {
-										List<Issue> issues = new ArrayList<>();
-										for (IModel<Issue> each: selectionColumn.getSelections())
-											issues.add(each.getObject());
-										return issues.iterator();
-									}
-
-									@Override
-									protected int getIssueCount() {
-										return selectionColumn.getSelections().size();
-									}
-
-									@Override
-									protected IssueQuery getIssueQuery() {
-										if (queryModel.getObject() != null)
-											return (IssueQuery) queryModel.getObject();
-										else
-											return null;
-									}
-
-								};
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to edit");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Move Selected Issues To...";
+						return "Watch/Unwatch Selected Issues";
 					}
 
 					@Override
@@ -640,134 +561,26 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
-				
-									@Override
-									protected List<Project> load() {
-										return getTargetProjects(true);
-									}
-									
-								}) {
-				
-									@Override
-									protected void onSelect(AjaxRequestTarget target, Project project) {
-										dropdown.close();
-										dropdown2.close();
-										
-										Long projectId = project.getId();
-										new ConfirmModalPanel(target) {
-											
-											private Project getTargetProject() {
-												return OneDev.getInstance(ProjectManager.class).load(projectId);
-											}
-											
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												Collection<Issue> issues = new ArrayList<>();
-												for (IModel<Issue> each: selectionColumn.getSelections())
-													issues.add(each.getObject());
-												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
-												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-												Session.get().success("Issues moved");
-											}
-											
-											@Override
-											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to move selected issues to project '" + getTargetProject() + "'";
-											}
-											
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-											
-										};
-									}
-				
-								}.add(AttributeAppender.append("class", "no-current"));
-							}
-						
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to move");
-								}
-							}
-							
-						};	
-					}
-					
-				});
-
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Copy Selected Issues To...";
-					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
-
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+								return new WatchStatusPanel(id) {
 
 									@Override
-									protected List<Project> load() {
-										return getTargetProjects(false);
+									protected WatchStatus getWatchStatus() {
+										return null;
 									}
 
-								}) {
-
 									@Override
-									protected void onSelect(AjaxRequestTarget target, Project project) {
+									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 										dropdown.close();
 										dropdown2.close();
 
-										Long projectId = project.getId();
-										new ConfirmModalPanel(target) {
-
-											private Project getTargetProject() {
-												return OneDev.getInstance(ProjectManager.class).load(projectId);
-											}
-
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												Collection<Issue> issues = new ArrayList<>();
-												for (IModel<Issue> each: selectionColumn.getSelections())
-													issues.add(each.getObject());
-												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
-												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-												Session.get().success("Issues copied");
-											}
-
-											@Override
-											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to copy selected issues to project '" + getTargetProject() + "'";
-											}
-
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-
-										};
+										var issues = selectionColumn.getSelections().stream()
+												.map(it->it.getObject()).collect(toList());
+										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+										Session.get().success("Watch status changed");
 									}
-
-								}.add(AttributeAppender.append("class", "no-current"));
+								};
 							}
 
 							@Override
@@ -782,7 +595,7 @@ public abstract class IssueListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to copy");
+									tag.put("title", "Please select issues to watch/unwatch");
 								}
 							}
 
@@ -791,232 +604,317 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 				
-				menuItems.add(new MenuItem() {
+				if (getProject() != null && SecurityUtils.canManageIssues(getProject())) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Delete Selected Issues";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
+						@Override
+						public String getLabel() {
+							return "Batch Edit Selected Issues";
+						}
 
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								new ConfirmModalPanel(target) {
-									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Issue> issues = new ArrayList<>();
-										for (IModel<Issue> each: selectionColumn.getSelections())
-											issues.add(each.getObject());
-										OneDev.getInstance(IssueManager.class).delete(issues, getProject());
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected issues";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to delete");
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ModalLink(id) {
+
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									dropdown.close();
+
+									return new BatchEditPanel(id) {
+
+										@Override
+										protected Project getProject() {
+											return IssueListPanel.this.getProject();
+										}
+
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
+
+										@Override
+										protected void onUpdated(AjaxRequestTarget target) {
+											modal.close();
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+
+										@Override
+										protected Iterator<Issue> getIssueIterator() {
+											List<Issue> issues = new ArrayList<>();
+											for (IModel<Issue> each : selectionColumn.getSelections())
+												issues.add(each.getObject());
+											return issues.iterator();
+										}
+
+										@Override
+										protected int getIssueCount() {
+											return selectionColumn.getSelections().size();
+										}
+
+										@Override
+										protected IssueQuery getIssueQuery() {
+											if (queryModel.getObject() != null)
+												return (IssueQuery) queryModel.getObject();
+											else
+												return null;
+										}
+
+									};
 								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Batch Edit All Queried Issues";
-					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new ModalLink(id) {
-
-							@Override
-							protected Component newContent(String id, ModalPanel modal) {
-								dropdown.close();
-								
-								return new BatchEditPanel(id) {
-
-									@Override
-									protected Project getProject() {
-										return IssueListPanel.this.getProject();
-									}
-
-									@Override
-									protected void onCancel(AjaxRequestTarget target) {
-										modal.close();
-									}
-
-									@Override
-									protected void onUpdated(AjaxRequestTarget target) {
-										modal.close();
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-
-									@Override
-									protected Iterator<? extends Issue> getIssueIterator() {
-										return dataProvider.iterator(0, issuesTable.getItemCount());
-									}
-
-									@Override
-									protected int getIssueCount() {
-										return (int) issuesTable.getItemCount();
-									}
-
-									@Override
-									protected IssueQuery getIssueQuery() {
-										if (queryModel.getObject() != null)
-											return queryModel.getObject();
-										else
-											return null;
-									}
-
-								};
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(issuesTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to edit");
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
 								}
-							}
-							
-						};						
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Move All Queried Issues To...";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
-
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
-				
-									@Override
-									protected List<Project> load() {
-										return getTargetProjects(true);
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to edit");
 									}
-									
-								}) {
-				
-									@SuppressWarnings("unchecked")
-									@Override
-									protected void onSelect(AjaxRequestTarget target, Project project) {
-										dropdown.close();
-										dropdown2.close();
-										
-										Long projectId = project.getId();
-										new ConfirmModalPanel(target) {
-											
-											private Project getTargetProject() {
-												return OneDev.getInstance(ProjectManager.class).load(projectId);
-											}
-											
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												Collection<Issue> issues = new ArrayList<>();
-												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
-													issues.add(it.next());
+								}
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Move Selected Issues To...";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
+
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+										@Override
+										protected List<Project> load() {
+											return getTargetProjects(true);
+										}
+
+									}) {
+
+										@Override
+										protected void onSelect(AjaxRequestTarget target, Project project) {
+											dropdown.close();
+											dropdown2.close();
+
+											Long projectId = project.getId();
+											new ConfirmModalPanel(target) {
+
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
 												}
-												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
-												setResponsePage(ProjectIssueListPage.class, 
-														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-												Session.get().success("Issues moved");
-											}
-											
-											@Override
-											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to move all queried issues to project '" + getTargetProject() + "'";
-											}
-											
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-											
-										};
-									}
-				
-								}.add(AttributeAppender.append("class", "no-current"));
-							}
-						
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(issuesTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to move");
-								}
-							}
-							
-						};	
-					}
-					
-				});
 
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Issue> issues = new ArrayList<>();
+													for (IModel<Issue> each : selectionColumn.getSelections())
+														issues.add(each.getObject());
+													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
+													setResponsePage(ProjectIssueListPage.class,
+															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
+													Session.get().success("Issues moved");
+												}
+
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to move selected issues to project '" + getTargetProject() + "'";
+												}
+
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+
+											};
+										}
+
+									}.add(AttributeAppender.append("class", "no-current"));
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to move");
+									}
+								}
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Copy Selected Issues To...";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
+
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+										@Override
+										protected List<Project> load() {
+											return getTargetProjects(false);
+										}
+
+									}) {
+
+										@Override
+										protected void onSelect(AjaxRequestTarget target, Project project) {
+											dropdown.close();
+											dropdown2.close();
+
+											Long projectId = project.getId();
+											new ConfirmModalPanel(target) {
+
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
+												}
+
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Issue> issues = new ArrayList<>();
+													for (IModel<Issue> each : selectionColumn.getSelections())
+														issues.add(each.getObject());
+													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
+													setResponsePage(ProjectIssueListPage.class,
+															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
+													Session.get().success("Issues copied");
+												}
+
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to copy selected issues to project '" + getTargetProject() + "'";
+												}
+
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+
+											};
+										}
+
+									}.add(AttributeAppender.append("class", "no-current"));
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to copy");
+									}
+								}
+
+							};
+						}
+
+					});
+					
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Delete Selected Issues";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Issue> issues = new ArrayList<>();
+											for (IModel<Issue> each : selectionColumn.getSelections())
+												issues.add(each.getObject());
+											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete selected issues";
+										}
+
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+
+									};
+
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to delete");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
 					public String getLabel() {
-						return "Copy All Queried Issues To...";
+						return "Watch/Unwatch All Queried Issues";
 					}
 
 					@Override
@@ -1025,139 +923,356 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+								return new WatchStatusPanel(id) {
 
 									@Override
-									protected List<Project> load() {
-										return getTargetProjects(false);
+									protected WatchStatus getWatchStatus() {
+										return null;
 									}
 
-								}) {
-
-									@SuppressWarnings("unchecked")
 									@Override
-									protected void onSelect(AjaxRequestTarget target, Project project) {
+									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 										dropdown.close();
 										dropdown2.close();
 
-										Long projectId = project.getId();
-										new ConfirmModalPanel(target) {
-
-											private Project getTargetProject() {
-												return OneDev.getInstance(ProjectManager.class).load(projectId);
-											}
-
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												Collection<Issue> issues = new ArrayList<>();
-												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
-													issues.add(it.next());
-												}
-												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
-												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-												Session.get().success("Issues copied");
-											}
-
-											@Override
-											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to copy all queried issues to project '" + getTargetProject() + "'";
-											}
-
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-
-										};
-									}
-
-								}.add(AttributeAppender.append("class", "no-current"));
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(issuesTable.getItemCount() != 0);
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to copy");
-								}
-							}
-
-						};
-					}
-
-				});
-
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Delete All Queried Issues";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@SuppressWarnings("unchecked")
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
-									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
 										Collection<Issue> issues = new ArrayList<>();
-										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) 
+										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 											issues.add(it.next());
-										OneDev.getInstance(IssueManager.class).delete(issues, getProject());
-										dataProvider.detach();
-										selectionColumn.getSelections().clear();
-										target.add(body);
+										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										Session.get().success("Watch status changed");
 									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried issues";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
+
 								};
 							}
-							
+
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
 								setEnabled(issuesTable.getItemCount() != 0);
 							}
-							
+
 							@Override
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to delete");
+									tag.put("title", "No issues to watch/unwatch");
 								}
 							}
-							
 						};
 					}
-					
+
 				});
+
+				if (getProject() != null && SecurityUtils.canManageIssues(getProject())) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Batch Edit All Queried Issues";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ModalLink(id) {
+
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									dropdown.close();
+
+									return new BatchEditPanel(id) {
+
+										@Override
+										protected Project getProject() {
+											return IssueListPanel.this.getProject();
+										}
+
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
+
+										@Override
+										protected void onUpdated(AjaxRequestTarget target) {
+											modal.close();
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+
+										@Override
+										protected Iterator<? extends Issue> getIssueIterator() {
+											return dataProvider.iterator(0, issuesTable.getItemCount());
+										}
+
+										@Override
+										protected int getIssueCount() {
+											return (int) issuesTable.getItemCount();
+										}
+
+										@Override
+										protected IssueQuery getIssueQuery() {
+											if (queryModel.getObject() != null)
+												return queryModel.getObject();
+											else
+												return null;
+										}
+
+									};
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to edit");
+									}
+								}
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Move All Queried Issues To...";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
+
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+										@Override
+										protected List<Project> load() {
+											return getTargetProjects(true);
+										}
+
+									}) {
+
+										@SuppressWarnings("unchecked")
+										@Override
+										protected void onSelect(AjaxRequestTarget target, Project project) {
+											dropdown.close();
+											dropdown2.close();
+
+											Long projectId = project.getId();
+											new ConfirmModalPanel(target) {
+
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
+												}
+
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Issue> issues = new ArrayList<>();
+													for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
+														issues.add(it.next());
+													}
+													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
+													setResponsePage(ProjectIssueListPage.class,
+															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
+													Session.get().success("Issues moved");
+												}
+
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to move all queried issues to project '" + getTargetProject() + "'";
+												}
+
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+
+											};
+										}
+
+									}.add(AttributeAppender.append("class", "no-current"));
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to move");
+									}
+								}
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Copy All Queried Issues To...";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
+
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+										@Override
+										protected List<Project> load() {
+											return getTargetProjects(false);
+										}
+
+									}) {
+
+										@SuppressWarnings("unchecked")
+										@Override
+										protected void onSelect(AjaxRequestTarget target, Project project) {
+											dropdown.close();
+											dropdown2.close();
+
+											Long projectId = project.getId();
+											new ConfirmModalPanel(target) {
+
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
+												}
+
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Issue> issues = new ArrayList<>();
+													for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
+														issues.add(it.next());
+													}
+													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
+													setResponsePage(ProjectIssueListPage.class,
+															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
+													Session.get().success("Issues copied");
+												}
+
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to copy all queried issues to project '" + getTargetProject() + "'";
+												}
+
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+
+											};
+										}
+
+									}.add(AttributeAppender.append("class", "no-current"));
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to copy");
+									}
+								}
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Delete All Queried Issues";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@SuppressWarnings("unchecked")
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Issue> issues = new ArrayList<>();
+											for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+												issues.add(it.next());
+											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
+											dataProvider.detach();
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete all queried issues";
+										}
+
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+
+									};
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to delete");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
 				
 				return menuItems;
 			}
@@ -1187,7 +1302,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getProject() != null && SecurityUtils.canManageIssues(getProject()));
+				setVisible(SecurityUtils.getUser() != null);
 			}
 			
 		});
@@ -1256,7 +1371,7 @@ public abstract class IssueListPanel extends Panel {
 
 		});
 		
-		if (getProject() != null && SecurityUtils.canManageIssues(getProject())) 
+		if (SecurityUtils.getUser() != null)
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>());
 		
 		columns.add(new AbstractColumn<>(Model.of("")) {
@@ -1497,6 +1612,10 @@ public abstract class IssueListPanel extends Panel {
 	
 	private ProjectManager getProjectManger() {
 		return OneDev.getInstance(ProjectManager.class);
+	}
+	
+	private IssueWatchManager getWatchManager() {
+		return OneDev.getInstance(IssueWatchManager.class);
 	}
 	
 	@Nullable
