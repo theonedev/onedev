@@ -3,8 +3,8 @@ package io.onedev.server.ee.subscription;
 import io.onedev.license.LicensePayload;
 import io.onedev.license.LicenseeUpdate;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -24,8 +24,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.UUID;
-
 import static com.google.common.base.Preconditions.checkState;
 import static io.onedev.server.ee.subscription.SubscriptionSetting.ENCRYPTION_KEY;
 import static io.onedev.server.ee.subscription.SubscriptionSetting.cipherService;
@@ -43,7 +41,6 @@ public class SubscriptionManagementPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var userCount = OneDev.getInstance(UserManager.class).cloneCache().size();
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription == null) {
@@ -75,8 +72,13 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			fragment.add(detail);
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
+			var licenseGroup = subscription.getLicenseGroup();
+			detail.add(new Label("licenseGroup", licenseGroup)
+					.setVisible(licenseGroup != null));
+			detail.add(new WebMarkupContainer("licenseGroupNotFound")
+					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
 			
-			var expirationDate = subscription.getExpirationDate(userCount);
+			var expirationDate = subscription.getExpirationDate();
 			if (expirationDate != null) {
 				detail.add(new Label("expirationDate", DateUtils.formatDate(expirationDate)));
 				detail.add(new WebMarkupContainer("alert").setVisible(false));
@@ -108,11 +110,21 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			}
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
+			var licenseGroup = subscription.getLicenseGroup();
+			detail.add(new Label("licenseGroup", licenseGroup)
+					.setVisible(licenseGroup != null));
+			detail.add(new WebMarkupContainer("licenseGroupNotFound")
+					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
 			detail.add(new Label("userMonths", Math.ceil(subscription.getUserDays()/31.0)));
-			var expirationDate = subscription.getExpirationDate(userCount);
+			var expirationDate = subscription.getExpirationDate();
 			if (expirationDate != null) {
-				var message = "With current number of users (" + userCount + "), the subscription will be active until <b>" 
-						+ DateUtils.formatDate(expirationDate) + "</b>";
+				String message;
+				if (licenseGroup != null && getGroupManager().find(licenseGroup) != null)
+					message = "With current number of users (" + subscription.countUsers() + ") in group '" + licenseGroup + "', ";
+				else
+					message = "With current number of users (" + subscription.countUsers() + "), ";
+					
+				message += "the subscription will be active until <b>" + DateUtils.formatDate(expirationDate) + "</b>";
 				detail.add(new Label("expirationInfo", message).setEscapeModelStrings(false));
 			} else {
 				detail.add(new WebMarkupContainer("expirationInfo").setVisible(false));
@@ -167,6 +179,10 @@ public class SubscriptionManagementPage extends AdministrationPage {
 				setResponsePage(SubscriptionManagementPage.class);
 			}
 		};
+	}
+	
+	private GroupManager getGroupManager() {
+		return OneDev.getInstance(GroupManager.class);
 	}
 	
 	@Override

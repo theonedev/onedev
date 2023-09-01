@@ -487,7 +487,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		// Cache will be null when we run reset-admin-password command
 		if (cache != null && event.getEntity() instanceof User) {
 			var facade = (UserFacade) event.getEntity().getFacade();
-			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+			if (facade.getId() > 0)
+				transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}
 

@@ -60,28 +60,28 @@ public abstract class LicensePayload implements Serializable {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
-
-    @Editable(order=10)
-    @NotEmpty
-    public String getLicensee() {
-        return licensee;
-    }
-
-    public void setLicensee(String licensee) {
-        this.licensee = licensee;
-    }
-
+	
     public Date getIssueDate() {
         return issueDate;
     }
 	
+	public void setIssueDate(Date issueDate) {
+		this.issueDate = issueDate;
+	}
+
+	@Editable(order=10)
+	@NotEmpty
+	public String getLicensee() {
+		return licensee;
+	}
+
+	public void setLicensee(String licensee) {
+		this.licensee = licensee;
+	}
+	
 	public Date getValidUntil() {
 		return new DateTime(issueDate).plusDays(VALID_DAYS).toDate();
 	}
-
-    public void setIssueDate(Date issueDate) {
-        this.issueDate = issueDate;
-    }
 
     public String generateLicense(byte[] privateKeyBytes) {
         try {

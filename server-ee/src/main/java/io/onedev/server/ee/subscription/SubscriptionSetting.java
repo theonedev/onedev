@@ -9,8 +9,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.shiro.crypto.CipherService;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -58,6 +56,7 @@ public class SubscriptionSetting implements Serializable {
 			if (!usedSubscriptionKeyUUIDs.contains(payload.getUuid())) {
 				var now = new DateTime();
 				if (payload.getValidUntil().after(now.toDate())) {
+					var licenseGroup = subscription != null? subscription.getLicenseGroup(): null;
 					if (subscription == null || subscription.isTrial()) {
 						if (payload instanceof TrialSubscription) {
 							TrialSubscription trialSubscription = (TrialSubscription) payload;
@@ -66,6 +65,10 @@ public class SubscriptionSetting implements Serializable {
 							} else {
 								subscription = new Subscription();
 								subscription.setLicensee(trialSubscription.getLicensee());
+								if (trialSubscription.getLicenseGroup() != null)
+									subscription.setLicenseGroup(trialSubscription.getLicenseGroup());
+								else 
+									subscription.setLicenseGroup(licenseGroup);
 								subscription.setUserDays(trialSubscription.getDays());
 								subscription.setTrial(true);
 								usedSubscriptionKeyUUIDs.add(payload.getUuid());
@@ -84,6 +87,10 @@ public class SubscriptionSetting implements Serializable {
 							SubscriptionCharge subscriptionCharge = (SubscriptionCharge) payload;
 							subscription = new Subscription();
 							subscription.setLicensee(subscriptionCharge.getLicensee());
+							if (subscriptionCharge.getLicenseGroup() != null)
+								subscription.setLicenseGroup(subscriptionCharge.getLicenseGroup());
+							else 
+								subscription.setLicenseGroup(licenseGroup);
 							subscription.setUserDays(subscriptionCharge.getUserMonths() * 31);
 							usedSubscriptionKeyUUIDs.add(payload.getUuid());
 							return null;
@@ -98,6 +105,10 @@ public class SubscriptionSetting implements Serializable {
 					} else {
 						SubscriptionCharge subscriptionCharge = (SubscriptionCharge) payload;
 						subscription.setUserDays(subscription.getUserDays() + subscriptionCharge.getUserMonths() * 31);
+						if (subscriptionCharge.getLicenseGroup() != null)
+							subscription.setLicenseGroup(subscriptionCharge.getLicenseGroup());
+						else 
+							subscription.setLicenseGroup(licenseGroup);
 						usedSubscriptionKeyUUIDs.add(payload.getUuid());
 						return null;
 					}

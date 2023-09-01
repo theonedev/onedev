@@ -12,6 +12,7 @@ import io.onedev.license.SiteInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -75,8 +76,11 @@ public class SupportRequestPanel extends Panel {
 			}
 		});
 		add(new Label("productVersion", siteInfo.getProductVersion()));
-		add(new Label("totalAgents", siteInfo.getTotalAgents()));
-		add(new Label("totalUsers", siteInfo.getTotalUsers()));
+		add(new Label("agentCount", siteInfo.getAgentCount()));
+		if (siteInfo.getLicenseGroup() != null)
+			add(new Label("userCount", siteInfo.getUserCount() + " (" + siteInfo.getLicenseGroup() + ")"));
+		else
+			add(new Label("userCount", siteInfo.getUserCount()));
 		add(new Label("remainingUserMonths", siteInfo.getRemainingUserMonths()));
 
 		add(BeanContext.view("serversAndSubscriptionKeys", siteInfo, 
@@ -104,13 +108,17 @@ public class SupportRequestPanel extends Panel {
 	}
 
 	private SiteInfo newSiteInfo() {
+		var subscriptionSettingSetting = SubscriptionSetting.load();
+		var subscription = subscriptionSettingSetting.getSubscription();
+		
 		var siteInfo = new SiteInfo();
 		siteInfo.setProductVersion(AppLoader.getProduct().getVersion());
-		siteInfo.setTotalAgents(OneDev.getInstance(AgentManager.class).getOnlineAgents().size());
-		siteInfo.setTotalUsers(OneDev.getInstance(UserManager.class).count());
+		siteInfo.setAgentCount(OneDev.getInstance(AgentManager.class).getOnlineAgents().size());
+		siteInfo.setUserCount(subscription.countUsers());
+		if (subscription.getLicenseGroup() != null && OneDev.getInstance(GroupManager.class).find(subscription.getLicenseGroup()) != null)
+			siteInfo.setLicenseGroup(subscription.getLicenseGroup());
 
-		var subscriptionSettingSetting = SubscriptionSetting.load();
-		siteInfo.setRemainingUserMonths(subscriptionSettingSetting.getSubscription().getUserDays()/31);
+		siteInfo.setRemainingUserMonths(subscription.getUserDays()/31);
 
 		siteInfo.setSubscriptionKeys(StringUtils.join(subscriptionSettingSetting.getUsedSubscriptionKeyUUIDs(), "\n"));
 

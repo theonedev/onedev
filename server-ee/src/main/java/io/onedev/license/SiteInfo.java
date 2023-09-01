@@ -13,10 +13,12 @@ public class SiteInfo implements Serializable {
 
     private String productVersion;
 
-    private int totalUsers;
+    private int userCount;
 
-    private int totalAgents;
+    private int agentCount;
 
+	private String licenseGroup;
+	
     private int remainingUserMonths;
 
     private List<ServerInfo> servers = new ArrayList<>();
@@ -33,24 +35,33 @@ public class SiteInfo implements Serializable {
     }
 
     @Editable(order=100)
-    public int getTotalUsers() {
-        return totalUsers;
+    public int getUserCount() {
+        return userCount;
     }
 
-    public void setTotalUsers(int totalUsers) {
-        this.totalUsers = totalUsers;
+    public void setUserCount(int userCount) {
+        this.userCount = userCount;
     }
 
 	@Editable(order=200)
-    public int getTotalAgents() {
-        return totalAgents;
+    public int getAgentCount() {
+        return agentCount;
     }
 
-    public void setTotalAgents(int totalAgents) {
-        this.totalAgents = totalAgents;
+    public void setAgentCount(int agentCount) {
+        this.agentCount = agentCount;
     }
 
-    @Editable(order=300)
+	@Editable(order=250)
+	public String getLicenseGroup() {
+		return licenseGroup;
+	}
+
+	public void setLicenseGroup(String licenseGroup) {
+		this.licenseGroup = licenseGroup;
+	}
+
+	@Editable(order=300)
     public int getRemainingUserMonths() {
         return remainingUserMonths;
     }

@@ -1,8 +1,8 @@
 package io.onedev.server.ee.subscription;
 
 import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -20,23 +20,23 @@ import javax.inject.Singleton;
 @Singleton
 public class DefaultSubscriptionManager implements SubscriptionManager, SchedulableTask {
 	
-	private final UserManager userManager;
-	
 	private final TaskScheduler taskScheduler;
 	
 	private final AlertManager alertManager;
 	
 	private final SettingManager settingManager;
 	
+	private final GroupManager groupManager;
+	
 	private String taskId;
 	
 	@Inject
-	public DefaultSubscriptionManager(UserManager userManager, AlertManager alertManager,
-									  TaskScheduler taskScheduler, SettingManager settingManager) {
-		this.userManager = userManager;
+	public DefaultSubscriptionManager(AlertManager alertManager, TaskScheduler taskScheduler, 
+									  SettingManager settingManager, GroupManager groupManager) {
 		this.taskScheduler = taskScheduler;
 		this.alertManager = alertManager;
 		this.settingManager = settingManager;
+		this.groupManager = groupManager;
 	}
 	
 	@Override
@@ -77,12 +77,12 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 		if (subscription != null) {
 			var alertSetting = settingManager.getAlertSetting();
 			var now = new DateTime();
-			var userCount = userManager.cloneCache().size();
+			int userCount = subscription.countUsers();
 			var userDays = subscription.getUserDays();
 			if (subscription.isTrial()) {
 				if (userDays > 0)
 					userDays--;
-				var expirationDate = subscription.getExpirationDate(userCount);
+				var expirationDate = subscription.getExpirationDate();
 				if (expirationDate == null) {
 					if (!alertSetting.isTrialSubscriptionExpiredAlerted()) {
 						alertManager.alert("Enterprise features are disabled as trial subscription was expired. " +
@@ -97,10 +97,16 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 					}
 				}
 			} else {
+				if (subscription.getLicenseGroup() != null
+						&& groupManager.find(subscription.getLicenseGroup()) == null) {
+					alertManager.alert(
+							"License group '" + subscription.getLicenseGroup() + "' not found",
+							"Remaining user month calculation will be based on all users in system");
+				}
 				userDays -= userCount;
 				if (userDays < 0)
 					userDays = 0;
-				var expirationDate = subscription.getExpirationDate(userCount);
+				var expirationDate = subscription.getExpirationDate();
 				if (expirationDate == null) {
 					if (!alertSetting.isSubscriptionExpiredAlerted()) {
 						alertManager.alert("Enterprise features are disabled as subscription was expired. " +
