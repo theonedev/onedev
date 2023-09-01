@@ -28,7 +28,7 @@ public class CommitCriteria extends Criteria<Build>  {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<?> projectAttribute = BuildQuery.getPath(from, Build.PROP_PROJECT);
-		Path<?> commitAttribute = BuildQuery.getPath(from, Build.PROP_COMMIT);
+		Path<?> commitAttribute = BuildQuery.getPath(from, Build.PROP_COMMIT_HASH);
 		return builder.and(
 				builder.equal(projectAttribute, project), 
 				builder.equal(commitAttribute, commitId.name()));

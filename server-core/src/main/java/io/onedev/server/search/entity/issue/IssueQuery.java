@@ -116,6 +116,10 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
+							case IssueQueryLexer.WatchedByMe:
+								if (!option.withCurrentUserCriteria())
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new WatchedByMeCriteria();
 							case IssueQueryLexer.CommentedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -174,6 +178,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							return new MentionedCriteria(getUser(value));
 						else if (ctx.SubmittedBy() != null)
 							return new SubmittedByCriteria(getUser(value));
+						else if (ctx.WatchedBy() != null)
+							return new WatchedByCriteria(getUser(value));
 						else if (ctx.CommentedBy() != null)
 							return new CommentedByCriteria(getUser(value));
 						else if (ctx.FixedInBuild() != null)

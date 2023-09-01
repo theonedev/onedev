@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.pullrequest;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -10,7 +11,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-public class CommentedByMeCriteria extends Criteria<PullRequest> {
+public class ToBeMergedByMeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,19 +27,19 @@ public class CommentedByMeCriteria extends Criteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		var user = User.get();
-		if (user != null)
+		if (user != null) 
 			return getCriteria(user).matches(request);
-		else
+		else 
 			throw new ExplicitException("Please login to perform this query");
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new CommentedByCriteria(user);
+		return new ToBeMergedByCriteria(user);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.CommentedByMe);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeMergedByMe);
 	}
 
 }

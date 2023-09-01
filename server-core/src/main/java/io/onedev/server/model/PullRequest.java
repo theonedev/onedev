@@ -84,6 +84,8 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final String PROP_SOURCE_BRANCH = "sourceBranch";
 	
+	public static final String PROP_BUILD_COMMIT_HASH = "buildCommitHash";
+	
 	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";

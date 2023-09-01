@@ -1,13 +1,13 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequest.Status;
+import io.onedev.server.util.criteria.Criteria;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequest.Status;
-import io.onedev.server.util.criteria.Criteria;
 
 public class StatusCriteria extends Criteria<PullRequest> {
 
@@ -21,7 +21,7 @@ public class StatusCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		return builder.equal(PullRequestQuery.getPath(from, PullRequest.PROP_STATUS), status);
+		return builder.equal(from.get(PullRequest.PROP_STATUS), status);
 	}
 
 	@Override

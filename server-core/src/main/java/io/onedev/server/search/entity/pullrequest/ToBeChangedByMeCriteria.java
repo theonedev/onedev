@@ -10,7 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-public class CommentedByMeCriteria extends Criteria<PullRequest> {
+public class ToBeChangedByMeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,19 +26,19 @@ public class CommentedByMeCriteria extends Criteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		var user = User.get();
-		if (user != null)
+		if (user != null) 
 			return getCriteria(user).matches(request);
-		else
+		else 
 			throw new ExplicitException("Please login to perform this query");
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new CommentedByCriteria(user);
+		return new ToBeChangedByCriteria(user);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.CommentedByMe);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeChangedByMe);
 	}
 
 }

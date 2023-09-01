@@ -19,6 +19,8 @@ public class PullRequestAssignment extends AbstractEntity {
 	
 	public static final String PROP_USER = "user";
 	
+	public static final String PROP_REQUEST = "request";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;

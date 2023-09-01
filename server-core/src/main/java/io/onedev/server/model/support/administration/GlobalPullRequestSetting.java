@@ -17,9 +17,12 @@ public class GlobalPullRequestSetting implements Serializable {
 	
 	public GlobalPullRequestSetting() {
 		namedQueries.add(new NamedPullRequestQuery("Open", "open"));
-		namedQueries.add(new NamedPullRequestQuery("To be reviewed by me", "open and to be reviewed by me"));
-		namedQueries.add(new NamedPullRequestQuery("To be changed by me", "open and submitted by me and someone requested for changes"));
+		namedQueries.add(new NamedPullRequestQuery("Need my action", "need my action"));
+		namedQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
+		namedQueries.add(new NamedPullRequestQuery("To be changed by me", "to be changed by me"));
+		namedQueries.add(new NamedPullRequestQuery("To be merged by me", "to be merged by me"));
 		namedQueries.add(new NamedPullRequestQuery("Requested for changes by me", "requested for changes by me"));
+		namedQueries.add(new NamedPullRequestQuery("Assigned to me", "assigned to me"));
 		namedQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
 		namedQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));

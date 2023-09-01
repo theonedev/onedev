@@ -1,3 +1,10 @@
+# 9.1.0
+
+### Pull Request
+
+1. The query criteria *has failed builds* has been changed to *has unsuccessful builds*
+2. The query criteria *to be verified by builds* has been changed to *has unfinished builds*
+
 # 9.0.0
  
 ### License Terms

@@ -64,13 +64,13 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="o_request_id"),  
-				@Index(columnList=PROP_COMMIT), @Index(columnList=PROP_PIPELINE),
+				@Index(columnList= PROP_COMMIT_HASH), @Index(columnList=PROP_PIPELINE),
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
 				@Index(columnList=PROP_FINISH_DAY), @Index(columnList=PROP_VERSION), 
-				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
+				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT_HASH)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
 public class Build extends ProjectBelonging 
@@ -140,7 +140,7 @@ public class Build extends ProjectBelonging
 	
 	public static final String PROP_REF_NAME = "refName";
 	
-	public static final String PROP_COMMIT = "commitHash";
+	public static final String PROP_COMMIT_HASH = "commitHash";
 	
 	public static final String PROP_PARAMS = "params";
 	
@@ -179,7 +179,7 @@ public class Build extends ProjectBelonging
 			NAME_RUNNING_DATE, PROP_RUNNING_DATE,
 			NAME_FINISH_DATE, PROP_FINISH_DATE,
 			NAME_PROJECT, PROP_PROJECT,
-			NAME_COMMIT, PROP_COMMIT);	
+			NAME_COMMIT, PROP_COMMIT_HASH);	
 	
 	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
 

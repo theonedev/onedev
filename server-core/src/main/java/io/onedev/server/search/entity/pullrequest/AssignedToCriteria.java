@@ -1,18 +1,11 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
+
+import javax.persistence.criteria.*;
 
 public class AssignedToCriteria extends Criteria<PullRequest> {
 
@@ -26,10 +19,13 @@ public class AssignedToCriteria extends Criteria<PullRequest> {
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Join<?, ?> join = from.join(PullRequest.PROP_ASSIGNMENTS, JoinType.LEFT);
-		Path<?> userPath = EntityQuery.getPath(join, PullRequestAssignment.PROP_USER);
-		join.on(builder.equal(userPath, user));
-		return join.isNotNull();
+		Subquery<PullRequestAssignment> assignmentQuery = query.subquery(PullRequestAssignment.class);
+		Root<PullRequestAssignment> assignment = assignmentQuery.from(PullRequestAssignment.class);
+		assignmentQuery.select(assignment);
+		assignmentQuery.where(builder.and(
+				builder.equal(assignment.get(PullRequestAssignment.PROP_REQUEST), from),
+				builder.equal(assignment.get(PullRequestAssignment.PROP_USER), user)));
+		return builder.exists(assignmentQuery);
 	}
 
 	@Override

@@ -1,14 +1,8 @@
 package io.onedev.server.model;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import io.onedev.server.model.support.EntityWatch;
+
+import javax.persistence.*;
 
 @Entity
 @Table(
@@ -19,6 +13,12 @@ public class PullRequestWatch extends EntityWatch {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_REQUEST = "request";
+
+	public static final String PROP_USER = "user";
+
+	public static final String PROP_WATCHING = "watching";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;

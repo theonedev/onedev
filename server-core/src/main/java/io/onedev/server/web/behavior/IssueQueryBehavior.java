@@ -32,7 +32,6 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
@@ -137,7 +136,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy)
+								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy || operator == WatchedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == FixedInBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -248,7 +247,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))
+				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)))
 				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))

@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -265,7 +264,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-		predicates.add(builder.equal(root.get(Build.PROP_COMMIT), commitId.name()));
+		predicates.add(builder.equal(root.get(Build.PROP_COMMIT_HASH), commitId.name()));
 		if (pipeline != null)
 			predicates.add(builder.equal(root.get(Build.PROP_PIPELINE), pipeline));
 		if (jobName != null)
