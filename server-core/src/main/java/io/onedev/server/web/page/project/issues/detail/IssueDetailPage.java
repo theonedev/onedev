@@ -231,7 +231,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+						IssueQueryParseOption option = new IssueQueryParseOption()
+								.withCurrentUserCriteria(true)
+								.withCurrentProjectCriteria(true);
 						return IssueQuery.parse(project, queryString, option, true);
 					}
 
