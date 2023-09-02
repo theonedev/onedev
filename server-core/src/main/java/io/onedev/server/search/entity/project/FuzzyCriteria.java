@@ -38,7 +38,7 @@ public class FuzzyCriteria extends Criteria<Project> {
 			if (Project.get() != null)
 				criterias.add(new NameCriteria("*" + part + "*"));
 			else
-				criterias.add(new PathCriteria("*" + part + "*"));
+				criterias.add(new PathCriteria("**/*" + part + "*/**"));
 		}
 		return new AndCriteria<>(criterias);
 	}
