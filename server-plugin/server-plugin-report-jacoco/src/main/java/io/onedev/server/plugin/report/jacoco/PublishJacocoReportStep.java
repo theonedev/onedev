@@ -107,8 +107,9 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 							}
 							writeLineCoverages(build, blobPath, lineCoverages);
 						} else {
-							logger.warning("Can not map file '" + fileName + "' under package '" 
-									+ packageName + "' to blob path, ignoring coverage info...");
+							logger.warning(String.format(
+									"Unable to find blob path (package name: %s, file name: %s)", 
+									packageName, fileName));
 						}
 					}
 					

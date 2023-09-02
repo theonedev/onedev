@@ -80,7 +80,8 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 				for (Element duplicationElement: doc.getRootElement().elements("duplication")) {
 					List<CodeDuplication> duplications = new ArrayList<>();
 					for (Element fileElement: duplicationElement.elements("file")) {
-						String blobPath = build.getBlobPath(fileElement.attributeValue("path"));
+						var filePath = fileElement.attributeValue("path");
+						String blobPath = build.getBlobPath(filePath);
 						if (blobPath != null) {
 							BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 							if (build.getProject().getBlob(blobIdent, false) != null) {
@@ -93,7 +94,11 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 								duplication.blobPath = blobPath;
 								duplication.range = range;
 								duplications.add(duplication);
+							} else {
+								logger.warning("Unable to find blob for path: " + blobPath);
 							}
+						} else {
+							logger.warning("Unable to find blob path for file: " + filePath);
 						}
 					}
 					if (duplications.size() >= 2) {

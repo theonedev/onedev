@@ -77,7 +77,8 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				
 				Element projectElement = doc.getRootElement().element("Project");
-				String blobDir = build.getBlobPath(projectElement.elementText("SrcDir"));
+				var srcDir = projectElement.elementText("SrcDir");
+				String blobDir = build.getBlobPath(srcDir);
 				if (blobDir != null) {
 					for (Element bugElement: doc.getRootElement().elements("BugInstance")) {
 						Element sourceElement = bugElement.element("SourceLine");
@@ -122,8 +123,12 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 								problemsByFile.put(blobPath, problemsOfFile);
 							}
 							problemsOfFile.add(problem);
+						} else {
+							logger.warning("Unable to find blob for path: " + blobPath);
 						}
 					}
+				} else {
+					logger.warning("Unable to find blob path for dir: " + srcDir);
 				}
 			} catch (DocumentException e) {
 				logger.warning("Ignored SpotBugs report '" + relativePath + "' as it is not a valid XML");

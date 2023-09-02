@@ -72,7 +72,8 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 
 				for (Element fileElement: doc.getRootElement().elements("file")) {
-					String blobPath = build.getBlobPath(fileElement.attributeValue("name"));
+					var filePath = fileElement.attributeValue("name");
+					String blobPath = build.getBlobPath(filePath);
 					if (blobPath != null) {
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
@@ -101,7 +102,11 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 								problemsOfFile.add(problem);
 							}
 							writeFileProblems(build, blobPath, problemsOfFile);
+						} else {
+							logger.warning("Unable to find blob for path: " + blobPath);
 						}
+					} else {
+						logger.warning("Unable to find blob path for file: " + filePath);						
 					}
 				}
 			} catch (DocumentException e) {

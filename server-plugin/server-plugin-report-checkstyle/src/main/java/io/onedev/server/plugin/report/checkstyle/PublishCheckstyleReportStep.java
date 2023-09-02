@@ -73,7 +73,8 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				for (Element fileElement: doc.getRootElement().elements("file")) {
-					String blobPath = build.getBlobPath(fileElement.attributeValue("name"));
+					var filePath = fileElement.attributeValue("name");
+					String blobPath = build.getBlobPath(filePath);
 					if (blobPath != null) { 
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
@@ -104,7 +105,11 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 							}
 							if (!problemsOfFile.isEmpty())
 								writeFileProblems(build, blobPath, problemsOfFile);
-						}						
+						} else {
+							logger.warning("Unable to find blob for path: " + blobPath);
+						}
+					} else {
+						logger.warning("Unable to find blob path for file: " + filePath);
 					}
 				}
 			} catch (DocumentException e) {

@@ -55,14 +55,7 @@ public class ProblemReport implements Serializable {
 			
 			problemFiles = new ArrayList<>(map.values());
 			
-			problemFiles.sort(new Comparator<ProblemFile>() {
-	
-				@Override
-				public int compare(ProblemFile o1, ProblemFile o2) {
-					return o2.getProblems().size() - o1.getProblems().size();
-				}
-				
-			});
+			problemFiles.sort((o1, o2) -> o2.getProblems().size() - o1.getProblems().size());
 		}
 		return problemFiles;
 	}
