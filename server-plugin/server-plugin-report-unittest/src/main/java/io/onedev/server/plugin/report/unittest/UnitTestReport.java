@@ -26,7 +26,7 @@ public class UnitTestReport implements Serializable {
 	
 	public static enum Status {
 
-		PASSED("#1BC5BD"), NOT_PASSED("#F64E60"), NOT_RUN("#8950FC"), OTHER("#FFA800");
+		NOT_PASSED("#F64E60"), OTHER("#FFA800"), NOT_RUN("#8950FC"), PASSED("#1BC5BD");
 		
 		private final String color;
 		

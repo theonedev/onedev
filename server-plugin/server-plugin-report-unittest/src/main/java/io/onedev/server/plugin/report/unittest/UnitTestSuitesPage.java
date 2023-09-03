@@ -1,11 +1,26 @@
 package io.onedev.server.plugin.report.unittest;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.chart.pie.PieChartPanel;
+import io.onedev.server.web.component.chart.pie.PieSlice;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -28,28 +43,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.chart.pie.PieChartPanel;
-import io.onedev.server.web.component.chart.pie.PieSlice;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.util.SuggestionUtils;
+import static java.util.Comparator.comparingInt;
+import static java.util.List.of;
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings("serial")
 public class UnitTestSuitesPage extends UnitTestReportPage {
@@ -79,14 +80,35 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 		
 		state.name = params.get(PARAM_NAME).toOptionalString();
 		state.longestDurationFirst = params.get(PARAM_LONGEST_DURATION_FIRST).toBoolean(false);
-		state.statuses = new LinkedHashSet<>();
 
-		if (!"none".equals(params.get(PARAM_STATUS).toString())) {
-			for (StringValue each: params.getValues(PARAM_STATUS)) 
-				state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
-			
-			if (state.statuses.isEmpty()) 
-				state.statuses.addAll(Arrays.asList(Status.values()));
+		namePatterns = parseNamePatterns();
+
+		if (params.get(PARAM_STATUS).toString() != null) {
+			state.statuses = new HashSet<>();
+			if (params.get(PARAM_STATUS).toString().length() != 0) {
+				for (StringValue each : params.getValues(PARAM_STATUS))
+					state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
+			}
+		}
+		updateActualStatuses();
+	}
+
+	private void updateActualStatuses() {
+		if (state.statuses == null) {
+			state.actualStatuses = new HashSet<>();
+			var report = getReport();
+			if (report != null && namePatterns != null) {
+				var seenStatuses = report.getTestSuites(namePatterns.orNull(), of(Status.values()))
+						.stream().map(TestSuite::getStatus).collect(toSet());
+				for (var status: Status.values()) {
+					if (seenStatuses.contains(status))
+						state.actualStatuses.add(status);
+				}
+			} else {
+				state.actualStatuses.addAll(Arrays.asList(Status.values()));
+			}
+		} else {
+			state.actualStatuses = new HashSet<>(state.statuses);
 		}
 	}
 	
@@ -99,7 +121,10 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		state = (State) data;
-		parseNamePatterns();
+		namePatterns = parseNamePatterns();
+		if (namePatterns == null)
+			form.error("Malformed name filter");
+		updateActualStatuses();
 		target.add(form);
 		target.add(summary);
 		target.add(orderBy);
@@ -155,7 +180,10 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
 					pushState(target);
-					parseNamePatterns();
+					namePatterns = parseNamePatterns();
+					if (namePatterns == null)
+						form.error("Malformed name filter");
+					updateActualStatuses();
 					target.add(feedback);
 					target.add(summary);
 					target.add(detail);
@@ -178,7 +206,10 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
 					pushState(target);
-					parseNamePatterns();
+					namePatterns = parseNamePatterns();
+					if (namePatterns == null)
+						form.error("Malformed name filter");
+					updateActualStatuses();
 					target.add(feedback);
 					target.add(summary);
 					target.add(detail);
@@ -188,7 +219,8 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 
 			fragment.add(form);
 
-			parseNamePatterns();
+			if (namePatterns == null)
+				form.error("Malformed name filter");
 
 			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
 
@@ -200,7 +232,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 							int numOfTestSuites = getReport().getTestSuites(
 									namePatterns.orNull(), Sets.newHashSet(status)).size();
 							slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "),
-									numOfTestSuites, status.getColor(), state.statuses.contains(status)));
+									numOfTestSuites, status.getColor(), state.actualStatuses.contains(status)));
 						}
 						return slices;
 					} else {
@@ -212,11 +244,12 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 
 				@Override
 				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-					Status status = Status.valueOf(sliceName.toUpperCase());
-					if (state.statuses.contains(status))
-						state.statuses.remove(status);
+					Status status = Status.valueOf(sliceName.replace(' ', '_').toUpperCase());
+					if (state.actualStatuses.contains(status))
+						state.actualStatuses.remove(status);
 					else
-						state.statuses.add(status);
+						state.actualStatuses.add(status);
+					state.statuses = new HashSet<>(state.actualStatuses);
 					pushState(target);
 					target.add(detail);
 				}
@@ -260,20 +293,16 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 						@Override
 						protected List<TestSuite> load() {
 							if (namePatterns != null) {
-								List<TestSuite> testSuites = getReport().getTestSuites(namePatterns.orNull(), state.statuses);
+								List<TestSuite> testSuites = getReport().getTestSuites(namePatterns.orNull(), state.actualStatuses);
+								testSuites.sort(comparingInt(o -> o.getStatus().ordinal()));
 								if (state.longestDurationFirst) {
-									testSuites.sort(new Comparator<TestSuite>() {
-
-										@Override
-										public int compare(TestSuite o1, TestSuite o2) {
-											if (o1.getDuration() < o2.getDuration())
-												return 1;
-											else if (o1.getDuration() > o2.getDuration())
-												return -1;
-											else
-												return 0;
-										}
-
+									testSuites.sort((o1, o2) -> {
+										if (o1.getDuration() < o2.getDuration())
+											return 1;
+										else if (o1.getDuration() > o2.getDuration())
+											return -1;
+										else
+											return 0;
 									});
 								}
 								return testSuites;
@@ -291,7 +320,6 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 
 					UnitTestCasesPage.State state = new UnitTestCasesPage.State();
 					state.testSuite = testSuite.getName();
-					state.statuses = UnitTestSuitesPage.this.state.statuses;
 					PageParameters params = UnitTestCasesPage.paramsOf(getBuild(), getReportName(), state);
 					Link<Void> link = new ViewStateAwarePageLink<Void>("testCases",
 							UnitTestCasesPage.class, params);
@@ -330,16 +358,15 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 		}
 	}
 	
-	private void parseNamePatterns() {
+	private Optional<PatternSet> parseNamePatterns() {
 		if (state.name != null) {
 			try {
-				namePatterns = Optional.of(PatternSet.parse(state.name));
+				return Optional.of(PatternSet.parse(state.name));
 			} catch (Exception e) {
-				namePatterns = null;
-				form.error("Malformed name filter");
+				return null;
 			}
 		} else {
-			namePatterns = Optional.absent();
+			return Optional.absent();
 		}
 	}
 	
@@ -352,7 +379,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 				for (Status status: state.statuses)
 					params.add(PARAM_STATUS, status.name().toLowerCase());
 			} else {
-				params.add(PARAM_STATUS, "none");
+				params.add(PARAM_STATUS, "");
 			}
 		}
 		if (state.longestDurationFirst)
@@ -367,8 +394,9 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 		
 		public boolean longestDurationFirst;
 		
-		public Collection<Status> statuses;
+		public Collection<Status> actualStatuses;
 		
+		public Collection<Status> statuses;
 	}
 	
 }
