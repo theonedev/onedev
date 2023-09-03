@@ -6,7 +6,6 @@ import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -148,7 +147,7 @@ public class UnitTestReport implements Serializable {
 			return 100;
 	}
 	
-	public static class TestSuite implements Serializable {
+	public static abstract class TestSuite implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
@@ -158,16 +157,12 @@ public class UnitTestReport implements Serializable {
 		
 		private final long duration;
 		
-		private final String message;
-		
 		private final String blobPath;
 		
-		public TestSuite(String name, Status status, long duration, @Nullable String message, 
-				@Nullable String blobPath) {
+		public TestSuite(String name, Status status, long duration, @Nullable String blobPath) {
 			this.name = name;
 			this.status = status;
 			this.duration = duration;
-			this.message = message;
 			this.blobPath = blobPath;
 		}
 
@@ -182,11 +177,6 @@ public class UnitTestReport implements Serializable {
 		public Status getStatus() {
 			return status;
 		}
-		
-		@Nullable
-		public String getMessage() {
-			return message;
-		}
 
 		@Nullable
 		public String getBlobPath() {
@@ -194,16 +184,11 @@ public class UnitTestReport implements Serializable {
 		}
 
 		@Nullable
-		protected Component renderMessage(String componentId, Build build) {
-			if (getMessage() != null) 
-				return new Label(componentId, getMessage());
-			else 
-				return null;
-		}
+		protected abstract Component renderDetail(String componentId, Build build);
 		
 	}
 	
-	public static class TestCase implements Serializable {
+	public static abstract class TestCase implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
@@ -217,16 +202,12 @@ public class UnitTestReport implements Serializable {
 		
 		private final long duration;
 		
-		private final String message;
-		
-		public TestCase(TestSuite testSuite, String name, Status status, @Nullable String statusText, 
-						long duration, String message) {
+		public TestCase(TestSuite testSuite, String name, Status status, @Nullable String statusText, long duration) {
 			this.testSuite = testSuite;
 			this.name = name;
 			this.status = status;
 			this.statusText = statusText;
 			this.duration = duration;
-			this.message = message;
 		}
 
 		public TestSuite getTestSuite() {
@@ -248,19 +229,9 @@ public class UnitTestReport implements Serializable {
 		public long getDuration() {
 			return duration;
 		}
-
-		@Nullable
-		public String getMessage() {
-			return message;
-		}
 		
 		@Nullable
-		protected Component renderMessage(String componentId, Build build) {
-			if (getMessage() != null) 
-				return new Label(componentId, getMessage());
-			else 
-				return null;
-		}
+		protected abstract Component renderDetail(String componentId, Build build);
 		
 	}
 	

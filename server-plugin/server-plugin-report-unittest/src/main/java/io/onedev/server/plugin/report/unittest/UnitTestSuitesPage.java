@@ -341,11 +341,11 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 					item.add(new Label("duration", DurationFormatUtils.formatDuration(testSuite.getDuration(), "s.SSS 's'")));
 					item.add(link);
 
-					Component messageViewer = testSuite.renderMessage("message", getBuild());
-					if (messageViewer != null)
-						item.add(messageViewer);
+					Component detailViewer = testSuite.renderDetail("detail", getBuild());
+					if (detailViewer != null)
+						item.add(detailViewer);
 					else
-						item.add(new WebMarkupContainer("message").setVisible(false));
+						item.add(new WebMarkupContainer("detail").setVisible(false));
 				}
 
 			});

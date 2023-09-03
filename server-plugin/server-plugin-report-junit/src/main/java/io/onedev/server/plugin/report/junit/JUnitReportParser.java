@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
@@ -14,6 +16,7 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.search.code.CodeSearchManager;
+import org.jetbrains.annotations.Nullable;
 
 public class JUnitReportParser {
 
@@ -58,12 +61,26 @@ public class JUnitReportParser {
 			String blobPath = OneDev.getInstance(CodeSearchManager.class).findBlobPathBySymbol(
 					build.getProject(), build.getCommitId(), name, ".");
 
-			TestSuite testSuite = new TestSuite(name, status, duration, null, blobPath);
+			TestSuite testSuite = new TestSuite(name, status, duration, blobPath) {
+
+				@Nullable
+				@Override
+				protected Component renderDetail(String componentId, Build build) {
+					return null;
+				}
+			};
 
 			for (Element testCaseElement: testSuiteElement.elements("testcase")) {
 				name = testCaseElement.attributeValue("name");
 				if (testCaseElement.element("skipped") != null) {
-					testCases.add(new TestCase(testSuite, name, Status.NOT_RUN, "skipped", 0, null));
+					testCases.add(new TestCase(testSuite, name, Status.NOT_RUN, "skipped", 0) {
+
+						@Nullable
+						@Override
+						protected Component renderDetail(String componentId, Build build) {
+							return null;
+						}
+					});
 				} else {
 					duration = getDouble(testCaseElement.attributeValue("time"));
 					status = Status.PASSED;
@@ -77,7 +94,19 @@ public class JUnitReportParser {
 						status = Status.NOT_PASSED;
 						message = errorElement.getText();
 					}
-					testCases.add(new TestCase(testSuite, name, status, null, duration, message));
+					
+					var finalMessage = message;
+					testCases.add(new TestCase(testSuite, name, status, null, duration) {
+
+						@Nullable
+						@Override
+						protected Component renderDetail(String componentId, Build build) {
+							if (finalMessage != null)
+								return new Label(componentId, finalMessage);
+							else 
+								return null;
+						}
+					});
 				}
 			}
 		}

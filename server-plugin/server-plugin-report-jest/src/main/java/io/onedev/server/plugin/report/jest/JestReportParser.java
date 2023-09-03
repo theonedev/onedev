@@ -66,25 +66,27 @@ public class JestReportParser {
 					}
 			}
 			
-			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, message, blobPath) {
+			var testSuiteMessage = message;
+			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, blobPath) {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Component renderMessage(String componentId, Build build) {
-					return JestReportParser.renderMessage(componentId, build, getMessage());
+				protected Component renderDetail(String componentId, Build build) {
+					return JestReportParser.renderMessage(componentId, build, testSuiteMessage);
 				}
 				
 			};
 			
 			for (TestCaseData testCaseData: testCaseDatum) {
-				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, testCaseData.statusText, 0, testCaseData.message) {
+				var testCaseMessage = testCaseData.message;
+				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, testCaseData.statusText, 0) {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					protected Component renderMessage(String componentId, Build build) {
-						return JestReportParser.renderMessage(componentId, build, getMessage());
+					protected Component renderDetail(String componentId, Build build) {
+						return JestReportParser.renderMessage(componentId, build, testCaseMessage);
 					}
 					
 				});

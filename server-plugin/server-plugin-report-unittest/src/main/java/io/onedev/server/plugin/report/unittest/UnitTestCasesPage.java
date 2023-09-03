@@ -9,6 +9,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -38,7 +39,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
-import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -424,10 +424,14 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					item.add(new TestStatusBadge("status", testCase.getStatus()));
 
 					var name = escapeHtml5(testCase.getName());
-					if (testCase.getTestSuite().getBlobPath() != null) {
+					if (testCase.getTestSuite().getBlobPath() != null && SecurityUtils.canReadCode(getProject())) {
 						var blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getBlobPath());
-						var blobUrl = urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), blobIdent));
-						name += " (<a href='" + blobUrl + "'>" + escapeHtml5(testCase.getTestSuite().getName()) + "</a>)";
+						if (getProject().getBlob(blobIdent, false) != null) {
+							var blobUrl = urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), blobIdent));
+							name += " (<a href='" + blobUrl + "' target='_blank'>" + escapeHtml5(testCase.getTestSuite().getName()) + "</a>)";
+						} else {
+							name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
+						}
 					} else {
 						name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
 					}
@@ -440,11 +444,11 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					else
 						item.add(new WebMarkupContainer("duration").setVisible(false));
 
-					Component messageViewer = testCase.renderMessage("message", getBuild());
-					if (messageViewer != null)
-						item.add(messageViewer);
+					Component detailViewer = testCase.renderDetail("detail", getBuild());
+					if (detailViewer != null)
+						item.add(detailViewer);
 					else
-						item.add(new WebMarkupContainer("message").setVisible(false));
+						item.add(new WebMarkupContainer("detail").setVisible(false));
 				}
 
 			});

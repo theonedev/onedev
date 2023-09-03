@@ -1,25 +1,40 @@
 package io.onedev.server.plugin.report.trx;
 
 import com.google.common.base.Splitter;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.StringTransformer;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.Status.getOverallStatus;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class TRXReportParser {
+
+	private static final Pattern PATTERN_LOCATION = Pattern.compile("\\sin\\s(.*):line\\s(\\d+)(\\s|$)", Pattern.MULTILINE);
 
 	public static List<TestCase> parse(Build build, Document doc) {
 		List<TestCase> testCases = new ArrayList<>();
@@ -61,19 +76,19 @@ public class TRXReportParser {
 			}
 			testCaseData.status = testStatus;
 			
-			var message = new StringBuilder();
+			var detailInfo = new StringBuilder();
 			var outputElement = testResultElement.element("Output");
 			if (outputElement != null) {
 				var errorInfoElement = outputElement.element("ErrorInfo");
 				if (errorInfoElement != null) {
-					appendMessage(message, null, errorInfoElement.elementText("Message"));
-					appendMessage(message, "StackTrace", errorInfoElement.elementText("StackTrace"));
+					appendMessage(detailInfo, null, errorInfoElement.elementText("Message"));
+					appendMessage(detailInfo, "StackTrace", errorInfoElement.elementText("StackTrace"));
 				}
-				appendMessage(message, "StdOut", outputElement.elementText("StdOut"));
-				appendMessage(message, "StdErr", outputElement.elementText("StdErr"));
-				appendMessage(message, "Exception", outputElement.elementText("Exception"));
+				appendMessage(detailInfo, "StdOut", outputElement.elementText("StdOut"));
+				appendMessage(detailInfo, "StdErr", outputElement.elementText("StdErr"));
+				appendMessage(detailInfo, "Exception", outputElement.elementText("Exception"));
 			}
-			testCaseData.message = StringUtils.trimToNull(message.toString());
+			testCaseData.detailInfo = StringUtils.trimToNull(detailInfo.toString());
 			
 			var testClass = testClasses.get(testId);
 			if (testClass != null) 
@@ -85,13 +100,68 @@ public class TRXReportParser {
 			Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
 			var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
 			var blobPath = searchManager.findBlobPathBySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
-			var testSuite = new TestSuite(entry.getKey(), status, duration, null, blobPath);
+			var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath) {
+
+				@Override
+				protected Component renderDetail(String componentId, Build build) {
+					return null;
+				}
+			};
 			for (var testCaseData: entry.getValue()) {
 				var name = testCaseData.name;
 				if (name.startsWith(testSuite.getName() + "."))
 					name = name.substring(testSuite.getName().length() + 1);
+				
+				var detailInfo = testCaseData.detailInfo;
 				testCases.add(new TestCase(testSuite, name, testCaseData.status, testCaseData.statusText, 
-						testCaseData.duration, testCaseData.message));
+						testCaseData.duration) {
+					
+					@Override
+					protected Component renderDetail(String componentId, Build build) {
+						if (detailInfo != null) {
+							if (SecurityUtils.canReadCode(build.getProject())) {
+								String transformed = new StringTransformer(PATTERN_LOCATION) {
+
+									@Override
+									protected String transformUnmatched(String string) {
+										return escapeHtml5(string);
+									}
+
+									@Override
+									protected String transformMatched(Matcher matcher) {
+										String file = matcher.group(1);
+										int line = Integer.parseInt(matcher.group(2));
+
+										var blobPath = build.getBlobPath(file);
+										if (blobPath != null) {
+											BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
+											if (build.getProject().getBlob(blobIdent, false) != null) {
+												ProjectBlobPage.State state = new ProjectBlobPage.State();
+												state.blobIdent = blobIdent;
+												PlanarRange range = new PlanarRange(line-1, -1, line-1, -1);
+												state.position = BlobRenderer.getSourcePosition(range);
+												PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
+												String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
+												return String.format(" in <a href='%s' target='_blank'>%s:line %d</a>)", url, escapeHtml5(blobPath), line);
+											} else {
+												return " in " + escapeHtml5(file) + ":line " + line + " ";
+											}
+										} else {
+											return " in " + escapeHtml5(file) + ":line " + line + " ";
+										}
+									}
+
+								}.transform(detailInfo);
+
+								return new Label(componentId, transformed).setEscapeModelStrings(false);
+							} else {
+								return new Label(componentId, detailInfo);
+							}
+						} else {
+							return null;
+						}
+					}
+				});
 			}
 		}
 		
@@ -104,20 +174,6 @@ public class TRXReportParser {
 				message.append("\n\n***** " + appendType + " *****:\n");
 			message.append(appendMessage);
 		}
-	}
-	
-	public static int getInt(String input) {
-		if (input == null) {
-			return 0;
-		}
-		return Integer.parseInt(input);
-	}
-
-	public static long getDouble(String input) {
-		if (input == null) {
-			return 0;
-		}
-		return (long) Double.parseDouble(input);
 	}
 	
 	private static long parseDuration(String duration) {
@@ -138,6 +194,6 @@ public class TRXReportParser {
 		
 		String statusText;
 		
-		String message;
+		String detailInfo;
 	}
 }
