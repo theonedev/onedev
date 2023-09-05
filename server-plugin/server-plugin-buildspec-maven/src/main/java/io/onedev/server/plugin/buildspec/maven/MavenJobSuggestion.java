@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -65,21 +66,16 @@ public class MavenJobSuggestion implements JobSuggestion {
 			setBuildVersion.setBuildVersion("@file:buildVersion@");
 			job.getSteps().add(setBuildVersion);
 			
-			CommandStep runMaven = new CommandStep();
-			runMaven.setName("run unit tests");
-			runMaven.setImage(imageName);
-			runMaven.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
+			CommandStep runTests = new CommandStep();
+			runTests.setName("run tests");
+			runTests.setImage(imageName);
+			runTests.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
 
-			job.getSteps().add(runMaven);
+			job.getSteps().add(runTests);
 			
-			// Trigger the job automatically when there is a push to the branch			
-			BranchUpdateTrigger trigger = new BranchUpdateTrigger();
-			job.getTriggers().add(trigger);
+			job.getTriggers().add(new BranchUpdateTrigger());
+			job.getTriggers().add(new PullRequestUpdateTrigger());
 			
-			/*
-			 * Cache Maven local repository in order not to download Maven dependencies all over again for 
-			 * subsequent builds
-			 */
 			CacheSpec cache = new CacheSpec();
 			cache.setKey("maven-cache");
 			cache.setPath("/root/.m2/repository");
