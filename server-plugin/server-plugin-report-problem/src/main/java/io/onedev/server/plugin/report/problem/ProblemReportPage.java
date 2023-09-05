@@ -67,6 +67,8 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
 
+import static java.util.stream.Collectors.*;
+
 @SuppressWarnings("serial")
 public class ProblemReportPage extends BuildReportPage {
 
@@ -121,7 +123,7 @@ public class ProblemReportPage extends BuildReportPage {
 			var fragment = new Fragment("report", "validFrag", this);
 			filePaths = getReport().getProblemFiles().stream()
 					.map(it->it.getBlobPath())
-					.collect(Collectors.toList());
+					.collect(toList());
 
 			form = new Form<Void>("form");
 
@@ -188,18 +190,22 @@ public class ProblemReportPage extends BuildReportPage {
 
 			PageableListView<ProblemFile> filesView;
 			filesContainer.add(filesView = new PageableListView<ProblemFile>("files",
-					new LoadableDetachableModel<List<ProblemFile>>() {
+					new LoadableDetachableModel<>() {
 
 						@Override
 						protected List<ProblemFile> load() {
 							if (filePatterns != null) {
 								if (filePatterns.isPresent()) {
 									Matcher matcher = new PathMatcher();
-									return getReport().getProblemFiles().stream()
-											.filter(it->filePatterns.get().matches(matcher, it.getBlobPath()))
-											.collect(Collectors.toList());
+									var problemFiles = getReport().getProblemFiles().stream()
+											.filter(it -> filePatterns.get().matches(matcher, it.getBlobPath().toLowerCase()))
+											.collect(toList());
+									problemFiles.sort(getReport().newProblemFileComparator());
+									return problemFiles;									
 								} else {
-									return getReport().getProblemFiles();
+									var problemFiles = new ArrayList<>(getReport().getProblemFiles());
+									problemFiles.sort(getReport().newProblemFileComparator());
+									return problemFiles;
 								}
 							} else {
 								return new ArrayList<>();
@@ -230,7 +236,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 						@Override
 						public String getObject() {
-							return expandedFiles.contains(filePath)? "expanded": "collapsed";
+							return expandedFiles.contains(filePath) ? "expanded" : "collapsed";
 						}
 
 					}));
@@ -258,11 +264,19 @@ public class ProblemReportPage extends BuildReportPage {
 
 					});
 
-					item.add(new ListView<CodeProblem>("problems", new LoadableDetachableModel<List<CodeProblem>>() {
+					item.add(new ListView<>("problems", new LoadableDetachableModel<List<CodeProblem>>() {
 
 						@Override
 						protected List<CodeProblem> load() {
-							List<CodeProblem> problems = item.getModelObject().getProblems();
+							List<CodeProblem> problems = new ArrayList<>(item.getModelObject().getProblems());
+							problems.sort((o1, o2) -> {
+								if (o1.getSeverity() != o2.getSeverity())
+									return o1.getSeverity().ordinal() - o2.getSeverity().ordinal();
+								else if (o1.getRange().getFromRow() != o2.getRange().getFromRow())
+									return o1.getRange().getFromRow() - o2.getRange().getFromRow();
+								else 
+									return o1.getRange().getFromColumn() - o2.getRange().getFromColumn();
+							});
 							if (problems.size() > MAX_PROBLEMS_TO_DISPLAY)
 								return problems.subList(0, MAX_PROBLEMS_TO_DISPLAY);
 							else
@@ -339,7 +353,7 @@ public class ProblemReportPage extends BuildReportPage {
 	private void parseFilePatterns() {
 		if (file != null) {
 			try {
-				filePatterns = Optional.of(PatternSet.parse(file));
+				filePatterns = Optional.of(PatternSet.parse(file.toLowerCase()));
 			} catch (Exception e) {
 				file = null;
 				form.error("Malformed filter");

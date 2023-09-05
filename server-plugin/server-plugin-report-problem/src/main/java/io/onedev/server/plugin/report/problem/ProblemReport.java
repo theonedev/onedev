@@ -1,23 +1,11 @@
 package io.onedev.server.plugin.report.problem;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.*;
+import java.util.*;
 
 public class ProblemReport implements Serializable {
 
@@ -29,19 +17,19 @@ public class ProblemReport implements Serializable {
 
 	public static final String FILES = "files";
 	
-	private final List<CodeProblem> problems;
+	private final Collection<CodeProblem> problems;
 	
-	private transient List<ProblemFile> problemFiles;
+	private transient Collection<ProblemFile> problemFiles;
 	
-	public ProblemReport(List<CodeProblem> problems) {
+	public ProblemReport(Collection<CodeProblem> problems) {
 		this.problems = problems;
 	}
 
-	public List<CodeProblem> getProblems() {
+	public Collection<CodeProblem> getProblems() {
 		return problems;
 	} 
 
-	public List<ProblemFile> getProblemFiles() {
+	public Collection<ProblemFile> getProblemFiles() {
 		if (problemFiles == null) {
 			Map<String, ProblemFile> map = new LinkedHashMap<>();
 			for (CodeProblem problem: problems) {
@@ -52,10 +40,7 @@ public class ProblemReport implements Serializable {
 				}
 				file.getProblems().add(problem);
 			}
-			
-			problemFiles = new ArrayList<>(map.values());
-			
-			problemFiles.sort((o1, o2) -> o2.getProblems().size() - o1.getProblems().size());
+			problemFiles = map.values();
 		}
 		return problemFiles;
 	}
@@ -63,7 +48,7 @@ public class ProblemReport implements Serializable {
 	public static ProblemReport readFrom(File reportDir) {
 		File dataFile = new File(reportDir, REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
-			return (ProblemReport) SerializationUtils.deserialize(is);
+			return SerializationUtils.deserialize(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -86,4 +71,36 @@ public class ProblemReport implements Serializable {
 		return ProblemReport.class.getName() + ":" + projectId + ":" +  buildNumber;
 	}
 	
+	public Comparator<ProblemFile> newProblemFileComparator() {
+		Map<String, Long> highSeverityCounts = new HashMap<>();
+		Map<String, Long> mediumSeverityCounts = new HashMap<>();
+		Map<String, Long> lowSeverityCounts = new HashMap<>();
+		
+		for (var problemFile: problemFiles) {
+			highSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.HIGH).count());
+			mediumSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.MEDIUM).count());
+			lowSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.LOW).count());
+		}
+
+		return new Comparator<ProblemFile>() {
+
+			private int compareSeverityCount(Map<String, Long> severityCounts, ProblemFile file1, ProblemFile file2) {
+				var severityCount1 = severityCounts.getOrDefault(file1.getBlobPath(), 0L);
+				var severityCount2 = severityCounts.getOrDefault(file2.getBlobPath(), 0L);
+				return severityCount2.compareTo(severityCount1);
+			}
+
+			@Override
+			public int compare(ProblemFile o1, ProblemFile o2) {
+				var order = compareSeverityCount(highSeverityCounts, o1, o2);
+				if (order != 0)
+					return order;
+				order = compareSeverityCount(mediumSeverityCounts, o1, o2);
+				if (order != 0)
+					return order;
+				return compareSeverityCount(lowSeverityCounts, o1, o2);
+			}
+			
+		};
+	}
 }

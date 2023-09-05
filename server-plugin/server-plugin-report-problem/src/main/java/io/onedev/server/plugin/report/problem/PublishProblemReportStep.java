@@ -17,6 +17,7 @@ import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +77,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		return null;
 	}
 	
-	private void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
+	private void writeFileProblems(Build build, String blobPath, Collection<CodeProblem> problemsOfFile) {
 		File reportDir = new File(build.getStorageDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		File violationsFile = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());

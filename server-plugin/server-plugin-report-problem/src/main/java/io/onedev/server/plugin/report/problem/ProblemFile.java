@@ -2,6 +2,7 @@ package io.onedev.server.plugin.report.problem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import io.onedev.server.codequality.CodeProblem;
@@ -12,7 +13,7 @@ public class ProblemFile implements Serializable {
 
 	private final String blobPath;
 	
-	private final List<CodeProblem> problems = new ArrayList<>();
+	private final Collection<CodeProblem> problems = new ArrayList<>();
 	
 	public ProblemFile(String blobPath) {
 		this.blobPath = blobPath;
@@ -22,7 +23,7 @@ public class ProblemFile implements Serializable {
 		return blobPath;
 	}
 
-	public List<CodeProblem> getProblems() {
+	public Collection<CodeProblem> getProblems() {
 		return problems;
 	}
 	
