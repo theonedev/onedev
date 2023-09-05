@@ -11,7 +11,6 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
@@ -60,7 +59,7 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
@@ -76,37 +75,27 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 					var filePath = fileElement.attributeValue("name");
 					String blobPath = build.getBlobPath(filePath);
 					if (blobPath != null) { 
-						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
-						if (build.getProject().getBlob(blobIdent, false) != null) {
-							List<CodeProblem> problemsOfFile = new ArrayList<>();
-							for (Element violationElement: fileElement.elements()) {
-								Severity severity;
-								String severityStr = violationElement.attributeValue("severity");
-								if (severityStr.equalsIgnoreCase("error"))
-									severity = Severity.MEDIUM;
-								else
-									severity = Severity.LOW;
-								String message = HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
-								String rule = violationElement.attributeValue("source");
-								int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
-								String column = violationElement.attributeValue("column");
+						for (Element violationElement: fileElement.elements()) {
+							Severity severity;
+							String severityStr = violationElement.attributeValue("severity");
+							if (severityStr.equalsIgnoreCase("error"))
+								severity = Severity.MEDIUM;
+							else
+								severity = Severity.LOW;
+							String message = HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
+							String rule = violationElement.attributeValue("source");
+							int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
+							String column = violationElement.attributeValue("column");
 
-								PlanarRange range;
-								if (column != null) {
-									int columnNo = Integer.parseInt(column)-1;
-									range = new PlanarRange(lineNo, columnNo, lineNo, -1, TAB_WIDTH);
-								} else {
-									range = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
-								}
-								
-								CodeProblem problem = new CodeProblem(severity, rule, blobPath, range, message);
-								problemsOfFile.add(problem);
-								problems.add(problem);
+							PlanarRange range;
+							if (column != null) {
+								int columnNo = Integer.parseInt(column)-1;
+								range = new PlanarRange(lineNo, columnNo, lineNo, -1, TAB_WIDTH);
+							} else {
+								range = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
 							}
-							if (!problemsOfFile.isEmpty())
-								writeFileProblems(build, blobPath, problemsOfFile);
-						} else {
-							logger.warning("Unable to find blob for path: " + blobPath);
+							
+							problems.add(new CodeProblem(severity, rule, blobPath, range, message));
 						}
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);

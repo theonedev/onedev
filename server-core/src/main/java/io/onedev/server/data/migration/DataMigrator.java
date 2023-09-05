@@ -5741,4 +5741,18 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate137(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CoverageMetrics.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("methodCoverage").detach();
+					element.element("statementCoverage").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

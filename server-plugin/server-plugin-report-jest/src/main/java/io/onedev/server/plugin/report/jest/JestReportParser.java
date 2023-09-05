@@ -16,14 +16,14 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
-import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class JestReportParser {
 
@@ -67,7 +67,7 @@ public class JestReportParser {
 			}
 			
 			var testSuiteMessage = message;
-			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, blobPath) {
+			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, blobPath, null) {
 
 				private static final long serialVersionUID = 1L;
 
@@ -103,7 +103,7 @@ public class JestReportParser {
 		
 					@Override
 					protected String transformUnmatched(String string) {
-						return HtmlEscape.escapeHtml5(string);
+						return escapeHtml5(string);
 					}
 		
 					@Override
@@ -113,20 +113,16 @@ public class JestReportParser {
 						int col = Integer.parseInt(matcher.group(3));
 						
 						var blobPath = build.getBlobPath(file);
-						if (blobPath != null)
-							file = blobPath;
-						
-						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), file, FileMode.REGULAR_FILE.getBits());
-						if (build.getProject().getBlob(blobIdent, false) != null) {
+						if (blobPath != null) {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
-							state.blobIdent = blobIdent;
+							state.blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 							PlanarRange range = new PlanarRange(line-1, col-1, line-1, col); 
 							state.position = BlobRenderer.getSourcePosition(range);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
 							String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
-							return String.format("(<a href='%s'>%s:%d:%d</a>)", url, HtmlEscape.escapeHtml5(file), line, col);
+							return String.format("(<a href='%s'>%s:%d:%d</a>)", url, escapeHtml5(blobPath), line, col);
 						} else {
-							return "(" + HtmlEscape.escapeHtml5(file) + ":" + line + ":" + col + ")";
+							return "(" + escapeHtml5(file) + ":" + line + ":" + col + ")";
 						}
 					}
 					

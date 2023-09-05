@@ -1,40 +1,35 @@
 package io.onedev.server.plugin.report.spotbugs;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.model.Build;
+import io.onedev.server.plugin.report.problem.ProblemReport;
+import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
+import io.onedev.server.util.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import javax.validation.constraints.NotEmpty;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.StepGroup;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.problem.ProblemReport;
-import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
-import io.onedev.server.util.XmlUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable(order=8010, group=StepGroup.PUBLISH_REPORTS, name="SpotBugs")
 public class PublishSpotBugsReportStep extends PublishProblemReportStep {
@@ -62,13 +57,12 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
 		List<CodeProblem> problems = new ArrayList<>();
-		Map<String, List<CodeProblem>> problemsByFile = new HashMap<>();
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing SpotBugs report '" + relativePath + "'...");
@@ -78,57 +72,43 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 				
 				Element projectElement = doc.getRootElement().element("Project");
 				var srcDir = projectElement.elementText("SrcDir");
-				String blobDir = build.getBlobPath(srcDir);
-				if (blobDir != null) {
-					for (Element bugElement: doc.getRootElement().elements("BugInstance")) {
-						Element sourceElement = bugElement.element("SourceLine");
-						String blobPath = sourceElement.attributeValue("sourcepath");
-						if (blobDir.length() != 0)
-							blobPath = blobDir + "/" + blobPath;
-						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
-						if (build.getProject().getBlob(blobIdent, false) != null) {
-							String type = bugElement.attributeValue("type");
-							
-							Severity severity;
-							String priority = bugElement.attributeValue("priority");
-							if (priority.equals("1"))
-								severity = Severity.HIGH;
-							else if (priority.equals("2"))
-								severity = Severity.MEDIUM;
-							else
-								severity = Severity.LOW;
-							
-							String message = bugElement.elementText("LongMessage");
-							if (StringUtils.isBlank(message))
-								message = bugElement.elementText("ShortMessage");
-							
-							message = HtmlEscape.escapeHtml5(message);
-							
-							PlanarRange range = getRange(bugElement, true);
+				for (Element bugElement: doc.getRootElement().elements("BugInstance")) {
+					Element sourceElement = bugElement.element("SourceLine");
+					String filePath = srcDir + "/" + sourceElement.attributeValue("sourcepath");
+					var blobPath = build.getBlobPath(filePath); 
+					if (blobPath != null) {
+						String type = bugElement.attributeValue("type");
+						
+						Severity severity;
+						String priority = bugElement.attributeValue("priority");
+						if (priority.equals("1"))
+							severity = Severity.HIGH;
+						else if (priority.equals("2"))
+							severity = Severity.MEDIUM;
+						else
+							severity = Severity.LOW;
+						
+						String message = bugElement.elementText("LongMessage");
+						if (StringUtils.isBlank(message))
+							message = bugElement.elementText("ShortMessage");
+						
+						message = HtmlEscape.escapeHtml5(message);
+						
+						PlanarRange range = getRange(bugElement, true);
 
-							if (range == null)
-								range = getRange(bugElement.element("Field"), false);
-							if (range == null)
-								range = getRange(bugElement.element("Method"), false);
-							if (range == null)
-								range = getRange(bugElement.element("Class"), false);
-							if (range == null) 
-								range = new PlanarRange(0, -1, 0, -1);
+						if (range == null)
+							range = getRange(bugElement.element("Field"), false);
+						if (range == null)
+							range = getRange(bugElement.element("Method"), false);
+						if (range == null)
+							range = getRange(bugElement.element("Class"), false);
+						if (range == null) 
+							range = new PlanarRange(0, -1, 0, -1);
 
-							CodeProblem problem = new CodeProblem(severity, type, blobPath, range, message); 
-							problems.add(problem);
-							List<CodeProblem> problemsOfFile = problemsByFile.get(blobPath);
-							if (problemsOfFile == null) {
-								problemsOfFile = new ArrayList<>();
-								problemsByFile.put(blobPath, problemsOfFile);
-							}
-							problemsOfFile.add(problem);
-						} else {
-							logger.warning("Unable to find blob for path: " + blobPath);
-						}
+						problems.add(new CodeProblem(severity, type, blobPath, range, message));
+					} else {
+						logger.warning("Unable to find blob path for file: " + filePath);
 					}
-				} else {
-					logger.warning("Unable to find blob path for dir: " + srcDir);
 				}
 			} catch (DocumentException e) {
 				logger.warning("Ignored SpotBugs report '" + relativePath + "' as it is not a valid XML");
@@ -137,9 +117,6 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 			}
 		}
 
-		for (Map.Entry<String, List<CodeProblem>> entry: problemsByFile.entrySet()) 
-			writeFileProblems(build, entry.getKey(), entry.getValue());
-		
 		if (!problems.isEmpty())
 			return new ProblemReport(problems);
 		else

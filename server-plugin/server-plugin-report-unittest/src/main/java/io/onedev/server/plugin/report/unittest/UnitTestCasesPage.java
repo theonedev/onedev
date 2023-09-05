@@ -19,6 +19,7 @@ import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
@@ -425,13 +426,13 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 
 					var name = escapeHtml5(testCase.getName());
 					if (testCase.getTestSuite().getBlobPath() != null && SecurityUtils.canReadCode(getProject())) {
-						var blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getBlobPath());
-						if (getProject().getBlob(blobIdent, false) != null) {
-							var blobUrl = urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), blobIdent));
-							name += " (<a href='" + blobUrl + "' target='_blank'>" + escapeHtml5(testCase.getTestSuite().getName()) + "</a>)";
-						} else {
-							name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
-						}
+						var sourceViewState = new ProjectBlobPage.State();
+						sourceViewState.blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getBlobPath());
+						if (testCase.getTestSuite().getPosition() != null)
+							sourceViewState.position = BlobRenderer.getSourcePosition(testCase.getTestSuite().getPosition());
+						
+						var blobUrl = urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), sourceViewState));
+						name += " (<a href='" + blobUrl + "' target='_blank'>" + escapeHtml5(testCase.getTestSuite().getName()) + "</a>)";
 					} else {
 						name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
 					}

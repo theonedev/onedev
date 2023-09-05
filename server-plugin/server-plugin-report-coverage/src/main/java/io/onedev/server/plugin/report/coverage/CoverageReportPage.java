@@ -56,20 +56,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public class CoverageReportPage extends BuildReportPage {
 
-	private static final String PARAM_PACKAGE = "package";
+	private static final String PARAM_GROUP = "group";
 	
 	private static final String PARAM_FILTER = "filter";
 	
 	private static final String PARAM_ORDER_BY = "order-by";
 	
-	private String packageName;
+	private Integer groupIndex;
 	
 	private com.google.common.base.Optional<PatternSet> filterPatterns;
 	
@@ -101,11 +101,19 @@ public class CoverageReportPage extends BuildReportPage {
 	public CoverageReportPage(PageParameters params) {
 		super(params);
 		
-		packageName = params.get(PARAM_PACKAGE).toOptionalString();
+		groupIndex = params.get(PARAM_GROUP).toOptionalInteger();
 		state.filter = params.get(PARAM_FILTER).toOptionalString();
 		String orderByString = params.get(PARAM_ORDER_BY).toOptionalString();
 		if (orderByString != null)
 			state.orderBy = CoverageOrderBy.valueOf(orderByString);
+	}
+	
+	@Nullable
+	private GroupCoverageInfo getGroupCoverage() {
+		if (groupIndex != null)
+			return getReportData().getGroupCoverages().get(groupIndex);
+		else 
+			return null;
 	}
 	
 	@Override
@@ -115,22 +123,20 @@ public class CoverageReportPage extends BuildReportPage {
 		if (getReportData() != null) {
 			var fragment = new Fragment("report", "validFrag", this);
 			add(fragment);
-
-			if (packageName != null)
-				fragment.add(new Label("coverageTitle", packageName));
+			
+			if (getGroupCoverage() != null)
+				fragment.add(new Label("coverageTitle", getGroupCoverage().getName()));
 			else
 				fragment.add(new Label("coverageTitle", "Overall"));
 
-			fragment.add(new CoverageInfoPanel<>("coverages", new LoadableDetachableModel<CoverageInfo>() {
+			fragment.add(new CoverageInfoPanel<>("coverages", new LoadableDetachableModel<>() {
 
 				@Override
 				protected CoverageInfo load() {
-					if (packageName != null) {
-						return getReportData().getCategoryCoverages().stream()
-								.filter(it -> it.getName().equals(packageName)).findFirst().get();
-					} else {
+					if (getGroupCoverage() != null) 
+						return getGroupCoverage();
+					else 
 						return getReportData().getOverallCoverages();
-					}
 				}
 
 			}));
@@ -139,10 +145,10 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public String getObject() {
-					if (packageName != null)
-						return "Items";
+					if (getGroupCoverage() != null)
+						return "Files";
 					else
-						return "Categories";
+						return "Groups";
 				}
 
 			}));
@@ -170,10 +176,10 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public String getObject() {
-					if (packageName != null)
-						return "Filter items...";
+					if (getGroupCoverage() != null)
+						return "Filter files...";
 					else
-						return "Filter categories...";
+						return "Filter groups...";
 				}
 
 			}));
@@ -182,15 +188,10 @@ public class CoverageReportPage extends BuildReportPage {
 				@Override
 				protected List<InputSuggestion> suggest(String matchWith) {
 					List<String> names;
-					if (packageName != null) {
-						Optional<CategoryCoverageInfo> packageCoverages = getReportData().getCategoryCoverages()
-								.stream().filter(it->it.getName().equals(packageName)).findFirst();
-						if (packageCoverages.isPresent())
-							names = packageCoverages.get().getItemCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
-						else
-							names = new ArrayList<>();
+					if (getGroupCoverage() != null) {
+						names = getGroupCoverage().getFileCoverages().stream().map(NamedCoverageInfo::getName).collect(toList());
 					} else {
-						names = getReportData().getCategoryCoverages().stream().map(it->it.getName()).collect(Collectors.toList());
+						names = getReportData().getGroupCoverages().stream().map(NamedCoverageInfo::getName).collect(toList());
 					}
 					return SuggestionUtils.suggest(names, matchWith);
 				}
@@ -236,6 +237,7 @@ public class CoverageReportPage extends BuildReportPage {
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
 									state.orderBy = orderBy;
+									pushState(target);
 									target.add(itemsContainer);
 								}
 
@@ -254,17 +256,9 @@ public class CoverageReportPage extends BuildReportPage {
 					List<MenuItem> menuItems = new ArrayList<>();
 					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.DEFAULT));
 					var overallCoverages = getReportData().getOverallCoverages();
-					if (overallCoverages.getMethodCoverage() >= 0) {
-						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_METHOD_COVERAGE));
-						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_METHOD_COVERAGE));
-					}
 					if (overallCoverages.getBranchCoverage() >= 0) {
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_BRANCH_COVERAGE));
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_BRANCH_COVERAGE));
-					}
-					if (overallCoverages.getStatementCoverage() >= 0) {
-						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_STATEMENT_COVERAGE));
-						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_STATEMENT_COVERAGE));
 					}
 					if (overallCoverages.getLineCoverage() >= 0) {
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_LINE_COVERAGE));
@@ -313,21 +307,15 @@ public class CoverageReportPage extends BuildReportPage {
 						protected List<NamedCoverageInfo> load() {
 							if (filterPatterns != null) {
 								List<? extends NamedCoverageInfo> coverages;
-								if (packageName != null) {
-									Optional<CategoryCoverageInfo> packageCoverages = getReportData().getCategoryCoverages()
-											.stream().filter(it -> it.getName().equals(packageName)).findFirst();
-									if (packageCoverages.isPresent())
-										coverages = packageCoverages.get().getItemCoverages();
-									else
-										coverages = new ArrayList<>();
-								} else {
-									coverages = getReportData().getCategoryCoverages();
-								}
+								if (getGroupCoverage() != null) 
+									coverages = getGroupCoverage().getFileCoverages();
+								else 
+									coverages = getReportData().getGroupCoverages();
 								if (filterPatterns.isPresent()) {
 									Matcher matcher = new StringMatcher();
 									coverages = coverages.stream()
-											.filter(it -> filterPatterns.get().matches(matcher, it.getName()))
-											.collect(Collectors.toList());
+											.filter(it -> filterPatterns.get().matches(matcher, it.getName().toLowerCase()))
+											.collect(toList());
 								}
 								coverages.sort((Comparator<CoverageInfo>) (o1, o2) -> state.orderBy.compare(o1, o2));
 								return (List<NamedCoverageInfo>) coverages;
@@ -343,16 +331,17 @@ public class CoverageReportPage extends BuildReportPage {
 							NamedCoverageInfo coverageInfo = item.getModelObject();
 
 							Link<Void> nameLink;
-							if (coverageInfo instanceof CategoryCoverageInfo) {
+							if (coverageInfo instanceof GroupCoverageInfo) {
 								State state = new State();
 								state.orderBy = CoverageReportPage.this.state.orderBy;
 								PageParameters params = paramsOf(getBuild(), getReportName(),
-										coverageInfo.getName(), state);
+										item.getIndex(), state);
 								nameLink = new BookmarkablePageLink<Void>("name", CoverageReportPage.class, params);
 							} else {
+								var fileCoverageInfo = (FileCoverageInfo) coverageInfo;
 								ProjectBlobPage.State state = new ProjectBlobPage.State();
 								state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
-										((ItemCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
+										fileCoverageInfo.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 								state.coverageReport = getReportName();
 								PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 								nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);
@@ -361,7 +350,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 							item.add(nameLink);
 
-							item.add(new CoverageInfoPanel<NamedCoverageInfo>("coverages", item.getModel()));
+							item.add(new CoverageInfoPanel<>("coverages", item.getModel()));
 						}
 
 					};
@@ -376,7 +365,7 @@ public class CoverageReportPage extends BuildReportPage {
 	private void parseFilterPatterns() {
 		if (state.filter != null) {
 			try {
-				filterPatterns = com.google.common.base.Optional.of(PatternSet.parse(state.filter));
+				filterPatterns = com.google.common.base.Optional.of(PatternSet.parse(state.filter.toLowerCase()));
 			} catch (Exception e) {
 				filterPatterns = null;
 				form.error("Malformed filter");
@@ -404,7 +393,7 @@ public class CoverageReportPage extends BuildReportPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		CharSequence url = urlFor(CoverageReportPage.class, paramsOf(getBuild(), getReportName(), packageName, state));
+		CharSequence url = urlFor(CoverageReportPage.class, paramsOf(getBuild(), getReportName(), groupIndex, state));
 		pushState(target, url.toString(), state);
 	}
 	
@@ -418,10 +407,10 @@ public class CoverageReportPage extends BuildReportPage {
 	}
 	
 	private static PageParameters paramsOf(Build build, String reportName, 
-			@Nullable String packageName, State state) {
+			@Nullable Integer groupIndex, State state) {
 		PageParameters params = BuildReportPage.paramsOf(build, reportName);
-		if (packageName != null)
-			params.add(PARAM_PACKAGE, packageName);
+		if (groupIndex != null)
+			params.add(PARAM_GROUP, groupIndex);
 		if (state.filter != null)
 			params.add(PARAM_FILTER, state.filter);
 		if (state.orderBy != null)

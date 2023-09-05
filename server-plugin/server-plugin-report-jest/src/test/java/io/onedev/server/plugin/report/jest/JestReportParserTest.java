@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,9 +26,12 @@ public class JestReportParserTest {
 		try (InputStream is = Resources.getResource(JestReportParserTest.class, "testResults.json").openStream()) {
 			JsonNode rootNode = new ObjectMapper().readTree(is);
 			
-			Build build = new Build();
-			build.setJobWorkspace("/Users/robin/Projects/onedev/reports/jest-demo");
-			build.getCheckoutPaths().add(null);
+			Build build = new Build() {
+				@Override
+				public String getBlobPath(String filePath) {
+					return filePath.substring("/Users/robin/Projects/onedev/reports/jest-demo/".length());
+				}
+			};
 			UnitTestReport report = new UnitTestReport(JestReportParser.parse(build, rootNode), false);
 			assertEquals(1, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_PASSED)).size());
 			assertEquals(2, report.getTestCases(null, null, Sets.newHashSet(Status.NOT_RUN)).size());

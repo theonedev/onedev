@@ -3,6 +3,7 @@ package io.onedev.server.search.code;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.IndexSearcher;
@@ -35,6 +36,6 @@ public interface CodeSearchManager {
 	String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix);
 
 	@Nullable
-	String findBlobPathBySymbol(Project project, ObjectId commitId, String symbolFQN, 
+	SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN,
 								String fqnSeparator);
 }

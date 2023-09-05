@@ -13,6 +13,12 @@
 			<artifactId>server-plugin-report-coverage</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>commons-loader</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.report.cobertura.CoberturaModule</moduleClass>

@@ -32,9 +32,11 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), () -> {
 			FileUtils.createDir(reportDir);
 			try {
-				ProblemReport aReport = createReport(build, inputDir, reportDir, logger);
+				ProblemReport aReport = process(build, inputDir, reportDir, logger);
 				if (aReport != null) {
 					aReport.writeTo(reportDir);
+					for (var problemFile: aReport.getProblemFiles())
+						writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
 					OneDev.getInstance(ProjectManager.class).directoryModified(
 							build.getProject().getId(), reportDir.getParentFile());
 					return aReport;
@@ -74,7 +76,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		return null;
 	}
 	
-	protected void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
+	private void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
 		File reportDir = new File(build.getStorageDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		File violationsFile = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());
@@ -85,6 +87,6 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		}
 	}
 
-	protected abstract ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
+	protected abstract ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger);
 	
 }

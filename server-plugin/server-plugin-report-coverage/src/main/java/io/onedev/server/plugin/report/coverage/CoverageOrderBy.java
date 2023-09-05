@@ -11,22 +11,6 @@ enum CoverageOrderBy {
 		}
 
 	}, 
-	LEAST_METHOD_COVERAGE {
-
-		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getMethodCoverage() - obj2.getMethodCoverage();
-		}
-		
-	}, 
-	MOST_METHOD_COVERAGE {
-
-		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return LEAST_METHOD_COVERAGE.compare(obj2, obj1);
-		}
-		
-	}, 
 	LEAST_BRANCH_COVERAGE {
 
 		@Override
@@ -40,22 +24,6 @@ enum CoverageOrderBy {
 		@Override
 		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
 			return LEAST_BRANCH_COVERAGE.compare(obj2, obj1);
-		}
-		
-	}, 
-	LEAST_STATEMENT_COVERAGE {
-
-		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getStatementCoverage() - obj2.getStatementCoverage();
-		}
-		
-	}, 
-	MOST_STATEMENT_COVERAGE {
-
-		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return LEAST_STATEMENT_COVERAGE.compare(obj2, obj1);
 		}
 		
 	}, 

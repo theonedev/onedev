@@ -889,6 +889,35 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
+	public BlobIdent getBlobIdent(Project project, ObjectId revId, String path) {
+		Long projectId = project.getId();
+
+		return runOnProjectServer(projectId, new ClusterTask<>() {
+
+			@Override
+			public BlobIdent call() {
+				if (path.length() == 0) {
+					return new BlobIdent(revId.name(), null, FileMode.TREE.getBits());
+				} else {
+					Repository repository = getRepository(projectId);
+					try (RevWalk revWalk = new RevWalk(repository)) {
+						RevCommit commit = GitUtils.parseCommit(revWalk, revId);
+						if (commit != null) {
+							TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree());
+							if (treeWalk != null)
+								return new BlobIdent(revId.name(), path, treeWalk.getRawMode(0));
+						}
+						return null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+
+		});
+	}
+	
+	@Override
 	public void deleteRefs(Project project, Collection<String> refs) {
 		Long projectId = project.getId();
 		runOnProjectServer(projectId, () -> {

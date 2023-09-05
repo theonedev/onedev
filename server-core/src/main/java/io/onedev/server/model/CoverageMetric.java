@@ -22,10 +22,6 @@ public class CoverageMetric extends AbstractEntity implements BuildMetric {
 	
 	@Column(nullable=false)
 	private String reportName;
-
-	private int methodCoverage;
-	
-	private int statementCoverage;
 	
 	private int branchCoverage;
 	
@@ -49,16 +45,6 @@ public class CoverageMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(group="Code Coverage", order=100, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
-			maxValue=100, minValue=0, name="Method", color="#F64E60")
-	public int getMethodCoverage() {
-		return methodCoverage;
-	}
-
-	public void setMethodCoverage(int methodCoverage) {
-		this.methodCoverage = methodCoverage;
-	}
-
 	@MetricIndicator(group="Code Coverage", order=200, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
 			maxValue=100, minValue=0, name="Branch", color="#1BC5BD")
 	public int getBranchCoverage() {
@@ -67,16 +53,6 @@ public class CoverageMetric extends AbstractEntity implements BuildMetric {
 
 	public void setBranchCoverage(int branchCoverage) {
 		this.branchCoverage = branchCoverage;
-	}
-
-	@MetricIndicator(group="Code Coverage", order=300, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
-			maxValue=100, minValue=0, name="Statement", color="#8950FC")
-	public int getStatementCoverage() {
-		return statementCoverage;
-	}
-
-	public void setStatementCoverage(int statementCoverage) {
-		this.statementCoverage = statementCoverage;
 	}
 
 	@MetricIndicator(group="Code Coverage", order=400, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 

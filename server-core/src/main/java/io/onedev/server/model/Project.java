@@ -677,6 +677,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			return blobOptional.orNull();
 	}
 	
+	public BlobIdent findBlobIdent(ObjectId revId, String path) {
+		return getGitService().getBlobIdent(this, revId, path);
+	}
+	
 	/**
 	 * Get cached object id of specified revision.
 	 * 

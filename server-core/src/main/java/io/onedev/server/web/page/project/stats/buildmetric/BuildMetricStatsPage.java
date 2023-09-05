@@ -1,19 +1,22 @@
 package io.onedev.server.web.page.project.stats.buildmetric;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.buildmetric.BuildMetricQuery;
+import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
+import io.onedev.server.util.*;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.BuildMetricQueryBehavior;
+import io.onedev.server.web.component.chart.line.Line;
+import io.onedev.server.web.component.chart.line.LineChartPanel;
+import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -30,29 +33,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.Day;
-import io.onedev.server.util.MetricIndicator;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.BuildMetricQueryBehavior;
-import io.onedev.server.web.component.chart.line.Line;
-import io.onedev.server.web.component.chart.line.LineChartPanel;
-import io.onedev.server.web.component.chart.line.LineSeries;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-
-import static java.util.Comparator.*;
+import static java.util.Comparator.comparingInt;
 
 @SuppressWarnings("serial")
 public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends ProjectPage {
@@ -256,10 +243,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							Map<String, Integer> yAxisValues = new HashMap<>();
 							for (String xAxisValue : xAxisValues)
 								yAxisValues.put(xAxisValue, completeValues.get(xAxisValue).get(lineIndex));
-							if ((minValue == null || minValue <= Collections.min(yAxisValues.values()))
-									&& (maxValue == null || maxValue >= Collections.max(yAxisValues.values()))) {
-								lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
-							}
+							lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
 							lineIndex++;
 						}
 

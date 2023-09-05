@@ -19,6 +19,7 @@ import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.SymbolQuery;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.BinaryDocValues;
@@ -344,24 +345,26 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 	
 	@Nullable
 	@Override
-	public String findBlobPathBySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
+	public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
 		var symbolName = symbolFQN;
 		var lastIndex = symbolName.lastIndexOf(fqnSeparator);
 		if (lastIndex != -1)
 			symbolName = symbolName.substring(lastIndex + 1);
-		
+
 		var query = new SymbolQuery.Builder(symbolName).caseSensitive(true).primary(true).count(MAX_BLOB_PATH_QUERY_COUNT).build();
-		String blobPath = null;
-		for (var hit: search(project, commitId, query)) {
+		SymbolHit found = null;
+		for (var hit : search(project, commitId, query)) {
 			var symbolHit = (SymbolHit) hit;
 			if (symbolFQN.equals(symbolHit.getSymbol().getFQN())) {
-				if (blobPath == null)
-					blobPath = symbolHit.getBlobPath();
-				else
-					blobPath = null;
+				if (found == null) {
+					found = symbolHit;
+				} else {
+					logger.warn("Multiple primary symbols matching: " + symbolFQN);
+					found = null;
+				}
 			}
 		}
-		return blobPath;
+		return found;
 	}
 
 }

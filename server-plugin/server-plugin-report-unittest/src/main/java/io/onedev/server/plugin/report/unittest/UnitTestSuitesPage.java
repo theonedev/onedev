@@ -20,6 +20,7 @@ import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
@@ -325,15 +326,13 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 							UnitTestCasesPage.class, params);
 					link.add(new Label("label", testSuite.getName()));
 
-					if (testSuite.getBlobPath() != null) {
-						BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath(),
-								FileMode.REGULAR_FILE.getBits());
-						if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
-							item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class,
-									ProjectBlobPage.paramsOf(getProject(), blobIdent)));
-						} else {
-							item.add(new WebMarkupContainer("viewSource").setVisible(false));
-						}
+					if (testSuite.getBlobPath() != null && SecurityUtils.canReadCode(getProject())) {
+						var sourceViewState = new ProjectBlobPage.State();
+						sourceViewState.blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath());
+						if (testSuite.getPosition() != null)
+							sourceViewState.position = BlobRenderer.getSourcePosition(testSuite.getPosition());
+						item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class,
+								ProjectBlobPage.paramsOf(getProject(), sourceViewState)));
 					} else {
 						item.add(new WebMarkupContainer("viewSource").setVisible(false));
 					}

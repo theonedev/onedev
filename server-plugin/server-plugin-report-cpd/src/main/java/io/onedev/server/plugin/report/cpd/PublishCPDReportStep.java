@@ -33,9 +33,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Editable(order=8030, group=StepGroup.PUBLISH_REPORTS, name="CPD")
 public class PublishCPDReportStep extends PublishProblemReportStep {
@@ -63,13 +61,12 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
 		List<CodeProblem> problems = new ArrayList<>();
-		Map<String, List<CodeProblem>> problemsByFile = new HashMap<>();
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing CPD report '" + relativePath + "'...");
@@ -83,20 +80,15 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 						var filePath = fileElement.attributeValue("path");
 						String blobPath = build.getBlobPath(filePath);
 						if (blobPath != null) {
-							BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
-							if (build.getProject().getBlob(blobIdent, false) != null) {
-								int beginLine = Integer.parseInt(fileElement.attributeValue("line"));
-								int endLine = Integer.parseInt(fileElement.attributeValue("endline"));
-								int beginColumn = Integer.parseInt(fileElement.attributeValue("column"));
-								int endColumn = Integer.parseInt(fileElement.attributeValue("endcolumn"));
-								PlanarRange range = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn);
-								CodeDuplication duplication = new CodeDuplication();
-								duplication.blobPath = blobPath;
-								duplication.range = range;
-								duplications.add(duplication);
-							} else {
-								logger.warning("Unable to find blob for path: " + blobPath);
-							}
+							int beginLine = Integer.parseInt(fileElement.attributeValue("line"));
+							int endLine = Integer.parseInt(fileElement.attributeValue("endline"));
+							int beginColumn = Integer.parseInt(fileElement.attributeValue("column"));
+							int endColumn = Integer.parseInt(fileElement.attributeValue("endcolumn"));
+							PlanarRange range = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn);
+							CodeDuplication duplication = new CodeDuplication();
+							duplication.blobPath = blobPath;
+							duplication.range = range;
+							duplications.add(duplication);
 						} else {
 							logger.warning("Unable to find blob path for file: " + filePath);
 						}
@@ -132,12 +124,6 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							CodeProblem problem = new CodeProblem(Severity.LOW, "Code Duplication", duplication.blobPath, 
 									duplication.range, message);
 							problems.add(problem);
-							List<CodeProblem> problemsOfFile = problemsByFile.get(problem.getBlobPath());
-							if (problemsOfFile == null) {
-								problemsOfFile = new ArrayList<>();
-								problemsByFile.put(problem.getBlobPath(), problemsOfFile);
-							}
-							problemsOfFile.add(problem);
 						}
 					}
 				}
@@ -147,9 +133,6 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 				throw new RuntimeException(e);
 			}
 		}
-		
-		for (Map.Entry<String, List<CodeProblem>> entry: problemsByFile.entrySet())
-			writeFileProblems(build, entry.getKey(), entry.getValue());
 
 		if (!problems.isEmpty())
 			return new ProblemReport(problems);

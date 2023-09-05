@@ -1022,10 +1022,14 @@ public class Build extends ProjectBelonging
 			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
 			absoluteCheckoutPath = Paths.get(absoluteCheckoutPath).normalize().toString();
 			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
-			if (filePath.startsWith(absoluteCheckoutPath + "/")) 
-				return filePath.substring(absoluteCheckoutPath.length() + 1);
-			else if (filePath.equals(absoluteCheckoutPath))
+			
+			if (filePath.startsWith(absoluteCheckoutPath + "/")) {
+				var blobPath = filePath.substring(absoluteCheckoutPath.length() + 1);
+				if (getProject().findBlobIdent(getCommitId(), blobPath) != null)
+					return blobPath;
+			} else if (filePath.equals(absoluteCheckoutPath)) {
 				return "";
+			}
 		}
 		return null;
 	}

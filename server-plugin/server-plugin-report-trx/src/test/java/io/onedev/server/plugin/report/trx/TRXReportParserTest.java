@@ -2,6 +2,7 @@ package io.onedev.server.plugin.report.trx;
 
 import com.google.common.io.Resources;
 import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.java.symbols.TypeSymbol;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.server.model.Build;
@@ -9,6 +10,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.IndexSearcher;
@@ -55,8 +57,8 @@ public class TRXReportParserTest extends AppLoaderMocker {
 
 				@Nullable
 				@Override
-				public String findBlobPathBySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
-					return "Test.cs";
+				public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
+					return null;
 				}
 
 			});

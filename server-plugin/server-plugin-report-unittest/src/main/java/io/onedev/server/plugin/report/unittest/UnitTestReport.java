@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.unittest;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -159,11 +160,15 @@ public class UnitTestReport implements Serializable {
 		
 		private final String blobPath;
 		
-		public TestSuite(String name, Status status, long duration, @Nullable String blobPath) {
+		private final PlanarRange position;
+		
+		public TestSuite(String name, Status status, long duration, @Nullable String blobPath, 
+						 @Nullable PlanarRange position) {
 			this.name = name;
 			this.status = status;
 			this.duration = duration;
 			this.blobPath = blobPath;
+			this.position = position;
 		}
 
 		public String getName() {
@@ -181,6 +186,11 @@ public class UnitTestReport implements Serializable {
 		@Nullable
 		public String getBlobPath() {
 			return blobPath;
+		}
+
+		@Nullable
+		public PlanarRange getPosition() {
+			return position;
 		}
 
 		@Nullable

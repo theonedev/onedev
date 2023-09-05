@@ -26,19 +26,19 @@ public class CoverageReport implements Serializable {
 	
 	private final CoverageInfo overallCoverages;
 	
-	private final List<CategoryCoverageInfo> categoryCoverages;
+	private final List<GroupCoverageInfo> groupCoverages;
 	
-	public CoverageReport(CoverageInfo overallCoverages, List<CategoryCoverageInfo> categoryCoverages) {
+	public CoverageReport(CoverageInfo overallCoverages, List<GroupCoverageInfo> groupCoverages) {
 		this.overallCoverages = overallCoverages;
-		this.categoryCoverages = categoryCoverages;
+		this.groupCoverages = groupCoverages;
 	}
 
 	public CoverageInfo getOverallCoverages() {
 		return overallCoverages;
 	}
 
-	public List<CategoryCoverageInfo> getCategoryCoverages() {
-		return categoryCoverages;
+	public List<GroupCoverageInfo> getGroupCoverages() {
+		return groupCoverages;
 	}
 	
 	public static CoverageReport readFrom(File reportDir) {

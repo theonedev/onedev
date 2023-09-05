@@ -58,10 +58,12 @@ public class JUnitReportParser {
 			else
 				status = Status.PASSED;
 			
-			String blobPath = OneDev.getInstance(CodeSearchManager.class).findBlobPathBySymbol(
+			var symbolHit = OneDev.getInstance(CodeSearchManager.class).findPrimarySymbol(
 					build.getProject(), build.getCommitId(), name, ".");
-
-			TestSuite testSuite = new TestSuite(name, status, duration, blobPath) {
+			
+			var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
+			var position = symbolHit != null? symbolHit.getHitPos(): null;
+			TestSuite testSuite = new TestSuite(name, status, duration, blobPath, position) {
 
 				@Nullable
 				@Override

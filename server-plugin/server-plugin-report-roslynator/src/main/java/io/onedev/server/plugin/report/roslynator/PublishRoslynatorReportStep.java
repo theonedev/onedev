@@ -12,7 +12,6 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
@@ -57,7 +56,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
@@ -103,15 +102,8 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 						var blobPath = blobPaths.get(filePath);
 						if (blobPath == null) {
 							blobPath = Optional.ofNullable(build.getBlobPath(filePath));
-							if (blobPath.isEmpty()) {
+							if (blobPath.isEmpty()) 
 								logger.warning("Unable to find blob path for file: " + filePath);
-							} else {
-								BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath.get());
-								if (build.getProject().getBlob(blobIdent, false) == null) {
-									logger.warning("Unable to find blob for path: " + blobIdent.path);
-									blobPath = Optional.empty();
-								}
-							}
 							blobPaths.put(filePath, blobPath);
 						}
 						if (blobPath.isPresent()) {
@@ -130,14 +122,10 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 			}
 		}
 
-		if (!problems.isEmpty()) {
-			var report = new ProblemReport(problems);
-			for (var problemFile: report.getProblemFiles())
-				writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
-			return report;
-		} else {
+		if (!problems.isEmpty())
+			return new ProblemReport(problems);
+		else 
 			return null;
-		}
 	}
 	
 }

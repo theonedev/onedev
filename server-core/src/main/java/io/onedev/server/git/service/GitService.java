@@ -83,6 +83,9 @@ public interface GitService {
 	@Nullable
 	Blob getBlob(Project project, ObjectId revId, String path);
 	
+	@Nullable
+	BlobIdent getBlobIdent(Project project, ObjectId revId, String path);
+	
 	void deleteRefs(Project project, Collection<String> refs);
 	
 	@Nullable

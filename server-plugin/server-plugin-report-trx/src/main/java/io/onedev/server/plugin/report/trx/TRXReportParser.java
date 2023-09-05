@@ -44,7 +44,7 @@ public class TRXReportParser {
 		for (var testDefinitionElement : testRunElement.element("TestDefinitions").elements()) {
 			testClasses.put(
 					testDefinitionElement.attributeValue("id"), 
-					testDefinitionElement.element("TestMethod").attributeValue("className"));
+					testDefinitionElement.element("TestMethod").attributeValue("className").replace('+', '.'));
 		}
 		
 		Map<String, List<TestCaseData>> testCaseDatum = new LinkedHashMap<>();
@@ -99,8 +99,10 @@ public class TRXReportParser {
 		for (var entry: testCaseDatum.entrySet()) {
 			Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
 			var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
-			var blobPath = searchManager.findBlobPathBySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
-			var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath) {
+			var symbolHit = searchManager.findPrimarySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
+			var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
+			var position = symbolHit != null? symbolHit.getHitPos(): null;
+			var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath, position) {
 
 				@Override
 				protected Component renderDetail(String componentId, Build build) {
@@ -134,18 +136,13 @@ public class TRXReportParser {
 
 										var blobPath = build.getBlobPath(file);
 										if (blobPath != null) {
-											BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
-											if (build.getProject().getBlob(blobIdent, false) != null) {
-												ProjectBlobPage.State state = new ProjectBlobPage.State();
-												state.blobIdent = blobIdent;
-												PlanarRange range = new PlanarRange(line-1, -1, line-1, -1);
-												state.position = BlobRenderer.getSourcePosition(range);
-												PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
-												String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
-												return String.format(" in <a href='%s' target='_blank'>%s:line %d</a>)", url, escapeHtml5(blobPath), line);
-											} else {
-												return " in " + escapeHtml5(file) + ":line " + line + " ";
-											}
+											ProjectBlobPage.State state = new ProjectBlobPage.State();
+											state.blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
+											PlanarRange range = new PlanarRange(line-1, -1, line-1, -1);
+											state.position = BlobRenderer.getSourcePosition(range);
+											PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
+											String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
+											return String.format(" in <a href='%s' target='_blank'>%s:line %d</a>)", url, escapeHtml5(blobPath), line);
 										} else {
 											return " in " + escapeHtml5(file) + ":line " + line + " ";
 										}

@@ -17,44 +17,6 @@ import org.apache.wicket.model.IModel;
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var methodContainer = new WebMarkupContainer("method");
-		add(methodContainer.setVisible(getCoverageInfo().getMethodCoverage() >= 0));
-		methodContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "Methods " + getCoverageInfo().getMethodCoverage() + "%";
-			}
-			
-		}));
-		methodContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
-
-			@Override
-			public Integer getObject() {
-				return getCoverageInfo().getMethodCoverage();
-			}
-			
-		}));
-		
-		var statementContainer = new WebMarkupContainer("statement");
-		add(statementContainer.setVisible(getCoverageInfo().getStatementCoverage() >= 0));
-		statementContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "Statements " + getCoverageInfo().getStatementCoverage() + "%";
-			}
-			
-		}));
-		statementContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
-
-			@Override
-			public Integer getObject() {
-				return getCoverageInfo().getStatementCoverage();
-			}
-			
-		}));
-		
 		var branchContainer = new WebMarkupContainer("branch");
 		add(branchContainer.setVisible(getCoverageInfo().getBranchCoverage() >= 0));
 		branchContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
