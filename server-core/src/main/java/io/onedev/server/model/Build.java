@@ -266,8 +266,6 @@ public class Build extends ProjectBelonging
 	@Column(nullable=false)
 	private String jobName;
 	
-	private String jobWorkspace;
-	
 	@Lob
 	@Column(nullable=false)
 	private ArrayList<String> checkoutPaths = new ArrayList<>();
@@ -412,15 +410,6 @@ public class Build extends ProjectBelonging
 
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
-	}
-
-	@Nullable
-	public String getJobWorkspace() {
-		return jobWorkspace;
-	}
-
-	public void setJobWorkspace(@Nullable String jobWorkspace) {
-		this.jobWorkspace = jobWorkspace;
 	}
 
 	public Collection<String> getCheckoutPaths() {
@@ -1010,24 +999,18 @@ public class Build extends ProjectBelonging
 	
 	@Nullable
 	public String getBlobPath(String filePath) {
-		if (jobWorkspace == null || checkoutPaths == null)
-			throw new ExplicitException("Job workspace or checkout paths unknown");
+		if (checkoutPaths.isEmpty())
+			throw new ExplicitException("No checkout path detected");
+		
 		filePath = filePath.replace('\\', '/');
 		filePath = Paths.get(filePath).normalize().toString();
 		filePath = filePath.replace('\\', '/');
 		for (var checkoutPath: checkoutPaths) {
-			var absoluteCheckoutPath = jobWorkspace;
-			if (checkoutPath != null)
-				absoluteCheckoutPath += "/" + checkoutPath;
-			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
-			absoluteCheckoutPath = Paths.get(absoluteCheckoutPath).normalize().toString();
-			absoluteCheckoutPath = absoluteCheckoutPath.replace('\\', '/');
-			
-			if (filePath.startsWith(absoluteCheckoutPath + "/")) {
-				var blobPath = filePath.substring(absoluteCheckoutPath.length() + 1);
+			if (filePath.startsWith(checkoutPath + "/")) {
+				var blobPath = filePath.substring(checkoutPath.length() + 1);
 				if (getProject().findBlobIdent(getCommitId(), blobPath) != null)
 					return blobPath;
-			} else if (filePath.equals(absoluteCheckoutPath)) {
+			} else if (filePath.equals(checkoutPath)) {
 				return "";
 			}
 		}

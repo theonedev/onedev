@@ -92,6 +92,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -510,7 +511,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		long timeout;
 
 		Job job;
-
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
@@ -538,15 +538,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
-		CompositeFacade entryFacade = new CompositeFacade(actions);
-		entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
-			if (executable instanceof CheckoutFacade) {
-				CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
-				build.getCheckoutPaths().add(checkoutFacade.getCheckoutPath());
-			}
-			return null;
-		}, new ArrayList<>());
-		
 		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
 		executionRef.set(new JobExecution(executorService.submit(() -> {
 			AtomicInteger retried = new AtomicInteger(0);
@@ -762,7 +753,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setSubmitReason(reason);
 				build.setCanceller(null);
 				build.setAgent(null);
-				build.setJobWorkspace(null);
 				build.getCheckoutPaths().clear();
 
 				buildParamManager.deleteParams(build);
@@ -1399,7 +1389,22 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void reportJobWorkspace(JobContext jobContext, String jobWorkspace) {
 		transactionManager.run(() -> {
 			Build build = buildManager.load(jobContext.getBuildId());
-			build.setJobWorkspace(jobWorkspace);
+			
+			CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
+			entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
+				if (executable instanceof CheckoutFacade) {
+					CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
+					var checkoutPath = jobWorkspace;
+					if (checkoutFacade.getCheckoutPath() != null)
+						checkoutPath += "/" + checkoutFacade.getCheckoutPath();
+					checkoutPath = checkoutPath.replace('\\', '/');
+					checkoutPath = Paths.get(checkoutPath).normalize().toString();
+					checkoutPath = checkoutPath.replace('\\', '/');
+					build.getCheckoutPaths().add(checkoutPath);
+				}
+				return null;
+			}, new ArrayList<>());
+			
 			buildManager.update(build);
 		});
 	}

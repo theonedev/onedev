@@ -111,8 +111,10 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 									break;
 								}
 							}
-							if (blobPathOpt == null)
+							if (blobPathOpt == null) {
 								blobPathOpt = Optional.empty();
+								logger.warning("Unable to find blob path for file: " + fileName);
+							}
 							blobPaths.put(fileName, blobPathOpt);
 						}
 						var blobPath = blobPathOpt.orElse(null);

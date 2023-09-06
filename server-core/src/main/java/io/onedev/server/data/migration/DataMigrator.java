@@ -5754,5 +5754,17 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate138(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("jobWorkspace").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
