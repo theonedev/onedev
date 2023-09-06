@@ -70,7 +70,7 @@ public class ProblemModule extends AbstractPluginModule {
 			Long projectId = build.getProject().getId();
 			Long buildNumber = build.getNumber();
 			
-			Map<String, List<CodeProblem>> problemsMap = getProjectManager().runOnActiveServer(
+			Map<String, Collection<CodeProblem>> problemsMap = getProjectManager().runOnActiveServer(
 					projectId, new GetCodeProblems(projectId, buildNumber, blobPath, reportName));
 			
 			List<CodeProblem> problems = new ArrayList<>();
@@ -118,7 +118,7 @@ public class ProblemModule extends AbstractPluginModule {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	
-	private static class GetCodeProblems implements ClusterTask<Map<String, List<CodeProblem>>> {
+	private static class GetCodeProblems implements ClusterTask<Map<String, Collection<CodeProblem>>> {
 
 		private static final long serialVersionUID = 1L;
 
@@ -138,9 +138,9 @@ public class ProblemModule extends AbstractPluginModule {
 		}
 
 		@Override
-		public Map<String, List<CodeProblem>> call() {
+		public Map<String, Collection<CodeProblem>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
-				Map<String, List<CodeProblem>> problems = new HashMap<>();
+				Map<String, Collection<CodeProblem>> problems = new HashMap<>();
 				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
@@ -148,7 +148,7 @@ public class ProblemModule extends AbstractPluginModule {
 							File file = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 							if (file.exists()) {
 								try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-									problems.put(reportDir.getName(), (List<CodeProblem>) SerializationUtils.deserialize(is));
+									problems.put(reportDir.getName(), (Collection<CodeProblem>) SerializationUtils.deserialize(is));
 								}
 							}
 						}
