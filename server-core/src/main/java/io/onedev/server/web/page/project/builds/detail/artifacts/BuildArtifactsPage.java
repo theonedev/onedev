@@ -9,6 +9,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -20,6 +21,8 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -126,6 +129,16 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
 					Fragment fragment = new Fragment(componentId, "deleteFrag", BuildArtifactsPage.this);
 					AjaxLink<?> link = new AjaxLink<Void>("link") {
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							String confirmMessage;
+							if (rowModel.getObject() instanceof DirectoryInfo)
+								confirmMessage = "Do you really want to delete this directory?";
+							else
+								confirmMessage = "Do you really want to delete this file?";
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
+						}
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -134,10 +147,6 @@ public class BuildArtifactsPage extends BuildDetailPage {
 						}
 
 					};
-					if (rowModel.getObject() instanceof DirectoryInfo)
-						link.add(new ConfirmClickModifier("Do you really want to delete this directory?"));
-					else
-						link.add(new ConfirmClickModifier("Do you really want to delete this file?"));
 					fragment.add(link);
 					cellItem.add(fragment);
 				}
