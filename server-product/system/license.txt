@@ -19,9 +19,9 @@ Copyright (c) 2023-present OneDev Pty
 * to encrypt or decrypt custom data.
 *
 * Functionalities offered by EE module of the software will be unlocked and shall only be used
-* with an active subscription (either trial or formal). Subscription shall only be extended with
-* a valid, exclusive, and unused subscription key (either trial or formal) issued by OneDev Pty
-* for current installation.
+* with an active subscription (either trial or formal). Subscription shall only be activated and
+* extended with a valid, exclusive, and unused subscription key (either trial or formal) issued
+* by OneDev Pty for current installation.
 *
 ***********************************************************************************************
 
