@@ -5768,5 +5768,16 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate139(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Agents.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.element("temporal").detach();
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

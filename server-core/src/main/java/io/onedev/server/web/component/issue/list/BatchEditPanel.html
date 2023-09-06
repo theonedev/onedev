@@ -6,6 +6,10 @@
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
+				<div class="alert alert-notice alert-light mb-4">
+					<b>NOTE:</b> Batch editing issues will not cause state transitions of other issues 
+					even if transition rule matches
+				</div>
 				<div class="mb-3 font-size-lg">Fields to Change</div>
 				<div wicket:id="feedback"></div>
 				<div class="d-flex flex-wrap">

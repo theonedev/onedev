@@ -825,20 +825,6 @@ class AgentListPanel extends Panel {
 			
 		});
 		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("Temporal")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isTemporal()));
-			}
-			
-			@Override
-			public Component getHeader(String componentId) {
-				return new Fragment(componentId, "temporalHeaderFrag", AgentListPanel.this);
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<Agent, Void>(Model.of("Status")) {
 
 			@Override

@@ -1,3 +1,10 @@
+# 9.1.5
+
+### Agent
+
+Temporal agent support is removed as this feature is flawed (using same token). 
+This feature will be replaced by on demand agent launch in future versions
+
 # 9.1.0
 
 ### Pull Request

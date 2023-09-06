@@ -100,8 +100,6 @@ public class Agent extends AbstractEntity {
 	
 	private int cpus;
 	
-	private boolean temporal;
-	
 	private boolean paused;
 	
 	@JsonIgnore
@@ -175,14 +173,6 @@ public class Agent extends AbstractEntity {
 		this.cpus = cpus;
 	}
 
-	public boolean isTemporal() {
-		return temporal;
-	}
-
-	public void setTemporal(boolean temporal) {
-		this.temporal = temporal;
-	}
-
 	public Collection<AgentAttribute> getAttributes() {
 		return attributes;
 	}
@@ -219,7 +209,7 @@ public class Agent extends AbstractEntity {
 	
 	public AgentData getAgentData() {
 		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
-				name, ipAddress, cpus, temporal, getAttributeMap());
+				name, ipAddress, cpus, getAttributeMap());
 	}
 	
 }
