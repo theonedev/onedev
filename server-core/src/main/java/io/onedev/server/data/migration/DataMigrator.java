@@ -5760,7 +5760,9 @@ public class DataMigrator {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					element.element("jobWorkspace").detach();
+					var jobWorkspaceElement = element.element("jobWorkspace");
+					if (jobWorkspaceElement != null)
+						jobWorkspaceElement.detach();
 				}
 				dom.writeToFile(file, false);
 			}
