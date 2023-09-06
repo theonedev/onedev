@@ -7,6 +7,13 @@
 		<artifactId>server-plugin</artifactId>
 		<version>9.1.2</version>
 	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-junit</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.maven.MavenModule</moduleClass>
 	</properties>

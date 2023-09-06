@@ -1,16 +1,7 @@
 package io.onedev.server.plugin.buildspec.gradle;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.google.common.collect.Lists;
-
+import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -24,13 +15,18 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
 import io.onedev.server.util.interpolative.VariableInterpolator;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class GradleJobSuggestion implements JobSuggestion {
 		
 	public static final String DETERMINE_DOCKER_IMAGE = "gradle:determine-docker-image";
-	
-	public static final String DETERMINE_PROJECT_VERSION = "gradle:determine-project-version";
 	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
@@ -62,14 +58,27 @@ public class GradleJobSuggestion implements JobSuggestion {
 			setBuildVersion.setBuildVersion("@file:buildVersion@");
 			job.getSteps().add(setBuildVersion);
 			
-			CommandStep runGradle = new CommandStep();
-			runGradle.setName("run gradle build");
-			runGradle.setImage(imageName);
-			runGradle.getInterpreter().setCommands(Lists.newArrayList("gradle build"));
-			job.getSteps().add(runGradle);
+			CommandStep runTest = new CommandStep();
+			runTest.setName("run test");
+			runTest.setImage(imageName);
+			runTest.getInterpreter().setCommands(Lists.newArrayList("gradle test"));
+			job.getSteps().add(runTest);
+
+			var publishUnitTestReportStep = new PublishJUnitReportStep();
+			publishUnitTestReportStep.setName("publish unit test report");
+			publishUnitTestReportStep.setReportName("Unit Test");
+			publishUnitTestReportStep.setFilePatterns("**/TEST-*.xml");
+			publishUnitTestReportStep.setCondition(ExecuteCondition.ALWAYS);
+			job.getSteps().add(publishUnitTestReportStep);
+
+			job.getTriggers().add(new BranchUpdateTrigger());
+			job.getTriggers().add(new PullRequestUpdateTrigger());
+
+			CacheSpec cache = new CacheSpec();
+			cache.setKey("gradle-cache");
+			cache.setPath("/home/gradle/.gradle");
+			job.getCaches().add(cache);
 			
-			setupTriggers(job);
-			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -77,27 +86,21 @@ public class GradleJobSuggestion implements JobSuggestion {
 	}
 	
 	private static Blob getGradleBlob(Project project, ObjectId commitId) {
-		return project.getBlob(new BlobIdent(commitId.name(), "build.gradle", FileMode.TYPE_FILE), false);		
+		var blob = project.getBlob(new BlobIdent(commitId.name(), "buildSrc/build.gradle"), false);		
+		if (blob == null)
+			blob = project.getBlob(new BlobIdent(commitId.name(), "build.gradle"), false);
+		return blob;
 	}
 	
 	private static Blob getKotlinGradleBlob(Project project, ObjectId commitId) {
-		return project.getBlob(new BlobIdent(commitId.name(), "build.gradle.kts", FileMode.TYPE_FILE), false);		
+		var blob = project.getBlob(new BlobIdent(commitId.name(), "buildSrc/build.gradle.kts"), false);		
+		if (blob == null)
+			blob = project.getBlob(new BlobIdent(commitId.name(), "build.gradle.kts"), false);
+		return blob;
 	}
 	
 	private static Blob getGradlePropertiesBlob(Project project, ObjectId commitId) {
-		return project.getBlob(new BlobIdent(commitId.name(), "gradle.properties", FileMode.TYPE_FILE), false);		
-	}
-	
-	private void setupTriggers(Job job) {
-		job.getTriggers().add(new BranchUpdateTrigger());
-		job.getTriggers().add(new PullRequestUpdateTrigger());
-	}
-	
-	private void setupCaches(Job job) {
-		CacheSpec cache = new CacheSpec();
-		cache.setKey("gradle-cache");
-		cache.setPath("/home/gradle/.gradle");
-		job.getCaches().add(cache);
+		return project.getBlob(new BlobIdent(commitId.name(), "gradle.properties"), false);		
 	}
 	
 	@Nullable

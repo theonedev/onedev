@@ -1,12 +1,22 @@
 package io.onedev.server.plugin.buildspec.maven;
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.k8shelper.ExecuteCondition;
+import io.onedev.server.buildspec.job.CacheSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobSuggestion;
+import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
+import io.onedev.server.buildspec.step.CheckoutStep;
+import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -16,21 +26,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.server.buildspec.job.CacheSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.buildspec.step.CheckoutStep;
-import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.SetBuildVersionStep;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import javax.annotation.Nullable;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MavenJobSuggestion implements JobSuggestion {
 
@@ -70,8 +69,14 @@ public class MavenJobSuggestion implements JobSuggestion {
 			runTests.setName("run tests");
 			runTests.setImage(imageName);
 			runTests.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
-
 			job.getSteps().add(runTests);
+
+			var publishUnitTestReportStep = new PublishJUnitReportStep();
+			publishUnitTestReportStep.setName("publish unit test report");
+			publishUnitTestReportStep.setReportName("Unit Test");
+			publishUnitTestReportStep.setFilePatterns("**/TEST-*.xml");
+			publishUnitTestReportStep.setCondition(ExecuteCondition.ALWAYS);
+			job.getSteps().add(publishUnitTestReportStep);
 			
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
