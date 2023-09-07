@@ -1132,14 +1132,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							transactionManager.run(() -> {
 								for (Long buildId : buildIdsOfServer) {
 									Build build = buildManager.load(buildId);
-									if (build.getStatus() == Status.RUNNING
-											|| build.getStatus() == Status.PENDING) {
+									if (build.getStatus() == Status.PENDING) {
 										JobExecution execution = jobExecutions.get(build.getId());
 										if (execution != null) {
-											if (execution.isTimedout())
-												execution.cancel(null);
+											execution.updateBeginTime();
 										} else if (thread != null) {
-											build.setStatus(Status.PENDING);
 											try {
 												jobExecutions.put(build.getId(), execute(build));
 											} catch (Throwable t) {
@@ -1149,6 +1146,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												else
 													markBuildError(build, Throwables.getStackTraceAsString(t));
 											}
+										}
+									} else if (build.getStatus() == Status.RUNNING) {
+										JobExecution execution = jobExecutions.get(build.getId());
+										if (execution != null) {
+											if (execution.isTimedout())
+												execution.cancel(null);
+										} else {
+											build.setStatus(Status.PENDING);
 										}
 									} else if (build.getStatus() == Status.WAITING) {
 										if (build.getRetryDate() != null) {

@@ -44,6 +44,7 @@ import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -73,6 +74,7 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT_HASH)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
+@DynamicUpdate
 public class Build extends ProjectBelonging 
 		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
