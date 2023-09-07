@@ -98,7 +98,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			if (description != null && description.length() > PullRequest.MAX_DESCRIPTION_LEN)
 				throw new ExplicitException("Description too long");
 			request.setDescription(description);
-			entityReferenceManager.addReferenceChange(request, description);
+			entityReferenceManager.addReferenceChange(SecurityUtils.getUser(), request, description);
 
 			PullRequestChange change = new PullRequestChange();
 			change.setRequest(request);

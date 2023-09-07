@@ -26,7 +26,6 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferenc
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedNumber;
 import org.jsoup.Jsoup;
@@ -55,7 +54,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	}
 	
 	@Override
-	public void addReferenceChange(Issue issue, String markdown) {
+	public void addReferenceChange(User user, Issue issue, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
 			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, issue.getProject())) {
@@ -76,7 +75,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromIssueData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.create(change, null);
@@ -101,7 +100,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromIssueData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.create(change, null);
@@ -164,7 +163,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	}
 	
 	@Override 
-	public void addReferenceChange(PullRequest request, String markdown) {
+	public void addReferenceChange(User user, PullRequest request, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
 			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, request.getTargetProject())) {
@@ -185,7 +184,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromPullRequestData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.create(change, null);
@@ -210,7 +209,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromPullRequestData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.create(change, null);
@@ -221,7 +220,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	}
 	
 	@Override
-	public void addReferenceChange(CodeComment comment, String markdown) {
+	public void addReferenceChange(User user, CodeComment comment, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
 			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, comment.getProject())) {
@@ -242,7 +241,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromCodeCommentData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.create(change, null);
@@ -267,7 +266,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromCodeCommentData);
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(user);
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.create(change, null);
@@ -280,81 +279,81 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(IssueCommentCreated event) {
-		addReferenceChange(event.getIssue(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getIssue(), event.getComment().getContent());
 	}
 
 	@Transactional
 	@Listen
 	public void on(IssueCommentEdited event) {
-		addReferenceChange(event.getIssue(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getIssue(), event.getComment().getContent());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(IssueChanged event) {
-		addReferenceChange(event.getIssue(), event.getComment());
+		addReferenceChange(event.getUser(), event.getIssue(), event.getComment());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestCommentCreated event) {
-		addReferenceChange(event.getRequest(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getRequest(), event.getComment().getContent());
 	}
 
 	@Transactional
 	@Listen
 	public void on(PullRequestCommentEdited event) {
-		addReferenceChange(event.getRequest(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getRequest(), event.getComment().getContent());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestChanged event) {
-		addReferenceChange(event.getRequest(), event.getComment());
+		addReferenceChange(event.getUser(), event.getRequest(), event.getComment());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(CodeCommentReplyCreated event) {
-		addReferenceChange(event.getComment(), event.getReply().getContent());
+		addReferenceChange(event.getUser(), event.getComment(), event.getReply().getContent());
 	}
 
 	@Transactional
 	@Listen
 	public void on(CodeCommentReplyEdited event) {
-		addReferenceChange(event.getComment(), event.getReply().getContent());
+		addReferenceChange(event.getUser(), event.getComment(), event.getReply().getContent());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(CodeCommentStatusChanged event) {
-		addReferenceChange(event.getComment(), event.getNote());
+		addReferenceChange(event.getUser(), event.getComment(), event.getNote());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestOpened event) {
-		addReferenceChange(event.getRequest(), event.getRequest().getTitle());
-		addReferenceChange(event.getRequest(), event.getRequest().getDescription());
+		addReferenceChange(event.getUser(), event.getRequest(), event.getRequest().getTitle());
+		addReferenceChange(event.getUser(), event.getRequest(), event.getRequest().getDescription());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(IssueOpened event) {
-		addReferenceChange(event.getIssue(), event.getIssue().getTitle());
-		addReferenceChange(event.getIssue(), event.getIssue().getDescription());
+		addReferenceChange(event.getUser(), event.getIssue(), event.getIssue().getTitle());
+		addReferenceChange(event.getUser(), event.getIssue(), event.getIssue().getDescription());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(CodeCommentCreated event) {
-		addReferenceChange(event.getComment(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getComment(), event.getComment().getContent());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(CodeCommentEdited event) {
-		addReferenceChange(event.getComment(), event.getComment().getContent());
+		addReferenceChange(event.getUser(), event.getComment(), event.getComment().getContent());
 	}
 	
 }

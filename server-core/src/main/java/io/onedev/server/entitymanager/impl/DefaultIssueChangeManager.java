@@ -148,7 +148,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
 				throw new ExplicitException("Description too long");
 			issue.setDescription(description);
-			entityReferenceManager.addReferenceChange(issue, description);
+			entityReferenceManager.addReferenceChange(SecurityUtils.getUser(), issue, description);
 
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
