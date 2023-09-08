@@ -27,8 +27,10 @@
 				<td>
 					<div class="d-flex align-items-start">
 						<span wicket:id="status" class="mr-3"></span>
-						<a wicket:id="testCases" class="mr-4 text-break" title="Show test cases of this test suite"><span wicket:id="label"></span></a>
-						<a wicket:id="viewSource" class="ml-n3 mr-4" title="View source file" target="_blank"><wicket:svg href="file" class="icon"/></a>
+						<span class="mr-4">
+							<a wicket:id="testCases" class="text-break" title="Show test cases of this test suite"><span wicket:id="label"></span></a>
+							<a wicket:id="viewSource" title="View source file" target="_blank"><wicket:svg href="file" class="icon"/></a>
+						</span>
 						<span wicket:id="duration" class="ml-auto"></span>
 					</div>
 					<pre wicket:id="detail" class="text-gray font-size-sm text-break mt-3"></pre>
