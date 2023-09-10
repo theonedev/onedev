@@ -33,7 +33,7 @@ onedev:
     # onedev.initSettings.email -- Administrator Email address. Leave empty to prompt
     email: ""
     # onedev.initSettings.serverUrl -- Server url. Leave empty to prompt. Will be ignored if ingress.host is specified
-    serverUrl: "http://localhost:6610"
+    serverUrl: ""
     # onedev.initSettings.sshRootUrl -- Root url to clone repository via SSH. Leave empty to derive from server url
     sshRootUrl: ""
 
