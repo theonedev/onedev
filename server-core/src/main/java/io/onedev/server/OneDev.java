@@ -271,9 +271,14 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	}
 	
 	public String guessServerUrl() {
-		ServerConfig serverConfig = serverConfigProvider.get();
-		var serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
-		return UrlUtils.toString(serverUrl);
+		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
+		if (serviceHost != null) {
+			return "http://" + serviceHost;
+		} else {
+			ServerConfig serverConfig = serverConfigProvider.get();
+			var serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
+			return UrlUtils.toString(serverUrl);
+		}
 	}
 	
 	private Url buildServerUrl(String host, String protocol, int port) {

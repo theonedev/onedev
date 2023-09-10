@@ -154,8 +154,6 @@ affinity: {}
 topologySpreadConstraints: []
 
 service:
-  # service.enabled -- If **true**, create a Service resource.
-  enabled: true
   # service.type -- Specify the type for the Service. ClusterIP, LoadBalancer
   type: "ClusterIP"
   # service.annotations -- Specify annotations for the Service.

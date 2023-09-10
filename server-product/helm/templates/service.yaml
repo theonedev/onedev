@@ -1,4 +1,3 @@
-{{- if and .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -95,5 +94,4 @@ spec:
 {{- if $ssh.topologyKeys }}
     topologyKeys: {{ toYaml $ssh.topologyKeys | nindent 4 }}
   {{- end }}
-{{- end -}}
 {{- end -}}
