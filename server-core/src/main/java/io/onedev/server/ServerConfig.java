@@ -3,6 +3,7 @@ package io.onedev.server;
 import com.google.common.base.Splitter;
 import io.onedev.agent.Agent;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.util.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,13 +108,8 @@ public class ServerConfig {
 					socket.connect(new InetSocketAddress(dbHost, dbPort));
 					clusterIp = socket.getLocalAddress().getHostAddress();
 				} catch (Exception e) {
-					logger.error("Unable to discover cluster ip, using arbitrary ip address", e);
-					try {
-						clusterIp = InetAddress.getLocalHost().getHostAddress();
-					} catch (Exception e2) {
-						logger.error("Unable to get local ip address, using loopback instead", e);
-						clusterIp = "127.0.0.1";
-					}
+					logger.error(String.format("Connection failed (host: %s, port: %d)", dbHost, dbPort), e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			}
 		}
