@@ -14,19 +14,19 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.data.migration.DataMigrator;
+import io.onedev.server.data.migration.MigrationHelper;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.data.migration.DataMigrator;
-import io.onedev.server.data.migration.MigrationHelper;
-import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceUtils;
@@ -81,9 +81,9 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Throwables.*;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
-import static org.unbescape.html.HtmlEscape.*;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -220,7 +220,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	        			sqls.add(sql);
 	        	}
 	        	execute(conn, sqls, true);
-	        	
+				
 	        	try (var stmt = conn.createStatement()) {
 	        		stmt.execute(String.format("insert into %s values(1, '%s')", 
 	        				getTableName(ModelVersion.class), MigrationHelper.getVersion(DataMigrator.class)));
