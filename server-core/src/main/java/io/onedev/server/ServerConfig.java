@@ -106,8 +106,14 @@ public class ServerConfig {
 				try (Socket socket = new Socket()) {
 					socket.connect(new InetSocketAddress(dbHost, dbPort));
 					clusterIp = socket.getLocalAddress().getHostAddress();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} catch (Exception e) {
+					logger.error("Unable to discover cluster ip, using arbitrary ip address", e);
+					try {
+						clusterIp = InetAddress.getLocalHost().getHostAddress();
+					} catch (Exception e2) {
+						logger.error("Unable to get local ip address, using loopback instead", e);
+						clusterIp = "127.0.0.1";
+					}
 				}
 			}
 		}
