@@ -62,7 +62,7 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=20, description="Enable this to allow project managers to open web terminal to running builds. "
+	@Editable(order=20, description="Enable this to allow to open interactive shell to diagnose running builds. "
 			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
 			+ "the executor. You should configure job requirement below to make sure the executor can only be "
 			+ "used by trusted jobs if this option is enabled")

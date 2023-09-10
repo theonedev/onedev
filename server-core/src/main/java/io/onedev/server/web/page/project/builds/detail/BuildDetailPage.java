@@ -336,7 +336,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
 							if (jobContext!= null) {
 								setVisible(SecurityUtils.isAdministrator()
-										|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());
+										|| SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()) && jobContext.getJobExecutor().isShellAccessEnabled());
 							} else {
 								setVisible(false);
 							}

@@ -1,7 +1,15 @@
 package io.onedev.server.ee.terminal;
 
-import java.io.IOException;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.terminal.MessageTypes;
+import io.onedev.server.terminal.TerminalManager;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Application;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -19,16 +27,7 @@ import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.terminal.MessageTypes;
-import io.onedev.server.terminal.TerminalManager;
-import io.onedev.server.web.page.base.BasePage;
+import java.io.IOException;
 
 @SuppressWarnings("serial")
 public class BuildTerminalPage extends BasePage {
@@ -111,7 +110,7 @@ public class BuildTerminalPage extends BasePage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getBuild().getProject());  
+		return SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName());  
 	}
 	
 	private Build getBuild() {

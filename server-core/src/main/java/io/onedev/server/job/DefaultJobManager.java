@@ -61,6 +61,7 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.MatrixRunner;
@@ -156,6 +157,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final ClusterManager clusterManager;
 
 	private final CodeIndexManager codeIndexManager;
+	
+	private final TerminalManager terminalManager;
 
 	private final GitService gitService;
 	
@@ -177,7 +180,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
 							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
 							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, PullRequestManager pullRequestManager, 
-							 IssueManager issueManager, GitService gitService, SSLFactory sslFactory, Dao dao) {
+							 IssueManager issueManager, GitService gitService, SSLFactory sslFactory, Dao dao, 
+							 TerminalManager terminalManager) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -185,6 +189,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
 		this.logManager = logManager;
+		this.terminalManager = terminalManager;
 		this.executorService = executorService;
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
@@ -828,81 +833,84 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public WebShell openShell(Long buildId, Terminal terminal) {
-		JobContext jobContext = getJobContext(buildId);
-		if (jobContext != null) {
-			String jobToken = jobContext.getJobToken();
-			String shellServer = jobServers.get(jobToken);
-			if (shellServer != null) {
-				if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {
-					clusterManager.runOnServer(shellServer, () -> {
-						JobContext innerJobContext = getJobContext(jobToken, true);
-						JobRunnable jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
-						if (jobRunnable != null) {
-							Shell shell = jobRunnable.openShell(innerJobContext, terminal);
-							jobShells.put(terminal.getSessionId(), shell);
-						} else {
-							throw new ExplicitException("Job shell not ready");
-						}
-						return null;
-					});
+		if (terminalManager.isTerminalSupported()) {
+			JobContext jobContext = getJobContext(buildId);
+			if (jobContext != null) {
+				String jobToken = jobContext.getJobToken();
+				String shellServer = jobServers.get(jobToken);
+				if (shellServer != null) {
+					if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {
+						clusterManager.runOnServer(shellServer, () -> {
+							JobContext innerJobContext = getJobContext(jobToken, true);
+							JobRunnable jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
+							if (jobRunnable != null) {
+								Shell shell = jobRunnable.openShell(innerJobContext, terminal);
+								jobShells.put(terminal.getSessionId(), shell);
+							} else {
+								throw new ExplicitException("Job shell not ready");
+							}
+							return null;
+						});
 
-					return new WebShell(buildId, terminal.getSessionId()) {
+						return new WebShell(buildId, terminal.getSessionId()) {
 
-						private static final long serialVersionUID = 1L;
+							private static final long serialVersionUID = 1L;
 
-						@Override
-						public void sendInput(String input) {
-							clusterManager.submitToServer(shellServer, () -> {
-								try {
-									Shell shell = jobShells.get(terminal.getSessionId());
-									if (shell != null)
-										shell.sendInput(input);
-								} catch (Exception e) {
-									logger.error("Error sending shell input", e);
-								}
-								return null;
-							});
-						}
+							@Override
+							public void sendInput(String input) {
+								clusterManager.submitToServer(shellServer, () -> {
+									try {
+										Shell shell = jobShells.get(terminal.getSessionId());
+										if (shell != null)
+											shell.sendInput(input);
+									} catch (Exception e) {
+										logger.error("Error sending shell input", e);
+									}
+									return null;
+								});
+							}
 
-						@Override
-						public void resize(int rows, int cols) {
-							clusterManager.submitToServer(shellServer, () -> {
-								try {
-									Shell shell = jobShells.get(terminal.getSessionId());
-									if (shell != null)
-										shell.resize(rows, cols);
-								} catch (Exception e) {
-									logger.error("Error resizing shell", e);
-								}
-								return null;
-							});
-						}
+							@Override
+							public void resize(int rows, int cols) {
+								clusterManager.submitToServer(shellServer, () -> {
+									try {
+										Shell shell = jobShells.get(terminal.getSessionId());
+										if (shell != null)
+											shell.resize(rows, cols);
+									} catch (Exception e) {
+										logger.error("Error resizing shell", e);
+									}
+									return null;
+								});
+							}
 
-						@Override
-						public void exit() {
-							clusterManager.submitToServer(shellServer, () -> {
-								try {
-									Shell shell = jobShells.remove(terminal.getSessionId());
-									if (shell != null)
-										shell.exit();
-								} catch (Exception e) {
-									logger.error("Error exiting shell", e);
-								}
-								return null;
-							});
-						}
+							@Override
+							public void exit() {
+								clusterManager.submitToServer(shellServer, () -> {
+									try {
+										Shell shell = jobShells.remove(terminal.getSessionId());
+										if (shell != null)
+											shell.exit();
+									} catch (Exception e) {
+										logger.error("Error exiting shell", e);
+									}
+									return null;
+								});
+							}
 
-					};
+						};
+					} else {
+						throw new UnauthorizedException();
+					}
 				} else {
-					throw new UnauthorizedException();
+					throw new ExplicitException("Job shell not ready");
 				}
 			} else {
 				throw new ExplicitException("Job shell not ready");
 			}
 		} else {
-			throw new ExplicitException("Job shell not ready");
+			throw new ExplicitException("This feature requires an active subscription");
 		}
-
 	}
 
 	@Override
