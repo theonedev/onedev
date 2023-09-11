@@ -1311,6 +1311,7 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
+				Project.push(getProject());
 				try {
 					var query = queryModel.getObject();
 					if (query != null) {
@@ -1319,18 +1320,23 @@ public abstract class IssueListPanel extends Panel {
 					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
+				} finally {
+					Project.pop();
 				}
 				return new ArrayList<Issue>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
+				Project.push(getProject());
 				try {
 					var query = queryModel.getObject();
 					if (query != null)
-						return getIssueManager().count(getProjectScope(), ((IssueQuery) query).getCriteria());
+						return getIssueManager().count(getProjectScope(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
+				} finally {
+					Project.pop();
 				}
 				return 0;
 			}
