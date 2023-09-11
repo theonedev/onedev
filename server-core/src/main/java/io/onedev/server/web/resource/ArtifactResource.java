@@ -52,10 +52,7 @@ public class ArtifactResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 
 		Long projectId = params.get(PARAM_PROJECT).toLong();
-		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
-		
-		if (buildNumber == null)
-			throw new IllegalArgumentException("Build number has to be specified");
+		Long buildNumber = params.get(PARAM_BUILD).toLong();
 		
 		List<String> pathSegments = new ArrayList<>();
 

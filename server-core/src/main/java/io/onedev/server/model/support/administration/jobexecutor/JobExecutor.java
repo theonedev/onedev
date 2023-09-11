@@ -39,6 +39,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	private boolean shellAccessEnabled;
 	
+	private boolean htmlReportPublishEnabled;
+	
 	private boolean sitePublishEnabled;
 	
 	private int cacheTTL = 7;
@@ -83,6 +85,16 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setSitePublishEnabled(boolean sitePublishEnabled) {
 		this.sitePublishEnabled = sitePublishEnabled;
+	}
+
+	@Editable(order=40, description = "Enable this to allow to run html report publish step. To avoid XSS attach, " +
+			"make sure this executor can only be used by trusted jobs")
+	public boolean isHtmlReportPublishEnabled() {
+		return htmlReportPublishEnabled;
+	}
+
+	public void setHtmlReportPublishEnabled(boolean htmlReportPublishEnabled) {
+		this.htmlReportPublishEnabled = htmlReportPublishEnabled;
 	}
 
 	@SuppressWarnings("unused")

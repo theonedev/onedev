@@ -1,0 +1,8 @@
+.html-report {
+    width: 100%;
+    border: none;
+}
+.dark-mode .html-report {
+	background: white !important;
+	filter: invert(1) hue-rotate(180deg);
+}

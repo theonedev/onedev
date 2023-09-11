@@ -48,6 +48,7 @@
 		<module>server-plugin-report-problem</module>
 		<module>server-plugin-report-spotbugs</module>
 		<module>server-plugin-report-pmd</module>
+		<module>server-plugin-report-html</module>
 		<module>server-plugin-report-roslynator</module>
 		<module>server-plugin-report-cpd</module>
 		<module>server-plugin-sso-discord</module>
