@@ -1,5 +1,7 @@
 package io.onedev.server.ee.subscription;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -9,6 +11,10 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
@@ -16,9 +22,11 @@ import org.quartz.ScheduleBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 @Singleton
-public class DefaultSubscriptionManager implements SubscriptionManager, SchedulableTask {
+public class DefaultSubscriptionManager implements SubscriptionManager, SchedulableTask, Serializable {
 	
 	private final TaskScheduler taskScheduler;
 	
@@ -40,7 +48,7 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	}
 	
 	@Override
-	public boolean isActive() {
+	public boolean isSubscriptionActive() {
 		var subscription = SubscriptionSetting.load().getSubscription();
 		if (subscription != null) 
 			return subscription.getUserDays() > 0;
@@ -133,8 +141,28 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	}
 
 	@Override
+	public Component renderSupportRequestLink(String componentId) {
+		if (isSubscriptionActive() && !"code.onedev.io".equals(getLicensee())) {
+			return new ModalLink(componentId) {
+
+				@Override
+				protected Component newContent(String id, ModalPanel modal) {
+					return new SupportRequestPanel(id, modal);
+				}
+
+			};
+		} else {
+			return new WebMarkupContainer(componentId).setVisible(false);
+		}
+	}
+
+	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return CronScheduleBuilder.cronSchedule("0 0 1 * * ?");
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(DefaultSubscriptionManager.class);
 	}
 	
 }

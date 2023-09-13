@@ -24,9 +24,7 @@ import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.DefaultAttachmentManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterResource;
-import io.onedev.server.cluster.DefaultClusterManager;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.commandhandler.*;
@@ -90,10 +88,6 @@ import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.*;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.*;
-import io.onedev.server.storage.DefaultStorageManager;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.terminal.DefaultTerminalManager;
-import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultBatchWorkManager;
@@ -262,6 +256,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueWatchManager.class).to(DefaultIssueWatchManager.class);
 		bind(IssueChangeManager.class).to(DefaultIssueChangeManager.class);
 		bind(IssueVoteManager.class).to(DefaultIssueVoteManager.class);
+		bind(IssueWorkManager.class).to(DefaultIssueWorkManager.class);
 		bind(MilestoneManager.class).to(DefaultMilestoneManager.class);
 		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
 		bind(IssueQueryPersonalizationManager.class).to(DefaultIssueQueryPersonalizationManager.class);
@@ -291,11 +286,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(ProjectLabelManager.class).to(DefaultProjectLabelManager.class);
 		bind(BuildLabelManager.class).to(DefaultBuildLabelManager.class);
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);
-		bind(ClusterManager.class).to(DefaultClusterManager.class);
-		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
-		bind(FeatureManager.class).to(DefaultFeatureManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -466,7 +458,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildEventBroadcaster.class);
 		bind(AlertEventBroadcaster.class);
 		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
-		bind(TerminalManager.class).to(DefaultTerminalManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
 		

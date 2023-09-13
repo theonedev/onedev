@@ -9,8 +9,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
@@ -194,7 +194,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
-				if (subscriptionManager.isActive()) {
+				if (subscriptionManager.isSubscriptionActive()) {
 					callWithWriter(writer -> {
 						sessionManager.run(() -> {
 							boolean indexStatusChanged = indexings.getAndIncrement() == 0;

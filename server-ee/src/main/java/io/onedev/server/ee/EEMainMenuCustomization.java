@@ -1,8 +1,8 @@
 package io.onedev.server.ee;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.ee.dashboard.DashboardPage;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.ee.xsearch.FileSearchPage;
 import io.onedev.server.ee.xsearch.SymbolSearchPage;
 import io.onedev.server.ee.xsearch.TextSearchPage;
@@ -20,13 +20,13 @@ public class EEMainMenuCustomization extends DefaultMainMenuCustomization {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean isLicensed() {
-		return OneDev.getInstance(SubscriptionManager.class).isActive();
+	private boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	@Override
 	public PageProvider getHomePage(boolean failsafe) {
-		if (isLicensed())
+		if (isSubscriptionActive())
 			return new PageProvider(DashboardPage.class, DashboardPage.paramsOf(null, failsafe));
 		else 
 			return super.getHomePage(failsafe);			
@@ -34,7 +34,7 @@ public class EEMainMenuCustomization extends DefaultMainMenuCustomization {
 
 	@Override
 	public List<SidebarMenuItem> getMainMenuItems() {
-		if (isLicensed()) {
+		if (isSubscriptionActive()) {
 			var menuItems = new ArrayList<SidebarMenuItem>();
 
 			menuItems.add(new SidebarMenuItem.Page("dashboard", "Dashboards", DashboardPage.class,

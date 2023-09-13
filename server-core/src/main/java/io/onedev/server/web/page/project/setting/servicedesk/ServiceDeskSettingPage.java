@@ -22,11 +22,11 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 
 @SuppressWarnings("serial")
-public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
+public class ServiceDeskSettingPage extends ProjectSettingPage {
 
 	private BeanEditor editor;
 	
-	public ProjectServiceDeskSettingPage(PageParameters params) {
+	public ServiceDeskSettingPage(PageParameters params) {
 		super(params);
 	}
 
@@ -53,7 +53,7 @@ public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
 				if (editor.isValid()) {
 					getProject().setServiceDeskName(bean.getServiceDeskName());
 					projectManager.update(getProject());
-					setResponsePage(ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject()));
+					setResponsePage(ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject()));
 					Session.get().success("Service desk settings updated");
 				}
 			}
@@ -73,7 +73,7 @@ public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (SecurityUtils.canManage(project)) {
 			if (project.isIssueManagement())
-				return new ViewStateAwarePageLink<Void>(componentId, ProjectServiceDeskSettingPage.class, paramsOf(project.getId()));
+				return new ViewStateAwarePageLink<Void>(componentId, ServiceDeskSettingPage.class, paramsOf(project.getId()));
 			else
 				return new ViewStateAwarePageLink<Void>(componentId, GeneralProjectSettingPage.class, paramsOf(project.getId()));
 		} else {

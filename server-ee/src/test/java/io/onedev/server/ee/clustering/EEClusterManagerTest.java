@@ -1,16 +1,19 @@
 package io.onedev.server.ee.clustering;
 
 import io.onedev.server.ServerConfig;
-import io.onedev.server.ee.subscription.SubscriptionManager;
+import io.onedev.server.SubscriptionManager;
+import io.onedev.server.data.DataManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.support.administration.ClusterSetting;
-import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.replica.ProjectReplica;
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.onedev.server.replica.ProjectReplica.Type.*;
 import static org.mockito.Mockito.mock;
@@ -24,15 +27,15 @@ public class EEClusterManagerTest extends TestCase {
 		var persistenceManager = mock(DataManager.class);
 		var hibernateConfig = mock(HibernateConfig.class);
 		var settingManager = mock(SettingManager.class);
-		var licenseManager = mock(SubscriptionManager.class);
+		var subscriptionManager = mock(SubscriptionManager.class);
 		
 		var clusterSetting = new ClusterSetting();
 		when(settingManager.getClusterSetting()).thenReturn(clusterSetting);
-		when(licenseManager.isActive()).thenReturn(true);
+		when(subscriptionManager.isSubscriptionActive()).thenReturn(true);
 		
 		var servers = new ArrayList<String>();
-		var clusterManager = new EEClusterManager(serverConfig, persistenceManager, settingManager, 
-				listenerRegistry, hibernateConfig, licenseManager) {
+		var clusterManager = new DefaultClusterManager(serverConfig, persistenceManager,  
+				listenerRegistry, hibernateConfig, settingManager, subscriptionManager) {
 			@Override
 			public List<String> getServerAddresses() {
 				return servers;

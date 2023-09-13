@@ -1,28 +1,17 @@
 package io.onedev.server.model.support.issue;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.annotation.Editable;
+import io.onedev.server.web.component.issue.workflowreconcile.*;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
 @Editable
 public class ProjectIssueSetting implements Serializable {
@@ -195,12 +184,8 @@ public class ProjectIssueSetting implements Serializable {
 		for (IssueQueryUpdater updater: getNamedQueryUpdaters())
 			updater.fixUndefinedFields(resolutions);
 		
-		if (boardSpecs != null) {
-			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (!it.next().fixUndefinedFields(resolutions))
-					it.remove();
-			}		
-		}
+		if (boardSpecs != null) 
+			boardSpecs.removeIf(boardSpec -> !boardSpec.fixUndefinedFields(resolutions));		
 	}	
 	
 	public void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {

@@ -34,7 +34,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.StorageManager;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;

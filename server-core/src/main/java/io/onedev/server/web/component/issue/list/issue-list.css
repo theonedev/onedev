@@ -10,6 +10,7 @@
 .issue-list .field .issue-state {
 	margin-bottom: 0.5rem;
 	margin-right: 0.5rem;
+	padding: 0.25rem 0.4rem;
 }
 
 .issue-list>div>.body .new-indicator {

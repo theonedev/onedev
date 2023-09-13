@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.FeatureManager;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -49,6 +49,7 @@ import io.onedev.server.web.page.admin.issuesetting.integritycheck.CheckIssueInt
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
@@ -126,10 +127,10 @@ import static io.onedev.server.model.Alert.PROP_DATE;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
     
-	private final IModel<Boolean> eeActivatedModel = new LoadableDetachableModel<Boolean>() {
+	private final IModel<Boolean> subscriptionActiveModel = new LoadableDetachableModel<>() {
 		@Override
 		protected Boolean load() {
-			return getFeatureManager().isEEActivated();
+			return getSubscriptionManager().isSubscriptionActive();
 		}
 	};
 	
@@ -223,6 +224,8 @@ public abstract class LayoutPage extends BasePage {
 							DefaultBoardListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links",
 							LinkSpecListPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Time Tracking",
+							TimeTrackingSettingPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates",
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
@@ -443,7 +446,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getFeatureManager().isEEAvailable() && !isEEActivated());
+				setVisible(!isSubscriptionActive());
 			}
 		});
 		
@@ -463,14 +466,14 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getFeatureManager().isEEAvailable() && !isEEActivated());
+				setVisible(!isSubscriptionActive());
 			}
 		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
-				if (isEEActivated() && SecurityUtils.isAdministrator())
+				if (isSubscriptionActive() && SecurityUtils.isAdministrator())
 					return "Bug Report";
 				else
 					return "Support & Bug Report";
@@ -478,7 +481,7 @@ public abstract class LayoutPage extends BasePage {
 			
 		}));
 		if (SecurityUtils.isAdministrator())
-			sidebar.add(getFeatureManager().renderSupportRequestLink("supportRequest"));
+			sidebar.add(getSubscriptionManager().renderSupportRequestLink("supportRequest"));
 		else
 			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));			
 		
@@ -803,20 +806,20 @@ public abstract class LayoutPage extends BasePage {
 
 	@Override
 	protected void onDetach() {
-		eeActivatedModel.detach();
+		subscriptionActiveModel.detach();
 		super.onDetach();
 	}
 	
-	private boolean isEEActivated() {
-		return eeActivatedModel.getObject();
+	private boolean isSubscriptionActive() {
+		return subscriptionActiveModel.getObject();
 	}
 
 	private AlertManager getAlertManager() {
 		return OneDev.getInstance(AlertManager.class);
 	}
 	
-	private FeatureManager getFeatureManager() {
-		return OneDev.getInstance(FeatureManager.class);
+	private SubscriptionManager getSubscriptionManager() {
+		return OneDev.getInstance(SubscriptionManager.class);
 	}
 	
 	private ClusterManager getClusterManager() {

@@ -27,6 +27,7 @@ import io.onedev.server.web.page.admin.issuesetting.integritycheck.CheckIssueInt
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
@@ -38,7 +39,6 @@ import io.onedev.server.web.page.admin.rolemanagement.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
-import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
@@ -116,7 +116,7 @@ import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSet
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
-import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
+import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -248,7 +248,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new BasePageMapper("~administration/settings/mail", MailSettingPage.class));
 		add(new BasePageMapper("~administration/settings/service-desk-setting", 
-				ServiceDeskSettingPage.class));
+				io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/issue-notification", 
 				IssueNotificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification", 
@@ -292,6 +292,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-links", LinkSpecListPage.class));
+		add(new BasePageMapper("~administration/settings/time-tracking", TimeTrackingSettingPage.class));
 		add(new BasePageMapper("~administration/settings/issue-templates", IssueTemplateListPage.class));
 		add(new BasePageMapper("~administration/settings/commit-message-fix-patterns", CommitMessageFixPatternsPage.class));
 		add(new BasePageMapper("~administration/settings/check-issue-integrity", CheckIssueIntegrityPage.class));
@@ -374,7 +375,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/build/job-properties", JobPropertiesPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
-		add(new ProjectPageMapper("${project}/~settings/service-desk", ProjectServiceDeskSettingPage.class));
+		add(new ProjectPageMapper("${project}/~settings/service-desk", ServiceDeskSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/web-hooks", WebHooksPage.class));
 		add(new ProjectPageMapper("${project}/~settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 
 				ContributedProjectSettingPage.class));

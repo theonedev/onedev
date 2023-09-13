@@ -1,8 +1,8 @@
 package io.onedev.server.ee.dashboard;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.ee.dashboard.widgets.ProjectListWidget;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.entitymanager.DashboardManager;
 import io.onedev.server.entitymanager.DashboardVisitManager;
 import io.onedev.server.model.*;
@@ -103,7 +103,7 @@ public class DashboardPage extends LayoutPage {
 	public DashboardPage(PageParameters params) {
 		super(params);
 		
-		if (!OneDev.getInstance(SubscriptionManager.class).isActive())
+		if (!OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
 			throw new UnsupportedOperationException();
 		
 		Long activeDashboardId = params.get(PARAM_DASHBOARD).toOptionalLong();

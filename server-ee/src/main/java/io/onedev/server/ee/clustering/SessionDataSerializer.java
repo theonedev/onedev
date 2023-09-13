@@ -16,7 +16,7 @@
 //  ========================================================================
 //
 
-package io.onedev.server.cluster;
+package io.onedev.server.ee.clustering;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;

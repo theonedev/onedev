@@ -12,7 +12,7 @@ import io.onedev.server.annotation.SafePath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.StorageManager;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.validation.constraints.NotEmpty;

@@ -65,7 +65,7 @@ import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSet
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
-import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
+import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -294,10 +294,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build", buildSettingMenuItems));
-
+			
 			if (getSettingManager().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk", 
-						ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject())));
+						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));
 			}
 			
 			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();

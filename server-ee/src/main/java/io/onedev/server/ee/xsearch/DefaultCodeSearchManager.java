@@ -3,9 +3,9 @@ package io.onedev.server.ee.xsearch;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
 import io.onedev.server.ee.xsearch.query.BlobQuery;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -76,7 +76,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 
 	@Override
 	public List<BlobMatch> search(BlobQuery query) throws TooGeneralQueryException {
-		if (subscriptionManager.isActive()) {
+		if (subscriptionManager.isSubscriptionActive()) {
 			List<BlobMatch> matches = new ArrayList<>();
 			var projectIdsByServer = projectManager.groupByActiveServers(query.getApplicableProjectIds());
 

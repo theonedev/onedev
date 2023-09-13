@@ -240,6 +240,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueVote> votes = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueWork> works = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();

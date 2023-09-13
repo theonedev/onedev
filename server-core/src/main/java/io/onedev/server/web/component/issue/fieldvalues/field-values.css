@@ -11,3 +11,6 @@
 	cursor: pointer;
 	display: none;
 }
+.field-values .value .badge {
+	padding: 0.25rem 0.4rem;
+}

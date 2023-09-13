@@ -135,6 +135,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new ScheduleIssues()));
 	}
 
+	public static boolean canLogWorks(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new LogWorks()));	
+	}
+	
 	public static boolean isAssignedRole(Project project, Role role) {
 		return isAssignedRole(getUser(), project, role);
 	}

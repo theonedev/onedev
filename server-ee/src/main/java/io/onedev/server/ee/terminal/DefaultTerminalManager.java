@@ -3,9 +3,9 @@ package io.onedev.server.ee.terminal;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -38,9 +38,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
-public class EETerminalManager implements TerminalManager, SchedulableTask, Serializable {
+public class DefaultTerminalManager implements TerminalManager, SchedulableTask, Serializable {
 
-	private static final Logger logger = LoggerFactory.getLogger(EETerminalManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTerminalManager.class);
 	
 	private final JobManager jobManager;
 	
@@ -57,8 +57,8 @@ public class EETerminalManager implements TerminalManager, SchedulableTask, Seri
 	private volatile String taskId;
 	
 	@Inject
-	public EETerminalManager(JobManager jobManager, TaskScheduler taskScheduler, ClusterManager clusterManager,
-			SessionManager sessionManager, SubscriptionManager subscriptionManager) {
+	public DefaultTerminalManager(JobManager jobManager, TaskScheduler taskScheduler, ClusterManager clusterManager,
+								  SessionManager sessionManager, SubscriptionManager subscriptionManager) {
 		this.jobManager = jobManager;
 		this.taskScheduler = taskScheduler;
 		this.clusterManager = clusterManager;
@@ -172,7 +172,7 @@ public class EETerminalManager implements TerminalManager, SchedulableTask, Seri
 
 	@Override
 	public boolean isTerminalSupported() {
-		return subscriptionManager.isActive();
+		return subscriptionManager.isSubscriptionActive();
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class EETerminalManager implements TerminalManager, SchedulableTask, Seri
 			clusterManager.submitToServer(terminalServer, () -> {
 				IWebSocketConnection connection = getConnection();
 				if (connection != null)
-					EETerminalManager.this.sendOutput(connection, output);
+					DefaultTerminalManager.this.sendOutput(connection, output);
 				return null;
 			});
 		}
@@ -238,7 +238,7 @@ public class EETerminalManager implements TerminalManager, SchedulableTask, Seri
 			clusterManager.submitToServer(terminalServer, () -> {
 				IWebSocketConnection connection = getConnection();
 				if (connection != null)
-					EETerminalManager.this.sendError(connection, error);
+					DefaultTerminalManager.this.sendError(connection, error);
 				return null;
 			});
 		}
@@ -248,7 +248,7 @@ public class EETerminalManager implements TerminalManager, SchedulableTask, Seri
 			clusterManager.submitToServer(terminalServer, () -> {
 				IWebSocketConnection connection = getConnection();
 				if (connection != null)
-					EETerminalManager.this.close(connection);
+					DefaultTerminalManager.this.close(connection);
 				return null;
 			});
 		}

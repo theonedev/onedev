@@ -1,4 +1,4 @@
-package io.onedev.server.storage;
+package io.onedev.server;
 
 import io.onedev.commons.utils.FileUtils;
 

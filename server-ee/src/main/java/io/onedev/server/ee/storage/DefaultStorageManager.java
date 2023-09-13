@@ -3,8 +3,9 @@ package io.onedev.server.ee.storage;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.StorageManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.ee.subscription.SubscriptionManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
@@ -12,8 +13,6 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.storage.DefaultStorageManager;
-import io.onedev.server.storage.StorageManager;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -28,7 +27,7 @@ import static io.onedev.commons.bootstrap.Bootstrap.getSiteDir;
 import static io.onedev.server.model.Build.getArtifactsDir;
 
 @Singleton
-public class EEStorageManager extends DefaultStorageManager implements Serializable {
+public class DefaultStorageManager implements StorageManager, Serializable {
 	
 	private final SettingManager settingManager;
 	
@@ -41,10 +40,9 @@ public class EEStorageManager extends DefaultStorageManager implements Serializa
 	private final SubscriptionManager subscriptionManager;
 	
 	@Inject
-	public EEStorageManager(SettingManager settingManager, TransactionManager transactionManager,
-							ClusterManager clusterManager, ProjectManager projectManager, 
-							SubscriptionManager subscriptionManager) { 
-		super(projectManager);
+	public DefaultStorageManager(SettingManager settingManager, TransactionManager transactionManager,
+								 ClusterManager clusterManager, ProjectManager projectManager,
+								 SubscriptionManager subscriptionManager) { 
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
 		this.clusterManager = clusterManager;
@@ -83,7 +81,7 @@ public class EEStorageManager extends DefaultStorageManager implements Serializa
 
 	@Override
 	public File initLfsDir(Long projectId) {
-		if (subscriptionManager.isActive()) {
+		if (subscriptionManager.isSubscriptionActive()) {
 			File gitDir = projectManager.getGitDir(projectId);
 			File lfsStorageDir = getLfsStorageDir(projectId);
 			var lfsDir = new File(gitDir, "lfs");
@@ -101,13 +99,15 @@ public class EEStorageManager extends DefaultStorageManager implements Serializa
 			}
 			return lfsDir;
 		} else {
-			return super.initLfsDir(projectId);
+			var lfsDir = new File(projectManager.getGitDir(projectId), "lfs");
+			FileUtils.createDir(lfsDir);
+			return lfsDir;
 		}
 	}
 
 	@Override
 	public File initArtifactsDir(Long projectId, Long buildNumber) {
-		if (subscriptionManager.isActive()) {
+		if (subscriptionManager.isSubscriptionActive()) {
 			File artifactsStorageDir = getArtifactsStorageDir(projectId, buildNumber);
 			File artifactsDir = getArtifactsDir(projectId, buildNumber);
 			if (artifactsStorageDir != null) {
@@ -126,13 +126,15 @@ public class EEStorageManager extends DefaultStorageManager implements Serializa
 			}
 			return artifactsDir;
 		} else {
-			return super.initArtifactsDir(projectId, buildNumber);
+			var artifactsDir = getArtifactsDir(projectId, buildNumber);
+			FileUtils.createDir(artifactsDir);
+			return artifactsDir;
 		}
 	}
 	
 	@Listen
 	public void on(EntityRemoved event) {
-		if (subscriptionManager.isActive()) {
+		if (subscriptionManager.isSubscriptionActive()) {
 			if (event.getEntity() instanceof Build) {
 				Build build = (Build) event.getEntity();
 				Long projectId = build.getProject().getId();

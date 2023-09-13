@@ -108,6 +108,10 @@
 	border-top-color: var(--dark-mode-light-dark);
 }
 
+.issue-boards>.body .board-card .state .badge {
+	padding: 0.25rem 0.4rem;
+}
+
 .issue-boards>.body .board-card .state {
 	border-bottom: 2px dotted transparent;
 	cursor: pointer;

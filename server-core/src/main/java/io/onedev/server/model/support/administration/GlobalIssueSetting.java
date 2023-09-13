@@ -47,6 +47,8 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<BoardSpec> boardSpecs = new ArrayList<>();
 	
+	private TimeTrackingSetting timeTrackingSetting;
+	
 	private List<String> listFields = new ArrayList<>();
 	
 	private List<String> listLinks = new ArrayList<>();
@@ -362,7 +364,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
-			
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				undefinedStates.addAll(query.getUndefinedStates());
@@ -387,6 +388,9 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedFields.addAll(board.getUndefinedFields());
 		for (IssueTemplate template: getIssueTemplates())
 			undefinedFields.addAll(template.getQueryUpdater().getUndefinedFields());
+		
+		if (timeTrackingSetting != null)
+			undefinedFields.addAll(timeTrackingSetting.getUndefinedFields());
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		
@@ -470,6 +474,9 @@ public class GlobalIssueSetting implements Serializable {
 			if (!it.next().getQueryUpdater().fixUndefinedFields(resolutions))
 				it.remove();
 		}
+		
+		if (timeTrackingSetting != null && !timeTrackingSetting.fixUndefinedFields(resolutions))
+			timeTrackingSetting = null;
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -636,6 +643,9 @@ public class GlobalIssueSetting implements Serializable {
 			template.getQueryUpdater().onRenameLink(oldName, newName);
 		
 		ReconcileUtils.renameItem(listLinks, oldName, newName);
+		
+		if (timeTrackingSetting != null)
+			timeTrackingSetting.onRenameLink(oldName, newName);
 	}
 
 	public Usage onDeleteLink(String linkName) {
@@ -661,6 +671,9 @@ public class GlobalIssueSetting implements Serializable {
 		if (listLinks.contains(linkName))
 			usage.add(new Usage().add("fields & links").prefix("-> issues"));
 		
+		if (timeTrackingSetting != null)
+			usage.add(timeTrackingSetting.onDeleteLink(linkName).prefix("time tracking"));
+		
 		return usage.prefix("issue settings");
 	}
 	
@@ -677,6 +690,15 @@ public class GlobalIssueSetting implements Serializable {
 
 	public void setBoardSpecs(List<BoardSpec> boardSpecs) {
 		this.boardSpecs = boardSpecs;
+	}
+
+	@Nullable
+	public TimeTrackingSetting getTimeTrackingSetting() {
+		return timeTrackingSetting;
+	}
+
+	public void setTimeTrackingSetting(TimeTrackingSetting timeTrackingSetting) {
+		this.timeTrackingSetting = timeTrackingSetting;
 	}
 
 	public List<String> getListFields() {

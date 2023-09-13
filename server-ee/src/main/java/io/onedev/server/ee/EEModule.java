@@ -4,23 +4,22 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.FeatureManager;
 import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.ee.clustering.ClusterManagementPage;
-import io.onedev.server.ee.clustering.EEClusterManager;
+import io.onedev.server.ee.clustering.DefaultClusterManager;
 import io.onedev.server.ee.dashboard.DashboardPage;
 import io.onedev.server.ee.dashboard.widgets.WidgetGroup;
+import io.onedev.server.ee.storage.DefaultStorageManager;
+import io.onedev.server.ee.storage.StorageSetting;
 import io.onedev.server.ee.subscription.DefaultSubscriptionManager;
 import io.onedev.server.ee.subscription.SubscriptionManagementPage;
-import io.onedev.server.ee.subscription.SubscriptionManager;
-import io.onedev.server.ee.storage.EEStorageManager;
-import io.onedev.server.ee.storage.StorageSetting;
 import io.onedev.server.ee.terminal.BuildTerminalPage;
-import io.onedev.server.ee.terminal.EETerminalManager;
+import io.onedev.server.ee.terminal.DefaultTerminalManager;
 import io.onedev.server.ee.xsearch.*;
 import io.onedev.server.model.support.Widget;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.BasePageMapper;
@@ -41,13 +40,12 @@ public class EEModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(TerminalManager.class).to(EETerminalManager.class);
-		bind(ClusterManager.class).to(EEClusterManager.class);
-		bind(StorageManager.class).to(EEStorageManager.class);
+		bind(TerminalManager.class).to(DefaultTerminalManager.class);
+		bind(ClusterManager.class).to(DefaultClusterManager.class);
+		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(CodeSearchManager.class).to(DefaultCodeSearchManager.class);
 		bind(CodeIndexManager.class).to(DefaultCodeIndexManager.class);
 		bind(SubscriptionManager.class).to(DefaultSubscriptionManager.class);
-		bind(FeatureManager.class).to(EEFeatureManager.class);
 		bind(CodeIndexStatusChangedBroadcaster.class);
 		
 		bind(MainMenuCustomization.class).to(EEMainMenuCustomization.class);
@@ -81,13 +79,13 @@ public class EEModule extends AbstractPluginModule {
 		
 		contribute(AdministrationSettingContribution.class, () -> {
 			var settings = new ArrayList<Class<? extends ContributedAdministrationSetting>>();
-			if (OneDev.getInstance(SubscriptionManager.class).isActive())
+			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
 				settings.add(StorageSetting.class);
 			return settings;
 		});
 		contribute(AdministrationMenuContribution.class, () -> {
 			var menuItems = new ArrayList<SidebarMenuItem>();
-			if (OneDev.getInstance(SubscriptionManager.class).isActive())
+			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
 				menuItems.add(new SidebarMenuItem.Page(null, "High Availability & Scalability", ClusterManagementPage.class, new PageParameters()));
 			menuItems.add(new SidebarMenuItem.Page(null, "Subscription Management", SubscriptionManagementPage.class, new PageParameters()));
 			return menuItems;

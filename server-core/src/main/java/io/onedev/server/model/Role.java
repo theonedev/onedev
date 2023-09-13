@@ -65,6 +65,8 @@ public class Role extends AbstractEntity implements Permission {
 	@Transient
 	private List<String> editableIssueLinks = new ArrayList<>();
 	
+	private boolean logWorks;
+	
 	private boolean manageBuilds;
 	
 	@Lob
@@ -240,6 +242,16 @@ public class Role extends AbstractEntity implements Permission {
 		return choices;
 	}
 
+	@Editable(order=630, description="Whether or not to allow to log works of issues for time tracking")
+	@ShowCondition("isManageIssuesDisabled")
+	public boolean isLogWorks() {
+		return logWorks;
+	}
+
+	public void setLogWorks(boolean logWorks) {
+		this.logWorks = logWorks;
+	}
+
 	@Editable(order=650, name="Build Management", description="Build administrative permission for all jobs inside a project, "
 			+ "including batch operations over multiple builds")
 	@ShowCondition("isManageProjectDisabled")
@@ -334,6 +346,8 @@ public class Role extends AbstractEntity implements Permission {
 				permissions.add(new AccessConfidentialIssues());
 			if (scheduleIssues)
 				permissions.add(new ScheduleIssues());
+			if (logWorks)
+				permissions.add(new LogWorks());
 			permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
 			for (LinkAuthorization linkAuthorization: getLinkAuthorizations()) 
 				permissions.add(new EditIssueLink(linkAuthorization.getLink()));

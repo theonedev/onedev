@@ -1,3 +1,10 @@
+# 9.2.0
+
+Well this is a notice rather than an incompatibility. You are highly recommended to check update 
+like below to list changes and incompatibilities since your current version before each upgrade:
+
+![check-update](check-update.png)
+
 # 9.1.5
 
 ### Agent
