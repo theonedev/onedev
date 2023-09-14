@@ -28,9 +28,9 @@ public class IncompatibilitiesPage extends LayoutPage {
 		protected String load() {
 			try {
 				File incompatibilitiesSinceUpgradedVersionFile = 
-						new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+						new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE);
 				File checkedIncompatibilitiesSinceUpgradedVersionFile = 
-						new File(Bootstrap.installDir, Upgrade.CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+						new File(Bootstrap.installDir, Upgrade.CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE);
 				if (incompatibilitiesSinceUpgradedVersionFile.exists()) {
 					String incompatibilitiesSinceUpgradedVersion = FileUtils.readFileToString(
 							incompatibilitiesSinceUpgradedVersionFile, StandardCharsets.UTF_8);
@@ -84,7 +84,7 @@ public class IncompatibilitiesPage extends LayoutPage {
 						return incompatibilitiesSinceUpgradedVersionModel.getObject();
 					} else {
 						return FileUtils.readFileToString(
-								new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES), 
+								new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES_FILE), 
 								StandardCharsets.UTF_8);
 					}
 				} catch (IOException e) {

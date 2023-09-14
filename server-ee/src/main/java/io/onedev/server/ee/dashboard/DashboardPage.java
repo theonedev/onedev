@@ -68,25 +68,20 @@ public class DashboardPage extends LayoutPage {
 					for (DashboardVisit visit: user.getDashboardVisits()) 
 						dates.put(visit.getDashboard(), visit.getDate());
 				} 
-				Collections.sort(dashboards, new Comparator<Dashboard>() {
-
-					@Override
-					public int compare(Dashboard o1, Dashboard o2) {
-						Date date1 = dates.get(o1);
-						Date date2 = dates.get(o2);
-						if (date1 != null) {
-							if (date2 != null)
-								return date2.compareTo(date1);
-							else
-								return -1;
-						} else {
-							if (date2 != null)
-								return 1;
-							else
-								return o2.getId().compareTo(o1.getId());
-						}
+				Collections.sort(dashboards, (o1, o2) -> {
+					Date date1 = dates.get(o1);
+					Date date2 = dates.get(o2);
+					if (date1 != null) {
+						if (date2 != null)
+							return date2.compareTo(date1);
+						else
+							return -1;
+					} else {
+						if (date2 != null)
+							return 1;
+						else
+							return o2.getId().compareTo(o1.getId());
 					}
-					
 				});
 			} 
 			return dashboards;

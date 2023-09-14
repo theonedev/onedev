@@ -1,7 +1,8 @@
-# 9.2.0
+# 9.1.6
 
-Well this is a notice rather than an incompatibility. You are highly recommended to check update 
-like below to list changes and incompatibilities since your current version before each upgrade:
+Well this is a notice rather than an incompatibility. You are highly recommended to check update
+like below to list changes and incompatibilities since your current version before each upgrade 
+as some incompatibility change may affect the upgrade procedure:
 
 ![check-update](check-update.png)
 

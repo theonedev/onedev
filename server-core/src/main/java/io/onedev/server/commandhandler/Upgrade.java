@@ -48,13 +48,15 @@ public class Upgrade extends AbstractPlugin {
 	
 	public static final String DB_BACKUP_DIR = "db-backup";
 	
+	private static final String INCOMPATIBILITIES_DIR = "incompatibilities";
+	
 	private static final String RELEASE_PROPS_FILE = "release.properties";
 	
-	public static final String INCOMPATIBILITIES = "incompatibilities/incompatibilities.md";
+	public static final String INCOMPATIBILITIES_FILE = INCOMPATIBILITIES_DIR + "/incompatibilities.md";
 	
-	public static final String INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/since-upgraded-version.md"; 
+	public static final String INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE = INCOMPATIBILITIES_DIR + "/since-upgraded-version.md"; 
 	
-	public static final String CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/checked-since-upgraded-version.md"; 
+	public static final String CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE = INCOMPATIBILITIES_DIR + "/checked-since-upgraded-version.md"; 
 	
 	private File upgradeDir;
 	
@@ -970,16 +972,16 @@ public class Upgrade extends AbstractPlugin {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, RELEASE_PROPS_FILE), new File(upgradeDir, RELEASE_PROPS_FILE));
 
-			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES).getParentFile());
-			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
-				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
-			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
-				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
+			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE).getParentFile());
+			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
+				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
+			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
+				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
 			List<String> incompatibilities = FileUtils.readLines(
-					new File(Bootstrap.installDir, INCOMPATIBILITIES), UTF_8);
-			if (new File(upgradeDir, INCOMPATIBILITIES).exists()) {
+					new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE), UTF_8);
+			if (new File(upgradeDir, INCOMPATIBILITIES_FILE).exists()) {
 				String lastIncompatibilityVersion = null;
-				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES), UTF_8)) {
+				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES_FILE), UTF_8)) {
 					if (line.trim().startsWith("# ")) {
 						lastIncompatibilityVersion = line.trim().substring(1).trim();
 						break;
@@ -998,13 +1000,15 @@ public class Upgrade extends AbstractPlugin {
 					}
 					if (!incompatibilitiesSinceUpgradedVersion.isEmpty()) {
 						FileUtils.writeFile(
-								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
+								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE), 
 								Joiner.on("\n").join(incompatibilitiesSinceUpgradedVersion));
 					}
 				}
 			}
-			FileUtils.copyFile(new File(Bootstrap.installDir, INCOMPATIBILITIES), 
-					new File(upgradeDir, INCOMPATIBILITIES));
+			
+			FileUtils.copyDirectory(
+					new File(Bootstrap.installDir, INCOMPATIBILITIES_DIR), 
+					new File(upgradeDir, INCOMPATIBILITIES_DIR));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
