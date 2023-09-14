@@ -144,6 +144,10 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		if (!hasSiteMapXml)
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.xml");
 		
+		var incompatibilitiesDir = new File(Bootstrap.installDir, "incompatibilities");
+		for (var file: incompatibilitiesDir.listFiles())
+			context.addServlet(new ServletHolder(new FileAssetServlet(incompatibilitiesDir)), "/~help/" + file.getName());
+		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
 	}
