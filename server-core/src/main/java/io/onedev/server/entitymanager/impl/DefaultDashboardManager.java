@@ -83,6 +83,7 @@ public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implem
 						builder.equal(groupShareRoot.get(DashboardGroupShare.PROP_DASHBOARD), root),
 						builder.equal(groupShareRoot.get(DashboardGroupShare.PROP_GROUP), group))));
 			}
+			predicates.add(builder.equal(root.get(Dashboard.PROP_FOR_EVERYONE), true));
 			criteriaQuery.where(builder.or(predicates.toArray(new Predicate[0])));
 		} else {
 			criteriaQuery.where(builder.equal(root.get(Dashboard.PROP_FOR_EVERYONE), true));
