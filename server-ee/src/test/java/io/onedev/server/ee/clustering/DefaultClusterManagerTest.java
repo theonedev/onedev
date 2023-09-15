@@ -19,7 +19,7 @@ import static io.onedev.server.replica.ProjectReplica.Type.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class EEClusterManagerTest extends TestCase {
+public class DefaultClusterManagerTest extends TestCase {
 
 	public void testRedistributeProjects() {
 		var serverConfig = mock(ServerConfig.class);

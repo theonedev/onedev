@@ -127,13 +127,6 @@ import static io.onedev.server.model.Alert.PROP_DATE;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
     
-	private final IModel<Boolean> subscriptionActiveModel = new LoadableDetachableModel<>() {
-		@Override
-		protected Boolean load() {
-			return getSubscriptionManager().isSubscriptionActive();
-		}
-	};
-	
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
 	
 	public LayoutPage(PageParameters params) {
@@ -803,23 +796,13 @@ public abstract class LayoutPage extends BasePage {
 			
 		});
 	}
-
-	@Override
-	protected void onDetach() {
-		subscriptionActiveModel.detach();
-		super.onDetach();
-	}
 	
-	private boolean isSubscriptionActive() {
-		return subscriptionActiveModel.getObject();
+	private SubscriptionManager getSubscriptionManager() {
+		return OneDev.getInstance(SubscriptionManager.class);
 	}
 
 	private AlertManager getAlertManager() {
 		return OneDev.getInstance(AlertManager.class);
-	}
-	
-	private SubscriptionManager getSubscriptionManager() {
-		return OneDev.getInstance(SubscriptionManager.class);
 	}
 	
 	private ClusterManager getClusterManager() {

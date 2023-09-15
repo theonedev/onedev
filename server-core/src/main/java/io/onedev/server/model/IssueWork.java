@@ -16,10 +16,6 @@ public class IssueWork extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_DAY = "day";
-	
-	public static final String PROP_USER = "user";
-	
-	public static final String PROP_ISSUE = "issue";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

@@ -72,19 +72,23 @@ public class DefaultTerminalManager implements TerminalManager, SchedulableTask,
 	
 	@Override
 	public void onOpen(IWebSocketConnection connection, Build build) {
-		try {
-			Long buildId = build.getId();
-			String sessionId = UUID.randomUUID().toString();
-			Terminal terminal = new ServerTerminal(sessionId, clusterManager.getLocalServerAddress());
-			shells.put(connection, jobManager.openShell(buildId, terminal));
-		} catch (Throwable t) {
-			ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
-			if (explicitException != null) {
-				sendError(connection, explicitException.getMessage());
-			} else {
-				logger.error("Error openning shell", t);
-				sendError(connection, "Error opening shell, check server log for details");
+		if (subscriptionManager.isSubscriptionActive()) {
+			try {
+				Long buildId = build.getId();
+				String sessionId = UUID.randomUUID().toString();
+				Terminal terminal = new ServerTerminal(sessionId, clusterManager.getLocalServerAddress());
+				shells.put(connection, jobManager.openShell(buildId, terminal));
+			} catch (Throwable t) {
+				ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
+				if (explicitException != null) {
+					sendError(connection, explicitException.getMessage());
+				} else {
+					logger.error("Error opening shell", t);
+					sendError(connection, "Error opening shell, check server log for details");
+				}
 			}
+		} else {
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -122,7 +126,7 @@ public class DefaultTerminalManager implements TerminalManager, SchedulableTask,
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public Void call() throws Exception {
+				public Void call() {
 					sessionManager.run(new Runnable() {
 
 						@Override
@@ -168,11 +172,6 @@ public class DefaultTerminalManager implements TerminalManager, SchedulableTask,
 		WebShell shell = shells.get(connection);
 		if (shell != null) 
 			shell.resize(rows, cols);
-	}
-
-	@Override
-	public boolean isTerminalSupported() {
-		return subscriptionManager.isSubscriptionActive();
 	}
 
 	@Override

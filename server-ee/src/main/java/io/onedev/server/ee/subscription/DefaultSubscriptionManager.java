@@ -13,6 +13,7 @@ import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.jetbrains.annotations.Nullable;
@@ -142,7 +143,7 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 
 	@Override
 	public Component renderSupportRequestLink(String componentId) {
-		if (isSubscriptionActive() && !"code.onedev.io".equals(getLicensee())) {
+		if (WicketUtils.isSubscriptionActive() && !"code.onedev.io".equals(getLicensee())) {
 			return new ModalLink(componentId) {
 
 				@Override

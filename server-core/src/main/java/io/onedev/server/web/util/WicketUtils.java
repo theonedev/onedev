@@ -1,16 +1,18 @@
 package io.onedev.server.web.util;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.websocket.PageKey;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.request.IRequestHandlerDelegate;
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -20,21 +22,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WicketUtils {
-	
-	public static String relativizeUrl(String url) {
-		if (Url.parse(url).isFull())
-			return url;
-		else
-			return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(url);
-	}
+
+	private static class SubscriptionActiveKey extends MetaDataKey<Boolean> {
+		static final SubscriptionActiveKey INSTANCE = new SubscriptionActiveKey();
+	};
 	
 	@Nullable
-	public static Page getPage() {
+	public static BasePage getPage() {
 		var pageRequestHandler = getPageRequestHandler();
 		if (pageRequestHandler != null)
-			return (Page) pageRequestHandler.getPage();
+			return (BasePage) pageRequestHandler.getPage();
 		else 
 			return null;
+	}
+	
+	public static boolean isSubscriptionActive() {
+		var requestCycle = RequestCycle.get();
+		if (requestCycle == null)
+			throw new IllegalStateException("No active request cycle");
+		Boolean subscriptionActive = requestCycle.getMetaData(SubscriptionActiveKey.INSTANCE);
+		if (subscriptionActive == null) {
+			subscriptionActive = OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+			requestCycle.setMetaData(SubscriptionActiveKey.INSTANCE, subscriptionActive);
+		}
+		return subscriptionActive;
 	}
 
 	@Nullable

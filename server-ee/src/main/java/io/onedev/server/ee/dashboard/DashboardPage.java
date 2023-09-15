@@ -1,7 +1,6 @@
 package io.onedev.server.ee.dashboard;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
 import io.onedev.server.ee.dashboard.widgets.ProjectListWidget;
 import io.onedev.server.entitymanager.DashboardManager;
 import io.onedev.server.entitymanager.DashboardVisitManager;
@@ -56,7 +55,7 @@ public class DashboardPage extends LayoutPage {
 	
 	private static final int HORIZONTAL_CELL_COUNT = 16;
 	
-	private final IModel<List<Dashboard>> dashboardsModel = new LoadableDetachableModel<List<Dashboard>>() {
+	private final IModel<List<Dashboard>> dashboardsModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected List<Dashboard> load() {
@@ -65,10 +64,10 @@ public class DashboardPage extends LayoutPage {
 			if (!dashboards.isEmpty()) {
 				Map<Dashboard, Date> dates = new HashMap<>();
 				if (user != null) {
-					for (DashboardVisit visit: user.getDashboardVisits()) 
+					for (DashboardVisit visit : user.getDashboardVisits())
 						dates.put(visit.getDashboard(), visit.getDate());
-				} 
-				Collections.sort(dashboards, (o1, o2) -> {
+				}
+				dashboards.sort((o1, o2) -> {
 					Date date1 = dates.get(o1);
 					Date date2 = dates.get(o2);
 					if (date1 != null) {
@@ -83,10 +82,10 @@ public class DashboardPage extends LayoutPage {
 							return o2.getId().compareTo(o1.getId());
 					}
 				});
-			} 
+			}
 			return dashboards;
 		}
-		
+
 	};
 	
 	private final IModel<Dashboard> activeDashboardModel;
@@ -97,9 +96,6 @@ public class DashboardPage extends LayoutPage {
 	
 	public DashboardPage(PageParameters params) {
 		super(params);
-		
-		if (!OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
-			throw new UnsupportedOperationException();
 		
 		Long activeDashboardId = params.get(PARAM_DASHBOARD).toOptionalLong();
 		activeDashboardModel = new LoadableDetachableModel<Dashboard>() {

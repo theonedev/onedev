@@ -4,7 +4,6 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.StorageManager;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
@@ -24,6 +23,7 @@ import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.*;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.ArrayList;
@@ -47,8 +47,7 @@ public class EEModule extends AbstractPluginModule {
 		bind(CodeIndexManager.class).to(DefaultCodeIndexManager.class);
 		bind(SubscriptionManager.class).to(DefaultSubscriptionManager.class);
 		bind(CodeIndexStatusChangedBroadcaster.class);
-		
-		bind(MainMenuCustomization.class).to(EEMainMenuCustomization.class);
+		bind(MainMenuCustomization.class).to(DefaultMainMenuCustomization.class);
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
 
 			@Override
@@ -79,13 +78,13 @@ public class EEModule extends AbstractPluginModule {
 		
 		contribute(AdministrationSettingContribution.class, () -> {
 			var settings = new ArrayList<Class<? extends ContributedAdministrationSetting>>();
-			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
+			if (WicketUtils.getPage().isSubscriptionActive())
 				settings.add(StorageSetting.class);
 			return settings;
 		});
 		contribute(AdministrationMenuContribution.class, () -> {
 			var menuItems = new ArrayList<SidebarMenuItem>();
-			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
+			if (WicketUtils.getPage().isSubscriptionActive())
 				menuItems.add(new SidebarMenuItem.Page(null, "High Availability & Scalability", ClusterManagementPage.class, new PageParameters()));
 			menuItems.add(new SidebarMenuItem.Page(null, "Subscription Management", SubscriptionManagementPage.class, new PageParameters()));
 			return menuItems;

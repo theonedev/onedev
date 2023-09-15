@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
@@ -18,6 +19,7 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.web.util.WicketUtils;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
@@ -68,7 +70,7 @@ public abstract class JobExecutor implements Serializable {
 			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
 			+ "the executor. You should configure job requirement below to make sure the executor can only be "
 			+ "used by trusted jobs if this option is enabled")
-	@ShowCondition("isTerminalSupported")
+	@ShowCondition("isSubscriptionActive")
 	public boolean isShellAccessEnabled() {
 		return shellAccessEnabled;
 	}
@@ -98,8 +100,8 @@ public abstract class JobExecutor implements Serializable {
 	}
 
 	@SuppressWarnings("unused")
-	private static boolean isTerminalSupported() {
-		return OneDev.getInstance(TerminalManager.class).isTerminalSupported();
+	private static boolean isSubscriptionActive() {
+		return WicketUtils.isSubscriptionActive();
 	}
 
 	@Editable(order=10000, placeholder="Any job", description="Optionally specify job requirement of this executor")

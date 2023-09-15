@@ -52,10 +52,7 @@ import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.BuildAware;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -331,7 +328,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (getTerminalManager().isTerminalSupported()) {
+						if (WicketUtils.isSubscriptionActive()) {
 							JobManager jobManager = OneDev.getInstance(JobManager.class);
 							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
 							if (jobContext!= null) {

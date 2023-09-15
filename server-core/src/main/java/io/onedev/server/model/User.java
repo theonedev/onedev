@@ -141,7 +141,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueVote> issueVotes = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<IssueWork> issueWorks = new ArrayList<>();
+	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
     

@@ -22,6 +22,7 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketMessages;
 import org.apache.commons.codec.binary.Base64;
@@ -83,7 +84,7 @@ public abstract class BasePage extends WebPage {
 	private FeedbackPanel sessionFeedback;
 
 	private RepeatingView rootComponents;
-
+	
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();
@@ -385,4 +386,8 @@ public abstract class BasePage extends WebPage {
 		handler.appendJavaScript("$(window).resize();");
 	}
 
+	public boolean isSubscriptionActive() {
+		return WicketUtils.isSubscriptionActive();
+	}
+	
 }
