@@ -88,6 +88,8 @@ import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.*;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.*;
+import io.onedev.server.timetracking.DefaultTimeTrackingManager;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultBatchWorkManager;
@@ -456,6 +458,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildEventBroadcaster.class);
 		bind(AlertEventBroadcaster.class);
 		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
+		bind(TimeTrackingManager.class).to(DefaultTimeTrackingManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
 		

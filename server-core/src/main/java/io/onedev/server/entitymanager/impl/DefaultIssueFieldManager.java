@@ -1,16 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.model.Issue;
@@ -21,9 +10,19 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+
 @Singleton
 public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> implements IssueFieldManager {
-
+	
 	@Inject
 	public DefaultIssueFieldManager(Dao dao) {
 		super(dao);
@@ -33,9 +32,9 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 	@Override
 	public void saveFields(Issue issue) {
 		Collection<Long> ids = new HashSet<>();
-		for (IssueField entity: issue.getFields()) {
-			if (entity.getId() != null)
-				ids.add(entity.getId());
+		for (IssueField field: issue.getFields()) {
+			if (field.getId() != null)
+				ids.add(field.getId());
 		}
 		if (!ids.isEmpty()) {
 			Query query = getSession().createQuery("delete from IssueField where issue = :issue and id not in (:ids)");

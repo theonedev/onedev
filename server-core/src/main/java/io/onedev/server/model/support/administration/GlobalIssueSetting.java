@@ -660,7 +660,7 @@ public class GlobalIssueSetting implements Serializable {
 			usage.add(board.getBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
 			usage.add(board.getBacklogBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
 			if (board.getDisplayLinks().contains(linkName))
-				usage.add("display links").prefix("default board #" + index);
+				usage.add(new Usage().add("display links").prefix("default board #" + index));
 			index++;
 		}
 		

@@ -8,10 +8,11 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -21,8 +22,6 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Editable
 @ClassValidating
@@ -36,8 +35,8 @@ public class TimeTrackingSetting implements Validatable, Serializable {
 
 	private String spentTimeField;
 	
-	private List<String> timeSummingLinks;
-
+	private String timeAggregationLink;
+	
 	@Editable(name="Applicable Projects", order=100, placeholder="All projects", description="" +
 			"Optionally specify space-separated projects applicable for time tracking. " +
 			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
@@ -88,24 +87,23 @@ public class TimeTrackingSetting implements Validatable, Serializable {
 
 	@Editable(order=500)
 	@ChoiceProvider("getLinkChoices")
-	public List<String> getTimeSummingLinks() {
-		return timeSummingLinks;
+	public String getTimeAggregationLink() {
+		return timeAggregationLink;
 	}
 
-	public void setTimeSummingLinks(List<String> timeSummingLinks) {
-		this.timeSummingLinks = timeSummingLinks;
+	public void setTimeAggregationLink(String timeAggregationLink) {
+		this.timeAggregationLink = timeAggregationLink;
 	}
 	
 	private static List<String> getLinkChoices() {
-		var choices = new ArrayList<String>();
+		var choices = new LinkedHashSet<String>();
 		for (var linkSpec: OneDev.getInstance(LinkSpecManager.class).query()) {
-			if (linkSpec.isMultiple()) 
+			if (linkSpec.getOpposite() != null) {
 				choices.add(linkSpec.getName());
-			var opposite = linkSpec.getOpposite();
-			if (opposite != null && opposite.isMultiple())
-				choices.add(opposite.getName());
+				choices.add(linkSpec.getOpposite().getName());
+			}
 		}
-		return choices;
+		return new ArrayList<>(choices);
 	}
 
 	public Collection<String> getUndefinedFields() {
@@ -144,6 +142,10 @@ public class TimeTrackingSetting implements Validatable, Serializable {
 			return true;
 		}
 	}
+	
+	public boolean isProjectApplicable(Project project) {
+		return projects == null || PatternSet.parse(projects).matches(new PathMatcher(), project.getPath());
+	}
 
 	private static GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
@@ -151,60 +153,14 @@ public class TimeTrackingSetting implements Validatable, Serializable {
 
 	public Usage onDeleteLink(String linkName) {
 		Usage usage = new Usage();
-		if (timeSummingLinks.contains(linkName))
-			usage.add("time summing links");
+		if (linkName.equals(timeAggregationLink))
+			usage.add("time aggregation link");
 		return usage;
 	}
 
 	public void onRenameLink(String oldName, String newName) {
-		var index = timeSummingLinks.indexOf(oldName);
-		if (index != -1)
-			timeSummingLinks.set(index, newName);
+		if (oldName.equals(timeAggregationLink))
+			timeAggregationLink = newName;
 	}
 	
-	public static class AutoWorkLogging implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-		
-		private String issueState;
-		
-		private String workerField;
-
-		@Editable(order=100)
-		@ChoiceProvider("getStateChoices")
-		@NotEmpty
-		public String getIssueState() {
-			return issueState;
-		}
-
-		public void setIssueState(String issueState) {
-			this.issueState = issueState;
-		}
-
-		private static List<String> getStateChoices() {
-			return getIssueSetting().getStateSpecs().stream()
-					.map(StateSpec::getName).collect(toList());
-		}
-		
-		@Editable(order=200)
-		@ChoiceProvider("getWorkerChoices")
-		@NotEmpty
-		public String getWorkerField() {
-			return workerField;
-		}
-
-		public void setWorkerField(String workerField) {
-			this.workerField = workerField;
-		}
-		
-		private static List<String> getWorkerChoices() {
-			List<String> choices = new ArrayList<>();
-			for (var field: getIssueSetting().getFieldSpecs()) {
-				if (field instanceof UserChoiceField || field instanceof GroupChoiceField)
-					choices.add(field.getName());
-			}
-			return choices;
-		}
-		
-	}
 }

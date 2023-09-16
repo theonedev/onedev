@@ -331,14 +331,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static Runnable inheritSubject(Runnable task) {
 		Subject subject = SecurityUtils.getSubject();
-		return new Runnable() {
-
-			@Override
-			public void run() {
-				ThreadContext.bind(subject);
-				task.run();
-			}
-			
+		return () -> {
+			ThreadContext.bind(subject);
+			task.run();
 		};
 	}
 	

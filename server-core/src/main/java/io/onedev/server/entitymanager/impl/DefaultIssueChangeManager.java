@@ -611,77 +611,38 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 		
 	}
-
-	@Transactional
-	@Override
-	public void changeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
-		Issue prevLinkedIssue = issue.findLinkedIssue(spec, opposite);
-		
-		List<Issue> linkedIssues = new ArrayList<>();
-		if (linkedIssue != null)
-			linkedIssues.add(linkedIssue);
-		issueLinkManager.syncLinks(spec, issue, linkedIssues, opposite);
-		
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setUser(SecurityUtils.getUser());
-		
-		IssueLinkChangeData data = new IssueLinkChangeData(spec.getName(opposite), 
-				getLinkedIssueInfo(issue, prevLinkedIssue), 
-				getLinkedIssueInfo(issue, linkedIssue));
-		change.setData(data);
-		create(change, null);
-		
-		logLinkedSideChange(spec, issue, prevLinkedIssue, linkedIssue, opposite);
-	}
 	
 	private void logLinkedSideChange(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, 
 			@Nullable Issue linkedIssue, boolean opposite) {
 		String linkName;
-		boolean multiple;
-		if (spec.getOpposite() != null) {
+		if (spec.getOpposite() != null) 
 			linkName = opposite?spec.getName():spec.getOpposite().getName();
-			multiple = opposite?spec.isMultiple():spec.getOpposite().isMultiple(); 
-		} else {
+		else 
 			linkName = spec.getName();
-			multiple = spec.isMultiple();
-		}
 		if (prevLinkedIssue != null) {
 			IssueChange change = new IssueChange();
 			change.setIssue(prevLinkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String prevIssueSummary = getLinkedIssueInfo(prevLinkedIssue, issue);
-			if (multiple)
-				change.setData(new IssueLinkRemoveData(linkName, prevIssueSummary));
-			else
-				change.setData(new IssueLinkChangeData(linkName, prevIssueSummary, null));
+			change.setData(new IssueLinkRemoveData(linkName, !opposite, getLinkedIssueNumber(prevLinkedIssue, issue)));
 			create(change, null);
 		} 
 		if (linkedIssue != null) {
 			IssueChange change = new IssueChange();
 			change.setIssue(linkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String issueSummary = getLinkedIssueInfo(linkedIssue, issue);
-			if (multiple)
-				change.setData(new IssueLinkAddData(linkName, issueSummary));
-			else
-				change.setData(new IssueLinkChangeData(linkName, null, issueSummary));
+			change.setData(new IssueLinkAddData(linkName, !opposite, getLinkedIssueNumber(linkedIssue, issue)));
 			create(change, null);
 		}
 	}
-	
-	@Nullable
-	private String getLinkedIssueInfo(Issue issue, @Nullable Issue linkedIssue) {
-		if (linkedIssue != null) {
-			if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
-				return "#" + linkedIssue.getNumber();
-			else
-				return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
-		} else {
-			return null;
-		}
-	}
 
+	@Nullable
+	private String getLinkedIssueNumber(Issue issue, Issue linkedIssue) {
+		if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
+			return "#" + linkedIssue.getNumber();
+		else
+			return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
+	}
+	
 	@Transactional
 	@Override
 	public void addLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
@@ -694,7 +655,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 	
 		String linkName = spec.getName(opposite);
-		IssueLinkAddData data = new IssueLinkAddData(linkName, getLinkedIssueInfo(issue, linkedIssue));
+		IssueLinkAddData data = new IssueLinkAddData(linkName, opposite, getLinkedIssueNumber(issue, linkedIssue));
 		change.setData(data);
 		create(change, null);
 		
@@ -713,11 +674,19 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		
 		String linkName = spec.getName(opposite);
-		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getLinkedIssueInfo(issue, linkedIssue));
+		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, opposite, getLinkedIssueNumber(issue, linkedIssue));
 		change.setData(data);
 		create(change, null);
 		
 		logLinkedSideChange(spec, issue, linkedIssue, null, opposite);
 	}
-	
+
+	@Transactional
+	@Override
+	public void changeLink(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, @Nullable Issue linkedIssue, boolean opposite) {
+		if (prevLinkedIssue != null)
+			removeLink(spec, issue, prevLinkedIssue, opposite);
+		if (linkedIssue != null)
+			addLink(spec, issue, linkedIssue, opposite);
+	}
 }

@@ -460,8 +460,8 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Not authorized to link issue in project '" + linkedIssue.getProject() + "'");
 							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else {
-							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), 
-									linkedIssue, side.isOpposite());
+							Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());
+							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), prevLinkedIssue, linkedIssue, side.isOpposite());
 							notifyIssueChange(handler, getIssue());
 						}
 					}
@@ -645,7 +645,7 @@ public abstract class IssueSidePanel extends Panel {
 					}
 					
 				};
-				new ResponseFiller<Milestone>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
 			}
 			
 		}) {

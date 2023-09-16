@@ -5799,4 +5799,18 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate141(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					var dataElement = element.element("data");
+					if (dataElement.attributeValue("class").startsWith("io.onedev.server.model.support.issue.changedata.IssueLink"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
