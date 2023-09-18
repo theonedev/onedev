@@ -7,9 +7,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.ReferenceTransformer;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -20,6 +23,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
@@ -151,6 +155,15 @@ public abstract class IssueEditableTitlePanel extends Panel {
 		titleViewer.add(new CopyToClipboardLink("copy", 
 				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
 		
+		titleViewer.add(new IssueProgressPanel("progress") {
+
+			@Override
+			protected Issue getIssue() {
+				return IssueEditableTitlePanel.this.getIssue();
+			}
+			
+		});
+
 		titleViewer.setOutputMarkupId(true);
 		
 		return titleViewer;

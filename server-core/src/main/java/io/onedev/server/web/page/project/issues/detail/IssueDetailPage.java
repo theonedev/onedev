@@ -143,8 +143,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 		});
 		
-		add(new Tabbable("issueTabs", new LoadableDetachableModel<List<? extends Tab>>() {
-			
+		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
+
 			@Override
 			protected List<? extends Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
@@ -167,13 +167,13 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					// Do not calculate fix builds now as it might be slow
 					tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
 				}
-				
+
 				if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
 					tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
-				
+
 				return tabs;
 			}
-			
+
 		}) {
 			@Override
 			public void onInitialize() {

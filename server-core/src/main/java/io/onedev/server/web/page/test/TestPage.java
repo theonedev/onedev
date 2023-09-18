@@ -21,9 +21,9 @@ public class TestPage extends BasePage {
 			@Override
 			public void onClick() {
 			}
-			
+
 		});
-	}
+	}	
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {

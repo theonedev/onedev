@@ -29,7 +29,7 @@ public class IssueWork extends AbstractEntity {
 	
 	private int minutes;
 	
-	private String description;
+	private String note;
 
 	public Issue getIssue() {
 		return issue;
@@ -64,11 +64,11 @@ public class IssueWork extends AbstractEntity {
 	}
 
 	@Nullable
-	public String getDescription() {
-		return description;
+	public String getNote() {
+		return note;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setNote(String note) {
+		this.note = note;
 	}
 }
