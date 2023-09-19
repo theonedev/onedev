@@ -158,7 +158,24 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			else
 				logger.warn("Please set up the server at " + guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
+			var localServer = clusterManager.getLocalServerAddress();
 			while (true) {
+				if (maintenanceFile.exists()) {
+					logger.info("Maintenance requested, trying to stop all servers...");
+					clusterManager.submitToAllServers(() -> {
+						if (!localServer.equals(clusterManager.getLocalServerAddress()))
+							restart();
+						return null;
+					});
+					while (thread != null && clusterManager.getServerAddresses().size() != 1) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ignored) {
+						}
+					}
+					restart();
+					return;
+				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -391,11 +408,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				}
 				restart();
 				break;
-			} else {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ignored) {
-				}
+			} 
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}

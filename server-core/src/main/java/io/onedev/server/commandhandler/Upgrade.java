@@ -233,6 +233,16 @@ public class Upgrade extends AbstractPlugin {
 			Properties oldReleaseProps = loadReleaseProps(new File(upgradeDir, RELEASE_PROPS_FILE));
 
 			if (!releaseProps.equals(oldReleaseProps)) {
+				var upgradingFile = new File(upgradeDir, "upgrading");
+				if (upgradingFile.exists()) {
+					logger.error("Last upgrade not completed yet. If you believe it already done, " +
+							"please remove file '" + upgradingFile.getAbsolutePath() + "' and try " +
+							"upgrade again");
+					System.exit(1);
+				}
+
+				FileUtils.touchFile(upgradingFile);
+
 				logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
 
 				if (OneDev.isServerRunning(upgradeDir)) {
@@ -435,16 +445,9 @@ public class Upgrade extends AbstractPlugin {
 								boolean programRestored = false;
 								logger.info("Restoring old program files...");
 								try {
-									for (File child : programBackup.listFiles()) {
-										if (!child.getName().equals("site")) {
-											File target = new File(upgradeDir, child.getName());
-											if (target.isDirectory()) {
-												FileUtils.cleanDir(target);
-												FileUtils.copyDirectory(child, target);
-											} else {
-												FileUtils.copyFile(child, target);
-											}
-										}
+									for (File file : programBackup.listFiles()) {
+										if (!file.getName().equals("site")) 
+											restoreProgramFiles(file, new File(upgradeDir, file.getName()));
 									}
 
 									if (oldAppDataVersion <= 102)
@@ -485,19 +488,27 @@ public class Upgrade extends AbstractPlugin {
 										logger.error("Error restoring old database", e);
 									}
 								}
+								
+								if (programRestored && !dbChanged)
+									FileUtils.deleteFile(upgradingFile);
 
 								StringBuilder errorMessage = new StringBuilder(String.format("!! Failed to upgrade %s", upgradeDir.getAbsolutePath()));
 								if (dbChanged) {
-									errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");
+									if (new File(upgradeDir, "IN_DOCKER").exists())
+										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command *INSIDE* the container:");
+									else
+										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");										
 									if (SystemUtils.IS_OS_WINDOWS) {
-										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
+										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath() + " false");
 									} else {
-										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
+										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath() + " false");
 									}
+									errorMessage.append("\n\n*** Do not forget to remove file '" + upgradingFile.getAbsolutePath() + "' after problem is solved ***");
 								}
 								throw new ExplicitException(errorMessage.toString());
 							} else {
 								logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
+								FileUtils.deleteFile(upgradingFile);
 								FileUtils.deleteDir(programBackup);
 							}
 							return null;
@@ -505,7 +516,7 @@ public class Upgrade extends AbstractPlugin {
 					};
 					
 					var maintenanceFile = OneDev.getMaintenanceFile(upgradeDir);
-					maintenanceFile.createNewFile();
+					FileUtils.touchFile(maintenanceFile);
 					try {
 						var hibernateConfig = new HibernateConfig(upgradeDir);
 						if (!hibernateConfig.isHSQLDialect()) {
@@ -517,7 +528,7 @@ public class Upgrade extends AbstractPlugin {
 							callable.call();
 						}
 					} finally {
-						maintenanceFile.delete();
+						FileUtils.deleteFile(maintenanceFile);
 					}
 					System.exit(0);
 				} catch (ExplicitException e) {
@@ -548,6 +559,36 @@ public class Upgrade extends AbstractPlugin {
 				logger.error("!! Error populating " + upgradeDir.getAbsolutePath(), e);
 				FileUtils.cleanDir(upgradeDir);
 				System.exit(1);
+			}
+		}
+	}
+	
+	private void restoreProgramFiles(File srcFile, File destFile) {
+		if (srcFile.isDirectory()) {
+			if (destFile.isDirectory()) {
+				for (var destChildFile: destFile.listFiles()) {
+					var srcChildFile = new File(srcFile, destChildFile.getName());
+					if (!srcChildFile.exists()) {
+						if (destChildFile.isFile())
+							FileUtils.deleteFile(destChildFile);
+						else 
+							FileUtils.deleteDir(destChildFile);
+					}
+				}
+			} else {
+				if (destFile.isFile())
+					FileUtils.deleteFile(destFile);
+				FileUtils.createDir(destFile);
+			}
+			for (var srcChildFile: srcFile.listFiles())
+				restoreProgramFiles(srcChildFile, new File(destFile, srcChildFile.getName()));
+		} else {
+			if (destFile.isDirectory())
+				FileUtils.deleteDir(destFile);
+			try {
+				FileUtils.copyFile(srcFile, destFile);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}
