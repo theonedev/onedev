@@ -435,16 +435,9 @@ public class Upgrade extends AbstractPlugin {
 								boolean programRestored = false;
 								logger.info("Restoring old program files...");
 								try {
-									for (File child : programBackup.listFiles()) {
-										if (!child.getName().equals("site")) {
-											File target = new File(upgradeDir, child.getName());
-											if (target.isDirectory()) {
-												FileUtils.cleanDir(target);
-												FileUtils.copyDirectory(child, target);
-											} else {
-												FileUtils.copyFile(child, target);
-											}
-										}
+									for (File file : programBackup.listFiles()) {
+										if (!file.getName().equals("site")) 
+											restoreProgramFiles(file, new File(upgradeDir, file.getName()));
 									}
 
 									if (oldAppDataVersion <= 102)
@@ -548,6 +541,36 @@ public class Upgrade extends AbstractPlugin {
 				logger.error("!! Error populating " + upgradeDir.getAbsolutePath(), e);
 				FileUtils.cleanDir(upgradeDir);
 				System.exit(1);
+			}
+		}
+	}
+	
+	private void restoreProgramFiles(File srcFile, File destFile) {
+		if (srcFile.isDirectory()) {
+			if (destFile.isDirectory()) {
+				for (var destChildFile: destFile.listFiles()) {
+					var srcChildFile = new File(srcFile, destChildFile.getName());
+					if (!srcChildFile.exists()) {
+						if (destChildFile.isFile())
+							FileUtils.deleteFile(destChildFile);
+						else 
+							FileUtils.deleteDir(destChildFile);
+					}
+				}
+			} else {
+				if (destFile.isFile())
+					FileUtils.deleteFile(destFile);
+				FileUtils.createDir(destFile);
+			}
+			for (var srcChildFile: srcFile.listFiles())
+				restoreProgramFiles(srcChildFile, new File(destFile, srcChildFile.getName()));
+		} else {
+			if (destFile.isDirectory())
+				FileUtils.deleteDir(destFile);
+			try {
+				FileUtils.copyFile(srcFile, destFile);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}
