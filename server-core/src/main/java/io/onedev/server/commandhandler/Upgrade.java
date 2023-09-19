@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -233,16 +234,7 @@ public class Upgrade extends AbstractPlugin {
 			Properties oldReleaseProps = loadReleaseProps(new File(upgradeDir, RELEASE_PROPS_FILE));
 
 			if (!releaseProps.equals(oldReleaseProps)) {
-				var upgradingFile = new File(upgradeDir, "upgrading");
-				if (upgradingFile.exists()) {
-					logger.error("Last upgrade not completed yet. If you believe it already done, " +
-							"please remove file '" + upgradingFile.getAbsolutePath() + "' and try " +
-							"upgrade again");
-					System.exit(1);
-				}
-
-				FileUtils.touchFile(upgradingFile);
-
+				var inDocker = new File(upgradeDir, "IN_DOCKER").exists();				
 				logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
 
 				if (OneDev.isServerRunning(upgradeDir)) {
@@ -489,26 +481,20 @@ public class Upgrade extends AbstractPlugin {
 									}
 								}
 								
-								if (programRestored && !dbChanged)
-									FileUtils.deleteFile(upgradingFile);
-
 								StringBuilder errorMessage = new StringBuilder(String.format("!! Failed to upgrade %s", upgradeDir.getAbsolutePath()));
 								if (dbChanged) {
-									if (new File(upgradeDir, "IN_DOCKER").exists())
-										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command *INSIDE* the container:");
+									if (inDocker)
+										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then exec into the container to run below command:");
 									else
 										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");										
-									if (SystemUtils.IS_OS_WINDOWS) {
-										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
-									} else {
-										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
-									}
-									errorMessage.append("\n\n*** Do not forget to remove file '" + upgradingFile.getAbsolutePath() + "' after problem is solved ***");
+									if (SystemUtils.IS_OS_WINDOWS) 
+										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
+									else 
+										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
 								}
 								throw new ExplicitException(errorMessage.toString());
 							} else {
 								logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
-								FileUtils.deleteFile(upgradingFile);
 								FileUtils.deleteDir(programBackup);
 							}
 							return null;
@@ -531,11 +517,25 @@ public class Upgrade extends AbstractPlugin {
 						FileUtils.deleteFile(maintenanceFile);
 					}
 					System.exit(0);
-				} catch (ExplicitException e) {
-					logger.error(e.getMessage());
-					System.exit(1);
 				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
+					var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null)
+						logger.error(e.getMessage());
+					else 
+						logger.error("Error upgrading '" + upgradeDir.getAbsolutePath() + "'", e);
+					if (inDocker) {
+						logger.info("*** After solving the problem, please restart container with correct image ***");
+						// loop here to make container active so that user can exec into the container to 
+						// solve problem
+						while (true) {
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException ex) {
+								break;
+							}
+						}
+					}
+					System.exit(1);
 				}
 			} else {
 				logger.info("Successfully checked {}", upgradeDir.getAbsolutePath());
@@ -582,14 +582,19 @@ public class Upgrade extends AbstractPlugin {
 			}
 			for (var srcChildFile: srcFile.listFiles())
 				restoreProgramFiles(srcChildFile, new File(destFile, srcChildFile.getName()));
-		} else {
+		} else try {
 			if (destFile.isDirectory())
 				FileUtils.deleteDir(destFile);
-			try {
+			if (destFile.exists()) {
+				if (destFile.canWrite())
+					FileUtils.copyFile(srcFile, destFile);
+				else if (!Arrays.equals(FileUtils.readFileToByteArray(srcFile), FileUtils.readFileToByteArray(destFile)))
+					throw new ExplicitException("Readonly file has been changed during upgrade: " + destFile.getAbsolutePath());
+			} else {
 				FileUtils.copyFile(srcFile, destFile);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
