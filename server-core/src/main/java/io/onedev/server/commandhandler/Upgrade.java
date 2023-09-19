@@ -383,7 +383,7 @@ public class Upgrade extends AbstractPlugin {
 										updateProgramFiles(upgradeDir, oldAppDataVersion);
 
 										logger.info("Restoring database with new program...");
-										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath(), "false").execute(new LineConsumer() {
+										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 											@Override
 											public void consume(String line) {
@@ -466,7 +466,7 @@ public class Upgrade extends AbstractPlugin {
 								if (programRestored && dbChanged && dbCleaned) {
 									logger.info("Restoring old database...");
 									try {
-										buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath(), "false").execute(new LineConsumer() {
+										buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 											@Override
 											public void consume(String line) {
@@ -499,9 +499,9 @@ public class Upgrade extends AbstractPlugin {
 									else
 										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");										
 									if (SystemUtils.IS_OS_WINDOWS) {
-										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath() + " false");
+										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
 									} else {
-										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath() + " false");
+										errorMessage.append("\n\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
 									}
 									errorMessage.append("\n\n*** Do not forget to remove file '" + upgradingFile.getAbsolutePath() + "' after problem is solved ***");
 								}

@@ -472,39 +472,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 	}
 	
-	@Override
-	public void validateData(File dataDir) {
-		var entityTypes = getEntityTypes();
-		Collections.reverse(entityTypes);
-		for (Class<?> entityType: entityTypes) {
-			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
-
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.startsWith(entityType.getSimpleName() + "s.xml");
-				}
-				
-			});
-			for (File file: dataFiles) {
-				try {
-					logger.info("Validating data file '" + file.getName() + "'...");
-					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					
-					for (Element element: dom.getRootElement().elements()) {
-						element.detach();
-						AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
-						if (entity.getId() > 0) {
-							for (ConstraintViolation<?> violation: validator.validate(entity)) 
-								reportError(entity, violation);
-						}
-					}
-				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
-				}
-			}
-		}	
-	}
-	
 	private void reportError(AbstractEntity entity, ConstraintViolation<?> violation) {
 		String errorInfo = String.format("Error validating entity (entity class: %s, entity id: %d, entity property: %s, error message: %s)", 
 				entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());

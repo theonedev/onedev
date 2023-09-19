@@ -4,8 +4,8 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.Command;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.data.DataManager;
+import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -60,12 +60,6 @@ public class RestoreDatabase extends CommandHandler {
 			System.exit(1);
 		}
 		
-		boolean validateData;
-		if (Bootstrap.command.getArgs().length >= 2)
-			validateData = Boolean.parseBoolean(Bootstrap.command.getArgs()[1]);
-		else 
-			validateData = true;
-		
 		logger.info("Restoring database from {}...", backupFile.getAbsolutePath());
 
 		try {
@@ -76,12 +70,12 @@ public class RestoreDatabase extends CommandHandler {
 					File dataDir = FileUtils.createTempDir("restore");
 					try {
 						FileUtils.unzip(backupFile, dataDir);
-						doRestore(dataDir, validateData);
+						doRestore(dataDir);
 					} finally {
 						FileUtils.deleteDir(dataDir);
 					}
 				} else {
-					doRestore(backupFile, validateData);
+					doRestore(backupFile);
 				}
 
 				if (hibernateConfig.isHSQLDialect()) {
@@ -101,12 +95,9 @@ public class RestoreDatabase extends CommandHandler {
 		}
 	}
 
-	private void doRestore(File dataDir, boolean validateData) {
+	private void doRestore(File dataDir) {
 		dataManager.migrateData(dataDir);
 		
-		if (validateData)
-			dataManager.validateData(dataDir);
-
 		try (var conn = dataManager.openConnection()) {
 			callWithTransaction(conn, () -> {
 				String dbDataVersion = dataManager.checkDataVersion(conn, true);

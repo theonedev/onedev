@@ -23,8 +23,6 @@ public interface DataManager {
 	
 	void importData(File dataDir);
 	
-	void validateData(File dataDir);
-	
 	void applyConstraints(Connection conn);
 	
 	void createTables(Connection conn);
