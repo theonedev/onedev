@@ -33,12 +33,6 @@ public class HibernateConfig extends Properties {
 		putAll(loadProperties(file));
 		put("hibernate.cache.hazelcast.shutdown_on_session_factory_close", "false");
 		
-		String url = getProperty(URL);
-		url = StringUtils.replace(url, "${installDir}", installDir.getAbsolutePath());
-		if (url.contains(":sqlserver:") && !url.toLowerCase().contains("selectMethod=cursor".toLowerCase())) 
-			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
-		setProperty(URL, url);
-
 		String value = System.getenv(ENV_PASS_FILE);
 		if (value != null) {
 			try {
@@ -52,6 +46,12 @@ public class HibernateConfig extends Properties {
 			if (value != null)
 				setProperty(env, value);
 		}
+		
+		String url = getProperty(URL);
+		url = StringUtils.replace(url, "${installDir}", installDir.getAbsolutePath());
+		if (url.contains(":sqlserver:") && !url.toLowerCase().contains("selectMethod=cursor".toLowerCase()))
+			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
+		setProperty(URL, url);
 	}
 
 	public String getDialect() {
