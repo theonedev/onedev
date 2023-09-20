@@ -1,7 +1,8 @@
-package io.onedev.server.web.component.issue.progress;
+package io.onedev.server.web.util.editablebean;
 
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.Markdown;
+import io.onedev.server.annotation.WithTime;
 import io.onedev.server.annotation.WorkingPeriod;
 
 import javax.validation.constraints.Min;
@@ -10,7 +11,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Editable(name="Log Work")
-public class IssueWorkEditBean implements Serializable {
+public class IssueWorkBean implements Serializable {
 	
 	private Integer spentTime;
 	
@@ -31,6 +32,7 @@ public class IssueWorkEditBean implements Serializable {
 	}
 	
 	@Editable(order=200, description = "When this work starts")
+	@WithTime
 	@NotNull
 	public Date getStartAt() {
 		return startAt;
@@ -41,7 +43,7 @@ public class IssueWorkEditBean implements Serializable {
 	}
 
 	@Editable(order=300, description = "Optionally leave a note")
-	@Multiline
+	@Markdown
 	public String getNote() {
 		return note;
 	}

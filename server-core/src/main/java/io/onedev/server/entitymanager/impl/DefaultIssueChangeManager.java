@@ -142,6 +142,22 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
+	public void changeOwnEstimatedTime(Issue issue, int ownEstimatedTime) {
+		int prevOwnEstimatedTime = issue.getOwnEstimatedTime();
+		if (ownEstimatedTime != prevOwnEstimatedTime) {
+			issue.setOwnEstimatedTime(ownEstimatedTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueOwnEstimatedTimeChangeData(prevOwnEstimatedTime, issue.getOwnEstimatedTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+	
+	@Transactional
+	@Override
 	public void changeDescription(Issue issue, @Nullable String description) {
 		String prevDescription = issue.getDescription();
 		if (!Objects.equals(description, prevDescription)) {

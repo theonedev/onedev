@@ -22,5 +22,11 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		Preconditions.checkState(work.isNew());
 		dao.persist(work);
 	}
-	
+
+	@Override
+	public void update(IssueWork work) {
+		Preconditions.checkState(!work.isNew());
+		dao.persist(work);
+	}
+
 }

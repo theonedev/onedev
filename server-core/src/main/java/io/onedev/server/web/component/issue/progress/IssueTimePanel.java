@@ -8,22 +8,27 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Day;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.editablebean.IssueWorkBean;
+import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import java.util.HashMap;
+import javax.annotation.Nullable;
+
+import static io.onedev.server.timetracking.TimeAggregationDirection.BOTH;
+import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
 abstract class IssueTimePanel extends Panel {
-	
+
 	private Page page;
-	
+
 	public IssueTimePanel(String id) {
 		super(id);
 	}
@@ -35,60 +40,126 @@ abstract class IssueTimePanel extends Panel {
 		page = getPage();
 		
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		var estimatedTimeField = timeTrackingSetting.getEstimatedTimeField();
+		var spentTimeField = timeTrackingSetting.getSpentTimeField();
+		var timeAggregationLink = timeTrackingSetting.getTimeAggregationLink();
 		
-		Integer estimatedTime = (Integer) getIssue().getFieldValue(timeTrackingSetting.getEstimatedTimeField());
-		if (estimatedTime == null)
-			add(new Label("estimatedTime", "<i>Not specified</i>").setEscapeModelStrings(false));
-		else
-			add(new Label("estimatedTime", DateUtils.formatWorkingPeriod(estimatedTime)));			
+		boolean timeAggregation = getIssue().isAggregatingTime(timeAggregationLink);
 		
-		add(new AjaxLink<Void>("editEstimation") {
+		if (timeAggregation) {
+			var fragment = new Fragment("content", "aggregationFrag", this);
+
+			Integer estimatedTime = (Integer) getIssue().getFieldValue(estimatedTimeField);
+			if (estimatedTime == null)
+				estimatedTime = 0;
+			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
+			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", estimatedTimeField, timeAggregationLink));
+			fragment.add(new Label("ownEstimatedTime", formatWorkingPeriod(getIssue().getOwnEstimatedTime())));
+			fragment.add(newEstimatedTimeEditLink("editOwnEstimatedTime"));
+			
+			int aggregatedTime = getTimeTrackingManager().aggregateSourceLinkTimes(getIssue(), estimatedTimeField, timeAggregationLink);
+			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkTimes(getIssue(), estimatedTimeField, timeAggregationLink);
+			
+			fragment.add(new Label("estimatedTimeAggregationLink", timeAggregationLink));
+			fragment.add(new Label("aggregatedEstimatedTime", formatWorkingPeriod(aggregatedTime)));
+
+			Integer spentTime = (Integer) getIssue().getFieldValue(spentTimeField);
+			if (spentTime == null)
+				spentTime = 0;
+			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
+			fragment.add(newSpentTimeSyncLink("syncSpentTime", spentTimeField, timeAggregationLink));
+			fragment.add(new Label("ownSpentTime", 
+					formatWorkingPeriod(getIssue().getWorks().stream().mapToInt(IssueWork::getMinutes).sum())));
+			fragment.add(newSpentTimeAddLink("addOwnSpentTime"));
+			
+			aggregatedTime = getTimeTrackingManager().aggregateSourceLinkTimes(getIssue(), spentTimeField, timeAggregationLink);
+			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkTimes(getIssue(), spentTimeField, timeAggregationLink);
+			fragment.add(new Label("spentTimeAggregationLink", timeAggregationLink));
+			fragment.add(new Label("aggregatedSpentTime", formatWorkingPeriod(aggregatedTime)));
+			
+			add(fragment);
+		} else {
+			var fragment = new Fragment("content", "noAggregationFrag", this);
+			
+			Integer estimatedTime = (Integer) getIssue().getFieldValue(estimatedTimeField);
+			if (estimatedTime == null)
+				estimatedTime = 0;
+			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
+			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", estimatedTimeField, timeAggregationLink));
+			fragment.add(newEstimatedTimeEditLink("editEstimatedTime"));
+
+			Integer spentTime = (Integer) getIssue().getFieldValue(spentTimeField);
+			if (spentTime == null)
+				spentTime = 0;
+			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
+			fragment.add(newSpentTimeSyncLink("syncSpentTime", spentTimeField, timeAggregationLink));
+			fragment.add(newSpentTimeAddLink("addSpentTime"));
+			
+			add(fragment);
+		}
+	}
+
+	private Component newEstimatedTimeSyncLink(String componentId, String estimatedTimeField, 
+											   @Nullable String timeAggregationLink) {
+		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				var bean = new EstimationTimeEditBean();
-				if (estimatedTime != null)
-					bean.setEstimationTime(estimatedTime);
+				getTimeTrackingManager().syncEstimatedTime(getIssue(), estimatedTimeField, timeAggregationLink, BOTH);
+				notifyObservablesChange(target);
+			}
+			
+		};
+	}
+	
+	private Component newEstimatedTimeEditLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				closeDropdown();
+				var bean = new EstimatedTimeEditBean();
+				bean.setEstimatedTime(getIssue().getOwnEstimatedTime());
 				new BeanEditModalPanel<>(target, bean) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, EstimationTimeEditBean bean) {
-						var fieldValues = new HashMap<String, Object>();
-						fieldValues.put(timeTrackingSetting.getEstimatedTimeField(), bean.getEstimationTime());
-						getIssueChangeManager().changeFields(getIssue(), fieldValues);
+					protected void onSave(AjaxRequestTarget target, EstimatedTimeEditBean bean) {
+						getIssueChangeManager().changeOwnEstimatedTime(getIssue(), bean.getEstimatedTime());
 						notifyObservablesChange(target);
 						close();
 					}
 				};
 			}
+		}.setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
+	}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
-			}
-		});
-
-		Integer spentTime = (Integer) getIssue().getFieldValue(timeTrackingSetting.getSpentTimeField());
-		if (spentTime == null)
-			add(new Label("spentTime", "<i>Not specified</i>").setEscapeModelStrings(false));
-		else
-			add(new Label("spentTime", DateUtils.formatWorkingPeriod(spentTime)));
-
-		add(new AjaxLink<Void>("addSpent") {
+	private Component newSpentTimeSyncLink(String componentId, String spentTimeField,
+											   @Nullable String timeAggregationLink) {
+		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				var bean = new IssueWorkEditBean();
+				getTimeTrackingManager().syncSpentTime(getIssue(), spentTimeField, timeAggregationLink, BOTH);
+				notifyObservablesChange(target);
+			}
+
+		};
+	}
+	
+	private Component newSpentTimeAddLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				closeDropdown();
+				var bean = new IssueWorkBean();
 				new BeanEditModalPanel<>(target, bean) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, IssueWorkEditBean bean) {
+					protected void onSave(AjaxRequestTarget target, IssueWorkBean bean) {
 						IssueWork work = new IssueWork();
 						work.setIssue(getIssue());
 						work.setUser(SecurityUtils.getUser());
 						work.setMinutes(bean.getSpentTime());
-						work.setDay(new Day(bean.getStartAt()).getValue());
+						work.setDate(bean.getStartAt());
 						work.setNote(bean.getNote());
 						OneDev.getInstance(IssueWorkManager.class).create(work);
 						notifyObservablesChange(target);
@@ -97,12 +168,11 @@ abstract class IssueTimePanel extends Panel {
 				};
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canLogWorks(getIssue().getProject()));
-			}
-		});
+		}.setVisible(SecurityUtils.canLogWorks(getIssue().getProject()));
+	}
+	
+	private TimeTrackingManager getTimeTrackingManager() {
+		return OneDev.getInstance(TimeTrackingManager.class);
 	}
 	
 	private IssueChangeManager getIssueChangeManager() {

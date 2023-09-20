@@ -210,6 +210,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private int commentCount;
 	
+	private int ownEstimatedTime;
+	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 
@@ -458,6 +460,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		}
 	}
 
+	public Collection<IssueWork> getWorks() {
+		return works;
+	}
+
+	public void setWorks(Collection<IssueWork> works) {
+		this.works = works;
+	}
+
 	public Collection<IssueMention> getMentions() {
 		return mentions;
 	}
@@ -494,6 +504,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setCommentCount(int commentCount) {
 		this.commentCount = commentCount;
+	}
+
+	public int getOwnEstimatedTime() {
+		return ownEstimatedTime;
+	}
+
+	public void setOwnEstimatedTime(int ownEstimatedTime) {
+		this.ownEstimatedTime = ownEstimatedTime;
 	}
 
 	public Collection<IssueField> getFields() {
@@ -930,4 +948,17 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		stack.get().pop();
 	}
 	
+	public boolean isAggregatingTime(@Nullable String timeAggregationLink) {
+		if (timeAggregationLink != null) {
+			for (var link : getTargetLinks()) {
+				if (link.getSpec().getName().equals(timeAggregationLink)) 
+					return true;
+			}
+			for (var link : getSourceLinks()) {
+				if (link.getSpec().getOpposite() != null && link.getSpec().getOpposite().getName().equals(timeAggregationLink)) 
+					return true;
+			}
+		}
+		return false;
+	}
 }

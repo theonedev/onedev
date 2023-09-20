@@ -9,20 +9,20 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Editable(name="Edit Estimated Time")
-public class EstimationTimeEditBean implements Serializable {
+public class EstimatedTimeEditBean implements Serializable {
 	
-	private Integer estimationTime;
+	private Integer estimatedTime;
 
 	@Editable
 	@OmitName
 	@NotNull(message="May not be empty")
 	@WorkingPeriod
 	@Min(1)
-	public Integer getEstimationTime() {
-		return estimationTime;
+	public Integer getEstimatedTime() {
+		return estimatedTime;
 	}
 
-	public void setEstimationTime(Integer estimationTime) {
-		this.estimationTime = estimationTime;
+	public void setEstimatedTime(Integer estimatedTime) {
+		this.estimatedTime = estimatedTime;
 	}
 }

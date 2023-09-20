@@ -21,6 +21,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void changeLink(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, @Nullable Issue linkedIssue, boolean opposite);
 	
 	void changeTitle(Issue issue, String title);
+	
+	void changeOwnEstimatedTime(Issue issue, int ownEstimatedTime);
 
 	void changeDescription(Issue issue, String description);
 	

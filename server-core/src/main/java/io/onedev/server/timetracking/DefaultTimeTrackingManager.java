@@ -9,15 +9,17 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueOwnEstimatedTimeChangeData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.util.ThreadContext;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
@@ -25,6 +27,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+
+import static io.onedev.server.timetracking.TimeAggregationDirection.*;
 
 @Singleton
 public class DefaultTimeTrackingManager implements TimeTrackingManager {
@@ -58,95 +62,131 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 		if (event.getEntity() instanceof Issue) {
 			Issue issue = (Issue) event.getEntity();
 			var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
+			String timeAggregationLink;
 			if (timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(issue.getProject())
-					&& timeTrackingSetting.getTimeAggregationLink() != null) {
+					&& (timeAggregationLink = timeTrackingSetting.getTimeAggregationLink()) != null) {
 				var affectedIssueIds = new HashSet<Long>();
 				for (var issueLink: issue.getTargetLinks()) {
 					if (issueLink.getSpec().getOpposite() != null 
-							&& issueLink.getSpec().getOpposite().getName().equals(timeTrackingSetting.getTimeAggregationLink())) {
+							&& issueLink.getSpec().getOpposite().getName().equals(timeAggregationLink)) {
 						affectedIssueIds.add(issueLink.getTarget().getId());
 					}
 				}
 				for (var issueLink: issue.getSourceLinks()) {
-					if (issueLink.getSpec().getName().equals(timeTrackingSetting.getTimeAggregationLink()))
+					if (issueLink.getSpec().getName().equals(timeAggregationLink))
 						affectedIssueIds.add(issueLink.getSource().getId());
 				}
 				for (var affectedIssueId: affectedIssueIds) {
-					trackTime(affectedIssueId, () -> {
+					runAsyncAfterCommit(affectedIssueId, () -> {
 						var affectedIssue = issueManager.get(affectedIssueId);
-						if (affectedIssue != null)
-							syncTimes(affectedIssue, timeTrackingSetting);
+						if (affectedIssue != null) {
+							syncEstimatedTime(affectedIssue, timeTrackingSetting.getEstimatedTimeField(), timeAggregationLink, BOTH);
+							syncSpentTime(affectedIssue, timeTrackingSetting.getSpentTimeField(), timeAggregationLink, BOTH);
+						}
 					});
 				}
 			}
-		}		
-	}
-	
-	private void syncTimes(Issue issue, TimeTrackingSetting timeTrackingSetting) {
-		var linkName = timeTrackingSetting.getTimeAggregationLink();
-		aggregateTargetLinkTimes(issue, linkName, timeTrackingSetting.getEstimatedTimeField());
-		aggregateTargetLinkTimes(issue, linkName, timeTrackingSetting.getSpentTimeField());
-		aggregateSourceLinkTimes(issue, linkName, timeTrackingSetting.getEstimatedTimeField());
-		aggregateSourceLinkTimes(issue, linkName, timeTrackingSetting.getSpentTimeField());
+		} else if (event.getEntity() instanceof IssueWork) {
+			var issueWork = (IssueWork) event.getEntity();
+			var issue = issueWork.getIssue();
+			var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
+			if (timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(issue.getProject())) {
+				var issueId = issue.getId();
+				runAsyncAfterCommit(issueId, () -> {
+					var innerIssue = issueManager.load(issueId);
+					syncSpentTime(innerIssue, timeTrackingSetting.getSpentTimeField(),
+							timeTrackingSetting.getTimeAggregationLink(), BOTH);
+				});
+			}
+		}
 	}
 	
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof IssueChange) {
+		if (event.getEntity() instanceof IssueWork) {
+			var issueWork = (IssueWork) event.getEntity();
+			var issue = issueWork.getIssue();
+			var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
+			if (timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(issue.getProject())) {
+				var issueId = issue.getId();
+				runAsyncAfterCommit(issueId, () -> {
+					var innerIssue = issueManager.load(issueId);
+					syncSpentTime(innerIssue, timeTrackingSetting.getSpentTimeField(),
+							timeTrackingSetting.getTimeAggregationLink(), BOTH);
+				});
+			}
+		} else if (event.getEntity() instanceof IssueChange) {
 			IssueChange issueChange = (IssueChange) event.getEntity();
 			var issue = issueChange.getIssue();
 			var issueId = issue.getId();
 			var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
-			if (timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(issue.getProject())
-					&& timeTrackingSetting.getTimeAggregationLink() != null) {
-				if (issueChange.getData() instanceof IssueFieldChangeData) {
-					var processedIssueIds = processedIssueIdsHolder.get();
-					if (!processedIssueIds.contains(issueId)) {
-						IssueFieldChangeData changeData = (IssueFieldChangeData) issueChange.getData();
+			if (timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(issue.getProject())) {
+				var estimatedTimeField = timeTrackingSetting.getEstimatedTimeField();
+				var spentTimeField = timeTrackingSetting.getSpentTimeField();
+				var timeAggregationLink = timeTrackingSetting.getTimeAggregationLink();
+				if (issueChange.getData() instanceof IssueOwnEstimatedTimeChangeData) {
+					runAsyncAfterCommit(issueId, () -> {
+						var innerIssue = issueManager.load(issueId);
+						syncEstimatedTime(innerIssue, timeTrackingSetting.getEstimatedTimeField(), 
+								timeAggregationLink, BOTH);
+					});
+				} else if (issueChange.getData() instanceof IssueFieldChangeData) {
+					if (timeAggregationLink != null) {
+						var processedIssueIds = processedIssueIdsHolder.get();
+						if (!processedIssueIds.contains(issueId)) {
+							IssueFieldChangeData changeData = (IssueFieldChangeData) issueChange.getData();
 
-						var fieldNames = new HashSet<String>();
-						fieldNames.addAll(changeData.getOldFields().keySet());
-						fieldNames.addAll(changeData.getNewFields().keySet());
+							var fieldNames = new HashSet<String>();
+							fieldNames.addAll(changeData.getOldFields().keySet());
+							fieldNames.addAll(changeData.getNewFields().keySet());
 
-						for (var fieldName: fieldNames) {
-							if (fieldName.equals(timeTrackingSetting.getEstimatedTimeField()) || fieldName.equals(timeTrackingSetting.getSpentTimeField())) {
-								trackTime(issueId, () -> {
-									var copyOfProcessedIssueIds = new HashSet<>(processedIssueIds);
-									copyOfProcessedIssueIds.add(issueId);
-									processedIssueIdsHolder.set(copyOfProcessedIssueIds);
-									try {
-										transactionManager.run(() -> {
+							for (var fieldName : fieldNames) {
+								if (fieldName.equals(estimatedTimeField) || fieldName.equals(spentTimeField)) {
+									runAsyncAfterCommit(issueId, () -> {
+										var copyOfProcessedIssueIds = new HashSet<>(processedIssueIds);
+										copyOfProcessedIssueIds.add(issueId);
+										processedIssueIdsHolder.set(copyOfProcessedIssueIds);
+										try {
 											var innerIssue = issueManager.load(issueId);
 											for (var sourceLink : innerIssue.getSourceLinks()) {
-												if (sourceLink.getSpec().getName().equals(timeTrackingSetting.getTimeAggregationLink()))
-													aggregateTargetLinkTimes(sourceLink.getSource(), timeTrackingSetting.getTimeAggregationLink(), fieldName);
+												if (sourceLink.getSpec().getName().equals(timeAggregationLink)) {
+													var sourceIssue = sourceLink.getSource();
+													if (fieldName.equals(estimatedTimeField))
+														syncEstimatedTime(sourceIssue, fieldName, timeAggregationLink, TARGET);
+													else
+														syncSpentTime(sourceIssue, fieldName, timeAggregationLink, TARGET);
+												}
 											}
 											for (var targetLink : innerIssue.getTargetLinks()) {
 												if (targetLink.getSpec().getOpposite() != null
-														&& targetLink.getSpec().getOpposite().getName().equals(timeTrackingSetting.getTimeAggregationLink())) {
-													aggregateSourceLinkTimes(targetLink.getTarget(), timeTrackingSetting.getTimeAggregationLink(), fieldName);
+														&& targetLink.getSpec().getOpposite().getName().equals(timeAggregationLink)) {
+													var targetIssue = targetLink.getTarget();
+													if (fieldName.equals(estimatedTimeField))
+														syncEstimatedTime(targetIssue, fieldName, timeAggregationLink, SOURCE);
+													else
+														syncSpentTime(targetIssue, fieldName, timeAggregationLink, SOURCE);
 												}
 											}
-										});
-									} finally {
-										processedIssueIdsHolder.set(new HashSet<>());
-									}
-								});
+										} finally {
+											processedIssueIdsHolder.set(new HashSet<>());
+										}
+									});
+								}
 							}
 						}
 					}
 				} else if (issueChange.getData() instanceof IssueLinkChangeData) {
 					IssueLinkChangeData changeData = (IssueLinkChangeData) issueChange.getData();
-					if (changeData.getLinkName().equals(timeTrackingSetting.getTimeAggregationLink())) {
-						trackTime(issueId, () -> {
+					if (changeData.getLinkName().equals(timeAggregationLink)) {
+						runAsyncAfterCommit(issueId, () -> {
 							var innerIssue = issueManager.load(issueId);
 							if (!changeData.isOpposite()) {
-								aggregateTargetLinkTimes(innerIssue, changeData.getLinkName(), timeTrackingSetting.getEstimatedTimeField());
-								aggregateTargetLinkTimes(innerIssue, changeData.getLinkName(), timeTrackingSetting.getSpentTimeField());
+								syncEstimatedTime(innerIssue, estimatedTimeField, changeData.getLinkName(), TARGET);
+								syncSpentTime(innerIssue, spentTimeField, changeData.getLinkName(), TARGET);
 							} else {
-								aggregateSourceLinkTimes(innerIssue, changeData.getLinkName(), timeTrackingSetting.getEstimatedTimeField());
-								aggregateSourceLinkTimes(innerIssue, changeData.getLinkName(), timeTrackingSetting.getSpentTimeField());
+								syncEstimatedTime(innerIssue, estimatedTimeField, changeData.getLinkName(), SOURCE);
+								syncSpentTime(innerIssue, spentTimeField, changeData.getLinkName(), SOURCE);
 							}
 						});
 					}
@@ -154,40 +194,66 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 			}
 		}
 	}
+
+	@Override
+	public void syncEstimatedTime(Issue issue, String estimatedTimeField, @Nullable String aggregationLink, 
+								  TimeAggregationDirection direction) {
+		int totalTime = issue.getOwnEstimatedTime();
+		if (aggregationLink != null) {
+			if (direction == TARGET || direction == BOTH)
+				totalTime += aggregateTargetLinkTimes(issue, estimatedTimeField, aggregationLink);
+			if (direction == SOURCE || direction == BOTH)
+				totalTime += aggregateSourceLinkTimes(issue, estimatedTimeField, aggregationLink);
+		}
+		writeTime(issue, estimatedTimeField, totalTime);
+	}
+
+	@Override
+	public void syncSpentTime(Issue issue, String spentTimeField, @Nullable String aggregationLink, 
+							  TimeAggregationDirection direction) {
+		int totalTime = issue.getWorks().stream().mapToInt(IssueWork::getMinutes).sum();
+		if (aggregationLink != null) {
+			if (direction == TARGET || direction == BOTH)
+				totalTime += aggregateTargetLinkTimes(issue, spentTimeField, aggregationLink);
+			if (direction == SOURCE || direction == BOTH)
+				totalTime += aggregateSourceLinkTimes(issue, spentTimeField, aggregationLink);
+		}
+		writeTime(issue, spentTimeField, totalTime);
+	}
+
+	private void writeTime(Issue issue, String fieldName, int time) {
+		Map<String, Object> fieldValues = new HashMap<>();
+		fieldValues.put(fieldName, time);
+		issueChangeManager.changeFields(issue, fieldValues);
+	}
 	
-	private void aggregateTargetLinkTimes(Issue issue, String linkName, String fieldName) {
-		var totalMinutes = 0;
+	@Override
+	public int aggregateTargetLinkTimes(Issue issue, String fieldName, String linkName) {
+		int totalTime = 0;
 		for (var targetLink : issue.getTargetLinks()) {
 			if (targetLink.getSpec().getName().equals(linkName)) {
-				var minutesOfTargetIssue = targetLink.getTarget().getFieldValue(fieldName);
-				if (minutesOfTargetIssue != null) 
-					totalMinutes += (int) minutesOfTargetIssue;
+				var time = targetLink.getTarget().getFieldValue(fieldName);
+				if (time != null) 
+					totalTime += (int) time;
 			}
 		}
-		if (totalMinutes != 0) {
-			Map<String, Object> fieldValues = new HashMap<>();
-			fieldValues.put(fieldName, totalMinutes);
-			issueChangeManager.changeFields(issue, fieldValues);
-		}
+		return totalTime;
 	}
-
-	private void aggregateSourceLinkTimes(Issue issue, String linkName, String fieldName) {
-		var totalMinutes = 0;
+	
+	@Override
+	public int aggregateSourceLinkTimes(Issue issue, String fieldName, String linkName) {
+		var totalTime = 0;
 		for (var sourceLink : issue.getSourceLinks()) {
 			if (sourceLink.getSpec().getOpposite() != null && sourceLink.getSpec().getOpposite().getName().equals(linkName)) {
-				var minutesOfSourceIssue = sourceLink.getSource().getFieldValue(fieldName);
-				if (minutesOfSourceIssue != null)
-					totalMinutes += (int) minutesOfSourceIssue;
+				var time = sourceLink.getSource().getFieldValue(fieldName);
+				if (time != null)
+					totalTime += (int) time;
 			}
 		}
-		if (totalMinutes != 0) {
-			Map<String, Object> fieldValues = new HashMap<>();
-			fieldValues.put(fieldName, totalMinutes);
-			issueChangeManager.changeFields(issue, fieldValues);
-		}
+		return totalTime;
 	}
 
-	private void trackTime(Long issueId, Runnable runnable) {
+	private void runAsyncAfterCommit(Long issueId, Runnable runnable) {
 		transactionManager.runAfterCommit(() -> {
 			executorService.execute(() -> {
 				ThreadContext.bind(SecurityUtils.asSubject(User.SYSTEM_ID));

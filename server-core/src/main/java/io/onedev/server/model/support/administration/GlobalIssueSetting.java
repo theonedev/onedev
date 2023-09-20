@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.WorkingPeriod;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
@@ -13,6 +14,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.*;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
@@ -162,6 +164,22 @@ public class GlobalIssueSetting implements Serializable {
 		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
 		showCondition.setValueMatcher(valueIsOneOf);
 		failedBuild.setShowCondition(showCondition);
+
+		var estimatedTimeField = new WorkingPeriodField();
+		estimatedTimeField.setAllowEmpty(true);
+		estimatedTimeField.setNameOfEmptyValue("Not specified");
+		estimatedTimeField.setName("Estimated Time");
+		estimatedTimeField.setPromptUponIssueOpen(false);
+		
+		fieldSpecs.add(estimatedTimeField);
+
+		var spentTimeField = new WorkingPeriodField();
+		spentTimeField.setAllowEmpty(true);
+		spentTimeField.setNameOfEmptyValue("Not specified");
+		spentTimeField.setName("Spent Time");
+		spentTimeField.setPromptUponIssueOpen(false);
+
+		fieldSpecs.add(spentTimeField);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
