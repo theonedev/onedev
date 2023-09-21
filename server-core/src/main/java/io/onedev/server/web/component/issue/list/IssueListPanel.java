@@ -38,6 +38,7 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -1424,6 +1425,15 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
+				fragment.add(new IssueProgressPanel("progress") {
+					
+					@Override
+					protected Issue getIssue() {
+						return (Issue) fragment.getDefaultModelObject();
+					}
+					
+				});
+				
 				fragment.add(new CopyToClipboardLink("copy",
 						Model.of(issue.getTitle() + " (#" + issue.getNumber() + ")")));
 

@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.admin.issuesetting.timetracking;
 
-import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.editable.BeanContext;
@@ -21,19 +20,18 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var bean = new TimeTrackingSettingBean();
-		bean.setTimeTrackingSetting(getSettingManager().getIssueSetting().getTimeTrackingSetting());
+		var timeTrackingSetting = getSettingManager().getIssueSetting().getTimeTrackingSetting();
 		Form<?> form = new Form<Void>("form") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				var issueSetting = getSettingManager().getIssueSetting();
-				issueSetting.setTimeTrackingSetting(bean.getTimeTrackingSetting());
+				issueSetting.setTimeTrackingSetting(timeTrackingSetting);
 				getSettingManager().saveIssueSetting(issueSetting);
-				Session.get().success("Time tracking setting updated");
+				Session.get().success("Time tracking settings have been saved");
 			}
 		};
-		form.add(BeanContext.edit("editor", bean));
+		form.add(BeanContext.edit("editor", timeTrackingSetting));
 		add(form);
 	}
 	
@@ -43,7 +41,7 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Time Tracking Setting</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>Time Tracking Settings</span>").setEscapeModelStrings(false);
 	}
 	
 }

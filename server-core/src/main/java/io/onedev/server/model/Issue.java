@@ -210,6 +210,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private int commentCount;
 	
+	private int totalEstimatedTime;
+	
+	private int totalSpentTime;
+	
 	private int ownEstimatedTime;
 	
 	@Column(nullable=false)
@@ -504,6 +508,22 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setCommentCount(int commentCount) {
 		this.commentCount = commentCount;
+	}
+
+	public int getTotalEstimatedTime() {
+		return totalEstimatedTime;
+	}
+
+	public void setTotalEstimatedTime(int totalEstimatedTime) {
+		this.totalEstimatedTime = totalEstimatedTime;
+	}
+
+	public int getTotalSpentTime() {
+		return totalSpentTime;
+	}
+
+	public void setTotalSpentTime(int totalSpentTime) {
+		this.totalSpentTime = totalSpentTime;
 	}
 
 	public int getOwnEstimatedTime() {

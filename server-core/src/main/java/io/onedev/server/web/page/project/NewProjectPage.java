@@ -1,10 +1,5 @@
 package io.onedev.server.web.page.project;
 
-import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
-import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
-import static io.onedev.server.model.Project.PROP_NAME;
-
 import java.util.Collection;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -34,6 +29,8 @@ import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editablebean.LabelsBean;
 
+import static io.onedev.server.model.Project.*;
+
 @SuppressWarnings("serial")
 public class NewProjectPage extends LayoutPage {
 
@@ -53,7 +50,7 @@ public class NewProjectPage extends LayoutPage {
 		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT);
+				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		LabelsBean labelsBean = new LabelsBean();

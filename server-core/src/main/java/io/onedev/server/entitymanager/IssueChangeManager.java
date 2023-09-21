@@ -24,6 +24,10 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeOwnEstimatedTime(Issue issue, int ownEstimatedTime);
 
+	void changeTotalEstimatedTime(Issue issue, int totalEstimatedTime);
+
+	void changeTotalSpentTime(Issue issue, int totalSpentTime);
+
 	void changeDescription(Issue issue, String description);
 	
 	void changeConfidential(Issue issue, boolean confidential);

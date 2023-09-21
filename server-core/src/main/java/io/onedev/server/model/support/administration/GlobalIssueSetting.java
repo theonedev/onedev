@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.WorkingPeriod;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
@@ -14,7 +13,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.*;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
@@ -49,7 +47,7 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<BoardSpec> boardSpecs = new ArrayList<>();
 	
-	private TimeTrackingSetting timeTrackingSetting;
+	private TimeTrackingSetting timeTrackingSetting = new TimeTrackingSetting();
 	
 	private List<String> listFields = new ArrayList<>();
 	
@@ -164,22 +162,6 @@ public class GlobalIssueSetting implements Serializable {
 		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
 		showCondition.setValueMatcher(valueIsOneOf);
 		failedBuild.setShowCondition(showCondition);
-
-		var estimatedTimeField = new WorkingPeriodField();
-		estimatedTimeField.setAllowEmpty(true);
-		estimatedTimeField.setNameOfEmptyValue("Not specified");
-		estimatedTimeField.setName("Estimated Time");
-		estimatedTimeField.setPromptUponIssueOpen(false);
-		
-		fieldSpecs.add(estimatedTimeField);
-
-		var spentTimeField = new WorkingPeriodField();
-		spentTimeField.setAllowEmpty(true);
-		spentTimeField.setNameOfEmptyValue("Not specified");
-		spentTimeField.setName("Spent Time");
-		spentTimeField.setPromptUponIssueOpen(false);
-
-		fieldSpecs.add(spentTimeField);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
@@ -292,6 +274,8 @@ public class GlobalIssueSetting implements Serializable {
 		entry.setPrefix("\\(\\s*");
 		entry.setSuffix("\\s*\\)\\s*$");
 		commitMessageFixPatterns.getEntries().add(entry);
+		
+		timeTrackingSetting.setTimeAggregationLink("Child Issue");
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
@@ -407,9 +391,6 @@ public class GlobalIssueSetting implements Serializable {
 		for (IssueTemplate template: getIssueTemplates())
 			undefinedFields.addAll(template.getQueryUpdater().getUndefinedFields());
 		
-		if (timeTrackingSetting != null)
-			undefinedFields.addAll(timeTrackingSetting.getUndefinedFields());
-		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
@@ -492,9 +473,6 @@ public class GlobalIssueSetting implements Serializable {
 			if (!it.next().getQueryUpdater().fixUndefinedFields(resolutions))
 				it.remove();
 		}
-		
-		if (timeTrackingSetting != null && !timeTrackingSetting.fixUndefinedFields(resolutions))
-			timeTrackingSetting = null;
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -662,8 +640,7 @@ public class GlobalIssueSetting implements Serializable {
 		
 		ReconcileUtils.renameItem(listLinks, oldName, newName);
 		
-		if (timeTrackingSetting != null)
-			timeTrackingSetting.onRenameLink(oldName, newName);
+		timeTrackingSetting.onRenameLink(oldName, newName);
 	}
 
 	public Usage onDeleteLink(String linkName) {
@@ -689,8 +666,7 @@ public class GlobalIssueSetting implements Serializable {
 		if (listLinks.contains(linkName))
 			usage.add(new Usage().add("fields & links").prefix("-> issues"));
 		
-		if (timeTrackingSetting != null)
-			usage.add(timeTrackingSetting.onDeleteLink(linkName).prefix("time tracking"));
+		usage.add(timeTrackingSetting.onDeleteLink(linkName).prefix("time tracking"));
 		
 		return usage.prefix("issue settings");
 	}
@@ -710,7 +686,6 @@ public class GlobalIssueSetting implements Serializable {
 		this.boardSpecs = boardSpecs;
 	}
 
-	@Nullable
 	public TimeTrackingSetting getTimeTrackingSetting() {
 		return timeTrackingSetting;
 	}

@@ -40,8 +40,6 @@ abstract class IssueTimePanel extends Panel {
 		page = getPage();
 		
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
-		var estimatedTimeField = timeTrackingSetting.getEstimatedTimeField();
-		var spentTimeField = timeTrackingSetting.getSpentTimeField();
 		var timeAggregationLink = timeTrackingSetting.getTimeAggregationLink();
 		
 		boolean timeAggregation = getIssue().isAggregatingTime(timeAggregationLink);
@@ -49,31 +47,27 @@ abstract class IssueTimePanel extends Panel {
 		if (timeAggregation) {
 			var fragment = new Fragment("content", "aggregationFrag", this);
 
-			Integer estimatedTime = (Integer) getIssue().getFieldValue(estimatedTimeField);
-			if (estimatedTime == null)
-				estimatedTime = 0;
+			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
-			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", estimatedTimeField, timeAggregationLink));
+			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(new Label("ownEstimatedTime", formatWorkingPeriod(getIssue().getOwnEstimatedTime())));
 			fragment.add(newEstimatedTimeEditLink("editOwnEstimatedTime"));
 			
-			int aggregatedTime = getTimeTrackingManager().aggregateSourceLinkTimes(getIssue(), estimatedTimeField, timeAggregationLink);
-			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkTimes(getIssue(), estimatedTimeField, timeAggregationLink);
+			int aggregatedTime = getTimeTrackingManager().aggregateSourceLinkEstimatedTime(getIssue(), timeAggregationLink);
+			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkEstimatedTime(getIssue(), timeAggregationLink);
 			
 			fragment.add(new Label("estimatedTimeAggregationLink", timeAggregationLink));
 			fragment.add(new Label("aggregatedEstimatedTime", formatWorkingPeriod(aggregatedTime)));
 
-			Integer spentTime = (Integer) getIssue().getFieldValue(spentTimeField);
-			if (spentTime == null)
-				spentTime = 0;
+			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
-			fragment.add(newSpentTimeSyncLink("syncSpentTime", spentTimeField, timeAggregationLink));
+			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(new Label("ownSpentTime", 
 					formatWorkingPeriod(getIssue().getWorks().stream().mapToInt(IssueWork::getMinutes).sum())));
 			fragment.add(newSpentTimeAddLink("addOwnSpentTime"));
 			
-			aggregatedTime = getTimeTrackingManager().aggregateSourceLinkTimes(getIssue(), spentTimeField, timeAggregationLink);
-			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkTimes(getIssue(), spentTimeField, timeAggregationLink);
+			aggregatedTime = getTimeTrackingManager().aggregateSourceLinkSpentTime(getIssue(), timeAggregationLink);
+			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkSpentTime(getIssue(), timeAggregationLink);
 			fragment.add(new Label("spentTimeAggregationLink", timeAggregationLink));
 			fragment.add(new Label("aggregatedSpentTime", formatWorkingPeriod(aggregatedTime)));
 			
@@ -81,31 +75,26 @@ abstract class IssueTimePanel extends Panel {
 		} else {
 			var fragment = new Fragment("content", "noAggregationFrag", this);
 			
-			Integer estimatedTime = (Integer) getIssue().getFieldValue(estimatedTimeField);
-			if (estimatedTime == null)
-				estimatedTime = 0;
+			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
-			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", estimatedTimeField, timeAggregationLink));
+			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(newEstimatedTimeEditLink("editEstimatedTime"));
 
-			Integer spentTime = (Integer) getIssue().getFieldValue(spentTimeField);
-			if (spentTime == null)
-				spentTime = 0;
+			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
-			fragment.add(newSpentTimeSyncLink("syncSpentTime", spentTimeField, timeAggregationLink));
+			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(newSpentTimeAddLink("addSpentTime"));
 			
 			add(fragment);
 		}
 	}
 
-	private Component newEstimatedTimeSyncLink(String componentId, String estimatedTimeField, 
-											   @Nullable String timeAggregationLink) {
+	private Component newEstimatedTimeSyncLink(String componentId, @Nullable String timeAggregationLink) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				getTimeTrackingManager().syncEstimatedTime(getIssue(), estimatedTimeField, timeAggregationLink, BOTH);
+				getTimeTrackingManager().syncEstimatedTime(getIssue(), timeAggregationLink, BOTH);
 				notifyObservablesChange(target);
 			}
 			
@@ -132,13 +121,12 @@ abstract class IssueTimePanel extends Panel {
 		}.setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 	}
 
-	private Component newSpentTimeSyncLink(String componentId, String spentTimeField,
-											   @Nullable String timeAggregationLink) {
+	private Component newSpentTimeSyncLink(String componentId, @Nullable String timeAggregationLink) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				getTimeTrackingManager().syncSpentTime(getIssue(), spentTimeField, timeAggregationLink, BOTH);
+				getTimeTrackingManager().syncSpentTime(getIssue(), timeAggregationLink, BOTH);
 				notifyObservablesChange(target);
 			}
 

@@ -155,6 +155,38 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			dao.persist(issue);
 		}
 	}
+
+	@Transactional
+	@Override
+	public void changeTotalEstimatedTime(Issue issue, int totalEstimatedTime) {
+		int prevTotalEstimatedTime = issue.getTotalEstimatedTime();
+		if (totalEstimatedTime != prevTotalEstimatedTime) {
+			issue.setTotalEstimatedTime(totalEstimatedTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueTotalEstimatedTimeChangeData(prevTotalEstimatedTime, issue.getTotalEstimatedTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void changeTotalSpentTime(Issue issue, int totalSpentTime) {
+		int prevTotalSpentTime = issue.getTotalSpentTime();
+		if (totalSpentTime != prevTotalSpentTime) {
+			issue.setTotalSpentTime(totalSpentTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueTotalSpentTimeChangeData(prevTotalSpentTime, issue.getTotalSpentTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
 	
 	@Transactional
 	@Override

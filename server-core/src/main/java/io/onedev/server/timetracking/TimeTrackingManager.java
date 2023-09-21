@@ -6,14 +6,18 @@ import javax.annotation.Nullable;
 
 public interface TimeTrackingManager {
 	
-	void syncEstimatedTime(Issue issue, String estimatedTimeField, @Nullable String aggregationLink,  
+	void syncEstimatedTime(Issue issue, @Nullable String aggregationLink,  
 						   TimeAggregationDirection direction);
 
-	void syncSpentTime(Issue issue, String spentTimeField, @Nullable String aggregationLink, 
+	void syncSpentTime(Issue issue, @Nullable String aggregationLink, 
 						   TimeAggregationDirection direction);
 
-	int aggregateSourceLinkTimes(Issue issue, String fieldName, String linkName);
+	int aggregateSourceLinkEstimatedTime(Issue issue, String linkName);
 	
-	int aggregateTargetLinkTimes(Issue issue, String fieldName, String linkName);
+	int aggregateTargetLinkEstimatedTime(Issue issue, String linkName);
+
+	int aggregateSourceLinkSpentTime(Issue issue, String linkName);
+
+	int aggregateTargetLinkSpentTime(Issue issue, String linkName);
 	
 }

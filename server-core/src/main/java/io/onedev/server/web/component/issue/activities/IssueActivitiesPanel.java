@@ -11,8 +11,9 @@ import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCommitData;
+import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.UserCache;
@@ -126,10 +127,9 @@ public abstract class IssueActivitiesPanel extends Panel {
 					ProjectScopedCommit commit = ((IssueReferencedFromCommitData) change.getData()).getCommit();
 					if (commit.canDisplay() && !getIssue().getCommits().contains(commit))
 						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssueFieldChangeData) {
-					if (change.getUser() == null || !change.getUser().isSystem())
-						otherActivities.add(new IssueChangeActivity(change));						
-				} else if (!(change.getData() instanceof IssueDescriptionChangeData)) {
+				} else if (!(change.getData() instanceof IssueDescriptionChangeData)
+						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
+						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}
@@ -141,7 +141,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		}
 		
 		var timeTrackingSetting = getTimeTrackingSetting();
-		if (showWorkLog && timeTrackingSetting != null && timeTrackingSetting.isProjectApplicable(getIssue().getProject())) {
+		if (showWorkLog && getIssue().getProject().isTimeTracking()) {
 			for (IssueWork work: getIssue().getWorks())
 				otherActivities.add(new IssueWorkActivity(work));
 		}
@@ -410,8 +410,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				var trackTimeSetting = getTimeTrackingSetting();
-				setVisible(trackTimeSetting != null && trackTimeSetting.isProjectApplicable(getIssue().getProject()));
+				setVisible(getIssue().getProject().isTimeTracking());
 			}
 			
 		});

@@ -1,9 +1,5 @@
 package io.onedev.server.web.component.project.forkoption;
 
-import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
-import static io.onedev.server.model.Project.PROP_NAME;
-
 import java.util.Collection;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -31,6 +27,8 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editablebean.LabelsBean;
+
+import static io.onedev.server.model.Project.*;
 
 @SuppressWarnings("serial")
 public abstract class ForkOptionPanel extends Panel {
@@ -70,7 +68,7 @@ public abstract class ForkOptionPanel extends Panel {
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
@@ -104,6 +102,7 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setForkedFrom(getProject());
 						newProject.setDescription(editProject.getDescription());
 						newProject.setIssueManagement(editProject.isIssueManagement());
+						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());

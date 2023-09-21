@@ -132,6 +132,11 @@
 .dark-mode .issue-boards>.body .board-card.ui-draggable-dragging {
 	box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.5);	
 }
+.issue-boards>.body .board-card .issue-progress {
+	width: 19px !important;
+	height: 19px !important;
+	margin-top: 2px;
+}
 
 .board-card-detail .modal-header h5 {
 	width: 100%;

@@ -12,7 +12,11 @@
 	margin-right: 0.5rem;
 	padding: 0.25rem 0.4rem;
 }
-
+.issue-list .issue-progress {
+	width: 16px !important;
+	height: 16px !important;
+	vertical-align: middle;
+}
 .issue-list>div>.body .new-indicator {
 	width: 4px;
 	padding: 0;

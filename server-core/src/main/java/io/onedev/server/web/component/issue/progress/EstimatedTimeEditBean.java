@@ -5,24 +5,22 @@ import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.WorkingPeriod;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Editable(name="Edit Estimated Time")
 public class EstimatedTimeEditBean implements Serializable {
 	
-	private Integer estimatedTime;
+	private int estimatedTime;
 
 	@Editable
 	@OmitName
-	@NotNull(message="May not be empty")
 	@WorkingPeriod
 	@Min(1)
-	public Integer getEstimatedTime() {
+	public int getEstimatedTime() {
 		return estimatedTime;
 	}
 
-	public void setEstimatedTime(Integer estimatedTime) {
+	public void setEstimatedTime(int estimatedTime) {
 		this.estimatedTime = estimatedTime;
 	}
 }
