@@ -15,11 +15,11 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
+public class WorkingPeriodPropertyEditor extends PropertyEditor<Long> {
 
 	private TextField<String> input;
 	
-	public WorkingPeriodPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Integer> propertyModel) {
+	public WorkingPeriodPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Long> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -32,7 +32,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 			period = DateUtils.formatWorkingPeriod(getModelObject()).toString();
 		else
 			period = null;
-		input = new TextField<String>("input", Model.of(period));
+		input = new TextField<>("input", Model.of(period));
 		add(input);
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		
@@ -48,7 +48,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 	}
 
 	@Override
-	protected Integer convertInputToValue() throws ConversionException {
+	protected Long convertInputToValue() throws ConversionException {
 		if (StringUtils.isNotBlank(input.getConvertedInput())) {
 			try {
 				return DateUtils.parseWorkingPeriod(input.getConvertedInput());

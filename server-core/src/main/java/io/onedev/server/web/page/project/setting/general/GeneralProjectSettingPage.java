@@ -59,7 +59,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		if (getProject().getParent() != null)
 			parentBean.setParentPath(getProject().getParent().getPath());
 		
-		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+		editor = BeanContext.editModel("editor", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -74,7 +74,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 			public void setObject(Serializable object) {
 				editor.getDescriptor().copyProperties(object, getProject());
 			}
-			
+
 		}, properties, false);
 		
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);		

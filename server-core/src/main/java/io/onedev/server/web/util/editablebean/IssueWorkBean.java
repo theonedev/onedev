@@ -13,7 +13,7 @@ import java.util.Date;
 @Editable(name="Log Work")
 public class IssueWorkBean implements Serializable {
 	
-	private int spentTime;
+	private Integer spentTime;
 	
 	private Date startAt = new Date();
 	
@@ -21,12 +21,13 @@ public class IssueWorkBean implements Serializable {
 
 	@Editable(order=100, name="Add Spent Time")
 	@WorkingPeriod
+	@NotNull(message = "Must not be empty")
 	@Min(1)
-	public int getSpentTime() {
+	public Integer getSpentTime() {
 		return spentTime;
 	}
 
-	public void setSpentTime(int spentTime) {
+	public void setSpentTime(Integer spentTime) {
 		this.spentTime = spentTime;
 	}
 	

@@ -69,7 +69,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		return ISODateTimeFormat.dateTime().print(date.getTime());
 	}
 	
-	public static int parseWorkingPeriod(String period) {
+	public static long parseWorkingPeriod(String period) {
 		period = StringUtils.deleteWhitespace(period);
 		if (StringUtils.isBlank(period))
 			throw new ValidationException("Invalid working period");
@@ -100,12 +100,12 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		return minutes;
 	}
 	
-	public static String formatWorkingPeriod(int minutes) {
-		int weeks = minutes/(60*8*5);
+	public static String formatWorkingPeriod(long minutes) {
+		long weeks = minutes/(60*8*5);
 		minutes = minutes%(60*8*5);
-		int days = minutes/(60*8);
+		long days = minutes/(60*8);
 		minutes = minutes%(60*8);
-		int hours = minutes/60;
+		long hours = minutes/60;
 		minutes = minutes%60;
 		
 		StringBuilder builder = new StringBuilder();

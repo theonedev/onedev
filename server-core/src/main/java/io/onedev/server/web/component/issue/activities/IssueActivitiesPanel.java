@@ -10,10 +10,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.TimeTrackingSetting;
-import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCommitData;
-import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.UserCache;
@@ -128,6 +125,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 					if (commit.canDisplay() && !getIssue().getCommits().contains(commit))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (!(change.getData() instanceof IssueDescriptionChangeData)
+						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
@@ -140,7 +138,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 				otherActivities.add(new IssueCommentedActivity(comment));
 		}
 		
-		var timeTrackingSetting = getTimeTrackingSetting();
 		if (showWorkLog && getIssue().getProject().isTimeTracking()) {
 			for (IssueWork work: getIssue().getWorks())
 				otherActivities.add(new IssueWorkActivity(work));

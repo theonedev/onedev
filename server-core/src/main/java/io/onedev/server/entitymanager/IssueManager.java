@@ -5,10 +5,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.MilestoneAndIssueState;
-import io.onedev.server.util.ProjectIssueStats;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.*;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -48,6 +45,8 @@ public interface IssueManager extends EntityManager<Issue> {
 			boolean loadFieldsAndLinks, int firstResult, int maxResults);
 	
 	int count(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
+	
+	IssueTimes queryTimes(ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
 	
 	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String term, int count);
 

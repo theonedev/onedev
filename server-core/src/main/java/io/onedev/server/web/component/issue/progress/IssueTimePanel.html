@@ -3,12 +3,11 @@
 	<wicket:fragment wicket:id="aggregationFrag">
 		<div class="mb-4 bg-light p-4 rounded">
 			<h6>
-				Estimated Time
+				Estimated Time <a wicket:id="syncEstimatedTime" title="Sync"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
 			</h6>
 			<div class="mb-2">
 				<span>Total: </span>
 				<span wicket:id="estimatedTime"></span>
-				<a wicket:id="syncEstimatedTime" title="Sync"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
 			</div>
 			<div class="mb-2">
 				<span>Own: </span> 
@@ -22,12 +21,11 @@
 		</div>
 		<div class="bg-light rounded p-4">
 			<h6>
-				Spent Time
+				Spent Time <a wicket:id="syncSpentTime" title="Sync"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
 			</h6>
 			<div class="mb-2">
 				<span>Total: </span>
 				<span wicket:id="spentTime"></span>
-				<a wicket:id="syncSpentTime" title="Sync"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
 			</div>
 			<div class="mb-2">
 				<span>Own: </span>

@@ -39,10 +39,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.util.MilestoneAndIssueState;
-import io.onedev.server.util.ProjectIssueStats;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.*;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -57,13 +54,15 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.*;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static io.onedev.server.model.Issue.PROP_OWN_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.PROP_OWN_SPENT_TIME;
+import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultIssueManager extends BaseEntityManager<Issue> implements IssueManager, Serializable {
@@ -288,6 +287,21 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Sessional
+	@Override
+	public IssueTimes queryTimes(ProjectScope projectScope, Criteria<Issue> issueCriteria) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<IssueTimes> criteriaQuery = builder.createQuery(IssueTimes.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+
+		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
+		
+		criteriaQuery.multiselect(
+				builder.sum(root.get(PROP_OWN_ESTIMATED_TIME)), 
+				builder.sum(root.get(PROP_OWN_SPENT_TIME)));
+		return getSession().createQuery(criteriaQuery).uniqueResult();
 	}
 	
 	private Predicate[] getPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria, 

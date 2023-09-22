@@ -11,10 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueOwnEstimatedTimeChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.*;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.SecurityUtils;
@@ -79,8 +76,8 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 					runAsyncAfterCommit(affectedIssueId, () -> {
 						var affectedIssue = issueManager.get(affectedIssueId);
 						if (affectedIssue != null) {
-							syncEstimatedTime(affectedIssue, timeAggregationLink, BOTH);
-							syncSpentTime(affectedIssue, timeAggregationLink, BOTH);
+							syncTotalEstimatedTime(affectedIssue, timeAggregationLink, BOTH);
+							syncTotalSpentTime(affectedIssue, timeAggregationLink, BOTH);
 						}
 					});
 				}
@@ -92,8 +89,7 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 				var issueId = issue.getId();
 				runAsyncAfterCommit(issueId, () -> {
 					var innerIssue = issueManager.load(issueId);
-					var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
-					syncSpentTime(innerIssue, timeTrackingSetting.getTimeAggregationLink(), BOTH);
+					syncOwnSpentTime(innerIssue);
 				});
 			}
 		}
@@ -109,8 +105,7 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 				var issueId = issue.getId();
 				runAsyncAfterCommit(issueId, () -> {
 					var innerIssue = issueManager.load(issueId);
-					var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
-					syncSpentTime(innerIssue, timeTrackingSetting.getTimeAggregationLink(), BOTH);
+					syncOwnSpentTime(innerIssue);
 				});
 			}
 		} else if (event.getEntity() instanceof IssueChange) {
@@ -123,7 +118,12 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 				if (issueChange.getData() instanceof IssueOwnEstimatedTimeChangeData) {
 					runAsyncAfterCommit(issueId, () -> {
 						var innerIssue = issueManager.load(issueId);
-						syncEstimatedTime(innerIssue, timeAggregationLink, BOTH);
+						syncTotalEstimatedTime(innerIssue, timeAggregationLink, BOTH);
+					});
+				} else if (issueChange.getData() instanceof IssueOwnSpentTimeChangeData) {
+					runAsyncAfterCommit(issueId, () -> {
+						var innerIssue = issueManager.load(issueId);
+						syncTotalSpentTime(innerIssue, timeAggregationLink, BOTH);
 					});
 				} else if (issueChange.getData() instanceof IssueTotalEstimatedTimeChangeData 
 						|| issueChange.getData() instanceof IssueTotalSpentTimeChangeData) {
@@ -140,9 +140,9 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 										if (sourceLink.getSpec().getName().equals(timeAggregationLink)) {
 											var sourceIssue = sourceLink.getSource();
 											if (issueChange.getData() instanceof IssueTotalEstimatedTimeChangeData)
-												syncEstimatedTime(sourceIssue, timeAggregationLink, TARGET);
+												syncTotalEstimatedTime(sourceIssue, timeAggregationLink, TARGET);
 											else
-												syncSpentTime(sourceIssue, timeAggregationLink, TARGET);
+												syncTotalSpentTime(sourceIssue, timeAggregationLink, TARGET);
 										}
 									}
 									for (var targetLink : innerIssue.getTargetLinks()) {
@@ -150,9 +150,9 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 												&& targetLink.getSpec().getOpposite().getName().equals(timeAggregationLink)) {
 											var targetIssue = targetLink.getTarget();
 											if (issueChange.getData() instanceof IssueTotalEstimatedTimeChangeData)
-												syncEstimatedTime(targetIssue, timeAggregationLink, SOURCE);
+												syncTotalEstimatedTime(targetIssue, timeAggregationLink, SOURCE);
 											else
-												syncSpentTime(targetIssue, timeAggregationLink, SOURCE);
+												syncTotalSpentTime(targetIssue, timeAggregationLink, SOURCE);
 										}
 									}
 								} finally {
@@ -167,11 +167,11 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 						runAsyncAfterCommit(issueId, () -> {
 							var innerIssue = issueManager.load(issueId);
 							if (!changeData.isOpposite()) {
-								syncEstimatedTime(innerIssue, changeData.getLinkName(), TARGET);
-								syncSpentTime(innerIssue, changeData.getLinkName(), TARGET);
+								syncTotalEstimatedTime(innerIssue, changeData.getLinkName(), TARGET);
+								syncTotalSpentTime(innerIssue, changeData.getLinkName(), TARGET);
 							} else {
-								syncEstimatedTime(innerIssue, changeData.getLinkName(), SOURCE);
-								syncSpentTime(innerIssue, changeData.getLinkName(), SOURCE);
+								syncTotalEstimatedTime(innerIssue, changeData.getLinkName(), SOURCE);
+								syncTotalSpentTime(innerIssue, changeData.getLinkName(), SOURCE);
 							}
 						});
 					}
@@ -181,8 +181,8 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 	}
 
 	@Override
-	public void syncEstimatedTime(Issue issue, @Nullable String aggregationLink, 
-								  TimeAggregationDirection direction) {
+	public void syncTotalEstimatedTime(Issue issue, @Nullable String aggregationLink,
+									   TimeAggregationDirection direction) {
 		int totalTime = issue.getOwnEstimatedTime();
 		if (aggregationLink != null) {
 			if (direction == TARGET || direction == BOTH)
@@ -194,9 +194,9 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 	}
 
 	@Override
-	public void syncSpentTime(Issue issue, @Nullable String aggregationLink, 
-							  TimeAggregationDirection direction) {
-		int totalTime = issue.getWorks().stream().mapToInt(IssueWork::getMinutes).sum();
+	public void syncTotalSpentTime(Issue issue, @Nullable String aggregationLink,
+								   TimeAggregationDirection direction) {
+		int totalTime = issue.getOwnSpentTime();
 		if (aggregationLink != null) {
 			if (direction == TARGET || direction == BOTH)
 				totalTime += aggregateTargetLinkSpentTime(issue, aggregationLink);
@@ -204,6 +204,12 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 				totalTime += aggregateSourceLinkSpentTime(issue, aggregationLink);
 		}
 		issueChangeManager.changeTotalSpentTime(issue, totalTime);
+	}
+
+	@Override
+	public void syncOwnSpentTime(Issue issue) {
+		int ownTime = issue.getWorks().stream().mapToInt(IssueWork::getMinutes).sum();
+		issueChangeManager.changeOwnSpentTime(issue, ownTime);
 	}
 	
 	@Override

@@ -134,6 +134,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final String PROP_PIN_DATE = "pinDate";
 	
+	public static final String PROP_OWN_ESTIMATED_TIME = "ownEstimatedTime";
+	
+	public static final String PROP_OWN_SPENT_TIME = "ownSpentTime";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
@@ -215,6 +219,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	private int totalSpentTime;
 	
 	private int ownEstimatedTime;
+	
+	private int ownSpentTime;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -528,6 +534,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public int getOwnEstimatedTime() {
 		return ownEstimatedTime;
+	}
+
+	public int getOwnSpentTime() {
+		return ownSpentTime;
+	}
+
+	public void setOwnSpentTime(int ownSpentTime) {
+		this.ownSpentTime = ownSpentTime;
 	}
 
 	public void setOwnEstimatedTime(int ownEstimatedTime) {

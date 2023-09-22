@@ -25,10 +25,10 @@ public class WorkingPeriodEditSupport implements EditSupport {
 		if (propertyGetter.getAnnotation(WorkingPeriod.class) != null) {
 			Class<?> propertyClass = propertyGetter.getReturnType();
 			if (propertyClass == int.class || propertyClass == Integer.class) {
-				return new PropertyContext<Integer>(descriptor) {
+				return new PropertyContext<Long>(descriptor) {
 	
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<Integer> model) {
+					public PropertyViewer renderForView(String componentId, final IModel<Long> model) {
 						return new PropertyViewer(componentId, descriptor) {
 	
 							@Override
@@ -51,7 +51,7 @@ public class WorkingPeriodEditSupport implements EditSupport {
 					}
 	
 					@Override
-					public PropertyEditor<Integer> renderForEdit(String componentId, IModel<Integer> model) {
+					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
 						return new WorkingPeriodPropertyEditor(componentId, descriptor, model);
 					}
 					
