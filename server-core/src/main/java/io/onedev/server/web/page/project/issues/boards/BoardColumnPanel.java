@@ -27,7 +27,10 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -268,6 +271,27 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		if (color != null) {
 			head.add(AttributeAppender.append("style", "border-top-color:" + color + ";"));
 			content.add(AttributeAppender.append("style", "border-color:" + color + ";"));
+		}
+
+		if (getQuery() != null && getProject().isTimeTracking()) {
+			head.add(new DropdownLink("showProgress") {
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new IssueQueryProgressPanel(id) {
+						@Override
+						protected ProjectScope getProjectScope() {
+							return BoardColumnPanel.this.getProjectScope();
+						}
+
+						@Override
+						protected IssueQuery getQuery() {
+							return BoardColumnPanel.this.getQuery();
+						}
+					};
+				}
+			});
+		} else {
+			head.add(new WebMarkupContainer("showProgress").setVisible(false));
 		}
 		
 		if (getQuery() != null) {

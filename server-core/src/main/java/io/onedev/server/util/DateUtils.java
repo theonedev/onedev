@@ -1,24 +1,20 @@
 package io.onedev.server.util;
 
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-import javax.validation.ValidationException;
-
+import com.google.common.collect.Lists;
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 import io.onedev.agent.ExecutorUtils;
-import io.onedev.k8shelper.KubernetesHelper;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
-import com.google.common.collect.Lists;
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
+import javax.annotation.Nullable;
+import javax.validation.ValidationException;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
@@ -69,7 +65,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		return ISODateTimeFormat.dateTime().print(date.getTime());
 	}
 	
-	public static long parseWorkingPeriod(String period) {
+	public static int parseWorkingPeriod(String period) {
 		period = StringUtils.deleteWhitespace(period);
 		if (StringUtils.isBlank(period))
 			throw new ValidationException("Invalid working period");
@@ -100,12 +96,12 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		return minutes;
 	}
 	
-	public static String formatWorkingPeriod(long minutes) {
-		long weeks = minutes/(60*8*5);
+	public static String formatWorkingPeriod(int minutes) {
+		int weeks = minutes/(60*8*5);
 		minutes = minutes%(60*8*5);
-		long days = minutes/(60*8);
+		int days = minutes/(60*8);
 		minutes = minutes%(60*8);
-		long hours = minutes/60;
+		int hours = minutes/60;
 		minutes = minutes%60;
 		
 		StringBuilder builder = new StringBuilder();

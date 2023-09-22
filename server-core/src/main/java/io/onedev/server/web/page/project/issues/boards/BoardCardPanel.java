@@ -18,7 +18,7 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
+import io.onedev.server.web.component.issue.progress.IssueProgressLink;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -129,7 +129,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		fragment.add(fieldsView);
 		
-		fragment.add(new IssueProgressPanel("progress") {
+		fragment.add(new IssueProgressLink("progress") {
 			@Override
 			protected Issue getIssue() {
 				return BoardCardPanel.this.getIssue();

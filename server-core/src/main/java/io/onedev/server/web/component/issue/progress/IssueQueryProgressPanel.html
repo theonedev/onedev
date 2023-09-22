@@ -1,0 +1,19 @@
+<wicket:panel>
+	<div wicket:id="content" class="p-4"></div>
+	<wicket:fragment wicket:id="hasQueryFrag">
+		<div class="d-flex align-items-center">
+			<div wicket:id="completion" class="issue-query-progress mr-2 mt-1"></div>
+			<div>
+				<div class="mb-2">
+					Total Estimated Time: <span wicket:id="estimatedTime"></span>
+				</div>
+				<div>
+					Total Spent Time: <span wicket:id="spentTime"></span>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noQueryFrag">
+		<wicket:svg href="exclamation-circle" class="icon"/> No valid query to show progress		
+	</wicket:fragment>
+</wicket:panel>

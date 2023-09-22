@@ -14,7 +14,10 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.base.BasePage;
@@ -130,6 +133,27 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 			
 		});
+
+		if (getQuery() != null && getProject().isTimeTracking()) {
+			add(new DropdownLink("showProgress") {
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new IssueQueryProgressPanel(id) {
+						@Override
+						protected ProjectScope getProjectScope() {
+							return BacklogColumnPanel.this.getProjectScope();
+						}
+
+						@Override
+						protected IssueQuery getQuery() {
+							return BacklogColumnPanel.this.getQuery();
+						}
+					};
+				}
+			});
+		} else {
+			add(new WebMarkupContainer("showProgress").setVisible(false));
+		}
 		
 		if (getQuery() != null) {
 			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);

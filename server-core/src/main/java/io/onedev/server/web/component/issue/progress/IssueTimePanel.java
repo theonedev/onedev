@@ -47,7 +47,7 @@ abstract class IssueTimePanel extends Panel {
 		if (timeAggregation) {
 			var fragment = new Fragment("content", "aggregationFrag", this);
 
-			long estimatedTime = getIssue().getTotalEstimatedTime();
+			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
 			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(new Label("ownEstimatedTime", formatWorkingPeriod(getIssue().getOwnEstimatedTime())));
@@ -59,7 +59,7 @@ abstract class IssueTimePanel extends Panel {
 			fragment.add(new Label("estimatedTimeAggregationLink", timeAggregationLink));
 			fragment.add(new Label("aggregatedEstimatedTime", formatWorkingPeriod(aggregatedTime)));
 
-			long spentTime = getIssue().getTotalSpentTime();
+			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
 			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(new Label("ownSpentTime", formatWorkingPeriod(getIssue().getOwnSpentTime())));
@@ -74,12 +74,12 @@ abstract class IssueTimePanel extends Panel {
 		} else {
 			var fragment = new Fragment("content", "noAggregationFrag", this);
 			
-			long estimatedTime = getIssue().getTotalEstimatedTime();
+			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
 			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(newEstimatedTimeEditLink("editEstimatedTime"));
 
-			long spentTime = getIssue().getTotalSpentTime();
+			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
 			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(newSpentTimeAddLink("addSpentTime"));

@@ -38,7 +38,8 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
+import io.onedev.server.web.component.issue.progress.IssueProgressLink;
+import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -1308,6 +1309,27 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		
+		if (getProject() != null && getProject().isTimeTracking()) {
+			add(new DropdownLink("showProgress") {
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new IssueQueryProgressPanel(id) {
+						@Override
+						protected ProjectScope getProjectScope() {
+							return IssueListPanel.this.getProjectScope();
+						}
+
+						@Override
+						protected IssueQuery getQuery() {
+							return queryModel.getObject();
+						}
+					};
+				}
+			});
+		} else {
+			add(new WebMarkupContainer("showProgress").setVisible(false));			
+		}
+		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
@@ -1425,7 +1447,7 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
-				fragment.add(new IssueProgressPanel("progress") {
+				fragment.add(new IssueProgressLink("progress") {
 					
 					@Override
 					protected Issue getIssue() {

@@ -11,9 +11,9 @@ import org.apache.wicket.behavior.AttributeAppender;
 
 import java.util.Collection;
 
-public abstract class IssueProgressPanel extends DropdownLink {
+public abstract class IssueProgressLink extends DropdownLink {
 	
-	public IssueProgressPanel(String id) {
+	public IssueProgressLink(String id) {
 		super(id);
 	}
 
@@ -57,7 +57,7 @@ public abstract class IssueProgressPanel extends DropdownLink {
 		return new IssueTimePanel(id) {
 			@Override
 			protected Issue getIssue() {
-				return IssueProgressPanel.this.getIssue();
+				return IssueProgressLink.this.getIssue();
 			}
 
 			@Override

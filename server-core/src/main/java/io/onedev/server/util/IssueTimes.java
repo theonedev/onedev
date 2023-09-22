@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public class IssueTimes implements Serializable {
@@ -10,16 +11,16 @@ public class IssueTimes implements Serializable {
 	
 	private final long spentTime;
 
-	public IssueTimes(long estimatedTime, long spentTime) {
-		this.estimatedTime = estimatedTime;
-		this.spentTime = spentTime;
+	public IssueTimes(@Nullable Long estimatedTime, @Nullable Long spentTime) {
+		this.estimatedTime = estimatedTime != null? estimatedTime: 0;
+		this.spentTime = spentTime != null? spentTime: 0;
 	}
 
-	public long getEstimatedTime() {
-		return estimatedTime;
+	public int getEstimatedTime() {
+		return (int) estimatedTime;
 	}
 
-	public long getSpentTime() {
-		return spentTime;
+	public int getSpentTime() {
+		return (int) spentTime;
 	}
 }
