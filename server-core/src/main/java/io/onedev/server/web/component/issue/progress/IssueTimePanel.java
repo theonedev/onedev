@@ -50,7 +50,6 @@ abstract class IssueTimePanel extends Panel {
 
 			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
-			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(new Label("ownEstimatedTime", formatWorkingPeriod(getIssue().getOwnEstimatedTime())));
 			fragment.add(newEstimatedTimeEditLink("editOwnEstimatedTime"));
 			
@@ -62,7 +61,6 @@ abstract class IssueTimePanel extends Panel {
 
 			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
-			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(new Label("ownSpentTime", formatWorkingPeriod(getIssue().getOwnSpentTime())));
 			fragment.add(newSpentTimeAddLink("addOwnSpentTime"));
 			
@@ -77,30 +75,16 @@ abstract class IssueTimePanel extends Panel {
 			
 			int estimatedTime = getIssue().getTotalEstimatedTime();
 			fragment.add(new Label("estimatedTime", formatWorkingPeriod(estimatedTime)));
-			fragment.add(newEstimatedTimeSyncLink("syncEstimatedTime", timeAggregationLink));
 			fragment.add(newEstimatedTimeEditLink("editEstimatedTime"));
 
 			int spentTime = getIssue().getTotalSpentTime();
 			fragment.add(new Label("spentTime", formatWorkingPeriod(spentTime)));
-			fragment.add(newSpentTimeSyncLink("syncSpentTime", timeAggregationLink));
 			fragment.add(newSpentTimeAddLink("addSpentTime"));
 			
 			add(fragment);
 		}
 	}
 
-	private Component newEstimatedTimeSyncLink(String componentId, @Nullable String aggregationLink) {
-		return new AjaxLink<Void>(componentId) {
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				closeDropdown();
-				getTimeTrackingManager().syncTotalEstimatedTime(getIssue(), getLinkAggregation(aggregationLink));
-				notifyObservablesChange(target);
-			}
-			
-		};
-	}
-	
 	private Component newEstimatedTimeEditLink(String componentId) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
@@ -119,19 +103,6 @@ abstract class IssueTimePanel extends Panel {
 				};
 			}
 		}.setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
-	}
-
-	private Component newSpentTimeSyncLink(String componentId, @Nullable String aggregationLink) {
-		return new AjaxLink<Void>(componentId) {
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				closeDropdown();
-				getTimeTrackingManager().syncOwnSpentTime(getIssue());
-				getTimeTrackingManager().syncTotalSpentTime(getIssue(), getLinkAggregation(aggregationLink));
-				notifyObservablesChange(target);
-			}
-
-		};
 	}
 	
 	private Component newSpentTimeAddLink(String componentId) {

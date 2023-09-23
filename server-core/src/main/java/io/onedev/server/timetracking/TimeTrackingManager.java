@@ -2,17 +2,11 @@ package io.onedev.server.timetracking;
 
 import io.onedev.server.model.Issue;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 
 public interface TimeTrackingManager {
 	
-	void syncTimes(Issue issue);
-	
-	void syncTotalEstimatedTime(Issue issue, @Nullable LinkAggregation linkAggregation);
-
-	void syncTotalSpentTime(Issue issue, @Nullable LinkAggregation linkAggregation);
-
-	void syncOwnSpentTime(Issue issue);
+	void requestToSyncTimes(Collection<Long> issueIds, boolean postChangeEvent);
 	
 	int aggregateSourceLinkEstimatedTime(Issue issue, String linkName);
 	

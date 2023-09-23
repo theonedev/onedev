@@ -23,8 +23,6 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void changeTitle(Issue issue, String title);
 	
 	void changeOwnEstimatedTime(Issue issue, int ownEstimatedTime);
-
-	void changeOwnSpentTime(Issue issue, int ownSpentTime);
 	
 	void changeTotalEstimatedTime(Issue issue, int totalEstimatedTime);
 

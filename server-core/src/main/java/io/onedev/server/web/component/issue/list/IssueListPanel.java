@@ -637,8 +637,9 @@ public abstract class IssueListPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
-									for (var model: selectionColumn.getSelections()) 
-										getTimeTrackingManager().syncTimes(model.getObject());
+									var issueIds = selectionColumn.getSelections().stream()
+											.map(it->it.getObject()).map(Issue::getId).collect(toList());
+									getTimeTrackingManager().requestToSyncTimes(issueIds, false);
 									selectionColumn.getSelections().clear();
 									Session.get().success("Requested to sync estimated/spent time");
 								}
@@ -1025,8 +1026,10 @@ public abstract class IssueListPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
-									for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) 
-										getTimeTrackingManager().syncTimes(it.next());
+									Collection<Long> issueIds = new ArrayList<>();
+									for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+										issueIds.add(it.next().getId());
+									getTimeTrackingManager().requestToSyncTimes(issueIds, false);
 									Session.get().success("Requested to sync estimated/spent time");
 								}
 								

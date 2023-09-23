@@ -125,7 +125,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 					if (commit.canDisplay() && !getIssue().getCommits().contains(commit))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (!(change.getData() instanceof IssueDescriptionChangeData)
-						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
