@@ -82,10 +82,11 @@ public abstract class SyncRepository extends ServerSideStep {
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 
-	@Editable(order=450, name="Certificate to Trust", placeholder = "Base64 encoded PEM format, starting with " +
+	@Editable(order=450, name="Certificates to Trust", placeholder = "Base64 encoded PEM format, starting with " +
 			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			description = "Specify certificate to trust if you are using self-signed certificate for above url")
-	@Multiline
+	@Multiline(monospace = true)
+	@Interpolative(variableSuggester="suggestVariables")
 	public String getCertificate() {
 		return certificate;
 	}
