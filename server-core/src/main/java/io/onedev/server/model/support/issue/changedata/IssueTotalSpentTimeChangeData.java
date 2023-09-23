@@ -21,7 +21,12 @@ public class IssueTotalSpentTimeChangeData extends IssueChangeData {
 		this.oldValue = oldValue;
 		this.newValue = newValue;
 	}
-	
+
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
+
 	@Override
 	public String getActivity() {
 		return "changed total spent time";

@@ -43,6 +43,11 @@ public class IssueOwnSpentTimeChangeData extends IssueChangeData {
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+
+	@Override
 	public ActivityDetail getActivityDetail() {
 		Map<String, String> oldFieldValues = new HashMap<>();
 		oldFieldValues.put("Own Spent Time", DateUtils.formatWorkingPeriod(oldValue));

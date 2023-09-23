@@ -18,16 +18,16 @@ public class TimeTrackingSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String timeAggregationLink;
+	private String aggregationLink;
 	
 	@Editable(order=500, placeholder = "No aggregation")
 	@ChoiceProvider("getLinkChoices")
-	public String getTimeAggregationLink() {
-		return timeAggregationLink;
+	public String getAggregationLink() {
+		return aggregationLink;
 	}
 
-	public void setTimeAggregationLink(String timeAggregationLink) {
-		this.timeAggregationLink = timeAggregationLink;
+	public void setAggregationLink(String aggregationLink) {
+		this.aggregationLink = aggregationLink;
 	}
 	
 	private static List<String> getLinkChoices() {
@@ -47,14 +47,14 @@ public class TimeTrackingSetting implements Serializable {
 
 	public Usage onDeleteLink(String linkName) {
 		Usage usage = new Usage();
-		if (linkName.equals(timeAggregationLink))
+		if (linkName.equals(aggregationLink))
 			usage.add("time aggregation link");
 		return usage;
 	}
 
 	public void onRenameLink(String oldName, String newName) {
-		if (oldName.equals(timeAggregationLink))
-			timeAggregationLink = newName;
+		if (oldName.equals(aggregationLink))
+			aggregationLink = newName;
 	}
 	
 }

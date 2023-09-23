@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.timetracking.LinkAggregation;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
@@ -22,7 +23,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import javax.annotation.Nullable;
 
-import static io.onedev.server.timetracking.TimeAggregationDirection.BOTH;
+import static io.onedev.server.timetracking.LinkAggregation.Direction.BOTH;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
 abstract class IssueTimePanel extends Panel {
@@ -40,7 +41,7 @@ abstract class IssueTimePanel extends Panel {
 		page = getPage();
 		
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
-		var timeAggregationLink = timeTrackingSetting.getTimeAggregationLink();
+		var timeAggregationLink = timeTrackingSetting.getAggregationLink();
 		
 		boolean timeAggregation = getIssue().isAggregatingTime(timeAggregationLink);
 		
@@ -88,12 +89,12 @@ abstract class IssueTimePanel extends Panel {
 		}
 	}
 
-	private Component newEstimatedTimeSyncLink(String componentId, @Nullable String timeAggregationLink) {
+	private Component newEstimatedTimeSyncLink(String componentId, @Nullable String aggregationLink) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				getTimeTrackingManager().syncTotalEstimatedTime(getIssue(), timeAggregationLink, BOTH);
+				getTimeTrackingManager().syncTotalEstimatedTime(getIssue(), getLinkAggregation(aggregationLink));
 				notifyObservablesChange(target);
 			}
 			
@@ -120,13 +121,13 @@ abstract class IssueTimePanel extends Panel {
 		}.setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 	}
 
-	private Component newSpentTimeSyncLink(String componentId, @Nullable String timeAggregationLink) {
+	private Component newSpentTimeSyncLink(String componentId, @Nullable String aggregationLink) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
 				getTimeTrackingManager().syncOwnSpentTime(getIssue());
-				getTimeTrackingManager().syncTotalSpentTime(getIssue(), timeAggregationLink, BOTH);
+				getTimeTrackingManager().syncTotalSpentTime(getIssue(), getLinkAggregation(aggregationLink));
 				notifyObservablesChange(target);
 			}
 
@@ -157,6 +158,14 @@ abstract class IssueTimePanel extends Panel {
 			}
 
 		}.setVisible(SecurityUtils.canLogWorks(getIssue().getProject()));
+	}
+	
+	@Nullable
+	private LinkAggregation getLinkAggregation(@Nullable String aggregationLink) {
+		LinkAggregation linkAggregation = null;
+		if (aggregationLink != null)
+			linkAggregation = new LinkAggregation(aggregationLink, BOTH);
+		return linkAggregation;
 	}
 	
 	private TimeTrackingManager getTimeTrackingManager() {

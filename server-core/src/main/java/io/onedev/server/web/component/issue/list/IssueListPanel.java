@@ -20,6 +20,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
@@ -579,7 +580,6 @@ public abstract class IssueListPanel extends Panel {
 												.map(it->it.getObject()).collect(toList());
 										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
 										selectionColumn.getSelections().clear();
-										target.add(body);
 										Session.get().success("Watch status changed");
 									}
 								};
@@ -605,6 +605,49 @@ public abstract class IssueListPanel extends Panel {
 					}
 
 				});
+
+				if (getProject() != null && getProject().isTimeTracking() && SecurityUtils.canManageIssues(getProject())) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Sync Timing of Selected Issues";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to sync estimated/spent time");
+									}
+								}
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									for (var model: selectionColumn.getSelections()) 
+										getTimeTrackingManager().syncTimes(model.getObject());
+									selectionColumn.getSelections().clear();
+									Session.get().success("Requested to sync estimated/spent time");
+								}
+
+							};
+						}
+
+					});
+				}
 				
 				if (getProject() != null && SecurityUtils.canManageIssues(getProject())) {
 					menuItems.add(new MenuItem() {
@@ -967,6 +1010,48 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
+				if (getProject() != null && getProject().isTimeTracking() && SecurityUtils.canManageIssues(getProject())) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Sync Timing of All Queried Issues";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) 
+										getTimeTrackingManager().syncTimes(it.next());
+									Session.get().success("Requested to sync estimated/spent time");
+								}
+								
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to sync estimated/spent time");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
+				
 				if (getProject() != null && SecurityUtils.canManageIssues(getProject())) {
 					menuItems.add(new MenuItem() {
 
@@ -1654,6 +1739,10 @@ public abstract class IssueListPanel extends Panel {
 	
 	private IssueWatchManager getWatchManager() {
 		return OneDev.getInstance(IssueWatchManager.class);
+	}
+	
+	private TimeTrackingManager getTimeTrackingManager() {
+		return OneDev.getInstance(TimeTrackingManager.class);
 	}
 	
 	@Nullable

@@ -275,7 +275,7 @@ public class GlobalIssueSetting implements Serializable {
 		entry.setSuffix("\\s*\\)\\s*$");
 		commitMessageFixPatterns.getEntries().add(entry);
 		
-		timeTrackingSetting.setTimeAggregationLink("Child Issue");
+		timeTrackingSetting.setAggregationLink("Child Issue");
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
