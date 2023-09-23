@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.CommandFacade;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ReservedOptions;
-import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
@@ -35,9 +32,10 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	private String buildContext;
 	
 	private String destinations;
-
+	
+	private String trustCertificates;
+	
 	private String moreOptions;
-
 
 	@Editable
 	@Override
@@ -81,6 +79,19 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	public void setDestinations(String destinations) {
 		this.destinations = destinations;
 	}
+
+	@Editable(order=325, name="Certificates to Trust", placeholder = "Base64 encoded PEM format, starting with " +
+			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----",
+			description = "Specify certificates to trust if you are using self-signed certificates for your docker registries")
+	@Multiline(monospace = true)
+	@Interpolative(variableSuggester="suggestVariables")
+	public String getTrustCertificates() {
+		return trustCertificates;
+	}
+
+	public void setTrustCertificates(String trustCertificates) {
+		this.trustCertificates = trustCertificates;
+	}
 	
 	@Editable(order=350, description="Optionally specify additional options to build image, " +
 			"separated by spaces")
@@ -94,7 +105,6 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.moreOptions = moreOptions;
 	}
 
-
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
@@ -107,8 +117,14 @@ public class BuildImageWithKanikoStep extends CommandStep {
 			public CommandFacade getExecutable(JobExecutor jobExecutor, String image, boolean useTTY) {
 				var commands = new ArrayList<String>();
 				if (jobExecutor instanceof DockerAware) {
-					commands.add("cat <<EOF>> /kaniko/.docker/config.json"); 
-					commands.add(buildDockerConfig((DockerAware) jobExecutor));
+					DockerAware dockerAware = (DockerAware) jobExecutor;
+					commands.add("cat <<EOF>> /kaniko/.docker/config.json");
+					commands.add(buildDockerConfig(dockerAware));
+					commands.add("EOF");
+				}
+				if (getTrustCertificates() != null) {
+					commands.add("cat <<EOF>> /kaniko/ssl/certs/additional-ca-cert-bundle.crt");
+					commands.add(getTrustCertificates().replace("\r\n", "\n"));
 					commands.add("EOF");
 				}
 				
