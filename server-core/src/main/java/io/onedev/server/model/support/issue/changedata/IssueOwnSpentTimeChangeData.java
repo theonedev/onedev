@@ -47,6 +47,14 @@ public class IssueOwnSpentTimeChangeData extends IssueChangeData {
 		return true;
 	}
 
+	public int getOldValue() {
+		return oldValue;
+	}
+
+	public int getNewValue() {
+		return newValue;
+	}
+
 	@Override
 	public ActivityDetail getActivityDetail() {
 		Map<String, String> oldFieldValues = new HashMap<>();

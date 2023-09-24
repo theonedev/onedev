@@ -107,13 +107,12 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 			executorService.execute(() -> {
 				var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 				for (var issueId: issueIds) 
-					syncTimes(issueId, aggregationLink, postChangeEvent, new HashSet<>());
+					syncTimes(issueId, aggregationLink, new HashSet<>());
 			});
 		});
 	}
 	
-	private void syncTimes(Long issueId, @Nullable String aggregationLink, 
-						   boolean postChangeEvent, Set<Long> processedIssueIds) {
+	private void syncTimes(Long issueId, @Nullable String aggregationLink, Set<Long> processedIssueIds) {
 		if (processedIssueIds.add(issueId)) {
 			var affectedIssueIds = LockUtils.call("time-tracking-" + issueId, () -> transactionManager.call(() -> {
 				var issue = issueManager.load(issueId);
@@ -126,25 +125,20 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 					totalEstimatedTime += aggregateTargetLinkEstimatedTime(issue, aggregationLink);
 				}
 				if (issue.getTotalEstimatedTime() != totalEstimatedTime) {
-					if (postChangeEvent)
-						issueChangeManager.changeTotalEstimatedTime(issue, totalEstimatedTime);
-					else
-						issue.setTotalEstimatedTime(totalEstimatedTime);
+					issueChangeManager.changeTotalEstimatedTime(issue, totalEstimatedTime);
 					timingChanged = true;
 				}
 
 				int ownSpentTime = issue.getWorks().stream().mapToInt(IssueWork::getMinutes).sum();
-				issue.setOwnSpentTime(ownSpentTime);
+				issueChangeManager.changeOwnSpentTime(issue, ownSpentTime);
+				
 				int totalSpentTime = ownSpentTime;
 				if (aggregationLink != null) {
 					totalSpentTime += aggregateSourceLinkSpentTime(issue, aggregationLink);
 					totalSpentTime += aggregateTargetLinkSpentTime(issue, aggregationLink);
 				}
 				if (issue.getTotalSpentTime() != totalSpentTime) {
-					if (postChangeEvent)
-						issueChangeManager.changeTotalSpentTime(issue, totalSpentTime);
-					else 
-						issue.setTotalSpentTime(totalSpentTime);
+					issueChangeManager.changeTotalSpentTime(issue, totalSpentTime);
 					timingChanged = true;
 				}
 
@@ -165,7 +159,7 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 			}));
 			
 			for (var affectedIssueId: affectedIssueIds) 
-				syncTimes(affectedIssueId, aggregationLink, postChangeEvent, new HashSet<>(processedIssueIds));
+				syncTimes(affectedIssueId, aggregationLink, new HashSet<>(processedIssueIds));
 		}
 	}
 

@@ -126,6 +126,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (!(change.getData() instanceof IssueDescriptionChangeData)
 						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
+						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}

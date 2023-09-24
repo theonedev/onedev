@@ -155,6 +155,22 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			dao.persist(issue);
 		}
 	}
+
+	@Transactional
+	@Override
+	public void changeOwnSpentTime(Issue issue, int ownSpentTime) {
+		int prevOwnSpentTime = issue.getOwnSpentTime();
+		if (ownSpentTime != prevOwnSpentTime) {
+			issue.setOwnSpentTime(ownSpentTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueOwnSpentTimeChangeData(prevOwnSpentTime, issue.getOwnSpentTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
 	
 	@Transactional
 	@Override

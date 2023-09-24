@@ -133,6 +133,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public static final String PROP_CONFIDENTIAL = "confidential";
 	
 	public static final String PROP_PIN_DATE = "pinDate";
+
+	public static final String NAME_ESTIMATED_TIME = "Estimated Time";
+	
+	public static final String NAME_SPENT_TIME = "Spent Time";
 	
 	public static final String PROP_OWN_ESTIMATED_TIME = "ownEstimatedTime";
 	
@@ -144,7 +148,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION, 
+			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION,
+			NAME_ESTIMATED_TIME, NAME_SPENT_TIME,
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
@@ -590,7 +595,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	}
 	
 	public Collection<String> getFieldNames() {
-		return getFields().stream().map(it->it.getName()).collect(Collectors.toSet());
+		return getFields().stream().map(IssueField::getName).collect(Collectors.toSet());
 	}
 	
 	public Map<String, Input> getFieldInputs() {
@@ -598,31 +603,20 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 			fieldInputs = new LinkedHashMap<>();
 	
 			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
-			for (IssueField field: getFields()) {
-				List<IssueField> fieldsOfName = fieldMap.get(field.getName());
-				if (fieldsOfName == null) {
-					fieldsOfName = new ArrayList<>();
-					fieldMap.put(field.getName(), fieldsOfName);
-				}
-				fieldsOfName.add(field);
-			}
+			for (IssueField field: getFields()) 
+				fieldMap.computeIfAbsent(field.getName(), k -> new ArrayList<>()).add(field);
 			for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 				String fieldName = fieldSpec.getName();
 				List<IssueField> fields = fieldMap.get(fieldName);
 				if (fields != null) {
-					Collections.sort(fields, new Comparator<IssueField>() {
-
-						@Override
-						public int compare(IssueField o1, IssueField o2) {
-							long result = o1.getOrdinal() - o2.getOrdinal();
-							if (result > 0)
-								return 1;
-							else if (result < 0)
-								return -1;
-							else
-								return 0;
-						}
-						
+					Collections.sort(fields, (Comparator<IssueField>) (o1, o2) -> {
+						long result = o1.getOrdinal() - o2.getOrdinal();
+						if (result > 0)
+							return 1;
+						else if (result < 0)
+							return -1;
+						else
+							return 0;
 					});
 					String type = fields.iterator().next().getType();
 					List<String> values = new ArrayList<>();

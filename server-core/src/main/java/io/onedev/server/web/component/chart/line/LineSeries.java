@@ -37,7 +37,7 @@ public class LineSeries implements Serializable {
 		return seriesName;
 	}
 
-	public List<String> getxAxisValues() {
+	public List<String> getXAxisValues() {
 		return xAxisValues;
 	}
 

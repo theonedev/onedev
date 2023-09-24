@@ -15,6 +15,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
+import io.onedev.server.model.support.issue.changedata.IssueOwnSpentTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.Day;
@@ -54,6 +55,8 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	private static final String DEFAULT_STORE = "default";
 	
 	private static final String STATE_HISTORY_STORE = "stateHistory";
+
+	private static final String SPENT_TIME_HISTORY_STORE = "spentTimeHistory";
 	
 	private static final ByteIterable LAST_ISSUE_KEY = new StringByteIterable("lastIssue");
 
@@ -101,6 +104,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
+		Store spentTimeHistoryStore = getStore(env, SPENT_TIME_HISTORY_STORE);
 
 		Long lastIssueId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_ISSUE_KEY, 0));
 		
@@ -109,6 +113,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			Issue lastIssue = null;
 			for (Issue issue: unprocessedIssues) {
 				initStateHistory(stateHistoryStore, txn, issue);
+				initSpentTimeHistory(spentTimeHistoryStore, txn, issue);
 				lastIssue = issue;
 			}
 			if (lastIssue != null)
@@ -124,6 +129,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			for (IssueChange change: unprocessedChanges) {
 				Issue issue = change.getIssue();
 				initStateHistory(stateHistoryStore, txn, issue);
+				initSpentTimeHistory(spentTimeHistoryStore, txn, issue);
 				
 				String state = null;
 				if (change.getData() instanceof IssueStateChangeData) {
@@ -142,6 +148,16 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 					Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
 					stateHistory.put(new Day(change.getDate()).getValue(), state);
 					stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
+				}
+
+				if (change.getData() instanceof IssueOwnSpentTimeChangeData) {
+					IssueOwnSpentTimeChangeData changeData = (IssueOwnSpentTimeChangeData) change.getData();
+					int spentTime = changeData.getNewValue();
+					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
+					byte[] bytes = Preconditions.checkNotNull(readBytes(spentTimeHistoryStore, txn, issueKey));
+					Map<Integer, Integer> spentTimeHistory = (Map<Integer, Integer>) SerializationUtils.deserialize(bytes);
+					spentTimeHistory.put(new Day(change.getDate()).getValue(), spentTime);
+					spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
 				}
 				
 				lastChange = change;
@@ -165,11 +181,24 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
 		}
 	}
+
+	private void initSpentTimeHistory(Store spentTimeHistoryStore, Transaction txn, Issue issue) {
+		ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
+		byte[] bytes = readBytes(spentTimeHistoryStore, txn, issueKey);
+		if (bytes == null) {
+			Map<Integer, Integer> spentTimeHistory = new LinkedHashMap<>();
+			Day day = new Day(issue.getSubmitDate());
+			spentTimeHistory.put(day.getValue(), issue.getOwnSpentTime());
+			spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
+		}
+	}
 	
 	private void remove(Long projectId, Long issueId) {
 		Environment env = getEnv(projectId.toString());
 		Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
 		env.executeInTransaction(txn -> stateHistoryStore.delete(txn, new LongByteIterable(issueId)));
+		Store spentTimeHistoryStore = getStore(env, SPENT_TIME_HISTORY_STORE);
+		env.executeInTransaction(txn -> spentTimeHistoryStore.delete(txn, new LongByteIterable(issueId)));
 	}
 	
 	@Sessional
@@ -268,49 +297,58 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		return INFO_VERSION;
 	}
 
-	@Sessional
-	@Override
-	public Map<Integer, String> getDailyStates(Issue issue, Integer fromDay, Integer toDay) {
+	private <T> Map<Integer, T> getDailyMetrics(Issue issue, String metricStore, Integer fromDay, Integer toDay) {
 		Long projectId = issue.getProject().getId();
 		Long issueId = issue.getId();
-		
-		return projectManager.runOnActiveServer(projectId, new ClusterTask<Map<Integer, String>>() {
+
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Map<Integer, String> call() throws Exception {
+			public Map<Integer, T> call() {
 				Environment env = getEnv(projectId.toString());
-				Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
-				
+				Store metricHistoryStore = getStore(env, metricStore);
+
 				return env.computeInTransaction(txn -> {
-					Map<Integer, String> dailyStates = new LinkedHashMap<>();
-					byte[] bytes = readBytes(stateHistoryStore, txn, new LongByteIterable(issueId));
+					Map<Integer, T> dailyMetrics = new LinkedHashMap<>();
+					byte[] bytes = readBytes(metricHistoryStore, txn, new LongByteIterable(issueId));
 					if (bytes != null) {
-						Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
-						String currentState = null;
-						for (Map.Entry<Integer, String> entry: stateHistory.entrySet()) {
-							if (entry.getKey()<=fromDay) 
-								currentState = entry.getValue();
+						var metricHistory = (Map<Integer, T>) SerializationUtils.deserialize(bytes);
+						T currentMetric = null;
+						for (var entry : metricHistory.entrySet()) {
+							if (entry.getKey() <= fromDay)
+								currentMetric = entry.getValue();
 							else
 								break;
 						}
-						
+
 						int currentDay = fromDay;
 						while (currentDay <= toDay) {
-							String stateOnDay = stateHistory.get(currentDay);
-							if (stateOnDay != null) 
-								currentState = stateOnDay;
-							dailyStates.put(currentDay, currentState);
+							T metricOnDay = metricHistory.get(currentDay);
+							if (metricOnDay != null)
+								currentMetric = metricOnDay;
+							dailyMetrics.put(currentDay, currentMetric);
 							currentDay = new Day(new Day(currentDay).getDate().plusDays(1)).getValue();
 						}
-					} 
-					
-					return dailyStates;
+					}
+
+					return dailyMetrics;
 				});
 			}
-			
+
 		});
+	}
+	
+	@Sessional
+	@Override
+	public Map<Integer, String> getDailyStates(Issue issue, Integer fromDay, Integer toDay) {
+		return getDailyMetrics(issue, STATE_HISTORY_STORE, fromDay, toDay);
+	}
+
+	@Override
+	public Map<Integer, Integer> getDailySpentTimes(Issue issue, Integer fromDay, Integer toDay) {
+		return getDailyMetrics(issue, SPENT_TIME_HISTORY_STORE, fromDay, toDay);
 	}
 
 }

@@ -1,13 +1,21 @@
 package io.onedev.server.web.component.milestone.burndown;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.infomanager.IssueInfoManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Milestone;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
+import io.onedev.server.util.Day;
+import io.onedev.server.web.component.chart.line.Line;
+import io.onedev.server.web.component.chart.line.LineChartPanel;
+import io.onedev.server.web.component.chart.line.LineSeries;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -19,29 +27,20 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.infomanager.IssueInfoManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
-import io.onedev.server.util.Day;
-import io.onedev.server.web.component.chart.line.Line;
-import io.onedev.server.web.component.chart.line.LineChartPanel;
-import io.onedev.server.web.component.chart.line.LineSeries;
-import io.onedev.server.web.page.base.BasePage;
+import java.util.*;
 
-@SuppressWarnings("serial")
+import static java.util.stream.Collectors.toList;
+
 public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 
 	private static final int MAX_DAYS = 365;
 	
-	public static final String NULL_FIELD = "<$Null Field$>";
+	public static final String FIELD_COUNT = "<$Count$>";
 
+	public static final String FIELD_REMAINING_TIME = "<$Remaining Time>";
+
+	public static final String FIELD_ESTIMATED_TIME = "<$Estimated Time>";
+	
 	private String field;
 	
 	public MilestoneBurndownPanel(String id, IModel<Milestone> milestoneModel) {
@@ -82,14 +81,18 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 		} else {
 			Fragment fragment = new Fragment("content", "chartFrag", this);
 
-			List<String> choices = getIssueSetting().getFieldSpecs().stream()
+			var choices = new ArrayList<String>();
+			if (getMilestone().getProject().isTimeTracking()) {
+				choices.add(FIELD_REMAINING_TIME);
+				choices.add(FIELD_ESTIMATED_TIME);
+			}
+			choices.add(FIELD_COUNT);
+
+			choices.addAll(getIssueSetting().getFieldSpecs().stream()
 				.filter(it -> it.getType().equals(InputSpec.INTEGER) || it.getType().equals(InputSpec.WORKING_PERIOD))
-				.map(it->it.getName())
-				.collect(Collectors.toList());
+				.map(FieldSpec::getName).collect(toList()));
 			
-			choices.add(0, NULL_FIELD);
-			
-			DropDownChoice<String> dropDownChoice = new DropDownChoice<String>("by", new IModel<String>() {
+			DropDownChoice<String> dropDownChoice = new DropDownChoice<>("by", new IModel<>() {
 
 				@Override
 				public void detach() {
@@ -97,28 +100,28 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 
 				@Override
 				public String getObject() {
-					if (field != null)
-						return field;
-					else
-						return NULL_FIELD;
+					return getField();
 				}
 
 				@Override
 				public void setObject(String object) {
-					if (!object.equals(NULL_FIELD))
-						field = object;
-					else
-						field = null;
+					field = object;
 				}
-				
-			}, choices, new IChoiceRenderer<String>() {
+
+			}, choices, new IChoiceRenderer<>() {
 
 				@Override
 				public Object getDisplayValue(String object) {
-					if (!object.equals(NULL_FIELD))
-						return object;
-					else
-						return "Issue Count";
+					switch (object) {
+						case FIELD_COUNT:
+							return "Issue Count";
+						case FIELD_REMAINING_TIME:
+							return "Remaining Time";
+						case FIELD_ESTIMATED_TIME:
+							return "Estimated Time";
+						default:
+							return object;
+					}
 				}
 
 				@Override
@@ -130,7 +133,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 				public String getObject(String id, IModel<? extends List<? extends String>> choices) {
 					return id;
 				}
-				
+
 			});
 			dropDownChoice.add(new OnChangeAjaxBehavior() {
 				
@@ -144,77 +147,84 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			
 			fragment.add(dropDownChoice);
 			
-			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<LineSeries>() {
+			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<>() {
 
 				private String getXAxisValue(Day day) {
-					return String.format("%02d-%02d", day.getMonthOfYear()+1, day.getDayOfMonth());
+					return String.format("%02d-%02d", day.getMonthOfYear() + 1, day.getDayOfMonth());
 				}
-				
+
 				@Override
 				protected LineSeries load() {
 					int startDayValue = new Day(getMilestone().getStartDate()).getValue();
 					int dueDayValue = new Day(getMilestone().getDueDate()).getValue();
-					
-					Map<Integer, Map<String, Integer>> dailyStateWeights = new LinkedHashMap<>();
-					for (IssueSchedule schedule: getMilestone().getSchedules()) {
+
+					Map<Integer, Map<String, Integer>> dailyStateMetrics = new LinkedHashMap<>();
+					for (IssueSchedule schedule : getMilestone().getSchedules()) {
 						Issue issue = schedule.getIssue();
-						int issueWeight = getFieldValue(issue);
 						int scheduleDayValue = new Day(schedule.getDate()).getValue();
-						Map<Integer, String> dailyStates = OneDev.getInstance(IssueInfoManager.class)
-								.getDailyStates(issue, Math.max(startDayValue, scheduleDayValue), dueDayValue);
-						for (Map.Entry<Integer, String> entry: dailyStates.entrySet()) {
-							Map<String, Integer> stateWeights = dailyStateWeights.get(entry.getKey());
-							if (stateWeights == null) {
-								stateWeights = new HashMap<>();
-								dailyStateWeights.put(entry.getKey(), stateWeights);
-							}
-							if (entry.getValue() != null) {
-								Integer weight = stateWeights.get(entry.getValue());
-								if (weight == null)
-									weight = 0;
-								weight += issueWeight;
-								stateWeights.put(entry.getValue(), weight);
+
+						Map<Integer, Integer> dailyMetrics = new HashMap<>();
+						var issueInfoManager = OneDev.getInstance(IssueInfoManager.class);
+						var fromDayValue = Math.max(startDayValue, scheduleDayValue);
+						var dailyStates = issueInfoManager.getDailyStates(issue, fromDayValue, dueDayValue);
+						if (getField().equals(FIELD_REMAINING_TIME)) {
+							var estimatedTime = issue.getOwnEstimatedTime();
+							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDayValue, dueDayValue).entrySet()) 
+								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
+						} else {
+							int metric = getFieldValue(issue);
+							for (var entry: dailyStates.entrySet())
+								dailyMetrics.put(entry.getKey(), metric);
+						}
+						for (var entry : dailyStates.entrySet()) {
+							var day = entry.getKey();
+							var state = entry.getValue();
+							Map<String, Integer> stateMetrics = dailyStateMetrics.computeIfAbsent(day, k -> new HashMap<>());
+							if (state != null) {
+								int metric = stateMetrics.getOrDefault(state, 0);
+								metric += dailyMetrics.getOrDefault(day, 0);
+								stateMetrics.put(state, metric);
 							}
 						}
 					}
 
 					List<String> xAxisValues = new ArrayList<>();
-					for (Integer dayValue: dailyStateWeights.keySet()) 
+					for (Integer dayValue : dailyStateMetrics.keySet())
 						xAxisValues.add(getXAxisValue(new Day(dayValue)));
-					
+
 					List<Line> lines = new ArrayList<>();
-					
-					int initialIssueWeight = 0;
+
+					int initialIssueMetric = 0;
 					int todayValue = new Day(new Date()).getValue();
-					for (StateSpec spec: OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
+					for (StateSpec spec : OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
 						Map<String, Integer> yAxisValues = new HashMap<>();
-						for (Map.Entry<Integer, Map<String, Integer>> entry: dailyStateWeights.entrySet()) {
+						for (Map.Entry<Integer, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
 							if (entry.getKey() <= todayValue) {
 								Day day = new Day(entry.getKey());
-								Integer weight = entry.getValue().get(spec.getName());
-								if (weight == null)
-									weight = 0;
-								yAxisValues.put(getXAxisValue(day), weight);
+								int metric = entry.getValue().getOrDefault(spec.getName(), 0);
+								yAxisValues.put(getXAxisValue(day), metric);
 							}
 						}
-						Integer stateWeight = yAxisValues.get(getXAxisValue(new Day(startDayValue)));
-						if (stateWeight == null)
-							stateWeight = 0;
-						initialIssueWeight += stateWeight;
+						Integer stateMetric = yAxisValues.get(getXAxisValue(new Day(startDayValue)));
+						if (stateMetric == null)
+							stateMetric = 0;
+						initialIssueMetric += stateMetric;
 						lines.add(new Line(spec.getName(), yAxisValues, spec.getColor(), "States", null));
 					}
 
 					Map<String, Integer> guidelineYAxisValues = new HashMap<>();
 					if (!xAxisValues.isEmpty()) {
-						guidelineYAxisValues.put(xAxisValues.get(0), initialIssueWeight);
-						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size()-1), 0);
+						guidelineYAxisValues.put(xAxisValues.get(0), initialIssueMetric);
+						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size() - 1), 0);
 					}
-					
-					String color = ((BasePage)getPage()).isDarkMode()?"white":"black";
+
+					String color = ((BasePage) getPage()).isDarkMode() ? "white" : "black";
 					lines.add(new Line("Guide Line", guidelineYAxisValues, color, null, "dashed"));
-					
+
 					String yAxisValueFormatter;
-					if (field != null && getIssueSetting().getFieldSpec(field) instanceof WorkingPeriodField) {
+					if (getField().equals(FIELD_REMAINING_TIME) 
+							|| getField().equals(FIELD_ESTIMATED_TIME) 
+							|| getIssueSetting().getFieldSpec(getField()) instanceof WorkingPeriodField) {
 						yAxisValueFormatter = ""
 								+ "function(value) {"
 								+ "  if (value != undefined) "
@@ -225,18 +235,31 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 					} else {
 						yAxisValueFormatter = null;
 					}
-					return new LineSeries(null, xAxisValues, lines, yAxisValueFormatter, 0, null);
+					return new LineSeries(null, xAxisValues, lines, yAxisValueFormatter, null, null);
 				}
-				
+
 			}).setOutputMarkupId(true));
 			
 			add(fragment);
 		}
 	}
 	
+	private String getField() {
+		if (field != null)
+			return field;
+		else if (getMilestone().getProject().isTimeTracking())
+			return FIELD_REMAINING_TIME;
+		else
+			return FIELD_COUNT;
+	}
+	
 	private int getFieldValue(Issue issue) {
-		if (field != null) {
-			Object value = issue.getFieldValue(field);
+		if (getField().equals(FIELD_ESTIMATED_TIME)) {
+			return issue.getOwnEstimatedTime();
+		} else if (getField().equals(FIELD_COUNT)) {
+			return 1;
+		} else {
+			Object value = issue.getFieldValue(getField());
 			if (value != null) {
 				if (value instanceof Integer)
 					return (int) value;
@@ -245,8 +268,6 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			} else {
 				return 0;
 			}
-		} else {
-			return 1;
 		}
 	}
 	
