@@ -24,6 +24,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.application.IComponentInstantiationListener;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.InvalidBehaviorIdException;
 import org.apache.wicket.core.request.handler.ComponentNotFoundException;
 import org.apache.wicket.core.request.handler.EmptyAjaxRequestHandler;
 import org.apache.wicket.core.request.handler.ListenerInvocationNotAllowedException;
@@ -257,7 +258,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
 						RequestCycle requestCycle = RequestCycle.get();
 						boolean isAjax = ((WebRequest)requestCycle.getRequest()).isAjax();
-						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException))
+						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException || e instanceof InvalidBehaviorIdException))
 							return EmptyAjaxRequestHandler.getInstance();
 						
 						IRequestMapper mapper = Application.get().getRootRequestMapper();

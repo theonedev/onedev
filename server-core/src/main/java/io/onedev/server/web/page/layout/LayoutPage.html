@@ -28,7 +28,7 @@
 					<a href="/~help/api" class="dropdown-item" target="_blank">RESTful API</a>
 					<a wicket:id="incompatibilities" class="dropdown-item">Incompatibilities</a>
 					<a class="dropdown-item" href="https://onedev.io/license-agreement" target="_blank">License Agreement</a>
-					<a wicket:id="checkUpdate" class="dropdown-item" target="_blank">Check Update</a>
+					<a wicket:id="checkUpdate" class="dropdown-item">Check Update</a>
 					<a wicket:id="tryEEMenuItem" href="https://onedev.io/pricing" class="try-ee dropdown-item d-none">Try Enterprise Edition</a>
 	          	</div>  					
 			</div>
@@ -46,8 +46,9 @@
 		</div>
 		<div class="topbar-right text-nowrap">
 			<a wicket:id="alerts" class="text-warning topbar-link" title="Alerts"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
-			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
+			<a wicket:id="newVersionStatus" class="new-version-status topbar-link" title="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting"><img wicket:id="icon"/></a>
 			<a wicket:id="darkMode" class="topbar-link" title="Toggle dark mode"><svg wicket:id="icon" class="icon"/></a>
+			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
 	  		<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline">Sign In</span></a>
 			<div wicket:id="userInfo" class="dropdown user-info">
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">

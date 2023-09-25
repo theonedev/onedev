@@ -90,6 +90,8 @@ import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.*;
 import io.onedev.server.timetracking.DefaultTimeTrackingManager;
 import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.updatecheck.DefaultUpdateCheckManager;
+import io.onedev.server.updatecheck.UpdateCheckManager;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultBatchWorkManager;
@@ -288,6 +290,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
+		bind(UpdateCheckManager.class).to(DefaultUpdateCheckManager.class);
 		
 		bind(WebHookManager.class);
 		
