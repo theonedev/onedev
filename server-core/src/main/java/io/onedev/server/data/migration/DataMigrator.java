@@ -5798,5 +5798,17 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate141(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM")) 
+						element.element("value").addElement("disableAutoUpdateCheck").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

@@ -94,6 +94,8 @@ import io.onedev.server.storage.DefaultStorageManager;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.terminal.DefaultTerminalManager;
 import io.onedev.server.terminal.TerminalManager;
+import io.onedev.server.updatecheck.DefaultUpdateCheckManager;
+import io.onedev.server.updatecheck.UpdateCheckManager;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultBatchWorkManager;
@@ -296,6 +298,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
 		bind(FeatureManager.class).to(DefaultFeatureManager.class);
+		bind(UpdateCheckManager.class).to(DefaultUpdateCheckManager.class);
 		
 		bind(WebHookManager.class);
 		

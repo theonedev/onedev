@@ -694,7 +694,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "gravatarEnabled");
+			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "disableAutoUpdateCheck", "gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add(SystemSetting.PROP_GIT_LOCATION);
 				excludedProps.add(SystemSetting.PROP_CURL_LOCATION);

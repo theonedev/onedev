@@ -415,5 +415,4 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			}
 		}
 	}
-	
 }

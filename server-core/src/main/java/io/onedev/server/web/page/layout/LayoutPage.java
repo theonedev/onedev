@@ -13,8 +13,10 @@ import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.updatecheck.UpdateCheckManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
@@ -92,6 +94,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -100,7 +103,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -111,6 +113,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Order;
@@ -122,6 +125,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static io.onedev.server.model.Alert.PROP_DATE;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -134,6 +138,8 @@ public abstract class LayoutPage extends BasePage {
 	};
 	
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
+	
+	private AbstractDefaultAjaxBehavior newVersionStatusBehavior;
 	
 	public LayoutPage(PageParameters params) {
 		super(params);
@@ -163,7 +169,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected String load() {
-						return OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+						return getSettingManager().getBrandingSetting().getName();
 					}
 					
 				}));
@@ -446,19 +452,27 @@ public abstract class LayoutPage extends BasePage {
 				setVisible(getFeatureManager().isEEAvailable() && !isEEActivated());
 			}
 		});
+
+		String commitHash;
+		try (var is = new FileInputStream(new File(Bootstrap.installDir, "release.properties"))) {
+			var releaseProps = new Properties();
+			releaseProps.load(is);
+			commitHash = releaseProps.getProperty("commit");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		
-		sidebar.add(new ExternalLink("checkUpdate", new LoadableDetachableModel<String>() {
+		var checkUpdateUrl = "https://onedev.io/check-update/" + commitHash;
+		sidebar.add(new AjaxLink<Void>("checkUpdate") {
+
 			@Override
-			protected String load() {
-				try (var is = new FileInputStream(new File(Bootstrap.installDir, "release.properties"))) {
-					var releaseProps = new Properties();
-					releaseProps.load(is);
-					return "https://onedev.io/check-update/" + releaseProps.getProperty("commit");
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+			public void onClick(AjaxRequestTarget target) {
+				getUpdateCheckManager().clearCache();
+				throw new RedirectToUrlException(checkUpdateUrl);
 			}
-		}));
+			
+		});
+		
 		sidebar.add(new WebMarkupContainer("tryEEMenuItem") {
 			@Override
 			protected void onConfigure() {
@@ -676,8 +690,45 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
-		
-		
+
+		topbar.add(new AjaxLink<Void>("newVersionStatus") {
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new WebMarkupContainer("icon") {
+					
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						var newVersionStatus = getUpdateCheckManager().getNewVersionStatus();
+						if (newVersionStatus != null) {
+							tag.put("src", "/~img/new-" + newVersionStatus + ".svg");
+							tag.put("onload", "onedev.server.layout.onNewVersionStatusIconLoaded();");
+						} else {
+							tag.put("src", checkUpdateUrl + "/icon.svg");
+							var script = String.format("onedev.server.layout.onNewVersionStatusIconLoaded(%s);",
+									newVersionStatusBehavior.getCallbackFunction(explicit("newVersionStatus")));
+							tag.put("onload", script);
+						}
+					}
+					
+				});
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getUpdateCheckManager().clearCache();
+				throw new RedirectToUrlException(checkUpdateUrl);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getSettingManager().getSystemSetting().isDisableAutoUpdateCheck());
+			}
+			
+		});
+
 		User loginUser = getLoginUser();
 		
 		topbar.add(new Link<Void>("signIn") {
@@ -799,6 +850,14 @@ public abstract class LayoutPage extends BasePage {
 			}
 			
 		});
+		
+		add(newVersionStatusBehavior = new AbstractPostAjaxBehavior() {
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				String newVersionStatus = RequestCycle.get().getRequest().getPostParameters().getParameterValue("newVersionStatus").toString();
+				getUpdateCheckManager().cacheNewVersionStatus(newVersionStatus);
+			}
+		});
 	}
 
 	@Override
@@ -825,7 +884,15 @@ public abstract class LayoutPage extends BasePage {
 
 	@Override
 	protected boolean isPermitted() {
-		return getLoginUser() != null || OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableAnonymousAccess();
+		return getLoginUser() != null || getSettingManager().getSecuritySetting().isEnableAnonymousAccess();
+	}
+	
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
+	}
+	
+	private UpdateCheckManager getUpdateCheckManager() {
+		return OneDev.getInstance(UpdateCheckManager.class);
 	}
 
 	@Override
