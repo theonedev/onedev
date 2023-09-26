@@ -70,6 +70,9 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		if (StringUtils.isBlank(period))
 			throw new ValidationException("Invalid working period");
 		
+		if (period.equals("0"))
+			return 0;
+		
 		Matcher matcher = WORKING_PERIOD_PATTERN.matcher(period);
 		if (!matcher.matches()) 
 			throw new ValidationException("Invalid working period");

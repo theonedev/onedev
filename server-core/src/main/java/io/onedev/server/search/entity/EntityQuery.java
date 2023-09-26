@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
+import javax.validation.ValidationException;
 
 import com.google.common.base.Splitter;
 
@@ -64,6 +65,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			return labelSpec;
 		else
 			throw new ExplicitException("Undefined label: " + labelName);
+	}
+	
+	public static int getWorkingPeriodValue(String value) {
+		try {
+			return DateUtils.parseWorkingPeriod(value);
+		} catch (ValidationException e) {
+			throw new ExplicitException("Invalid working period: " + value);
+		}
 	}
 	
 	public static long getLongValue(String value) {

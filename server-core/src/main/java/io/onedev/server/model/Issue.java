@@ -137,6 +137,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public static final String NAME_ESTIMATED_TIME = "Estimated Time";
 	
 	public static final String NAME_SPENT_TIME = "Spent Time";
+
+	public static final String PROP_TOTAL_ESTIMATED_TIME = "totalEstimatedTime";
+
+	public static final String PROP_TOTAL_SPENT_TIME = "totalSpentTime";
 	
 	public static final String PROP_OWN_ESTIMATED_TIME = "ownEstimatedTime";
 	
@@ -169,7 +173,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 				return o1.getLastActivity().getDate().compareTo(o2.getLastActivity().getDate());
 			}
 			
-		}));	
+		}));
+		ORDER_FIELDS.put(NAME_ESTIMATED_TIME, new SortField<>(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
+		ORDER_FIELDS.put(NAME_SPENT_TIME, new SortField<>(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
 	}
 	
 	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {

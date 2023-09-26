@@ -14,6 +14,7 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -30,6 +31,8 @@ import org.antlr.v4.runtime.*;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
@@ -252,6 +255,12 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
+								} else if (fieldName.equals(Issue.NAME_ESTIMATED_TIME)) {
+									int intValue = value.equals(NAME_SPENT_TIME)? -1: DateUtils.parseWorkingPeriod(value);
+									return new EstimatedTimeCriteria(intValue, operator);
+								} else if (fieldName.equals(Issue.NAME_SPENT_TIME)) {
+									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: DateUtils.parseWorkingPeriod(value);
+									return new SpentTimeCriteria(intValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IssueChoiceField) {
@@ -284,6 +293,12 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
+								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
+									int intValue = value.equals(NAME_SPENT_TIME)? -1: DateUtils.parseWorkingPeriod(value);
+									return new EstimatedTimeCriteria(intValue, operator);
+								} else if (fieldName.equals(NAME_SPENT_TIME)) {
+									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: DateUtils.parseWorkingPeriod(value);
+									return new SpentTimeCriteria(intValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IntegerField) {
@@ -414,6 +429,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				break;
 			case IssueQueryLexer.Is:
 				if (!fieldName.equals(Issue.NAME_PROJECT)
+						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
+						&& !fieldName.equals(NAME_SPENT_TIME)
 						&& !fieldName.equals(Issue.NAME_STATE)
 						&& !fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
@@ -440,6 +457,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			case IssueQueryLexer.IsLessThan:
 			case IssueQueryLexer.IsGreaterThan:
 				if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
+						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
+						&& !fieldName.equals(NAME_SPENT_TIME)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)
