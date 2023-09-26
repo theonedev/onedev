@@ -24,6 +24,7 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
+import io.onedev.server.web.component.issue.progress.IssueProgressLink;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -189,6 +190,14 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 							@Override
 							protected Cursor getCursor() {
 								return null;
+							}
+
+						});
+						fragment.add(new IssueProgressLink("progress") {
+
+							@Override
+							protected Issue getIssue() {
+								return getIssueManager().load(issueId);
 							}
 
 						});

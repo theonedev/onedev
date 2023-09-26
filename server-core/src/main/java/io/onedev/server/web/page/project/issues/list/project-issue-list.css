@@ -11,6 +11,11 @@
 .pinned-issue .primary .number, .pinned-issue .primary .title {
 	font-size: 1.2rem;
 }
+.pinned-issue .primary .issue-progress {
+	width: 16px !important;
+	height: 16px !important;
+	vertical-align: middle;
+}
 .pinned-issue.card {
 	margin-bottom: 0.5rem;
 }
