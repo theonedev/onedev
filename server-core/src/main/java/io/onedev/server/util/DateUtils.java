@@ -25,11 +25,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			"yesterday", "yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "last month", "1 month 2 days ago", "last year", "1 year ago"); 
 
-	private static final Pattern WORKING_PERIOD_PATTERN = Pattern.compile("(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?");
+	private static final Pattern WORKING_PERIOD_PATTERN = Pattern.compile("(\\d+w)?(\\d+d)?(\\d+h)?");
 	
 	public static final String WORKING_PERIOD_HELP = "Should be specified as one or more "
-			+ "<tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> "
-			+ "represents one week one day one hour and one minute";
+			+ "<tt>&lt;number&gt;(w|d|h)</tt>. For instance <tt>1w 1d 1h</tt> "
+			+ "represents 1 week (5 days), 1 day (8 hours) and 1 hour";
 	
     public static String formatAge(Date date) {
     	return PRETTY_TIME.format(date);
@@ -74,35 +74,28 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		if (!matcher.matches()) 
 			throw new ValidationException("Invalid working period");
 		
-		int minutes = 0;
+		int hours = 0;
 		if (matcher.group(1) != null) {
 			int weeks = Integer.parseInt(StringUtils.stripEnd(matcher.group(1), "w"));
-			minutes += weeks*5*8*60;
+			hours += weeks*5*8;
 		}
 		
 		if (matcher.group(2) != null) {
 			int days = Integer.parseInt(StringUtils.stripEnd(matcher.group(2), "d"));
-			minutes += days*8*60;
+			hours += days*8;
 		}
 		
-		if (matcher.group(3) != null) {
-			int hours = Integer.parseInt(StringUtils.stripEnd(matcher.group(3), "h"));
-			minutes += hours*60;
-		}
+		if (matcher.group(3) != null) 
+			hours += Integer.parseInt(StringUtils.stripEnd(matcher.group(3), "h"));
 		
-		if (matcher.group(4) != null) 
-			minutes += Integer.parseInt(StringUtils.stripEnd(matcher.group(4), "m"));
-		
-		return minutes;
+		return hours;
 	}
 	
-	public static String formatWorkingPeriod(int minutes) {
-		int weeks = minutes/(60*8*5);
-		minutes = minutes%(60*8*5);
-		int days = minutes/(60*8);
-		minutes = minutes%(60*8);
-		int hours = minutes/60;
-		minutes = minutes%60;
+	public static String formatWorkingPeriod(int hours) {
+		int weeks = hours/(8*5);
+		hours = hours%(8*5);
+		int days = hours/8;
+		hours = hours%8;
 		
 		StringBuilder builder = new StringBuilder();
 		if (weeks != 0)
@@ -111,12 +104,10 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			builder.append(days).append("d ");
 		if (hours != 0)
 			builder.append(hours).append("h ");
-		if (minutes != 0)
-			builder.append(minutes).append("m");
 		
 		String formatted = builder.toString().trim();
 		if (formatted.length() == 0)
-			formatted = "0m";
+			formatted = "0h";
 		return formatted;
 	}
 	
