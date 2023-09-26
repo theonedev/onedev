@@ -91,7 +91,8 @@ abstract class IssueTimePanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
 				var bean = new EstimatedTimeEditBean();
-				bean.setEstimatedTime(getIssue().getOwnEstimatedTime());
+				if (getIssue().getOwnEstimatedTime() != 0)
+					bean.setEstimatedTime(getIssue().getOwnEstimatedTime());
 				new BeanEditModalPanel<>(target, bean) {
 
 					@Override
@@ -124,6 +125,11 @@ abstract class IssueTimePanel extends Panel {
 						OneDev.getInstance(IssueWorkManager.class).create(work);
 						notifyObservablesChange(target);
 						close();
+					}
+
+					@Override
+					protected boolean isDirtyAware() {
+						return false;
 					}
 				};
 			}

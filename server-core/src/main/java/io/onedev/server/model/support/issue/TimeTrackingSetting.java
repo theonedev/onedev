@@ -20,7 +20,8 @@ public class TimeTrackingSetting implements Serializable {
 	
 	private String aggregationLink;
 	
-	@Editable(order=500, placeholder = "No aggregation")
+	@Editable(order=500, placeholder = "No aggregation", description = "If specified, total estimated/spent time " +
+			"of an issue will also include linked issues of this type")
 	@ChoiceProvider("getLinkChoices")
 	public String getAggregationLink() {
 		return aggregationLink;
