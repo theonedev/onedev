@@ -183,8 +183,6 @@ onedev.server.layout = {
 				height: "16px"
 			});
 		}
-
-		console.log(newVersionStatusCallback);
 		
 		// cache new version status so that we do not need to check new version 
 		// in remaining time of the day
