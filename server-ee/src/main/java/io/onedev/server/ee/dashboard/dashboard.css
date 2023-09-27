@@ -104,6 +104,7 @@
 	right: -5px;
 	bottom: -5px;
 }
+.dashboard.dashboard-editor>.body>.content>.widget.ui-draggable-dragging, 
 .dashboard.dashboard-editor>.body>.content>.widget.ui-resizable-resizing {
 	z-index: 10;
 }
