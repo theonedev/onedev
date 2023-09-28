@@ -74,7 +74,11 @@ abstract class BeanEditContentPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target);
+				BeanEditContentPanel.this.validate(editor);
+				if (editor.isValid())
+					onSave(target);
+				else 
+					target.add(form);
 			}
 			
 		});
@@ -119,6 +123,8 @@ abstract class BeanEditContentPanel extends Panel {
 	
 	@Nullable
 	protected abstract String getTitle();
+	
+	protected abstract void validate(BeanEditor editor);
 	
 	protected abstract void onSave(AjaxRequestTarget target);
 	

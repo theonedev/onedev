@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import io.onedev.server.util.Day;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -20,7 +21,9 @@ public class IssueWork extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_DATE = "date";
-
+	
+	public static final String PROP_DAY = "day";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Issue issue;
@@ -30,6 +33,8 @@ public class IssueWork extends AbstractEntity {
 	private User user;
 	
 	private Date date;
+	
+	private int day;
 	
 	private int minutes;
 
@@ -58,6 +63,11 @@ public class IssueWork extends AbstractEntity {
 
 	public void setDate(Date date) {
 		this.date = date;
+		day = new Day(date).getValue();
+	}
+
+	public int getDay() {
+		return day;
 	}
 
 	public int getMinutes() {

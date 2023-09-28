@@ -1,0 +1,46 @@
+<wicket:extend>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="hasTimesheetsFrag">
+		<div class="head d-flex align-items-center flex-wrap">
+			<a wicket:id="timesheetChoice" class="btn btn-outline-secondary btn-hover-primary text-nowrap bg-white">
+				<wicket:svg href="work-log" class="icon mr-2"></wicket:svg>
+				<span wicket:id="name"></span>
+				<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
+			</a>
+			<div class="time-range text-nowrap ml-4">
+				<span class="btn-group">
+					<a wicket:id="prevMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white"><wicket:svg href="arrow" class="icon flip-x mr-1"></wicket:svg> Prev</a>
+					<a wicket:id="thisMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white"><wicket:svg href="calendar" class="icon mr-1"></wicket:svg><span wicket:id="label"></span></a>
+					<a wicket:id="nextMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white">Next <wicket:svg href="arrow" class="icon ml-1"></wicket:svg></a>
+				</span>
+			</div>
+		</div>
+		<div wicket:id="body"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="timesheetChoiceFrag">
+		<div class="timesheet-choice p-4">
+			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> The first timesheet will be the default timesheet</div>
+			<table class="table">
+				<tr wicket:id="timesheets" class="timesheet">
+					<td class="name">
+						<span wicket:id="dragIndicator" class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>
+						<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
+						<span wicket:id="inherited" class="badge badge-sm badge-light-info ml-2">inherited</span>
+						<span wicket:id="default" class="badge badge-sm badge-light-info ml-2">default</span>
+					</td>
+					<td wicket:id="actions" class="actions text-right">
+						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+						<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+					</td>
+				</tr>
+			</table>
+			<a wicket:id="newTimesheet" class="btn btn-light btn-hover-primary btn-sm btn-block"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Timesheet</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noTimesheetsFrag">
+		<div class="alert alert-outline-secondary bg-white shadow no-timesheets">
+			<span class="mr-3">No timesheets defined</span>
+			<a wicket:id="newTimesheet"><wicket:svg href="plus" class="icon"></wicket:svg>Add New</a>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

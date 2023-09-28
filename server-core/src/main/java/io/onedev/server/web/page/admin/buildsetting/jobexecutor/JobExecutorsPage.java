@@ -1,7 +1,12 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.page.admin.AdministrationPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,12 +18,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class JobExecutorsPage extends AdministrationPage {
@@ -77,8 +77,7 @@ public class JobExecutorsPage extends AdministrationPage {
 			
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-				JobExecutor executor = executors.get(from.getItemIndex());
-				executors.set(from.getItemIndex(), executors.set(to.getItemIndex(), executor));
+				CollectionUtils.move(executors, from.getItemIndex(), to.getItemIndex());
 				getSettingManager().saveJobExecutors(executors);
 				
 				target.add(container);

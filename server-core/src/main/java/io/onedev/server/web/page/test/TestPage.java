@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class TestPage extends BasePage {
-
+	
 	public TestPage(PageParameters params) {
 		super(params);
 	}
@@ -23,8 +23,8 @@ public class TestPage extends BasePage {
 			}
 
 		});
-	}	
-	
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

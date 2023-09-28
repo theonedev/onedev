@@ -16,6 +16,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -42,7 +43,6 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -307,7 +307,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
 
-							item.add(new WebMarkupContainer("primary").setVisible(item.getIndex() == 0));
+							item.add(new WebMarkupContainer("default").setVisible(item.getIndex() == 0));
 							
 							WebMarkupContainer actions = new WebMarkupContainer("actions") {
 
@@ -360,8 +360,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							
 							@Override
 							protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-								BoardSpec board = boards.get(from.getItemIndex());
-								boards.set(from.getItemIndex(), boards.set(to.getItemIndex(), board));
+								CollectionUtils.move(boards, from.getItemIndex(), to.getItemIndex());
 								getProject().getIssueSetting().setBoardSpecs(boards);
 								OneDev.getInstance(ProjectManager.class).update(getProject());
 								target.add(menuFragment);

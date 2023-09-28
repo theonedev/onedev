@@ -1,8 +1,7 @@
-package io.onedev.server.web.editable.jobprivilege;
+package io.onedev.server.web.editable.issue.creation;
 
-import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -14,7 +13,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -34,16 +32,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
-class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
+class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<JobPrivilege> privileges;
+	private final List<IssueCreationSetting> settings;
 	
-	public JobPrivilegeListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public IssueCreationSettingListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		privileges = new ArrayList<>();
+		settings = new ArrayList<>();
 		for (Serializable each: model.getObject()) {
-			privileges.add((JobPrivilege) each);
+			settings.add((IssueCreationSetting) each);
 		}
 	}
 	
@@ -54,7 +52,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new JobPrivilegeEditPanel(id, privileges, -1) {
+				return new IssueCreationSettingEditPanel(id, settings, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -66,7 +64,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						markFormDirty(target);
 						modal.close();
 						onPropertyUpdating(target);
-						target.add(JobPrivilegeListEditPanel.this);
+						target.add(IssueCreationSettingListEditPanel.this);
 					}
 
 				};
@@ -74,12 +72,12 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		List<IColumn<JobPrivilege, Void>> columns = new ArrayList<>();
+		List<IColumn<IssueCreationSetting, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
+			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
 				cellItem.add(new SpriteImage(componentId, "grip") {
 
 					@Override
@@ -99,42 +97,40 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Job Names")) {
+		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Sender Emails")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getJobNames()));
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Privilege")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
-				JobPrivilege privilege = rowModel.getObject();
-				if (privilege.isManageJob())
-					cellItem.add(new Label(componentId, "Manage Job"));
-				else if (privilege.isRunJob())
-					cellItem.add(new Label(componentId, "Run Job"));
-				else if (privilege.isAccessLog())
-					cellItem.add(new Label(componentId, "Access Log"));
-				else if (privilege.getAccessibleReports() != null)
-					cellItem.add(new Label(componentId, "Access Reports: " + privilege.getAccessibleReports()));
+			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
+				IssueCreationSetting setting = rowModel.getObject();
+				if (setting.getSenderEmails() != null)
+					cellItem.add(new Label(componentId, setting.getSenderEmails()));
 				else
-					cellItem.add(new Label(componentId, "Access Artifacts"));
+					cellItem.add(new Label(componentId, "<i>Any sender</i>").setEscapeModelStrings(false));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Applicable Projects")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", JobPrivilegeListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
+				IssueCreationSetting setting = rowModel.getObject();
+				if (setting.getApplicableProjects() != null)
+					cellItem.add(new Label(componentId, setting.getApplicableProjects()));
+				else
+					cellItem.add(new Label(componentId, "<i>Any project</i>").setEscapeModelStrings(false));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", IssueCreationSettingListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new JobPrivilegeEditPanel(id, privileges, cellItem.findParent(Item.class).getIndex()) {
+						return new IssueCreationSettingEditPanel(id, settings, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -146,7 +142,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 								markFormDirty(target);
 								modal.close();
 								onPropertyUpdating(target);
-								target.add(JobPrivilegeListEditPanel.this);
+								target.add(IssueCreationSettingListEditPanel.this);
 							}
 
 						};
@@ -156,17 +152,11 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this privilege?"));
-					}
-
-					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markFormDirty(target);
-						privileges.remove(rowModel.getObject());
+						settings.remove(rowModel.getObject());
 						onPropertyUpdating(target);
-						target.add(JobPrivilegeListEditPanel.this);
+						target.add(IssueCreationSettingListEditPanel.this);
 					}
 					
 				});
@@ -175,33 +165,32 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "actions minimum";
 			}
 			
 		});		
 		
-		IDataProvider<JobPrivilege> dataProvider = new ListDataProvider<JobPrivilege>() {
+		IDataProvider<IssueCreationSetting> dataProvider = new ListDataProvider<IssueCreationSetting>() {
 
 			@Override
-			protected List<JobPrivilege> getData() {
-				return privileges;			
+			protected List<IssueCreationSetting> getData() {
+				return settings;			
 			}
 
 		};
 		
-		DataTable<JobPrivilege, Void> dataTable;
-		add(dataTable = new DataTable<JobPrivilege, Void>("privileges", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<IssueCreationSetting, Void> dataTable;
+		add(dataTable = new DataTable<IssueCreationSetting, Void>("settings", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
 		dataTable.add(new NoRecordsBehavior());
-		
 		dataTable.add(new SortBehavior() {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-				CollectionUtils.move(privileges, from.getItemIndex(), to.getItemIndex());
+				CollectionUtils.move(settings, from.getItemIndex(), to.getItemIndex());
 				onPropertyUpdating(target);
-				target.add(JobPrivilegeListEditPanel.this);
+				target.add(IssueCreationSettingListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -220,7 +209,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (JobPrivilege each: privileges)
+		for (IssueCreationSetting each: settings)
 			value.add(each);
 		return value;
 	}
@@ -229,5 +218,5 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 	public boolean needExplicitSubmit() {
 		return true;
 	}
-	
+
 }

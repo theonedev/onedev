@@ -97,13 +97,13 @@ import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.*;
+import io.onedev.server.web.page.project.issues.timesheets.TimesheetsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
-import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
@@ -225,7 +225,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}", UserProfilePage.class));
 		add(new BasePageMapper("~administration/users/${user}/email-setting", UserEmailAddressesPage.class));
 		add(new BasePageMapper("~administration/users/${user}/groups", UserMembershipsPage.class));
-		add(new BasePageMapper("~administration/users/${user}/authorizations", UserAuthorizationsPage.class));
+		add(new BasePageMapper("~administration/users/${user}/authorizations", 
+				io.onedev.server.web.page.admin.usermanagement.authorization.UserAuthorizationsPage.class));
 		add(new BasePageMapper("~administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new BasePageMapper("~administration/users/${user}/password", UserPasswordPage.class));
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
@@ -350,6 +351,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~milestones/${milestone}/burndown", MilestoneBurndownPage.class));
 		add(new ProjectPageMapper("${project}/~milestones/${milestone}/edit", MilestoneEditPage.class));
 		add(new ProjectPageMapper("${project}/~milestones/new", NewMilestonePage.class));
+		add(new ProjectPageMapper("${project}/~timesheets", TimesheetsPage.class));
+		add(new ProjectPageMapper("${project}/~timesheets/${timesheet}", TimesheetsPage.class));
 		
 		add(new ProjectPageMapper("${project}/~builds", ProjectBuildsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}", BuildDashboardPage.class));

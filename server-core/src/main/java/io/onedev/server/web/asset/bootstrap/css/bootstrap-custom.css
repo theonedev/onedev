@@ -756,6 +756,9 @@ input[type="radio"], input[type="checkbox"] {
     opacity: 0.6;
     cursor: not-allowed;
 }
+.radio-inline {
+	flex-direction: row;
+}
 .radio-inline .radio {
     margin-right: 1rem;
     margin-bottom: 0.35rem;

@@ -26,6 +26,8 @@ public class ProjectIssueSetting implements Serializable {
 
 	private List<NamedIssueQuery> namedQueries;
 	
+	private Map<String, TimesheetSetting> timesheetSettings = new LinkedHashMap<>();
+	
 	private transient GlobalIssueSetting setting;
 	
 	private GlobalIssueSetting getGlobalSetting() {
@@ -68,6 +70,14 @@ public class ProjectIssueSetting implements Serializable {
 
 	public void setNamedQueries(@Nullable List<NamedIssueQuery> namedQueries) {
 		this.namedQueries = namedQueries;
+	}
+
+	public Map<String, TimesheetSetting> getTimesheetSettings() {
+		return timesheetSettings;
+	}
+
+	public void setTimesheetSettings(Map<String, TimesheetSetting> timesheetSettings) {
+		this.timesheetSettings = timesheetSettings;
 	}
 
 	public void onRenameUser(String oldName, String newName) {

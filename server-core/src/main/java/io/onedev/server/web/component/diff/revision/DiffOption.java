@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.annotation.RadioChoice;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.annotation.Editable;
 
@@ -17,6 +18,7 @@ public class DiffOption implements Serializable {
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 
 	@Editable(order=100)
+	@RadioChoice
 	@NotNull
 	public DiffViewMode getViewMode() {
 		return viewMode;
@@ -27,6 +29,7 @@ public class DiffOption implements Serializable {
 	}
 
 	@Editable(order=200)
+	@RadioChoice
 	@NotNull
 	public WhitespaceOption getWhitespaceOption() {
 		return whitespaceOption;

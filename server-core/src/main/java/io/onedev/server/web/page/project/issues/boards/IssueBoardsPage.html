@@ -35,21 +35,21 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
-		<div class="alert alert-notice alert-light-success shadow no-boards">
+		<div class="alert alert-outline-secondary bg-white shadow no-boards">
 			<span class="mr-3">No issue boards defined</span> 
 			<a wicket:id="newBoard" class="mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg>Add New</a>
-			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon mr-1"></wicket:svg>Use Default</a>
+			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon"></wicket:svg>Use Default</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="boardMenuFrag">
 		<div class="board-menu p-4">
-			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> The first board will be the primary board</div>
+			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> The first board will be the default board</div>
 			<table class="boards table">
 				<tr wicket:id="boards" class="board">
 					<td class="name">
 						<span wicket:id="dragIndicator" class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>			
 						<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
-						<span wicket:id="primary" class="badge badge-sm badge-light-info ml-2">Primary</span>
+						<span wicket:id="default" class="badge badge-sm badge-light-info ml-2">default</span>
 					</td>
 					<td wicket:id="actions" class="actions text-right">
 						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>

@@ -33,6 +33,7 @@ import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.issue.TimesheetSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
@@ -1576,11 +1577,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedIssueQuery> namedQueries = current.getIssueSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedIssueQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedIssueQuery>) getSettingManager().getIssueSetting().getNamedQueries();
+		return getSettingManager().getIssueSetting().getNamedQueries();
 	}
 	
 	public List<NamedBuildQuery> getNamedBuildQueries() {
@@ -1588,11 +1589,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedBuildQuery> namedQueries = current.getBuildSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedBuildQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedBuildQuery>) getSettingManager().getBuildSetting().getNamedQueries();
+		return getSettingManager().getBuildSetting().getNamedQueries();
 	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
@@ -1600,15 +1601,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedPullRequestQuery> namedQueries = current.getPullRequestSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedPullRequestQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedPullRequestQuery>) getSettingManager().getPullRequestSetting().getNamedQueries();
+		return getSettingManager().getPullRequestSetting().getNamedQueries();
 	}
-
+	
+	public Map<String, TimesheetSetting> getHierarchyTimesheetSettings() {
+		Map<String, TimesheetSetting> timesheetSettings = new LinkedHashMap<>();
+		Project current = this;
+		do {
+			for (var entry: current.getIssueSetting().getTimesheetSettings().entrySet()) 
+				timesheetSettings.putIfAbsent(entry.getKey(), entry.getValue());
+			current = current.getParent();
+		} while (current != null);
+		return timesheetSettings;
+	}
+	
 	public List<BoardSpec> getHierarchyBoards() {
-		List<BoardSpec> boards = null;
+		List<BoardSpec> boards;
 		
 		Project current = this;
 		do {
