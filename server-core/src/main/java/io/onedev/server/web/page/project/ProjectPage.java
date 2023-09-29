@@ -224,7 +224,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
 			if (getProject().isTimeTracking()) {
 				issueMenuItems.add(new SidebarMenuItem.Page(null, "Timesheets",
-						TimesheetsPage.class, TimesheetsPage.paramsOf(getProject(), null)));
+						TimesheetsPage.class, TimesheetsPage.paramsOf(getProject(), null, null)));
 			}
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}

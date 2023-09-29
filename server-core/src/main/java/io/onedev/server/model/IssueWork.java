@@ -34,9 +34,9 @@ public class IssueWork extends AbstractEntity {
 	
 	private Date date;
 	
-	private int day;
+	private long day;
 	
-	private int minutes;
+	private int hours;
 
 	@Column(length=MAX_CONTENT_LEN)
 	private String note;
@@ -63,19 +63,22 @@ public class IssueWork extends AbstractEntity {
 
 	public void setDate(Date date) {
 		this.date = date;
-		day = new Day(date).getValue();
 	}
 
-	public int getDay() {
+	public long getDay() {
 		return day;
 	}
 
-	public int getMinutes() {
-		return minutes;
+	public void setDay(long day) {
+		this.day = day;
 	}
 
-	public void setMinutes(int minutes) {
-		this.minutes = minutes;
+	public int getHours() {
+		return hours;
+	}
+
+	public void setHours(int hours) {
+		this.hours = hours;
 	}
 
 	@Nullable

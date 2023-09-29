@@ -23,6 +23,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import javax.annotation.Nullable;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import static io.onedev.server.timetracking.LinkAggregation.Direction.BOTH;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
@@ -119,8 +122,11 @@ abstract class IssueTimePanel extends Panel {
 						IssueWork work = new IssueWork();
 						work.setIssue(getIssue());
 						work.setUser(SecurityUtils.getUser());
-						work.setMinutes(bean.getSpentTime());
+						work.setHours(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
+						work.setDay(bean.getStartAt().toInstant()
+								.atZone(ZoneId.systemDefault())
+								.toLocalDate().toEpochDay());
 						work.setNote(bean.getNote());
 						OneDev.getInstance(IssueWorkManager.class).create(work);
 						notifyObservablesChange(target);

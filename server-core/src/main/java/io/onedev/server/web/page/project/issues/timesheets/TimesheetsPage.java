@@ -11,6 +11,7 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -18,7 +19,6 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
-import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -33,11 +33,11 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.*;
 
 import static io.onedev.server.model.support.issue.TimesheetSetting.TimeRangeType.WEEK;
@@ -46,7 +46,9 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_TIMESHEET = "timesheet";
 	
-	private String timesheetName;
+	private static final String PARAM_BASE_DATE = "base-date";
+	
+	private State state = new State();
 	
 	private Map<String, TimesheetSetting> timesheetSettings;
 	
@@ -56,15 +58,21 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	
 	public TimesheetsPage(PageParameters params) {
 		super(params);
+		
 		timesheetSettings = getProject().getIssueSetting().getTimesheetSettings();
 		hierarchyTimesheetSettings = getProject().getHierarchyTimesheetSettings();
-		timesheetName = params.get(PARAM_TIMESHEET).toOptionalString();
-		if (timesheetName != null) {
-			if (!hierarchyTimesheetSettings.containsKey(timesheetName))			
-				throw new ExplicitException("Unable to find timesheet: " + timesheetName);
+		
+		state.timesheetName = params.get(PARAM_TIMESHEET).toOptionalString();
+		if (state.timesheetName != null) {
+			if (!hierarchyTimesheetSettings.containsKey(state.timesheetName))			
+				throw new ExplicitException("Unable to find timesheet: " + state.timesheetName);
 		} else if (!hierarchyTimesheetSettings.isEmpty()) {
-			timesheetName = hierarchyTimesheetSettings.entrySet().iterator().next().getKey();
+			state.timesheetName = hierarchyTimesheetSettings.entrySet().iterator().next().getKey();
 		}
+		
+		String baseDate = params.get(PARAM_BASE_DATE).toOptionalString();
+		if (baseDate != null)
+			state.baseDate = LocalDate.parse(baseDate);
 	}
 	
 	@Override
@@ -80,7 +88,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 					add(new Label("name", new AbstractReadOnlyModel<String>() {
 						@Override
 						public String getObject() {
-							return timesheetName;
+							return state.timesheetName;
 						}
 					}));
 				}
@@ -106,7 +114,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 							else 
 								dragIndicator.add(AttributeAppender.append("class", "opacity-25")).add(AttributeAppender.append("title", "Inherited timesheets can not be sorted"));
 							
-							Link<Void> link = new BookmarkablePageLink<Void>("select", TimesheetsPage.class, paramsOf(getProject(), entry.getKey()));
+							Link<Void> link = new BookmarkablePageLink<Void>("select", TimesheetsPage.class, paramsOf(getProject(), entry.getKey(), state.baseDate));
 							link.add(new Label("name", entry.getKey()));
 							item.add(link);
 
@@ -133,11 +141,11 @@ public class TimesheetsPage extends ProjectIssuesPage {
 								
 								@Override
 								protected void onSave(AjaxRequestTarget target, ModalPanel modal, String name, TimesheetSetting setting) {
-									timesheetName = name;
+									state.timesheetName = name;
 									target.add(fragment);
 									modal.close();
-									CharSequence url = urlFor(TimesheetsPage.class, paramsOf(getProject(), timesheetName));
-									pushState(target, url.toString(), timesheetName);
+									CharSequence url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
+									pushState(target, url.toString(), state);
 								}
 								
 							});
@@ -152,10 +160,10 @@ public class TimesheetsPage extends ProjectIssuesPage {
 									getProjectManager().update(getProject());
 
 									PageParameters params;
-									if (entry.getKey().equals(timesheetName))
-										params = paramsOf(getProject(), null);
+									if (entry.getKey().equals(state.timesheetName))
+										params = paramsOf(getProject(), null, state.baseDate);
 									else
-										params = paramsOf(getProject(), timesheetName);
+										params = paramsOf(getProject(), state.timesheetName, state.baseDate);
 									setResponsePage(TimesheetsPage.class, params);
 								}
 
@@ -171,7 +179,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 
 						@Override
 						protected void onSave(AjaxRequestTarget target, ModalPanel modal, String name, TimesheetSetting setting) {
-							setResponsePage(TimesheetsPage.class, paramsOf(getProject(), name));
+							setResponsePage(TimesheetsPage.class, paramsOf(getProject(), name, state.baseDate));
 						}
 						
 						@Override
@@ -211,32 +219,79 @@ public class TimesheetsPage extends ProjectIssuesPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
+					var baseDate = state.baseDate;
+					if (baseDate == null)
+						baseDate = LocalDate.now();
+					if (getTimesheetSetting().getTimeRangeType() == WEEK) 
+						state.baseDate = baseDate.minusWeeks(1);
+					else
+						state.baseDate = baseDate.minusMonths(1);
+					target.add(body);
 					
+					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
+					pushState(target, url.toString(), state);
 				}
 			});
 			fragment.add(new AjaxLink<Void>("thisMonthOrWeek") {
 				@Override
 				protected void onInitialize() {
 					super.onInitialize();
-					if (getTimesheetSetting().getTimeRangeType() == WEEK)
-						add(new Label("label", "This Week"));
-					else
-						add(new Label("label", "This Month"));
+					add(new Label("label", new AbstractReadOnlyModel<String>() {
+						@Override
+						public String getObject() {
+							if (getTimesheetSetting().getTimeRangeType() == WEEK)
+								return "This Week";
+							else
+								return "This Month";
+						}
+					}));
 				}
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
+					state.baseDate = null;
+					target.add(body);
 					
+					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
+					pushState(target, url.toString(), state);	
 				}
 			});
 			fragment.add(new AjaxLink<Void>("nextMonthOrWeek") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-
+					var baseDate = state.baseDate;
+					if (baseDate == null)
+						baseDate = LocalDate.now();
+					if (getTimesheetSetting().getTimeRangeType() == WEEK)
+						state.baseDate = baseDate.plusWeeks(1);
+					else
+						state.baseDate = baseDate.plusMonths(1);
+					target.add(body);
+					
+					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
+					pushState(target, url.toString(), state);
 				}
 			});
-			fragment.add(body = new WebMarkupContainer("body").setOutputMarkupId(true));
+			fragment.add(body = new TimesheetPanel("body") {
+				
+				@Override
+				protected Project getProject() {
+					return TimesheetsPage.this.getProject();
+				}
+
+				@Override
+				protected TimesheetSetting getSetting() {
+					return getTimesheetSetting();
+				}
+
+				@Override
+				protected LocalDate getBaseDate() {
+					return state.baseDate != null? state.baseDate: LocalDate.now();
+				}
+				
+			}.setOutputMarkupId(true));
+			
 			fragment.setOutputMarkupId(true);
 			add(fragment);
 		} else {
@@ -245,7 +300,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 				
 				@Override
 				protected void onSave(AjaxRequestTarget target, ModalPanel modal, String name, TimesheetSetting setting) {
-					setResponsePage(TimesheetsPage.class, paramsOf(getProject(), name));
+					setResponsePage(TimesheetsPage.class, paramsOf(getProject(), name, state.baseDate));
 				}
 
 				@Override
@@ -262,14 +317,14 @@ public class TimesheetsPage extends ProjectIssuesPage {
 
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		timesheetName = (String) data;
+		state = (State) data;
 		target.add(get("content"));
 	}
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isIssueManagement() && project.isTimeTracking())
-			return new ViewStateAwarePageLink<>(componentId, TimesheetsPage.class, TimesheetsPage.paramsOf(project, null));
+			return new ViewStateAwarePageLink<>(componentId, TimesheetsPage.class, TimesheetsPage.paramsOf(project, null, state.baseDate));
 		else
 			return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
@@ -280,13 +335,15 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	}
 
 	private TimesheetSetting getTimesheetSetting() {
-		return hierarchyTimesheetSettings.get(timesheetName);
+		return hierarchyTimesheetSettings.get(state.timesheetName);
 	}
 	
-	public static PageParameters paramsOf(Project project, @Nullable String timesheetName) {
+	public static PageParameters paramsOf(Project project, @Nullable String timesheetName, @Nullable LocalDate baseDate) {
 		PageParameters params = paramsOf(project);
 		if (timesheetName != null)
 			params.add(PARAM_TIMESHEET, timesheetName);
+		if (baseDate != null)
+			params.add(PARAM_BASE_DATE, baseDate.toString());
 		return params;
 	}
 
@@ -346,4 +403,10 @@ public class TimesheetsPage extends ProjectIssuesPage {
 		protected abstract void onSave(AjaxRequestTarget target, ModalPanel modal, String name, TimesheetSetting setting);
 	}
 	
+	private static class State implements Serializable {
+		String timesheetName;
+		
+		LocalDate baseDate;
+		
+	}
 }

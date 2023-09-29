@@ -6,7 +6,6 @@ import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.base.BasePage;
@@ -25,6 +24,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+
+import java.time.ZoneId;
 
 import static io.onedev.server.util.DateUtils.formatDateTime;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
@@ -58,7 +59,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 	
 	private Component newDetailViewer(String componentId) {
 		var fragment = new Fragment(componentId, "detailViewFrag", this);
-		fragment.add(new Label("workingPeriod", formatWorkingPeriod(getWork().getMinutes())));
+		fragment.add(new Label("workingPeriod", formatWorkingPeriod(getWork().getHours())));
 		if (getWork().getNote() != null)
 			fragment.add(new MarkdownViewer("note", Model.of(getWork().getNote()), null));
 		else 
@@ -114,7 +115,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 		var bean = new IssueWorkBean();
 		bean.setNote(getWork().getNote());
 		bean.setStartAt(getWork().getDate());
-		bean.setSpentTime(getWork().getMinutes());
+		bean.setSpentTime(getWork().getHours());
 		form.add(BeanContext.edit("editor", bean));
 		form.add(new AjaxButton("save") {
 			@Override
@@ -123,7 +124,10 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 				var work = getWork();
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
-				work.setMinutes(bean.getSpentTime());
+				work.setDay(bean.getStartAt().toInstant()
+						.atZone(ZoneId.systemDefault())
+						.toLocalDate().toEpochDay());
+				work.setHours(bean.getSpentTime());
 				getWorkManager().update(work);
 				var detailViewer = newDetailViewer("detail");
 				fragment.replaceWith(detailViewer);

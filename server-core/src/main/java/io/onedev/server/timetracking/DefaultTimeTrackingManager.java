@@ -129,7 +129,7 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 					timingChanged = true;
 				}
 
-				int ownSpentTime = issue.getWorks().stream().mapToInt(IssueWork::getMinutes).sum();
+				int ownSpentTime = issue.getWorks().stream().mapToInt(IssueWork::getHours).sum();
 				issueChangeManager.changeOwnSpentTime(issue, ownSpentTime);
 				
 				int totalSpentTime = ownSpentTime;
