@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -140,7 +141,9 @@ public class PropertyDescriptor implements Serializable {
 			return false;
 		
 		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
-		ComponentContext.push(Preconditions.checkNotNull(componentContexts.get(getPropertyName())));
+		var componentContext = componentContexts.get(getPropertyName());
+		if (componentContext != null)
+			ComponentContext.push(componentContext);
 		try {
 			/* 
 			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
@@ -159,7 +162,8 @@ public class PropertyDescriptor implements Serializable {
 			return true;
 		} finally {
 			getDependencyPropertyNames().addAll(prevDependencyPropertyNames);
-			ComponentContext.pop();
+			if (componentContext != null)
+				ComponentContext.pop();
 		}
 	}
 	

@@ -107,6 +107,10 @@ public class BeanDescriptor implements Serializable {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public boolean isPropertyVisible(String propertyNameOrDisplayName) {
+		return getProperty(propertyNameOrDisplayName).isPropertyVisible(new HashMap<>(), this);
+	}
 
 	public String getPropertyName(String propertyNameOrDisplayName) {
 		for (List<PropertyDescriptor> groupProperties: properties.values()) {
