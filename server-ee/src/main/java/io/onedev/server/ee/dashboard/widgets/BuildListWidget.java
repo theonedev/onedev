@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Editable(name="Build List", order=300)
+@Editable(name="Build list", order=400)
 public class BuildListWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

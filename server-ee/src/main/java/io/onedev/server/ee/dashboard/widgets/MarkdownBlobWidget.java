@@ -37,7 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Editable(name="Markdown from File", order=10010)
+@Editable(name="Markdown from file", order=10010)
 public class MarkdownBlobWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

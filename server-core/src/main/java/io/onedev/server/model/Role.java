@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleName;
@@ -64,8 +65,6 @@ public class Role extends AbstractEntity implements Permission {
 	
 	@Transient
 	private List<String> editableIssueLinks = new ArrayList<>();
-	
-	private boolean logWorks;
 	
 	private boolean manageBuilds;
 	
@@ -193,7 +192,7 @@ public class Role extends AbstractEntity implements Permission {
 		this.accessConfidentialIssues = accessConfidentialIssues;
 	}
 	
-	@Editable(order=500, description="This permission enables one to schedule issues into milestones")
+	@Editable(order=500, descriptionProvider = "getScheduleIssuesDescription")
 	@ShowCondition("isManageIssuesDisabled")
 	public boolean isScheduleIssues() {
 		return scheduleIssues;
@@ -201,6 +200,15 @@ public class Role extends AbstractEntity implements Permission {
 
 	public void setScheduleIssues(boolean scheduleIssues) {
 		this.scheduleIssues = scheduleIssues;
+	}
+	
+	private static String getScheduleIssuesDescription() {
+		if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive()) {
+			return "This permission enables one to schedule issues into milestones as well as edit estimated " +
+					"time of issues if time tracking is enabled";			
+		} else {
+			return "This permission enables one to schedule issues into milestones";
+		}
 	}
 
 	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")
@@ -240,16 +248,6 @@ public class Role extends AbstractEntity implements Permission {
 				choices.put(link.getName(), link.getName());
 		}
 		return choices;
-	}
-
-	@Editable(order=630, description="Whether or not to allow to log works of issues for time tracking")
-	@ShowCondition("isManageIssuesDisabled")
-	public boolean isLogWorks() {
-		return logWorks;
-	}
-
-	public void setLogWorks(boolean logWorks) {
-		this.logWorks = logWorks;
 	}
 
 	@Editable(order=650, name="Build Management", description="Build administrative permission for all jobs inside a project, "
@@ -346,8 +344,6 @@ public class Role extends AbstractEntity implements Permission {
 				permissions.add(new AccessConfidentialIssues());
 			if (scheduleIssues)
 				permissions.add(new ScheduleIssues());
-			if (logWorks)
-				permissions.add(new LogWorks());
 			permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
 			for (LinkAuthorization linkAuthorization: getLinkAuthorizations()) 
 				permissions.add(new EditIssueLink(linkAuthorization.getLink()));

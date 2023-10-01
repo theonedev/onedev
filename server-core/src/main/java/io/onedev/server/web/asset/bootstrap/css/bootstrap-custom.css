@@ -20,10 +20,10 @@
 	--dark-blue: #1f3b7b;
 	
 	--dark-mode-light-gray: #cdcdde;
-	--dark-mode-dark: #1e1e2d;
+	--dark-mode-dark: #23232d;
 	--dark-mode-darker: #151521;
 	--dark-mode-light-dark: #2b2b40;
-	--dark-mode-lighter-dark: rgb(54, 54, 79);
+	--dark-mode-lighter-dark: #36364F;
 	--dark-mode-light-primary: #212e48;
 	--dark-mode-light-info: #2f264f;
 	--dark-mode-light-warning: #392f28;
@@ -1999,12 +1999,12 @@ input[type="radio"], input[type="checkbox"] {
 .table-sm th, .table-sm td {
     padding: 0.3rem;
 }
-.table-hover tbody tr:hover {
+.table.table-hover tbody tr:hover td {
     background-color: var(--light);
 }
-.dark-mode .table-hover tbody tr:hover {
+.dark-mode .table.table-hover tbody tr:hover td {
 	color: var(--dark-mode-light-gray);
-    background-color: var(--dark-mode-light-dark);
+    background-color: #262638;
 }
 .table-borderless tbody+tbody, .table-borderless td, .table-borderless th, .table-borderless thead th {
     border: 0;
@@ -2025,6 +2025,12 @@ input[type="radio"], input[type="checkbox"] {
 }
 .table-dark.table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(255, 255, 255, 0.05);
+}
+.table-bordered td, .table-bordered th {
+	border: 1px solid var(--light-gray);
+}
+.dark-mode .table-bordered td, .dark-mode .table-bordered th {
+	border: 1px solid var(--dark-mode-light-dark);
 }
 
 .nav .nav-link {

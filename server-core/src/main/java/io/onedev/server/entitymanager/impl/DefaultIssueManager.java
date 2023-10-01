@@ -219,16 +219,18 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		dao.persist(issue);
 	}
 
-	private List<javax.persistence.criteria.Order> getOrders(List<EntitySort> sorts, CriteriaBuilder builder, Root<Issue> root) {
+	@Override
+	public List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
+															  From<Issue, Issue> issue) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
 			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
+					orders.add(builder.asc(IssueQuery.getPath(issue, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
+					orders.add(builder.desc(IssueQuery.getPath(issue, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
 			} else {
-				Join<Issue, IssueField> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
+				Join<Issue, IssueField> join = issue.join(Issue.PROP_FIELDS, JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
 					orders.add(builder.asc(join.get(IssueField.PROP_ORDINAL)));
@@ -238,7 +240,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
+			orders.add(builder.desc(IssueQuery.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
 		return orders;
 	}
@@ -255,8 +257,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
-		criteriaQuery.where(getPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
-		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
+		criteriaQuery.where(buildPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
+		criteriaQuery.orderBy(buildOrders(issueQuery.getSorts(), builder, root));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -283,7 +285,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
+		criteriaQuery.where(buildPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -296,38 +298,39 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<IssueTimes> criteriaQuery = builder.createQuery(IssueTimes.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
+		criteriaQuery.where(buildPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
 		
 		criteriaQuery.multiselect(
 				builder.sum(root.get(PROP_OWN_ESTIMATED_TIME)), 
 				builder.sum(root.get(PROP_OWN_SPENT_TIME)));
 		return getSession().createQuery(criteriaQuery).uniqueResult();
 	}
-	
-	private Predicate[] getPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria, 
-			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
+
+	@Override
+	public Predicate[] buildPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria,
+									   CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (projectScope != null) {
 			Project project = projectScope.getProject();
-			Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
+			Path<Project> projectPath = issue.get(Issue.PROP_PROJECT);
 			List<Predicate> projectPredicates = new ArrayList<>();
 			if (projectScope.isRecursive()) {
 				Collection<Long> subtreeIds = projectManager.getSubtreeIds(project.getId());
-				projectPredicates.add(getPredicate(builder, root, subtreeIds));
-				projectPredicates.add(getAuthorizationPredicate(query, builder, root, subtreeIds));
+				projectPredicates.add(buildPredicate(builder, issue, subtreeIds));
+				projectPredicates.add(buildAuthorizationPredicate(query, builder, issue, subtreeIds));
 			} else if (SecurityUtils.canAccessConfidentialIssues(project)) {
 				projectPredicates.add(builder.equal(projectPath, project));
 			} else {
-				projectPredicates.add(getNonConfidentialPredicate(builder, root, project));
-				projectPredicates.add(getAuthorizationPredicate(query, builder, root, project));
+				projectPredicates.add(buildNonConfidentialPredicate(builder, issue, project));
+				projectPredicates.add(buildAuthorizationPredicate(query, builder, issue, project));
 			}
 			if (projectScope.isInherited()) {
 				for (Project ancestor: projectScope.getProject().getAncestors()) {
 					if (SecurityUtils.canAccessConfidentialIssues(ancestor)) {
 						projectPredicates.add(builder.equal(projectPath, ancestor));
 					} else if (SecurityUtils.canAccess(ancestor)) { 
-						projectPredicates.add(getNonConfidentialPredicate(builder, root, ancestor));
-						projectPredicates.add(getAuthorizationPredicate(query, builder, root, ancestor));
+						projectPredicates.add(buildNonConfidentialPredicate(builder, issue, ancestor));
+						projectPredicates.add(buildAuthorizationPredicate(query, builder, issue, ancestor));
 					}
 				}
 			}
@@ -337,35 +340,35 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			if (!projects.isEmpty()) { 
 				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(toSet());
 				predicates.add(builder.or(
-						getPredicate(builder, root, projectIds), 
-						getAuthorizationPredicate(query, builder, root, projectIds)));
+						buildPredicate(builder, issue, projectIds), 
+						buildAuthorizationPredicate(query, builder, issue, projectIds)));
 			} else { 
 				predicates.add(builder.disjunction());
 			}
 		}
 		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(query, root, builder));
+			predicates.add(issueCriteria.getPredicate(query, issue, builder));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
 	
-	private Predicate getNonConfidentialPredicate(CriteriaBuilder builder, Root<Issue> root, Project project) {
+	private Predicate buildNonConfidentialPredicate(CriteriaBuilder builder, From<Issue, Issue> issue, Project project) {
 		return builder.and(
-				builder.equal(root.get(Issue.PROP_PROJECT), project),
-				builder.equal(root.get(Issue.PROP_CONFIDENTIAL), false));
+				builder.equal(issue.get(Issue.PROP_PROJECT), project),
+				builder.equal(issue.get(Issue.PROP_CONFIDENTIAL), false));
 	}
 	
-	private Predicate getAuthorizationPredicate(CriteriaQuery<?> query, CriteriaBuilder builder, 
-			Root<Issue> root, Collection<Long> projectIds) {
+	private Predicate buildAuthorizationPredicate(CriteriaQuery<?> query, CriteriaBuilder builder,
+												  From<Issue, Issue> issue, Collection<Long> projectIds) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Subquery<IssueAuthorization> authorizationQuery = query.subquery(IssueAuthorization.class);
 			Root<IssueAuthorization> authorizationRoot = authorizationQuery.from(IssueAuthorization.class);
 			authorizationQuery.select(authorizationRoot);
 	
-			Predicate issuePredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_ISSUE), root);
+			Predicate issuePredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_ISSUE), issue);
 			Predicate userPredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_USER), user);
-			Path<Long> projectIdPath = root.get(Issue.PROP_PROJECT).get(Project.PROP_ID);
+			Path<Long> projectIdPath = issue.get(Issue.PROP_PROJECT).get(Project.PROP_ID);
 			return builder.and(
 					Criteria.forManyValues(builder, projectIdPath, projectIds, projectManager.getIds()), 
 					builder.exists(authorizationQuery.where(issuePredicate, userPredicate))); 
@@ -374,26 +377,26 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 	}
 	
-	private Predicate getAuthorizationPredicate(CriteriaQuery<?> query, CriteriaBuilder builder, 
-			Root<Issue> root, Project project) {
+	private Predicate buildAuthorizationPredicate(CriteriaQuery<?> query, CriteriaBuilder builder,
+												  From<Issue, Issue> issue, Project project) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Subquery<IssueAuthorization> authorizationQuery = query.subquery(IssueAuthorization.class);
 			Root<IssueAuthorization> authorizationRoot = authorizationQuery.from(IssueAuthorization.class);
 			authorizationQuery.select(authorizationRoot);
 	
-			Predicate issuePredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_ISSUE), root);
+			Predicate issuePredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_ISSUE), issue);
 			Predicate userPredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_USER), user);
-			Predicate projectPredicate = builder.equal(root.get(Issue.PROP_PROJECT), project);
+			Predicate projectPredicate = builder.equal(issue.get(Issue.PROP_PROJECT), project);
 			return builder.and(projectPredicate, builder.exists(authorizationQuery.where(issuePredicate, userPredicate))); 
 		} else {
 			return builder.disjunction();
 		}
 	}
 	
-	private Predicate getPredicate(CriteriaBuilder builder, Root<Issue> root, Collection<Long> projectIds) {
+	private Predicate buildPredicate(CriteriaBuilder builder, From<Issue, Issue> issue, Collection<Long> projectIds) {
 		Collection<Long> allIds = projectManager.getIds();
-		Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
+		Path<Project> projectPath = issue.get(Issue.PROP_PROJECT);
 		Path<Long> projectIdPath = projectPath.get(Project.PROP_ID);
 		if (SecurityUtils.isAdministrator()) {
 			return Criteria.forManyValues(builder, projectIdPath, projectIds, allIds);
@@ -416,7 +419,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				predicates.add(builder.and(
 						Criteria.forManyValues(
 								builder, projectIdPath, projectIdsWithoutConfidentialIssuePermission, allIds),
-						builder.equal(root.get(Issue.PROP_CONFIDENTIAL), false)));
+						builder.equal(issue.get(Issue.PROP_CONFIDENTIAL), false)));
 			}
 			return builder.or(predicates.toArray(new Predicate[0]));
 		}
@@ -813,22 +816,22 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		List<Predicate> predicates = new ArrayList<>();
 		
 		if (scope != null)
-			predicates.addAll(Arrays.asList(getPredicates(null, scope.getCriteria(), criteriaQuery, builder, root)));		
+			predicates.addAll(Arrays.asList(buildPredicates(null, scope.getCriteria(), criteriaQuery, builder, root)));		
 		
 		List<Predicate> projectPredicates = new ArrayList<>();
 		if (SecurityUtils.canAccessConfidentialIssues(project)) {
 			projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
 		} else { 
-			projectPredicates.add(getNonConfidentialPredicate(builder, root, project));
-			projectPredicates.add(getAuthorizationPredicate(criteriaQuery, builder, root, project));
+			projectPredicates.add(buildNonConfidentialPredicate(builder, root, project));
+			projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, project));
 		}
 		
 		for (Project forkParent: project.getForkParents()) {
 			if (SecurityUtils.canAccessConfidentialIssues(forkParent)) {
 				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
 			} else if (SecurityUtils.canAccess(forkParent)) {
-				projectPredicates.add(getNonConfidentialPredicate(builder, root, forkParent));
-				projectPredicates.add(getAuthorizationPredicate(criteriaQuery, builder, root, forkParent));
+				projectPredicates.add(buildNonConfidentialPredicate(builder, root, forkParent));
+				projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, forkParent));
 			}
 		}
 		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
@@ -849,7 +852,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		
 		if (scope != null && !scope.getSorts().isEmpty()) {
-			criteriaQuery.orderBy(getOrders(scope.getSorts(), builder, root));
+			criteriaQuery.orderBy(buildOrders(scope.getSorts(), builder, root));
 		} else {
 			criteriaQuery.orderBy(
 					builder.desc(root.get(Issue.PROP_PROJECT)), 
@@ -925,7 +928,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
 		criteriaQuery.where(builder.and(
-				getSubtreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
+				buildSubtreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -943,12 +946,12 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
 				.get(Issue.PROP_PROJECT);
 		
-		criteriaQuery.where(getSubtreePredicate(builder, projectPath, project));
+		criteriaQuery.where(buildSubtreePredicate(builder, projectPath, project));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
 	
-	private Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> projectPath, Project project) {
+	private Predicate buildSubtreePredicate(CriteriaBuilder builder, Path<Project> projectPath, Project project) {
 		Collection<Long> subtreeIds = projectManager.getSubtreeIds(project.getId());
 		Collection<Long> allIds = projectManager.getIds();
 		return Criteria.forManyValues(builder, projectPath.get(Project.PROP_ID), subtreeIds, allIds);
@@ -1126,7 +1129,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
 				.get(Issue.PROP_PROJECT);
 		criteriaQuery.where(builder.and(
-				getSubtreePredicate(builder, projectPath, project),
+				buildSubtreePredicate(builder, projectPath, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		for (IssueSchedule schedule: getSession().createQuery(criteriaQuery).getResultList()) 
@@ -1178,7 +1181,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 						builder.equal(root.get(Issue.PROP_CONFIDENTIAL), false),
 						root.get(Issue.PROP_PROJECT).in(projectsWithoutConfidentialIssuePermission)));
 			}
-			predicates.add(getAuthorizationPredicate(criteriaQuery, builder, root, projectIds));
+			predicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, projectIds));
 			
 			criteriaQuery.where(builder.or(predicates.toArray(new Predicate[0])));
 			criteriaQuery.orderBy(builder.asc(root.get(Issue.PROP_STATE_ORDINAL)));

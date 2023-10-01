@@ -558,13 +558,11 @@ onedev.server = {
 		},
 	},
 	util: {
-		formatWorkingPeriod: function(minutes) {
-			var weeks = Math.floor(minutes/(60*8*5));
-			minutes = minutes%(60*8*5);
-			var days = Math.floor(minutes/(60*8));
-			minutes = minutes%(60*8);
-			var hours = Math.floor(minutes/60);
-			minutes = minutes%60;
+		formatWorkingPeriod: function(hours) {
+			var weeks = Math.floor(hours/(8*5));
+			hours = hours%(8*5);
+			var days = Math.floor(hours/8);
+			hours = hours%8;
 			
 			var formatted = "";
 			if (weeks != 0)
@@ -573,12 +571,10 @@ onedev.server = {
 				formatted = formatted + days + "d ";
 			if (hours != 0)
 				formatted = formatted + hours + "h ";
-			if (minutes != 0)
-				formatted = formatted + minutes + "m";
 			
 			formatted = formatted.trim();
 			if (formatted.length == 0)
-				return "0m";
+				return "0h";
 			else
 				return formatted;
 		},

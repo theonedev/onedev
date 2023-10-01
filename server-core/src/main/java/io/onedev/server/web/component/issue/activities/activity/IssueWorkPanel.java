@@ -25,8 +25,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import java.time.ZoneId;
-
 import static io.onedev.server.util.DateUtils.formatDateTime;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
@@ -124,9 +122,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 				var work = getWork();
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
-				work.setDay(bean.getStartAt().toInstant()
-						.atZone(ZoneId.systemDefault())
-						.toLocalDate().toEpochDay());
+				work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 				work.setHours(bean.getSpentTime());
 				getWorkManager().update(work);
 				var detailViewer = newDetailViewer("detail");

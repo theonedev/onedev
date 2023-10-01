@@ -5,15 +5,15 @@
 			<div wicket:id="completion" class="flex-shrink-0 flex-grow-0 issue-query-progress mr-2 mt-1"></div>
 			<div class="flex-shrink-0 flex-grow-0">
 				<div class="mb-2 text-nowrap">
-					Total Estimated Time: <span wicket:id="estimatedTime"></span>
+					Overall Estimated Time: <span wicket:id="estimatedTime"></span>
 				</div>
 				<div class="text-nowrap">
-					Total Spent Time: <span wicket:id="spentTime"></span>
+					Overall Spent Time: <span wicket:id="spentTime"></span>
 				</div>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noQueryFrag">
-		<wicket:svg href="exclamation-circle" class="icon"/> No valid query to show progress		
+		<wicket:svg href="warning" class="icon"/> No valid query to show progress		
 	</wicket:fragment>
 </wicket:panel>

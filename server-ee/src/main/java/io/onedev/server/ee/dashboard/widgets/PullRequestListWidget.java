@@ -19,7 +19,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 
-@Editable(name="Pull Request List", order=300)
+@Editable(name="Pull request list", order=300)
 public class PullRequestListWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

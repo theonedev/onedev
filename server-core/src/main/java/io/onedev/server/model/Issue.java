@@ -666,7 +666,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	@Nullable
 	public Object getFieldValue(String fieldName) {
 		Input input = getFieldInputs().get(fieldName);
-		
 		if (input != null) 
 			return input.getTypedValue(getIssueSetting().getFieldSpec(fieldName));
 		else

@@ -1,19 +1,13 @@
 <wicket:extend>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="hasTimesheetsFrag">
-		<div class="head d-flex align-items-center flex-wrap">
-			<a wicket:id="timesheetChoice" class="btn btn-outline-secondary btn-hover-primary text-nowrap bg-white">
+		<div class="head d-flex align-items-center flex-wrap row-gap-2 mb-4">
+			<a wicket:id="timesheetChoice" class="btn btn-outline-secondary btn-hover-primary text-nowrap bg-white mr-4">
 				<wicket:svg href="work-log" class="icon mr-2"></wicket:svg>
 				<span wicket:id="name"></span>
 				<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
 			</a>
-			<div class="time-range text-nowrap ml-4">
-				<span class="btn-group">
-					<a wicket:id="prevMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white"><wicket:svg href="arrow" class="icon flip-x mr-1"></wicket:svg> Prev</a>
-					<a wicket:id="thisMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white"><wicket:svg href="calendar" class="icon mr-1"></wicket:svg><span wicket:id="label"></span></a>
-					<a wicket:id="nextMonthOrWeek" class="btn btn-outline-secondary btn-hover-primary bg-white">Next <wicket:svg href="arrow" class="icon ml-1"></wicket:svg></a>
-				</span>
-			</div>
+			<div wicket:id="dateRangeNav" class="date-range"></div>
 		</div>
 		<div wicket:id="body"></div>
 	</wicket:fragment>

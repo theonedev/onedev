@@ -51,7 +51,7 @@ public class SuggestionUtils {
 		
 		return sortAndTruncate(suggestions, matchWith);
 	}
-	
+
 	public static List<InputSuggestion> suggestLabels(String matchWith) {
 		var labelNames = OneDev.getInstance(LabelSpecManager.class).query().stream()
 				.map(it->it.getName())

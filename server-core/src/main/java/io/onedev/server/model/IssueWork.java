@@ -20,6 +20,8 @@ public class IssueWork extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_ISSUE = "issue";
+	
 	public static final String PROP_DATE = "date";
 	
 	public static final String PROP_DAY = "day";

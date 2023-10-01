@@ -2,14 +2,19 @@ package io.onedev.server.web.component.issue.progress;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.timetracking.LinkAggregation;
 import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.editablebean.IssueWorkBean;
@@ -21,12 +26,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import javax.annotation.Nullable;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-
-import static io.onedev.server.timetracking.LinkAggregation.Direction.BOTH;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
 abstract class IssueTimePanel extends Panel {
@@ -106,7 +105,35 @@ abstract class IssueTimePanel extends Panel {
 					}
 				};
 			}
-		}.setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				if (SecurityUtils.canScheduleIssues(getIssue().getProject())) {
+					setVisible(true);
+				} else if (SecurityUtils.getUser() == null) {
+					setVisible(false);
+				} else {
+					for (var field: getIssue().getFields()) {
+						var fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(field.getName());
+						if (fieldSpec instanceof UserChoiceField && ((UserChoiceField) fieldSpec).isEditEstimatedTime()) {
+							if (SecurityUtils.getUser().getName().equals(field.getValue())) {
+								setVisible(true);
+								return;
+							}
+						} else if (fieldSpec instanceof GroupChoiceField && ((GroupChoiceField) fieldSpec).isEditEstimatedTime()) {
+							for (var group : SecurityUtils.getUser().getGroups()) {
+								if (group.getName().equals(field.getValue())) {
+									setVisible(true);
+									return;
+								}
+							}
+						}
+					}
+					setVisible(false);
+				}
+			}
+		};
 	}
 	
 	private Component newSpentTimeAddLink(String componentId) {
@@ -124,9 +151,7 @@ abstract class IssueTimePanel extends Panel {
 						work.setUser(SecurityUtils.getUser());
 						work.setHours(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
-						work.setDay(bean.getStartAt().toInstant()
-								.atZone(ZoneId.systemDefault())
-								.toLocalDate().toEpochDay());
+						work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 						work.setNote(bean.getNote());
 						OneDev.getInstance(IssueWorkManager.class).create(work);
 						notifyObservablesChange(target);
@@ -140,15 +165,7 @@ abstract class IssueTimePanel extends Panel {
 				};
 			}
 
-		}.setVisible(SecurityUtils.canLogWorks(getIssue().getProject()));
-	}
-	
-	@Nullable
-	private LinkAggregation getLinkAggregation(@Nullable String aggregationLink) {
-		LinkAggregation linkAggregation = null;
-		if (aggregationLink != null)
-			linkAggregation = new LinkAggregation(aggregationLink, BOTH);
-		return linkAggregation;
+		}.setVisible(SecurityUtils.getUser() != null);
 	}
 	
 	private TimeTrackingManager getTimeTrackingManager() {

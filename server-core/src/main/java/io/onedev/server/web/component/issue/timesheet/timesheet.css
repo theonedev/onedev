@@ -1,0 +1,9 @@
+.timesheet.table>thead>tr>th {
+	font-size: 0.9rem;
+}
+.timesheet.table .weekend {
+	background: #F8F8FC;
+}
+.dark-mode .timesheet.table .weekend {
+	background: #262638;
+}

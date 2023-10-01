@@ -79,7 +79,7 @@ public class ReferenceParserTest extends AppLoaderMocker {
 		parser = new ReferenceParser(Issue.class) {
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-				return "<a href='" + referenceable.getFQN() + "'>" + referenceText + "</a>";
+				return "<a href='" + referenceable + "'>" + referenceText + "</a>";
 			}
 		};
 		issueNumbers = parser.parseReferences(doc, project1);

@@ -8,7 +8,7 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 
-@Editable(name="Project List", order=100)
+@Editable(name="Project list", order=100)
 public class ProjectListWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

@@ -19,7 +19,7 @@ import io.onedev.server.model.support.Widget;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 
-@Editable(order=110, name="Project Overview")
+@Editable(order=110, name="Project overview")
 public class ProjectOverviewWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

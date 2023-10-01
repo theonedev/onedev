@@ -11,7 +11,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
-import io.onedev.server.util.Day;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
@@ -24,11 +23,14 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import java.time.LocalDate;
 import java.util.*;
 
+import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.util.stream.Collectors.toList;
 
 public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
@@ -58,17 +60,10 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 		String message = null;
 		if (getMilestone().getStartDate() != null && getMilestone().getDueDate() != null) {
 			if (getMilestone().getStartDate().before(getMilestone().getDueDate())) {
-				int currentDay = new Day(getMilestone().getStartDate()).getValue();
-				int toDay = new Day(getMilestone().getDueDate()).getValue();
-				
-				int dayCount = 0;
-				while (currentDay <= toDay) {
-					currentDay = new Day(new Day(currentDay).getDate().plusDays(1)).getValue();
-					if (++dayCount > MAX_DAYS) {
-						message = "Milestone spans too long to show burndown chart";						
-						break;
-					}
-				}
+				long startDay = toLocalDate(getMilestone().getStartDate()).toEpochDay();
+				long dueDay = toLocalDate(getMilestone().getDueDate()).toEpochDay();
+				if (dueDay - startDay >= MAX_DAYS) 
+					message = "Milestone spans too long to show burndown chart";						
 			} else {
 				message = "Milestone start date should be before due date";
 			}
@@ -139,7 +134,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 				
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(fragment.get("chart"));
+					target.add(fragment);
 				}
 				
 			});
@@ -149,28 +144,30 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			
 			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<>() {
 
-				private String getXAxisValue(Day day) {
-					return String.format("%02d-%02d", day.getMonthOfYear() + 1, day.getDayOfMonth());
+				private String getXAxisValue(LocalDate date) {
+					return String.format("%02d-%02d", date.getMonthValue(), date.getDayOfMonth());
 				}
 
 				@Override
 				protected LineSeries load() {
-					int startDayValue = new Day(getMilestone().getStartDate()).getValue();
-					int dueDayValue = new Day(getMilestone().getDueDate()).getValue();
+					long startDay = toLocalDate(getMilestone().getStartDate()).toEpochDay();					
+					long dueDay = toLocalDate(getMilestone().getDueDate()).toEpochDay();
 
-					Map<Integer, Map<String, Integer>> dailyStateMetrics = new LinkedHashMap<>();
+					Map<Long, Map<String, Integer>> dailyStateMetrics = new LinkedHashMap<>();
 					for (IssueSchedule schedule : getMilestone().getSchedules()) {
 						Issue issue = schedule.getIssue();
-						int scheduleDayValue = new Day(schedule.getDate()).getValue();
+						long scheduleDay = toLocalDate(schedule.getDate()).toEpochDay();
 
-						Map<Integer, Integer> dailyMetrics = new HashMap<>();
+						Map<Long, Integer> dailyMetrics = new HashMap<>();
 						var issueInfoManager = OneDev.getInstance(IssueInfoManager.class);
-						var fromDayValue = Math.max(startDayValue, scheduleDayValue);
-						var dailyStates = issueInfoManager.getDailyStates(issue, fromDayValue, dueDayValue);
+						var fromDay = Math.max(startDay, scheduleDay);
+						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, dueDay);
 						if (getField().equals(FIELD_REMAINING_TIME)) {
 							var estimatedTime = issue.getOwnEstimatedTime();
-							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDayValue, dueDayValue).entrySet()) 
-								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
+							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, dueDay).entrySet()) {
+								if (entry.getValue() != null)
+									dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
+							}
 						} else {
 							int metric = getFieldValue(issue);
 							for (var entry: dailyStates.entrySet())
@@ -189,23 +186,23 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 					}
 
 					List<String> xAxisValues = new ArrayList<>();
-					for (Integer dayValue : dailyStateMetrics.keySet())
-						xAxisValues.add(getXAxisValue(new Day(dayValue)));
+					for (Long day : dailyStateMetrics.keySet())
+						xAxisValues.add(getXAxisValue(LocalDate.ofEpochDay(day)));
 
 					List<Line> lines = new ArrayList<>();
 
 					int initialIssueMetric = 0;
-					int todayValue = new Day(new Date()).getValue();
+					long today = LocalDate.now().toEpochDay();
 					for (StateSpec spec : OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
 						Map<String, Integer> yAxisValues = new HashMap<>();
-						for (Map.Entry<Integer, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
-							if (entry.getKey() <= todayValue) {
-								Day day = new Day(entry.getKey());
+						for (Map.Entry<Long, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
+							if (entry.getKey() <= today) {
+								var date = LocalDate.ofEpochDay(entry.getKey());
 								int metric = entry.getValue().getOrDefault(spec.getName(), 0);
-								yAxisValues.put(getXAxisValue(day), metric);
+								yAxisValues.put(getXAxisValue(date), metric);
 							}
 						}
-						Integer stateMetric = yAxisValues.get(getXAxisValue(new Day(startDayValue)));
+						Integer stateMetric = yAxisValues.get(getXAxisValue(LocalDate.ofEpochDay(startDay)));
 						if (stateMetric == null)
 							stateMetric = 0;
 						initialIssueMetric += stateMetric;
@@ -238,8 +235,27 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 					return new LineSeries(null, xAxisValues, lines, yAxisValueFormatter, null, null);
 				}
 
-			}).setOutputMarkupId(true));
+			}));
+
+			var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting()
+					.getTimeTrackingSetting().getAggregationLink();
+			fragment.add(new Label("message", new AbstractReadOnlyModel<String>() {
+				@Override
+				public String getObject() {
+					if (aggregationLink != null && (getField().equals(FIELD_ESTIMATED_TIME) || getField().equals(FIELD_REMAINING_TIME)))
+						return"To avoid duplication, estimated/remaining time showing here does not include those aggregated from '" + aggregationLink + "'";
+					else
+						return null;
+				}
+			}) {
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(getDefaultModelObject() != null);
+				}
+			});
 			
+			fragment.setOutputMarkupId(true);
 			add(fragment);
 		}
 	}

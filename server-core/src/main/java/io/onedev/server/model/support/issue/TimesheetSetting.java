@@ -2,12 +2,14 @@ package io.onedev.server.model.support.issue;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.annotation.RadioChoice;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
@@ -19,7 +21,7 @@ public class TimesheetSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum TimeRangeType {MONTH, WEEK};
+	public enum DateRangeType {MONTH, WEEK};
 	
 	public enum RowType {ISSUES, USERS};
 	
@@ -27,7 +29,7 @@ public class TimesheetSetting implements Serializable {
 	
 	private String issueQuery;
 	
-	private TimeRangeType timeRangeType = TimeRangeType.MONTH;
+	private DateRangeType dateRangeType = DateRangeType.MONTH;
 	
 	private String groupBy = NAME_PROJECT;
 
@@ -55,17 +57,16 @@ public class TimesheetSetting implements Serializable {
 	@Editable(order=200, name="Time Range")
 	@RadioChoice
 	@NotNull
-	public TimeRangeType getTimeRangeType() {
-		return timeRangeType;
+	public TimesheetSetting.DateRangeType getDateRangeType() {
+		return dateRangeType;
 	}
 
-	public void setTimeRangeType(TimeRangeType timeRangeType) {
-		this.timeRangeType = timeRangeType;
+	public void setDateRangeType(DateRangeType dateRangeType) {
+		this.dateRangeType = dateRangeType;
 	}
 
-	@Editable(order=400, name="Group By")
+	@Editable(order=400, name="Group By", placeholder = "No group by")
 	@ChoiceProvider("getGroupByChoices")
-	@NotEmpty
 	public String getGroupBy() {
 		return groupBy;
 	}

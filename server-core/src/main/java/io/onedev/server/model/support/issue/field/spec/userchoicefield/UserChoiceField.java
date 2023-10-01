@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.issue.field.spec.userchoicefield;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
@@ -28,6 +30,8 @@ public class UserChoiceField extends FieldSpec {
 	private DefaultValueProvider defaultValueProvider;
 	
 	private DefaultMultiValueProvider defaultMultiValueProvider;
+	
+	private boolean editEstimatedTime = true;
 	
 	@Editable(order=1000, name="Available Choices")
 	@NotNull(message="may not be empty")
@@ -71,7 +75,22 @@ public class UserChoiceField extends FieldSpec {
 	private static boolean isDefaultMultiValueProviderVisible() {
 		return EditContext.get().getInputValue("allowMultiple").equals(true);
 	}
+
+	@Editable(order=1200, name="Can Edit Estimated Time", description = "If ticked, group indicated by this " +
+			"field will be able to edit estimated time of corresponding issues if time tracking is enabled")
+	@ShowCondition("isSubscriptionActive")
+	public boolean isEditEstimatedTime() {
+		return editEstimatedTime;
+	}
+
+	public void setEditEstimatedTime(boolean editEstimatedTime) {
+		this.editEstimatedTime = editEstimatedTime;
+	}
 	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+	}
+
 	@Override
 	public List<String> getPossibleValues() {
 		return UserChoiceInput.getPossibleValues();

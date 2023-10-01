@@ -2,7 +2,6 @@ package io.onedev.server.web.behavior;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -36,8 +35,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -93,24 +91,40 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
+					private Map<String, String> getFieldCandidates(Collection<String> fields) {
+						Map<String, String> candidates = new LinkedHashMap<>();
+						for (var field: fields) {
+							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME))
+									&& issueSetting.getTimeTrackingSetting().getAggregationLink() != null) {
+								if (field.equals(NAME_ESTIMATED_TIME))
+									candidates.put(field, "Total estimated time");
+								else
+									candidates.put(field, "Total spent time");
+							} else {
+								candidates.put(field, null);
+							}
+						}
+						return candidates;
+					}
+					
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.QUERY_FIELDS);
+							Map<String, String> candidates = getFieldCandidates(QUERY_FIELDS);
 							if (!option.withProjectCriteria())
 								candidates.remove(NAME_PROJECT);
 							if (!option.withStateCriteria())
 								candidates.remove(NAME_STATE);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
-								candidates.add(field.getName());
+								candidates.put(field.getName(), null);
 							if (project != null && !project.isTimeTracking()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
+							Map<String, String> candidates = getFieldCandidates(ORDER_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
 							if (project != null && !project.isTimeTracking()) {
@@ -121,7 +135,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
 										|| field instanceof DateField || field instanceof DateTimeField 
 										|| field instanceof MilestoneChoiceField) { 
-									candidates.add(field.getName());
+									candidates.put(field.getName(), null);
 								}
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);

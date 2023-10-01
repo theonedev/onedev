@@ -5,6 +5,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.util.*;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -13,6 +14,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,12 @@ public interface IssueManager extends EntityManager<Issue> {
 	void resetNextNumber(Project numberScope);
 	
 	List<Issue> queryPinned(Project project);
+
+	Predicate[] buildPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria,
+								CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue);
+
+	List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
+													   From<Issue, Issue> issue);
 	
 	List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
 			boolean loadFieldsAndLinks, int firstResult, int maxResults);

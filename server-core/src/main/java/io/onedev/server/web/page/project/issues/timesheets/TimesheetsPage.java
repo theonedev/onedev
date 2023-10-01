@@ -11,6 +11,7 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.timesheet.DateRangeNavigator;
 import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -39,8 +40,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
-
-import static io.onedev.server.model.support.issue.TimesheetSetting.TimeRangeType.WEEK;
 
 public class TimesheetsPage extends ProjectIssuesPage {
 	
@@ -143,6 +142,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 								protected void onSave(AjaxRequestTarget target, ModalPanel modal, String name, TimesheetSetting setting) {
 									state.timesheetName = name;
 									target.add(fragment);
+									resizeWindow(target);
 									modal.close();
 									CharSequence url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
 									pushState(target, url.toString(), state);
@@ -215,62 +215,24 @@ public class TimesheetsPage extends ProjectIssuesPage {
 					return choiceFragment;
 				}
 			});
-			fragment.add(new AjaxLink<Void>("prevMonthOrWeek") {
+			fragment.add(new DateRangeNavigator("dateRangeNav") {
 
 				@Override
-				public void onClick(AjaxRequestTarget target) {
-					var baseDate = state.baseDate;
-					if (baseDate == null)
-						baseDate = LocalDate.now();
-					if (getTimesheetSetting().getTimeRangeType() == WEEK) 
-						state.baseDate = baseDate.minusWeeks(1);
-					else
-						state.baseDate = baseDate.minusMonths(1);
+				protected LocalDate getBaseDate() {
+					return state.baseDate;
+				}
+
+				@Override
+				protected void onBaseDateUpdate(AjaxRequestTarget target, LocalDate baseDate) {
+					state.baseDate = baseDate;
 					target.add(body);
-					
 					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
 					pushState(target, url.toString(), state);
 				}
-			});
-			fragment.add(new AjaxLink<Void>("thisMonthOrWeek") {
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					add(new Label("label", new AbstractReadOnlyModel<String>() {
-						@Override
-						public String getObject() {
-							if (getTimesheetSetting().getTimeRangeType() == WEEK)
-								return "This Week";
-							else
-								return "This Month";
-						}
-					}));
-				}
 
 				@Override
-				public void onClick(AjaxRequestTarget target) {
-					state.baseDate = null;
-					target.add(body);
-					
-					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
-					pushState(target, url.toString(), state);	
-				}
-			});
-			fragment.add(new AjaxLink<Void>("nextMonthOrWeek") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					var baseDate = state.baseDate;
-					if (baseDate == null)
-						baseDate = LocalDate.now();
-					if (getTimesheetSetting().getTimeRangeType() == WEEK)
-						state.baseDate = baseDate.plusWeeks(1);
-					else
-						state.baseDate = baseDate.plusMonths(1);
-					target.add(body);
-					
-					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
-					pushState(target, url.toString(), state);
+				protected TimesheetSetting getTimesheetSetting() {
+					return TimesheetsPage.this.getTimesheetSetting();
 				}
 			});
 			fragment.add(body = new TimesheetPanel("body") {
@@ -290,7 +252,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 					return state.baseDate != null? state.baseDate: LocalDate.now();
 				}
 				
-			}.setOutputMarkupId(true));
+			});
 			
 			fragment.setOutputMarkupId(true);
 			add(fragment);

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Editable(order=210, name="Milestone List")
+@Editable(order=210, name="Milestone list")
 public class MilestoneListWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;

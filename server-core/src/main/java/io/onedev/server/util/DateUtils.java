@@ -11,6 +11,8 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import javax.annotation.Nullable;
 import javax.validation.ValidationException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -92,6 +94,10 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 			hours += Integer.parseInt(StringUtils.stripEnd(matcher.group(3), "h"));
 		
 		return hours;
+	}
+	
+	public static LocalDate toLocalDate(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 	
 	public static String formatWorkingPeriod(int hours) {

@@ -18,7 +18,6 @@ import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueOwnSpentTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.Day;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -40,13 +39,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
 		implements IssueInfoManager, Serializable {
 
-	private static final int INFO_VERSION = 1;
+	private static final int INFO_VERSION = 2;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -145,8 +145,8 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 				if (state != null) {
 					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 					byte[] bytes = Preconditions.checkNotNull(readBytes(stateHistoryStore, txn, issueKey));
-					Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
-					stateHistory.put(new Day(change.getDate()).getValue(), state);
+					Map<Long, String> stateHistory = (Map<Long, String>) SerializationUtils.deserialize(bytes);
+					stateHistory.put(toLocalDate(change.getDate()).toEpochDay(), state);
 					stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
 				}
 
@@ -155,8 +155,8 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 					int spentTime = changeData.getNewValue();
 					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 					byte[] bytes = Preconditions.checkNotNull(readBytes(spentTimeHistoryStore, txn, issueKey));
-					Map<Integer, Integer> spentTimeHistory = (Map<Integer, Integer>) SerializationUtils.deserialize(bytes);
-					spentTimeHistory.put(new Day(change.getDate()).getValue(), spentTime);
+					Map<Long, Integer> spentTimeHistory = (Map<Long, Integer>) SerializationUtils.deserialize(bytes);
+					spentTimeHistory.put(toLocalDate(change.getDate()).toEpochDay(), spentTime);
 					spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
 				}
 				
@@ -175,9 +175,8 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 		byte[] bytes = readBytes(stateHistoryStore, txn, issueKey);
 		if (bytes == null) {
-			Map<Integer, String> stateHistory = new LinkedHashMap<>(); 
-			Day day = new Day(issue.getSubmitDate());
-			stateHistory.put(day.getValue(), issue.getState());
+			Map<Long, String> stateHistory = new LinkedHashMap<>(); 
+			stateHistory.put(toLocalDate(issue.getSubmitDate()).toEpochDay(), issue.getState());
 			stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
 		}
 	}
@@ -186,9 +185,8 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 		byte[] bytes = readBytes(spentTimeHistoryStore, txn, issueKey);
 		if (bytes == null) {
-			Map<Integer, Integer> spentTimeHistory = new LinkedHashMap<>();
-			Day day = new Day(issue.getSubmitDate());
-			spentTimeHistory.put(day.getValue(), issue.getOwnSpentTime());
+			Map<Long, Integer> spentTimeHistory = new LinkedHashMap<>();
+			spentTimeHistory.put(toLocalDate(issue.getSubmitDate()).toEpochDay(), issue.getOwnSpentTime());
 			spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
 		}
 	}
@@ -297,7 +295,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		return INFO_VERSION;
 	}
 
-	private <T> Map<Integer, T> getDailyMetrics(Issue issue, String metricStore, Integer fromDay, Integer toDay) {
+	private <T> Map<Long, T> getDailyMetrics(Issue issue, String metricStore, Long fromDay, Long toDay) {
 		Long projectId = issue.getProject().getId();
 		Long issueId = issue.getId();
 
@@ -306,15 +304,15 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Map<Integer, T> call() {
+			public Map<Long, T> call() {
 				Environment env = getEnv(projectId.toString());
 				Store metricHistoryStore = getStore(env, metricStore);
 
 				return env.computeInTransaction(txn -> {
-					Map<Integer, T> dailyMetrics = new LinkedHashMap<>();
+					Map<Long, T> dailyMetrics = new LinkedHashMap<>();
 					byte[] bytes = readBytes(metricHistoryStore, txn, new LongByteIterable(issueId));
 					if (bytes != null) {
-						var metricHistory = (Map<Integer, T>) SerializationUtils.deserialize(bytes);
+						var metricHistory = (Map<Long, T>) SerializationUtils.deserialize(bytes);
 						T currentMetric = null;
 						for (var entry : metricHistory.entrySet()) {
 							if (entry.getKey() <= fromDay)
@@ -323,13 +321,13 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 								break;
 						}
 
-						int currentDay = fromDay;
+						long currentDay = fromDay;
 						while (currentDay <= toDay) {
 							T metricOnDay = metricHistory.get(currentDay);
 							if (metricOnDay != null)
 								currentMetric = metricOnDay;
 							dailyMetrics.put(currentDay, currentMetric);
-							currentDay = new Day(new Day(currentDay).getDate().plusDays(1)).getValue();
+							currentDay++;
 						}
 					}
 
@@ -342,12 +340,12 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	@Sessional
 	@Override
-	public Map<Integer, String> getDailyStates(Issue issue, Integer fromDay, Integer toDay) {
+	public Map<Long, String> getDailyStates(Issue issue, Long fromDay, Long toDay) {
 		return getDailyMetrics(issue, STATE_HISTORY_STORE, fromDay, toDay);
 	}
 
 	@Override
-	public Map<Integer, Integer> getDailySpentTimes(Issue issue, Integer fromDay, Integer toDay) {
+	public Map<Long, Integer> getDailySpentTimes(Issue issue, Long fromDay, Long toDay) {
 		return getDailyMetrics(issue, SPENT_TIME_HISTORY_STORE, fromDay, toDay);
 	}
 

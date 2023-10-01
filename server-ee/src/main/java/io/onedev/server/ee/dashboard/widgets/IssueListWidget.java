@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Editable(name="Issue List", order=200)
+@Editable(name="Issue list", order=200)
 public class IssueListWidget extends Widget {
 
 	private static final long serialVersionUID = 1L;
