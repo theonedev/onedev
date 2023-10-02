@@ -61,10 +61,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -606,7 +603,9 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
-				if (getProject() != null && getProject().isTimeTracking() && SecurityUtils.canManageIssues(getProject())) {
+				if (getProject() != null && getProject().isTimeTracking() 
+						&& SecurityUtils.canManageIssues(getProject()) 
+						&& WicketUtils.isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -1011,7 +1010,9 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
-				if (getProject() != null && getProject().isTimeTracking() && SecurityUtils.canManageIssues(getProject())) {
+				if (getProject() != null && getProject().isTimeTracking() 
+						&& SecurityUtils.canManageIssues(getProject())
+						&& WicketUtils.isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -1397,7 +1398,7 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		
-		if (getProject() != null && getProject().isTimeTracking()) {
+		if (getProject() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {

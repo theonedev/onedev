@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.timesheets;
+package io.onedev.server.ee.timetracking;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
@@ -11,9 +11,6 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.issue.timesheet.DateRangeNavigator;
-import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
-import io.onedev.server.web.component.issue.timesheet.TimesheetXlsxResource;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -59,6 +56,9 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	
 	public TimesheetsPage(PageParameters params) {
 		super(params);
+		
+		if (!isSubscriptionActive())
+			throw new UnsupportedOperationException();
 		
 		timesheetSettings = getProject().getIssueSetting().getTimesheetSettings();
 		hierarchyTimesheetSettings = getProject().getHierarchyTimesheetSettings();

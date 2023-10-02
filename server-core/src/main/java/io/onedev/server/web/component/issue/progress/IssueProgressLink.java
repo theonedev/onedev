@@ -6,6 +6,7 @@ import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CompletionRatioBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 
@@ -49,7 +50,7 @@ public abstract class IssueProgressLink extends DropdownLink {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(getIssue().getProject().isTimeTracking());
+		setVisible(getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive());
 	}
 
 	@Override

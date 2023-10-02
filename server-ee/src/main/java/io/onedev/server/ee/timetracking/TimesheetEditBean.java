@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.timesheets;
+package io.onedev.server.ee.timetracking;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.issue.TimesheetSetting;

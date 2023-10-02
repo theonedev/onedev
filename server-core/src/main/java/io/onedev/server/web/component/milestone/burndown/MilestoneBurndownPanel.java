@@ -15,6 +15,7 @@ import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -77,7 +78,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			Fragment fragment = new Fragment("content", "chartFrag", this);
 
 			var choices = new ArrayList<String>();
-			if (getMilestone().getProject().isTimeTracking()) {
+			if (getMilestone().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 				choices.add(FIELD_REMAINING_TIME);
 				choices.add(FIELD_ESTIMATED_TIME);
 			}
@@ -164,10 +165,8 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, dueDay);
 						if (getField().equals(FIELD_REMAINING_TIME)) {
 							var estimatedTime = issue.getOwnEstimatedTime();
-							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, dueDay).entrySet()) {
-								if (entry.getValue() != null)
-									dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
-							}
+							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, dueDay).entrySet()) 
+								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
 						} else {
 							int metric = getFieldValue(issue);
 							for (var entry: dailyStates.entrySet())
@@ -263,7 +262,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 	private String getField() {
 		if (field != null)
 			return field;
-		else if (getMilestone().getProject().isTimeTracking())
+		else if (getMilestone().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive())
 			return FIELD_REMAINING_TIME;
 		else
 			return FIELD_COUNT;

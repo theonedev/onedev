@@ -10,6 +10,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
 import io.onedev.server.annotation.ProjectName;
@@ -908,7 +909,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	@Editable(order=350)
-	@ShowCondition("isIssueManagementEnabled")
+	@ShowCondition("isSubscriptionActiveAndIssueManagementEnabled")
 	public boolean isTimeTracking() {
 		return timeTracking;
 	}
@@ -919,6 +920,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	private static boolean isIssueManagementEnabled() {
 		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
+	}
+
+	private static boolean isSubscriptionActiveAndIssueManagementEnabled() {
+		return isIssueManagementEnabled() && OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	@Nullable

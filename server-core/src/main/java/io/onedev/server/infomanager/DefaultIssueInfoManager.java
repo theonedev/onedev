@@ -346,7 +346,12 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public Map<Long, Integer> getDailySpentTimes(Issue issue, Long fromDay, Long toDay) {
-		return getDailyMetrics(issue, SPENT_TIME_HISTORY_STORE, fromDay, toDay);
+		Map<Long, Integer> dailySpentTimes = getDailyMetrics(issue, SPENT_TIME_HISTORY_STORE, fromDay, toDay);
+		for (var entry: dailySpentTimes.entrySet()) {
+			if (entry.getValue() == null)
+				entry.setValue(0);
+		}
+		return dailySpentTimes;
 	}
 
 }

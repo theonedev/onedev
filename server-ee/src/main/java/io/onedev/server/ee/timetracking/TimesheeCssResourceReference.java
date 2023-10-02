@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.timesheet;
+package io.onedev.server.ee.timetracking;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 

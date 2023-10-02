@@ -223,8 +223,10 @@ public abstract class LayoutPage extends BasePage {
 							DefaultBoardListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links",
 							LinkSpecListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Time Tracking",
-							TimeTrackingSettingPage.class, new PageParameters()));
+					if (isSubscriptionActive()) {
+						issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Time Tracking",
+								TimeTrackingSettingPage.class, new PageParameters()));
+					}
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates",
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",

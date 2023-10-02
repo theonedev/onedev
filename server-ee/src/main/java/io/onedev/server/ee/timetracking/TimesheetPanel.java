@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.timesheet;
+package io.onedev.server.ee.timetracking;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;

@@ -22,6 +22,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -134,7 +135,7 @@ abstract class BacklogColumnPanel extends Panel {
 			
 		});
 
-		if (getQuery() != null && getProject().isTimeTracking()) {
+		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {

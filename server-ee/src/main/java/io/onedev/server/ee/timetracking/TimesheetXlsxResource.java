@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.timesheet;
+package io.onedev.server.ee.timetracking;
 
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;

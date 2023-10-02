@@ -1,6 +1,8 @@
 package io.onedev.server.timetracking;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.page.layout.SidebarMenuItem;
 
 import java.util.Collection;
 
@@ -15,5 +17,7 @@ public interface TimeTrackingManager {
 	int aggregateSourceLinkSpentTime(Issue issue, String linkName);
 
 	int aggregateTargetLinkSpentTime(Issue issue, String linkName);
+
+	SidebarMenuItem.Page newTimesheetsMenuItem(Project project);
 	
 }

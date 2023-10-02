@@ -9,6 +9,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
@@ -44,7 +45,6 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
-import io.onedev.server.web.page.project.issues.timesheets.TimesheetsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -222,10 +222,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "Milestones", 
 					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
 					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
-			if (getProject().isTimeTracking()) {
-				issueMenuItems.add(new SidebarMenuItem.Page(null, "Timesheets",
-						TimesheetsPage.class, TimesheetsPage.paramsOf(getProject(), null, null)));
-			}
+			if (getProject().isTimeTracking() && isSubscriptionActive()) 
+				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
 		

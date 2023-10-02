@@ -97,7 +97,6 @@ import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.*;
-import io.onedev.server.web.page.project.issues.timesheets.TimesheetsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -351,8 +350,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~milestones/${milestone}/burndown", MilestoneBurndownPage.class));
 		add(new ProjectPageMapper("${project}/~milestones/${milestone}/edit", MilestoneEditPage.class));
 		add(new ProjectPageMapper("${project}/~milestones/new", NewMilestonePage.class));
-		add(new ProjectPageMapper("${project}/~timesheets", TimesheetsPage.class));
-		add(new ProjectPageMapper("${project}/~timesheets/${timesheet}", TimesheetsPage.class));
 		
 		add(new ProjectPageMapper("${project}/~builds", ProjectBuildsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}", BuildDashboardPage.class));

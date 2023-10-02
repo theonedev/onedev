@@ -1,7 +1,8 @@
-package io.onedev.server.timetracking;
+package io.onedev.server.ee.timetracking;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -11,10 +12,13 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWork;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueOwnEstimatedTimeChangeData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.web.page.layout.SidebarMenuItem;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -37,64 +41,71 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 	
 	private final IssueChangeManager issueChangeManager;
 	
+	private final SubscriptionManager subscriptionManager;
+	
 	@Inject
 	public DefaultTimeTrackingManager(SettingManager settingManager, TransactionManager transactionManager, 
 									  IssueManager issueManager, IssueChangeManager issueChangeManager, 
-									  ExecutorService executorService) {
+									  ExecutorService executorService, SubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.executorService = executorService;
+		this.subscriptionManager = subscriptionManager;
 	}
 
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Issue) {
-			Issue issue = (Issue) event.getEntity();
-			var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
-			String aggregationLink;
-			if (issue.getProject().isTimeTracking()
-					&& (aggregationLink = timeTrackingSetting.getAggregationLink()) != null) {
-				var affectedIssueIds = new HashSet<Long>();
-				for (var issueLink: issue.getTargetLinks()) {
-					if (issueLink.getSpec().getOpposite() != null 
-							&& issueLink.getSpec().getOpposite().getName().equals(aggregationLink)) {
-						affectedIssueIds.add(issueLink.getTarget().getId());
+		if (subscriptionManager.isSubscriptionActive()) {
+			if (event.getEntity() instanceof Issue) {
+				Issue issue = (Issue) event.getEntity();
+				var timeTrackingSetting = settingManager.getIssueSetting().getTimeTrackingSetting();
+				String aggregationLink;
+				if (issue.getProject().isTimeTracking()
+						&& (aggregationLink = timeTrackingSetting.getAggregationLink()) != null) {
+					var affectedIssueIds = new HashSet<Long>();
+					for (var issueLink : issue.getTargetLinks()) {
+						if (issueLink.getSpec().getOpposite() != null
+								&& issueLink.getSpec().getOpposite().getName().equals(aggregationLink)) {
+							affectedIssueIds.add(issueLink.getTarget().getId());
+						}
 					}
+					for (var issueLink : issue.getSourceLinks()) {
+						if (issueLink.getSpec().getName().equals(aggregationLink))
+							affectedIssueIds.add(issueLink.getSource().getId());
+					}
+					requestToSyncTimes(affectedIssueIds, true);
 				}
-				for (var issueLink: issue.getSourceLinks()) {
-					if (issueLink.getSpec().getName().equals(aggregationLink))
-						affectedIssueIds.add(issueLink.getSource().getId());
-				}
-				requestToSyncTimes(affectedIssueIds, true);
+			} else if (event.getEntity() instanceof IssueWork) {
+				var issue = ((IssueWork) event.getEntity()).getIssue();
+				if (issue.getProject().isTimeTracking())
+					requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
 			}
-		} else if (event.getEntity() instanceof IssueWork) {
-			var issue = ((IssueWork) event.getEntity()).getIssue();
-			if (issue.getProject().isTimeTracking()) 
-				requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
 		}
 	}
 	
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof IssueWork) {
-			var issue = ((IssueWork) event.getEntity()).getIssue();
-			if (issue.getProject().isTimeTracking())
-				requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
-		} else if (event.getEntity() instanceof IssueChange) {
-			IssueChange change = (IssueChange) event.getEntity();
-			var issue = change.getIssue();
-			if (issue.getProject().isTimeTracking()) {
-				if (change.getData() instanceof IssueOwnEstimatedTimeChangeData) {
+		if (subscriptionManager.isSubscriptionActive()) {
+			if (event.getEntity() instanceof IssueWork) {
+				var issue = ((IssueWork) event.getEntity()).getIssue();
+				if (issue.getProject().isTimeTracking())
 					requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
-				} else if (change.getData() instanceof IssueLinkChangeData) {
-					IssueLinkChangeData changeData = (IssueLinkChangeData) change.getData();
-					var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
-					if (changeData.getLinkName().equals(aggregationLink)) 
+			} else if (event.getEntity() instanceof IssueChange) {
+				IssueChange change = (IssueChange) event.getEntity();
+				var issue = change.getIssue();
+				if (issue.getProject().isTimeTracking()) {
+					if (change.getData() instanceof IssueOwnEstimatedTimeChangeData) {
 						requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+					} else if (change.getData() instanceof IssueLinkChangeData) {
+						IssueLinkChangeData changeData = (IssueLinkChangeData) change.getData();
+						var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
+						if (changeData.getLinkName().equals(aggregationLink))
+							requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+					}
 				}
 			}
 		}
@@ -203,4 +214,8 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 		return totalTime;
 	}
 
+	public SidebarMenuItem.Page newTimesheetsMenuItem(Project project) {
+		return new SidebarMenuItem.Page(null, "Timesheets",
+				TimesheetsPage.class, TimesheetsPage.paramsOf(project, null, null));
+	}	
 }

@@ -17,11 +17,16 @@ import io.onedev.server.ee.subscription.DefaultSubscriptionManager;
 import io.onedev.server.ee.subscription.SubscriptionManagementPage;
 import io.onedev.server.ee.terminal.BuildTerminalPage;
 import io.onedev.server.ee.terminal.DefaultTerminalManager;
+import io.onedev.server.ee.timetracking.DefaultTimeTrackingManager;
+import io.onedev.server.ee.timetracking.TimesheetsPage;
 import io.onedev.server.ee.xsearch.*;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.terminal.TerminalManager;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.BasePageMapper;
+import io.onedev.server.web.mapper.ProjectPageMapper;
+import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.layout.*;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -46,6 +51,7 @@ public class EEModule extends AbstractPluginModule {
 		bind(CodeSearchManager.class).to(DefaultCodeSearchManager.class);
 		bind(CodeIndexManager.class).to(DefaultCodeIndexManager.class);
 		bind(SubscriptionManager.class).to(DefaultSubscriptionManager.class);
+		bind(TimeTrackingManager.class).to(DefaultTimeTrackingManager.class);
 		bind(CodeIndexStatusChangedBroadcaster.class);
 		bind(MainMenuCustomization.class).to(DefaultMainMenuCustomization.class);
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
@@ -74,6 +80,8 @@ public class EEModule extends AbstractPluginModule {
 			application.mount(new BasePageMapper("~code-search/files", FileSearchPage.class));
 			application.mount(new BasePageMapper("~administration/cluster", ClusterManagementPage.class));
 			application.mount(new BasePageMapper("~administration/subscription-management", SubscriptionManagementPage.class));
+			application.mount(new ProjectPageMapper("${project}/~timesheets", TimesheetsPage.class));
+			application.mount(new ProjectPageMapper("${project}/~timesheets/${timesheet}", TimesheetsPage.class));
 		});
 		
 		contribute(AdministrationSettingContribution.class, () -> {

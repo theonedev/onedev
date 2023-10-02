@@ -23,6 +23,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -138,7 +139,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				otherActivities.add(new IssueCommentedActivity(comment));
 		}
 		
-		if (showWorkLog && getIssue().getProject().isTimeTracking()) {
+		if (showWorkLog && getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 			for (IssueWork work: getIssue().getWorks())
 				otherActivities.add(new IssueWorkActivity(work));
 		}
@@ -407,7 +408,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getIssue().getProject().isTimeTracking());
+				setVisible(getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive());
 			}
 			
 		});

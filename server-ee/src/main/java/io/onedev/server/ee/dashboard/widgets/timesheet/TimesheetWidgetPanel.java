@@ -2,9 +2,9 @@ package io.onedev.server.ee.dashboard.widgets.timesheet;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.TimesheetSetting;
-import io.onedev.server.web.component.issue.timesheet.DateRangeNavigator;
-import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
-import io.onedev.server.web.component.issue.timesheet.TimesheetXlsxResource;
+import io.onedev.server.ee.timetracking.DateRangeNavigator;
+import io.onedev.server.ee.timetracking.TimesheetPanel;
+import io.onedev.server.ee.timetracking.TimesheetXlsxResource;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;

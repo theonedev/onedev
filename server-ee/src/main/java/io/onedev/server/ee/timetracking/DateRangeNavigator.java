@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.timesheet;
+package io.onedev.server.ee.timetracking;
 
 import io.onedev.server.model.support.issue.TimesheetSetting;
 import org.apache.wicket.ajax.AjaxRequestTarget;
