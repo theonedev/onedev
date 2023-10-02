@@ -50,76 +50,7 @@ import static java.util.Comparator.naturalOrder;
 public class DataMigrator {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataMigrator.class);
-
-	private void migrate1(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("CodeComments.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element branchRefElement = element.element("branchRef");
-					if (branchRefElement != null)
-						branchRefElement.detach();
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate2(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Depots.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element gateKeeperElement = element.element("gateKeeper");
-					gateKeeperElement.detach();
-					element.addElement("gateKeepers");
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate4(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Accounts.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element avatarUploadDateElement = element.element("avatarUploadDate");
-					if (avatarUploadDateElement != null)
-						avatarUploadDateElement.detach();
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate3(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-			for (Element element: dom.getRootElement().elements()) {
-				String name = element.getName();
-				name = StringUtils.replace(name, "com.pmease.commons", "com.gitplex.commons");
-				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex.server");
-				element.setName(name);
-			}
-			if (file.getName().startsWith("Configs.xml")) {
-				for (Element element: dom.getRootElement().elements()) {
-					Element settingElement = element.element("setting");
-					if (settingElement != null) {
-						String clazz = settingElement.attributeValue("class");
-						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
-						Element gitConfigElement = settingElement.element("gitConfig");
-						if (gitConfigElement != null) {
-							clazz = gitConfigElement.attributeValue("class");
-							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
-						}
-					}
-				}
-			}
-			dom.writeToFile(file, false);
-		}
-	}
-
+	
 	private void migrate5(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Configs.xml")) {
