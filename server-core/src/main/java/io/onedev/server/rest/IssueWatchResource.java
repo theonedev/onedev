@@ -23,7 +23,7 @@ import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
 public class IssueWatchResource {
 
 	private final IssueWatchManager watchManager;
-
+	
 	@Inject
 	public IssueWatchResource(IssueWatchManager watchManager) {
 		this.watchManager = watchManager;

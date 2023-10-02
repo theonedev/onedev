@@ -1,5 +1,6 @@
 package io.onedev.server.rest;
 
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
@@ -14,8 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static io.onedev.server.security.SecurityUtils.canAccess;
-import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
+import static io.onedev.server.security.SecurityUtils.*;
 
 @Api(order=2250)
 @Path("/issue-works")
@@ -26,15 +26,20 @@ public class IssueWorkResource {
 
 	private final IssueWorkManager workManager;
 	
+	private final SubscriptionManager subscriptionManager;
+	
 	@Inject
-	public IssueWorkResource(IssueWorkManager workManager) {
+	public IssueWorkResource(IssueWorkManager workManager, SubscriptionManager subscriptionManager) {
 		this.workManager = workManager;
+		this.subscriptionManager = subscriptionManager;
 	}
 
 	@Api(order=100)
 	@Path("/{workId}")
 	@GET
 	public IssueWork get(@PathParam("workId") Long workId) {
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new UnsupportedOperationException("This feature requires an active subscription");
 		IssueWork work = workManager.load(workId);
     	if (!canAccess(work.getIssue().getProject()))  
 			throw new UnauthorizedException();
@@ -44,6 +49,11 @@ public class IssueWorkResource {
 	@Api(order=200, description="Log new issue work")
 	@POST
 	public Long create(@NotNull IssueWork work) {
+		if (!subscriptionManager.isSubscriptionActive()) 
+			throw new UnsupportedOperationException("This feature requires an active subscription");
+		if (!work.getIssue().getProject().isTimeTracking())
+			throw new UnsupportedOperationException("Time tracking not enabled for project");
+		
     	if (!canAccess(work.getIssue().getProject()) || !canModifyOrDelete(work))  
 			throw new UnauthorizedException();
 
