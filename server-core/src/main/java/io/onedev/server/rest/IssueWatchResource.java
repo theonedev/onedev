@@ -1,24 +1,19 @@
 package io.onedev.server.rest;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import static io.onedev.server.security.SecurityUtils.canAccess;
+import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
 
 @Api(order=2200)
 @Path("/issue-watches")
@@ -39,7 +34,7 @@ public class IssueWatchResource {
 	@GET
 	public IssueWatch get(@PathParam("watchId") Long watchId) {
 		IssueWatch watch = watchManager.load(watchId);
-		if (!SecurityUtils.canAccess(watch.getIssue().getProject()))
+		if (!canAccess(watch.getIssue().getProject()))
 			throw new UnauthorizedException();
 		return watch;
 	}
@@ -47,10 +42,8 @@ public class IssueWatchResource {
 	@Api(order=200, description="Create new issue watch")
 	@POST
 	public Long create(@NotNull IssueWatch watch) {
-		if (!SecurityUtils.canAccess(watch.getIssue().getProject()) 
-				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
+		if (!canAccess(watch.getIssue().getProject()) || !canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		}
 		watchManager.create(watch);
 		return watch.getId();
 	}
@@ -59,10 +52,8 @@ public class IssueWatchResource {
 	@Path("/{watchId}")
 	@POST
 	public Response update(@PathParam("watchId") Long watchId, @NotNull IssueWatch watch) {
-		if (!SecurityUtils.canAccess(watch.getIssue().getProject())
-				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
+		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		}
 		watchManager.update(watch);
 		return Response.ok().build();
 	}
@@ -72,7 +63,7 @@ public class IssueWatchResource {
 	@DELETE
 	public Response delete(@PathParam("watchId") Long watchId) {
 		IssueWatch watch = watchManager.load(watchId);
-		if (!SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) 
+		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
 		
 		watchManager.delete(watch);

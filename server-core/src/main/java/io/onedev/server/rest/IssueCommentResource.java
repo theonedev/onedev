@@ -14,6 +14,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 
+import static io.onedev.server.security.SecurityUtils.canAccess;
+import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
+
 @Api(order=2300)
 @Path("/issue-comments")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -33,7 +36,7 @@ public class IssueCommentResource {
 	@GET
 	public IssueComment get(@PathParam("commentId") Long commentId) {
 		IssueComment comment = commentManager.load(commentId);
-    	if (!SecurityUtils.canAccess(comment.getIssue().getProject()))  
+    	if (!canAccess(comment.getIssue().getProject()))  
 			throw new UnauthorizedException();
     	return comment;
 	}
@@ -41,10 +44,8 @@ public class IssueCommentResource {
 	@Api(order=200, description="Create new issue comment")
 	@POST
 	public Long create(@NotNull IssueComment comment) {
-    	if (!SecurityUtils.canAccess(comment.getIssue().getProject()) || 
-    			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
+    	if (!canAccess(comment.getIssue().getProject()) || !canModifyOrDelete(comment))  
 			throw new UnauthorizedException();
-    	}
     	
 		commentManager.create(comment, new ArrayList<>());
 		
@@ -55,10 +56,8 @@ public class IssueCommentResource {
 	@Path("/{commentId}")
 	@POST
 	public Response update(@PathParam("commentId") Long commentId, @NotNull IssueComment comment) {
-		if (!SecurityUtils.canAccess(comment.getIssue().getProject()) ||
-				!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
+		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-		}
 
 		commentManager.update(comment);
 
@@ -70,7 +69,7 @@ public class IssueCommentResource {
 	@DELETE
 	public Response delete(@PathParam("commentId") Long commentId) {
 		IssueComment comment = commentManager.load(commentId);
-    	if (!SecurityUtils.canModifyOrDelete(comment)) 
+    	if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
 		commentManager.delete(comment);
 		return Response.ok().build();

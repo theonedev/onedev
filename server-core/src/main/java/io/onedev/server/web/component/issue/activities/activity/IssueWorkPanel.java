@@ -63,9 +63,6 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 		else 
 			fragment.add(new WebMarkupContainer("note").setVisible(false));
 
-		boolean canEditOrDelete = SecurityUtils.canManageIssues(getWork().getIssue().getProject())
-				|| getWork().getUser().equals(SecurityUtils.getUser());
-
 		fragment.add(new AjaxLink<Void>("edit") {
 			
 			@Override
@@ -78,7 +75,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(canEditOrDelete);
+				setVisible(SecurityUtils.canModifyOrDelete(getWork()));
 			}
 		});
 		
@@ -98,7 +95,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(canEditOrDelete);
+				setVisible(SecurityUtils.canModifyOrDelete(getWork()));
 			}
 		});
 

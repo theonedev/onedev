@@ -284,6 +284,24 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				|| canManageIssues(comment.getIssue().getProject());
 	}
 
+	public static boolean canModifyOrDelete(IssueWork work) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(work.getUser())
+				|| canManageIssues(work.getIssue().getProject());
+	}
+
+	public static boolean canModifyOrDelete(IssueVote vote) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(vote.getUser())
+				|| canManageIssues(vote.getIssue().getProject());
+	}
+
+	public static boolean canModifyOrDelete(IssueWatch watch) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(watch.getUser())
+				|| canManageIssues(watch.getIssue().getProject());
+	}
+	
 	public static boolean canModify(PullRequest request) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(request.getSubmitter()) 

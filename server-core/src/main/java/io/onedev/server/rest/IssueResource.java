@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
@@ -53,8 +52,8 @@ public class IssueResource {
 	
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
-			IssueChangeManager issueChangeManager, MilestoneManager milestoneManager, 
-			ProjectManager projectManager, ObjectMapper objectMapper) {
+						 IssueChangeManager issueChangeManager, MilestoneManager milestoneManager, 
+						 ProjectManager projectManager, ObjectMapper objectMapper) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
@@ -112,6 +111,16 @@ public class IssueResource {
 			throw new UnauthorizedException();
     	return issue.getComments();
     }
+
+	@Api(order=425)
+	@Path("/{issueId}/works")
+	@GET
+	public Collection<IssueWork> getWorks(@PathParam("issueId") Long issueId) {
+		Issue issue = issueManager.load(issueId);
+		if (!SecurityUtils.canAccess(issue))
+			throw new UnauthorizedException();
+		return issue.getWorks();
+	}
 	
 	@Api(order=450)
 	@Path("/{issueId}/milestones")
@@ -279,6 +288,17 @@ public class IssueResource {
 		issueChangeManager.changeConfidential(issue, confidential);
 		return Response.ok().build();
     }
+
+	@Api(order=1275)
+	@Path("/{issueId}/own-estimated-time")
+	@POST
+	public Response setOwnEstimatedTime(@PathParam("issueId") Long issueId, int hours) {
+		Issue issue = issueManager.load(issueId);
+		if (!SecurityUtils.canScheduleIssues(issue.getProject()))
+			throw new UnauthorizedException();
+		issueChangeManager.changeOwnEstimatedTime(issue, hours);
+		return Response.ok().build();
+	}
 	
 	@Api(order=1300, description="Schedule issue into specified milestones with list of milestone id")
 	@Path("/{issueId}/milestones")
@@ -399,6 +419,9 @@ public class IssueResource {
 		@Api(order=400)
 		private boolean confidential;
 		
+		@Api(order=450, description = "Own estimated time in hours")
+		private int ownEstimatedTime;
+		
 		@Api(order=500)
 		private List<Long> milestoneIds = new ArrayList<>();
 		
@@ -439,6 +462,14 @@ public class IssueResource {
 			this.confidential = confidential;
 		}
 
+		public int getOwnEstimatedTime() {
+			return ownEstimatedTime;
+		}
+
+		public void setOwnEstimatedTime(int ownEstimatedTime) {
+			this.ownEstimatedTime = ownEstimatedTime;
+		}
+		
 		public List<Long> getMilestoneIds() {
 			return milestoneIds;
 		}

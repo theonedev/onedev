@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.onedev.server.util.Day;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
@@ -36,6 +37,7 @@ public class IssueWork extends AbstractEntity {
 	
 	private Date date;
 	
+	@JsonIgnore
 	private long day;
 	
 	private int hours;
