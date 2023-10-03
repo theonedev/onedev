@@ -6,7 +6,8 @@ import io.onedev.server.util.criteria.Criteria;
 
 import javax.persistence.criteria.*;
 
-import static io.onedev.server.model.Issue.*;
+import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
+import static io.onedev.server.model.Issue.PROP_TOTAL_SPENT_TIME;
 
 
 public class SpentTimeCriteria extends Criteria<Issue> {
@@ -25,54 +26,29 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Path<Integer> spentTimeAttribute = from.get(PROP_TOTAL_SPENT_TIME);
-		if (value == -1) {
-			Path<Integer> estimatedTimeAttribute = from.get(PROP_TOTAL_ESTIMATED_TIME);
-			if (operator == IssueQueryLexer.Is)
-				return builder.equal(spentTimeAttribute, estimatedTimeAttribute);
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return builder.greaterThan(spentTimeAttribute, estimatedTimeAttribute);
-			else
-				return builder.lessThan(spentTimeAttribute, estimatedTimeAttribute);
-		} else {
-			if (operator == IssueQueryLexer.Is)
-				return builder.equal(spentTimeAttribute, value);
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return builder.greaterThan(spentTimeAttribute, value);
-			else
-				return builder.lessThan(spentTimeAttribute, value);
-		}
+		if (operator == IssueQueryLexer.Is)
+			return builder.equal(spentTimeAttribute, value);
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return builder.greaterThan(spentTimeAttribute, value);
+		else
+			return builder.lessThan(spentTimeAttribute, value);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (value == -1) {
-			if (operator == IssueQueryLexer.Is)
-				return issue.getTotalSpentTime() == issue.getTotalEstimatedTime();
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return issue.getTotalSpentTime() > issue.getTotalEstimatedTime();
-			else
-				return issue.getTotalSpentTime() < issue.getTotalEstimatedTime();
-		} else {
-			if (operator == IssueQueryLexer.Is)
-				return issue.getTotalSpentTime() == value;
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return issue.getTotalSpentTime() > value;
-			else
-				return issue.getTotalSpentTime() < value;
-		}
+		if (operator == IssueQueryLexer.Is)
+			return issue.getTotalSpentTime() == value;
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return issue.getTotalSpentTime() > value;
+		else
+			return issue.getTotalSpentTime() < value;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		if (value == -1) {
-			return quote(NAME_SPENT_TIME) + " "
-					+ IssueQuery.getRuleName(operator) + " "
-					+ quote(NAME_ESTIMATED_TIME);
-		} else {
-			return quote(NAME_SPENT_TIME) + " "
-					+ IssueQuery.getRuleName(operator) + " "
-					+ quote(DateUtils.formatWorkingPeriod(value));
-		}
+		return quote(NAME_SPENT_TIME) + " "
+				+ IssueQuery.getRuleName(operator) + " "
+				+ quote(DateUtils.formatWorkingPeriod(value));
 	}
 
 	@Override

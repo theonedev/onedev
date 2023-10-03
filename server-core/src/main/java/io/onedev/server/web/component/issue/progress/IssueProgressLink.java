@@ -3,7 +3,7 @@ package io.onedev.server.web.component.issue.progress;
 import com.google.common.collect.Sets;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.CompletionRatioBehavior;
+import io.onedev.server.web.behavior.CompletionRateBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.util.WicketUtils;
@@ -22,7 +22,7 @@ public abstract class IssueProgressLink extends DropdownLink {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new CompletionRatioBehavior() {
+		add(new CompletionRateBehavior() {
 			@Override
 			protected long getTotal() {
 				return getIssue().getTotalEstimatedTime();

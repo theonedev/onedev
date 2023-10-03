@@ -30,6 +30,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -94,12 +95,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					private Map<String, String> getFieldCandidates(Collection<String> fields) {
 						Map<String, String> candidates = new LinkedHashMap<>();
 						for (var field: fields) {
-							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME))
+							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME) || field.equals(NAME_COMPLETION_RATE))
 									&& issueSetting.getTimeTrackingSetting().getAggregationLink() != null) {
 								if (field.equals(NAME_ESTIMATED_TIME))
 									candidates.put(field, "Total estimated time");
-								else
+								else if (field.equals(NAME_SPENT_TIME))
 									candidates.put(field, "Total spent time");
+								else
+									candidates.put(field, "Total spent time / total estimated time");
+							} else if (field.equals(NAME_COMPLETION_RATE)) {
+								candidates.put(field, "Spent time / estimated time");
 							} else {
 								candidates.put(field, null);
 							}
@@ -118,18 +123,20 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(NAME_STATE);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.put(field.getName(), null);
-							if (project != null && !project.isTimeTracking()) {
+							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
+								candidates.remove(NAME_COMPLETION_RATE);
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							Map<String, String> candidates = getFieldCandidates(ORDER_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
-							if (project != null && !project.isTimeTracking()) {
+							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
+								candidates.remove(NAME_COMPLETION_RATE);
 							}
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
@@ -225,16 +232,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 												return SuggestionUtils.suggestMilestones(project, matchWith);
 											else
 												return null;
-										} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
-											var suggestions = SuggestionUtils.suggest(newArrayList(NAME_SPENT_TIME), matchWith);
+										} else if (fieldName.equals(NAME_ESTIMATED_TIME) || fieldName.equals(NAME_SPENT_TIME)) {
+											var suggestions = new ArrayList<InputSuggestion>();
 											if ("1w 1d 1h".contains(matchWith.toLowerCase()))
 												suggestions.add(new InputSuggestion("1w 1d 1h", "specify working period, modify as necessary", null));
 											return !suggestions.isEmpty()? suggestions: null;
-										} else if (fieldName.equals(NAME_SPENT_TIME)) {
-											var suggestions = SuggestionUtils.suggest(newArrayList(NAME_ESTIMATED_TIME), matchWith);
-											if ("1w 1d 1h".contains(matchWith.toLowerCase()))
-												suggestions.add(new InputSuggestion("1w 1d 1h", "specify working period, modify as necessary", null));
-											return !suggestions.isEmpty()? suggestions: null;
+										} else if (fieldName.equals(NAME_COMPLETION_RATE)) {
+											var suggestions = new ArrayList<InputSuggestion>();
+											if ("0.5".contains(matchWith.toLowerCase()))
+												suggestions.add(new InputSuggestion("0.5", "specify decimal number, modify as necessary", null));
+											return !suggestions.isEmpty() ? suggestions : null;
 										} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
 												|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
 												|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 

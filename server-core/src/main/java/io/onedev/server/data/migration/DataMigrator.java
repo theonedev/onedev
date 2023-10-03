@@ -5759,6 +5759,7 @@ public class DataMigrator {
 					element.addElement("totalSpentTime").setText("0");
 					element.addElement("ownEstimatedTime").setText("0");
 					element.addElement("ownSpentTime").setText("0");
+					element.addElement("completionRate").setText("-1");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {

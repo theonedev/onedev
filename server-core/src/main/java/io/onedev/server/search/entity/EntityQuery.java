@@ -58,6 +58,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new ExplicitException("Invalid number: " + value);
 		}
 	}
+
+	public static float getFloatValue(String value) {
+		try {
+			return Float.parseFloat(value);
+		} catch (NumberFormatException e) {
+			throw new ExplicitException("Invalid decimal: " + value);
+		}
+	}
 	
 	public static LabelSpec getLabelSpec(String labelName) {
 		var labelSpec = OneDev.getInstance(LabelSpecManager.class).find(labelName);

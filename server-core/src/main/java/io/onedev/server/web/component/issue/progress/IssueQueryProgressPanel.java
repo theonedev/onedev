@@ -5,7 +5,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.behavior.CompletionRatioBehavior;
+import io.onedev.server.web.behavior.CompletionRateBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -38,7 +38,7 @@ public abstract class IssueQueryProgressPanel extends Panel {
 		
 		if (getQuery() != null) {
 			var fragment = new Fragment("content", "hasQueryFrag", this);
-			fragment.add(new WebMarkupContainer("completion").add(new CompletionRatioBehavior() {
+			fragment.add(new WebMarkupContainer("completion").add(new CompletionRateBehavior() {
 				@Override
 				protected long getTotal() {
 					return timesModel.getObject().getEstimatedTime();
