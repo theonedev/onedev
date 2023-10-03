@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -38,6 +39,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
+import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressLink;
 import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
@@ -1607,6 +1609,13 @@ public abstract class IssueListPanel extends Panel {
 						stateFragment.add(transitLink);
 
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
+					} else if (field.equals(IssueSchedule.NAME_MILESTONE)) {
+						fieldsView.add(new MilestoneCrumbPanel(fieldsView.newChildId()) {
+							@Override
+							protected Issue getIssue() {
+								return (Issue) fragment.getDefaultModelObject();
+							}
+						});
 					} else {
 						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME, true) {
 
@@ -1624,9 +1633,8 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Input getField() {
-								Issue issue = (Issue) fragment.getDefaultModelObject();
-								if (issue.isFieldVisible(field))
-									return issue.getFieldInputs().get(field);
+								if (getIssue().isFieldVisible(field))
+									return getIssue().getFieldInputs().get(field);
 								else
 									return null;
 							}
@@ -1635,7 +1643,7 @@ public abstract class IssueListPanel extends Panel {
 					}
 				}
 				fragment.add(fieldsView);
-
+				
 				LastActivity lastActivity = issue.getLastActivity();
 				if (lastActivity.getUser() != null)
 					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));

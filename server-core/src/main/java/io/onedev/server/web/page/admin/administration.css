@@ -28,3 +28,9 @@
 .label-management td.property-id {
 	display: none;
 }
+
+.milestone-type-management .drag-indicator,
+.milestone-type-management th.property-id,
+.milestone-type-management td.property-id {
+	display: none;
+}

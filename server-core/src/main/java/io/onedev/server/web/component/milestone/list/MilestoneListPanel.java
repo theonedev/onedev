@@ -1,38 +1,5 @@
 package io.onedev.server.web.component.milestone.list;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -61,6 +28,32 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Restrictions;
+
+import javax.annotation.Nullable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class MilestoneListPanel extends GenericPanel<Project> {
@@ -71,20 +64,20 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 	
 	private final PagingHistorySupport pagingHistorySupport;
 	
-	private final IModel<Collection<MilestoneAndIssueState>> milestoneAndStatesModel = 
-			new LoadableDetachableModel<Collection<MilestoneAndIssueState>>() {
+	private final IModel<Collection<MilestoneAndIssueState>> milestoneAndStatesModel =
+			new LoadableDetachableModel<>() {
 
-		@Override
-		protected Collection<MilestoneAndIssueState> load() {
-			List<Milestone> milestones = new ArrayList<>();
-			for (Component row: (WebMarkupContainer)milestonesTable.get("body").get("rows")) {
-				Milestone milestone = (Milestone) row.getDefaultModelObject();
-				milestones.add(milestone);
-			}
-			return OneDev.getInstance(IssueManager.class).queryMilestoneAndIssueStates(getProject(), milestones);
-		}
-		
-	}; 
+				@Override
+				protected Collection<MilestoneAndIssueState> load() {
+					List<Milestone> milestones = new ArrayList<>();
+					for (Component row : (WebMarkupContainer) milestonesTable.get("body").get("rows")) {
+						Milestone milestone = (Milestone) row.getDefaultModelObject();
+						milestones.add(milestone);
+					}
+					return OneDev.getInstance(IssueManager.class).queryMilestoneAndIssueStates(getProject(), milestones);
+				}
+
+			}; 
 	
 	private DataTable<Milestone, Void> milestonesTable;					
 	
@@ -213,19 +206,19 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 		
 		List<IColumn<Milestone, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public String getCssClass() {
 				return "name align-middle";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
-					IModel<Milestone> rowModel) {
+									 IModel<Milestone> rowModel) {
 				Milestone milestone = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", MilestoneListPanel.this);
-				WebMarkupContainer link = new ActionablePageLink("link", MilestoneIssuesPage.class, 
+				WebMarkupContainer link = new ActionablePageLink("link", MilestoneIssuesPage.class,
 						MilestoneIssuesPage.paramsOf(getProject(), milestone, null)) {
 
 					@Override
@@ -234,7 +227,7 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 								getPage().getClass(), getPage().getPageParameters()).toString();
 						WebSession.get().setRedirectUrlAfterDelete(Milestone.class, redirectUrlAfterDelete);
 					}
-					
+
 				};
 				link.add(new Label("label", milestone.getName()));
 				fragment.add(link);
@@ -245,44 +238,44 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 						super.onConfigure();
 						setVisible(!rowModel.getObject().getProject().equals(getProject()));
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
-			
+
 		});
-		
-		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Due Date")) {
+
+		columns.add(new AbstractColumn<>(Model.of("Due Date")) {
 
 			@Override
 			public String getCssClass() {
 				return "due-date d-none d-lg-table-cell align-middle";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
-					IModel<Milestone> rowModel) {
+									 IModel<Milestone> rowModel) {
 				cellItem.add(new MilestoneDateLabel(componentId, rowModel));
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Issue Stats")) {
+		columns.add(new AbstractColumn<>(Model.of("Issue Stats")) {
 
 			@Override
 			public String getCssClass() {
 				return "issue-stats align-middle";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
-					IModel<Milestone> rowModel) {
+									 IModel<Milestone> rowModel) {
 				Fragment fragment = new Fragment(componentId, "issueStatsFrag", MilestoneListPanel.this) {
 
 					@Override
 					protected void onBeforeRender() {
 						/*
-						 * Create StateStatsBar here as it requires to access the milestoneAndStatsModel which can 
+						 * Create StateStatsBar here as it requires to access the milestoneAndStatsModel which can
 						 * only be calculated correctly after the milestone table is initialized
 						 */
 						addOrReplace(new StateStatsBar("content", new LoadableDetachableModel<Map<String, Integer>>() {
@@ -290,11 +283,11 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 							@Override
 							protected Map<String, Integer> load() {
 								Map<String, Integer> stateStats = new HashMap<>();
-								for (MilestoneAndIssueState milestoneAndState: milestoneAndStatesModel.getObject()) {
+								for (MilestoneAndIssueState milestoneAndState : milestoneAndStatesModel.getObject()) {
 									if (milestoneAndState.getMilestoneId().equals(rowModel.getObject().getId())) {
 										Integer count = stateStats.get(milestoneAndState.getIssueState());
 										if (count != null)
-											count ++;
+											count++;
 										else
 											count = 1;
 										stateStats.put(milestoneAndState.getIssueState(), count);
@@ -302,7 +295,7 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 								}
 								return stateStats;
 							}
-							
+
 						}) {
 
 							@Override
@@ -311,57 +304,57 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 								PageParameters params = MilestoneIssuesPage.paramsOf(getProject(), rowModel.getObject(), query);
 								return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 							}
-							
-						});								
+
+						});
 						super.onBeforeRender();
 					}
-					
+
 				};
 				cellItem.add(fragment);
 			}
-			
+
 		});
 		
 		if (SecurityUtils.canManageIssues(getProject())) {
-			columns.add(new AbstractColumn<Milestone, Void>(Model.of("")) {
-	
+			columns.add(new AbstractColumn<>(Model.of("")) {
+
 				@Override
 				public String getCssClass() {
 					return "d-none d-lg-table-cell actions align-middle";
 				}
-	
+
 				@Override
 				public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
-						IModel<Milestone> rowModel) {
+										 IModel<Milestone> rowModel) {
 					if (rowModel.getObject().getProject().equals(getProject())) {
 						cellItem.add(new MilestoneActionsPanel(componentId, rowModel) {
-	
+
 							@Override
 							protected void onUpdated(AjaxRequestTarget target) {
 								target.add(milestonesTable);
 							}
-	
+
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
 								target.add(milestonesTable);
 							}
-							
+
 						});
 					} else {
 						cellItem.add(new Label(componentId, "&nbsp;").setEscapeModelStrings(false));
 					}
 				}
-				
+
 			});
 		}
 		
-		SortableDataProvider<Milestone, Void> dataProvider = new LoadableDetachableDataProvider<Milestone, Void>() {
+		SortableDataProvider<Milestone, Void> dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends Milestone> iterator(long first, long count) {
 				EntityCriteria<Milestone> criteria = getCriteria(closed);
 				criteria.addOrder(sort.getOrder(closed));
-				return OneDev.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(Dao.class).query(criteria, (int) first, (int) count).iterator();
 			}
 
 			@Override
@@ -372,18 +365,18 @@ public class MilestoneListPanel extends GenericPanel<Project> {
 			@Override
 			public IModel<Milestone> model(Milestone object) {
 				Long id = object.getId();
-				return new LoadableDetachableModel<Milestone>() {
+				return new LoadableDetachableModel<>() {
 
 					@Override
 					protected Milestone load() {
 						return OneDev.getInstance(MilestoneManager.class).load(id);
 					}
-					
+
 				};
 			}
 		};
 		
-		add(milestonesTable = new DefaultDataTable<Milestone, Void>("milestones", columns, dataProvider, 
+		add(milestonesTable = new DefaultDataTable<>("milestones", columns, dataProvider,
 				WebConstants.PAGE_SIZE, pagingHistorySupport));		
 		milestonesTable.setOutputMarkupId(true);
 	}

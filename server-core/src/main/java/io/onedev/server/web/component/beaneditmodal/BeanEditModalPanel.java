@@ -79,11 +79,6 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 				return title;
 			}
 
-			@Override
-			protected void validate(BeanEditor editor) {
-				BeanEditModalPanel.this.onValidate(editor, bean);
-			}
-
 		};
 	}
 	
@@ -92,9 +87,6 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 	}
 
 	protected abstract void onSave(AjaxRequestTarget target, T bean);
-	
-	protected void onValidate(BeanEditor editor, T bean) {
-	}
 	
 	protected void onCancel(AjaxRequestTarget target) {
 	}

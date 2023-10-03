@@ -1,28 +1,20 @@
 package io.onedev.server.util.patternset;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
+import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
+import org.antlr.v4.runtime.*;
+import org.apache.tools.ant.DirectoryScanner;
+
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.apache.tools.ant.DirectoryScanner;
-
-import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
-import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
 
 public class PatternSet implements Serializable {
 

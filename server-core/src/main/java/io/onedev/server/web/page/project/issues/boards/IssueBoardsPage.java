@@ -22,6 +22,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -34,6 +35,7 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.editablebean.MilestoneEditBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -535,12 +537,27 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									}
 									
 								});
-								fragment.add(new MilestoneEditLink("edit", item.getModelObject().getId()) {
+								
+								var bean = new MilestoneEditBean();
+								bean.readFrom(item.getModelObject());
+								fragment.add(new AjaxLink<Void>("edit") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										super.onClick(target);
 										dropdown.close();
+										
+										new BeanEditModalPanel<>(target, bean, "Edit Milestone") {
+
+											@Override
+											protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
+												var milestone = item.getModelObject();
+												bean.writeTo(milestone);
+												getMilestoneManager().update(milestone);
+												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
+														getProject(), getBoard(), milestone, backlog, queryString,
+														backlogQueryString));
+											}
+										};
 									}
 
 								});
@@ -614,12 +631,25 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						
 					});
 					
-					menuFragment.add(new CreateMilestoneLink("newMilestone") {
+					menuFragment.add(new AjaxLink<Void>("newMilestone") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							super.onClick(target);
 							dropdown.close();
+							var bean = new MilestoneEditBean();
+							new BeanEditModalPanel<>(target, bean, "Create Milestone") {
+
+								@Override
+								protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
+									var milestone = new Milestone();
+									milestone.setProject(getProject());
+									bean.writeTo(milestone);
+									getMilestoneManager().create(milestone);
+									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
+											getProject(), getBoard(), milestone, backlog, queryString,
+											backlogQueryString));
+								}
+							};
 						}
 						
 						@Override
@@ -919,68 +949,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							getProject(), board, getMilestone(), backlog, queryString, 
 							backlogQueryString));
 					modal.close();
-				}
-
-				@Override
-				protected void onCancel(AjaxRequestTarget target) {
-					modal.close();
-				}
-				
-			};
-		}
-		
-	}
-
-	private class CreateMilestoneLink extends ModalLink {
-
-		public CreateMilestoneLink(String id) {
-			super(id);
-		}
-
-		@Override
-		protected Component newContent(String id, ModalPanel modal) {
-			return new NewMilestonePanel(id) {
-
-				@Override
-				protected Project getProject() {
-					return IssueBoardsPage.this.getProject();
-				}
-
-				@Override
-				protected void onMilestoneCreated(AjaxRequestTarget target, Milestone milestone) {
-					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, queryString, 
-							backlogQueryString));
-				}
-
-				@Override
-				protected void onCancel(AjaxRequestTarget target) {
-					modal.close();
-				}
-				
-			};
-		}
-		
-	}	
-	
-	private abstract class MilestoneEditLink extends ModalLink {
-
-		private final Long milestoneId;
-		
-		public MilestoneEditLink(String id, Long milestoneId) {
-			super(id);
-			this.milestoneId = milestoneId;
-		}
-
-		@Override
-		protected Component newContent(String id, ModalPanel modal) {
-			return new MilestoneEditPanel(id, milestoneId) {
-
-				@Override
-				protected void onMilestoneSaved(AjaxRequestTarget target, Milestone milestone) {
-					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, queryString, 
-							backlogQueryString));
 				}
 
 				@Override

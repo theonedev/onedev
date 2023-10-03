@@ -5,8 +5,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.TimesheetSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -15,7 +13,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
@@ -325,15 +322,13 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	}
 
 	private abstract class TimesheetEditLink extends AjaxLink<Void> {
-
-		private final String oldName;
 		
 		private final TimesheetEditBean bean = new TimesheetEditBean();
 		
 		public TimesheetEditLink(String id, @Nullable String name) {
 			super(id);
-			oldName = name;
 			
+			bean.setOldName(name);
 			TimesheetSetting setting;
 			if (name != null)
 				setting = hierarchyTimesheetSettings.get(name);
@@ -345,15 +340,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 
 		@Override
 		public void onClick(AjaxRequestTarget target) {
-			new BeanEditModalPanel<>(target, bean, oldName != null? "Edit Timesheet": "Add Timesheet") {
-				@Override
-				protected void onValidate(BeanEditor editor, TimesheetEditBean bean) {
-					if (timesheetSettings.containsKey(bean.getName())
-							&& (oldName == null || !oldName.equals(bean.getName()))) {
-						editor.error(new Path(new PathNode.Named("name")), 
-								"Name already used by another timesheet in this project");
-					}
-				}
+			new BeanEditModalPanel<>(target, bean, bean.getOldName() != null? "Edit Timesheet": "Add Timesheet") {
 
 				@Override
 				protected void onSave(AjaxRequestTarget target, TimesheetEditBean bean) {
@@ -361,7 +348,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 					new BeanDescriptor(TimesheetSetting.class).copyProperties(bean, setting);
 					var newTimesheetSettings = new LinkedHashMap<String, TimesheetSetting>();
 					for (var entry: timesheetSettings.entrySet()) {
-						if (entry.getKey().equals(oldName))
+						if (entry.getKey().equals(bean.getOldName()))
 							newTimesheetSettings.put(bean.getName(), setting);
 						else
 							newTimesheetSettings.put(entry.getKey(), entry.getValue());

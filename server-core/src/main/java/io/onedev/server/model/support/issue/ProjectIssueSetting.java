@@ -4,6 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
@@ -148,8 +149,11 @@ public class ProjectIssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (!fieldName.equals(Issue.NAME_STATE) && getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (!fieldName.equals(Issue.NAME_STATE) 
+						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
+						&& getGlobalSetting().getFieldSpec(fieldName) == null) {
 					undefinedFields.add(fieldName);
+				}
 			}
 		}
 		for (IssueQueryUpdater updater: getNamedQueryUpdaters())

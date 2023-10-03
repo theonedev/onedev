@@ -1,20 +1,18 @@
 package io.onedev.server.web.editable;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.util.ComponentContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.hibernate.proxy.HibernateProxyHelper;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.util.ComponentContext;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public abstract class PropertyContext<T> implements Serializable {
@@ -138,9 +136,9 @@ public abstract class PropertyContext<T> implements Serializable {
 	public boolean isPropertyExcluded()	{
 		return descriptor.isPropertyExcluded();
 	}
-	
-	public void setPropertyExcluded(boolean propertyExcluded) {
-		descriptor.setPropertyExcluded(propertyExcluded);
+
+	public boolean isPropertyHidden() {
+		return descriptor.isPropertyHidden();
 	}
 	
 	public boolean isPropertyRequired() {

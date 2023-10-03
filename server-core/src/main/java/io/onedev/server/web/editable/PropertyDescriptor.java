@@ -33,6 +33,8 @@ public class PropertyDescriptor implements Serializable {
 	
 	private boolean propertyExcluded;
 	
+	private boolean propertyHidden;
+	
 	private Set<String> dependencyPropertyNames = new HashSet<>();
 	
 	private transient Method propertyGetter;
@@ -81,6 +83,14 @@ public class PropertyDescriptor implements Serializable {
 
 	public void setPropertyExcluded(boolean propertyExcluded) {
 		this.propertyExcluded = propertyExcluded;
+	}
+
+	public boolean isPropertyHidden() {
+		return propertyHidden;
+	}
+
+	public void setPropertyHidden(boolean propertyHidden) {
+		this.propertyHidden = propertyHidden;
 	}
 
 	public void copyProperty(Object fromBean, Object toBean) {

@@ -188,13 +188,15 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!property.getDescriptor().isPropertyExcluded() 
-						&& property.getDescriptor().isPropertyVisible(componentContexts, descriptor));
+				setVisible(!property.isPropertyExcluded() 
+						&& property.isPropertyVisible(componentContexts, descriptor));
 			}
 
 		};
 		
 		propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
+		if (property.isPropertyHidden())
+			propertyContainer.add(AttributeAppender.append("class", "d-none"));
 
 		return propertyContainer;
 	}
@@ -286,7 +288,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
-		final Serializable bean = (Serializable) getDescriptor().newBeanInstance();
+		Serializable bean = (Serializable) getDescriptor().newBeanInstance();
 		
 		visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>) (object, visit) -> {
 			if (!object.getDescriptor().isPropertyExcluded()) 

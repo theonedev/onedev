@@ -52,6 +52,7 @@ public class BeanDescriptor implements Serializable {
 				property.setPropertyExcluded(BeanUtils.findSetter(propertyGetter) == null 
 						|| propertyNames.contains(propertyName) && excluded 
 						|| !propertyNames.contains(propertyName) && !excluded);
+				property.setPropertyHidden(editable.hidden());
 			}
 		}
 	}

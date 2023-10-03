@@ -1,0 +1,8 @@
+.milestone-crumb {
+	cursor: pointer;
+	border-bottom: 2px dotted transparent;
+	padding: 0 0.5rem 0.5rem 0;
+}
+.milestone-crumb:hover {
+	border-color: var(--gray);
+}

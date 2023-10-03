@@ -4,6 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -17,6 +18,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
+import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressLink;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -79,25 +81,31 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		BoardSpec board = ((IssueBoardsPage)getPage()).getBoard();
 
-		List<String> displayFields = board.getDisplayFields();
-		
-		AjaxLink<Void> transitLink = new TransitionMenuLink("transit") {
-
-			@Override
-			protected Issue getIssue() {
-				return issueModel.getObject();
-			}
-			
-		};
-		transitLink.setVisible(displayFields.contains(Issue.NAME_STATE));		
-		
-		transitLink.add(new IssueStateBadge("state", issueModel));
-		
-		fragment.add(transitLink);
-
 		RepeatingView fieldsView = new RepeatingView("fields");
-		for (String fieldName: displayFields) {
-			if (!fieldName.equals(Issue.NAME_STATE)) {
+		for (String fieldName: board.getDisplayFields()) {
+			if (fieldName.equals(Issue.NAME_STATE)) {
+				Fragment stateFragment = new Fragment(fieldsView.newChildId(),
+						"stateFrag", BoardCardPanel.this);
+				AjaxLink<Void> transitLink = new TransitionMenuLink("transit") {
+
+					@Override
+					protected Issue getIssue() {
+						return issueModel.getObject();
+					}
+
+				};
+
+				transitLink.add(new IssueStateBadge("state", issueModel));
+				stateFragment.add(transitLink);
+				fieldsView.add(stateFragment.setOutputMarkupId(true));
+			} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+				fieldsView.add(new MilestoneCrumbPanel(fieldsView.newChildId()) {
+					@Override
+					protected Issue getIssue() {
+						return issueModel.getObject();
+					}
+				});
+			} else {
 				Input field = issue.getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR, true) {
@@ -136,7 +144,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			}
 		});
 		RepeatingView avatarsView = new RepeatingView("avatars");
-		for (String fieldName: displayFields) {
+		for (String fieldName: board.getDisplayFields()) {
 			Input field = issue.getFieldInputs().get(fieldName);
 			if (field != null && field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 				avatarsView.add(new FieldValuesPanel(avatarsView.newChildId(), Mode.AVATAR, true) {

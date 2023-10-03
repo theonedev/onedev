@@ -1,30 +1,12 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 @Table(
@@ -32,7 +14,6 @@ import io.onedev.server.annotation.Multiline;
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", Milestone.PROP_NAME})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@Editable
 public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -42,6 +23,8 @@ public class Milestone extends AbstractEntity {
 	public static final String PROP_PROJECT = "project";
 	
 	public static final String PROP_NAME = "name";
+	
+	public static final String PROP_TYPE = "type";
 	
 	public static final String PROP_START_DATE = "startDate";
 	
@@ -77,9 +60,7 @@ public class Milestone extends AbstractEntity {
 	public void setProject(Project project) {
 		this.project = project;
 	}
-
-	@Editable(order=100)
-	@NotEmpty
+	
 	public String getName() {
 		return name;
 	}
@@ -88,8 +69,6 @@ public class Milestone extends AbstractEntity {
 		this.name = name;
 	}
 
-	@Editable(order=200)
-	@Multiline
 	public String getDescription() {
 		return description;
 	}
@@ -98,7 +77,6 @@ public class Milestone extends AbstractEntity {
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
-	@Editable(order=250, description="Optionally specify start date of the milestone")
 	@Nullable
 	public Date getStartDate() {
 		return startDate;
@@ -108,7 +86,6 @@ public class Milestone extends AbstractEntity {
 		this.startDate = startDate;
 	}
 
-	@Editable(order=300, description="Optionally specify due date of the milestone")
 	@Nullable
 	public Date getDueDate() {
 		return dueDate;

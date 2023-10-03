@@ -9,6 +9,7 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Spec
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.*;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
@@ -239,7 +240,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees"));
+		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_MILESTONE));
 		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
 		
@@ -247,6 +248,7 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add("Type");
 		listFields.add("Priority");
 		listFields.add("Assignees");
+		listFields.add(IssueSchedule.NAME_MILESTONE);
 		
 		listLinks.add("Child Issue");
 		listLinks.add("Blocked By");
@@ -255,13 +257,14 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
-		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
+		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Milestone\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 		
@@ -378,8 +381,11 @@ public class GlobalIssueSetting implements Serializable {
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
 		for (String fieldName: getListFields()) {
-			if (!fieldName.equals(Issue.NAME_STATE) && getFieldSpec(fieldName) == null)
+			if (!fieldName.equals(Issue.NAME_STATE) 
+					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE) 
+					&& getFieldSpec(fieldName) == null) {
 				undefinedFields.add(fieldName);
+			}
 		}
 		
 		for (TransitionSpec transition: getTransitionSpecs())

@@ -7,9 +7,6 @@
 			<a wicket:id="showDetail" title="Click to show issue details" class="show-detail"><wicket:svg href="ellipsis" class="icon"/></a>
 		</div>
 		<div class="secondary d-flex flex-wrap mb-n2">
-			<div wicket:id="transit" class="state">
-				<span wicket:id="state" class="mb-2 mr-2"></span>
-			</div>
 			<div wicket:id="fields" class="field"></div>
 			<div class="avatars ml-auto d-flex flex-wrap mr-n2">
 				<div wicket:id="avatars" class="avatar"></div>
@@ -21,5 +18,8 @@
 			<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
 		</div>
 		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="stateFrag">
+		<div wicket:id="transit" class="state"><span wicket:id="state" class="mb-2 mr-2"></span></div>
 	</wicket:fragment>
 </wicket:panel>

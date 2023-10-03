@@ -8,6 +8,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -38,6 +39,7 @@ public class FieldsAndLinksBean implements Serializable {
 		choices.add(Issue.NAME_STATE);
 		for (String fieldName: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames())
 			choices.add(fieldName);
+		choices.add(IssueSchedule.NAME_MILESTONE);
 		return choices;
 	}
 	
