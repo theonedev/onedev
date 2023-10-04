@@ -1,9 +1,6 @@
 package io.onedev.server.util.channelnotification;
 
-import java.io.Serializable;
-
-import javax.validation.constraints.NotEmpty;
-
+import io.onedev.server.annotation.*;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
@@ -12,13 +9,11 @@ import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.annotation.BuildQuery;
-import io.onedev.server.annotation.CodeCommentQuery;
-import io.onedev.server.annotation.CommitQuery;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.IssueQuery;
-import io.onedev.server.annotation.PullRequestQuery;
-import io.onedev.server.annotation.ShowCondition;
+import org.hibernate.validator.constraints.URL;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import java.io.Serializable;
 
 @Editable
 public class ChannelNotification implements Serializable {
@@ -48,6 +43,7 @@ public class ChannelNotification implements Serializable {
 	private String codeCommentQuery;
 
 	@Editable(order=50, description="Specify webhook url to post events")
+	@Pattern(regexp="http://.+|https://.+", message = "Url beginning with http/https is expected")
 	@NotEmpty
 	public String getWebhookUrl() {
 		return webhookUrl;

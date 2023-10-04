@@ -54,5 +54,6 @@
 		<module>server-plugin-sso-discord</module>
 		<module>server-plugin-notification-slack</module>
     	<module>server-plugin-notification-discord</module>
+		<module>server-plugin-notification-ntfy</module>
     </modules>
 </project>

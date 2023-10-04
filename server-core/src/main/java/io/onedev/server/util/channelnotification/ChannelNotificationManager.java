@@ -1,13 +1,12 @@
 package io.onedev.server.util.channelnotification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.IOUtils;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
-import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.git.GitUtils;
@@ -19,8 +18,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jgit.lib.ObjectId;
@@ -28,7 +25,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -38,15 +34,9 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 
 	private static final Logger logger = LoggerFactory.getLogger(ChannelNotificationManager.class);
 
-	private final ObjectMapper objectMapper;
-
 	private final Class<T> settingClass;
 
-	@SuppressWarnings("unchecked")
-	@Inject
-	public ChannelNotificationManager(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-
+	public ChannelNotificationManager() {
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ChannelNotificationManager.class, getClass());
 		if (typeArguments.size() == 1 && ChannelNotificationSetting.class.isAssignableFrom(typeArguments.get(0))) {
 			settingClass = (Class<T>) typeArguments.get(0);
@@ -65,8 +55,10 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle());
 
 			String eventDescription;
-			if (user != null) eventDescription = user.getDisplayName() + " " + event.getActivity();
-			else eventDescription = StringUtils.capitalize(event.getActivity());
+			if (user != null) 
+				eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else 
+				eventDescription = StringUtils.capitalize(event.getActivity());
 
 			postIfApplicable(issueInfo + " " + eventDescription, event);
 		}
@@ -148,16 +140,11 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	}
 
 	private void postIfApplicable(String title, ProjectEvent event) {
-		Object data = toJsonObject(title, event);
-
 		for (ChannelNotification notification : getNotifications(event.getProject())) {
 			if (notification.matches(event)) {
 				try (CloseableHttpClient client = HttpClientBuilder.create().useSystemProperties().build()) {
 					HttpPost post = new HttpPost(notification.getWebhookUrl());
-
-					StringEntity requestEntity = new StringEntity(objectMapper.writeValueAsString(data), ContentType.APPLICATION_JSON);
-					post.setEntity(requestEntity);
-
+					post(post, title, event);
 					try (CloseableHttpResponse response = client.execute(post)) {
 						if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK && response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
 							HttpEntity responseEntity = response.getEntity();
@@ -177,7 +164,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			}
 		}
 	}
-
-	protected abstract Object toJsonObject(String title, ProjectEvent event);
+	
+	protected abstract void post(HttpPost post, String title, ProjectEvent event);
 
 }

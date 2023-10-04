@@ -31,7 +31,7 @@ public class ChannelNotificationSetting implements ContributedProjectSetting, Va
 	public void setNotifications(List<ChannelNotificationWrapper> notifications) {
 		this.notifications = notifications;
 	}
-
+	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		Set<String> webhookUrls = new HashSet<>();
