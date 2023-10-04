@@ -8,7 +8,7 @@ import javax.persistence.criteria.*;
 import static io.onedev.server.model.Issue.*;
 
 
-public class CompletionRateCriteria extends Criteria<Issue> {
+public class ProgressCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,31 +16,31 @@ public class CompletionRateCriteria extends Criteria<Issue> {
 	
 	private final int operator;
 	
-	public CompletionRateCriteria(float value, int operator) {
+	public ProgressCriteria(float value, int operator) {
 		this.value = value;
 		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		Path<Integer> completionRateAttribute = from.get(PROP_COMPLETION_RATE);
+		Path<Integer> progressAttribute = from.get(PROP_PROGRESS);
 		Predicate ratePredicate;
 		int intValue = (int)(value*100);
 		if (operator == IssueQueryLexer.IsGreaterThan)
-			ratePredicate = builder.gt(completionRateAttribute, intValue);
+			ratePredicate = builder.gt(progressAttribute, intValue);
 		else
-			ratePredicate = builder.lt(completionRateAttribute, intValue);
-		return builder.and(builder.not(builder.equal(completionRateAttribute, -1)), ratePredicate);
+			ratePredicate = builder.lt(progressAttribute, intValue);
+		return builder.and(builder.not(builder.equal(progressAttribute, -1)), ratePredicate);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (issue.getCompletionRate() != -1) {
+		if (issue.getProgress() != -1) {
 			int intValue = (int)(value*100);
 			if (operator == IssueQueryLexer.IsGreaterThan)
-				return issue.getCompletionRate() > intValue;
+				return issue.getProgress() > intValue;
 			else
-				return issue.getCompletionRate() < intValue;
+				return issue.getProgress() < intValue;
 		} else {
 			return false;
 		}
@@ -48,7 +48,7 @@ public class CompletionRateCriteria extends Criteria<Issue> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(NAME_COMPLETION_RATE) + " "
+		return quote(NAME_PROGRESS) + " "
 				+ IssueQuery.getRuleName(operator) + " "
 				+ quote(String.format("%.2f", value));
 	}

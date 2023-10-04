@@ -95,7 +95,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					private Map<String, String> getFieldCandidates(Collection<String> fields) {
 						Map<String, String> candidates = new LinkedHashMap<>();
 						for (var field: fields) {
-							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME) || field.equals(NAME_COMPLETION_RATE))
+							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME) || field.equals(NAME_PROGRESS))
 									&& issueSetting.getTimeTrackingSetting().getAggregationLink() != null) {
 								if (field.equals(NAME_ESTIMATED_TIME))
 									candidates.put(field, "Total estimated time");
@@ -103,7 +103,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									candidates.put(field, "Total spent time");
 								else
 									candidates.put(field, "Total spent time / total estimated time");
-							} else if (field.equals(NAME_COMPLETION_RATE)) {
+							} else if (field.equals(NAME_PROGRESS)) {
 								candidates.put(field, "Spent time / estimated time");
 							} else {
 								candidates.put(field, null);
@@ -126,7 +126,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
-								candidates.remove(NAME_COMPLETION_RATE);
+								candidates.remove(NAME_PROGRESS);
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
@@ -136,7 +136,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
-								candidates.remove(NAME_COMPLETION_RATE);
+								candidates.remove(NAME_PROGRESS);
 							}
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
@@ -237,7 +237,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											if ("1w 1d 1h 1m".contains(matchWith.toLowerCase()))
 												suggestions.add(new InputSuggestion("1w 1d 1h 1m", "specify working period, modify as necessary", null));
 											return !suggestions.isEmpty()? suggestions: null;
-										} else if (fieldName.equals(NAME_COMPLETION_RATE)) {
+										} else if (fieldName.equals(NAME_PROGRESS)) {
 											var suggestions = new ArrayList<InputSuggestion>();
 											if ("0.5".contains(matchWith.toLowerCase()))
 												suggestions.add(new InputSuggestion("0.5", "specify decimal number, modify as necessary", null));

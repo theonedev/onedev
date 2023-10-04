@@ -298,9 +298,9 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								} else if (fieldName.equals(NAME_SPENT_TIME)) {
 									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: parseWorkingPeriod(value);
 									return new SpentTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(Issue.NAME_COMPLETION_RATE)) {
+								} else if (fieldName.equals(Issue.NAME_PROGRESS)) {
 									var floatValue = getFloatValue(value);
-									return new CompletionRateCriteria(floatValue, operator);
+									return new ProgressCriteria(floatValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IntegerField) {
@@ -461,7 +461,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
 						&& !fieldName.equals(NAME_SPENT_TIME)
-						&& !fieldName.equals(NAME_COMPLETION_RATE)
+						&& !fieldName.equals(NAME_PROGRESS)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)

@@ -140,19 +140,19 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final String PROP_OWN_SPENT_TIME = "ownSpentTime";
 	
-	public static final String NAME_COMPLETION_RATE = "Completion Rate";
+	public static final String NAME_PROGRESS = "Progress";
 	
-	public static final String PROP_COMPLETION_RATE = "completionRate";
+	public static final String PROP_PROGRESS = "progress";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
 			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE, 
-			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_COMPLETION_RATE);
+			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION,
-			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_COMPLETION_RATE,
+			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
@@ -175,7 +175,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		}));
 		ORDER_FIELDS.put(NAME_ESTIMATED_TIME, new SortField<>(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
 		ORDER_FIELDS.put(NAME_SPENT_TIME, new SortField<>(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
-		ORDER_FIELDS.put(NAME_COMPLETION_RATE, new SortField<>(PROP_COMPLETION_RATE, comparingInt(Issue::getCompletionRate)));
+		ORDER_FIELDS.put(NAME_PROGRESS, new SortField<>(PROP_PROGRESS, comparingInt(Issue::getProgress)));
 	}
 	
 	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {
@@ -233,7 +233,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private int ownSpentTime;
 	
-	private int completionRate = -1;
+	private int progress = -1;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -535,14 +535,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setTotalEstimatedTime(int totalEstimatedTime) {
 		this.totalEstimatedTime = totalEstimatedTime;
-		calcCompletionRate();
+		calcProgress();
 	}
 	
-	private void calcCompletionRate() {
+	private void calcProgress() {
 		if (totalEstimatedTime != 0)
-			completionRate = totalSpentTime * 100 / totalEstimatedTime;
+			progress = totalSpentTime * 100 / totalEstimatedTime;
 		else
-			completionRate = -1;
+			progress = -1;
 	}
 
 	public int getTotalSpentTime() {
@@ -551,7 +551,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setTotalSpentTime(int totalSpentTime) {
 		this.totalSpentTime = totalSpentTime;
-		calcCompletionRate();
+		calcProgress();
 	}
 
 	public int getOwnEstimatedTime() {
@@ -570,8 +570,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		this.ownEstimatedTime = ownEstimatedTime;
 	}
 
-	public int getCompletionRate() {
-		return completionRate;
+	public int getProgress() {
+		return progress;
 	}
 
 	public Collection<IssueField> getFields() {
