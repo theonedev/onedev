@@ -56,6 +56,11 @@ public class TimesheetWidget extends Widget {
 	protected Component doRender(String componentId) {
 		return new TimesheetWidgetPanel(componentId) {
 			@Override
+			protected String getTitle() {
+				return TimesheetWidget.this.getTitle();
+			}
+
+			@Override
 			protected TimesheetSetting getSetting() {
 				return setting;
 			}

@@ -5841,6 +5841,7 @@ public class DataMigrator {
 									fieldSpecElement.addElement("editEstimatedTime").setText("true");
 								}
 							}
+							valueElement.addElement("timeTrackingSetting");
 						}
 					}
 				}

@@ -321,6 +321,10 @@
 			<artifactId>javase</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.dhatim</groupId>
+			<artifactId>fastexcel</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 		</dependency>

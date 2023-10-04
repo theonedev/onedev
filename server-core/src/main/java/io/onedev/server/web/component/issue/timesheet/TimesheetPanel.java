@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.timesheet;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.Issue;
@@ -18,8 +19,8 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -29,8 +30,12 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.dhatim.fastexcel.Workbook;
+import org.dhatim.fastexcel.Worksheet;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
@@ -40,8 +45,10 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 
 import static io.onedev.server.model.Issue.NAME_PROJECT;
+import static io.onedev.server.model.support.issue.TimesheetSetting.DateRangeType.MONTH;
 import static io.onedev.server.model.support.issue.TimesheetSetting.DateRangeType.WEEK;
 import static io.onedev.server.model.support.issue.TimesheetSetting.RowType.ISSUES;
+import static io.onedev.server.model.support.issue.TimesheetSetting.RowType.USERS;
 import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 import static io.onedev.server.web.component.user.ident.Mode.AVATAR_AND_NAME;
 import static java.util.stream.Collectors.toList;
@@ -189,9 +196,7 @@ public abstract class TimesheetPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<LocalDate> item) {
 				var date = item.getModelObject();
-				var weekDay = date.getDayOfWeek().toString();
-				weekDay = weekDay.substring(0, 1) + weekDay.substring(1, 3).toLowerCase();
-				item.add(new Label("day", String.format("%d %s", date.getDayOfMonth(), weekDay)));
+				item.add(new Label("day", formatWeekDay(date)));
 				if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY)
 					item.add(AttributeAppender.append("class", " weekend"));
 			}
@@ -224,6 +229,32 @@ public abstract class TimesheetPanel extends Panel {
 			add(new WebMarkupContainer("message").setVisible(false));
 		setOutputMarkupId(true);
 	}
+	
+	private String formatWeekDay(LocalDate date) {
+		var weekDay = date.getDayOfWeek().toString();
+		weekDay = weekDay.substring(0, 1) + weekDay.substring(1, 3).toLowerCase();
+		return String.format("%d %s", date.getDayOfMonth(), weekDay);
+	}
+	
+	public void exportAsXlsx(String title, OutputStream os) {
+		var version = StringUtils.substringBeforeLast(OneDev.getInstance().getVersion(), ".");
+		try (
+				var workBook = new Workbook(os, "OneDev", version); 
+			 	var worksheet = workBook.newWorksheet(title)) {
+			worksheet.range(0, 0, 0, 2).merge();
+			worksheet.value(0, 0, getFromDate().toString() + " -> " + getToDate().toString());
+	
+			var colIndex = 3;
+			for (var date : datesModel.getObject())
+				worksheet.value(0, colIndex++, formatWeekDay(date));
+
+			var rowIndex = 1;
+			for (var row: rowsModel.getObject()) 
+				row.fill(worksheet, rowIndex++);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	protected void onDetach() {
@@ -247,7 +278,7 @@ public abstract class TimesheetPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new TimesheeResourceReference()));
+		response.render(CssHeaderItem.forReference(new TimesheeCssResourceReference()));
 	}
 
 	@Nullable
@@ -273,9 +304,20 @@ public abstract class TimesheetPanel extends Panel {
 			return spentTimes.values().stream().reduce(0, Integer::sum);
 		}
 		
+		void fillSpentTimes(Worksheet worksheet, int rowIndex, boolean bold) {
+			for (var entry: spentTimes.entrySet()) {
+				var colIndex = (int)(entry.getKey() - getFromDate().toEpochDay()) + 3;
+				worksheet.value(rowIndex, colIndex, formatWorkingPeriod(entry.getValue()));
+				if (bold)
+					worksheet.style(rowIndex, colIndex).bold().set();
+			}
+		}
+		
 		abstract Component renderSummary(String componentId);
 		
 		abstract Component renderSpentTime(String componentId, long day);
+		
+		abstract void fill(Worksheet worksheet, int rowIndex);
 	}
 	
 	private class TotalRow extends Row {
@@ -298,6 +340,16 @@ public abstract class TimesheetPanel extends Panel {
 			}
 		}
 
+		@Override
+		void fill(Worksheet worksheet, int rowIndex) {
+			worksheet.range(rowIndex, 0, rowIndex, 1).merge();
+			worksheet.value(rowIndex, 0, "Total time");
+			worksheet.style(rowIndex, 0).bold().set();
+			worksheet.value(rowIndex, 2, formatWorkingPeriod(getToalSpentTime()));
+			worksheet.style(rowIndex, 2).bold().set();
+			fillSpentTimes(worksheet, rowIndex, true);
+		}
+
 	}
 	
 	private class GroupRow extends Row {
@@ -312,7 +364,12 @@ public abstract class TimesheetPanel extends Panel {
 				fragment = new Fragment(componentId, "projectSummaryFrag", TimesheetPanel.this);
 				var link = new BookmarkablePageLink<Void>("project", ProjectBlobPage.class, ProjectBlobPage.paramsOf(projectId));
 				link.add(new ProjectAvatar("avatar", projectId));
-				link.add(new Label("path", OneDev.getInstance(ProjectManager.class).load(projectId).getPath()));
+				
+				var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				var path = StringUtils.abbreviate(project.getPath(), getMaxLen());
+				link.add(new Label("path", path));
+				if (!path.equals(project.getPath()))
+					link.add(AttributeAppender.append("title", project.getPath()));
 				fragment.add(link);
 			} else {
 				fragment = new Fragment(componentId, "fieldValueSummaryFrag", TimesheetPanel.this);
@@ -332,7 +389,23 @@ public abstract class TimesheetPanel extends Panel {
 				return new WebMarkupContainer(componentId);
 			}
 		}
-		
+
+		@Override
+		void fill(Worksheet worksheet, int rowIndex) {
+			worksheet.range(rowIndex, 0, rowIndex, 1).merge();
+			if (getSetting().getGroupBy().equals(NAME_PROJECT)) {
+				var projectId = Long.valueOf(group);
+				var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				worksheet.value(rowIndex, 0, project.getPath());
+			} else {
+				worksheet.value(rowIndex, 0, group);
+			}
+			worksheet.style(rowIndex, 0).bold().set();
+			worksheet.value(rowIndex, 2, formatWorkingPeriod(getToalSpentTime()));
+			worksheet.style(rowIndex, 2).bold().set();
+			fillSpentTimes(worksheet, rowIndex, true);
+		}
+
 	}
 
 	private class ItemRow extends Row {
@@ -346,8 +419,11 @@ public abstract class TimesheetPanel extends Panel {
 				fragment = new Fragment(componentId, "issueSummaryFrag", TimesheetPanel.this);
 				var issue = OneDev.getInstance(IssueManager.class).load(item);
 				var link = new BookmarkablePageLink<Void>("issue", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
-				link.add(new Label("number", "Issue " + getIssueNumber(issue)));
-				link.add(AttributeAppender.append("title", issue.getTitle()));
+				link.add(new Label("number", getIssueNumber(issue, getMaxLen() / 2)));
+				var title = StringUtils.abbreviate(issue.getTitle(), getMaxLen());
+				link.add(new Label("title", title));
+				if (!title.equals(issue.getTitle()))
+					link.add(AttributeAppender.append("title", issue.getTitle()));
 				fragment.add(link);
 			} else {
 				fragment = new Fragment(componentId, "userSummaryFrag", TimesheetPanel.this);
@@ -412,7 +488,7 @@ public abstract class TimesheetPanel extends Panel {
 									var issue = work.getIssue();
 									var link = new BookmarkablePageLink<Void>("issue", IssueActivitiesPage.class,
 											IssueActivitiesPage.paramsOf(issue));
-									link.add(new Label("number", getIssueNumber(issue)));
+									link.add(new Label("number", getIssueNumber(issue, Integer.MAX_VALUE)));
 									link.add(new Label("title", issue.getTitle()));
 									item.add(link);
 									item.add(new Label("spentTime", formatWorkingPeriod(work.getHours())));
@@ -433,12 +509,32 @@ public abstract class TimesheetPanel extends Panel {
 			}
 		}
 
-		private String getIssueNumber(Issue issue) {
+		@Override
+		void fill(Worksheet worksheet, int rowIndex) {
+			if (getSetting().getRowType() == USERS) {
+				var user = OneDev.getInstance(UserManager.class).load(item);
+				worksheet.value(rowIndex, 1, user.getDisplayName());
+			} else {
+				var issue = OneDev.getInstance(IssueManager.class).load(item);
+				worksheet.value(rowIndex, 1, getIssueNumber(issue, Integer.MAX_VALUE) + " " + issue.getTitle());
+			}
+			worksheet.value(rowIndex, 2, formatWorkingPeriod(getToalSpentTime()));
+			fillSpentTimes(worksheet, rowIndex, false);
+		}
+
+		private String getIssueNumber(Issue issue, int maxLength) {
 			if (NAME_PROJECT.equals(getSetting().getGroupBy()) || issue.getProject().equals(getProject()))
 				return "#" + issue.getNumber();
-			else
-				return issue.getFQN().toString();
+			else 
+				return StringUtils.abbreviate(issue.getProject().getPath(), maxLength) + "#" + issue.getNumber();
 		}
+	}
+	
+	private int getMaxLen() {
+		if (getSetting().getDateRangeType() == MONTH)
+			return 50;
+		else
+			return 100;
 	}
 	
 }

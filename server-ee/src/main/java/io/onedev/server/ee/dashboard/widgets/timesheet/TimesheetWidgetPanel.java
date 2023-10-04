@@ -4,10 +4,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.TimesheetSetting;
 import io.onedev.server.web.component.issue.timesheet.DateRangeNavigator;
 import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
-import org.apache.wicket.Component;
+import io.onedev.server.web.component.issue.timesheet.TimesheetXlsxResource;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 
@@ -15,7 +15,7 @@ public abstract class TimesheetWidgetPanel extends Panel {
 	
 	private LocalDate baseDate;
 	
-	private Component body;
+	private TimesheetPanel timesheet;
 	
 	public TimesheetWidgetPanel(String id) {
 		super(id);
@@ -34,7 +34,7 @@ public abstract class TimesheetWidgetPanel extends Panel {
 			@Override
 			protected void onBaseDateUpdate(AjaxRequestTarget target, LocalDate baseDate) {
 				TimesheetWidgetPanel.this.baseDate = baseDate;
-				target.add(body);
+				target.add(timesheet);
 			}
 
 			@Override
@@ -43,8 +43,21 @@ public abstract class TimesheetWidgetPanel extends Panel {
 			}
 			
 		});
+
+		add(new ResourceLink<Void>("export", new TimesheetXlsxResource() {
+
+			@Override
+			protected String getTitle() {
+				return TimesheetWidgetPanel.this.getTitle();
+			}
+
+			@Override
+			protected TimesheetPanel getTimesheet() {
+				return timesheet;
+			}
+		}));
 		
-		add(body = new TimesheetPanel("body") {
+		add(timesheet = new TimesheetPanel("body") {
 			
 			@Override
 			protected Project getProject() {
@@ -63,6 +76,8 @@ public abstract class TimesheetWidgetPanel extends Panel {
 		});
 	}
 
+	protected abstract String getTitle();
+	
 	protected abstract TimesheetSetting getSetting();
 	
 }

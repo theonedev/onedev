@@ -596,6 +596,11 @@
 				<artifactId>hazelcast-hibernate53</artifactId>
 				<version>2.2.1</version>
 			</dependency>
+			<dependency>
+				<groupId>org.dhatim</groupId>
+				<artifactId>fastexcel</artifactId>
+				<version>0.15.7</version>
+			</dependency>			
 		</dependencies>
 	</dependencyManagement>
 	<repositories>

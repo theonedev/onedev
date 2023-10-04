@@ -13,6 +13,7 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.timesheet.DateRangeNavigator;
 import io.onedev.server.web.component.issue.timesheet.TimesheetPanel;
+import io.onedev.server.web.component.issue.timesheet.TimesheetXlsxResource;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -29,6 +30,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -53,7 +55,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 	
 	private Map<String, TimesheetSetting> hierarchyTimesheetSettings;
 	
-	private Component body;
+	private TimesheetPanel timesheet;
 	
 	public TimesheetsPage(PageParameters params) {
 		super(params);
@@ -225,7 +227,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 				@Override
 				protected void onBaseDateUpdate(AjaxRequestTarget target, LocalDate baseDate) {
 					state.baseDate = baseDate;
-					target.add(body);
+					target.add(timesheet);
 					var url = urlFor(TimesheetsPage.class, paramsOf(getProject(), state.timesheetName, state.baseDate));
 					pushState(target, url.toString(), state);
 				}
@@ -235,7 +237,20 @@ public class TimesheetsPage extends ProjectIssuesPage {
 					return TimesheetsPage.this.getTimesheetSetting();
 				}
 			});
-			fragment.add(body = new TimesheetPanel("body") {
+			fragment.add(new ResourceLink<Void>("export", new TimesheetXlsxResource() {
+
+				@Override
+				protected String getTitle() {
+					return state.timesheetName;
+				}
+
+				@Override
+				protected TimesheetPanel getTimesheet() {
+					return timesheet;
+				}
+			}));
+			
+			fragment.add(timesheet = new TimesheetPanel("body") {
 				
 				@Override
 				protected Project getProject() {
