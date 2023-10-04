@@ -2,14 +2,11 @@ package io.onedev.server.web.component.issue.progress;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.security.SecurityUtils;
@@ -149,7 +146,7 @@ abstract class IssueTimePanel extends Panel {
 						IssueWork work = new IssueWork();
 						work.setIssue(getIssue());
 						work.setUser(SecurityUtils.getUser());
-						work.setHours(bean.getSpentTime());
+						work.setMinutes(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
 						work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 						work.setNote(bean.getNote());

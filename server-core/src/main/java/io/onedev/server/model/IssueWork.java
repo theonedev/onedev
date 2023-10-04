@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.onedev.server.util.Day;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -40,7 +39,7 @@ public class IssueWork extends AbstractEntity {
 	@JsonIgnore
 	private long day;
 	
-	private int hours;
+	private int minutes;
 
 	@Column(length=MAX_CONTENT_LEN)
 	private String note;
@@ -77,12 +76,12 @@ public class IssueWork extends AbstractEntity {
 		this.day = day;
 	}
 
-	public int getHours() {
-		return hours;
+	public int getMinutes() {
+		return minutes;
 	}
 
-	public void setHours(int hours) {
-		this.hours = hours;
+	public void setMinutes(int minutes) {
+		this.minutes = minutes;
 	}
 
 	@Nullable

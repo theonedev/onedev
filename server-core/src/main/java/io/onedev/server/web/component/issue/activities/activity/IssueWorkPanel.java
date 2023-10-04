@@ -57,7 +57,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 	
 	private Component newDetailViewer(String componentId) {
 		var fragment = new Fragment(componentId, "detailViewFrag", this);
-		fragment.add(new Label("workingPeriod", formatWorkingPeriod(getWork().getHours())));
+		fragment.add(new Label("workingPeriod", formatWorkingPeriod(getWork().getMinutes())));
 		if (getWork().getNote() != null)
 			fragment.add(new MarkdownViewer("note", Model.of(getWork().getNote()), null));
 		else 
@@ -110,7 +110,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 		var bean = new IssueWorkBean();
 		bean.setNote(getWork().getNote());
 		bean.setStartAt(getWork().getDate());
-		bean.setSpentTime(getWork().getHours());
+		bean.setSpentTime(getWork().getMinutes());
 		form.add(BeanContext.edit("editor", bean));
 		form.add(new AjaxButton("save") {
 			@Override
@@ -120,7 +120,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
 				work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
-				work.setHours(bean.getSpentTime());
+				work.setMinutes(bean.getSpentTime());
 				getWorkManager().update(work);
 				var detailViewer = newDetailViewer("detail");
 				fragment.replaceWith(detailViewer);

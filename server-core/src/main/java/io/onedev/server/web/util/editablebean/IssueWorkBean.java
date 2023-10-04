@@ -15,7 +15,7 @@ import java.util.Date;
 @Editable(name="Log Work")
 public class IssueWorkBean implements Serializable {
 	
-	private Integer spentTime = 8;
+	private Integer spentTime = 8 * 60;
 	
 	private Date startAt = new Date();
 	

@@ -234,8 +234,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 												return null;
 										} else if (fieldName.equals(NAME_ESTIMATED_TIME) || fieldName.equals(NAME_SPENT_TIME)) {
 											var suggestions = new ArrayList<InputSuggestion>();
-											if ("1w 1d 1h".contains(matchWith.toLowerCase()))
-												suggestions.add(new InputSuggestion("1w 1d 1h", "specify working period, modify as necessary", null));
+											if ("1w 1d 1h 1m".contains(matchWith.toLowerCase()))
+												suggestions.add(new InputSuggestion("1w 1d 1h 1m", "specify working period, modify as necessary", null));
 											return !suggestions.isEmpty()? suggestions: null;
 										} else if (fieldName.equals(NAME_COMPLETION_RATE)) {
 											var suggestions = new ArrayList<InputSuggestion>();

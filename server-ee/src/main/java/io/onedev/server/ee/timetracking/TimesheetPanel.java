@@ -111,7 +111,7 @@ public abstract class TimesheetPanel extends Panel {
 			var itemRows = new HashMap<String, ItemRow>();
 			
 			for (var work: works) {
-				totalRow.spentTimes.merge(work.getDay(), work.getHours(), Integer::sum);
+				totalRow.spentTimes.merge(work.getDay(), work.getMinutes(), Integer::sum);
 				
 				if (getSetting().getGroupBy() != null) {
 					String group;
@@ -132,7 +132,7 @@ public abstract class TimesheetPanel extends Panel {
 							groupRows.put(group, groupRow);
 							rows.add(groupRow);
 						}
-						groupRow.spentTimes.merge(work.getDay(), work.getHours(), Integer::sum);
+						groupRow.spentTimes.merge(work.getDay(), work.getMinutes(), Integer::sum);
 
 						var item = getSetting().getRowType() == ISSUES? work.getIssue().getId(): work.getUser().getId();
 						var itemKey = Hex.encodeHexString(group.getBytes(StandardCharsets.UTF_8)) + ":" + item;
@@ -150,7 +150,7 @@ public abstract class TimesheetPanel extends Panel {
 							if (!rows.contains(itemRow))
 								rows.add(itemRow);
 						}
-						itemRow.spentTimes.merge(work.getDay(), work.getHours(), Integer::sum);
+						itemRow.spentTimes.merge(work.getDay(), work.getMinutes(), Integer::sum);
 					}
 				} else {
 					var item = getSetting().getRowType() == ISSUES? work.getIssue().getId(): work.getUser().getId();
@@ -162,7 +162,7 @@ public abstract class TimesheetPanel extends Panel {
 						itemRows.put(itemKey, itemRow);
 						rows.add(itemRow);
 					}
-					itemRow.spentTimes.merge(work.getDay(), work.getHours(), Integer::sum);
+					itemRow.spentTimes.merge(work.getDay(), work.getMinutes(), Integer::sum);
 				}
 			}
 			if (NAME_PROJECT.equals(getSetting().getGroupBy()) 
@@ -464,7 +464,7 @@ public abstract class TimesheetPanel extends Panel {
 								protected void populateItem(ListItem<IssueWork> item) {
 									var work = item.getModelObject();
 									item.add(new UserIdentPanel("user", work.getUser(), AVATAR_AND_NAME));
-									item.add(new Label("spentTime", formatWorkingPeriod(work.getHours())));
+									item.add(new Label("spentTime", formatWorkingPeriod(work.getMinutes())));
 									item.add(renderNote("note", work));
 								}
 
@@ -491,7 +491,7 @@ public abstract class TimesheetPanel extends Panel {
 									link.add(new Label("number", getIssueNumber(issue, Integer.MAX_VALUE)));
 									link.add(new Label("title", issue.getTitle()));
 									item.add(link);
-									item.add(new Label("spentTime", formatWorkingPeriod(work.getHours())));
+									item.add(new Label("spentTime", formatWorkingPeriod(work.getMinutes())));
 									item.add(renderNote("note", work));
 								}
 
