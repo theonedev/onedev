@@ -1,25 +1,5 @@
 package io.onedev.server.rest;
 
-import java.io.Serializable;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -29,6 +9,18 @@ import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
 
 @Api(order=5010)
 @Path("/email-addresses")
@@ -132,8 +124,8 @@ public class EmailAddressResource {
 		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser()))
 			throw new UnauthorizedException();
 
-		if (settingManager.getMailSetting() == null)
-			throw new ExplicitException("Unable to send verification email as mail setting is not specified");
+		if (settingManager.getMailService() == null)
+			throw new ExplicitException("Unable to send verification email as mail service is not configured");
 		if (emailAddress.isVerified())
 			throw new ExplicitException("Unable to send verification email as this email address is already verified");
 		

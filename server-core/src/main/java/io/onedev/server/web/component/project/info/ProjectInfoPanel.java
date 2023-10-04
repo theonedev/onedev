@@ -38,7 +38,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,13 +135,13 @@ public abstract class ProjectInfoPanel extends Panel {
         
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         if (settingManager.getServiceDeskSetting() != null
-        		&& settingManager.getMailSetting() != null 
-        		&& settingManager.getMailSetting().getCheckSetting() != null
+        		&& settingManager.getMailService() != null 
+        		&& settingManager.getMailService().getInboxMonitor() != null
         		&& getProject().isIssueManagement()) {
         	
         	String subAddressed;
         	
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailSetting().getCheckSetting().getCheckAddress());
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
 			if (getProject().getServiceDeskName() != null)
 				subAddressed = checkAddress.getSubAddressed(getProject().getServiceDeskName());
 			else

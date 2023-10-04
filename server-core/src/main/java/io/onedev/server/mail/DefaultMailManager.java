@@ -6,7 +6,6 @@ import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.ibm.icu.impl.locale.XCldrStub.Splitter;
 import com.sun.mail.imap.IMAPFolder;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -25,7 +24,6 @@ import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -52,7 +50,6 @@ import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -60,7 +57,6 @@ import javax.inject.Singleton;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.internet.MimeMessage.RecipientType;
-import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -74,8 +70,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
-import static io.onedev.server.model.Setting.Key.MAIL;
+import static io.onedev.server.model.Setting.Key.MAIL_SERVICE;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
@@ -117,8 +114,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private final EmailAddressManager emailAddressManager;
 	
-	private final UrlManager urlManager;
-	
 	private final AttachmentManager attachmentManager;
 	
 	private final ClusterManager clusterManager;
@@ -127,14 +122,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	@Inject
 	public DefaultMailManager(TransactionManager transactionManager, SettingManager settingManager, 
-			UserManager userManager, ProjectManager projectManager, 
-			UserAuthorizationManager authorizationManager, IssueManager issueManager, 
-			IssueCommentManager issueCommentManager, IssueWatchManager issueWatchManager, 
-			PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
-			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
-			UrlManager urlManager, EmailAddressManager emailAddressManager, 
-			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager, 
-			ClusterManager clusterManager) {
+							  UserManager userManager, ProjectManager projectManager, 
+							  UserAuthorizationManager authorizationManager, IssueManager issueManager, 
+							  IssueCommentManager issueCommentManager, IssueWatchManager issueWatchManager, 
+							  PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
+							  PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
+							  EmailAddressManager emailAddressManager, IssueAuthorizationManager issueAuthorizationManager, 
+							  AttachmentManager attachmentManager, ClusterManager clusterManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
 		this.userManager = userManager;
@@ -147,7 +141,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.pullRequestCommentManager = pullRequestCommentManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
 		this.executorService = executorService;
-		this.urlManager = urlManager;
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.attachmentManager = attachmentManager;
@@ -163,26 +156,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 	public void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 							  String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 							  @Nullable String senderName, @Nullable String references) {
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				executorService.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
-									senderName, references);
-						} catch (Exception e) {
-							logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
-						}		
-					}
-					
-				});
-			}
-			
-		});
+		transactionManager.runAfterCommit(() -> executorService.execute(() -> {
+			try {
+				sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
+						senderName, references);
+			} catch (Exception e) {
+				logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
+			}		
+		}));
 	}
 	
 	private String getThreadIndex(String references) {
@@ -221,105 +202,96 @@ public class DefaultMailManager implements MailManager, Serializable {
     }
     
 	@Override
-	public void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
-						 Collection<String> bccList, String subject, String htmlBody, String textBody, 
-						 @Nullable String replyAddress, @Nullable String senderName, 
+	public void sendMail(SmtpSetting smtpSetting, Collection<String> toList, Collection<String> ccList,
+						 Collection<String> bccList, String subject, String htmlBody, String textBody,
+						 @Nullable String replyAddress, @Nullable String senderName, String senderAddress,
 						 @Nullable String references) {
 		if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 			return;
 
-		if (sendSetting == null) {
-			MailSetting mailSetting = settingManager.getMailSetting();
-			sendSetting = mailSetting!=null? mailSetting.getSendSetting(): null;
+		Properties properties = new Properties();
+		properties.setProperty("mail.smtp.host", smtpSetting.getSmtpHost());
+		
+		smtpSetting.getSslSetting().configure(properties);
+ 
+		properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
+		properties.setProperty("mail.smtp.timeout", String.valueOf(smtpSetting.getTimeout()*1000));
+		
+		Authenticator authenticator;
+		if (smtpSetting.getSmtpUser() != null) {
+			properties.setProperty("mail.smtp.auth", "true");
+			if (smtpSetting.getSmtpCredential() instanceof OAuthAccessToken)
+				properties.setProperty("mail.smtp.auth.mechanisms", "XOAUTH2");
+			String smtpUser = smtpSetting.getSmtpUser();
+			String credentialValue = smtpSetting.getSmtpCredential()!=null? smtpSetting.getSmtpCredential().getValue():null;
+			authenticator = new Authenticator() {
+				
+				@Override
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(smtpUser, credentialValue);
+				}
+				
+			};	        	
+		} else {
+			authenticator = null;
 		}
 		
-		if (sendSetting != null) {
-			Properties properties = new Properties();
-	        properties.setProperty("mail.smtp.host", sendSetting.getSmtpHost());
+		try {
+			Session session = Session.getInstance(properties, authenticator);	        
 			
-			sendSetting.getSslSetting().configure(properties);
-	 
-	        properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
-	        properties.setProperty("mail.smtp.timeout", String.valueOf(sendSetting.getTimeout()*1000));
-	        
-	        Authenticator authenticator;
-	        if (sendSetting.getSmtpUser() != null) {
-	        	properties.setProperty("mail.smtp.auth", "true");
-	        	if (sendSetting.getSmtpCredential() instanceof OAuthAccessToken)
-	        		properties.setProperty("mail.smtp.auth.mechanisms", "XOAUTH2");
-	        	String smtpUser = sendSetting.getSmtpUser();
-	        	String credentialValue = sendSetting.getSmtpCredential()!=null?sendSetting.getSmtpCredential().getValue():null;
-	        	authenticator = new Authenticator() {
-		        	
-		            @Override
-		            protected PasswordAuthentication getPasswordAuthentication() {
-		                return new PasswordAuthentication(smtpUser, credentialValue);
-		            }
-		            
-		        };	        	
-	        } else {
-	        	authenticator = null;
-	        }
-	        
-	        try {
-				Session session = Session.getInstance(properties, authenticator);	        
-				
-				MimeMultipart bodyPart = new MimeMultipart("alternative");
-				
-				MimeBodyPart htmlPart = new MimeBodyPart();
-				htmlPart.setContent(htmlBody, "text/html; charset=" + StandardCharsets.UTF_8.name());
-				bodyPart.addBodyPart(htmlPart, 0);
-				
-				MimeBodyPart textPart = new MimeBodyPart();
-				textPart.setText(textBody, StandardCharsets.UTF_8.name());
-				bodyPart.addBodyPart(textPart, 0);
+			MimeMultipart bodyPart = new MimeMultipart("alternative");
+			
+			MimeBodyPart htmlPart = new MimeBodyPart();
+			htmlPart.setContent(htmlBody, "text/html; charset=" + StandardCharsets.UTF_8.name());
+			bodyPart.addBodyPart(htmlPart, 0);
+			
+			MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setText(textBody, StandardCharsets.UTF_8.name());
+			bodyPart.addBodyPart(textPart, 0);
 
-				Message message = new MimeMessage(session);
+			Message message = new MimeMessage(session);
+			
+			if (references != null) {
+				Map<String, String> headers = CollectionUtils.newHashMap(
+						"References", references, 
+						"In-Reply-To", references, 
+						"Thread-Index", getThreadIndex(references));
 				
-				if (references != null) {
-				    Map<String, String> headers = CollectionUtils.newHashMap(
-				    		"References", references, 
-				    		"In-Reply-To", references, 
-				    		"Thread-Index", getThreadIndex(references));
-				    
-				    for (Map.Entry<String, String> entry: headers.entrySet())
-				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
-				}
-				
-				var brandName = settingManager.getBrandingSetting().getName();
-				if (senderName == null || senderName.equalsIgnoreCase(User.SYSTEM_NAME)) {
-					if (brandName.equalsIgnoreCase(User.SYSTEM_NAME))
-						senderName = QUOTE_MARK;
-					else 
-						senderName = brandName + " " + QUOTE_MARK;
-				} else {
-					senderName += " " + QUOTE_MARK;
-				}
-				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), senderName));
-				
-				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
-					throw new ExplicitException("At least one receiver address should be specified");
-				
-				message.setRecipients(RecipientType.TO, 
-						toList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
-				message.setRecipients(RecipientType.CC, 
-						ccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
-				message.setRecipients(RecipientType.BCC, 
-						bccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
-				if (replyAddress != null)
-					message.setReplyTo(new InternetAddress[]{createInetAddress(replyAddress, null)});
-
-				message.setSubject(subject);
-				message.setContent(bodyPart);
-
-				logger.debug("Sending email (subject: {}, to: {}, cc: {}, bcc: {})... ", subject, toList, ccList, bccList);
-				
-	            Transport.send(message);
-			} catch (MessagingException e) {
-				throw new RuntimeException(e);
+				for (Map.Entry<String, String> entry: headers.entrySet())
+					message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
 			}
-		} else {
-			logger.warn("Unable to send mail as mail setting is not specified");
+			
+			var brandName = settingManager.getBrandingSetting().getName();
+			if (senderName == null || senderName.equalsIgnoreCase(User.SYSTEM_NAME)) {
+				if (brandName.equalsIgnoreCase(User.SYSTEM_NAME))
+					senderName = QUOTE_MARK;
+				else 
+					senderName = brandName + " " + QUOTE_MARK;
+			} else {
+				senderName += " " + QUOTE_MARK;
+			}
+			message.setFrom(createInetAddress(senderAddress, senderName));
+			
+			if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
+				throw new ExplicitException("At least one receiver address should be specified");
+			
+			message.setRecipients(RecipientType.TO, 
+					toList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
+			message.setRecipients(RecipientType.CC, 
+					ccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
+			message.setRecipients(RecipientType.BCC, 
+					bccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
+			if (replyAddress != null)
+				message.setReplyTo(new InternetAddress[]{createInetAddress(replyAddress, null)});
+
+			message.setSubject(subject);
+			message.setContent(bodyPart);
+
+			logger.debug("Sending email (subject: {}, to: {}, cc: {}, bcc: {})... ", subject, toList, ccList, bccList);
+			
+			Transport.send(message);
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -327,8 +299,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 						 String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 						 @Nullable String senderName, @Nullable String references) {
-		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
-				senderName, references);
+		var mailService = settingManager.getMailService();
+		if (mailService != null) {
+			mailService.sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress,
+					senderName, references);
+		} else {
+			logger.warn("Unable to send mail as mail service is not configured");
+		}
 	}
 	
 	@Transactional
@@ -336,7 +313,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Setting) {
 			Setting setting = (Setting) event.getEntity();
-			if (setting.getKey() == MAIL) {
+			if (setting.getKey() == MAIL_SERVICE) {
 				transactionManager.runAfterCommit(() -> clusterManager.submitToServer(clusterManager.getLeaderServerAddress(), () -> {
 					Thread copy = thread;
 					if (copy != null)
@@ -357,68 +334,65 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 	
+	private String getSystemAddress() {
+		var mailService = settingManager.getMailService();
+		if (mailService != null)
+			return mailService.getSystemAddress();
+		else 
+			throw new ExplicitException("Mail service not specified");
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	protected void onMessage(MailSendSetting sendSetting, MailCheckSetting checkSetting, Message message) throws MessagingException, IOException {
-		String[] toHeader = message.getHeader("To");
-		String[] fromHeader = message.getHeader("From");
-		String[] ccHeader = message.getHeader("Cc");
-		if (toHeader != null && toHeader.length != 0) {
-			if (fromHeader == null || fromHeader.length == 0)
-				throw new ExplicitException("Invalid email message: no from address found");
-			
-			if (!fromHeader[0].equalsIgnoreCase(checkSetting.getCheckAddress())) {
-				InternetAddress from = InternetAddress.parse(fromHeader[0], true)[0];
-
-				EmailAddress fromAddressEntity = emailAddressManager.findByValue(from.getAddress());
+	protected void handleMessage(MailMessage message) {
+		var toInternetAddresses = message.getToAddresses();
+		if (!toInternetAddresses.isEmpty()) {
+			var fromInternetAddress = message.getFromAddress();
+			var fromAddress = fromInternetAddress.getAddress();
+			var systemAddress = getSystemAddress();
+			var parsedSystemAddress = ParsedEmailAddress.parse(systemAddress);
+			if (!fromAddress.equalsIgnoreCase(systemAddress)) {
+				EmailAddress fromAddressEntity = emailAddressManager.findByValue(fromAddress);
 				if (fromAddressEntity != null && !fromAddressEntity.isVerified()) {
-					logger.error("Another account uses email address '{}' but not verified", from.getAddress());
+					logger.error("Another account uses email address '{}' but not verified", fromAddress);
 				} else {
-					User user = fromAddressEntity != null ? fromAddressEntity.getOwner() : null;
+					User fromUser = fromAddressEntity != null ? fromAddressEntity.getOwner() : null;
 					SenderAuthorization authorization = null;
 					String designatedProject = null;
 					ServiceDeskSetting serviceDeskSetting = settingManager.getServiceDeskSetting();
 					if (serviceDeskSetting != null) {
-						authorization = serviceDeskSetting.getSenderAuthorization(from.getAddress());
-						designatedProject = serviceDeskSetting.getDesignatedProject(from.getAddress());
+						authorization = serviceDeskSetting.getSenderAuthorization(fromAddress);
+						designatedProject = serviceDeskSetting.getDesignatedProject(fromAddress);
 					}
-					ParsedEmailAddress parsedSystemAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-					logger.trace("Parsed system address: " + parsedSystemAddress);
 
 					Collection<Issue> issues = new ArrayList<>();
 					Collection<PullRequest> pullRequests = new ArrayList<>();
 					Collection<InternetAddress> involved = new ArrayList<>();
 
-					List<InternetAddress> receivers = new ArrayList<>();
-					receivers.addAll(Arrays.asList(InternetAddress.parse(toHeader[0], true)));
+					List<InternetAddress> receiverInternetAddresses = new ArrayList<>(message.getToAddresses());
+					receiverInternetAddresses.addAll(message.getCcAddresses());
+					
+					for (InternetAddress receiverInternetAddress : receiverInternetAddresses) {
+						logger.trace("Processing on behalf of receiver '" + receiverInternetAddress.getAddress() + "'");
 
-					if (ccHeader != null && ccHeader.length != 0)
-						receivers.addAll(Arrays.asList(InternetAddress.parse(ccHeader[0], true)));
-
-					List<String> receiverEmailAddresses =
-							receivers.stream().map(InternetAddress::getAddress).collect(toList());
-
-					for (InternetAddress receiver : receivers) {
-						logger.trace("Processing on behalf of receiver '" + receiver.getAddress() + "'");
-
-						ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiver.getAddress());
+						ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiverInternetAddress.getAddress());
 
 						logger.trace("Parsed receiver address: " + parsedReceiverAddress);
 
-						if (parsedReceiverAddress.toString().equals(parsedSystemAddress.toString())) {
+						if (parsedReceiverAddress.toString().equals(systemAddress)) {
 							logger.trace("Message is targeting system address");
 							if (serviceDeskSetting != null) {
 								if (designatedProject == null)
-									throw new ExplicitException("No project designated for sender: " + from.getAddress());
+									throw new ExplicitException("No project designated for sender: " + fromInternetAddress.getAddress());
 								Project project = projectManager.findByPath(designatedProject);
 								if (project == null) {
 									String errorMessage = String.format(
 											"Sender project does not exist (sender: %s, project: %s)",
-											from.getAddress(), designatedProject);
+											fromInternetAddress.getAddress(), designatedProject);
 									throw new ExplicitException(errorMessage);
 								}
-								checkPermission(from, project, new AccessProject(), user, authorization);
-								issues.add(openIssue(message, project, from, user, authorization, parsedSystemAddress));
+								checkPermission(fromInternetAddress, project, new AccessProject(), fromUser, authorization);
+								issues.add(openIssue(message, project, fromInternetAddress, fromUser, authorization, parsedSystemAddress));
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
@@ -443,8 +417,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 									if (issue == null)
 										throw new ExplicitException("Non-existent issue specified in receipient address: " + parsedReceiverAddress);
 									if (subAddress.contains("unsubscribe")) {
-										if (user != null) {
-											IssueWatch watch = issueWatchManager.find(issue, user);
+										if (fromUser != null) {
+											IssueWatch watch = issueWatchManager.find(issue, fromUser);
 											if (watch != null) {
 												watch.setWatching(false);
 												issueWatchManager.update(watch);
@@ -457,13 +431,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 												String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 												String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 
-												sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-														subject, htmlBody, textBody, null, null, getMessageId(message));
+												sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
+														subject, htmlBody, textBody, null, null, message.getId());
 											}
 										}
 									} else {
-										checkPermission(from, issue.getProject(), new AccessProject(), user, authorization);
-										addComment(sendSetting, issue, message, from, receiverEmailAddresses, user, authorization);
+										checkPermission(fromInternetAddress, issue.getProject(), new AccessProject(), fromUser, authorization);
+										addComment(issue, message, fromInternetAddress, fromUser, authorization, receiverInternetAddresses);
 										issues.add(issue);
 									}
 								} else if (subAddress.contains("pullrequest")) {
@@ -473,8 +447,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 									if (pullRequest == null)
 										throw new ExplicitException("Non-existent pull request specified in receipient address: " + parsedReceiverAddress);
 									if (subAddress.contains("unsubscribe")) {
-										if (user != null) {
-											PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, user);
+										if (fromUser != null) {
+											PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, fromUser);
 											if (watch != null) {
 												watch.setWatching(false);
 												pullRequestWatchManager.update(watch);
@@ -485,13 +459,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 												bindings.put("pullRequest", pullRequest);
 												String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 												String textBody = EmailTemplates.evalTemplate(false, template, bindings);
-												sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-														subject, htmlBody, textBody, null, null, getMessageId(message));
+												sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
+														subject, htmlBody, textBody, null, null, message.getId());
 											}
 										}
 									} else {
-										checkPermission(from, pullRequest.getTargetProject(), new ReadCode(), user, authorization);
-										addComment(sendSetting, pullRequest, message, from, receiverEmailAddresses, user, authorization);
+										checkPermission(fromInternetAddress, pullRequest.getTargetProject(), new ReadCode(), fromUser, authorization);
+										addComment(pullRequest, message, fromInternetAddress, fromUser, authorization, receiverInternetAddresses);
 										pullRequests.add(pullRequest);
 									}
 								} else {
@@ -507,16 +481,16 @@ public class DefaultMailManager implements MailManager, Serializable {
 								if (project == null)
 									throw new ExplicitException("Non-existent project specified in receipient address: " + parsedReceiverAddress);
 								if (serviceDeskSetting != null) {
-									checkPermission(from, project, new AccessProject(), user, authorization);
+									checkPermission(fromInternetAddress, project, new AccessProject(), fromUser, authorization);
 									logger.debug("Creating issue via email (project: {})...", project.getPath());
-									issues.add(openIssue(message, project, from, user, authorization, parsedSystemAddress));
+									issues.add(openIssue(message, project, fromInternetAddress, fromUser, authorization, parsedSystemAddress));
 								} else {
 									throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 								}
 							}
 						} else {
 							logger.trace("Adding receiver to involved list");
-							involved.add(receiver);
+							involved.add(receiverInternetAddress);
 						}
 					}
 
@@ -528,14 +502,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 							} else {
 								if (serviceDeskSetting != null)
 									authorization = serviceDeskSetting.getSenderAuthorization(each.getAddress());
-								user = emailAddressEntity != null ? emailAddressEntity.getOwner() : null;
+								fromUser = emailAddressEntity != null ? emailAddressEntity.getOwner() : null;
 								try {
-									checkPermission(each, issue.getProject(), new AccessProject(), user, authorization);
-									if (user == null)
-										user = createUser(each, issue.getProject(), authorization.getAuthorizedRole());
-									issueWatchManager.watch(issue, user, true);
+									checkPermission(each, issue.getProject(), new AccessProject(), fromUser, authorization);
+									if (fromUser == null)
+										fromUser = createUser(each, issue.getProject(), authorization.getAuthorizedRole());
+									issueWatchManager.watch(issue, fromUser, true);
 									if (issue.isConfidential())
-										issueAuthorizationManager.authorize(issue, user);
+										issueAuthorizationManager.authorize(issue, fromUser);
 								} catch (UnauthorizedException e) {
 									logger.error("Error adding receipient to watch list", e);
 								}
@@ -548,14 +522,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 							if (emailAddressEntity != null && !emailAddressEntity.isVerified()) {
 								logger.error("Another account uses email address '{}' but not verified", each.getAddress());
 							} else {
-								user = emailAddressEntity != null ? emailAddressEntity.getOwner() : null;
+								fromUser = emailAddressEntity != null ? emailAddressEntity.getOwner() : null;
 								if (serviceDeskSetting != null)
 									authorization = serviceDeskSetting.getSenderAuthorization(each.getAddress());
 								try {
-									checkPermission(each, pullRequest.getProject(), new ReadCode(), user, authorization);
-									if (user == null)
-										user = createUser(each, pullRequest.getProject(), authorization.getAuthorizedRole());
-									pullRequestWatchManager.watch(pullRequest, user, true);
+									checkPermission(each, pullRequest.getProject(), new ReadCode(), fromUser, authorization);
+									if (fromUser == null)
+										fromUser = createUser(each, pullRequest.getProject(), authorization.getAuthorizedRole());
+									pullRequestWatchManager.watch(pullRequest, fromUser, true);
 								} catch (UnauthorizedException e) {
 									logger.error("Error adding receipient to watch list", e);
 								}
@@ -585,17 +559,15 @@ public class DefaultMailManager implements MailManager, Serializable {
 	}
 	
 	@Nullable
-	private String stripQuotationAndSignature(MailSendSetting sendSetting, String content) {
+	@Override
+	public String stripQuotationAndSignature(String content) {
 		String quotationMark = null;
-		if (content.contains(QUOTE_MARK)) {
+		if (content.contains(QUOTE_MARK)) 
 			quotationMark = QUOTE_MARK;
-		} else if (content.contains(sendSetting.getSenderAddress())) {
-			quotationMark = sendSetting.getSenderAddress();
-		} else if (sendSetting.getSmtpUser() != null 
-				&& sendSetting.getSmtpUser().contains("@") 
-				&& !sendSetting.getSmtpUser().equalsIgnoreCase(sendSetting.getSenderAddress())) {
-			quotationMark = sendSetting.getSmtpUser();
-		}
+		
+		var systemAddress = getSystemAddress();
+		if (quotationMark == null && content.contains(systemAddress)) 
+			quotationMark = systemAddress;
 		
 		if (quotationMark != null) {
 			content = StringUtils.substringBefore(content, quotationMark);
@@ -673,83 +645,72 @@ public class DefaultMailManager implements MailManager, Serializable {
 		return String.format("<div class='%s'>\n\n", COMMENT_MARKER) + content + "\n\n</div>";
 	}
 	
-	private void addComment(MailSendSetting sendSetting, Issue issue, Message message, InternetAddress author, 
-			Collection<String> receiverEmailAddresses, @Nullable User user, 
-			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
+	private void addComment(Issue issue, MailMessage message, InternetAddress authorAddress, @Nullable User author, 
+							@Nullable SenderAuthorization authorization, Collection<InternetAddress> notifiedInternetAddresses) {
 		IssueComment comment = new IssueComment();
 		comment.setIssue(issue);
-		if (user == null)
-			user = createUser(author, issue.getProject(), authorization.getAuthorizedRole());
-		logger.trace("Creating issue comment on behalf of user '" + user.getName() + "'");
-		comment.setUser(user);
-		String content = stripQuotationAndSignature(sendSetting, getText(issue.getProject(), issue.getUUID(), message));
+		if (author == null)
+			author = createUser(authorAddress, issue.getProject(), authorization.getAuthorizedRole());
+		logger.trace("Creating issue comment on behalf of user '" + author.getName() + "'");
+		comment.setUser(author);
+		String content = message.parseBody(issue.getProject(), issue.getUUID());
 		if (content != null) {
 			// Add double line breaks in the beginning and ending as otherwise plain text content 
 			// received from email may not be formatted correctly with our markdown renderer. 
 			comment.setContent(decorateContent(content));
-			issueCommentManager.create(comment, receiverEmailAddresses);
+			issueCommentManager.create(comment, notifiedInternetAddresses.stream().map(InternetAddress::getAddress).collect(toList()));
 		}
 	}
 	
-	private void addComment(MailSendSetting sendSetting, PullRequest pullRequest, Message message, InternetAddress author, 
-			Collection<String> receiverEmailAddresses, @Nullable User user, 
-			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
+	private void addComment(PullRequest pullRequest, MailMessage message, InternetAddress authorAddress, @Nullable User author,
+							@Nullable SenderAuthorization authorization, Collection<InternetAddress> notifiedInternetAddresses) {
 		PullRequestComment comment = new PullRequestComment();
 		comment.setRequest(pullRequest);
-		if (user == null)
-			user = createUser(author, pullRequest.getProject(), authorization.getAuthorizedRole());
-		logger.trace("Creating pull request comment on behalf of user '" + user.getName() + "'");
-		comment.setUser(user);
-		String content = stripQuotationAndSignature(sendSetting, getText(pullRequest.getProject(), pullRequest.getUUID(), message, null));
+		if (author == null)
+			author = createUser(authorAddress, pullRequest.getProject(), authorization.getAuthorizedRole());
+		logger.trace("Creating pull request comment on behalf of user '" + author.getName() + "'");
+		comment.setUser(author);
+		String content = message.parseBody(pullRequest.getProject(), pullRequest.getUUID());
 		if (content != null) {
 			comment.setContent(decorateContent(content));
-			pullRequestCommentManager.create(comment, receiverEmailAddresses);
+			pullRequestCommentManager.create(comment, notifiedInternetAddresses.stream().map(InternetAddress::getAddress).collect(toList()));
 		}
 	}
 	
-	@Nullable
-	private String getMessageId(Message message) throws MessagingException {
-		String[] messageId = message.getHeader("Message-ID");
-		if (messageId != null && messageId.length != 0)
-			return messageId[0];
-		else
-			return null;
-	}
-	
-	private Issue openIssue(Message message, Project project, InternetAddress submitter, 
-			@Nullable User user, @Nullable SenderAuthorization authorization, 
-			ParsedEmailAddress parsedSystemAddress) throws MessagingException, IOException {
+	private Issue openIssue(MailMessage message, Project project, InternetAddress submitterAddress, 
+			@Nullable User submitter, @Nullable SenderAuthorization authorization, 
+			ParsedEmailAddress parsedSystemAddress) {
 		Issue issue = new Issue();
 		issue.setProject(project);
-		if (StringUtils.isNotBlank(message.getSubject())) {
-			if (message.getSubject().trim().toLowerCase().startsWith("re:")) {
-				throw new ExplicitException("This address is intended to open issues, " +
-						"however the message looks like a reply to some other email");
-			}
-			issue.setTitle(message.getSubject());
-		} else {
-			throw new ExplicitException("Subject required to open issue via email");
-		}
 		
-		String messageId = getMessageId(message);
+		String subject = message.getSubject();
+		if (StringUtils.isBlank(subject)) {
+			throw new ExplicitException("Subject required to open issue via email");
+		} else if (subject.trim().toLowerCase().startsWith("re:")) {
+			throw new ExplicitException("This address is intended to open issues, " +
+					"however the message looks like a reply to some other email");
+		}
+		issue.setTitle(subject);
+		
+		String messageId = message.getId();
 		if (messageId != null)
 			issue.setThreadingReference(messageId);
 
-		String description = getText(project, issue.getUUID(), message);
+		String description = message.parseBody(project, issue.getUUID());
 		if (StringUtils.isNotBlank(description)) 
 			description = stripSignature(description);
 		if (StringUtils.isNotBlank(description))
 			issue.setDescription(decorateContent(description));
 
-		if (user == null)
-			user = createUser(submitter, project, authorization.getAuthorizedRole());
-		issue.setSubmitter(user);
+		if (submitter == null)
+			submitter = createUser(submitterAddress, project, authorization.getAuthorizedRole());
+		issue.setSubmitter(submitter);
 		
 		GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 		issue.setState(issueSetting.getInitialStateSpec().getName());
 		
 		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting()
-				.getIssueCreationSetting(submitter.getAddress(), project);
+				.getIssueCreationSetting(submitterAddress.getAddress(), project);
 		issue.setConfidential(issueCreationSetting.isConfidential());
 		for (FieldSupply supply: issueCreationSetting.getIssueFields()) {
 			Object fieldValue = issueSetting.getFieldSpec(supply.getName())
@@ -759,7 +720,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		
 		issueManager.open(issue);
 		
-		ParsedEmailAddress parsedSubmitterAddress = ParsedEmailAddress.parse(submitter.getAddress());
+		ParsedEmailAddress parsedSubmitterAddress = ParsedEmailAddress.parse(submitterAddress.getAddress());
 		if (!parsedSubmitterAddress.getDomain().equalsIgnoreCase(parsedSystemAddress.getDomain()) 
 				|| !parsedSubmitterAddress.getName().toLowerCase().startsWith(parsedSystemAddress.getName().toLowerCase() + "+") 
 						&& !parsedSubmitterAddress.getName().equalsIgnoreCase(parsedSystemAddress.getName())) {
@@ -770,9 +731,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 			String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 			String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 			
-			sendMailAsync(Lists.newArrayList(submitter.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
+			sendMailAsync(Lists.newArrayList(submitterAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
 					"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
-					submitter.getPersonal(), issue.getEffectiveThreadingReference()); 
+					submitterAddress.getPersonal(), issue.getEffectiveThreadingReference()); 
 		}
 		return issue;
 	}
@@ -831,15 +792,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 		thread = new Thread(() -> {
 			while (thread != null) {
 				try {
-					MailSetting mailSetting = settingManager.getMailSetting();
-					MailCheckSetting checkSetting = mailSetting!=null?mailSetting.getCheckSetting():null;
-					if (checkSetting != null && clusterManager.isLeaderServer()) {
-						MailSendSetting sendSetting = mailSetting.getSendSetting();
-						MailPosition mailPosition = new MailPosition();
+					var mailService = settingManager.getMailService();
+					var inboxMonitor = mailService != null? mailService.getInboxMonitor(): null;
+					if (inboxMonitor != null && clusterManager.isLeaderServer()) {
 						while (thread != null) {
-							Future<?> future = monitorInbox(checkSetting, message -> 
-									onMessage(sendSetting, checkSetting, message), mailPosition, false);
-							
+							Future<?> future = inboxMonitor.monitor(this::handleMessage, false);
 							try {
 								future.get();
 							} catch (InterruptedException e) {
@@ -877,24 +834,25 @@ public class DefaultMailManager implements MailManager, Serializable {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, 
+	public Future<?> monitorInbox(ImapSetting imapSetting, Consumer<MailMessage> mailConsumer,
 								  MailPosition lastPosition, boolean testMode) {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
 				int messageCount = inbox.getMessageCount();
+				var systemAddress = getSystemAddress();
 				for (int i=messageNumber.get()+1; i<=messageCount; i++) {
 					Message message = inbox.getMessage(i);
 					lastPosition.setUid(inbox.getUID(message));
-					logger.trace("Processing inbox messge (subject: {}, uid: {}, seq: {})", 
+					logger.trace("Processing inbox message (subject: {}, uid: {}, seq: {})", 
 							message.getSubject(), lastPosition.getUid(), i);
 					try {
-						listener.onReceived(message);
+						mailConsumer.accept(new ImapMessage(message));
 					} catch (Exception e) {
 						try {
 							String[] fromHeader = message.getHeader("From");
 							if (fromHeader != null && fromHeader.length != 0 
-									&& !fromHeader[0].equalsIgnoreCase(checkSetting.getCheckAddress())) {
+									&& !fromHeader[0].equalsIgnoreCase(systemAddress)) {
 								InternetAddress from = InternetAddress.parse(fromHeader[0], true)[0];
 								
 								String template = StringUtils.join(settingManager.getEmailTemplates().getServiceDeskIssueOpenFailed(), "\n");
@@ -928,11 +886,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 			public void run() {
 		        Properties properties = new Properties();
 		        
-		        properties.setProperty("mail.imap.host", checkSetting.getImapHost());
-				checkSetting.getSslSetting().configure(properties);
+		        properties.setProperty("mail.imap.host", imapSetting.getImapHost());
+				imapSetting.getSslSetting().configure(properties);
 		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
-		        properties.setProperty("mail.imap.timeout", String.valueOf(checkSetting.getTimeout()*1000));
-	        	if (checkSetting.getImapCredential() instanceof OAuthAccessToken)
+		        properties.setProperty("mail.imap.timeout", String.valueOf(imapSetting.getTimeout()*1000));
+	        	if (imapSetting.getImapCredential() instanceof OAuthAccessToken)
 	        		properties.setProperty("mail.imap.auth.mechanisms", "XOAUTH2");
 				
 				Session session = Session.getInstance(properties);
@@ -940,8 +898,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 				IMAPFolder inbox = null;
 				try {
 					store = session.getStore("imap");
-					String credentialValue = checkSetting.getImapCredential().getValue();
-					store.connect(checkSetting.getImapUser(), credentialValue);
+					String credentialValue = imapSetting.getImapCredential().getValue();
+					store.connect(imapSetting.getImapUser(), credentialValue);
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);
 					
@@ -978,7 +936,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 
 					long time = System.currentTimeMillis();
 					while (true) { 
-						Thread.sleep(checkSetting.getPollInterval()*1000);
+						if (testMode)
+							Thread.sleep(5000);
+						else
+							Thread.sleep(imapSetting.getPollInterval()*1000);
 						processMessages(inbox, messageNumber);
 						
 						// discard inbox periodically to save memory
@@ -1005,170 +966,35 @@ public class DefaultMailManager implements MailManager, Serializable {
 			}
 		});
 	}
-	
-	@Override
-	public String getReplyAddress(Issue issue) {
-		MailSetting mailSetting = settingManager.getMailSetting();
-		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
-		if (checkSetting != null) {
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-			return checkAddress.getSubAddressed("issue~" + issue.getId()); 
+
+	private String getFeedbackAddress(String subAddress) {
+		var mailService = settingManager.getMailService();
+		if (mailService != null && mailService.getInboxMonitor() != null) {
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(mailService.getSystemAddress());
+			return checkAddress.getSubAddressed(subAddress);
 		} else {
 			return null;
 		}
+	}
+	
+	@Override
+	public String getReplyAddress(Issue issue) {
+		return getFeedbackAddress("issue~" + issue.getId());
 	}
 	
 	@Override
 	public String getReplyAddress(PullRequest request) {
-		MailSetting mailSetting = settingManager.getMailSetting();
-		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
-		if (checkSetting != null) {
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-			return checkAddress.getSubAddressed("pullrequest~" + request.getId()); 
-		} else {
-			return null;
-		}
+		return getFeedbackAddress("pullrequest~" + request.getId());
 	}
 	
 	@Override
 	public String getUnsubscribeAddress(Issue issue) {
-		MailSetting mailSetting = settingManager.getMailSetting();
-		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
-		if (checkSetting != null) {
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-			return checkAddress.getSubAddressed("issueunsubscribe~" + issue.getId()); 
-		} else {
-			return null;
-		}
+		return getFeedbackAddress("issueunsubscribe~" + issue.getId());
 	}
 
 	@Override
 	public String getUnsubscribeAddress(PullRequest request) {
-		MailSetting mailSetting = settingManager.getMailSetting();
-		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
-		if (checkSetting != null) {
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
-			return checkAddress.getSubAddressed("pullrequestunsubscribe~" + request.getId()); 
-		} else {
-			return null;
-		}
-	}
-	
-	private String getText(Project project, String attachmentGroup, Message message) 
-			throws IOException, MessagingException {
-		Attachments attachments = new Attachments();
-		fillAttachments(project, attachmentGroup, message, attachments);
-		String text = getText(project, attachmentGroup, message, attachments);
-
-		attachments.identifiable.keySet().removeAll(attachments.referenced);
-		attachments.nonIdentifiable.addAll(attachments.identifiable.values());
-		if (!attachments.nonIdentifiable.isEmpty()) {
-			text += "\n\n---";
-			List<String> markdowns = new ArrayList<>();
-			for (Attachment attachment: attachments.nonIdentifiable)
-				markdowns.add(attachment.getMarkdown());
-			text += "\n\n" + Joiner.on(" &nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp; ").join(markdowns);
-		}
-		return text;
-	}
-	
-	private String getText(Project project, String attachmentGroup, Part part, Attachments attachments) 
-			throws IOException, MessagingException {
-		if (part.getDisposition() == null) {
-		    if (part.isMimeType("text/plain")) {
-		        return HtmlEscape.escapeHtml5(part.getContent().toString());
-		    } else if (part.isMimeType("text/html")) {
-		        Document doc = Jsoup.parse(part.getContent().toString());
-		        for (Element element: doc.getElementsByTag("img")) {
-		        	String src = element.attr("src");
-		        	if (src != null && src.startsWith("cid:")) {
-		        		String contentId = "<" + src.substring("cid:".length()) + ">";
-		        		attachments.referenced.add(contentId);
-		        		Attachment attachment = attachments.identifiable.get(contentId);
-		        		if (attachment != null) 
-		        			element.attr("src", attachment.url);
-		        	}
-		        }
-		        return doc.html();
-		    } else if (part.isMimeType("multipart/*")) {
-		    	Multipart multipart = (Multipart) part.getContent();
-			    int count = multipart.getCount();
-			    if (count != 0) {
-				    boolean multipartAlt = new ContentType(multipart.getContentType()).match("multipart/alternative");
-				    if (multipartAlt)
-				        // alternatives appear in an order of increasing 
-				        // faithfulness to the original content. Customize as req'd.
-				        return getText(project, attachmentGroup, multipart.getBodyPart(count - 1), attachments);
-				    StringBuilder builder = new StringBuilder();
-				    for (int i=0; i<count; i++)  
-				        builder.append(getText(project, attachmentGroup, multipart.getBodyPart(i), attachments));
-				    return builder.toString();
-			    } else {
-			    	return "";
-			    }
-		    } else { 
-		    	return "";
-		    }
-		} else {
-			return "";
-		}
-	}
-	
-	private void fillAttachments(Project project, String attachmentGroup, Part part, Attachments attachments) 
-			throws IOException, MessagingException {
-	    if (part.getDisposition() != null) {
-	    	String[] contentId = part.getHeader("Content-ID");
-	    	String fileName = MimeUtility.decodeText(part.getFileName());
-	        String attachmentName = attachmentManager.saveAttachment(project.getId(), attachmentGroup, 
-					fileName, part.getInputStream());
-			String attachmentUrl = project.getAttachmentUrlPath(attachmentGroup, attachmentName);
-			Attachment attachment;
-	        if (part.isMimeType("image/*"))
-	        	attachment = new ImageAttachment(attachmentUrl, fileName);
-	        else
-	        	attachment = new FileAttachment(attachmentUrl, fileName);
-			if (contentId != null && contentId.length != 0) 
-				attachments.identifiable.put(contentId[0], attachment);
-			else 
-				attachments.nonIdentifiable.add(attachment);
-	    } else if (part.isMimeType("multipart/*")) {
-	    	Multipart multipart = (Multipart) part.getContent();
-		    int count = multipart.getCount();
-		    if (count != 0) {
-			    boolean multipartAlt = new ContentType(multipart.getContentType()).match("multipart/alternative");
-			    if (multipartAlt)
-			        // alternatives appear in an order of increasing 
-			        // faithfulness to the original content. Customize as req'd.
-			        fillAttachments(project, attachmentGroup, multipart.getBodyPart(count - 1), attachments);
-			    for (int i=0; i<count; i++)  
-			        fillAttachments(project, attachmentGroup, multipart.getBodyPart(i), attachments);
-		    }
-	    } 
-	}
-	
-	private static class Attachments {
-		
-		final Map<String, Attachment> identifiable = new LinkedHashMap<>();
-		
-		final Collection<Attachment> nonIdentifiable = new ArrayList<>();
-		
-		final Collection<String> referenced = new HashSet<>();
-
-	}
-	
-	private static abstract class Attachment {
-		
-		final String url;
-		
-		final String fileName;
-		
-		public Attachment(String url, String fileName) {
-			this.url = url;
-			this.fileName = fileName;
-		}
-
-		public abstract String getMarkdown();
-		
+		return getFeedbackAddress("pullrequestunsubscribe~" + request.getId());
 	}
 	
 	@Override
@@ -1184,32 +1010,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@Override
 	public boolean isMailContent(String comment) {
 		return comment.contains(String.format("<div class='%s'>", COMMENT_MARKER));
-	}
-
-	private static class ImageAttachment extends Attachment {
-
-		public ImageAttachment(String url, String fileName) {
-			super(url, fileName);
-		}
-
-		@Override
-		public String getMarkdown() {
-			return String.format("![%s](%s)", fileName, url);
-		}
-		
-	}
-	
-	private static class FileAttachment extends Attachment {
-
-		public FileAttachment(String url, String fileName) {
-			super(url, fileName);
-		}
-		
-		@Override
-		public String getMarkdown() {
-			return String.format("[%s](%s)", fileName, url);
-		}
-		
 	}
 
 }

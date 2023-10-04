@@ -24,6 +24,9 @@
 		<module>server-plugin-buildspec-gradle</module>
 		<module>server-plugin-buildspec-node</module>
 		<module>server-plugin-authenticator-ldap</module>
+		<module>server-plugin-mailservice-smtpimap</module>
+		<module>server-plugin-mailservice-office365</module>
+		<module>server-plugin-mailservice-gmail</module>
 		<module>server-plugin-sso-openid</module>
 		<module>server-plugin-report-markdown</module>
 		<module>server-plugin-report-jest</module>

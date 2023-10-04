@@ -30,6 +30,8 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -315,7 +317,7 @@ public class ImportServer implements Serializable, Validatable {
 		return markdown.toString();
 	}
 	
-	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
 		
 		Client client = newClient();
@@ -363,13 +365,13 @@ public class ImportServer implements Serializable, Validatable {
 				result.unmappedIssueTypes.addAll(currentResult.unmappedIssueTypes);
 			}
 			
-			return result.toHtml("Projects imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} finally {
 			client.close();
 		}	
 	}
 	
-	String importIssues(Project project, String jiraProject, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importIssues(Project project, String jiraProject, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
 		
 		Client client = newClient();
@@ -379,7 +381,7 @@ public class ImportServer implements Serializable, Validatable {
 			if (projectNode == null)
 				throw new ExplicitException("Unable to find project: " + jiraProject);
 			ImportResult result = importIssues(projectNode, project, option, users, dryRun, logger);
-			return result.toHtml("Issues imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
 		} finally {
 			client.close();
 		}

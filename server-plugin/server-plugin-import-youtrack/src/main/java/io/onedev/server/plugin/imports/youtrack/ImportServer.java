@@ -29,6 +29,9 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.http.client.utils.URIBuilder;
@@ -1050,7 +1053,7 @@ public class ImportServer implements Serializable, Validatable {
 		return result;
 	}
 
-	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, String> youTrackProjectIds = new HashMap<>();
 		Map<String, String> youTrackProjectDescriptions = new HashMap<>();
 		Client client = newClient();
@@ -1104,7 +1107,7 @@ public class ImportServer implements Serializable, Validatable {
 				result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
 			}
 
-			return result.toHtml("Projects imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} finally {
 			client.close();
 		}
@@ -1137,7 +1140,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	String importIssues(Project project, String youTrackProject, ImportOption option,
+	TaskResult importIssues(Project project, String youTrackProject, ImportOption option,
 						boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from '" + youTrackProject + "'...");
 		Client client = newClient();
@@ -1147,10 +1150,10 @@ public class ImportServer implements Serializable, Validatable {
 				if (youTrackProject.equals(projectNode.get("name").asText())) {
 					ImportResult result = doImportIssues(projectNode.get("id").asText(),
 							project, option, dryRun, logger);
-					return result.toHtml("Issues imported successfully");
+					return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
 				}
 			}
-			throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
+			return new TaskResult(false, new PlainMessage("Unable to find YouTrack project: " + youTrackProject));
 		} finally {
 			client.close();
 		}

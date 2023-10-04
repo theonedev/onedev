@@ -1,5 +1,16 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.model.UserInvitation;
+import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.mailservice.MailServicePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -8,17 +19,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.model.UserInvitation;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.web.component.taskbutton.TaskButton;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 
 @SuppressWarnings("serial")
 public class NewInvitationPage extends AdministrationPage {
@@ -31,8 +31,8 @@ public class NewInvitationPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		MailSetting mailSetting = OneDev.getInstance(SettingManager.class).getMailSetting();
-		if (mailSetting != null) {
+		var mailService = OneDev.getInstance(SettingManager.class).getMailService();
+		if (mailService != null) {
 			Fragment fragment = new Fragment("content", "inviteFrag", this);
 			NewInvitationBean bean = new NewInvitationBean();
 			Form<?> form = new Form<Void>("form");
@@ -41,7 +41,7 @@ public class NewInvitationPage extends AdministrationPage {
 			form.add(new TaskButton("invite") {
 
 				@Override
-				protected String runTask(TaskLogger logger) throws InterruptedException {
+				protected TaskResult runTask(TaskLogger logger) throws InterruptedException {
 					for (String emailAddress: bean.getListOfEmailAddresses()) {
 						logger.log("Sending invitation to '" + emailAddress + "'...");
 						UserInvitation invitation = new UserInvitation();
@@ -52,7 +52,7 @@ public class NewInvitationPage extends AdministrationPage {
 						if (Thread.interrupted())
 							throw new InterruptedException();
 					}
-					return "Invitations sent";
+					return new TaskResult(true, new PlainMessage("Invitations sent"));
 				}
 
 				@Override
@@ -65,8 +65,8 @@ public class NewInvitationPage extends AdministrationPage {
 			fragment.add(form);
 			add(fragment);
 		} else {
-			Fragment fragment = new Fragment("content", "noMailSettingFrag", this);
-			fragment.add(new BookmarkablePageLink<Void>("mailSetting", MailSettingPage.class));
+			Fragment fragment = new Fragment("content", "noMailServiceFrag", this);
+			fragment.add(new BookmarkablePageLink<Void>("mailSetting", MailServicePage.class));
 			add(fragment);
 		}
 	}

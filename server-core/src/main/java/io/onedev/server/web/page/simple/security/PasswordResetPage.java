@@ -14,6 +14,8 @@ import io.onedev.server.model.support.administration.emailtemplates.EmailTemplat
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import io.onedev.server.web.page.simple.SimplePage;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -72,7 +74,7 @@ public class PasswordResetPage extends SimplePage {
 			}
 
 			@Override
-			protected String runTask(TaskLogger logger) {
+			protected TaskResult runTask(TaskLogger logger) {
 				OneDev.getInstance(SessionManager.class).openSession();
 				try {
 					UserManager userManager = OneDev.getInstance(UserManager.class);
@@ -83,7 +85,7 @@ public class PasswordResetPage extends SimplePage {
 						throw new ExplicitException("No user found with login name or verified email: " + loginNameOrEmail);
 					} else {
 						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-						if (settingManager.getMailSetting() != null) {
+						if (settingManager.getMailService() != null) {
 							String password = CryptoUtils.generateSecret();								
 							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 							user.setSsoConnector(null);
@@ -113,16 +115,14 @@ public class PasswordResetPage extends SimplePage {
 									emailAddressValue = emailAddress.getValue();
 							}
 							
-							mailManager.sendMail(
-									settingManager.getMailSetting().getSendSetting(), 
-									Arrays.asList(emailAddressValue),
+							mailManager.sendMail(Arrays.asList(emailAddressValue),
 									Lists.newArrayList(), Lists.newArrayList(), 
 									"[Password Reset] Your OneDev Password Has Been Reset", 
 									htmlBody, textBody, null, null, null);
 							
-							return "Please check your email " + emailAddressValue + " for the reset password";
+							return new TaskResult(true, new PlainMessage("Please check your email " + emailAddressValue + " for the reset password"));
 						} else {
-							throw new ExplicitException("Unable to send password reset email as smtp settings are not defined");
+							return new TaskResult(false, new PlainMessage("Unable to send password reset email as smtp settings are not defined"));
 						}
 					}
 				} finally {

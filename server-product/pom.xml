@@ -195,6 +195,21 @@
 			<artifactId>server-plugin-notification-discord</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-smtpimap</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-office365</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-gmail</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
 		<dependency>
 			<groupId>commons-codec</groupId>

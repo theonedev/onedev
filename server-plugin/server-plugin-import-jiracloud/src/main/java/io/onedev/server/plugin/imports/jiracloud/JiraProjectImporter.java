@@ -3,6 +3,7 @@ package io.onedev.server.plugin.imports.jiracloud;
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
 import java.io.Serializable;
@@ -68,7 +69,7 @@ public class JiraProjectImporter implements ProjectImporter {
 	}
 
 	@Override
-	public String doImport(boolean dryRun, TaskLogger logger) {
+	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		return serverStep.getSetting().importProjects(
 				projectsStep.getSetting(), optionStep.getSetting(), dryRun, logger);
 	}

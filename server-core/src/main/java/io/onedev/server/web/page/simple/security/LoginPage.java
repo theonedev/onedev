@@ -1,13 +1,18 @@
 package io.onedev.server.web.page.simple.security;
 
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
-
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
+import com.google.common.base.Preconditions;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.realm.PasswordAuthorizingRealm;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
+import io.onedev.server.web.page.simple.SimpleCssResourceReference;
+import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.RestartResponseException;
@@ -29,19 +34,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthorizingRealm;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
-import io.onedev.server.web.page.simple.SimpleCssResourceReference;
-import io.onedev.server.web.page.simple.SimplePage;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 
 @SuppressWarnings("serial")
 public class LoginPage extends SimplePage {
@@ -173,7 +167,7 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(OneDev.getInstance(SettingManager.class).getMailSetting() != null);
+				setVisible(OneDev.getInstance(SettingManager.class).getMailService() != null);
 			}
 			
 		});

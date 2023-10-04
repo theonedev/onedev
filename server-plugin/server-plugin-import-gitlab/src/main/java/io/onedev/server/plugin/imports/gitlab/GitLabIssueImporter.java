@@ -5,6 +5,8 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import io.onedev.server.web.util.ImportStep;
 
 import java.io.Serializable;
@@ -74,7 +76,7 @@ public class GitLabIssueImporter implements IssueImporter {
 	}
 	
 	@Override
-	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
+	public TaskResult doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String gitLabProject = projectStep.getSetting().getProject();
 		IssueImportOption option = optionStep.getSetting();
@@ -82,7 +84,7 @@ public class GitLabIssueImporter implements IssueImporter {
 		Map<String, Optional<User>> users = new HashMap<>();
 		
 		ImportResult result = server.importIssues(gitLabProject, project, option, users, dryRun, logger);
-		return result.toHtml("Issues imported successfully");
+		return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
 	}
 
 	@Override

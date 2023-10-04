@@ -5,15 +5,17 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -82,7 +84,7 @@ public class ImportServer implements Serializable, Validatable {
 		return null;
 	}
 	
-	String importProject(boolean dryRun, TaskLogger logger) {
+	TaskResult importProject(boolean dryRun, TaskLogger logger) {
 		try {
 			String projectPath = getProject();
 			if (projectPath == null)
@@ -124,9 +126,9 @@ public class ImportServer implements Serializable, Validatable {
 				} finally {
 					SensitiveMasker.pop();
 				}
-				return "project imported successfully";
+				return new TaskResult(true, new PlainMessage("project imported successfully"));
 			} else {
-				throw new ExplicitException("Project already has code");
+				return new TaskResult(false, new PlainMessage("Project already has code"));
 			}
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);

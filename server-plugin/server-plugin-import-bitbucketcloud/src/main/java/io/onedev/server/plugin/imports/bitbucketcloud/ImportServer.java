@@ -17,6 +17,8 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -172,7 +174,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	String importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			for (var bitbucketRepository: repositories.getImportRepositories()) {
@@ -234,7 +236,7 @@ public class ImportServer implements Serializable, Validatable {
 					logger.warning("Skipping code clone as the project already has code");
 				}
 			}
-			return "Repositories imported successfully";
+			return new TaskResult(true, new PlainMessage("Repositories imported successfully"));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {

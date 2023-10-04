@@ -164,12 +164,12 @@ public class InvitationListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						if (OneDev.getInstance(SettingManager.class).getMailSetting() != null) {
+						if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
 							UserInvitation invitation = rowModel.getObject();
 							getInvitationManager().sendInvitationEmail(invitation);
 							Session.get().success("Invitation sent to '" + invitation.getEmailAddress() + "'");
 						} else {
-							Session.get().error("Mail settings not specified");
+							Session.get().error("Mail service not configured");
 						}
 					}
 					

@@ -54,7 +54,7 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 
 	@Override
 	public void sendInvitationEmail(UserInvitation invitation) {
-		Preconditions.checkState(settingManager.getMailSetting() != null);
+		Preconditions.checkState(settingManager.getMailService() != null);
 		
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
 		
@@ -68,9 +68,7 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 		String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 		String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 		
-		mailManager.sendMail(
-				settingManager.getMailSetting().getSendSetting(), 
-				Arrays.asList(invitation.getEmailAddress()),
+		mailManager.sendMail(Arrays.asList(invitation.getEmailAddress()),
 				Lists.newArrayList(), Lists.newArrayList(), 
 				"[Invitation] You are Invited to Use OneDev", 
 				htmlBody, textBody, null, null, null);

@@ -1,7 +1,16 @@
 package io.onedev.server.web.page.admin.authenticator;
 
-import java.io.Serializable;
-
+import com.google.common.base.Joiner;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.authenticator.Authenticated;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
+import io.onedev.server.web.editable.*;
+import io.onedev.server.web.page.admin.AdministrationPage;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,20 +26,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import com.google.common.base.Joiner;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.taskbutton.TaskButton;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class AuthenticatorPage extends AdministrationPage {
@@ -136,7 +132,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask(TaskLogger logger) {
+			protected TaskResult runTask(TaskLogger logger) {
 				Authenticated authenticated = bean.getAuthenticator().authenticate(
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();
@@ -165,7 +161,7 @@ public class AuthenticatorPage extends AdministrationPage {
 					messageBuilder.append(" with below information retrieved:<br>")
 							.append(retrievedInfoBuilder);
 				} 
-				return messageBuilder.toString();
+				return new TaskResult(true, new HtmlMessgae(messageBuilder.toString()));
 			}
 
 		};

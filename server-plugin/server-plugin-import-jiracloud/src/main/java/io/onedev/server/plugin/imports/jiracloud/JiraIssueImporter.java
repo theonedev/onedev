@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
 public class JiraIssueImporter implements IssueImporter {
@@ -71,7 +72,7 @@ public class JiraIssueImporter implements IssueImporter {
 	}
 
 	@Override
-	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
+	public TaskResult doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String jiraProject = projectStep.getSetting().getProject();
 		ImportOption option = optionStep.getSetting();

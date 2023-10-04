@@ -24,9 +24,14 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.*;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
+import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -247,7 +252,7 @@ public class ImportServer implements Serializable, Validatable {
 		return milestone;
 	}
 	
-	String importProjects(ImportProjects projects, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportProjects projects, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
@@ -340,7 +345,7 @@ public class ImportServer implements Serializable, Validatable {
 				}
 			}
 
-			return result.toHtml("Projects imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {

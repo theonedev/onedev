@@ -54,7 +54,7 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
-import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.mailservice.MailServicePage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -241,8 +241,8 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents",
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Settings",
-							MailSettingPage.class, new PageParameters()));
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Service",
+							MailServicePage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings",
 							ServiceDeskSettingPage.class, new PageParameters()));

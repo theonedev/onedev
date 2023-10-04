@@ -26,7 +26,6 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceUtils;
@@ -664,7 +663,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		Setting setting = settingManager.getSetting(Key.SYSTEM);
-		SystemSetting systemSetting = null;
+		SystemSetting systemSetting;
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
 		
@@ -822,19 +821,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) 
 			settingManager.saveContributedSettings(new LinkedHashMap<>());
 		
-		setting = settingManager.getSetting(Key.MAIL);
-		if (setting == null) {
-			settingManager.saveMailSetting(null);
-		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Settings", null, setting.getValue()) {
-
-				@Override
-				public void complete() {
-					settingManager.saveMailSetting((MailSetting) getSetting());
-				}
-				
-			});
-		}
+		setting = settingManager.getSetting(Key.MAIL_SERVICE);
+		if (setting == null) 
+			settingManager.saveMailService(null);
 		
 		setting = settingManager.getSetting(Key.BACKUP);
 		if (setting == null) {

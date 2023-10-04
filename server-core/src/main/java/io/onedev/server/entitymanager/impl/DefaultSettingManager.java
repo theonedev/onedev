@@ -2,13 +2,13 @@ package io.onedev.server.entitymanager.impl;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -96,11 +96,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		setting.setValue(value);
 		dao.persist(setting);
 	}
-	
-	@Override
-	public MailSetting getMailSetting() {
-		return (MailSetting) getSettingValue(Key.MAIL);
-	}
 
 	@Override
 	public BackupSetting getBackupSetting() {
@@ -130,6 +125,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public Authenticator getAuthenticator() {
 		return (Authenticator) getSettingValue(Key.AUTHENTICATOR);
+	}
+	
+	@Override
+	public MailService getMailService() {
+		return (MailService) getSettingValue(Key.MAIL_SERVICE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -218,13 +218,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public void saveSubscriptionData(String subscriptionData) {
 		saveSetting(Key.SUBSCRIPTION_DATA, subscriptionData);
 	}
-
-	@Transactional
-	@Override
-	public void saveMailSetting(MailSetting mailSetting) {
-		saveSetting(Key.MAIL, mailSetting);
-	}
-
+	
 	@Transactional
 	@Override
 	public void saveBackupSetting(BackupSetting backupSetting) {
@@ -259,6 +253,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public void saveAuthenticator(Authenticator authenticator) {
 		saveSetting(Key.AUTHENTICATOR, authenticator);
+	}
+	
+	@Transactional
+	@Override
+	public void saveMailService(MailService mailService) {
+		saveSetting(Key.MAIL_SERVICE, mailService);
 	}
 
 	@Transactional

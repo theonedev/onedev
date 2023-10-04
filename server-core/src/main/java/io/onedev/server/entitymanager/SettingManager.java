@@ -1,12 +1,12 @@
 package io.onedev.server.entitymanager;
 
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.usage.Usage;
@@ -57,27 +57,6 @@ public interface SettingManager extends EntityManager<Setting> {
 	void saveSubscriptionData(@Nullable String subscriptionData);
 	
 	/**
-	 * Get mail setting.
-	 * <p>
-	 * @return
-	 * 			mail setting, or <tt>null</tt> if mail setting record exists but value is 
-	 * 			null.
-	 * @throws 
-	 * 			RuntimeException if mail setting record is not found
-	 */
-	@Nullable
-	MailSetting getMailSetting();
-
-	/**
-	 * Save specified mail setting.
-	 * <p>
-	 * @param mailSetting
-	 * 			mail setting to be saved. Use <tt>null</tt> to clear the setting (but 
-	 * 			setting record will still be remained in database)
-	 */
-	void saveMailSetting(@Nullable MailSetting mailSetting);
-	
-	/**
 	 * Get backup setting.
 	 * <p>
 	 * @return
@@ -117,6 +96,11 @@ public interface SettingManager extends EntityManager<Setting> {
 	Authenticator getAuthenticator();
 	
 	void saveAuthenticator(@Nullable Authenticator authenticator);
+
+	@Nullable
+	MailService getMailService();
+	
+	void saveMailService(@Nullable MailService mailService);
 
 	List<JobExecutor> getJobExecutors();
 	

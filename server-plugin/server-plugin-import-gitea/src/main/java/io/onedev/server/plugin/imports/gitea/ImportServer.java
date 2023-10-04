@@ -27,6 +27,8 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -470,8 +472,8 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	String importProjects(ImportRepositories repositories, ProjectImportOption option, 
-			boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportRepositories repositories, ProjectImportOption option,
+							  boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
@@ -566,7 +568,7 @@ public class ImportServer implements Serializable, Validatable {
 				} 
 			}
 			
-			return result.toHtml("Repositories imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Repositories imported successfully")));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {

@@ -139,12 +139,12 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick(AjaxRequestTarget target) {
-											if (OneDev.getInstance(SettingManager.class).getMailSetting() != null) {
+											if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
 												getEmailAddressManager().sendVerificationEmail(item.getModelObject());
 												Session.get().success("Verification email sent, please check it");
 											} else {
 												target.appendJavaScript(String.format("alert('%s');", 
-														"Unable to send verification email as system mail setting is not defined yet"));
+														"Unable to send verification email as mail service is not configured yet"));
 											}
 											dropdown.close();
 										}
