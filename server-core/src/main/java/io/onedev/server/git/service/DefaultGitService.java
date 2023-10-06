@@ -321,8 +321,8 @@ public class DefaultGitService implements GitService, Serializable {
 
 					@Override
 					public void run() {
-						Project project1 = projectManager.load(projectId);
-						listenerRegistry.post(new RefUpdated(project1, refName, commitId, ObjectId.zeroId()));
+						Project innerProject = projectManager.load(projectId);
+						listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 					}
 					
 				});
@@ -333,6 +333,7 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			return null;
 		});
+		project.cacheObjectId(GitUtils.branch2ref(branchName), null);
 	}
 	
 	@Override
@@ -347,8 +348,8 @@ public class DefaultGitService implements GitService, Serializable {
 				
 				String refName = GitUtils.tag2ref(tagName);
 				sessionManager.runAsync(() -> {
-					Project project1 = projectManager.load(projectId);
-					listenerRegistry.post(new RefUpdated(project1, refName, commitId, ObjectId.zeroId()));
+					Project innerProject = projectManager.load(projectId);
+					listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 				});
 				
 			} catch (Exception e) {
@@ -357,6 +358,7 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			return null;
 		});
+		project.cacheObjectId(GitUtils.tag2ref(tagName), null);
 	}
 
 	@Sessional
