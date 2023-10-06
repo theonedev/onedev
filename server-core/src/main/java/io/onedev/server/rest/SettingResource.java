@@ -257,7 +257,7 @@ public class SettingResource {
     }
 
 	@Api(order=2200)
-	@Path("/mail")
+	@Path("/mail-service")
 	@POST
     public Response setMailService(MailService mailService) {
     	if (!SecurityUtils.isAdministrator()) 

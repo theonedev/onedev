@@ -20,6 +20,7 @@ import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.eclipse.cdt.core.parser.util.IContentAssistMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
@@ -5771,7 +5772,25 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.Office365Setting",
+							"io.onedev.server.plugin.mailservice.office365.Office365MailService");
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.GmailSetting",
+							"io.onedev.server.plugin.mailservice.gmail.GmailMailService");
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.OtherMailSetting",
+							"io.onedev.server.plugin.mailservice.smtpimap.SmtpImapMailService");
+					content = StringUtils.replace(content, 
+							"io.onedev.server.model.support.administration.mailsetting.",
+							"io.onedev.server.model.support.administration.mailservice.");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
@@ -5783,6 +5802,17 @@ public class DataMigrator {
 								}
 							}
 							valueElement.addElement("timeTrackingSetting");
+						}
+					} else if (element.elementTextTrim("key").equals("MAIL")) {
+						element.element("key").setText("MAIL_SERVICE");
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var emailAddressElement = valueElement.element("emailAddress");
+							if (emailAddressElement != null)
+								emailAddressElement.setName("systemAddress");
+							var otherInboxPollSettingElement = valueElement.element("otherInboxPollSetting");
+							if (otherInboxPollSettingElement != null)
+								otherInboxPollSettingElement.setName("inboxPollSetting");
 						}
 					}
 				}
