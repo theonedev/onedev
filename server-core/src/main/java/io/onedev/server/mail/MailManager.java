@@ -4,6 +4,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 
 import javax.annotation.Nullable;
+import javax.mail.Message;
 import java.util.Collection;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -42,11 +43,11 @@ public interface MailManager {
 	boolean isMailContent(String comment);
 	
 	String toPlainText(String mailContent);
-
-	@Nullable
-	String stripQuotationAndSignature(String content);
 	
-	Future<?> monitorInbox(ImapSetting imapSetting, Consumer<MailMessage> mailConsumer, 
+	Future<?> monitorInbox(ImapSetting imapSetting, String systemAddress, 
+						   Consumer<Message> messageConsumer, 
 						   MailPosition lastPosition, boolean testMode);
 
+	void handleMessage(Message message, String systemAddress);
+	
 }

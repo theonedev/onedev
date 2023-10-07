@@ -11,6 +11,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
@@ -50,6 +51,7 @@ import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -57,6 +59,7 @@ import javax.inject.Singleton;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.internet.MimeMessage.RecipientType;
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -73,6 +76,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static io.onedev.server.model.Setting.Key.MAIL_SERVICE;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
@@ -334,22 +338,15 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 	
-	private String getSystemAddress() {
-		var mailService = settingManager.getMailService();
-		if (mailService != null)
-			return mailService.getSystemAddress();
-		else 
-			throw new ExplicitException("Mail service not specified");
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	protected void handleMessage(MailMessage message) {
-		var toInternetAddresses = message.getToAddresses();
-		if (!toInternetAddresses.isEmpty()) {
-			var fromInternetAddress = message.getFromAddress();
+	@Override
+	public void handleMessage(Message message, String systemAddress) {
+		var fromInternetAddresses = getAddresses(message, "From");
+		var toInternetAddresses = getAddresses(message, "To");
+		if (fromInternetAddresses.length != 0 && toInternetAddresses.length != 0) {
+			var fromInternetAddress = fromInternetAddresses[0];
 			var fromAddress = fromInternetAddress.getAddress();
-			var systemAddress = getSystemAddress();
 			var parsedSystemAddress = ParsedEmailAddress.parse(systemAddress);
 			if (!fromAddress.equalsIgnoreCase(systemAddress)) {
 				EmailAddress fromAddressEntity = emailAddressManager.findByValue(fromAddress);
@@ -369,8 +366,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 					Collection<PullRequest> pullRequests = new ArrayList<>();
 					Collection<InternetAddress> involved = new ArrayList<>();
 
-					List<InternetAddress> receiverInternetAddresses = new ArrayList<>(message.getToAddresses());
-					receiverInternetAddresses.addAll(message.getCcAddresses());
+					List<InternetAddress> receiverInternetAddresses = new ArrayList<>();
+					receiverInternetAddresses.addAll(asList(toInternetAddresses));
+					receiverInternetAddresses.addAll(asList(getAddresses(message, "Cc")));
 					
 					for (InternetAddress receiverInternetAddress : receiverInternetAddresses) {
 						logger.trace("Processing on behalf of receiver '" + receiverInternetAddress.getAddress() + "'");
@@ -432,7 +430,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 
 												sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-														subject, htmlBody, textBody, null, null, message.getId());
+														subject, htmlBody, textBody, null, null, getMessageId(message));
 											}
 										}
 									} else {
@@ -460,7 +458,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 												String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 												sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-														subject, htmlBody, textBody, null, null, message.getId());
+														subject, htmlBody, textBody, null, null, getMessageId(message));
 											}
 										}
 									} else {
@@ -541,7 +539,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 				logger.warn("Ignore message as 'From' is same as system email address");
 			}
 		} else {
-			logger.warn("Ignore message as 'To' header is not available");
+			logger.warn("Ignore message as 'To' or 'From' header is not available");
 		}
 	}
 	
@@ -556,29 +554,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 			}
 			current = current.parent();
 		}
-	}
-	
-	@Nullable
-	@Override
-	public String stripQuotationAndSignature(String content) {
-		String quotationMark = null;
-		if (content.contains(QUOTE_MARK)) 
-			quotationMark = QUOTE_MARK;
-		
-		var systemAddress = getSystemAddress();
-		if (quotationMark == null && content.contains(systemAddress)) 
-			quotationMark = systemAddress;
-		
-		if (quotationMark != null) {
-			content = StringUtils.substringBefore(content, quotationMark);
-			content = StringUtils.substringBeforeLast(content, "\n");
-		}
-		
-		Document document = HtmlUtils.parse(stripTextSignature(content));
-		document.select(".gmail_quote").remove();
-		document.outputSettings().prettyPrint(false);
-		
-		return getContent(document);
 	}
 
 	private String stripTextSignature(String content) {
@@ -645,7 +620,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		return String.format("<div class='%s'>\n\n", COMMENT_MARKER) + content + "\n\n</div>";
 	}
 	
-	private void addComment(Issue issue, MailMessage message, InternetAddress authorAddress, @Nullable User author, 
+	private void addComment(Issue issue, Message message, InternetAddress authorAddress, @Nullable User author, 
 							@Nullable SenderAuthorization authorization, Collection<InternetAddress> notifiedInternetAddresses) {
 		IssueComment comment = new IssueComment();
 		comment.setIssue(issue);
@@ -653,7 +628,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			author = createUser(authorAddress, issue.getProject(), authorization.getAuthorizedRole());
 		logger.trace("Creating issue comment on behalf of user '" + author.getName() + "'");
 		comment.setUser(author);
-		String content = message.parseBody(issue.getProject(), issue.getUUID());
+		String content = parseBody(message, issue.getProject(), issue.getUUID());
 		if (content != null) {
 			// Add double line breaks in the beginning and ending as otherwise plain text content 
 			// received from email may not be formatted correctly with our markdown renderer. 
@@ -662,7 +637,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 	
-	private void addComment(PullRequest pullRequest, MailMessage message, InternetAddress authorAddress, @Nullable User author,
+	private void addComment(PullRequest pullRequest, Message message, InternetAddress authorAddress, @Nullable User author,
 							@Nullable SenderAuthorization authorization, Collection<InternetAddress> notifiedInternetAddresses) {
 		PullRequestComment comment = new PullRequestComment();
 		comment.setRequest(pullRequest);
@@ -670,33 +645,37 @@ public class DefaultMailManager implements MailManager, Serializable {
 			author = createUser(authorAddress, pullRequest.getProject(), authorization.getAuthorizedRole());
 		logger.trace("Creating pull request comment on behalf of user '" + author.getName() + "'");
 		comment.setUser(author);
-		String content = message.parseBody(pullRequest.getProject(), pullRequest.getUUID());
+		String content = parseBody(message, pullRequest.getProject(), pullRequest.getUUID());
 		if (content != null) {
 			comment.setContent(decorateContent(content));
 			pullRequestCommentManager.create(comment, notifiedInternetAddresses.stream().map(InternetAddress::getAddress).collect(toList()));
 		}
 	}
 	
-	private Issue openIssue(MailMessage message, Project project, InternetAddress submitterAddress, 
+	private Issue openIssue(Message message, Project project, InternetAddress submitterAddress, 
 			@Nullable User submitter, @Nullable SenderAuthorization authorization, 
 			ParsedEmailAddress parsedSystemAddress) {
 		Issue issue = new Issue();
 		issue.setProject(project);
-		
-		String subject = message.getSubject();
-		if (StringUtils.isBlank(subject)) {
-			throw new ExplicitException("Subject required to open issue via email");
-		} else if (subject.trim().toLowerCase().startsWith("re:")) {
-			throw new ExplicitException("This address is intended to open issues, " +
-					"however the message looks like a reply to some other email");
+
+		try {
+			var subject = message.getSubject();
+			if (StringUtils.isBlank(subject)) {
+				throw new ExplicitException("Subject required to open issue via email");
+			} else if (subject.trim().toLowerCase().startsWith("re:")) {
+				throw new ExplicitException("This address is intended to open issues, " +
+						"however the message looks like a reply to some other email");
+			}
+			issue.setTitle(subject);
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
 		}
-		issue.setTitle(subject);
 		
-		String messageId = message.getId();
+		String messageId = getMessageId(message);
 		if (messageId != null)
 			issue.setThreadingReference(messageId);
 
-		String description = message.parseBody(project, issue.getUUID());
+		String description = parseBody(message, project, issue.getUUID());
 		if (StringUtils.isNotBlank(description)) 
 			description = stripSignature(description);
 		if (StringUtils.isNotBlank(description))
@@ -731,8 +710,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 			String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 			String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 			
+			var replyAddress = parsedSystemAddress.getSubAddressed("issue~" + issue.getId());
 			sendMailAsync(Lists.newArrayList(submitterAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-					"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
+					"Re: " + issue.getTitle(), htmlBody, textBody, replyAddress, 
 					submitterAddress.getPersonal(), issue.getEffectiveThreadingReference()); 
 		}
 		return issue;
@@ -795,8 +775,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 					var mailService = settingManager.getMailService();
 					var inboxMonitor = mailService != null? mailService.getInboxMonitor(): null;
 					if (inboxMonitor != null && clusterManager.isLeaderServer()) {
+						var systemAddress = mailService.getSystemAddress();
 						while (thread != null) {
-							Future<?> future = inboxMonitor.monitor(this::handleMessage, false);
+							Future<?> future = inboxMonitor.monitor(message -> {
+								handleMessage(message, systemAddress);
+							}, false);
 							try {
 								future.get();
 							} catch (InterruptedException e) {
@@ -834,20 +817,20 @@ public class DefaultMailManager implements MailManager, Serializable {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(ImapSetting imapSetting, Consumer<MailMessage> mailConsumer,
+	public Future<?> monitorInbox(ImapSetting imapSetting, String systemAddress, 
+								  Consumer<Message> messageConsumer,
 								  MailPosition lastPosition, boolean testMode) {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
 				int messageCount = inbox.getMessageCount();
-				var systemAddress = getSystemAddress();
 				for (int i=messageNumber.get()+1; i<=messageCount; i++) {
 					Message message = inbox.getMessage(i);
 					lastPosition.setUid(inbox.getUID(message));
 					logger.trace("Processing inbox message (subject: {}, uid: {}, seq: {})", 
 							message.getSubject(), lastPosition.getUid(), i);
 					try {
-						mailConsumer.accept(new ImapMessage(message));
+						messageConsumer.accept(message);
 					} catch (Exception e) {
 						try {
 							String[] fromHeader = message.getHeader("From");
@@ -969,14 +952,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 
 	private String getFeedbackAddress(String subAddress) {
 		var mailService = settingManager.getMailService();
-		if (mailService != null && mailService.getInboxMonitor() != null) {
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(mailService.getSystemAddress());
-			return checkAddress.getSubAddressed(subAddress);
-		} else {
+		if (mailService != null && mailService.getInboxMonitor() != null) 
+			return ParsedEmailAddress.parse(mailService.getSystemAddress()).getSubAddressed(subAddress);
+		else 
 			return null;
-		}
 	}
-	
+
 	@Override
 	public String getReplyAddress(Issue issue) {
 		return getFeedbackAddress("issue~" + issue.getId());
@@ -1010,6 +991,142 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@Override
 	public boolean isMailContent(String comment) {
 		return comment.contains(String.format("<div class='%s'>", COMMENT_MARKER));
+	}
+
+	@Nullable
+	private String getMessageId(Message message) {
+		try {
+			var messageId = message.getHeader("Message-ID");
+			if (messageId != null && messageId.length != 0)
+				return messageId[0];
+			else
+				return null;
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private InternetAddress[] getAddresses(Message message, String header) {
+		try {
+			String[] values = message.getHeader(header);
+			if (values != null && values.length != 0)
+				return InternetAddress.parse(values[0], true);
+			else 
+				return new InternetAddress[0];
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Nullable
+	private String parseBody(Message message, Project project, String attachmentGroup) {
+		try {
+			Attachments attachments = new Attachments();
+			fillAttachments(project, attachmentGroup, message, attachments);
+			String body = parseBody(project, attachmentGroup, message, attachments);
+			
+			String quotationMark = null;
+			if (body.contains(QUOTE_MARK))
+				quotationMark = QUOTE_MARK;
+
+			if (quotationMark != null) {
+				body = StringUtils.substringBefore(body, quotationMark);
+				body = StringUtils.substringBeforeLast(body, "\n");
+			}
+			body = stripTextSignature(body);
+
+			attachments.identifiable.keySet().removeAll(attachments.referenced);
+			attachments.nonIdentifiable.addAll(attachments.identifiable.values());
+			if (!attachments.nonIdentifiable.isEmpty()) {
+				body += "\n\n---";
+				List<String> markdowns = new ArrayList<>();
+				for (Attachment attachment: attachments.nonIdentifiable)
+					markdowns.add(attachment.getMarkdown());
+				body += "\n\n" + Joiner.on(" &nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp; ").join(markdowns);
+			}
+			
+			var document = HtmlUtils.parse(body);
+			document.outputSettings().prettyPrint(false);
+
+			return getContent(document);
+		} catch (IOException | MessagingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private String parseBody(Project project, String attachmentGroup, Part part, Attachments attachments)
+			throws IOException, MessagingException {
+		if (part.getDisposition() == null) {
+			if (part.isMimeType("text/plain")) {
+				return HtmlEscape.escapeHtml5(part.getContent().toString());
+			} else if (part.isMimeType("text/html")) {
+				Document doc = Jsoup.parse(part.getContent().toString());
+				for (Element element: doc.getElementsByTag("img")) {
+					String src = element.attr("src");
+					if (src != null && src.startsWith("cid:")) {
+						String contentId = "<" + src.substring("cid:".length()) + ">";
+						attachments.referenced.add(contentId);
+						Attachment attachment = attachments.identifiable.get(contentId);
+						if (attachment != null)
+							element.attr("src", attachment.url);
+					}
+				}
+				return doc.html();
+			} else if (part.isMimeType("multipart/*")) {
+				Multipart multipart = (Multipart) part.getContent();
+				int count = multipart.getCount();
+				if (count != 0) {
+					boolean multipartAlt = new ContentType(multipart.getContentType()).match("multipart/alternative");
+					if (multipartAlt)
+						// alternatives appear in an order of increasing 
+						// faithfulness to the original content. Customize as req'd.
+						return parseBody(project, attachmentGroup, multipart.getBodyPart(count - 1), attachments);
+					StringBuilder builder = new StringBuilder();
+					for (int i=0; i<count; i++)
+						builder.append(parseBody(project, attachmentGroup, multipart.getBodyPart(i), attachments));
+					return builder.toString();
+				} else {
+					return "";
+				}
+			} else {
+				return "";
+			}
+		} else {
+			return "";
+		}
+	}
+
+	private void fillAttachments(Project project, String attachmentGroup, Part part, Attachments attachments)
+			throws IOException, MessagingException {
+		if (part.getDisposition() != null) {
+			String[] contentId = part.getHeader("Content-ID");
+			String fileName = MimeUtility.decodeText(part.getFileName());
+			var attachmentManager = OneDev.getInstance(AttachmentManager.class);
+			String attachmentName = attachmentManager.saveAttachment(project.getId(), attachmentGroup,
+					fileName, part.getInputStream());
+			String attachmentUrl = project.getAttachmentUrlPath(attachmentGroup, attachmentName);
+			Attachment attachment;
+			if (part.isMimeType("image/*"))
+				attachment = new ImageAttachment(attachmentUrl, fileName);
+			else
+				attachment = new FileAttachment(attachmentUrl, fileName);
+			if (contentId != null && contentId.length != 0)
+				attachments.identifiable.put(contentId[0], attachment);
+			else
+				attachments.nonIdentifiable.add(attachment);
+		} else if (part.isMimeType("multipart/*")) {
+			Multipart multipart = (Multipart) part.getContent();
+			int count = multipart.getCount();
+			if (count != 0) {
+				boolean multipartAlt = new ContentType(multipart.getContentType()).match("multipart/alternative");
+				if (multipartAlt)
+					// alternatives appear in an order of increasing 
+					// faithfulness to the original content. Customize as req'd.
+					fillAttachments(project, attachmentGroup, multipart.getBodyPart(count - 1), attachments);
+				for (int i=0; i<count; i++)
+					fillAttachments(project, attachmentGroup, multipart.getBodyPart(i), attachments);
+			}
+		}
 	}
 
 }

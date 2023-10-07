@@ -125,7 +125,7 @@ public class Office365MailService implements MailService {
 	}
 	
 	@Editable(order=10000, description="Specify timeout in seconds when communicating with mail server")
-	@Min(value=10, message="This value should not be less than 10")
+	@Min(value=5, message="This value should not be less than 5")
 	public int getTimeout() {
 		return timeout;
 	}
@@ -234,11 +234,11 @@ public class Office365MailService implements MailService {
 	public InboxMonitor getInboxMonitor() {
 		var imapSetting = getImapSetting();
 		if (imapSetting != null) {
-			return (mailConsumer, testMode) -> {
+			return (messageConsumer, testMode) -> {
 				if (mailPosition == null)
 					mailPosition = new MailPosition();
-				return getMailManager().monitorInbox(getImapSetting(), mailConsumer,
-						mailPosition, testMode);
+				return getMailManager().monitorInbox(getImapSetting(), getSystemAddress(), 
+						messageConsumer, mailPosition, testMode);
 			};
 		} else {
 			return null;			

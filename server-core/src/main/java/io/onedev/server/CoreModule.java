@@ -163,6 +163,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
@@ -179,17 +181,12 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(ObjectMapper.class).toProvider(ObjectMapperProvider.class).in(Singleton.class);
 		
-		bind(ValidatorFactory.class).toProvider(new com.google.inject.Provider<ValidatorFactory>() {
-
-			@Override
-			public ValidatorFactory get() {
-				Configuration<?> configuration = Validation
-						.byDefaultProvider()
-						.configure()
-						.messageInterpolator(new ParameterMessageInterpolator());
-				return configuration.buildValidatorFactory();
-			}
-			
+		bind(ValidatorFactory.class).toProvider(() -> {
+			Configuration<?> configuration = Validation
+					.byDefaultProvider()
+					.configure()
+					.messageInterpolator(new ParameterMessageInterpolator());
+			return configuration.buildValidatorFactory();
 		}).in(Singleton.class);
 		
 		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
@@ -319,7 +316,7 @@ public class CoreModule extends AbstractPluginModule {
 	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
 	    
 	    
-		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> Lists.newArrayList());
+		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> newArrayList());
 	    
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
@@ -339,21 +336,14 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PasswordService.class).to(DefaultPasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
-        contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
-
-            @Override
-            public void configure(FilterChainManager filterChainManager) {
-                filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic, authcBearer");
-                filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic, authcBearer");
-                filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic, authcBearer");
-            }
-            
-        });
+        contribute(FilterChainConfigurator.class, filterChainManager -> {
+			filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic, authcBearer");
+			filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic, authcBearer");
+			filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic, authcBearer");
+		});
         contributeFromPackage(Authenticator.class, Authenticator.class);
 		
-		bind(SSLFactory.class).toProvider(() -> {
-			return KubernetesHelper.buildSSLFactory(Bootstrap.getTrustCertsDir());
-		}).in(Singleton.class);
+		bind(SSLFactory.class).toProvider(() -> KubernetesHelper.buildSSLFactory(Bootstrap.getTrustCertsDir())).in(Singleton.class);
 	}
 	
 	private void configureGit() {
@@ -374,32 +364,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(ResourceConfig.class).toProvider(ResourceConfigProvider.class).in(Singleton.class);
 		bind(ServletContainer.class).to(DefaultServletContainer.class);
 		
-		contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
-
-			@Override
-			public void configure(FilterChainManager filterChainManager) {
-				filterChainManager.createChain("/~api/**", "noSessionCreation, authcBasic, authcBearer");
-			}
-			
-		});
-		
-		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
-			
-			@Override
-			public void configure(ResourceConfig resourceConfig) {
-				resourceConfig.packages(ProjectResource.class.getPackage().getName());
-			}
-			
-		});
-		
-		contribute(JerseyConfigurator.class, new JerseyConfigurator() {
-			
-			@Override
-			public void configure(ResourceConfig resourceConfig) {
-				resourceConfig.register(ClusterResource.class);
-			}
-			
-		});
+		contribute(FilterChainConfigurator.class, filterChainManager -> filterChainManager.createChain("/~api/**", "noSessionCreation, authcBasic, authcBearer"));
+		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.packages(ProjectResource.class.getPackage().getName()));
+		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(ClusterResource.class));
 	}
 
 	private void configureWeb() {
@@ -418,14 +385,7 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
-		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
-			
-			@Override
-			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
-				application.mount(new BasePageMapper("/~test", TestPage.class));
-			}
-			
-		});
+		contribute(WebApplicationConfigurator.class, application -> application.mount(new BasePageMapper("/~test", TestPage.class)));
 		
 		bind(CommitIndexedBroadcaster.class);
 		
@@ -437,14 +397,7 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contributeFromPackage(MarkdownProcessor.class, MarkdownProcessor.class);
 
-		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
-			
-			@Override
-			public Collection<Class<?>> getResourcePackScopes() {
-				return Lists.newArrayList(WebApplication.class);
-			}
-			
-		});
+		contribute(ResourcePackScopeContribution.class, () -> newArrayList(WebApplication.class));
 		
 		contributeFromPackage(ExceptionHandler.class, ExceptionHandler.class);
 		contributeFromPackage(ExceptionHandler.class, GitException.class);
@@ -478,7 +431,7 @@ public class CoreModule extends AbstractPluginModule {
 			public GroovyScript getScript() {
 				GroovyScript script = new GroovyScript();
 				script.setName("determine-build-failure-investigator");
-				script.setContent(Lists.newArrayList("io.onedev.server.util.script.ScriptContribution.determineBuildFailureInvestigator()"));
+				script.setContent(newArrayList("io.onedev.server.util.script.ScriptContribution.determineBuildFailureInvestigator()"));
 				return script;
 			}
 			
@@ -489,7 +442,7 @@ public class CoreModule extends AbstractPluginModule {
 			public GroovyScript getScript() {
 				GroovyScript script = new GroovyScript();
 				script.setName("get-build-number");
-				script.setContent(Lists.newArrayList("io.onedev.server.util.script.ScriptContribution.getBuildNumber()"));
+				script.setContent(newArrayList("io.onedev.server.util.script.ScriptContribution.getBuildNumber()"));
 				return script;
 			}
 			
