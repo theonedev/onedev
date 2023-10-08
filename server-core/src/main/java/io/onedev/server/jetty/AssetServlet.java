@@ -82,7 +82,7 @@ public abstract class AssetServlet extends DefaultServlet {
 			    return "false";
 			if (name.equals("cacheControl")) {
 		        if (!Bootstrap.sandboxMode || Bootstrap.prodMode)
-			        return "max-age=31536000,public";
+			        return "max-age=86400,public";
 		        else
 		        	return "must-revalidate,no-cache,no-store";
 			}

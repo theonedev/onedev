@@ -884,6 +884,16 @@ public class Upgrade extends AbstractPlugin {
 				}
 			}
 		}
+		
+		if (oldAppDataVersion < 142) {
+			try {
+				FileUtils.copyFile(
+						new File(Bootstrap.getSiteDir(), "assets/robots.txt"), 
+						new File(upgradeDir, "site/assets/robots.txt"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
