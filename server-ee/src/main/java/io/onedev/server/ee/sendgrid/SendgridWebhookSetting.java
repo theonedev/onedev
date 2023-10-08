@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.mailservice.sendgrid;
+package io.onedev.server.ee.sendgrid;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;

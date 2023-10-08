@@ -1,9 +1,9 @@
-package io.onedev.server.plugin.mailservice.sendgrid;
+package io.onedev.server.ee.sendgrid;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-interface MessageManager {
+public interface MessageManager {
 
     void process(HttpServletRequest request, HttpServletResponse response);
 

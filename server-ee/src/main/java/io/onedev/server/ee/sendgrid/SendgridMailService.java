@@ -1,7 +1,9 @@
-package io.onedev.server.plugin.mailservice.sendgrid;
+package io.onedev.server.ee.sendgrid;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.ee.NoSubscriptionException;
 import io.onedev.server.mail.BasicAuthPassword;
 import io.onedev.server.mail.InboxMonitor;
 import io.onedev.server.mail.MailManager;
@@ -10,13 +12,16 @@ import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.mailservice.SmtpImplicitSsl;
 import org.jetbrains.annotations.Nullable;
 
+import javax.mail.Message;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
-@Editable(name="SendGrid", order=400)
+@Editable(name="SendGrid", order=400, descriptionProvider = "getClassDescription")
 public class SendgridMailService implements MailService {
 
 	private static final long serialVersionUID = 1L;
@@ -76,33 +81,59 @@ public class SendgridMailService implements MailService {
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 						 String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 						 @Nullable String senderName, @Nullable String references) {
-		var smtpSetting = new SmtpSetting("smtp.sendgrid.net", new SmtpImplicitSsl(), 
-				"apikey", new BasicAuthPassword(getApiKey()), getTimeout());
-		getMailManager().sendMail(smtpSetting, toList, ccList, bccList, subject, 
-				htmlBody, textBody, replyAddress, senderName, getSystemAddress(), references);
+		if (isSubscriptionActive()) {
+			var smtpSetting = new SmtpSetting("smtp.sendgrid.net", new SmtpImplicitSsl(),
+					"apikey", new BasicAuthPassword(getApiKey()), getTimeout());
+			getMailManager().sendMail(smtpSetting, toList, ccList, bccList, subject,
+					htmlBody, textBody, replyAddress, senderName, getSystemAddress(), references);
+		} else {
+			throw new NoSubscriptionException();
+		}
 	}
 
 	@Override
 	public InboxMonitor getInboxMonitor() {
 		if (webhookSetting != null) {
-			return (messageConsumer, testMode) -> OneDev.getInstance(ExecutorService.class).submit(() -> {
-				var messageManager = OneDev.getInstance(MessageManager.class);
-				var target = new MessageTarget(webhookSetting.getSecret());
-				messageManager.register(target);
-				try {
-					while (true) 
-						messageConsumer.accept(target.getQueue().take());
-				} finally {
-					messageManager.unregister(target);
+			return new InboxMonitor() {
+				@Override
+				public Future<?> monitor(Consumer<Message> messageConsumer, boolean testMode) {
+					return OneDev.getInstance(ExecutorService.class).submit(() -> {
+						if (isSubscriptionActive()) {
+							var messageManager = OneDev.getInstance(MessageManager.class);
+							var target = new MessageTarget(webhookSetting.getSecret());
+							messageManager.register(target);
+							try {
+								while (true)
+									messageConsumer.accept(target.getQueue().take());
+							} finally {
+								messageManager.unregister(target);
+							}
+						} else {
+							throw new NoSubscriptionException();
+						}
+					});
 				}
-			});
+			};
 		} else {
 			return null;
 		}
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	private MailManager getMailManager() {
 		return OneDev.getInstance(MailManager.class);
 	}
 	
+	private static String getClassDescription() {
+		if (!isSubscriptionActive()) {
+			return "<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature requiring " +
+					"an active subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> " +
+					"for 30 days";
+		} else {
+			return null;
+		}
+	}
 }

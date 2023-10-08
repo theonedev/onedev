@@ -6,6 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.ee.NoSubscriptionException;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
 import io.onedev.server.ee.xsearch.query.BlobQuery;
 import io.onedev.server.manager.ProjectManager;

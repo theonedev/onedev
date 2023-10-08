@@ -1,4 +1,4 @@
-package io.onedev.server.ee.xsearch;
+package io.onedev.server.ee;
 
 import io.onedev.commons.utils.ExplicitException;
 

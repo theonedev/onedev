@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.mailservice.sendgrid;
+package io.onedev.server.ee.sendgrid;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

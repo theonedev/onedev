@@ -1,5 +1,6 @@
 package io.onedev.server.ee;
 
+import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
@@ -11,6 +12,7 @@ import io.onedev.server.ee.clustering.ClusterManagementPage;
 import io.onedev.server.ee.clustering.DefaultClusterManager;
 import io.onedev.server.ee.dashboard.DashboardPage;
 import io.onedev.server.ee.dashboard.widgets.WidgetGroup;
+import io.onedev.server.ee.sendgrid.*;
 import io.onedev.server.ee.storage.DefaultStorageManager;
 import io.onedev.server.ee.storage.StorageSetting;
 import io.onedev.server.ee.subscription.DefaultSubscriptionManager;
@@ -20,13 +22,14 @@ import io.onedev.server.ee.terminal.DefaultTerminalManager;
 import io.onedev.server.ee.timetracking.DefaultTimeTrackingManager;
 import io.onedev.server.ee.timetracking.TimesheetsPage;
 import io.onedev.server.ee.xsearch.*;
+import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.model.support.Widget;
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.mapper.ProjectPageMapper;
-import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.layout.*;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -97,6 +100,25 @@ public class EEModule extends AbstractPluginModule {
 			menuItems.add(new SidebarMenuItem.Page(null, "Subscription Management", SubscriptionManagementPage.class, new PageParameters()));
 			return menuItems;
 		});
+
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
+
+			@Override
+			public Class<?> getAbstractClass() {
+				return MailService.class;
+			}
+
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				return Sets.newHashSet(SendgridMailService.class);
+			}
+
+		});
+
+		bind(MessageManager.class).to(DefaultMessageManager.class);
+		bind(SendgridServlet.class);
+		contribute(ServletConfigurator.class, SendgridServletConfigurator.class);
+		
 	}
 
 	@Override
