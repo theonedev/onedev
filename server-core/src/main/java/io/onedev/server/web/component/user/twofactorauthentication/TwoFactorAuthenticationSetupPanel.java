@@ -2,7 +2,7 @@ package io.onedev.server.web.component.user.twofactorauthentication;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.util.CryptoUtils;

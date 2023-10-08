@@ -6,7 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.manager.PullRequestChangeManager;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.User;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;

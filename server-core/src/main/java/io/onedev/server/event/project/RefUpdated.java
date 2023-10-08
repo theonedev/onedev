@@ -7,7 +7,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitAware;

@@ -6,7 +6,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.job.JobAuthorizationContext;

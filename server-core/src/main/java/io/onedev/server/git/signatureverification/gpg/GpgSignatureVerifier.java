@@ -1,7 +1,7 @@
 package io.onedev.server.git.signatureverification.gpg;
 
-import io.onedev.server.entitymanager.GpgKeyManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.GpgKeyManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.git.signatureverification.VerificationResult;
 import io.onedev.server.model.support.administration.GpgSetting;

@@ -5,7 +5,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
 import io.onedev.server.annotation.WithTime;
 import io.onedev.server.annotation.WorkingPeriod;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;

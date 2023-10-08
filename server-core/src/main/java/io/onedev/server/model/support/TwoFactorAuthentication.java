@@ -20,7 +20,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;
 
 public class TwoFactorAuthentication implements Serializable {

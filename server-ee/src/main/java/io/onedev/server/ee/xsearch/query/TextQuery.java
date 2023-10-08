@@ -5,7 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
 import io.onedev.server.ee.xsearch.match.ContentMatch;
 import io.onedev.server.ee.xsearch.match.TextMatch;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.search.code.query.TextQueryOption;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;

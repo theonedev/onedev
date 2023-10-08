@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.manager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;

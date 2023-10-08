@@ -5,8 +5,8 @@ import java.util.Date;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;

@@ -5,7 +5,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;

@@ -2,7 +2,7 @@ package io.onedev.server.mail;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.manager.AlertManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.OAuthUtils;

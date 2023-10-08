@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;

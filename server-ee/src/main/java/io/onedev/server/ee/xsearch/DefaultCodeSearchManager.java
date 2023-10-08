@@ -8,7 +8,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
 import io.onedev.server.ee.xsearch.query.BlobQuery;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.search.code.query.TooGeneralQueryException;

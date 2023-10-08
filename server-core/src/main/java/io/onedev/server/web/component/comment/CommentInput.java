@@ -10,10 +10,10 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

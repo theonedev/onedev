@@ -3,7 +3,7 @@ package io.onedev.server.event.project.pullrequest;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 

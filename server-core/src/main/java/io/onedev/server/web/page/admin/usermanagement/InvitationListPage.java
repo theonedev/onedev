@@ -27,8 +27,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserInvitationManager;
 import io.onedev.server.model.UserInvitation;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;

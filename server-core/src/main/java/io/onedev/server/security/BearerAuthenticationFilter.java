@@ -15,7 +15,7 @@ import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.ExceptionUtils;

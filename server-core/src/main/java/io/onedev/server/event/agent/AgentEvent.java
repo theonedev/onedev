@@ -1,7 +1,7 @@
 package io.onedev.server.event.agent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Agent;
 

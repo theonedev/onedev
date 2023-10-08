@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.timetracking;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import org.apache.wicket.Component;

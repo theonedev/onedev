@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.notification.ActivityDetail;

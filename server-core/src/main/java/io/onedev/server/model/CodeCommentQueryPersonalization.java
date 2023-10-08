@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
+import io.onedev.server.manager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;

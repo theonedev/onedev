@@ -1,7 +1,6 @@
 package io.onedev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -30,8 +29,8 @@ import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.commandhandler.*;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.data.DefaultDataManager;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.entitymanager.impl.*;
+import io.onedev.server.manager.*;
+import io.onedev.server.manager.impl.*;
 import io.onedev.server.entityreference.DefaultEntityReferenceManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.event.DefaultListenerRegistry;
@@ -128,7 +127,6 @@ import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.web.config.ShiroFilterConfiguration;
-import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroFilter;
@@ -159,7 +157,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.*;
 

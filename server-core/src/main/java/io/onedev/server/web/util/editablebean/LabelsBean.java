@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.manager.LabelSpecManager;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;

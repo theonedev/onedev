@@ -1,9 +1,9 @@
 package io.onedev.server.rest;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.PullRequestChangeManager;
+import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;

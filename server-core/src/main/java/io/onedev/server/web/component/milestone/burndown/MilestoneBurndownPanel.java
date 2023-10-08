@@ -2,7 +2,7 @@ package io.onedev.server.web.component.milestone.burndown;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.infomanager.IssueInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;

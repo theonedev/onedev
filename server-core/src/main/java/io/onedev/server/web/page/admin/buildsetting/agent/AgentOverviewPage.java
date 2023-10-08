@@ -1,9 +1,9 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.manager.AgentAttributeManager;
+import io.onedev.server.manager.AgentManager;
+import io.onedev.server.manager.AgentTokenManager;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.web.component.AgentStatusBadge;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;

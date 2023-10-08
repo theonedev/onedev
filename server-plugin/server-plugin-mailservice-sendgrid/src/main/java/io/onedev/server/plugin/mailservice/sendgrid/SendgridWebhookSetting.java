@@ -1,9 +1,7 @@
 package io.onedev.server.plugin.mailservice.sendgrid;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.entitymanager.SettingManager;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;

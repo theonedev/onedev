@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.manager.EmailAddressManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;

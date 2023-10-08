@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.PullRequest;

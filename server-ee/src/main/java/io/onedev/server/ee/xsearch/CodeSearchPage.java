@@ -10,7 +10,7 @@ import io.onedev.server.ee.xsearch.match.ContentMatch;
 import io.onedev.server.ee.xsearch.query.FileQuery;
 import io.onedev.server.ee.xsearch.query.SymbolQuery;
 import io.onedev.server.ee.xsearch.query.TextQuery;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.search.code.query.FileQueryOption;
 import io.onedev.server.search.code.query.QueryOption;

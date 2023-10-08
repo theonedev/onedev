@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.LinkSpecManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;

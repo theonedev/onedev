@@ -24,7 +24,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.AccessToken;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
@@ -33,9 +32,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.SshKeyManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.CommitQueryPersonalization;
@@ -57,8 +56,6 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.exception.InvalidParamException;
-import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.annotation.UserName;
 

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 

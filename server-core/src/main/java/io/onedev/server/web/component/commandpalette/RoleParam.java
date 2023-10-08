@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.web.page.admin.rolemanagement.RoleDetailPage;
 

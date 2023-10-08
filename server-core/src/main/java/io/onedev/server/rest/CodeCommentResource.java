@@ -18,9 +18,9 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;

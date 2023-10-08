@@ -13,16 +13,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.onedev.server.model.Group;
-import io.onedev.server.model.User;
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.MembershipManager;
+import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.model.Membership;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-
-import java.lang.reflect.Member;
 
 @Api(order=6100)
 @Path("/memberships")

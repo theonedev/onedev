@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.setting.code.git;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.security.SecurityUtils;

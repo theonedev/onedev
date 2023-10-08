@@ -18,13 +18,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.manager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;

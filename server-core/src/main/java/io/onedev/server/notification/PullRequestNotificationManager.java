@@ -2,10 +2,10 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.entitymanager.PullRequestMentionManager;
-import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.PullRequestMentionManager;
+import io.onedev.server.manager.PullRequestWatchManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.infomanager.VisitInfoManager;

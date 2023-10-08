@@ -27,8 +27,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GpgKeyManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.GpgKeyManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.util.GpgUtils;

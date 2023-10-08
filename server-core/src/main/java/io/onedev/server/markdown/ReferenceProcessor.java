@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.entityreference.ReferenceParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;

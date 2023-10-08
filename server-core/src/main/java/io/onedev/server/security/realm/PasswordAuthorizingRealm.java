@@ -3,7 +3,7 @@ package io.onedev.server.security.realm;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;

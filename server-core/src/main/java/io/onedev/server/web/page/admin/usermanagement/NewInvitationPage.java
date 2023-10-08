@@ -2,8 +2,8 @@ package io.onedev.server.web.page.admin.usermanagement;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserInvitationManager;
 import io.onedev.server.model.UserInvitation;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;

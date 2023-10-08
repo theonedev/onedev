@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.manager.PullRequestAssignmentManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;

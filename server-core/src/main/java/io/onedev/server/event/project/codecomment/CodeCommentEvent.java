@@ -3,8 +3,8 @@ package io.onedev.server.event.project.codecomment;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;

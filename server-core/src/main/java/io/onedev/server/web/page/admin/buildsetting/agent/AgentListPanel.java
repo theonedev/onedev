@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.agent.AgentQuery;

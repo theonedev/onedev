@@ -3,7 +3,7 @@ package io.onedev.server.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.rest.annotation.Api;

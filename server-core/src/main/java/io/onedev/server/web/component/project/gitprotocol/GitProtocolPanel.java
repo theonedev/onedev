@@ -15,8 +15,8 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.security.SecurityUtils;

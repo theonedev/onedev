@@ -2,7 +2,7 @@ package io.onedev.server.web.component.issue.side;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.manager.*;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.EntityWatch;

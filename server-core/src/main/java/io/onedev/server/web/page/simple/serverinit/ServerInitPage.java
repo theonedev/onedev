@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.simple.serverinit;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ManualConfigStep;

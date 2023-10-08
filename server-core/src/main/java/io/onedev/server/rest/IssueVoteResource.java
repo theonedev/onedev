@@ -1,9 +1,8 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.IssueVoteManager;
+import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;

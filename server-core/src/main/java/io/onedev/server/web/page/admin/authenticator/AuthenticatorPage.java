@@ -3,7 +3,7 @@ package io.onedev.server.web.page.admin.authenticator;
 import com.google.common.base.Joiner;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;

@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.report.html;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -9,8 +9,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.nio.charset.StandardCharsets;
 
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.START_PAGE;
 import static java.nio.charset.StandardCharsets.*;

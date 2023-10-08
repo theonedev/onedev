@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;

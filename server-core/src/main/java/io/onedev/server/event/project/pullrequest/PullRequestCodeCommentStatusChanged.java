@@ -3,8 +3,8 @@ package io.onedev.server.event.project.pullrequest;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.CodeCommentStatusChangeManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;

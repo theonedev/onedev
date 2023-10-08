@@ -17,7 +17,7 @@ import com.google.common.base.Joiner;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.security.SecurityUtils;
 

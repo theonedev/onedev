@@ -1,9 +1,9 @@
 package io.onedev.server.web.page.project.setting.authorization;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupAuthorizationManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.GroupAuthorizationManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

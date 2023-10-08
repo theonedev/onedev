@@ -11,8 +11,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.LinkSpecManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;

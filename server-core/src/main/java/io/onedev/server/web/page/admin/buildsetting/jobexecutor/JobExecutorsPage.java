@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;

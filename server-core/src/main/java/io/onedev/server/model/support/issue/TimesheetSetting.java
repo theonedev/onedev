@@ -6,7 +6,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.RadioChoice;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
 import javax.annotation.Nullable;

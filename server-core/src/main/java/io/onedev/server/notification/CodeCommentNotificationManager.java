@@ -1,9 +1,9 @@
 package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
-import io.onedev.server.entitymanager.CodeCommentMentionManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.CodeCommentMentionManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;

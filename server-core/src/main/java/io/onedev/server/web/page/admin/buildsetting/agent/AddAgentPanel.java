@@ -2,7 +2,6 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,8 +14,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.AgentTokenManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;

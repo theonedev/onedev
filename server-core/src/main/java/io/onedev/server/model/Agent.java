@@ -7,7 +7,7 @@ import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.util.CollectionUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;

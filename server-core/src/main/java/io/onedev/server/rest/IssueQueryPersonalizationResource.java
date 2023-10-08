@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.manager.IssueQueryPersonalizationManager;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

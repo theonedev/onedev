@@ -1,10 +1,6 @@
 package io.onedev.server.util.usermatch;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 

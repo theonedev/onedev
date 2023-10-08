@@ -12,7 +12,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;

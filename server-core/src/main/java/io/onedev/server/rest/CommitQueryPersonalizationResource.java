@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.manager.CommitQueryPersonalizationManager;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

@@ -7,16 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.EmailAddressManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.search.commit.AfterCriteria;
 import io.onedev.server.search.commit.AuthorCriteria;
 import io.onedev.server.search.commit.BeforeCriteria;
 import io.onedev.server.search.commit.CommitQuery;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;

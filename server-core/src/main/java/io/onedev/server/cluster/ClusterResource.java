@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitUtils;

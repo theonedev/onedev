@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionManager;

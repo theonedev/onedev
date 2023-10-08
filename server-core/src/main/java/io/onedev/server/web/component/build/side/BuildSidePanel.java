@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.BuildLabelManager;
+import io.onedev.server.manager.BuildLabelManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;

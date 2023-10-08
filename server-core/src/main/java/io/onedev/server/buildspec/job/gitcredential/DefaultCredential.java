@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.gitcredential;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.annotation.Editable;
 

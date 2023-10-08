@@ -1,8 +1,8 @@
 package io.onedev.server.ee.subscription;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.UserManager;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;

@@ -1,10 +1,9 @@
 package io.onedev.server.web.page.admin.mailservice;
 
 import com.google.common.collect.Sets;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;

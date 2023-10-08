@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;

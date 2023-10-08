@@ -2,7 +2,7 @@ package io.onedev.server.web.component.symboltooltip;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;

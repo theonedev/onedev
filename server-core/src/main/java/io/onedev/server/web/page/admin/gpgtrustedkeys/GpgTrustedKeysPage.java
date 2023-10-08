@@ -29,7 +29,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.BaseGpgKey;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.util.GpgUtils;

@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.BuildLabelManager;
+import io.onedev.server.manager.BuildLabelManager;
 import io.onedev.server.model.BuildLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

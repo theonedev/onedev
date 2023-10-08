@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;

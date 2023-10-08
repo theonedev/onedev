@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.select2.ChoiceProvider;

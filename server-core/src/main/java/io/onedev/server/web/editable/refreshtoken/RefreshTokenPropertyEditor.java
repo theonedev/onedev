@@ -34,7 +34,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.OAuthUtils;
 import io.onedev.server.util.ReflectionUtils;

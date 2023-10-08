@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.issue.progress;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.ProjectScope;

@@ -1,7 +1,7 @@
 package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.security.SecurityUtils;
 

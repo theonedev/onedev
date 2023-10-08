@@ -3,7 +3,6 @@ package io.onedev.server.web.resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,14 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.manager.AgentManager;
+import io.onedev.server.manager.AgentTokenManager;
 import io.onedev.server.security.SecurityUtils;
 
 public class AgentLibResource extends AbstractResource {

@@ -11,8 +11,8 @@ import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 import com.google.common.base.Splitter;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.UserInvitationManager;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;

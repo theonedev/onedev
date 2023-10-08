@@ -13,7 +13,7 @@ import javax.validation.Valid;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.PathMatcher;

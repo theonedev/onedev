@@ -1,7 +1,7 @@
 package io.onedev.server.search.entity.agent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.manager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.util.criteria.Criteria;
 

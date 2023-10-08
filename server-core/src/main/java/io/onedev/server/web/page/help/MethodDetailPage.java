@@ -4,7 +4,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.rest.TriggerJobResource;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.ParamCheckFilter;

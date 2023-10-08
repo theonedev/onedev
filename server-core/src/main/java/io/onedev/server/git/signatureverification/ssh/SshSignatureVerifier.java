@@ -2,8 +2,8 @@ package io.onedev.server.git.signatureverification.ssh;
 
 import com.trilead.ssh2.packets.TypesReader;
 import com.trilead.ssh2.packets.TypesWriter;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.SshKeyManager;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.git.signatureverification.VerificationResult;
 import io.onedev.server.util.ExceptionUtils;

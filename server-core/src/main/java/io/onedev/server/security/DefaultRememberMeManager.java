@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.util.CryptoUtils;
 
 @Singleton

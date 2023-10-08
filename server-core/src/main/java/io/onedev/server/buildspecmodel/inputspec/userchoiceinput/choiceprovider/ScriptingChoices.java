@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;

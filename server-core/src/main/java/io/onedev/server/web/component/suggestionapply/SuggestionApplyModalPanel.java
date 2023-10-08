@@ -11,7 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.manager.CodeCommentStatusChangeManager;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObsoleteCommitException;

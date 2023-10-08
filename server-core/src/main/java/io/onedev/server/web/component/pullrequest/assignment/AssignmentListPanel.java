@@ -2,7 +2,7 @@ package io.onedev.server.web.component.pullrequest.assignment;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.manager.PullRequestAssignmentManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;

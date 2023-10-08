@@ -16,7 +16,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 
 public class ProjectMapperUtils {
 

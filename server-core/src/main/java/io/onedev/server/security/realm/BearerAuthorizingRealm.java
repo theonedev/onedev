@@ -8,10 +8,10 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
 
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.BearerAuthenticationToken;
 

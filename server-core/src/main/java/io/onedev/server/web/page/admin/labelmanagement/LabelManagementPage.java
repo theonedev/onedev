@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.labelmanagement;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.manager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;

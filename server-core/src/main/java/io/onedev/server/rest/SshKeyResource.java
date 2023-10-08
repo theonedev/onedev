@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.manager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

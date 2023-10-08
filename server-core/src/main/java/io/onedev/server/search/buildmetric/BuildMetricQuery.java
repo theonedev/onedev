@@ -23,7 +23,7 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.manager.BuildParamManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.search.buildmetric.BuildMetricQueryParser.AndCriteriaContext;

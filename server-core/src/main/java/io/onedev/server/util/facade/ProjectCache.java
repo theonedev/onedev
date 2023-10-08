@@ -2,7 +2,7 @@ package io.onedev.server.util.facade;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
@@ -12,7 +12,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.util.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;

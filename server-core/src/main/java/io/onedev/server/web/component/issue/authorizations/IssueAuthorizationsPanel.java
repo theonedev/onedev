@@ -36,8 +36,8 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueAuthorizationManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.IssueAuthorizationManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.User;

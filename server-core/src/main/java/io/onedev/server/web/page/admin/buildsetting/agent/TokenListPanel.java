@@ -3,7 +3,6 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -24,7 +23,7 @@ import org.apache.wicket.model.Model;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.manager.AgentTokenManager;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;

@@ -1,8 +1,8 @@
 package io.onedev.server.event.project.codecomment;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.CodeCommentReplyManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;

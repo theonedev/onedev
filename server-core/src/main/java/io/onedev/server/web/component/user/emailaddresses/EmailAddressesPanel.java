@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.user.emailaddresses;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;

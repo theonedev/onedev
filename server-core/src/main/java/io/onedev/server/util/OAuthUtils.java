@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AlertManager;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.joda.time.DateTime;
 
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;

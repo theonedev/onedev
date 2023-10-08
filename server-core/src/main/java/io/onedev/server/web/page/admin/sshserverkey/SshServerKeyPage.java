@@ -11,7 +11,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.web.editable.BeanContext;

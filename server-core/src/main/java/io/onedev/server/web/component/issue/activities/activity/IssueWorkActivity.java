@@ -1,9 +1,7 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.model.IssueComment;
+import io.onedev.server.manager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;

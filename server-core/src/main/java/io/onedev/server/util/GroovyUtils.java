@@ -8,7 +8,7 @@ import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;

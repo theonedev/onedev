@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.util.match.PathMatcher;

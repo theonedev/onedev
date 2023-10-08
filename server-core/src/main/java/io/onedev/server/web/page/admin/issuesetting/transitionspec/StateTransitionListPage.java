@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.issuesetting.transitionspec;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.util.CollectionUtils;

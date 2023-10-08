@@ -1,8 +1,8 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;

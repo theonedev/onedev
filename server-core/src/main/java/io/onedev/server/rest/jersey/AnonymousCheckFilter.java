@@ -12,7 +12,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.rest.TriggerJobResource;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

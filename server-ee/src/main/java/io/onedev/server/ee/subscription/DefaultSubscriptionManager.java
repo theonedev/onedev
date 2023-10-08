@@ -2,9 +2,9 @@ package io.onedev.server.ee.subscription;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.SubscriptionManager;
-import io.onedev.server.entitymanager.AlertManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.AlertManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;

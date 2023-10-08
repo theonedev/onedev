@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.manager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;

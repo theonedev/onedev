@@ -3,8 +3,8 @@ package io.onedev.server.web.page.project.pullrequests.detail.activities.activit
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.PullRequestChangeManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;

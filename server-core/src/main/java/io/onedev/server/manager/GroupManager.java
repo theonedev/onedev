@@ -1,0 +1,36 @@
+package io.onedev.server.manager;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import io.onedev.server.model.Group;
+import io.onedev.server.persistence.dao.EntityManager;
+
+public interface GroupManager extends EntityManager<Group> {
+	
+	void create(Group group);
+	
+	/**
+	 * Save specified group
+	 * 
+	 * @param group
+	 * 			group to save
+	 * @param oldName
+	 * 			in case of rename, this parameter should hold the original name 
+	 * 			when above group object is initially loaded to ensure database 
+	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
+	 * 			or the name is not changed
+	 */
+	void update(Group group, @Nullable String oldName);
+	
+	@Nullable
+	Group find(String name);
+
+	int count(@Nullable String term);
+	
+	List<Group> query(@Nullable String term, int firstResult, int maxResults);
+	
+	List<Group> queryAdminstrator();
+	
+}

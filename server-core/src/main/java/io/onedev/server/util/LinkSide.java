@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.manager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 
 public class LinkSide {

@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;

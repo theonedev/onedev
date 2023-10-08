@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;

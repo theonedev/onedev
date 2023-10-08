@@ -1,8 +1,8 @@
 package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;

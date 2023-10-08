@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.manager.CommitQueryPersonalizationManager;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;

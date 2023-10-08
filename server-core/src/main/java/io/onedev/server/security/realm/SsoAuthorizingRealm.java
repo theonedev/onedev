@@ -13,13 +13,13 @@ import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.MembershipManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.SshKeyManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;

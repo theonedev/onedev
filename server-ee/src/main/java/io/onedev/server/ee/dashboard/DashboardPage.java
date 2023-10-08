@@ -2,8 +2,8 @@ package io.onedev.server.ee.dashboard;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ee.dashboard.widgets.ProjectListWidget;
-import io.onedev.server.entitymanager.DashboardManager;
-import io.onedev.server.entitymanager.DashboardVisitManager;
+import io.onedev.server.manager.DashboardManager;
+import io.onedev.server.manager.DashboardVisitManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.security.SecurityUtils;

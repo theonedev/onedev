@@ -16,7 +16,7 @@ import io.onedev.server.annotation.Markdown;
 import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.manager.*;
 import io.onedev.server.git.*;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;

@@ -2,7 +2,7 @@ package io.onedev.server.entityreference;
 
 import com.google.common.collect.ImmutableSet;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.*;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ProjectScopedNumber;

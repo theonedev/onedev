@@ -11,7 +11,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;

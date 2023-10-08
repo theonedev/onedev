@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.stats.buildmetric;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.manager.BuildMetricManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;

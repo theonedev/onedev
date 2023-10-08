@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

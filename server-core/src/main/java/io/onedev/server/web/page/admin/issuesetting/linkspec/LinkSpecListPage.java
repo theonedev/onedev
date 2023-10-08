@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.linkspec;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.manager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;

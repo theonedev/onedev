@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
+import io.onedev.server.manager.PendingSuggestionApplyManager;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobEdits;

@@ -3,7 +3,7 @@ package io.onedev.server.web.component.project;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 

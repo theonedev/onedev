@@ -9,8 +9,8 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.BuildMetricManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.persistence.dao.Dao;
@@ -18,7 +18,6 @@ import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @Editable

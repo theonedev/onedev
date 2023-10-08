@@ -5747,7 +5747,16 @@ public class DataMigrator {
 	private void migrate142(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.util.channelnotification.",
+							"io.onedev.server.model.support.channelnotification.");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("timeTracking").setText("false");
 					element.element("issueSetting").addElement("timesheetSettings").addAttribute("class", "linked-hash-map");

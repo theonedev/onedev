@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;

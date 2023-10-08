@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.HttpCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.validation.Validatable;

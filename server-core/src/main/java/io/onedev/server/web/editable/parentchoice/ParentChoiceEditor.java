@@ -14,7 +14,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.facade.ProjectCache;

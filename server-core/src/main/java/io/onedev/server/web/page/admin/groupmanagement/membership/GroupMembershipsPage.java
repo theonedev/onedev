@@ -35,8 +35,8 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.MembershipManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;

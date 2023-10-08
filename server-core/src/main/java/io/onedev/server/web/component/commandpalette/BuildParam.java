@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.JobCriteria;

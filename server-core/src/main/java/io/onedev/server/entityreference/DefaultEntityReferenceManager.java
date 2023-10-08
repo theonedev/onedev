@@ -1,10 +1,10 @@
 package io.onedev.server.entityreference;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.PullRequestChangeManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.*;
 import io.onedev.server.event.project.issue.IssueChanged;

@@ -2,7 +2,7 @@ package io.onedev.server.web.component.user.profileedit;
 
 import java.io.Serializable;
 
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import org.apache.wicket.Session;
@@ -14,7 +14,7 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;

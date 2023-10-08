@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.setting.code.tagprotection;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;

@@ -2,11 +2,10 @@ package io.onedev.server.ee.xsearch.query;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.util.patternset.PatternSet;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;

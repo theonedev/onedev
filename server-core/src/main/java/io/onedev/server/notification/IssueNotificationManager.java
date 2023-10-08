@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.manager.*;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.util.ProjectScope;
 import org.apache.commons.lang3.StringUtils;

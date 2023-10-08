@@ -2,7 +2,7 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.data.DataManager;

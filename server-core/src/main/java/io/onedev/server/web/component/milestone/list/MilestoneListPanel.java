@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.milestone.list;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;

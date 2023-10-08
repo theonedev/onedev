@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.LayoutPage;
 import org.apache.wicket.markup.head.CssHeaderItem;

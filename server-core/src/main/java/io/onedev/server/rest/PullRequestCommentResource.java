@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;

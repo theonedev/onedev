@@ -3,7 +3,7 @@ package io.onedev.server.ssh;
 import com.google.common.collect.Lists;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;

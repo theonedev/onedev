@@ -3,7 +3,7 @@ package io.onedev.server.model.support.role;
 import java.util.Collection;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.annotation.Editable;
 
 @Editable(order=100, name="All")

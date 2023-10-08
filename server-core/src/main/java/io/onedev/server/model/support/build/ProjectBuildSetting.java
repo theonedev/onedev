@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.build;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;

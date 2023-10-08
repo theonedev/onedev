@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.setting.code.pullrequest;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.security.SecurityUtils;

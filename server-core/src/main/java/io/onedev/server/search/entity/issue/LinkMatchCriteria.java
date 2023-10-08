@@ -21,7 +21,7 @@ import javax.persistence.criteria.Subquery;
 import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.manager.IssueLinkManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;

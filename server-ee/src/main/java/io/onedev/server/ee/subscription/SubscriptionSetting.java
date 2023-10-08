@@ -5,7 +5,7 @@ import io.onedev.license.LicenseeUpdate;
 import io.onedev.license.SubscriptionCharge;
 import io.onedev.license.TrialSubscription;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.shiro.crypto.CipherService;
 import org.joda.time.DateTime;

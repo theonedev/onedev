@@ -1,7 +1,7 @@
 package io.onedev.server.ssh;
 
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;

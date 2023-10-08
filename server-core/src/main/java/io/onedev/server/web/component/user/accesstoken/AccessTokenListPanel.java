@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.user.accesstoken;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.AccessToken;
 import org.apache.wicket.Component;

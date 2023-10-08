@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.manager.GroupAuthorizationManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.RoleManager;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;

@@ -12,9 +12,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;

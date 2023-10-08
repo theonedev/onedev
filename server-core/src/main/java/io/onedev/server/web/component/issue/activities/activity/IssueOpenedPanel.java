@@ -3,7 +3,7 @@ package io.onedev.server.web.component.issue.activities.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -14,7 +14,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

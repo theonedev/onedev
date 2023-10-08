@@ -6,7 +6,7 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.security.SecurityUtils;
@@ -16,7 +16,6 @@ import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
-import io.onedev.server.web.resource.ArtifactResourceReference;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -2,8 +2,8 @@ package io.onedev.server.buildspec.job;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 

@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.manager.IssueWatchManager;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.rest.annotation.Api;
 import org.apache.shiro.authz.UnauthorizedException;

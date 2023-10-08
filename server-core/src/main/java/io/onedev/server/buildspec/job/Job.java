@@ -14,7 +14,7 @@ import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.match.JobMatch;
