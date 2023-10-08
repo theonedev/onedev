@@ -223,7 +223,6 @@ onedev.server.sourceView = {
 		}
 	},
 	addCoverageGutter: function(line, coverageStatus) {
-		console.log(coverageStatus);
 		let tooltip;
 		if (coverageStatus == 'COVERED')
 			tooltip = `Covered by tests`;
