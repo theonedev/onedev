@@ -89,7 +89,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -489,6 +488,7 @@ public abstract class IssueListPanel extends Panel {
 							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
 						}
 						target.add(body);
+						onDisplayFieldsAndLinksUpdated(target);
 					}
 					
 				});
@@ -502,6 +502,7 @@ public abstract class IssueListPanel extends Panel {
 						getProject().getIssueSetting().setListLinks(null);
 						OneDev.getInstance(ProjectManager.class).update(getProject());
 						target.add(body);
+						onDisplayFieldsAndLinksUpdated(target);
 					}
 
 					@Override
@@ -684,6 +685,7 @@ public abstract class IssueListPanel extends Panel {
 											modal.close();
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											onBatchUpdated(target);
 										}
 
 										@Override
@@ -919,6 +921,7 @@ public abstract class IssueListPanel extends Panel {
 											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											onBatchDeleted(target);
 										}
 
 										@Override
@@ -1091,6 +1094,7 @@ public abstract class IssueListPanel extends Panel {
 											modal.close();
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											onBatchUpdated(target);
 										}
 
 										@Override
@@ -1330,6 +1334,7 @@ public abstract class IssueListPanel extends Panel {
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											onBatchDeleted(target);
 										}
 
 										@Override
@@ -1550,11 +1555,24 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new CopyToClipboardLink("copy",
 						Model.of(issue.getTitle() + " (#" + issue.getNumber() + ")")));
 
-				fragment.add(new Link<Void>("pin") {
+				fragment.add(new AjaxLink<Void>("pin") {
 
 					@Override
-					public void onClick() {
-						getIssueManager().togglePin((Issue) fragment.getDefaultModelObject());
+					public void onClick(AjaxRequestTarget target) {
+						var issue = (Issue) fragment.getDefaultModelObject();
+						getIssueManager().togglePin(issue);
+						send(getPage(), Broadcast.BREADTH, new IssuePinStatusChanged(target, issueId));
+					}
+
+					@Override
+					public void onEvent(IEvent<?> event) {
+						super.onEvent(event);
+						if (event.getPayload() instanceof IssuePinStatusChanged) {
+							var issuePinStatusChanged = (IssuePinStatusChanged) event.getPayload();
+							if (issuePinStatusChanged.getIssueId().equals(issueId))
+								issuePinStatusChanged.getHandler().add(this);
+						}
+						event.dontBroadcastDeeper();
 					}
 
 					@Override
@@ -1566,7 +1584,7 @@ public abstract class IssueListPanel extends Panel {
 								&& SecurityUtils.canManageIssues(getProject())
 								&& issue.getProject().equals(getProject()));
 					}
-				});
+				}.setOutputMarkupPlaceholderTag(true));
 
 				var linksPanel = new IssueLinksPanel("links") {
 
@@ -1785,6 +1803,15 @@ public abstract class IssueListPanel extends Panel {
 			current = current.getParent();
 		}
 		return getGlobalIssueSetting().getListLinks();
+	}
+	
+	protected void onDisplayFieldsAndLinksUpdated(AjaxRequestTarget target) {
+	}
+	
+	protected void onBatchUpdated(AjaxRequestTarget target) {
+	}
+	
+	protected void onBatchDeleted(AjaxRequestTarget target) {
 	}
 	
 	@Override

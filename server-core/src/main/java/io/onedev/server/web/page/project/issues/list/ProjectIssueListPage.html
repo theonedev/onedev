@@ -19,9 +19,6 @@
 			<a wicket:id="unpin" title="Unpin this issue" class="unpin btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="unpin" class="icon flip-x"/></a>
 		</div>
 		<div class="secondary d-flex flex-wrap">
-			<div wicket:id="transit" class="state">
-				<span wicket:id="state" class="mb-2 mr-2"></span>
-			</div>
 			<div wicket:id="fields" class="field"></div>
 		</div>
 		<wicket:enclosure child="linkedIssues">
@@ -29,5 +26,8 @@
 				<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
 			</div>
 		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="stateFrag">
+		<div wicket:id="transit" class="state"><span wicket:id="state"></span></div>
 	</wicket:fragment>
 </wicket:extend>

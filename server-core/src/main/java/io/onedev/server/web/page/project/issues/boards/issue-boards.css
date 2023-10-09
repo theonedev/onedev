@@ -94,11 +94,8 @@
 .issue-boards>.body .board-card .secondary .working-indicator {
 	margin-bottom: 6px;
 }
-.issue-boards>.body .board-card .secondary .avatars .working-indicator {
-	margin-top: 2px;
-	margin-bottom: 0;
-}
-.issue-boards>.body .board-card .secondary>:last-child {
+.issue-boards>.body .board-card .secondary .avatars-and-progress>:last-child,
+.issue-boards>.body .board-card .secondary .avatars-and-progress>.avatar:last-child .value:last-child {
 	margin-right: 0 !important;
 }
 

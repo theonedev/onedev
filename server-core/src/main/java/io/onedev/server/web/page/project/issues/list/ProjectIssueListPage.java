@@ -8,6 +8,7 @@ import io.onedev.server.manager.IssueQueryPersonalizationManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueQueryPersonalization;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
@@ -22,6 +23,8 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
+import io.onedev.server.web.component.issue.list.IssuePinStatusChanged;
+import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -43,6 +46,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -86,6 +91,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	private IssueListPanel issueList;
 	
+	private Component pinnedIssuesContainer;
+	
 	public ProjectIssueListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
@@ -103,7 +110,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new WebMarkupContainer("pinnedIssues") {
+		add(pinnedIssuesContainer = new WebMarkupContainer("pinnedIssues") {
+			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
@@ -120,28 +128,38 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 						Fragment fragment = new Fragment(componentId, "pinnedIssueFrag", ProjectIssueListPage.this);
 
 						List<String> displayFields = issueList.getListFields();
-						AjaxLink<Void> transitLink = new TransitionMenuLink("transit") {
-
-							@Override
-							protected Issue getIssue() {
-								return getIssueManager().load(issueId);
-							}
-
-						};
-						transitLink.setVisible(displayFields.contains(Issue.NAME_STATE));
-
-						transitLink.add(new IssueStateBadge("state", new LoadableDetachableModel<>() {
-							@Override
-							protected Issue load() {
-								return getIssueManager().load(issueId);
-							}
-						}));
-
-						fragment.add(transitLink);
 
 						RepeatingView fieldsView = new RepeatingView("fields");
 						for (String fieldName: displayFields) {
-							if (!fieldName.equals(Issue.NAME_STATE)) {
+							if (fieldName.equals(Issue.NAME_STATE)) {
+								Fragment stateFragment = new Fragment(fieldsView.newChildId(),
+										"stateFrag", ProjectIssueListPage.this);
+								AjaxLink<Void> transitLink = new TransitionMenuLink("transit") {
+
+									@Override
+									protected Issue getIssue() {
+										return getIssueManager().load(issueId);
+									}
+
+								};
+
+								transitLink.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
+									@Override
+									protected Issue load() {
+										return getIssueManager().load(issueId);
+									}
+								}));
+								stateFragment.add(transitLink);
+
+								fieldsView.add(stateFragment.setOutputMarkupId(true));
+							} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+								fieldsView.add(new MilestoneCrumbPanel(fieldsView.newChildId()) {
+									@Override
+									protected Issue getIssue() {
+										return getIssueManager().load(issueId);
+									}
+								});
+							} else {
 								Input field = issue.getFieldInputs().get(fieldName);
 								if (field != null && !field.getValues().isEmpty()) {
 									fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR, true) {
@@ -223,11 +241,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 						};
 						fragment.add(linksPanel);
 						
-						fragment.add(new Link<Void>("unpin") {
+						fragment.add(new AjaxLink<Void>("unpin") {
 
 							@Override
-							public void onClick() {
+							public void onClick(AjaxRequestTarget target) {
 								getIssueManager().togglePin(getIssueManager().load(issueId));
+								send(getPage(), Broadcast.BREADTH, new IssuePinStatusChanged(target, issueId));
 							}
 
 							@Override
@@ -285,6 +304,16 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 					}
 					
 				});
+				
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof IssuePinStatusChanged) 
+					((IssuePinStatusChanged) event.getPayload()).getHandler().add(this);
+				event.dontBroadcastDeeper();
 			}
 
 			@Override
@@ -373,6 +402,21 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 					}
 					
 				};
+			}
+
+			@Override
+			protected void onDisplayFieldsAndLinksUpdated(AjaxRequestTarget target) {
+				target.add(pinnedIssuesContainer);
+			}
+
+			@Override
+			protected void onBatchUpdated(AjaxRequestTarget target) {
+				target.add(pinnedIssuesContainer);
+			}
+
+			@Override
+			protected void onBatchDeleted(AjaxRequestTarget target) {
+				target.add(pinnedIssuesContainer);
 			}
 
 			@Override

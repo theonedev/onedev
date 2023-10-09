@@ -331,7 +331,7 @@ img.avatar {
 }
 .avatar+.name {
 	display: inline !important;
-	margin-left: 0.4rem !important; 
+	margin-left: 0.2rem !important; 
 }
 
 .floating {

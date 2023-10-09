@@ -7,11 +7,11 @@
 			<a wicket:id="showDetail" title="Click to show issue details" class="show-detail"><wicket:svg href="ellipsis" class="icon"/></a>
 		</div>
 		<div class="secondary d-flex align-items-center flex-wrap mb-n2">
-			<div wicket:id="fields" class="field mr-2"></div>
-			<div class="avatars ml-auto d-flex align-items-center flex-wrap">
-				<div wicket:id="avatars" class="avatar mr-2"></div>
+			<div wicket:id="fields" class="field"></div>
+			<div class="avatars-and-progress ml-auto d-flex align-items-center flex-wrap">
+				<div wicket:id="avatars" class="avatar"></div>
+				<div wicket:id="progress" class="d-flex align-items-center mr-2 mb-2"></div>
 			</div>
-			<span wicket:id="progress" class="d-flex align-items-center mr-2 mb-2"></span>
 		</div>
 		<wicket:enclosure child="linkedIssues">
 		<div class="linked-issues pl-3">
