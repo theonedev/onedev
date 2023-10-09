@@ -315,7 +315,6 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
-		
 	}
 	
 	private void configureSecurity() {

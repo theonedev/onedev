@@ -5,8 +5,7 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.manager.StorageManager;
-import io.onedev.server.manager.SubscriptionManager;
+import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.ee.clustering.ClusterManagementPage;
 import io.onedev.server.ee.clustering.DefaultClusterManager;
@@ -23,6 +22,8 @@ import io.onedev.server.ee.timetracking.DefaultTimeTrackingManager;
 import io.onedev.server.ee.timetracking.TimesheetsPage;
 import io.onedev.server.ee.xsearch.*;
 import io.onedev.server.jetty.ServletConfigurator;
+import io.onedev.server.manager.StorageManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.terminal.TerminalManager;
@@ -31,7 +32,6 @@ import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.layout.*;
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.ArrayList;
@@ -89,13 +89,13 @@ public class EEModule extends AbstractPluginModule {
 		
 		contribute(AdministrationSettingContribution.class, () -> {
 			var settings = new ArrayList<Class<? extends ContributedAdministrationSetting>>();
-			if (WicketUtils.getPage().isSubscriptionActive())
+			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
 				settings.add(StorageSetting.class);
 			return settings;
 		});
 		contribute(AdministrationMenuContribution.class, () -> {
 			var menuItems = new ArrayList<SidebarMenuItem>();
-			if (WicketUtils.getPage().isSubscriptionActive())
+			if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive())
 				menuItems.add(new SidebarMenuItem.Page(null, "High Availability & Scalability", ClusterManagementPage.class, new PageParameters()));
 			menuItems.add(new SidebarMenuItem.Page(null, "Subscription Management", SubscriptionManagementPage.class, new PageParameters()));
 			return menuItems;
