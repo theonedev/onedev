@@ -1,7 +1,7 @@
 package io.onedev.server.ee.subscription;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.manager.AlertManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.SettingManager;
@@ -9,8 +9,8 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.util.WicketUtils;

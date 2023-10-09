@@ -16,7 +16,7 @@ import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
-import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
+import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -139,7 +139,7 @@ abstract class BacklogColumnPanel extends Panel {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new IssueQueryProgressPanel(id) {
+					return new QueriedIssuesProgressPanel(id) {
 						@Override
 						protected ProjectScope getProjectScope() {
 							return BacklogColumnPanel.this.getProjectScope();

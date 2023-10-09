@@ -1,6 +1,5 @@
 package io.onedev.server.manager.impl;
 
-import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.server.manager.IssueFieldManager;
 import io.onedev.server.manager.IssueManager;
@@ -8,11 +7,13 @@ import io.onedev.server.manager.IssueWorkManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import javax.inject.Inject;
@@ -23,8 +24,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.server.model.IssueWork.PROP_DAY;
-import static io.onedev.server.model.IssueWork.PROP_ISSUE;
+import static io.onedev.server.model.IssueWork.*;
 import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
 import static java.util.stream.Collectors.toSet;
 
@@ -43,14 +43,7 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
     }
 
 	@Override
-	public void create(IssueWork work) {
-		Preconditions.checkState(work.isNew());
-		dao.persist(work);
-	}
-
-	@Override
-	public void update(IssueWork work) {
-		Preconditions.checkState(!work.isNew());
+	public void createOrUpdate(IssueWork work) {
 		dao.persist(work);
 	}
 
@@ -84,4 +77,14 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		return works;
 	}
 
+	@Sessional
+	@Override
+	public List<IssueWork> query(User user, Issue issue, long day) {
+		var criteria = newCriteria();
+		criteria.add(Restrictions.eq(PROP_USER, user));
+		criteria.add(Restrictions.eq(PROP_ISSUE, issue));
+		criteria.add(Restrictions.eq(PROP_DAY, day));
+		return query(criteria);
+	}
+	
 }

@@ -1,7 +1,7 @@
 package io.onedev.server.ee.clustering;
 
 import io.onedev.server.ServerConfig;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;

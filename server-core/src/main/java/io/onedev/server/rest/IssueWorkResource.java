@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.manager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
@@ -57,7 +57,7 @@ public class IssueWorkResource {
 			throw new UnauthorizedException();
 
 		work.setDay(DateUtils.toLocalDate(work.getDate()).toEpochDay());		
-		workManager.create(work);
+		workManager.createOrUpdate(work);
 		
 		return work.getId();
 	}
@@ -70,7 +70,7 @@ public class IssueWorkResource {
 			throw new UnauthorizedException();
 
 		work.setDay(DateUtils.toLocalDate(work.getDate()).toEpochDay());
-		workManager.update(work);
+		workManager.createOrUpdate(work);
 
 		return Response.ok().build();
 	}

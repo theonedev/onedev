@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.event.Listen;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;

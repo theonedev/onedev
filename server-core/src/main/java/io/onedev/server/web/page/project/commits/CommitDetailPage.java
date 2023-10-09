@@ -18,7 +18,7 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;

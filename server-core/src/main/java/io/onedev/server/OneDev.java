@@ -25,7 +25,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.taskschedule.TaskScheduler;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;

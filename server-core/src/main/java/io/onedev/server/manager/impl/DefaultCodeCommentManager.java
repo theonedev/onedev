@@ -13,7 +13,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;

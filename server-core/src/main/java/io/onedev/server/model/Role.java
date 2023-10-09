@@ -2,7 +2,7 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleName;

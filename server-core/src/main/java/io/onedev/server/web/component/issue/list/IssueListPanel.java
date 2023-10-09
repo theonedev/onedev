@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.*;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -41,8 +41,8 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.issue.progress.IssueProgressLink;
-import io.onedev.server.web.component.issue.progress.IssueQueryProgressPanel;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
+import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -1404,7 +1404,7 @@ public abstract class IssueListPanel extends Panel {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new IssueQueryProgressPanel(id) {
+					return new QueriedIssuesProgressPanel(id) {
 						@Override
 						protected ProjectScope getProjectScope() {
 							return IssueListPanel.this.getProjectScope();
@@ -1538,7 +1538,7 @@ public abstract class IssueListPanel extends Panel {
 
 				});
 
-				fragment.add(new IssueProgressLink("progress") {
+				fragment.add(new IssueProgressPanel("progress") {
 					
 					@Override
 					protected Issue getIssue() {

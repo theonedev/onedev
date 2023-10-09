@@ -6,7 +6,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.manager.IssueLinkManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;

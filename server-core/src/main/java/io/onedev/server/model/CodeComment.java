@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;

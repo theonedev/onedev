@@ -76,10 +76,16 @@
 .issue-boards>.body .board-card .primary .title {
 	word-break: break-word !important;
 	overflow-wrap: break-word !important;
+	font-size: 1.175rem;
 }
 .issue-boards>.body .board-card .primary .number {
 	margin-right: 0.25rem;
+	font-size: 1.175rem;
 }
+.issue-boards>.body .board-card .primary .issue-link {
+	font-weight: 500;
+}
+
 .issue-boards>.body .board-card .primary .show-detail {
 	position: absolute;
 	right: 0;
@@ -91,6 +97,9 @@
 .issue-boards>.body .board-card .secondary .avatars .working-indicator {
 	margin-top: 2px;
 	margin-bottom: 0;
+}
+.issue-boards>.body .board-card .secondary>:last-child {
+	margin-right: 0 !important;
 }
 
 .issue-boards>.body .board-card .linked-issues {
@@ -132,10 +141,9 @@
 .dark-mode .issue-boards>.body .board-card.ui-draggable-dragging {
 	box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.5);	
 }
-.issue-boards>.body .board-card .issue-progress {
+.issue-boards>.body .board-card .issue-progress .completion-rate {
 	width: 19px !important;
 	height: 19px !important;
-	margin-top: 2px;
 }
 
 .board-card-detail .modal-header h5 {

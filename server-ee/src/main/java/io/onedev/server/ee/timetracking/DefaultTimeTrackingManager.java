@@ -2,7 +2,7 @@ package io.onedev.server.ee.timetracking;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.SettingManager;

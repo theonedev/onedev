@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.codecomments;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;

@@ -19,7 +19,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.server.ServerSocketServlet;
+import io.onedev.server.agent.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.GoGetFilter;

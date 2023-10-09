@@ -51,7 +51,7 @@ import io.onedev.server.manager.CodeCommentReplyManager;
 import io.onedev.server.manager.CodeCommentStatusChangeManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;

@@ -9,7 +9,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.event.Listen;

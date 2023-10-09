@@ -12,6 +12,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -129,4 +130,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 	
+	public static Date toDate(LocalDateTime localDateTime) {
+		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());		
+	}
 }

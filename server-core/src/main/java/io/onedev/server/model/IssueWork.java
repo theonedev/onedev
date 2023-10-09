@@ -10,15 +10,19 @@ import javax.persistence.*;
 import java.util.Date;
 
 import static io.onedev.server.model.IssueWork.PROP_DATE;
+import static io.onedev.server.model.IssueWork.PROP_DAY;
 
 @Entity
-@Table(indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"), @Index(columnList=PROP_DATE)})
+@Table(indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"), 
+		@Index(columnList=PROP_DATE), @Index(columnList = PROP_DAY)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class IssueWork extends AbstractEntity {
 
 	private static final int MAX_CONTENT_LEN = 1000;
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String PROP_USER = "user";
 	
 	public static final String PROP_ISSUE = "issue";
 	
@@ -33,7 +37,8 @@ public class IssueWork extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
-	
+
+	@Column(nullable = false)
 	private Date date;
 	
 	@JsonIgnore

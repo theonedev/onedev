@@ -8,7 +8,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.StorageManager;
+import io.onedev.server.manager.StorageManager;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.util.FileUpload;

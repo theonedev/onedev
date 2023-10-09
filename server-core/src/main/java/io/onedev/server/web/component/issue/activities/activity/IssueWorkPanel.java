@@ -121,7 +121,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 				work.setDate(bean.getStartAt());
 				work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 				work.setMinutes(bean.getSpentTime());
-				getWorkManager().update(work);
+				getWorkManager().createOrUpdate(work);
 				var detailViewer = newDetailViewer("detail");
 				fragment.replaceWith(detailViewer);
 				target.add(detailViewer);

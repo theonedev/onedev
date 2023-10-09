@@ -6,7 +6,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;

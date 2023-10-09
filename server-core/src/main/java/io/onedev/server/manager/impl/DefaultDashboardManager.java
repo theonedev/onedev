@@ -1,7 +1,7 @@
 package io.onedev.server.manager.impl;
 
 import com.google.common.base.Preconditions;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.manager.DashboardGroupShareManager;
 import io.onedev.server.manager.DashboardManager;
 import io.onedev.server.manager.DashboardUserShareManager;

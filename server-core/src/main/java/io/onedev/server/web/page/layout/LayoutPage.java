@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.AlertManager;
 import io.onedev.server.manager.SettingManager;

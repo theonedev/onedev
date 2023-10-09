@@ -8,7 +8,7 @@ import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.*;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.manager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;

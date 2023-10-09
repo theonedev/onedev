@@ -23,10 +23,7 @@ public abstract class CompletionRateBehavior extends Behavior {
 			builder.append("border:1px solid #F64E60;background-image:conic-gradient(#F64E60 100%,transparent 0);");
 		} else {
 			long ratio = completed * 100 / total;
-			if (ratio < 50)
-				builder.append(String.format("border:1px solid #FFA800;background-image:conic-gradient(#FFA800 %s,transparent 0);", ratio + "%"));
-			else
-				builder.append(String.format("border:1px solid #1BC5BD;background-image:conic-gradient(#1BC5BD %s,transparent 0);", ratio + "%"));
+			builder.append(String.format("border:1px solid #8950FC;background-image:conic-gradient(#8950FC %s,transparent 0);", ratio + "%"));
 		}
 		tag.put("style", builder.toString());
 	}

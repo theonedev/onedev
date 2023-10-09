@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.issue.field.spec.userchoicefield;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
