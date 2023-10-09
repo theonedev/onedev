@@ -1,6 +1,7 @@
 package io.onedev.server.ee.sendgrid;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.ee.NoSubscriptionException;
@@ -22,6 +23,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 @Editable(name="SendGrid", order=400, descriptionProvider = "getClassDescription")
+@SubscriptionRequired
 public class SendgridMailService implements MailService {
 
 	private static final long serialVersionUID = 1L;

@@ -18,6 +18,7 @@ import javax.validation.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
@@ -144,6 +145,10 @@ public class PropertyDescriptor implements Serializable {
 	
 	public boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor) {
 		return isPropertyVisible(componentContexts, beanDescriptor, Sets.newHashSet());
+	}
+	
+	public boolean isSubscriptionRequired() {
+		return getPropertyGetter().getAnnotation(SubscriptionRequired.class) != null;
 	}
 	
 	private boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {

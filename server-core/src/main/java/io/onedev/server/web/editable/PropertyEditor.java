@@ -7,11 +7,14 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.visit.IVisit;
@@ -38,24 +41,19 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new INullAcceptingValidator<T>() {
-
-			@Override
-			public void validate(IValidatable<T> validatable) {
-				ComponentContext.push(new ComponentContext(PropertyEditor.this));
-				try {
-					Validator validator = AppLoader.getInstance(Validator.class);
-					Set<?> violations = validator.validateValue(
-							descriptor.getBeanClass(), descriptor.getPropertyName(), validatable.getValue());
-					for (Object each: violations) {
-						ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
-						error(violation.getMessage());
-					}
-				} finally {
-					ComponentContext.pop();
+		add((INullAcceptingValidator<T>) validatable -> {
+			ComponentContext.push(new ComponentContext(PropertyEditor.this));
+			try {
+				Validator validator = AppLoader.getInstance(Validator.class);
+				Set<?> violations = validator.validateValue(
+						descriptor.getBeanClass(), descriptor.getPropertyName(), validatable.getValue());
+				for (Object each: violations) {
+					ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
+					error(violation.getMessage());
 				}
+			} finally {
+				ComponentContext.pop();
 			}
-			
 		});
 		
 		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
@@ -67,14 +65,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				// Do not call !isValid() here as otherwise all parent containers with invalid inputs 
 				// will also be marked as is-invalid
 				if (hasErrorMessage() && getInvalidClass() != null) {
-					if (visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, PropertyEditor<?>>() {
-
-						@Override
-						public void component(PropertyEditor<?> object, IVisit<PropertyEditor<?>> visit) {
-							visit.stop(object);
-						}
-						
-					}) == null) {
+					if (visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<?>, PropertyEditor<?>>) (object, visit) -> visit.stop(object)) == null) {
 						classes += getInvalidClass();
 					}
 				}
@@ -83,6 +74,8 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			
 		}));
 		
+		if (descriptor.isSubscriptionRequired() && !WicketUtils.isSubscriptionActive())
+			add(AttributeAppender.append("class", "disabled"));
 		setOutputMarkupId(true);
 	}
 	
@@ -98,7 +91,19 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				getMarkupId());
 		target.prependJavaScript(script);
 	}
-	
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		var script = String.format("" +
+				"var $propertyEditor = $('#%s');" +
+				"if ($propertyEditor.closest('.disabled').length != 0)" +
+				"  $propertyEditor.find('input').addBack('input').attr('disabled', 'disabled')", 
+				getMarkupId());
+		response.render(OnDomReadyHeaderItem.forScript(script));
+	}
+
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {
 		convertInput();
 		clearErrors();

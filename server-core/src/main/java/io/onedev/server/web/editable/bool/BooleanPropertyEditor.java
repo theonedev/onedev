@@ -1,14 +1,13 @@
 package io.onedev.server.web.editable.bool;
 
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
 public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
@@ -25,7 +24,7 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 		
 		add(input = new CheckBox("input", Model.of(getModelObject())));
 		
-		input.add(new AjaxFormComponentUpdatingBehavior("change"){
+		input.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

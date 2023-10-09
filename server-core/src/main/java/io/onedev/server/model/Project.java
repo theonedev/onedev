@@ -10,13 +10,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SubscriptionManager;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Markdown;
-import io.onedev.server.annotation.ProjectName;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.manager.*;
 import io.onedev.server.git.*;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;
@@ -24,7 +19,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signatureverification.SignatureVerificationManager;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
-import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.build.*;
@@ -908,14 +903,25 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.issueManagement = issueManagement;
 	}
 
-	@Editable(order=350)
-	@ShowCondition("isSubscriptionActiveAndIssueManagementEnabled")
+	@Editable(order=350, descriptionProvider = "getTimeTrackingDescription")
+	@ShowCondition("isIssueManagementEnabled")
+	@SubscriptionRequired
 	public boolean isTimeTracking() {
 		return timeTracking;
 	}
 
 	public void setTimeTracking(boolean timeTracking) {
 		this.timeTracking = timeTracking;
+	}
+	
+	private static String getTimeTrackingDescription() {
+		if (!WicketUtils.isSubscriptionActive()) {
+			return "<b class='text-danger'>NOTE: </b>Time tracking is an enterprise feature requiring " +
+					"an active subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> " +
+					"for 30 days";
+		} else {
+			return null;
+		}
 	}
 
 	private static boolean isIssueManagementEnabled() {

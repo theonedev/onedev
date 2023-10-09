@@ -137,6 +137,22 @@
 	margin-top: 1rem;
 }
 
+.bean-editor.disabled {
+	opacity: 50%;
+	position: relative;
+}
+.bean-editor>.disable-mask {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+}
+.bean-editor.disabled>.disable-mask {
+	display: block;
+}
+
 .bean-viewer .type-selector {
 	font-style: italic;
 } 

@@ -5,10 +5,10 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.AlertManager;
 import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -104,6 +104,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -348,6 +349,8 @@ public abstract class LayoutPage extends BasePage {
 						administrationMenuItems.addAll(contribution.getAdministrationMenuItems());
 					
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", "Administration", administrationMenuItems));
+					if (!isSubscriptionActive())
+						menuItems.add(new SidebarMenuItem.Link("enterprise", "Try Enterprise Edition", "https://onedev.io/pricing"));							
 				}
 				menus.add(new SidebarMenu(null, menuItems));
 				menus.addAll(getSidebarMenus());
@@ -402,6 +405,11 @@ public abstract class LayoutPage extends BasePage {
 									menuLink = new ViewStateAwarePageLink<Void>("link", page.getPageClass(), page.getPageParams());
 									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
 									item.add(new WebMarkupContainer("subMenu").setVisible(false));
+								} else if (menuItem instanceof SidebarMenuItem.Link) {
+									SidebarMenuItem.Link link = (SidebarMenuItem.Link) menuItem;
+									menuLink = new ExternalLink("link", link.getUrl());
+									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
+									item.add(new WebMarkupContainer("subMenu").setVisible(false));
 								} else {
 									SidebarMenuItem.SubMenu subMenu = (SidebarMenuItem.SubMenu) menuItem;
 									menuLink = new WebMarkupContainer("link");
@@ -443,13 +451,6 @@ public abstract class LayoutPage extends BasePage {
 
 		var version = AppLoader.getProduct().getVersion();
 		sidebar.add(new Label("productVersion", "OneDev " + version));
-		sidebar.add(new WebMarkupContainer("tryEE") {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!isSubscriptionActive());
-			}
-		});
 
 		String commitHash;
 		try (var is = new FileInputStream(new File(Bootstrap.installDir, "release.properties"))) {
@@ -471,13 +472,6 @@ public abstract class LayoutPage extends BasePage {
 			
 		});
 		
-		sidebar.add(new WebMarkupContainer("tryEEMenuItem") {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!isSubscriptionActive());
-			}
-		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
 			@Override

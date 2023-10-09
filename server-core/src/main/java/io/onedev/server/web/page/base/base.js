@@ -80,6 +80,7 @@ onedev.server = {
 		 * when sorting the elements inside a form. 
 		 */
 		markDirty: function($forms) {
+			console.log("markDirty");
 			$forms.addClass("dirty").each(function() {
 				onedev.server.form.dirtyChanged($(this));
 			});

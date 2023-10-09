@@ -1,18 +1,14 @@
 package io.onedev.server.web.page.layout;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.List;
 
 public abstract class SidebarMenuItem implements Serializable {
 
@@ -38,20 +34,25 @@ public abstract class SidebarMenuItem implements Serializable {
 
 	public abstract boolean isActive();
 	
-	public abstract static class Action extends SidebarMenuItem {
-
+	public static class Link extends SidebarMenuItem {
+		
 		private static final long serialVersionUID = 1L;
 
-		public Action(String iconHref, String label) {
+		private final String url;
+		
+		public Link(String iconHref, String label, String url) {
 			super(iconHref, label);
+			this.url = url;
 		}
 
 		@Override
 		public boolean isActive() {
 			return false;
 		}
-		
-		public abstract void onClick(AjaxRequestTarget target);
+
+		public String getUrl() {
+			return url;
+		}
 	}
 	
 	public static class Page extends SidebarMenuItem {

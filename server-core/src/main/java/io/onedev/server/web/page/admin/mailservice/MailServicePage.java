@@ -3,11 +3,13 @@ package io.onedev.server.web.page.admin.mailservice;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.mail.MailManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ParsedEmailAddress;
+import io.onedev.server.web.component.DisableAwareButton;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
@@ -16,8 +18,10 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -52,7 +56,7 @@ public class MailServicePage extends AdministrationPage {
 		
 		PropertyEditor<Serializable> editor = 
 				PropertyContext.edit("editor", bean, "mailService");
-		Button saveButton = new Button("save") {
+		Button saveButton = new DisableAwareButton("save") {
 
 			@Override
 			public void onSubmit() {
@@ -61,10 +65,28 @@ public class MailServicePage extends AdministrationPage {
 				getSettingManager().saveMailService(bean.getMailService());
 				getSession().success("Mail service settings saved");
 			}
-			
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				BeanEditor beanEditor = editor.visitChildren(
+						BeanEditor.class,
+						(IVisitor<BeanEditor, BeanEditor>) (component, visit) -> visit.stop(component));
+				setEnabled(beanEditor == null 
+						|| beanEditor.getDescriptor().getBeanClass().getAnnotation(SubscriptionRequired.class) == null 
+						|| WicketUtils.isSubscriptionActive());
+			}
 		};
+		
 		TaskButton testButton = new TaskButton("test") {
 
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.put("disabled", "disabled");
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -73,6 +95,9 @@ public class MailServicePage extends AdministrationPage {
 						BeanEditor.class,
 						(IVisitor<BeanEditor, BeanEditor>) (component, visit) -> visit.stop(component));
 				setVisible(beanEditor != null && beanEditor.isVisibleInHierarchy());
+				setEnabled(beanEditor == null
+						|| beanEditor.getDescriptor().getBeanClass().getAnnotation(SubscriptionRequired.class) == null
+						|| WicketUtils.isSubscriptionActive());
 			}
 
 			@Override
@@ -148,6 +173,7 @@ public class MailServicePage extends AdministrationPage {
 				if (event.getPayload() instanceof PropertyUpdating) {
 					PropertyUpdating propertyChanged = (PropertyUpdating) event.getPayload();
 					propertyChanged.getHandler().add(testButton);
+					propertyChanged.getHandler().add(saveButton);
 				}
 				
 			}
