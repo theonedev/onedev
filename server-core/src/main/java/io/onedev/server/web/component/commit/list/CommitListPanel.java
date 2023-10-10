@@ -81,7 +81,7 @@ public abstract class CommitListPanel extends Panel {
 	
 	private static final int COMMITS_PER_PAGE = 50;
 	
-	private static final int MAX_PAGES = 50;
+	private static final int MAX_PAGES = 20;
 	
 	private final IModel<String> queryStringModel;
 	
@@ -449,6 +449,7 @@ public abstract class CommitListPanel extends Panel {
 						}
 						target.prependJavaScript(builder);
 						target.add(foot);
+						target.focusComponent(null);
 						target.appendJavaScript(renderCommitGraph());
 						
 						getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
