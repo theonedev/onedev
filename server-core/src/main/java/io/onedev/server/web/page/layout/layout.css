@@ -178,11 +178,11 @@
 	color: var(--gray);
 }
 .sidebar-footer>.try-ee {
-	background-color: var(--light-info);
-	color: var(--info) !important;
+	background-color: var(--light-success);
+	color: var(--success) !important;
 }
 .sidebar-footer>.try-ee:hover {
-	color: var(--info) !important;
+	color: var(--success) !important;
 }
 .sidebar-help .dropdown-menu .dropdown-item {
 	color: var(--dark);

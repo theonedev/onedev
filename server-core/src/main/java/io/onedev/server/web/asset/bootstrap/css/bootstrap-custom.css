@@ -2216,6 +2216,9 @@ input[type="radio"], input[type="checkbox"] {
 .border-secondary {
 	border-color: var(--secondary) !important;
 }
+.dark-mode .border-secondary {
+	border-color: #323248 !important;
+}
 .border-danger {
 	border-color: var(--danger) !important;
 }

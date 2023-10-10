@@ -5,10 +5,10 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.AlertManager;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -104,7 +104,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -131,29 +130,29 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
-    
+
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
-	
+
 	private AbstractDefaultAjaxBehavior newVersionStatusBehavior;
-	
+
 	public LayoutPage(PageParameters params) {
 		super(params);
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
-		
+
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie("sidebar.minimized");
-		if (cookie != null && "true".equals(cookie.getValue())) 
+		if (cookie != null && "true".equals(cookie.getValue()))
 			sidebar.add(AttributeAppender.append("class", "sidebar-minimized"));
 		add(sidebar);
-		
+
 		MainMenuCustomization customization = OneDev.getInstance(MainMenuCustomization.class);
-		
+
 		sidebar.add(new BookmarkablePageLink<Void>("brandLink", HomePage.class) {
 
 			@Override
@@ -166,10 +165,10 @@ public abstract class LayoutPage extends BasePage {
 					protected String load() {
 						return getSettingManager().getBrandingSetting().getName();
 					}
-					
+
 				}));
 			}
-			
+
 		});
 
 		sidebar.add(new ListView<SidebarMenu>("menus", new LoadableDetachableModel<>() {
@@ -232,7 +231,7 @@ public abstract class LayoutPage extends BasePage {
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
 							CommitMessageFixPatternsPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Check Workflow Integrity", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Check Workflow Integrity",
 							CheckIssueIntegrityPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Settings", issueSettingMenuItems));
@@ -272,13 +271,13 @@ public abstract class LayoutPage extends BasePage {
 							PasswordResetTemplatePage.class, new PageParameters()));
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "System Alert",
 							AlertTemplatePage.class, new PageParameters()));
-					
+
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Email Templates",
 							emailTemplatesMenuItems));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Alert Settings",
 							AlertSettingPage.class, new PageParameters()));
-					
+
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management",
 							LabelManagementPage.class, new PageParameters()));
 
@@ -345,12 +344,10 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "System Maintenance", maintenanceMenuItems));
-					for (var contribution: OneDev.getExtensions(AdministrationMenuContribution.class)) 
+					for (var contribution: OneDev.getExtensions(AdministrationMenuContribution.class))
 						administrationMenuItems.addAll(contribution.getAdministrationMenuItems());
-					
+
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", "Administration", administrationMenuItems));
-					if (!isSubscriptionActive())
-						menuItems.add(new SidebarMenuItem.Link("enterprise", "Try Enterprise Edition", "https://onedev.io/pricing"));							
 				}
 				menus.add(new SidebarMenu(null, menuItems));
 				menus.addAll(getSidebarMenus());
@@ -362,7 +359,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void populateItem(ListItem<SidebarMenu> item) {
 				SidebarMenu menu = item.getModelObject();
-				
+
 				SidebarMenu.Header header = menu.getMenuHeader();
 				if (header != null) {
 					Fragment fragment = new Fragment("header", "menuHeaderFrag", LayoutPage.this);
@@ -374,17 +371,17 @@ public abstract class LayoutPage extends BasePage {
 						protected Component newContent(String id, FloatingPanel dropdown) {
 							return header.newMoreInfo(id, dropdown);
 						}
-						
+
 					});
 					item.add(fragment);
 				} else {
 					item.add(new WebMarkupContainer("header").setVisible(false));
 				}
-				
+
 				class MenuBody extends Fragment {
 
 					private final List<SidebarMenuItem> menuItems;
-					
+
 					public MenuBody(String componentId, List<SidebarMenuItem> menuItems) {
 						super(componentId, "menuBodyFrag", LayoutPage.this);
 						this.menuItems = menuItems;
@@ -393,7 +390,7 @@ public abstract class LayoutPage extends BasePage {
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						
+
 						add(new ListView<>("items", menuItems) {
 
 							@Override
@@ -403,11 +400,6 @@ public abstract class LayoutPage extends BasePage {
 								if (menuItem instanceof SidebarMenuItem.Page) {
 									SidebarMenuItem.Page page = (SidebarMenuItem.Page) menuItem;
 									menuLink = new ViewStateAwarePageLink<Void>("link", page.getPageClass(), page.getPageParams());
-									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
-									item.add(new WebMarkupContainer("subMenu").setVisible(false));
-								} else if (menuItem instanceof SidebarMenuItem.Link) {
-									SidebarMenuItem.Link link = (SidebarMenuItem.Link) menuItem;
-									menuLink = new ExternalLink("link", link.getUrl());
 									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
 									item.add(new WebMarkupContainer("subMenu").setVisible(false));
 								} else {
@@ -441,16 +433,23 @@ public abstract class LayoutPage extends BasePage {
 
 						});
 					}
-					
+
 				}
-				
+
 				item.add(new MenuBody("body", menu.getMenuItems()));
 			}
-			
+
 		});
 
 		var version = AppLoader.getProduct().getVersion();
 		sidebar.add(new Label("productVersion", "OneDev " + version));
+		sidebar.add(new WebMarkupContainer("tryEE") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!isSubscriptionActive());
+			}
+		});
 
 		String commitHash;
 		try (var is = new FileInputStream(new File(Bootstrap.installDir, "release.properties"))) {
@@ -460,7 +459,7 @@ public abstract class LayoutPage extends BasePage {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		var checkUpdateUrl = "https://onedev.io/check-update/" + commitHash;
 		sidebar.add(new AjaxLink<Void>("checkUpdate") {
 
@@ -469,9 +468,16 @@ public abstract class LayoutPage extends BasePage {
 				getUpdateCheckManager().clearCache();
 				throw new RedirectToUrlException(checkUpdateUrl);
 			}
-			
+
 		});
-		
+
+		sidebar.add(new WebMarkupContainer("tryEEMenuItem") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!isSubscriptionActive());
+			}
+		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
 			@Override
@@ -481,16 +487,16 @@ public abstract class LayoutPage extends BasePage {
 				else
 					return "Support & Bug Report";
 			}
-			
+
 		}));
 		if (SecurityUtils.isAdministrator())
 			sidebar.add(getSubscriptionManager().renderSupportRequestLink("supportRequest"));
 		else
-			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));			
-		
+			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));
+
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");
 		add(topbar);
-		
+
 		topbar.add(newTopbarTitle("title"));
 
 		DropdownLink alertsLink;
@@ -513,14 +519,14 @@ public abstract class LayoutPage extends BasePage {
 						setVisible(SecurityUtils.isAdministrator());
 					}
 				});
-						
+
 				List<IColumn<Alert, Void>> columns = new ArrayList<>();
 
 				columns.add(new AbstractColumn<>(Model.of("When")) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
-						cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getDate())));						
+						cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getDate())));
 					}
 
 					@Override
@@ -535,17 +541,17 @@ public abstract class LayoutPage extends BasePage {
 						var alert = rowModel.getObject();
 						var fragment = new Fragment(componentId, "alertMessageFrag", LayoutPage.this);
 						fragment.add(new Label("subject", alert.getSubject()).setEscapeModelStrings(false));
-						
+
 						var detail = new Label("detail", new AbstractReadOnlyModel<String>() {
 							@Override
 							public String getObject() {
 								return rowModel.getObject().getDetail();
 							}
-							
+
 						}).setEscapeModelStrings(false).setVisible(false);
-						
+
 						fragment.add(detail);
-						
+
 						fragment.add(new AjaxLink<Void>("showDetail") {
 
 							@Override
@@ -554,14 +560,14 @@ public abstract class LayoutPage extends BasePage {
 								detail.setVisible(true);
 								target.add(fragment);
 							}
-							
+
 						}.setVisible(alert.getDetail() != null));
-						
+
 						fragment.setOutputMarkupId(true);
 						cellItem.add(fragment);
 					}
 				});
-				
+
 				if (SecurityUtils.isAdministrator()) {
 					columns.add(new AbstractColumn<>(Model.of("")) {
 
@@ -615,20 +621,20 @@ public abstract class LayoutPage extends BasePage {
 					protected Collection<String> findObservables() {
 						return Sets.newHashSet(Alert.getChangeObservable());
 					}
-				});				
+				});
 				alertsFrag.setOutputMarkupId(true);
 				return alertsFrag;
 			}
-			
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getAlertManager().count() != 0);
 			}
-			
+
 		});
 		alertsLink.setOutputMarkupPlaceholderTag(true);
-		
+
 		topbar.add(new ChangeObserver() {
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
@@ -642,7 +648,7 @@ public abstract class LayoutPage extends BasePage {
 				return Sets.newHashSet(Alert.getChangeObservable());
 			}
 		});
-		
+
 		topbar.add(new ModalLink("showCommandPalette") {
 
 			@Override
@@ -653,7 +659,7 @@ public abstract class LayoutPage extends BasePage {
 					protected void onCancel(AjaxRequestTarget target) {
 						modal.close();
 					}
-					
+
 				};
 			}
 
@@ -677,10 +683,10 @@ public abstract class LayoutPage extends BasePage {
 						else
 							return "sun";
 					}
-					
+
 				}));
 			}
-			
+
 		});
 
 		topbar.add(new AjaxLink<Void>("newVersionStatus") {
@@ -688,7 +694,7 @@ public abstract class LayoutPage extends BasePage {
 			protected void onInitialize() {
 				super.onInitialize();
 				add(new WebMarkupContainer("icon") {
-					
+
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
@@ -703,7 +709,7 @@ public abstract class LayoutPage extends BasePage {
 							tag.put("onload", script);
 						}
 					}
-					
+
 				});
 			}
 
@@ -718,20 +724,20 @@ public abstract class LayoutPage extends BasePage {
 				super.onConfigure();
 				setVisible(!getSettingManager().getSystemSetting().isDisableAutoUpdateCheck());
 			}
-			
+
 		});
 
 		User loginUser = getLoginUser();
-		
+
 		topbar.add(new Link<Void>("signIn") {
 
 			@Override
 			public void onClick() {
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);
 			}
-			
+
 		}.setVisible(loginUser == null));
-		
+
 		topbar.add(new BookmarkablePageLink<Void>("brandLink", HomePage.class) {
 
 			@Override
@@ -739,9 +745,9 @@ public abstract class LayoutPage extends BasePage {
 				super.onInitialize();
 				add(new BrandLogoPanel("brandLogo"));
 			}
-			
+
 		});
-		
+
 		WebMarkupContainer userInfo = new WebMarkupContainer("userInfo");
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
@@ -760,40 +766,40 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("avatar"));
 			userInfo.add(new WebMarkupContainer("name"));
 		}
-		
+
 		WebMarkupContainer item;
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
 		if (getPage() instanceof MyProfilePage)
 			item.add(AttributeAppender.append("class", "active"));
-		
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
 		if (getPage() instanceof MyEmailAddressesPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAvatar", MyAvatarPage.class));
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
-				
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
 
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
-		    item.add(AttributeAppender.append("class", "active"));
-		
+			item.add(AttributeAppender.append("class", "active"));
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
 		if (getPage() instanceof MyGpgKeysPage)
-		    item.add(AttributeAppender.append("class", "active"));
-		
+			item.add(AttributeAppender.append("class", "active"));
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessTokens", MyAccessTokensPage.class));
 		if (getPage() instanceof MyAccessTokensPage)
-		    item.add(AttributeAppender.append("class", "active"));
-		
+			item.add(AttributeAppender.append("class", "active"));
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class));
 		if (getPage() instanceof MyTwoFactorAuthenticationPage)
-		    item.add(AttributeAppender.append("class", "active"));
-		
+			item.add(AttributeAppender.append("class", "active"));
+
 		if (!SecurityUtils.getPrevUserId().equals(0L)) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {
 
@@ -803,29 +809,29 @@ public abstract class LayoutPage extends BasePage {
 					Session.get().warn("Exited impersonation");
 					throw new RestartResponseException(HomePage.class);
 				}
-				
-			}; 
+
+			};
 			signOutLink.add(new Label("label", "Exit Impersonation"));
 			userInfo.add(signOutLink);
 		} else {
-			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class); 
+			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class);
 			signOutLink.add(new Label("label", "Sign Out"));
 			userInfo.add(signOutLink);
 		}
 
 		userInfo.setVisible(loginUser != null);
-		
+
 		if (getPage() instanceof MyPage)
 			userInfo.add(AttributeAppender.append("class", "active"));
-		
+
 		topbar.add(userInfo);
-		
+
 		add(commandPaletteBehavior = new AbstractDefaultAjaxBehavior() {
-			
+
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				new ModalPanel(target) {
-					
+
 					@Override
 					protected Component newContent(String id) {
 						return new CommandPalettePanel(id) {
@@ -834,15 +840,15 @@ public abstract class LayoutPage extends BasePage {
 							protected void onCancel(AjaxRequestTarget target) {
 								close();
 							}
-							
+
 						};
 					}
-					
+
 				};
 			}
-			
+
 		});
-		
+
 		add(newVersionStatusBehavior = new AbstractPostAjaxBehavior() {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -851,7 +857,7 @@ public abstract class LayoutPage extends BasePage {
 			}
 		});
 	}
-	
+
 	private SubscriptionManager getSubscriptionManager() {
 		return OneDev.getInstance(SubscriptionManager.class);
 	}
@@ -859,7 +865,7 @@ public abstract class LayoutPage extends BasePage {
 	private AlertManager getAlertManager() {
 		return OneDev.getInstance(AlertManager.class);
 	}
-	
+
 	private ClusterManager getClusterManager() {
 		return OneDev.getInstance(ClusterManager.class);
 	}
@@ -868,11 +874,11 @@ public abstract class LayoutPage extends BasePage {
 	protected boolean isPermitted() {
 		return getLoginUser() != null || getSettingManager().getSecuritySetting().isEnableAnonymousAccess();
 	}
-	
+
 	private SettingManager getSettingManager() {
 		return OneDev.getInstance(SettingManager.class);
 	}
-	
+
 	private UpdateCheckManager getUpdateCheckManager() {
 		return OneDev.getInstance(UpdateCheckManager.class);
 	}
@@ -881,15 +887,15 @@ public abstract class LayoutPage extends BasePage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new LayoutResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.layout.onDomReady(%s);", 
+		response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.layout.onDomReady(%s);",
 				commandPaletteBehavior.getCallbackFunction())));
 		response.render(OnLoadHeaderItem.forScript("onedev.server.layout.onLoad();"));
 	}
-	
+
 	protected List<SidebarMenu> getSidebarMenus() {
 		return Lists.newArrayList();
 	}
 
 	protected abstract Component newTopbarTitle(String componentId);
-	
+
 }

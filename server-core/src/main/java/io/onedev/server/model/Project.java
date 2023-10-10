@@ -916,9 +916,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	private static String getTimeTrackingDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
-			return "<b class='text-danger'>NOTE: </b>Time tracking is an enterprise feature requiring " +
-					"an active subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> " +
-					"for 30 days";
+			return "<b class='text-danger'>NOTE: </b>Time tracking is an enterprise feature. " +
+					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
 		} else {
 			return null;
 		}

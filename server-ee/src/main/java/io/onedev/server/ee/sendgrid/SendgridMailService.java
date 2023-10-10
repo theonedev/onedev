@@ -131,9 +131,8 @@ public class SendgridMailService implements MailService {
 	
 	private static String getClassDescription() {
 		if (!isSubscriptionActive()) {
-			return "<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature requiring " +
-					"an active subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> " +
-					"for 30 days";
+			return "<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. " +
+					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
 		} else {
 			return null;
 		}

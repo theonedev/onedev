@@ -34,27 +34,6 @@ public abstract class SidebarMenuItem implements Serializable {
 
 	public abstract boolean isActive();
 	
-	public static class Link extends SidebarMenuItem {
-		
-		private static final long serialVersionUID = 1L;
-
-		private final String url;
-		
-		public Link(String iconHref, String label, String url) {
-			super(iconHref, label);
-			this.url = url;
-		}
-
-		@Override
-		public boolean isActive() {
-			return false;
-		}
-
-		public String getUrl() {
-			return url;
-		}
-	}
-	
 	public static class Page extends SidebarMenuItem {
 
 		private static final long serialVersionUID = 1L;
