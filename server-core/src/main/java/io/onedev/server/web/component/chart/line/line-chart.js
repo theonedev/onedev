@@ -101,9 +101,7 @@ onedev.server.lineChart = {
 				}
 			};
 			if (yAxisValueFormatter) {
-				option.yAxis.axisLabel = {
-	        		formatter: yAxisValueFormatter
-	    		}
+				option.yAxis.axisLabel.formatter = yAxisValueFormatter;
 				option.tooltip.formatter = function(params) {
 					if (params.length != 0) {
 						let tooltip = params[0].axisValueLabel;

@@ -27,6 +27,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.web.component.milestone.burndown.BurndownIndicators;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.IssueAware;
@@ -147,8 +148,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
-			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE, 
-			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS);
+			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE,
+			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
+			BurndownIndicators.ISSUE_COUNT, BurndownIndicators.REMAINING_TIME);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION,

@@ -1,56 +1,45 @@
 package io.onedev.server.web.component.milestone.burndown;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.IssueInfoManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.*;
 
 import static io.onedev.server.util.DateUtils.toLocalDate;
-import static java.util.stream.Collectors.toList;
+import static io.onedev.server.web.component.milestone.burndown.BurndownIndicators.*;
 
 public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 
 	private static final int MAX_DAYS = 365;
 	
-	public static final String FIELD_COUNT = "<$Count$>";
-
-	public static final String FIELD_REMAINING_TIME = "<$Remaining Time>";
-
-	public static final String FIELD_ESTIMATED_TIME = "<$Estimated Time>";
+	private final String indicator;
 	
-	private String field;
-	
-	public MilestoneBurndownPanel(String id, IModel<Milestone> milestoneModel) {
+	public MilestoneBurndownPanel(String id, IModel<Milestone> milestoneModel, @Nullable String indicator) {
 		super(id, milestoneModel);
+		this.indicator = indicator;
 	}
 
-	private GlobalIssueSetting getIssueSetting() {
+	private static GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
@@ -76,73 +65,6 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			add(new Label("content", message).add(AttributeAppender.append("class", messageCssClasses)));
 		} else {
 			Fragment fragment = new Fragment("content", "chartFrag", this);
-
-			var choices = new ArrayList<String>();
-			if (getMilestone().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
-				choices.add(FIELD_REMAINING_TIME);
-				choices.add(FIELD_ESTIMATED_TIME);
-			}
-			choices.add(FIELD_COUNT);
-
-			choices.addAll(getIssueSetting().getFieldSpecs().stream()
-				.filter(it -> it.getType().equals(InputSpec.INTEGER) || it.getType().equals(InputSpec.WORKING_PERIOD))
-				.map(FieldSpec::getName).collect(toList()));
-			
-			DropDownChoice<String> dropDownChoice = new DropDownChoice<>("by", new IModel<>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public String getObject() {
-					return getField();
-				}
-
-				@Override
-				public void setObject(String object) {
-					field = object;
-				}
-
-			}, choices, new IChoiceRenderer<>() {
-
-				@Override
-				public Object getDisplayValue(String object) {
-					switch (object) {
-						case FIELD_COUNT:
-							return "Issue Count";
-						case FIELD_REMAINING_TIME:
-							return "Remaining Time";
-						case FIELD_ESTIMATED_TIME:
-							return "Estimated Time";
-						default:
-							return object;
-					}
-				}
-
-				@Override
-				public String getIdValue(String object, int index) {
-					return object;
-				}
-
-				@Override
-				public String getObject(String id, IModel<? extends List<? extends String>> choices) {
-					return id;
-				}
-
-			});
-			dropDownChoice.add(new OnChangeAjaxBehavior() {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					target.add(fragment);
-				}
-				
-			});
-			dropDownChoice.setRequired(true);
-			
-			fragment.add(dropDownChoice);
-			
 			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<>() {
 
 				private String getXAxisValue(LocalDate date) {
@@ -163,12 +85,12 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 						var issueInfoManager = OneDev.getInstance(IssueInfoManager.class);
 						var fromDay = Math.max(startDay, scheduleDay);
 						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, dueDay);
-						if (getField().equals(FIELD_REMAINING_TIME)) {
+						if (getIndicator().equals(REMAINING_TIME)) {
 							var estimatedTime = issue.getOwnEstimatedTime();
 							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, dueDay).entrySet()) 
 								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
 						} else {
-							int metric = getFieldValue(issue);
+							int metric = getIndicatorValue(issue);
 							for (var entry: dailyStates.entrySet())
 								dailyMetrics.put(entry.getKey(), metric);
 						}
@@ -218,9 +140,9 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 					lines.add(new Line("Guide Line", guidelineYAxisValues, color, null, "dashed"));
 
 					String yAxisValueFormatter;
-					if (getField().equals(FIELD_REMAINING_TIME) 
-							|| getField().equals(FIELD_ESTIMATED_TIME) 
-							|| getIssueSetting().getFieldSpec(getField()) instanceof WorkingPeriodField) {
+					if (getIndicator().equals(REMAINING_TIME) 
+							|| getIndicator().equals(ESTIMATED_TIME) 
+							|| getIssueSetting().getFieldSpec(getIndicator()) instanceof WorkingPeriodField) {
 						yAxisValueFormatter = ""
 								+ "function(value) {"
 								+ "  if (value != undefined) "
@@ -241,7 +163,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			fragment.add(new Label("message", new AbstractReadOnlyModel<String>() {
 				@Override
 				public String getObject() {
-					if (aggregationLink != null && (getField().equals(FIELD_ESTIMATED_TIME) || getField().equals(FIELD_REMAINING_TIME)))
+					if (aggregationLink != null && (getIndicator().equals(ESTIMATED_TIME) || getIndicator().equals(REMAINING_TIME)))
 						return"To avoid duplication, estimated/remaining time showing here does not include those aggregated from '" + aggregationLink + "'";
 					else
 						return null;
@@ -257,24 +179,24 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			fragment.setOutputMarkupId(true);
 			add(fragment);
 		}
+		
+		setOutputMarkupId(true);
 	}
 	
-	private String getField() {
-		if (field != null)
-			return field;
-		else if (getMilestone().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive())
-			return FIELD_REMAINING_TIME;
-		else
-			return FIELD_COUNT;
+	private String getIndicator() {
+		if (indicator != null)
+			return indicator;
+		else 
+			return getDefault(getMilestone().getProject());
 	}
 	
-	private int getFieldValue(Issue issue) {
-		if (getField().equals(FIELD_ESTIMATED_TIME)) {
+	private int getIndicatorValue(Issue issue) {
+		if (getIndicator().equals(ESTIMATED_TIME)) {
 			return issue.getOwnEstimatedTime();
-		} else if (getField().equals(FIELD_COUNT)) {
+		} else if (getIndicator().equals(ISSUE_COUNT)) {
 			return 1;
 		} else {
-			Object value = issue.getFieldValue(getField());
+			Object value = issue.getFieldValue(getIndicator());
 			if (value != null) {
 				if (value instanceof Integer)
 					return (int) value;

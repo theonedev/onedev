@@ -26,7 +26,7 @@ public class MilestoneListWidget extends Widget {
 
 	private String projectPath;
 	
-	@Editable(order=100)
+	@Editable(order=100, name="Project")
 	@ProjectChoice("getPermittedProjects")
 	@NotEmpty
 	public String getProjectPath() {

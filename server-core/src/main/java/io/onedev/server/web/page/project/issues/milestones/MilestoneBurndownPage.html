@@ -1,3 +1,6 @@
 <wicket:extend>
-	<div wicket:id="burndown"></div>
+	<div class="d-flex align-items-center flex-nowrap mb-4">
+		<span class="font-size-lg mr-3">Show States By</span> <div class="flex-shrink-1"><select wicket:id="by" class="form-control"></select></div>
+	</div>
+	<div wicket:id="burndown" class="rounded border-secondary border-dashed p-3"></div>
 </wicket:extend>

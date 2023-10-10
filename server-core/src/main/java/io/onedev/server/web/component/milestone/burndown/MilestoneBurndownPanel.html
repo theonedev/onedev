@@ -1,10 +1,7 @@
 <wicket:panel>
-	<div wicket:id="content" class="milestone-burndown"></div>
+	<div wicket:id="content" class="burndown"></div>
 	<wicket:fragment wicket:id="chartFrag">
-		<div class="d-flex align-items-center flex-nowrap mb-4">
-			<span class="font-size-lg mr-3">Show States By</span> <div class="flex-shrink-1"><select wicket:id="by" class="form-control" placeholder="Issue Count"></select></div>
-		</div>
-		<div wicket:id="chart" class="border-dashed border-secondary rounded pt-5 px-3"></div>
+		<div wicket:id="chart"></div>
 		<wicket:enclosure child="message">
 			<div class="mt-4 text-muted font-size-sm"><wicket:svg href="bulb" class="icon"/> <span wicket:id="message"/></div>
 		</wicket:enclosure>
