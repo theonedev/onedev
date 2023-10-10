@@ -61,13 +61,12 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     @Sessional
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new EmailAddressCache(hazelcastInstance.getMap("emailAddressCache"));
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("emailAddressCacheInited");        
-		clusterManager.init(cacheInited, () -> {
-			for (EmailAddress address: query())
-				cache.put(address.getId(), address.getFacade());
-			return 1L;			
-		});
+		
+		// Use replicated map, otherwise it will be slow to display many user avatars
+		// (in issue list for instance) which will call findPrimaryFacade many times
+        cache = new EmailAddressCache(hazelcastInstance.getReplicatedMap("emailAddressCache"));
+		for (EmailAddress address: query())
+			cache.put(address.getId(), address.getFacade());
     }
     
     @Sessional

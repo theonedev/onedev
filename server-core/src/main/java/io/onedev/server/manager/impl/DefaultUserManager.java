@@ -5,12 +5,12 @@ import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.manager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.exception.ServerNotReadyException;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
@@ -340,13 +340,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 		temporalAccessTokens = hazelcastInstance.getMap("temporalAccessTokens");
-        cache = new UserCache(hazelcastInstance.getMap("userCache"));
-        var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheInited");
-		clusterManager.init(cacheInited, () -> {
-			for (User user: query())
-				cache.put(user.getId(), user.getFacade());
-			return 1L;			
-		});
+		
+		// Use replicated map, otherwise it will be slow to display many user avatars
+		// (in issue list for instance) which will call findFacadeById many times
+        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
+		for (User user: query())
+			cache.put(user.getId(), user.getFacade());
     }
     
 	@Transactional
