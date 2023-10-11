@@ -191,7 +191,7 @@ public class Role extends AbstractEntity implements Permission {
 		this.accessConfidentialIssues = accessConfidentialIssues;
 	}
 	
-	@Editable(order=500, descriptionProvider = "This permission enables one to schedule issues into milestones")
+	@Editable(order=500, description = "This permission enables one to schedule issues into milestones")
 	@ShowCondition("isManageIssuesDisabled")
 	public boolean isScheduleIssues() {
 		return scheduleIssues;
