@@ -144,6 +144,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<IssueWork> issueWorks = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Stopwatch> stopwatches = new ArrayList<>();
 	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
@@ -721,6 +725,22 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setIssueVotes(Collection<IssueVote> issueVotes) {
 		this.issueVotes = issueVotes;
+	}
+
+	public Collection<IssueWork> getIssueWorks() {
+		return issueWorks;
+	}
+
+	public void setIssueWorks(Collection<IssueWork> issueWorks) {
+		this.issueWorks = issueWorks;
+	}
+
+	public Collection<Stopwatch> getStopwatches() {
+		return stopwatches;
+	}
+
+	public void setStopwatches(Collection<Stopwatch> stopwatches) {
+		this.stopwatches = stopwatches;
 	}
 
 	public Collection<IssueQueryPersonalization> getIssueQueryPersonalizations() {

@@ -250,18 +250,21 @@ public abstract class LayoutPage extends BasePage {
 					List<SidebarMenuItem> emailTemplatesMenuItems = new ArrayList<>();
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification",
 							IssueNotificationTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification",
-							PullRequestNotificationTemplatePage.class, new PageParameters()));
-
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification Unsubscribed",
 							IssueNotificationUnsubscribedTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification Unsubscribed",
-							PullRequestNotificationUnsubscribedTemplatePage.class, new PageParameters()));
-
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Opened",
 							ServiceDeskIssueOpenedTemplatePage.class, new PageParameters()));
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Open Failed",
 							ServiceDeskIssueOpenFailedTemplatePage.class, new PageParameters()));
+					if (isSubscriptionActive()) {
+						emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Stopwatch Overdue",
+								StopwatchOverdueTemplatePage.class, new PageParameters()));
+					}
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification",
+							PullRequestNotificationTemplatePage.class, new PageParameters()));
+
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification Unsubscribed",
+							PullRequestNotificationUnsubscribedTemplatePage.class, new PageParameters()));
 
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "User Invitation",
 							UserInvitationTemplatePage.class, new PageParameters()));

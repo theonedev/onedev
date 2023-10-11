@@ -5,10 +5,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueWorkManager;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.StopWatchManager;
+import io.onedev.server.manager.StopwatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
-import io.onedev.server.model.StopWatch;
+import io.onedev.server.model.Stopwatch;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.security.SecurityUtils;
@@ -182,8 +182,8 @@ abstract class TimingDetailPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				var stopWatch = getStopWatchManager().startWork(SecurityUtils.getUser(), getIssue());
-				onWorkStarted(target, stopWatch);
+				var stopwatch = getStopWatchManager().startWork(SecurityUtils.getUser(), getIssue());
+				onWorkStarted(target, stopwatch);
 			}
 
 			@Override
@@ -195,8 +195,8 @@ abstract class TimingDetailPanel extends Panel {
 		};
 	}
 	
-	private StopWatchManager getStopWatchManager() {
-		return OneDev.getInstance(StopWatchManager.class);
+	private StopwatchManager getStopWatchManager() {
+		return OneDev.getInstance(StopwatchManager.class);
 	}
 	
 	private TimeTrackingManager getTimeTrackingManager() {
@@ -219,7 +219,7 @@ abstract class TimingDetailPanel extends Panel {
 	
 	protected abstract Issue getIssue();
 	
-	protected abstract void onWorkStarted(AjaxRequestTarget target, StopWatch stopWatch);
+	protected abstract void onWorkStarted(AjaxRequestTarget target, Stopwatch stopwatch);
 	
 	protected abstract void closeDropdown();
 	

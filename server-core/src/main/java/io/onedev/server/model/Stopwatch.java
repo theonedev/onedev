@@ -11,7 +11,7 @@ import java.util.Date;
 		indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_user_id"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class StopWatch extends AbstractEntity {
+public class Stopwatch extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 	

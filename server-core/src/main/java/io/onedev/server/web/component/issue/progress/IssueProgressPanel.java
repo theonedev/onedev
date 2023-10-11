@@ -2,9 +2,9 @@ package io.onedev.server.web.component.issue.progress;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.StopWatchManager;
+import io.onedev.server.manager.StopwatchManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.StopWatch;
+import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CompletionRateBehavior;
@@ -26,9 +26,9 @@ import java.util.Collection;
 
 public abstract class IssueProgressPanel extends Panel {
 
-	private final IModel<StopWatch> stopWatchModel = new LoadableDetachableModel<>() {
+	private final IModel<Stopwatch> stopwatchModel = new LoadableDetachableModel<>() {
 		@Override
-		protected StopWatch load() {
+		protected Stopwatch load() {
 			var user = SecurityUtils.getUser();
 			if (user != null)
 				return getStopWatchManager().find(user, getIssue());
@@ -54,8 +54,8 @@ public abstract class IssueProgressPanel extends Panel {
 					}
 
 					@Override
-					protected void onWorkStarted(AjaxRequestTarget target, StopWatch stopWatch) {
-						stopWatchModel.setObject(stopWatch);
+					protected void onWorkStarted(AjaxRequestTarget target, Stopwatch stopwatch) {
+						stopwatchModel.setObject(stopwatch);
 						target.add(IssueProgressPanel.this);
 					}
 
@@ -99,7 +99,7 @@ public abstract class IssueProgressPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getStopWatchManager().stopWork(getStopWatch());
-				stopWatchModel.setObject(null);
+				stopwatchModel.setObject(null);
 				target.add(IssueProgressPanel.this);
 			}
 
@@ -119,18 +119,18 @@ public abstract class IssueProgressPanel extends Panel {
 		
 	}
 
-	private StopWatch getStopWatch() {
-		return stopWatchModel.getObject();
+	private Stopwatch getStopWatch() {
+		return stopwatchModel.getObject();
 	}
 	
 	@Override
 	protected void onDetach() {
-		stopWatchModel.detach();
+		stopwatchModel.detach();
 		super.onDetach();
 	}
 
-	private StopWatchManager getStopWatchManager() {
-		return OneDev.getInstance(StopWatchManager.class);
+	private StopwatchManager getStopWatchManager() {
+		return OneDev.getInstance(StopwatchManager.class);
 	}
 
 	@Override

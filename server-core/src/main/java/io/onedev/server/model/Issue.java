@@ -270,6 +270,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWork> works = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<Stopwatch> stopwatches = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
@@ -491,6 +494,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public void setWorks(Collection<IssueWork> works) {
 		this.works = works;
+	}
+
+	public Collection<Stopwatch> getStopwatches() {
+		return stopwatches;
+	}
+
+	public void setStopwatches(Collection<Stopwatch> stopwatches) {
+		this.stopwatches = stopwatches;
 	}
 
 	public Collection<IssueMention> getMentions() {

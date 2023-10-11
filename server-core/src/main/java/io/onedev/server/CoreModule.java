@@ -279,7 +279,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);
 		bind(UpdateCheckManager.class).to(DefaultUpdateCheckManager.class);
-		bind(StopWatchManager.class).to(DefaultStopWatchManager.class);
+		bind(StopwatchManager.class).to(DefaultStopwatchManager.class);
 		
 		bind(WebHookManager.class);
 		

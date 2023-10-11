@@ -815,6 +815,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.EMAIL_TEMPLATES);
 		if (setting == null) {
 			settingManager.saveEmailTemplates(new EmailTemplates());
+		} else {
+			var emailTemplates = (EmailTemplates) setting.getValue();
+			if (emailTemplates.getStopwatchOverdue() == null)
+				emailTemplates.setStopwatchOverdue(EmailTemplates.DEFAULT_STOPWATCH_OVERDUE);
 		}
 		
 		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);

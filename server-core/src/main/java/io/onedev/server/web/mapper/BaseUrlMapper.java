@@ -267,6 +267,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				EmailVerificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/password-reset",
 				PasswordResetTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/stopwatch-overdue",
+				StopwatchOverdueTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/alert",
 				AlertTemplatePage.class));
 		

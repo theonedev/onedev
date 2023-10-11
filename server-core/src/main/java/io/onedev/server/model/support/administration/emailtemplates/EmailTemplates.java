@@ -34,6 +34,8 @@ public class EmailTemplates implements Serializable {
 	public static final String DEFAULT_EMAIL_VERIFICATION;
 	
 	public static final String DEFAULT_PASSWORD_RESET;
+
+	public static final String DEFAULT_STOPWATCH_OVERDUE;
 	
 	public static final String DEFAULT_ALERT;
 	
@@ -54,6 +56,8 @@ public class EmailTemplates implements Serializable {
 	public static final String PROP_EMAIL_VERIFICATION = "emailVerification";
 	
 	public static final String PROP_PASSWORD_RESET = "passwordReset";
+
+	public static final String PROP_STOPWATCH_OVERDUE = "stopwatchOverdue";
 	
 	public static final String PROP_ALERT = "alert";
 	
@@ -83,6 +87,9 @@ public class EmailTemplates implements Serializable {
 			url = Resources.getResource(EmailTemplates.class, "default-password-reset.tpl");
 			DEFAULT_PASSWORD_RESET = Resources.toString(url, StandardCharsets.UTF_8);
 
+			url = Resources.getResource(EmailTemplates.class, "default-stopwatch-overdue.tpl");
+			DEFAULT_STOPWATCH_OVERDUE = Resources.toString(url, StandardCharsets.UTF_8);
+			
 			url = Resources.getResource(EmailTemplates.class, "default-alert.tpl");
 			DEFAULT_ALERT = Resources.toString(url, StandardCharsets.UTF_8);
 		} catch (IOException e) {
@@ -108,6 +115,7 @@ public class EmailTemplates implements Serializable {
 	
 	private String passwordReset = DEFAULT_PASSWORD_RESET;
 	
+	private String stopwatchOverdue = DEFAULT_STOPWATCH_OVERDUE;
 	private String alert = DEFAULT_ALERT;
 	
 	@Editable(order=200)
@@ -218,6 +226,18 @@ public class EmailTemplates implements Serializable {
 		this.passwordReset = passwordReset;
 	}
 
+	@Editable(order=850)
+	@Code(language = Code.GROOVY_TEMPLATE)
+	@OmitName
+	@NotEmpty
+	public String getStopwatchOverdue() {
+		return stopwatchOverdue;
+	}
+
+	public void setStopwatchOverdue(String stopwatchOverdue) {
+		this.stopwatchOverdue = stopwatchOverdue;
+	}
+
 	@Editable(order=900)
 	@Code(language=Code.GROOVY_TEMPLATE)
 	@OmitName
@@ -229,7 +249,7 @@ public class EmailTemplates implements Serializable {
 	public void setAlert(String alert) {
 		this.alert = alert;
 	}
-
+	
 	public static String evalTemplate(boolean htmlVersion, String template, Map<String, Object> bindings) {
 		var currentBindins = new HashMap<String, Object>(bindings);	
 		currentBindins.put("htmlVersion", htmlVersion);

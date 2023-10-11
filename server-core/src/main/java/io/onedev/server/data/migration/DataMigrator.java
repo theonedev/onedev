@@ -5801,7 +5801,8 @@ public class DataMigrator {
 				}
 				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 				for (Element element : dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("ISSUE")) {
+					var key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
@@ -5812,7 +5813,7 @@ public class DataMigrator {
 							}
 							valueElement.addElement("timeTrackingSetting");
 						}
-					} else if (element.elementTextTrim("key").equals("MAIL")) {
+					} else if (key.equals("MAIL")) {
 						element.element("key").setText("MAIL_SERVICE");
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -5823,6 +5824,8 @@ public class DataMigrator {
 							if (otherInboxPollSettingElement != null)
 								otherInboxPollSettingElement.setName("inboxPollSetting");
 						}
+					} else if (key.equals("EMAIL_TEMPLATES")) {
+						
 					}
 				}
 				dom.writeToFile(file, false);
