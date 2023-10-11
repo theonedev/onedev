@@ -20,7 +20,6 @@ import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
 import org.dom4j.Node;
-import org.eclipse.cdt.core.parser.util.IContentAssistMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
@@ -5804,15 +5803,8 @@ public class DataMigrator {
 					var key = element.elementTextTrim("key");
 					if (key.equals("ISSUE")) {
 						Element valueElement = element.element("value");
-						if (valueElement != null) {
-							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
-								if (fieldSpecElement.getName().contains("UserChoiceField")
-										|| fieldSpecElement.getName().contains("GroupChoiceField")) {
-									fieldSpecElement.addElement("editEstimatedTime").setText("true");
-								}
-							}
+						if (valueElement != null) 
 							valueElement.addElement("timeTrackingSetting");
-						}
 					} else if (key.equals("MAIL")) {
 						element.element("key").setText("MAIL_SERVICE");
 						Element valueElement = element.element("value");
@@ -5824,8 +5816,6 @@ public class DataMigrator {
 							if (otherInboxPollSettingElement != null)
 								otherInboxPollSettingElement.setName("inboxPollSetting");
 						}
-					} else if (key.equals("EMAIL_TEMPLATES")) {
-						
 					}
 				}
 				dom.writeToFile(file, false);

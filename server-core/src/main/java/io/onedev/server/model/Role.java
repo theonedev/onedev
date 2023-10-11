@@ -2,7 +2,6 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleName;
@@ -192,7 +191,7 @@ public class Role extends AbstractEntity implements Permission {
 		this.accessConfidentialIssues = accessConfidentialIssues;
 	}
 	
-	@Editable(order=500, descriptionProvider = "getScheduleIssuesDescription")
+	@Editable(order=500, descriptionProvider = "This permission enables one to schedule issues into milestones")
 	@ShowCondition("isManageIssuesDisabled")
 	public boolean isScheduleIssues() {
 		return scheduleIssues;
@@ -200,15 +199,6 @@ public class Role extends AbstractEntity implements Permission {
 
 	public void setScheduleIssues(boolean scheduleIssues) {
 		this.scheduleIssues = scheduleIssues;
-	}
-	
-	private static String getScheduleIssuesDescription() {
-		if (OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive()) {
-			return "This permission enables one to schedule issues into milestones as well as edit estimated " +
-					"time of issues if time tracking is enabled";			
-		} else {
-			return "This permission enables one to schedule issues into milestones";
-		}
 	}
 
 	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")

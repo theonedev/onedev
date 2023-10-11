@@ -9,8 +9,6 @@ import io.onedev.server.manager.StopwatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.DateUtils;
@@ -112,29 +110,7 @@ abstract class TimingDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				if (SecurityUtils.canScheduleIssues(getIssue().getProject())) {
-					setVisible(true);
-				} else if (SecurityUtils.getUser() == null) {
-					setVisible(false);
-				} else {
-					for (var field: getIssue().getFields()) {
-						var fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(field.getName());
-						if (fieldSpec instanceof UserChoiceField && ((UserChoiceField) fieldSpec).isEditEstimatedTime()) {
-							if (SecurityUtils.getUser().getName().equals(field.getValue())) {
-								setVisible(true);
-								return;
-							}
-						} else if (fieldSpec instanceof GroupChoiceField && ((GroupChoiceField) fieldSpec).isEditEstimatedTime()) {
-							for (var group : SecurityUtils.getUser().getGroups()) {
-								if (group.getName().equals(field.getValue())) {
-									setVisible(true);
-									return;
-								}
-							}
-						}
-					}
-					setVisible(false);
-				}
+				setVisible(SecurityUtils.getUser() != null);
 			}
 		};
 	}

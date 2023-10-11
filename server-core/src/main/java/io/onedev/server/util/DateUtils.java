@@ -30,9 +30,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
 	private static final Pattern WORKING_PERIOD_PATTERN = Pattern.compile("(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?");
 	
-	public static final String WORKING_PERIOD_HELP = "Should be specified as one or more "
-			+ "<tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> "
-			+ "represents 1 week (5 working days), 1 day (8 working hours), 1 hour, and 1 minute";
+	public static final String WORKING_PERIOD_HELP = "Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. " +
+			"For instance <tt>1w 1d 1h 1m</tt> represents 1 week (5 working days), 1 day (8 working hours), 1 hour, and 1 minute";
 	
     public static String formatAge(Date date) {
     	return PRETTY_TIME.format(date);

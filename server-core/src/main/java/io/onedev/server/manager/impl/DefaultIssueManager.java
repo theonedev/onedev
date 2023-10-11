@@ -186,6 +186,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Preconditions.checkArgument(issue.isNew());
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
+		issue.setTotalEstimatedTime(issue.getOwnEstimatedTime());
 		issue.setSubmitDate(new Date());
 		
 		LastActivity lastActivity = new LastActivity();

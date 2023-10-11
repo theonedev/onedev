@@ -240,6 +240,7 @@ public class IssueResource {
 		issue.setSubmitDate(new Date());
 		issue.setSubmitter(user);
 		issue.setState(issueSetting.getInitialStateSpec().getName());
+		issue.setOwnEstimatedTime(data.getOwnEstimatedTime());
 
 		for (Long milestoneId : data.getMilestoneIds()) {
 			Milestone milestone = milestoneManager.load(milestoneId);

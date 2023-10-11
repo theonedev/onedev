@@ -6,7 +6,9 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.WorkingPeriodInput;
 import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
@@ -33,6 +35,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -78,6 +81,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	private MilestoneMultiChoice milestoneChoice;
 	
 	private BeanEditor fieldEditor;
+	
+	private BeanEditor estimatedTimeEditor;
 	
 	private String lastDescriptionTemplate;
 	
@@ -227,6 +232,11 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				fieldBeanClass, fieldNames);
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false)
 				.renderForEdit("fields", Model.of(fieldBean)));
+		
+		var estimatedTimeEditBean = new EstimatedTimeEditBean();
+		add(estimatedTimeEditor = new BeanContext(EstimatedTimeEditBean.class)
+				.renderForEdit("estimatedTime", Model.of(estimatedTimeEditBean)));
+		estimatedTimeEditor.setVisible(WicketUtils.isSubscriptionActive() && getProject().isTimeTracking());
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 
@@ -411,6 +421,12 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			schedule.setMilestone(milestone);
 			issue.getSchedules().add(schedule);
 		}
+		
+		estimatedTimeEditor.convertInput();
+		EstimatedTimeEditBean estimatedTimeEditBean = (EstimatedTimeEditBean) estimatedTimeEditor.getConvertedInput();
+		if (estimatedTimeEditBean.getEstimatedTime() != null) 
+			issue.setOwnEstimatedTime(estimatedTimeEditBean.getEstimatedTime());
+		
 		return issue;
 	}
 	
