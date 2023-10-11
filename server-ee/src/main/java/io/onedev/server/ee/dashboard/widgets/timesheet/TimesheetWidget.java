@@ -25,17 +25,7 @@ public class TimesheetWidget extends Widget {
 	public void setSetting(TimesheetSetting setting) {
 		this.setting = setting;
 	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 10;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
+	
 	@Override
 	protected Component doRender(String componentId) {
 		return new TimesheetWidgetPanel(componentId) {

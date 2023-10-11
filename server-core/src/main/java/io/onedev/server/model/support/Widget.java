@@ -74,11 +74,11 @@ public abstract class Widget implements Serializable {
 	}
 	
 	public int getDefaultWidth() {
-		return 12;
+		return 16;
 	}
 	
 	public int getDefaultHeight() {
-		return 12;
+		return 8;
 	}
 
 	public Component render(String componentId, boolean failsafe) {

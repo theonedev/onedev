@@ -7,9 +7,9 @@ import io.onedev.server.annotation.BlobChoice;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.RevisionChoice;
-import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -96,16 +96,6 @@ public class MarkdownBlobWidget extends Widget {
 		this.filePath = filePath;
 	}
 	
-	@Override
-	public int getDefaultWidth() {
-		return 10;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
 	@SuppressWarnings("unused")
 	private static ProjectScopedCommit getCurrentCommit() {
 		Project project = getCurrentProject();

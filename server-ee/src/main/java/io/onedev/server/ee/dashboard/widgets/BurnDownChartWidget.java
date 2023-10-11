@@ -99,17 +99,7 @@ public class BurnDownChartWidget extends Widget {
 			return new ArrayList<>();
 		}
 	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 16;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
+	
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}

@@ -19,6 +19,7 @@
 	z-index: 1031;
 	display: flex;
 	transition: all var(--transition-duration) ease;
+	border-right: 1px solid #1b1b28;
 }
 .sidebar.sidebar-docked {
 	left: 0;
@@ -42,7 +43,7 @@
 	justify-content: space-between;
 	padding: 0 20px;
 	flex: 0 0 var(--topbar-height);
-	background: #1a1a27;
+	border-bottom: 1px solid var(--dark-mode-lighter-dark);
 }
 
 .sidebar-brand {
@@ -171,7 +172,7 @@
 	align-items: center;
 	padding: 0 20px;
 	flex: 0 0 var(--topbar-height);
-	background: #1a1a27;
+	border-top: 1px solid var(--dark-mode-lighter-dark);
 }
 .sidebar-version {
 	font-weight: 500;

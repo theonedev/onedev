@@ -1,23 +1,22 @@
 package io.onedev.server.ee.dashboard.widgets;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.PullRequestQuery;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.Model;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.Model;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Editable(name="Pull request list", order=300)
 public class PullRequestListWidget extends Widget {
@@ -59,17 +58,7 @@ public class PullRequestListWidget extends Widget {
 	public void setBaseQuery(String baseQuery) {
 		this.baseQuery = baseQuery;
 	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 10;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
+	
 	@Override
 	protected Component doRender(String componentId) {
 		Long projectId;

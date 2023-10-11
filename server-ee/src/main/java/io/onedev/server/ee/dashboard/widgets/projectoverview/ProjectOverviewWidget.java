@@ -1,23 +1,21 @@
 package io.onedev.server.ee.dashboard.widgets.projectoverview;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ProjectChoice;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.LoadableDetachableModel;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.LoadableDetachableModel;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Editable(order=110, name="Project overview")
 public class ProjectOverviewWidget extends Widget {
@@ -35,16 +33,6 @@ public class ProjectOverviewWidget extends Widget {
 
 	public void setProjectPath(String projectPath) {
 		this.projectPath = projectPath;
-	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 6;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
 	}
 
 	private static ProjectManager getProjectManager() {

@@ -36,17 +36,7 @@ public class MilestoneListWidget extends Widget {
 	public void setProjectPath(String projectPath) {
 		this.projectPath = projectPath;
 	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 12;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
+	
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}

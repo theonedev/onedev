@@ -16,16 +16,6 @@ public class MarkdownWidget extends Widget {
 
 	private String markdown;
 	
-	@Override
-	public int getDefaultWidth() {
-		return 10;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-	
 	@Editable(order=100)
 	@Markdown
 	@NotEmpty

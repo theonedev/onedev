@@ -44,7 +44,7 @@ html, body {
 	color: var(--gray-dark);
 }
 html.dark-mode, .dark-mode body {
-	background: var(--dark-mode-darker);
+	background: #1b1b28;
 	color: var(--dark-mode-gray);
 }
 
@@ -362,7 +362,6 @@ pre code {
 	border-radius: 0.42rem;
 }
 .dark-mode .card {
-	box-shadow: 0 0 12px rgb(0 0 0 / 50%);	
     background-color: var(--dark-mode-dark);
 }
 

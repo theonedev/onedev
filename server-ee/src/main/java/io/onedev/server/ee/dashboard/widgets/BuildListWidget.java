@@ -79,17 +79,7 @@ public class BuildListWidget extends Widget {
 	public void setShowRef(boolean showRef) {
 		this.showRef = showRef;
 	}
-
-	@Override
-	public int getDefaultWidth() {
-		return 10;
-	}
-
-	@Override
-	public int getDefaultHeight() {
-		return 8;
-	}
-
+	
 	@Override
 	protected Component doRender(String componentId) {
 		Long projectId;
