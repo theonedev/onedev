@@ -136,8 +136,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size() - 1), 0);
 					}
 
-					String color = ((BasePage) getPage()).isDarkMode() ? "white" : "black";
-					lines.add(new Line("Guide Line", guidelineYAxisValues, color, null, "dashed"));
+					lines.add(new Line("Guide Line", guidelineYAxisValues, "#7E8299", null, "dashed"));
 
 					String yAxisValueFormatter;
 					if (getIndicator().equals(REMAINING_TIME) 

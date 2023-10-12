@@ -1998,10 +1998,10 @@ input[type="radio"], input[type="checkbox"] {
 .table-sm th, .table-sm td {
     padding: 0.3rem;
 }
-.table.table-hover tbody tr:hover td {
+.table-hover tbody tr:hover td {
     background-color: var(--light);
 }
-.dark-mode .table.table-hover tbody tr:hover td {
+.dark-mode .table-hover tbody tr:hover td {
 	color: var(--dark-mode-light-gray);
     background-color: #262638;
 }

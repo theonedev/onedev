@@ -20,8 +20,12 @@ onedev.server.pieChart = {
 			chart.setOption({
 				color: chartColors,
 	            tooltip: {  
-	                formatter: "{b}"  
-	            }, 
+	                formatter: "{b}",
+					textStyle: {
+						color: darkMode? 'white': '#535370'
+					},
+					backgroundColor: darkMode? '#36364F': 'white'
+	            },
 				legend: {
 					show: true,
 					selected: pieSelections,

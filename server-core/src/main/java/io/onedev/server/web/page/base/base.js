@@ -559,6 +559,8 @@ onedev.server = {
 	},
 	util: {
 		formatWorkingPeriod: function(minutes) {
+			var negative = minutes < 0;
+			minutes = Math.abs(minutes);
 			var weeks = Math.floor(minutes/(60*8*5));
 			minutes = minutes%(60*8*5);
 			var days = Math.floor(minutes/(60*8));
@@ -579,6 +581,8 @@ onedev.server = {
 			formatted = formatted.trim();
 			if (formatted.length == 0)
 				return "0m";
+			else if (negative)
+				return "-" + formatted;
 			else
 				return formatted;
 		},

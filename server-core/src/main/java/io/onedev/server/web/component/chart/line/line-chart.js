@@ -28,7 +28,12 @@ onedev.server.lineChart = {
 			    	},
 			    },
 				tooltip: {
-					trigger: 'axis' 
+					trigger: 'axis',
+					textStyle: {
+						color: darkMode? 'white': '#535370'
+					},
+					borderColor: darkMode? '#36364F': 'white',
+					backgroundColor: darkMode? '#36364F': 'white'
 				},
 				series: []
 			};
@@ -90,6 +95,7 @@ onedev.server.lineChart = {
 				var stack = lineSeries.lines[i].stack;
 				if (stack) {
 					option.series[i].stack = stack;
+					option.series[i].stackStrategy = "all";
 					option.series[i].areaStyle = {};
 				}
 			}
