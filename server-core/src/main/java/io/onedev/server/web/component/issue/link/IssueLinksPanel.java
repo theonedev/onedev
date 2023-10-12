@@ -39,8 +39,10 @@ public abstract class IssueLinksPanel extends Panel {
 			}
 			for (IssueLink link: getIssue().getSourceLinks()) {
 				LinkSpec spec = link.getSpec();
-				if (spec.getOpposite() == null || spec.getOpposite().getName().equals(linkName))
+				if (spec.getOpposite() == null && spec.getName().equals(linkName) 
+						|| spec.getOpposite() != null && spec.getOpposite().getName().equals(linkName)) {
 					count++;
+				}
 			}
 			if (count != 0) {
 				AjaxLink<Void> link = new AjaxLink<Void>(linksView.newChildId()) {
