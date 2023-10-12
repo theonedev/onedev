@@ -44,7 +44,7 @@ html, body {
 	color: var(--gray-dark);
 }
 html.dark-mode, .dark-mode body {
-	background: #1b1b28;
+	background: var(--dark-mode-darker);
 	color: var(--dark-mode-gray);
 }
 
