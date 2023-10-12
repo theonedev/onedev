@@ -335,7 +335,7 @@ public class ImportServer implements Serializable, Validatable {
 					+ "reporter(login,name,email),"
 					+ "tags(name),"
 					+ "customFields(name,value(name,login,email,presentation,text),projectCustomField(field(fieldType(id)))),"
-					+ "links(direction,linkType(name,sourceToTarget,targetToSource),issues(numberInProject))";
+					+ "links(direction,linkType(name,sourceToTarget,targetToSource),issues(project(id),numberInProject))";
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
 				@Nullable
@@ -825,8 +825,11 @@ public class ImportServer implements Serializable, Validatable {
 
 						for (JsonNode linkNode : issueNode.get("links")) {
 							List<Long> linkedIssueNumbers = new ArrayList<>();
-							for (JsonNode linkedIssueNode : linkNode.get("issues"))
-								linkedIssueNumbers.add(linkedIssueNode.get("numberInProject").asLong());
+							for (JsonNode linkedIssueNode : linkNode.get("issues")) {
+								var projectNode = linkedIssueNode.get("project");
+								if (projectNode == null || projectNode.get("id").asText().equals(youTrackProjectId))
+									linkedIssueNumbers.add(linkedIssueNode.get("numberInProject").asLong());
+							}
 
 							if (!linkedIssueNumbers.isEmpty() && linkNode.hasNonNull("linkType")) {
 								JsonNode linkTypeNode = linkNode.get("linkType");
