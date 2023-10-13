@@ -89,6 +89,8 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private boolean confidential;
 	
+	private Component watchesContainer;
+	
 	public IssueSidePanel(String id) {
 		super(id);
 		confidential = getIssue().isConfidential();
@@ -102,7 +104,7 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newLinksContainer());
 		addOrReplace(newVotesContainer());
 		
-		addOrReplace(new EntityWatchesPanel("watches") {
+		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
@@ -709,7 +711,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		}));
 
-		container.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+		container.add(new ListView<>("voters", new LoadableDetachableModel<List<IssueVote>>() {
 
 			@Override
 			protected List<IssueVote> load() {
@@ -718,7 +720,7 @@ public abstract class IssueSidePanel extends Panel {
 					votes = votes.subList(0, MAX_DISPLAY_AVATARS);
 				return votes;
 			}
-			
+
 		}) {
 
 			@Override
@@ -732,7 +734,7 @@ public abstract class IssueSidePanel extends Panel {
 				super.onConfigure();
 				setVisible(!getIssue().getVotes().isEmpty());
 			}
-			
+
 		});
 		
 		container.add(new SimpleUserListLink("more") {
@@ -776,6 +778,7 @@ public abstract class IssueSidePanel extends Panel {
 						vote.setDate(new Date());
 						OneDev.getInstance(IssueVoteManager.class).create(vote);
 						getIssue().getVotes().add(vote);
+						target.add(watchesContainer);
 					} else {
 						getIssue().getVotes().remove(vote);
 						OneDev.getInstance(IssueVoteManager.class).delete(vote);

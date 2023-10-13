@@ -40,14 +40,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			if (watch.isWatching() && isAuthorized(watch.getUser()))
 				watches.add(watch);
 		}
-		Collections.sort(watches, new Comparator<EntityWatch>() {
-
-			@Override
-			public int compare(EntityWatch o1, EntityWatch o2) {
-				return o2.getId().compareTo(o1.getId());
-			}
-			
-		});
+		watches.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
 		return watches;
 	}
 	
@@ -61,12 +54,12 @@ public abstract class EntityWatchesPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return "Watchers (" + String.valueOf(getEffectWatches().size()) + ")";
+				return "Watchers (" + getEffectWatches().size() + ")";
 			}
 			
 		}));
 		
-		add(new ListView<EntityWatch>("watchers", new LoadableDetachableModel<List<EntityWatch>>() {
+		add(new ListView<>("watchers", new LoadableDetachableModel<List<EntityWatch>>() {
 
 			@Override
 			protected List<EntityWatch> load() {
@@ -75,7 +68,7 @@ public abstract class EntityWatchesPanel extends Panel {
 					watches = watches.subList(0, MAX_DISPLAY_AVATARS);
 				return watches;
 			}
-			
+
 		}) {
 
 			@Override
@@ -89,7 +82,7 @@ public abstract class EntityWatchesPanel extends Panel {
 				super.onConfigure();
 				setVisible(!getEffectWatches().isEmpty());
 			}
-			
+
 		});
 		
 		add(new SimpleUserListLink("more") {
