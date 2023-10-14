@@ -413,6 +413,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				
 				if (mergeBase != null 
 						&& getLoginUser() != null 
+						&& !getLoginUser().isEffectiveGuest()
 						&& state.leftSide.getBranch()!=null 
 						&& state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();

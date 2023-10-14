@@ -1,11 +1,13 @@
 package io.onedev.server.security.permission;
 
+import io.onedev.server.model.User;
 import org.apache.shiro.authz.Permission;
 
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
+import org.jetbrains.annotations.Nullable;
 
-public class AccessBuildReports implements Permission {
+public class AccessBuildReports implements BasePermission {
 
 	private final String reportNames;
 	
@@ -30,4 +32,8 @@ public class AccessBuildReports implements Permission {
 		}
 	}
 
+	@Override
+	public boolean isApplicable(@Nullable User user) {
+		return true;
+	}
 }

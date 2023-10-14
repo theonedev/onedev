@@ -1,19 +1,21 @@
 package io.onedev.server.security.permission;
 
+import io.onedev.server.model.User;
 import org.apache.shiro.authz.Permission;
 
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
+import org.jetbrains.annotations.Nullable;
 
-public class JobPermission implements Permission {
+public class JobPermission implements BasePermission {
 
 	private final String jobNames;
 	
-	private final Permission privilege;
+	private final BasePermission privilege;
 	
 	private transient PatternSet jobNamesPatternSet;
 	
-	public JobPermission(String jobNames, Permission privilege) {
+	public JobPermission(String jobNames, BasePermission privilege) {
 		this.jobNames = jobNames;
 		this.privilege = privilege;
 	}
@@ -34,4 +36,9 @@ public class JobPermission implements Permission {
 		return false;
 	}
 
+	@Override
+	public boolean isApplicable(@Nullable User user) {
+		return privilege.isApplicable(user);
+	}
+	
 }

@@ -5,6 +5,7 @@ import io.onedev.license.LicenseeUpdate;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -41,6 +42,7 @@ public class SubscriptionManagementPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var userCount = OneDev.getInstance(UserManager.class).countNonGuests();
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription == null) {
@@ -72,13 +74,8 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			fragment.add(detail);
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
-			var licenseGroup = subscription.getLicenseGroup();
-			detail.add(new Label("licenseGroup", licenseGroup)
-					.setVisible(licenseGroup != null));
-			detail.add(new WebMarkupContainer("licenseGroupNotFound")
-					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
 			
-			var expirationDate = subscription.getExpirationDate();
+			var expirationDate = subscription.getExpirationDate(userCount);
 			if (expirationDate != null) {
 				detail.add(new Label("expirationDate", DateUtils.formatDate(expirationDate)));
 				detail.add(new WebMarkupContainer("alert").setVisible(false));
@@ -110,19 +107,10 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			}
 			
 			detail.add(new Label("licensee", subscription.getLicensee()));
-			var licenseGroup = subscription.getLicenseGroup();
-			detail.add(new Label("licenseGroup", licenseGroup)
-					.setVisible(licenseGroup != null));
-			detail.add(new WebMarkupContainer("licenseGroupNotFound")
-					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
 			detail.add(new Label("userMonths", Math.ceil(subscription.getUserDays()/31.0)));
-			var expirationDate = subscription.getExpirationDate();
+			var expirationDate = subscription.getExpirationDate(userCount);
 			if (expirationDate != null) {
-				String message;
-				if (licenseGroup != null && getGroupManager().find(licenseGroup) != null)
-					message = "With current number of users (" + subscription.countUsers() + ") in group '" + licenseGroup + "', ";
-				else
-					message = "With current number of users (" + subscription.countUsers() + "), ";
+				String message = "With current number of non-guest users (" + userCount + "), ";
 					
 				message += "the subscription will be active until <b>" + DateUtils.formatDate(expirationDate) + "</b>";
 				detail.add(new Label("expirationInfo", message).setEscapeModelStrings(false));

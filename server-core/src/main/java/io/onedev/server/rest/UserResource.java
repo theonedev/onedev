@@ -13,17 +13,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Sets;
 import io.onedev.server.model.support.AccessToken;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
@@ -296,6 +290,7 @@ public class UserResource {
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
 			user.setPassword(passwordService.encryptPassword(data.getPassword()));
+			user.setGuest(data.isGuest());
 			userManager.create(user);
 			
 			EmailAddress emailAddress = new EmailAddress();
@@ -370,6 +365,23 @@ public class UserResource {
 	    	return Response.ok().build();
 		}
     }
+	
+	@Api(order=2050)
+	@Path("/{userId}/guest")
+	@POST
+	public Response setGuest(@PathParam("userId") Long userId, boolean guest) {
+		User user = userManager.load(userId);
+		if (!SecurityUtils.isAdministrator()) {
+			throw new UnauthorizedException();
+		} else if (user.isRoot()) {
+			throw new ExplicitException("Can not change guest status of root user");
+		} else if (user.equals(SecurityUtils.getUser())) {
+			throw new ExplicitException("Can not change guest status of yourself");
+		} else {
+			userManager.setAsGuest(Sets.newHashSet(user), guest);
+			return Response.ok().build();
+		}
+	}
 	
 	@Api(order=2100)
 	@Path("/{userId}/queries-and-watches")
@@ -458,6 +470,8 @@ public class UserResource {
 		private String fullName;
 		
 		private String emailAddress;
+		
+		private boolean guest;
 
 		@Api(order=100, description="Login name of the user")
 		@UserName
@@ -499,7 +513,15 @@ public class UserResource {
 		public void setEmailAddress(String emailAddress) {
 			this.emailAddress = emailAddress;
 		}
-		
+
+		@Api(order=400)
+		public boolean isGuest() {
+			return guest;
+		}
+
+		public void setGuest(boolean guest) {
+			this.guest = guest;
+		}
 	}
 	
 	public static class ProfileUpdateData implements Serializable {

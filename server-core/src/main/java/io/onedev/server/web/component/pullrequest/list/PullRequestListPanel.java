@@ -721,9 +721,10 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		add(queryForm);
-		
+
+		Component newPullRequestLink;
 		if (getProject() == null) {
-			add(new DropdownLink("newPullRequest") {
+			add(newPullRequestLink = new DropdownLink("newPullRequest") {
 	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
@@ -753,9 +754,11 @@ public abstract class PullRequestListPanel extends Panel {
 				
 			});
 		} else {
-			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+			add(newPullRequestLink = new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
 					NewPullRequestPage.paramsOf(getProject())));		
 		}
+		var user = SecurityUtils.getUser();
+		newPullRequestLink.setVisible(user == null || !user.isEffectiveGuest());
 		
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));

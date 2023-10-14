@@ -3,6 +3,7 @@ package io.onedev.server.manager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
@@ -37,6 +38,8 @@ public interface UserManager extends EntityManager<User> {
 	void useInternalAuthentication(Collection<User> users);
 	
 	void useExternalAuthentication(Collection<User> users);
+
+	void setAsGuest(Collection<User> users, boolean guest);
 	
 	/**
 	 * Find root user in the system. 
@@ -91,11 +94,13 @@ public interface UserManager extends EntityManager<User> {
 	
 	int count(String term);
 	
+	int countNonGuests();
+	
 	void onRenameSsoConnector(String oldName, String newName);
 	 
 	void onDeleteSsoConnector(String name);
 
-	Collection<User> getAuthorizedUsers(Project project, Permission permission);
+	Collection<User> getAuthorizedUsers(Project project, BasePermission permission);
 	
 	UserCache cloneCache();
 	

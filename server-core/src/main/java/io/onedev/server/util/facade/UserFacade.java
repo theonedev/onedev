@@ -13,12 +13,15 @@ public class UserFacade extends EntityFacade {
 	
 	private final String fullName;
 	
+	private final boolean guest;
+	
 	private final List<AccessToken> accessTokens;
 	
-	public UserFacade(Long id, String name, @Nullable String fullName, List<AccessToken> accessTokens) {
+	public UserFacade(Long id, String name, @Nullable String fullName, boolean guest, List<AccessToken> accessTokens) {
 		super(id);
 		this.name = name;
 		this.fullName = fullName;
+		this.guest = guest;
 		this.accessTokens = accessTokens;
 	}
 
@@ -28,6 +31,10 @@ public class UserFacade extends EntityFacade {
 
 	public String getFullName() {
 		return fullName;
+	}
+
+	public boolean isGuest() {
+		return guest;
 	}
 
 	public List<AccessToken> getAccessTokens() {

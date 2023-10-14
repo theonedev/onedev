@@ -35,6 +35,8 @@ public class UserInvitation extends AbstractEntity {
 	@Column(unique=true, nullable=false)
     @JsonIgnore
     private String invitationCode = UUID.randomUUID().toString();
+	
+	private boolean inviteAsGuest;
 
 	public String getEmailAddress() {
 		return emailAddress;
@@ -52,4 +54,11 @@ public class UserInvitation extends AbstractEntity {
 		this.invitationCode = invitationCode;
 	}
 
+	public boolean isInviteAsGuest() {
+		return inviteAsGuest;
+	}
+
+	public void setInviteAsGuest(boolean inviteAsGuest) {
+		this.inviteAsGuest = inviteAsGuest;
+	}
 }

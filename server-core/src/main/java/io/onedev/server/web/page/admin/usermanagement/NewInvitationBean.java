@@ -25,8 +25,10 @@ public class NewInvitationBean implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 
 	private String emailAddresses;
+	
+	private boolean inviteAsGuest;
 
-	@Editable(description="Specify email addresses to send invitations, with one per line")
+	@Editable(order=100, description="Specify email addresses to send invitations, with one per line")
 	@Multiline
 	@NotEmpty
 	public String getEmailAddresses() {
@@ -36,7 +38,16 @@ public class NewInvitationBean implements Serializable, Validatable {
 	public void setEmailAddresses(String emailAddresses) {
 		this.emailAddresses = emailAddresses;
 	}
-	
+
+	@Editable(order=200, description = "Whether or not to invite the user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	public boolean isInviteAsGuest() {
+		return inviteAsGuest;
+	}
+
+	public void setInviteAsGuest(boolean inviteAsGuest) {
+		this.inviteAsGuest = inviteAsGuest;
+	}
+
 	public List<String> getListOfEmailAddresses() {
 		return Splitter.on("\n").omitEmptyStrings().trimResults().splitToList(getEmailAddresses());
 	}

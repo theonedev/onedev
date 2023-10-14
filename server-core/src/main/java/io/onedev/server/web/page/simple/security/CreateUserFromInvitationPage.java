@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.simple.security;
 
+import com.google.common.collect.Sets;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
@@ -57,7 +58,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 		super.onInitialize();
 
 		User newUser = new User();
-		BeanEditor editor = BeanContext.edit("editor", newUser);
+		BeanEditor editor = BeanContext.edit("editor", newUser, Sets.newHashSet(User.PROP_GUEST), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -76,21 +77,17 @@ public class CreateUserFromInvitationPage extends SimplePage {
 					user.setName(newUser.getName());
 					user.setFullName(newUser.getFullName());
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUser.getPassword()));
+					user.setGuest(invitationModel.getObject().isInviteAsGuest());
 					
 					EmailAddress emailAddress = new EmailAddress();
 					emailAddress.setValue(invitationModel.getObject().getEmailAddress());
 					emailAddress.setOwner(user);
 					emailAddress.setVerificationCode(null);
 					
-					OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-						@Override
-						public void run() {
-							getUserManager().create(user);
-							getEmailAddressManager().create(emailAddress);
-							getInvitationManager().delete(invitationModel.getObject());
-						}
-						
+					OneDev.getInstance(TransactionManager.class).run(() -> {
+						getUserManager().create(user);
+						getEmailAddressManager().create(emailAddress);
+						getInvitationManager().delete(invitationModel.getObject());
 					});
 					
 					Session.get().success("Account set up successfully");

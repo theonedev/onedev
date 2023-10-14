@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.util.EditContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,8 @@ public class SecuritySetting implements Serializable {
 	private boolean enableAnonymousAccess = false;
 	
 	private boolean enableSelfRegister = true;
+	
+	private boolean selfRegisterAsGuest = false;
 	
 	private boolean enableSelfDeregister;
 	
@@ -49,8 +53,21 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfRegister = enableSelfRegister;
 	}
 
-	@Editable(order=300, name="Default Login Group", description="Optionally specify a default group "
-			+ "for all users logged in")
+	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	@ShowCondition("isEnableSelfRegisterEnabled")
+	public boolean isSelfRegisterAsGuest() {
+		return selfRegisterAsGuest;
+	}
+
+	public void setSelfRegisterAsGuest(boolean selfRegisterAsGuest) {
+		this.selfRegisterAsGuest = selfRegisterAsGuest;
+	}
+	
+	private static boolean isEnableSelfRegisterEnabled() {
+		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
+	}
+
+	@Editable(order=300, name="Default Login Group", description="Optionally specify a default group for all users logged in")
 	@GroupChoice
 	public String getDefaultLoginGroupName() {
 		return defaultLoginGroupName;

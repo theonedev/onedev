@@ -21,6 +21,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserCache;
@@ -38,8 +39,10 @@ import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static io.onedev.server.model.User.*;
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
@@ -91,7 +94,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		getSession().replicate(user, ReplicationMode.OVERWRITE);
 		idManager.useId(User.class, user.getId());
 		var facade = user.getFacade();
-		transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+		if (facade.getId() > 0)
+			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 	}
 	
     @Transactional
@@ -116,9 +120,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 					throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
 				}
     		}
-    		
     		settingManager.onRenameUser(oldName, user.getName());
-    		
     		issueFieldManager.onRenameUser(oldName, user.getName());
     	}
     }
@@ -270,7 +272,44 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			user.setSsoConnector(null);
 		}
 	}
-	
+
+	@Transactional
+	@Override
+	public void setAsGuest(Collection<User> users, boolean guest) {
+		for (var user: users) {
+			user.setGuest(guest);
+			if (guest) {
+				var query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
+				query.setParameter("submitter", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+
+				query = getSession().createQuery("update Build set canceller=:unknown where canceller=:canceller");
+				query.setParameter("canceller", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+
+				query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
+				query.setParameter("submitter", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from PullRequestAssignment where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from IssueWork where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from Stopwatch where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+			}
+			dao.persist(user);
+		}
+	}
+
 	@Sessional
     @Override
     public User findByName(String userName) {
@@ -418,7 +457,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
-	
+
+	@Override
+	public int countNonGuests() {
+		return (int) cache.values().stream().filter(it -> !it.isGuest()).count();
+	}
+
 	@Sessional
 	@Override
 	public User findByVerifiedEmailAddress(String emailAddressValue) {
@@ -434,25 +478,27 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return cache.clone();
 	}
 
+	private Collection<User> filterApplicable(Collection<User> users, BasePermission permission) {
+		return users.stream().filter(permission::isApplicable).collect(toList());
+	}
+	
 	@Override
-	public Collection<User> getAuthorizedUsers(Project project, Permission permission) {
+	public Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
 		UserCache cacheClone = cache.clone();
 
 		Collection<User> authorizedUsers = Sets.newHashSet(getRoot());
 
-       	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+		Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
    		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
-   			return cacheClone.getUsers();
+   			return filterApplicable(cacheClone.getUsers(), permission);
    		
-		for (Group group: groupManager.queryAdminstrator()) {
-			for (User user: group.getMembers())
-				authorizedUsers.add(user);
-		}
+		for (Group group: groupManager.queryAdminstrator()) 
+			authorizedUsers.addAll(group.getMembers());
 		
 		Project current = project;
 		do {
 			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission)) 
-	   			return cacheClone.getUsers();
+	   			return filterApplicable(cacheClone.getUsers(), permission);
 			
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {  
 				if (authorization.getRole().implies(permission))
@@ -462,8 +508,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {  
 				if (authorization.getRole().implies(permission)) {
 					if (authorization.getGroup().equals(defaultLoginGroup))
-			   			return cacheClone.getUsers();
-					
+						return filterApplicable(cacheClone.getUsers(), permission);
 					for (User user: authorization.getGroup().getMembers())
 						authorizedUsers.add(user);
 				}
@@ -477,7 +522,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 				authorizedUsers.add(authorization.getUser());
 		}
 
-        return authorizedUsers;	
+        return filterApplicable(authorizedUsers, permission);	
 	}
 
 	@Transactional

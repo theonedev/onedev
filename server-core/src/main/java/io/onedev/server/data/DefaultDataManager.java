@@ -651,7 +651,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean) {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(User.PROP_GUEST)) {
 	
 					@Override
 					public void complete() {

@@ -16,7 +16,11 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
-		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
+		<a wicket:id="link">
+			<img wicket:id="avatar">
+			<span wicket:id="name" class="name"></span>
+			<span wicket:id="guest" class="badge badge-sm badge-info ml-1">guest</span>
+		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
 		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Impersonate this user"><wicket:svg href="user-tick" class="icon align-middle"/></a>

@@ -72,6 +72,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_SSO_CONNECTOR = "ssoConnector";
 	
+	public static final String PROP_GUEST = "guest";
+	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
 		@Override
@@ -92,6 +94,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@JsonIgnore
 	private String ssoConnector;
+	
+	private boolean guest;
 
 	@JsonIgnore
 	@Lob
@@ -483,6 +487,19 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.ssoConnector = ssoConnector;
 	}
 
+	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	public boolean isGuest() {
+		return guest;
+	}
+
+	public void setGuest(boolean guest) {
+		this.guest = guest;
+	}
+
+	public boolean isEffectiveGuest() {
+		return guest && !isRoot() && !isSystem();
+	}
+	
 	public ArrayList<AccessToken> getAccessTokens() {
 		return accessTokens;
 	}
@@ -872,7 +889,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), getAccessTokens());
+		return new UserFacade(getId(), getName(), getFullName(), isGuest(), getAccessTokens());
 	}
 	
 }

@@ -4,3 +4,6 @@
 .user-detail .authorization-list .select2-container {
 	width: 100%;
 }
+.topbar-title .guest {
+	margin-top: 2px;
+}

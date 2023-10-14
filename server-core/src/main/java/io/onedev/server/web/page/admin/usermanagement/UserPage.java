@@ -8,6 +8,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -110,6 +111,7 @@ public abstract class UserPage extends AdministrationPage {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("users", UserListPage.class));
 		fragment.add(new Label("userName", getUser().getDisplayName()));
+		fragment.add(new WebMarkupContainer("guest").setVisible(getUser().isEffectiveGuest()));
 		return fragment;
 	}
 

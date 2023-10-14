@@ -1,8 +1,5 @@
 package io.onedev.server.ee.subscription;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.UserManager;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -15,8 +12,6 @@ public class Subscription implements Serializable {
 	
 	private String licensee;
 	
-	private String licenseGroup;
-	
 	private int userDays;
 	
 	private boolean trial;
@@ -28,15 +23,6 @@ public class Subscription implements Serializable {
 
 	public void setLicensee(String licensee) {
 		this.licensee = licensee;
-	}
-
-	@Nullable
-	public String getLicenseGroup() {
-		return licenseGroup;
-	}
-
-	public void setLicenseGroup(String licenseGroup) {
-		this.licenseGroup = licenseGroup;
 	}
 
 	public int getUserDays() {
@@ -56,38 +42,19 @@ public class Subscription implements Serializable {
 	}
 	
 	@Nullable
-	public Date getExpirationDate() {
-		if (userDays > 0) {
+	public Date getExpirationDate(int userCount) {
+		if (getUserDays() > 0) {
 			if (trial) 
-				return new DateTime().plusDays(userDays).toDate();
+				return new DateTime().plusDays(getUserDays()).toDate();
 			else 
-				return new DateTime().plusDays(userDays / countUsers()).toDate();
+				return new DateTime().plusDays(getUserDays() / userCount).toDate();
 		} else {
 			return null;
 		}
 	}
 	
 	public boolean isExpired() {
-		return userDays == 0;
-	}
-	
-	public int countUsers() {
-		var userManager = OneDev.getInstance(UserManager.class);
-		var groupManager = OneDev.getInstance(GroupManager.class);
-		
-		int userCount;
-		if (getLicenseGroup() != null) {
-			var licenseGroup = groupManager.find(getLicenseGroup());
-			if (licenseGroup == null) 
-				userCount = userManager.cloneCache().size();
-			else 
-				userCount = licenseGroup.getMemberships().size();
-		} else {
-			userCount = userManager.cloneCache().size();
-		}
-		if (userCount == 0)
-			userCount = 1;
-		return userCount;
+		return getUserDays() == 0;
 	}
 	
 }

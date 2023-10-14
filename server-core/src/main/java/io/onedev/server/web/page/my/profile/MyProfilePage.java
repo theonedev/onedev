@@ -43,13 +43,13 @@ public class MyProfilePage extends MyPage {
 
 			}.setVisible(canRemoveSelf));
 		} else { 
-			add(new ProfileEditPanel("content", new AbstractReadOnlyModel<User>() {
+			add(new ProfileEditPanel("content", new AbstractReadOnlyModel<>() {
 
 				@Override
 				public User getObject() {
 					return getLoginUser();
 				}
-				
+
 			}));
 			add(new WebMarkupContainer("delete").setVisible(false));
 		}

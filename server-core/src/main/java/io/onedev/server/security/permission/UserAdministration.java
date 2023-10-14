@@ -3,8 +3,9 @@ package io.onedev.server.security.permission;
 import org.apache.shiro.authz.Permission;
 
 import io.onedev.server.model.User;
+import org.jetbrains.annotations.Nullable;
 
-public class UserAdministration implements Permission {
+public class UserAdministration implements BasePermission {
 	
 	private final User user;
 
@@ -25,5 +26,9 @@ public class UserAdministration implements Permission {
 			return false;
 		}
 	}
-	
+
+	@Override
+	public boolean isApplicable(@Nullable User user) {
+		return user != null;
+	}
 }

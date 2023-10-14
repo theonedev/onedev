@@ -1,30 +1,21 @@
 package io.onedev.server.security.realm;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
-
 import com.google.common.collect.Sets;
-
-import io.onedev.server.manager.EmailAddressManager;
-import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.MembershipManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.SshKeyManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 @Singleton
 public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
@@ -54,6 +45,7 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 	private User newUser(SsoAuthenticated authenticated) {
 		User user = new User();
 		user.setName(authenticated.getUserName());
+		user.setGuest(authenticated.getConnector().isCreateUserAsGuest());
 		user.setSsoConnector(authenticated.getConnector().getName());
 		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
@@ -108,29 +100,24 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
 			throws AuthenticationException {
-		return transactionManager.call(new Callable<AuthenticationInfo>() {
-
-			@Override
-			public AuthenticationInfo call() {
-				EmailAddress emailAddress;
-				SsoAuthenticated authenticated = (SsoAuthenticated) token;
-				String userName = authenticated.getUserName();
-				String emailAddressValue = authenticated.getEmail();
-		    	emailAddress = emailAddressManager.findByValue(emailAddressValue);
-		    	if (emailAddress == null) {
-		    		if (userManager.findByName(userName) != null)
-		    			throw new AuthenticationException("Login name '" + userName + "' already used by another user");
-		    		else
-		    			return newUser(authenticated);
-		    	} else if (!userName.equalsIgnoreCase(emailAddress.getOwner().getName()) 
-	    				&& userManager.findByName(userName) != null) {
-	    			throw new AuthenticationException("Login name '" + userName + "' already used by another user");
-	    		} else {
-	    			updateUser(emailAddress, authenticated);
-	    			return emailAddress.getOwner();
-	    		}
+		return transactionManager.call((Callable<AuthenticationInfo>) () -> {
+			EmailAddress emailAddress;
+			SsoAuthenticated authenticated = (SsoAuthenticated) token;
+			String userName = authenticated.getUserName();
+			String emailAddressValue = authenticated.getEmail();
+			emailAddress = emailAddressManager.findByValue(emailAddressValue);
+			if (emailAddress == null) {
+				if (userManager.findByName(userName) != null)
+					throw new AuthenticationException("Login name '" + userName + "' already used by another user");
+				else
+					return newUser(authenticated);
+			} else if (!userName.equalsIgnoreCase(emailAddress.getOwner().getName())
+					&& userManager.findByName(userName) != null) {
+				throw new AuthenticationException("Login name '" + userName + "' already used by another user");
+			} else {
+				updateUser(emailAddress, authenticated);
+				return emailAddress.getOwner();
 			}
-			
 		});
 	}
 }

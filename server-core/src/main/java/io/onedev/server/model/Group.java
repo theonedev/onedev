@@ -1,30 +1,31 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.security.permission.CreateRootProjects;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.SystemAdministration;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.facade.GroupFacade;
+import org.apache.shiro.authz.Permission;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
-
-import org.apache.shiro.authz.Permission;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import io.onedev.server.security.permission.CreateRootProjects;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.facade.GroupFacade;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Group extends AbstractEntity implements Permission {
+public class Group extends AbstractEntity implements BasePermission {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -157,18 +158,24 @@ public class Group extends AbstractEntity implements Permission {
 	}
 
 	@Override
-	public boolean implies(Permission p) {
-		if (isAdministrator()) 
-			return true;
-		if (isCreateRootProjects() && new CreateRootProjects().implies(p))
-			return true;
-		if (p instanceof ProjectPermission) {
-			for (GroupAuthorization authorization: getAuthorizations()) { 
-				if (new ProjectPermission(authorization.getProject(), authorization.getRole()).implies(p))
-					return true;
-			}
-		}
-		return false;
+	public boolean implies(Permission permission) {
+		return getPermissions().stream().anyMatch(it -> it.implies(permission));
+	}
+	
+	private Collection<BasePermission> getPermissions() {
+		Collection<BasePermission> permissions = new ArrayList<>(); 
+		if (isAdministrator())
+			permissions.add(new SystemAdministration());
+		if (isCreateRootProjects())
+			permissions.add(new CreateRootProjects());
+		for (GroupAuthorization authorization: getAuthorizations()) 
+			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+		return permissions;
+	}
+
+	@Override
+	public boolean isApplicable(@Nullable User user) {
+		return getPermissions().stream().allMatch(it -> it.isApplicable(user));
 	}
 	
 }

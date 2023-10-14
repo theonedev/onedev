@@ -1263,8 +1263,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		});
 		
-		statusBarContainer.add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
-				NewPullRequestPage.paramsOf(getProject())));		
+		var user = SecurityUtils.getUser();
+		statusBarContainer.add(new BookmarkablePageLink<Void>(
+				"newPullRequest", 
+				NewPullRequestPage.class, 
+				NewPullRequestPage.paramsOf(getProject())).setVisible(user == null || !user.isEffectiveGuest()));		
 		
 		return statusBarContainer;
 	}

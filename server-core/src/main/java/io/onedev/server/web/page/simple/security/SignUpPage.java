@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
+import com.google.common.collect.Sets;
+import io.onedev.server.model.support.administration.SecuritySetting;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
@@ -31,10 +33,14 @@ public class SignUpPage extends SimplePage {
 	public SignUpPage(PageParameters params) {
 		super(params);
 		
-		if (!OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister())
+		if (!getSecuritySetting().isEnableSelfRegister())
 			throw new UnauthenticatedException("User sign-up is disabled");
 		if (getLoginUser() != null)
 			throw new IllegalStateException("Can not sign up a user while signed in");
+	}
+	
+	private SecuritySetting getSecuritySetting() {
+		return OneDev.getInstance(SettingManager.class).getSecuritySetting();
 	}
 	
 	@Override
@@ -42,7 +48,7 @@ public class SignUpPage extends SimplePage {
 		super.onInitialize();
 	
 		NewUserBean newUserBean = new NewUserBean();
-		BeanEditor editor = BeanContext.edit("editor", newUserBean);
+		BeanEditor editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(User.PROP_GUEST), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -65,19 +71,15 @@ public class SignUpPage extends SimplePage {
 					user.setName(newUserBean.getName());
 					user.setFullName(newUserBean.getFullName());
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUserBean.getPassword()));
+					user.setGuest(getSecuritySetting().isSelfRegisterAsGuest());
 					
 					EmailAddress emailAddress = new EmailAddress();
 					emailAddress.setValue(newUserBean.getEmailAddress());
 					emailAddress.setOwner(user);
 					
-					OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-						@Override
-						public void run() {
-							getUserManager().create(user);
-							getEmailAddressManager().create(emailAddress);
-						}
-						
+					OneDev.getInstance(TransactionManager.class).run(() -> {
+						getUserManager().create(user);
+						getEmailAddressManager().create(emailAddress);
 					});
 					
 					Session.get().success("Account sign up successfully");

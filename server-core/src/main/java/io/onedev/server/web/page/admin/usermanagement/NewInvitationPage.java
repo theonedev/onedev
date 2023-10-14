@@ -46,6 +46,7 @@ public class NewInvitationPage extends AdministrationPage {
 						logger.log("Sending invitation to '" + emailAddress + "'...");
 						UserInvitation invitation = new UserInvitation();
 						invitation.setEmailAddress(emailAddress);
+						invitation.setInviteAsGuest(bean.isInviteAsGuest());
 						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
 						userInvitationManager.create(invitation);
 						userInvitationManager.sendInvitationEmail(invitation);

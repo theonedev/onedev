@@ -6,6 +6,7 @@ import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
@@ -81,7 +82,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getPathMatchingIds(PatternSet patternSet);
 	
-	Collection<Project> getPermittedProjects(Permission permission);
+	Collection<Project> getPermittedProjects(BasePermission permission);
 	
 	ProjectCache cloneCache();
 	

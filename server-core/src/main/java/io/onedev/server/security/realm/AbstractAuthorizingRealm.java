@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -28,10 +30,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.security.permission.ConfidentialIssuePermission;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.SystemAdministration;
-import io.onedev.server.security.permission.UserAdministration;
 
 public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 
@@ -46,8 +44,7 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     protected final SettingManager settingManager;
     
     @SuppressWarnings("serial")
-	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = 
-			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
+	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
     
 	@Inject
     public AbstractAuthorizingRealm(UserManager userManager, GroupManager groupManager, 
@@ -63,7 +60,7 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 		Collection<Permission> permissions = sessionManager.call(() -> {
 			Collection<Permission> innerPermissions = new ArrayList<>();
 			
-			if (userId != 0L) { 
+			if (userId != 0L) {
 				Permission systemAdministration = new SystemAdministration();
 				
 				User user = userManager.load(userId);
@@ -71,15 +68,15 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 					return Lists.newArrayList(systemAdministration);
 				
 				List<Group> groups = new ArrayList<>(user.getGroups());
-				   Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-				   if (defaultLoginGroup != null) 
-					   groups.add(defaultLoginGroup);
-				
-				   for (Group group: groups) {
-					   if (group.implies(systemAdministration))
-						   return Lists.newArrayList(systemAdministration);
-					   innerPermissions.add(group);
-				   }
+				Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+				if (defaultLoginGroup != null) 
+					groups.add(defaultLoginGroup);
+
+				for (Group group : groups) {
+					if (group.implies(systemAdministration))
+						return Lists.newArrayList(systemAdministration);
+					innerPermissions.add(group);
+				}
 				   
 				innerPermissions.add(new UserAdministration(user));
 				
@@ -125,7 +122,14 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return permissions;
+				return Lists.newArrayList(permission -> {
+					if (permission instanceof BasePermission) {
+						BasePermission basePermission = (BasePermission) permission;	
+						if (!basePermission.isApplicable(SecurityUtils.getUser()))							
+							return false;
+					} 
+					return permissions.stream().anyMatch(it -> it.implies(permission));
+				});
 			}
 			
 		};		

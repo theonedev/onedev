@@ -16,10 +16,10 @@ public class SiteInfo implements Serializable {
     private int userCount;
 
     private int agentCount;
-
-	private String licenseGroup;
 	
-    private int remainingUserMonths;
+	private boolean trialSubscription;
+	
+    private long remainingUserMonthsOrTrialExpirationDate;
 
     private List<ServerInfo> servers = new ArrayList<>();
 
@@ -52,22 +52,21 @@ public class SiteInfo implements Serializable {
         this.agentCount = agentCount;
     }
 
-	@Editable(order=250)
-	public String getLicenseGroup() {
-		return licenseGroup;
+	public boolean isTrialSubscription() {
+		return trialSubscription;
 	}
 
-	public void setLicenseGroup(String licenseGroup) {
-		this.licenseGroup = licenseGroup;
+	public void setTrialSubscription(boolean trialSubscription) {
+		this.trialSubscription = trialSubscription;
 	}
 
 	@Editable(order=300)
-    public int getRemainingUserMonths() {
-        return remainingUserMonths;
+    public long getRemainingUserMonthsOrTrialExpirationDate() {
+        return remainingUserMonthsOrTrialExpirationDate;
     }
 
-    public void setRemainingUserMonths(int remainingUserMonths) {
-        this.remainingUserMonths = remainingUserMonths;
+    public void setRemainingUserMonthsOrTrialExpirationDate(long remainingUserMonthsOrTrialExpirationDate) {
+        this.remainingUserMonthsOrTrialExpirationDate = remainingUserMonthsOrTrialExpirationDate;
     }
 
     @Editable(order=400, name="Cluster Members")

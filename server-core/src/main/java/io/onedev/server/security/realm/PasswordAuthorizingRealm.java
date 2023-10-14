@@ -59,13 +59,15 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		return token instanceof UsernamePasswordToken;
 	}
 
-	private User newUser(String userNameOrEmailAddress, Authenticated authenticated, @Nullable String defaultGroup) {
+	private User newUser(String userNameOrEmailAddress, Authenticated authenticated, 
+						 boolean createAsGuest, @Nullable String defaultGroup) {
 		User user = new User();
 		var userName = userNameOrEmailAddress;
 		if (userName.contains("@"))
 			userName = StringUtils.substringBefore(userName, "@");
 		user.setName(UserNameValidator.suggestUserName(userName));
 		user.setPassword(User.EXTERNAL_MANAGED);
+		user.setGuest(createAsGuest);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);
@@ -173,10 +175,12 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 								throw new AuthenticationException("Email address '" + emailAddressValue
 										+ "' has already been used by another user");
 							} else {
-								return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+								return newUser(userNameOrEmailAddressValue, authenticated, 
+										authenticator.isCreateUserAsGuest(), authenticator.getDefaultGroup());
 							}
 						} else {
-							return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+							return newUser(userNameOrEmailAddressValue, authenticated, 
+									authenticator.isCreateUserAsGuest(), authenticator.getDefaultGroup());
 						}
 					} else {
 						throw new UnknownAccountException("Invalid credentials");

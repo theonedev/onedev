@@ -12,8 +12,9 @@ import io.onedev.license.SiteInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.manager.AgentManager;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -30,6 +31,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+
+import java.util.Date;
 
 public class SupportRequestPanel extends Panel {
 	
@@ -76,11 +79,19 @@ public class SupportRequestPanel extends Panel {
 		});
 		add(new Label("productVersion", siteInfo.getProductVersion()));
 		add(new Label("agentCount", siteInfo.getAgentCount()));
-		if (siteInfo.getLicenseGroup() != null)
-			add(new Label("userCount", siteInfo.getUserCount() + " (" + siteInfo.getLicenseGroup() + ")"));
-		else
-			add(new Label("userCount", siteInfo.getUserCount()));
-		add(new Label("remainingUserMonths", siteInfo.getRemainingUserMonths()));
+		add(new Label("userCount", siteInfo.getUserCount()));
+		
+		if (siteInfo.isTrialSubscription()) {
+			add(new Label("remainingUserMonthsOrTrialExpirationDateLabel", "Trial Expiration Date"));
+			add(new Label(
+					"remainingUserMonthsOrTrialExpirationDate", 
+					DateUtils.formatDate(new Date(siteInfo.getRemainingUserMonthsOrTrialExpirationDate()))));
+		} else {
+			add(new Label("remainingUserMonthsOrTrialExpirationDateLabel", "Remaining User Months"));
+			add(new Label(
+					"remainingUserMonthsOrTrialExpirationDate", 
+					siteInfo.getRemainingUserMonthsOrTrialExpirationDate()));
+		}
 
 		add(BeanContext.view("serversAndSubscriptionKeys", siteInfo, 
 				Sets.newHashSet("servers", "subscriptionKeys"), false));
@@ -113,11 +124,17 @@ public class SupportRequestPanel extends Panel {
 		var siteInfo = new SiteInfo();
 		siteInfo.setProductVersion(AppLoader.getProduct().getVersion());
 		siteInfo.setAgentCount(OneDev.getInstance(AgentManager.class).getOnlineAgents().size());
-		siteInfo.setUserCount(subscription.countUsers());
-		if (subscription.getLicenseGroup() != null && OneDev.getInstance(GroupManager.class).find(subscription.getLicenseGroup()) != null)
-			siteInfo.setLicenseGroup(subscription.getLicenseGroup());
-
-		siteInfo.setRemainingUserMonths(subscription.getUserDays()/31);
+		siteInfo.setUserCount(OneDev.getInstance(UserManager.class).countNonGuests());
+		siteInfo.setTrialSubscription(subscription.isTrial());
+		if (subscription.isTrial()) {
+			var expirationDate = subscription.getExpirationDate(siteInfo.getUserCount());
+			if (expirationDate != null)
+				siteInfo.setRemainingUserMonthsOrTrialExpirationDate(expirationDate.getTime());
+			else 
+				siteInfo.setRemainingUserMonthsOrTrialExpirationDate(new Date().getTime());
+		} else {
+			siteInfo.setRemainingUserMonthsOrTrialExpirationDate(subscription.getUserDays() / 31);
+		}
 
 		siteInfo.setSubscriptionKeys(StringUtils.join(subscriptionSettingSetting.getUsedSubscriptionKeyUUIDs(), "\n"));
 

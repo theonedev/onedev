@@ -14,11 +14,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.manager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.manager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
@@ -30,6 +30,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.CollectionUtils;
@@ -328,7 +329,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 
-	private void checkPermission(InternetAddress sender, Project project, Permission privilege, 
+	private void checkPermission(InternetAddress sender, Project project, BasePermission privilege, 
 			@Nullable User user, @Nullable SenderAuthorization authorization) {
 		if ((user == null || !user.asSubject().isPermitted(new ProjectPermission(project, privilege))) 
 				&& (authorization == null || !authorization.isPermitted(project, privilege))) {
@@ -723,6 +724,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		user.setName(UserNameValidator.suggestUserName(ParsedEmailAddress.parse(address.getAddress()).getName()));
 		user.setFullName(address.getPersonal());
 		user.setPassword("impossible password");
+		user.setGuest(true);
 		userManager.create(user);
 		
 		EmailAddress emailAddress = new EmailAddress();
@@ -733,20 +735,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 		emailAddress.setOwner(user);
 		emailAddressManager.create(emailAddress);
 		
-		boolean found = false;
-		for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-			if (authorization.getProject().equals(project)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			UserAuthorization authorization = new UserAuthorization();
-			authorization.setUser(user);
-			authorization.setProject(project);
-			authorization.setRole(role);
-			authorizationManager.create(authorization);
-		}
+		UserAuthorization authorization = new UserAuthorization();
+		authorization.setUser(user);
+		authorization.setProject(project);
+		authorization.setRole(role);
+		authorizationManager.create(authorization);
 		
 		return user;
 	}

@@ -20,6 +20,7 @@ import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
@@ -190,7 +191,7 @@ public class SuggestionUtils {
 		return suggestProjectPaths(matchWith, new AccessProject());
 	}
 	
-	public static List<InputSuggestion> suggestProjectPaths(String matchWith, Permission permission) {
+	public static List<InputSuggestion> suggestProjectPaths(String matchWith, BasePermission permission) {
 		Collection<Project> projects = getProjectManager().getPermittedProjects(permission);
 		ProjectCache cache = getProjectManager().cloneCache();
 		

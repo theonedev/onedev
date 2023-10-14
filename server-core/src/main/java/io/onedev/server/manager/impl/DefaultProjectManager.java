@@ -60,6 +60,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.manager.StorageManager;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.ProjectNameReservation;
 import io.onedev.server.util.artifact.ArtifactInfo;
@@ -939,47 +940,50 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
-	public Collection<Project> getPermittedProjects(Permission permission) {
-		ProjectCache cacheClone = cache.clone();
-
-		Collection<Long> permittedProjectIds;
+	public Collection<Project> getPermittedProjects(BasePermission permission) {
 		User user = SecurityUtils.getUser();
-		if (user != null) {
-			if (user.isRoot() || user.isSystem()) {
-				return cacheClone.getProjects();
+		if (permission.isApplicable(user)) {
+			ProjectCache cacheClone = cache.clone();
+			Collection<Long> permittedProjectIds;
+			if (user != null) {
+				if (user.isRoot() || user.isSystem()) {
+					return cacheClone.getProjects();
+				} else {
+					permittedProjectIds = new HashSet<>();
+					for (Group group : user.getGroups()) {
+						if (group.isAdministrator())
+							return cacheClone.getProjects();
+						for (GroupAuthorization authorization : group.getAuthorizations()) {
+							if (authorization.getRole().implies(permission))
+								addSubTreeIds(permittedProjectIds, authorization.getProject());
+						}
+					}
+					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+					if (defaultLoginGroup != null) {
+						if (defaultLoginGroup.isAdministrator())
+							return cacheClone.getProjects();
+						for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
+							if (authorization.getRole().implies(permission))
+								addSubTreeIds(permittedProjectIds, authorization.getProject());
+						}
+					}
+
+					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
+						if (authorization.getRole().implies(permission))
+							addSubTreeIds(permittedProjectIds, authorization.getProject());
+					}
+					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+				}
 			} else {
 				permittedProjectIds = new HashSet<>();
-				for (Group group : user.getGroups()) {
-					if (group.isAdministrator())
-						return cacheClone.getProjects();
-					for (GroupAuthorization authorization : group.getAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							addSubTreeIds(permittedProjectIds, authorization.getProject());
-					}
-				}
-				Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-				if (defaultLoginGroup != null) {
-					if (defaultLoginGroup.isAdministrator())
-						return cacheClone.getProjects();
-					for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							addSubTreeIds(permittedProjectIds, authorization.getProject());
-					}
-				}
-
-				for (UserAuthorization authorization : user.getProjectAuthorizations()) {
-					if (authorization.getRole().implies(permission))
-						addSubTreeIds(permittedProjectIds, authorization.getProject());
-				}
-				addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+				if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
+					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
 			}
-		} else {
-			permittedProjectIds = new HashSet<>();
-			if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
-				addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
-		}
 
-		return permittedProjectIds.stream().map(it -> load(it)).collect(toSet());
+			return permittedProjectIds.stream().map(it -> load(it)).collect(toSet());
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	private void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,

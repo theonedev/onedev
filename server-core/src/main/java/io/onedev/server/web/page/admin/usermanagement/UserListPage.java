@@ -71,13 +71,13 @@ public class UserListPage extends AdministrationPage {
 			UserCache cache = getUserManager().cloneCache();
 			List<User> users = new ArrayList<>(cache.getUsers());
 			users.sort(cache.comparingDisplayName(Sets.newHashSet()));
-			users = new Similarities<User>(users) {
+			users = new Similarities<>(users) {
 
 				@Override
 				protected double getSimilarScore(User item) {
 					return cache.getSimilarScore(item, query);
 				}
-				
+
 			};
 			return users;
 		}
@@ -122,7 +122,7 @@ public class UserListPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(searchField = new TextField<String>("filterUsers", new IModel<String>() {
+		add(searchField = new TextField<>("filterUsers", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -139,7 +139,7 @@ public class UserListPage extends AdministrationPage {
 				PageParameters params = getPageParameters();
 				params.set(PARAM_QUERY, query);
 				params.remove(PARAM_PAGE);
-				
+
 				String url = RequestCycle.get().urlFor(UserListPage.class, params).toString();
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
@@ -147,14 +147,14 @@ public class UserListPage extends AdministrationPage {
 					replaceState(target, url, query);
 				else
 					pushState(target, url, query);
-				
+
 				usersTable.setCurrentPage(0);
 				target.add(usersTable);
 				selectionColumn.getSelections().clear();
-				
+
 				typing = true;
 			}
-			
+
 		}));
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
@@ -186,6 +186,119 @@ public class UserListPage extends AdministrationPage {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set Selected Users as Guest";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								for (var model: selectionColumn.getSelections()) {
+									var user = model.getObject();
+									if (user.isRoot()) {
+										Session.get().error("Can not set root as guest");
+										return;
+									} else if (user.equals(SecurityUtils.getUser())) {
+										Session.get().error("Can not set yourself as guest");
+										return;
+									}
+								}
+
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										getUserManager().setAsGuest(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()), true);
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Set as guest successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Change records of these users will be removed as result of set to guest. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+								
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select users to set as guest");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set Selected Users as non-Guest";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								getUserManager().setAsGuest(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()), false);
+								target.add(usersTable);
+								selectionColumn.getSelections().clear();
+								Session.get().success("Set as non-guest successfully");
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select users to set as non-guest");
+								}
+							}
+
+						};
+					}
+
+				});
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -378,6 +491,126 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
+						return "Set All Queried Users as Guest";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								for (var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
+									var user = it.next();
+									if (user.isRoot()) {
+										Session.get().error("Can not set root as guest");
+										return;
+									} else if (user.equals(SecurityUtils.getUser())) {
+										Session.get().error("Can not set yourself as guest");
+										return;
+									}
+								}
+								
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										var users = new ArrayList<User>();
+										for (var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) 
+											users.add(it.next());
+										getUserManager().setAsGuest(users, true);
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Set as guest successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Change records of these users will be removed as result of set to guest. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(usersTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No users to set as guest");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Users as non-Guest";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								Collection<User> users = new ArrayList<>();
+								for (var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
+									users.add(it.next());
+								}
+								getUserManager().setAsGuest(users, false);
+								target.add(usersTable);
+								selectionColumn.getSelections().clear();
+
+								Session.get().success("Set as non-guest successfully");
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(usersTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No users to set as non-guest");
+								}
+							}
+
+						};
+					}
+
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
 						return "Set All Queried Users to Use Internal Authentication";
 					}
 
@@ -436,7 +669,7 @@ public class UserListPage extends AdministrationPage {
 					}
 
 				});
-
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -585,11 +818,11 @@ public class UserListPage extends AdministrationPage {
 
 		columns.add(selectionColumn = new SelectionColumn<User, Void>());
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Login Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Login Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
-					IModel<User> rowModel) {
+									 IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
 				WebMarkupContainer link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
@@ -600,40 +833,36 @@ public class UserListPage extends AdministrationPage {
 								UserListPage.class, getPageParameters()).toString();
 						WebSession.get().setRedirectUrlAfterDelete(User.class, redirectUrlAfterDelete);
 					}
-					
+
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
+				link.add(new WebMarkupContainer("guest").setVisible(user.isEffectiveGuest()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Full Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Full Name")) {
 
 			@Override
 			public String getCssClass() {
 				return "d-none d-lg-table-cell";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
-					IModel<User> rowModel) {
+									 IModel<User> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getFullName()));
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Primary Email")) {
+		columns.add(new AbstractColumn<>(Model.of("Primary Email")) {
 
 			@Override
-			public String getCssClass() {
-				return "d-none d-lg-table-cell";
-			}
-			
-			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
-					IModel<User> rowModel) {
+									 IModel<User> rowModel) {
 				EmailAddress emailAddress = rowModel.getObject().getPrimaryEmailAddress();
 				if (emailAddress != null) {
 					Fragment fragment = new Fragment(componentId, "emailFrag", UserListPage.this);
@@ -645,23 +874,23 @@ public class UserListPage extends AdministrationPage {
 					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
 				}
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Auth Source")) {
+		columns.add(new AbstractColumn<>(Model.of("Auth Source")) {
 
 			@Override
 			public String getCssClass() {
 				return "d-none d-lg-table-cell";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getAuthSource()));
 			}
-			
+
 		});
-		
+
 		columns.add(new AbstractColumn<User, Void>(Model.of("")) {
 
 			@Override
@@ -688,15 +917,15 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		dataProvider = new LoadableDetachableDataProvider<User, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends User> iterator(long first, long count) {
 				List<User> users = usersModel.getObject();
 				if (first + count > users.size())
-					return users.subList((int)first, users.size()).iterator();
+					return users.subList((int) first, users.size()).iterator();
 				else
-					return users.subList((int)first, (int) (first+count)).iterator();
+					return users.subList((int) first, (int) (first + count)).iterator();
 			}
 
 			@Override
@@ -713,7 +942,7 @@ public class UserListPage extends AdministrationPage {
 					protected User load() {
 						return getUserManager().load(id);
 					}
-					
+
 				};
 			}
 		};
