@@ -1,6 +1,7 @@
 package io.onedev.server.commandhandler;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.ExplicitException;
@@ -127,6 +128,7 @@ public class Upgrade extends AbstractPlugin {
 				"--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED",
 				"--add-opens=java.management/sun.management=ALL-UNNAMED",
 				"--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+				"--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
 				"-classpath", "*", bootstrapClass, 
 				command);
 		cmdline.addArgs(commandArgs);
@@ -927,7 +929,24 @@ public class Upgrade extends AbstractPlugin {
 
 			wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
-			writeStringToFile(wrapperConfFile, wrapperConf, UTF_8);
+			var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
+			if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {
+				lines = new ArrayList<>(lines);
+				lines.removeIf(line -> line.contains("Maximum Java Heap Size (in MB)") || line.contains("wrapper.java.maxmemory"));
+
+				int appendIndex = lines.size();
+				for (int i=0; i<lines.size(); i++) {
+					if (lines.get(i).contains("wrapper.java.additional.50")) {
+						appendIndex = i+1;
+						break;
+					}
+				}
+				lines.add(appendIndex, "set.default.max_memory_percent=50");
+				lines.add(appendIndex, "");
+				lines.add(appendIndex, "wrapper.java.additional.100=-XX:MaxRAMPercentage=%max_memory_percent%");
+			}
+			
+			FileUtils.writeLines(wrapperConfFile, UTF_8.name(), lines);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
