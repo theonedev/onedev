@@ -651,6 +651,21 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     modeProps: {closeBrackets: {pairs: '()[]{}""', triples: '"'}}
   });
 
+  def("text/x-sourcepawn", {
+    name: "clike",
+    keywords: words("break case const continue decl default defined delete do else enum " +
+                    "for forward funcenum functag function if INVALID_FUNCTION methodmap " +
+                    "native new null property operator public return sizeof static stock " +
+                    "struct switch this typedef typeset view_as while"),
+    types: words("any bool char int float void"),
+    blockKeywords: words("case do else for if switch while"),
+    defKeywords: words("enum methodmap struct typedef typeset"),
+    typeFirstDefinitions: true,
+    atoms: words("true false null"),
+    isReservedIdentifier: cIsReservedIdentifier,
+    hooks: {"#": cppHook}
+  });
+
   function tokenKotlinString(tripleString){
     return function (stream, state) {
       var escaped = false, next, end = false;
