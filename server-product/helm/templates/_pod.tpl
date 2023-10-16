@@ -34,6 +34,10 @@ containers:
     env:
     - name: k8s_service
       value: {{ include "ods.fullname" . }}
+{{- if .Values.onedev.jvm.max_memory_percent }}
+    - name: max_memory_percent
+      value: {{ .Values.onedev.jvm.max_memory_percent }}
+{{- end }}
 {{- if .Values.onedev.initSettings.user }}
     - name: initial_user
       value: {{ .Values.onedev.initSettings.user }}

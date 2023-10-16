@@ -23,7 +23,8 @@ onedev:
     # where /path/to/trust-certs is a local directory contains all certificates to be trusted. Certificate should be 
     # of base64 encoded PEM format beginning with "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
-
+  jvm:
+    max_memory_percent=50
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
     # onedev.initSettings.user -- Administrator username. Leave empty to prompt
