@@ -31,12 +31,18 @@ containers:
 {{- end }}
     image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.command }}
+    command: {{ toYaml .Values.command | nindent 6 }}
+{{- end }}
+{{- if .Values.args }}
+    args: {{ toYaml .Values.args | nindent 6 }}
+{{- end }}
     env:
     - name: k8s_service
       value: {{ include "ods.fullname" . }}
-{{- if .Values.onedev.jvm.max_memory_percent }}
+{{- if .Values.onedev.jvm.maxMemoryPercent }}
     - name: max_memory_percent
-      value: {{ .Values.onedev.jvm.max_memory_percent }}
+      value: "{{ .Values.onedev.jvm.maxMemoryPercent }}"
 {{- end }}
 {{- if .Values.onedev.initSettings.user }}
     - name: initial_user

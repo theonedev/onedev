@@ -24,7 +24,7 @@ onedev:
     # of base64 encoded PEM format beginning with "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
   jvm:
-    max_memory_percent=50
+    maxMemoryPercent: "50"
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
     # onedev.initSettings.user -- Administrator username. Leave empty to prompt
@@ -100,6 +100,10 @@ podSecurityContext: {}
 
 # securityContext -- Specify securityContext for Containers.
 securityContext: {}
+# command -- Override default image command.
+command: []
+# args -- Override default image arguments.
+args: []
 
 # env -- Define additional environment variables.
 env: []
