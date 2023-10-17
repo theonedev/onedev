@@ -61,7 +61,7 @@ public class YouTrackIssueImporter implements IssueImporter {
 		protected ImportOption newSetting() {
 			ImportServer server = serverStep.getSetting();
 			String project = projectStep.getSetting().getProject();
-			return server.buildImportOption(project);
+			return server.buildImportOption(project, projectStep.getSetting().isPopulateTagMappings());
 		}
 		
 	};

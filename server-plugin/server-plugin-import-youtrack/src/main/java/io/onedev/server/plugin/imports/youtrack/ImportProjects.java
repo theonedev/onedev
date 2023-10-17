@@ -33,6 +33,8 @@ public class ImportProjects implements Serializable, Validatable {
 	private boolean all;
 
 	private List<String> youTrackProjects;
+	
+	private boolean populateTagMappings = true;
 
 	@Editable(order=200, name="Parent OneDev Project", description = "Optionally specify a OneDev project " +
 			"to be used as parent of imported projects. Leave empty to import as root projects")
@@ -82,6 +84,16 @@ public class ImportProjects implements Serializable, Validatable {
 		return projects.server.listProjects();
 	}
 
+	@Editable(order=600, description = "Whether or not to pre-populate tag mappings in next page. " +
+			"You may want to disable this if there are too many tags to display")
+	public boolean isPopulateTagMappings() {
+		return populateTagMappings;
+	}
+
+	public void setPopulateTagMappings(boolean populateTagMappings) {
+		this.populateTagMappings = populateTagMappings;
+	}
+	
 	public Collection<String> getImportProjects() {
 		if (isAll())
 			return server.listProjects();

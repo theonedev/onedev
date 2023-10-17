@@ -10,10 +10,10 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
-import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -75,7 +75,7 @@ public class ImportServer implements Serializable, Validatable {
 	private String userName;
 
 	private String password;
-
+	
 	@Editable(order = 10, name = "YouTrack API URL", description = "Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>")
 	@NotEmpty
 	public String getApiUrl() {
@@ -164,13 +164,13 @@ public class ImportServer implements Serializable, Validatable {
 					projectNodes.add(projectNode);
 			}
 
-			return buildImportOption(projectNodes);
+			return buildImportOption(projectNodes, projects.isPopulateTagMappings());
 		} finally {
 			client.close();
 		}
 	}
 
-	ImportOption buildImportOption(String project) {
+	ImportOption buildImportOption(String project, boolean populateTagMappings) {
 		Client client = newClient();
 		try {
 			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name,customFields(field(name),bundle(values(name)))");
@@ -185,7 +185,7 @@ public class ImportServer implements Serializable, Validatable {
 				if (project.equals(projectNode.get("name").asText())) {
 					List<JsonNode> projectNodes = new ArrayList<>();
 					projectNodes.add(projectNode);
-					return buildImportOption(projectNodes);
+					return buildImportOption(projectNodes, populateTagMappings);
 				}
 			}
 			throw new ExplicitException("Unable to find YouTrack project: " + project);
@@ -194,7 +194,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	ImportOption buildImportOption(Collection<JsonNode> projectNodes) {
+	ImportOption buildImportOption(Collection<JsonNode> projectNodes, boolean populateTagMappings) {
 		ImportOption option = new ImportOption();
 		Client client = newClient();
 		try {
@@ -242,14 +242,17 @@ public class ImportServer implements Serializable, Validatable {
 				}
 
 			};
-			String apiEndpoint = getApiEndpoint("/issueTags?fields=name");
-			for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
-				IssueTagMapping mapping = new IssueTagMapping();
-				mapping.setYouTrackIssueTag(tagNode.get("name").asText());
-				option.getIssueTagMappings().add(mapping);
+			
+			if (populateTagMappings) {
+				String apiEndpoint = getApiEndpoint("/issueTags?fields=name");
+				for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
+					IssueTagMapping mapping = new IssueTagMapping();
+					mapping.setYouTrackIssueTag(tagNode.get("name").asText());
+					option.getIssueTagMappings().add(mapping);
+				}
 			}
 
-			apiEndpoint = getApiEndpoint("/issueLinkTypes?fields=name");
+			String apiEndpoint = getApiEndpoint("/issueLinkTypes?fields=name");
 			for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
 				IssueLinkMapping mapping = new IssueLinkMapping();
 				mapping.setYouTrackIssueLink(tagNode.get("name").asText());
