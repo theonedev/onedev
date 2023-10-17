@@ -277,8 +277,7 @@ public class MarkdownBlobWidget extends Widget {
 					}
 
 					@Override
-					public ObjectId uploadFiles(Collection<FileUpload> uploads, String directory,
-							String commitMessage) {
+					public ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
 						throw new UnsupportedOperationException();
 					}
 

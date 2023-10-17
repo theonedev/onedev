@@ -117,8 +117,8 @@ import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
-import io.onedev.server.web.upload.DefaultUploadItemManager;
-import io.onedev.server.web.upload.UploadItemManager;
+import io.onedev.server.web.upload.DefaultUploadManager;
+import io.onedev.server.web.upload.UploadManager;
 import io.onedev.server.web.websocket.*;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -407,7 +407,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
 		bind(AlertEventBroadcaster.class);
-		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
+		bind(UploadManager.class).to(DefaultUploadManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
 		

@@ -1,8 +1,12 @@
 package io.onedev.server.web.page.project.blob;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.dropzonefield.DropzoneField;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.upload.UploadManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -17,14 +21,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.upload.FileUpload;
-
 @SuppressWarnings("serial")
 public abstract class BlobUploadPanel extends Panel {
 
@@ -34,7 +30,7 @@ public abstract class BlobUploadPanel extends Panel {
 	
 	private String commitMessage;
 	
-	private final Collection<FileUpload> uploads = new ArrayList<>();
+	private String uploadId;
 	
 	public BlobUploadPanel(String id, BlobRenderContext context) {
 		super(id);
@@ -68,7 +64,7 @@ public abstract class BlobUploadPanel extends Panel {
 		
 		DropzoneField dropzone = new DropzoneField(
 				"files", 
-				new PropertyModel<Collection<FileUpload>>(this, "uploads"), 
+				new PropertyModel<String>(this, "uploadId"), 
 				null, 0, maxUploadFileSize);
 		dropzone.setRequired(true).setLabel(Model.of("File"));
 		form.add(dropzone);
@@ -83,11 +79,11 @@ public abstract class BlobUploadPanel extends Panel {
 				if (StringUtils.isBlank(commitMessage))
 					commitMessage = "Add files via upload";
 				
+				var upload = getUploadManager().getUpload(uploadId);
 				try {
-					onCommitted(target, context.uploadFiles(uploads, directory, commitMessage));
+					onCommitted(target, context.uploadFiles(upload, directory, commitMessage));
 				} finally {
-					for (FileUpload upload: uploads)
-						upload.release();
+					upload.clear();
 				}
 			}
 
@@ -116,12 +112,14 @@ public abstract class BlobUploadPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				for (FileUpload upload: uploads)
-					upload.release();
 				onCancel(target);
 			}
 			
 		});
+	}
+	
+	private UploadManager getUploadManager() {
+		return OneDev.getInstance(UploadManager.class);
 	}
 
 	public abstract void onCommitted(AjaxRequestTarget target, ObjectId commitId);

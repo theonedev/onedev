@@ -1,44 +1,43 @@
 package io.onedev.server.web.upload;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.OneDev;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.wicket.util.string.Strings;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
+import java.util.Date;
+import java.util.List;
 
-public class FileUpload implements Serializable {
+public class FileUpload {
+	
+	private final String id;
+	
+	private final Date date = new Date();
+	
+	private final List<FileItem> items;
+	
+	public FileUpload(String id, List<FileItem> items) {
+		this.id = id;
+		this.items = items;
+	}
 
-	private static final long serialVersionUID = 1L;
+	public String getId() {
+		return id;
+	}
 
-	private final String uploadId;
-	
-	private final int uploadIndex;
-	
-	private transient FileItem uploadItem;
-	
-	public FileUpload(String uploadId, int uploadIndex) {
-		this.uploadId = uploadId;
-		this.uploadIndex = uploadIndex;
+	public List<FileItem> getItems() {
+		return items;
+	}
+
+	public Date getDate() {
+		return date;
 	}
 	
-	private FileItem getUploadItem() {
-		if (uploadItem == null) {
-			List<FileItem> items = OneDev.getInstance(UploadItemManager.class).getUploadItems(uploadId);
-			if (uploadIndex >= items.size())
-				throw new ExplicitException("Uploaded files timed out and cleaned up");
-			uploadItem = items.get(uploadIndex);
-		}
-		return uploadItem;
+	public void clear() {
+		OneDev.getInstance(UploadManager.class).clearUpload(id);
 	}
-	
-	public String getFileName() {
-		String name = getUploadItem().getName();
+
+	public static String getFileName(FileItem file) {
+		String name = file.getName();
 
 		// when uploading from localhost some browsers will specify the entire path, we strip it
 		// down to just the file name
@@ -46,26 +45,6 @@ public class FileUpload implements Serializable {
 		name = Strings.lastPathComponent(name, '\\');
 
 		return name;
-	}
-	
-	public InputStream getInputStream() {
-		try {
-			return getUploadItem().getInputStream();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public String getContentType() {
-		return getUploadItem().getContentType();
-	}
-
-	public byte[] getBytes() {
-		return getUploadItem().get();
-	}
-	
-	public void release() {
-		OneDev.getInstance(UploadItemManager.class).setUploadItems(uploadId, new ArrayList<>());
 	}
 	
 }
