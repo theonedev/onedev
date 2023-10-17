@@ -53,16 +53,13 @@ public class Import implements Serializable, Validatable {
 	
 	private String accessTokenSecret;
 	
+	private transient Project project;
+	
+	private transient RevCommit commit;
+	
 	private transient BuildSpec buildSpec;
 	
-	private static ThreadLocal<Stack<String>> importChain = new ThreadLocal<Stack<String>>() {
-
-		@Override
-		protected Stack<String> initialValue() {
-			return new Stack<>();
-		}
-		
-	};
+	private static ThreadLocal<Stack<String>> importChain = ThreadLocal.withInitial(Stack::new);
 	
 	// change Named("projectPath") also if change name of this property 
 	@Editable(order=100, name="Project", description="Specify project to import build spec from. "
@@ -160,8 +157,8 @@ public class Import implements Serializable, Validatable {
 				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
 				if (user == null) {
 					throw new ExplicitException(String.format(
-							"Unable to import build spec as access token is invalid (import project: %s)", 
-							projectPath));
+							"Unable to import build spec as access token is invalid (import project: %s, import revision: %s)", 
+							projectPath, revision));
 				}
 				subject = user.asSubject();
 			} else {
@@ -170,8 +167,8 @@ public class Import implements Serializable, Validatable {
 			if (!subject.isPermitted(new ProjectPermission(project, new ReadCode())) 
 					&& !project.isPermittedByLoginUser(new ReadCode())) {
 				String errorMessage = String.format(
-						"Code read permission is required to import build spec (import project: %s)", 
-						projectPath);
+						"Code read permission is required to import build spec (import project: %s, import revision: %s)", 
+						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
 			
@@ -179,12 +176,12 @@ public class Import implements Serializable, Validatable {
 			try {
 				buildSpec = project.getBuildSpec(commit);
 			} catch (BuildSpecParseException e) {
-				String errorMessage = String.format("Malformed build spec (import project: %s, tag: %s)", 
+				String errorMessage = String.format("Malformed build spec (import project: %s, import revision: %s)", 
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
 			if (buildSpec == null) {
-				String errorMessage = String.format("Build spec not defined (import project: %s, tag: %s)", 
+				String errorMessage = String.format("Build spec not defined (import project: %s, import revision: %s)", 
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
@@ -195,63 +192,69 @@ public class Import implements Serializable, Validatable {
 	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
-		if (importChain.get().contains(projectPath)) {
-			List<String> circular = new ArrayList<>(importChain.get());
-			circular.add(projectPath);
-			String errorMessage = "Circular build spec imports (" + circular + ")";
-			context.disableDefaultConstraintViolation();
-			context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
-			return false;
-		} else {
-			importChain.get().push(projectPath);
-			try {
-				Validator validator = OneDev.getInstance(Validator.class);
-				BuildSpec buildSpec = getBuildSpec();
-				JobAuthorizationContext.push(new JobAuthorizationContext(
-						getProject(), getCommit(), SecurityUtils.getUser(), null));
-				try {
-					for (int i=0; i<buildSpec.getImports().size(); i++) {
-						Import aImport = buildSpec.getImports().get(i);
-						for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
-							String location = "imports[" + i + "]";
-							if (violation.getPropertyPath().toString().length() != 0)
-								location += "." + violation.getPropertyPath();
-				    		String message = String.format("Error validating imported build spec (import project: %s, location: %s, message: %s)", 
-				    				projectPath, location, violation.getMessage());
-				    		throw new ValidationException(message);
-						}
-					}
-					return true;
-				} finally {
-					JobAuthorizationContext.pop();
-				}
-			} catch (Exception e) {
+		try {
+			var commit = getCommit();
+			if (importChain.get().contains(commit.name())) {
+				List<String> circular = new ArrayList<>(importChain.get());
+				circular.add(commit.name());
+				String errorMessage = "Circular build spec imports (" + circular + ")";
 				context.disableDefaultConstraintViolation();
-				String message = e.getMessage();
-				if (message == null) 
-					message = Throwables.getStackTraceAsString(e);
-				context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+				context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 				return false;
-			} finally {
-				importChain.get().pop();
+			} else {
+				importChain.get().push(commit.name());
+				try {
+					Validator validator = OneDev.getInstance(Validator.class);
+					BuildSpec buildSpec = getBuildSpec();
+					JobAuthorizationContext.push(new JobAuthorizationContext(
+							getProject(), getCommit(), SecurityUtils.getUser(), null));
+					try {
+						for (int i = 0; i < buildSpec.getImports().size(); i++) {
+							Import aImport = buildSpec.getImports().get(i);
+							for (ConstraintViolation<Import> violation : validator.validate(aImport)) {
+								String location = "imports[" + i + "]";
+								if (violation.getPropertyPath().toString().length() != 0)
+									location += "." + violation.getPropertyPath();
+								String message = String.format("Error validating imported build spec (import project: %s, import revision: %s, location: %s, message: %s)",
+										projectPath, revision, location, violation.getMessage());
+								throw new ValidationException(message);
+							}
+						}
+						return true;
+					} finally {
+						JobAuthorizationContext.pop();
+					}
+				} finally {
+					importChain.get().pop();
+				}
 			}
+		} catch (Exception e) {
+			context.disableDefaultConstraintViolation();
+			String message = e.getMessage();
+			if (message == null)
+				message = Throwables.getStackTraceAsString(e);
+			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
 		}
 	}
 	
 	public Project getProject() {
-		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
-		if (project == null) 
-			throw new ExplicitException("Unable to find project to import build spec: " + projectPath);
-		else 
-			return project;
+		if (project == null) {
+			project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+			if (project == null)
+				throw new ExplicitException("Unable to find project to import build spec: " + projectPath);
+		}
+		return project;
 	}
 	
 	public RevCommit getCommit() {
-		RevCommit commit = getProject().getRevCommit(revision, false);
 		if (commit == null) {
-			String errorMessage = String.format("Unable to find commit to import build spec (import project: %s, revision: %s)", 
-					projectPath, revision);
-			throw new ExplicitException(errorMessage);
+			commit = getProject().getRevCommit(revision, false);
+			if (commit == null) {
+				String errorMessage = String.format("Unable to find commit to import build spec (import project: %s, import revision: %s)",
+						projectPath, revision);
+				throw new ExplicitException(errorMessage);
+			}
 		}
 		return commit;
 	}

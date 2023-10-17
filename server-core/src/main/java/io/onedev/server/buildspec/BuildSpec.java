@@ -150,28 +150,28 @@ public class BuildSpec implements Serializable, Validatable {
 		importedBuildSpecs = null;
 	}
 	
-	private List<BuildSpec> getImportedBuildSpecs(Collection<String> projectChain) {
+	private List<BuildSpec> getImportedBuildSpecs(Collection<String> commitChain) {
 		if (importedBuildSpecs == null) {
 			importedBuildSpecs = new ArrayList<>();
-			for (Import aImport: getImports()) { 
-				if (!projectChain.contains(aImport.getProjectPath())) {
-					Collection<String> newProjectChain = new HashSet<>(projectChain);
-					newProjectChain.add(aImport.getProjectPath());
-					try {
+			for (Import aImport: getImports()) {
+				try {
+					var importCommit = aImport.getCommit();
+					if (!commitChain.contains(importCommit.name())) {
+						Collection<String> newCommitChain = new HashSet<>(commitChain);
+						newCommitChain.add(importCommit.name());
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
-						RevCommit commit = aImport.getProject().getRevCommit(aImport.getRevision(), true);
 						JobAuthorizationContext.push(new JobAuthorizationContext(
-								aImport.getProject(), commit, SecurityUtils.getUser(), null));
+								aImport.getProject(), importCommit, SecurityUtils.getUser(), null));
 						try {
-							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newProjectChain));
+							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newCommitChain));
 						} finally {
 							JobAuthorizationContext.pop();
 						}
 						importedBuildSpecs.add(importedBuildSpec);
-					} catch (Exception e) {
-						// Ignore here as we rely on this method to show viewer/editor 
-						// Errors relating to this will be shown when validated
 					}
+				} catch (Exception e) {
+					// Ignore here as we rely on this method to show viewer/editor 
+					// Errors relating to this will be shown when validated
 				}
 			}
 		}
@@ -377,10 +377,10 @@ public class BuildSpec implements Serializable, Validatable {
 			index++;
 		}
 		
-		Set<String> importProjectNames = new HashSet<>();
+		Set<String> importProjectAndRevisions = new HashSet<>();
 		for (Import aImport: imports) {
-			if (!importProjectNames.add(aImport.getProjectPath())) {
-				context.buildConstraintViolationWithTemplate("Duplicate import (" + aImport.getProjectPath() + ")")
+			if (!importProjectAndRevisions.add(aImport.getProjectPath() + ":" + aImport.getRevision())) {
+				context.buildConstraintViolationWithTemplate(String.format("Duplicate import (project: %s, revision: %s)", aImport.getProjectPath(), aImport.getRevision()))
 						.addPropertyNode(PROP_IMPORTS).addConstraintViolation();
 				isValid = false;
 			}
