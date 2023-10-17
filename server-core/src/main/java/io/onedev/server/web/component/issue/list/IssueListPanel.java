@@ -641,7 +641,7 @@ public abstract class IssueListPanel extends Panel {
 									dropdown.close();
 									var issueIds = selectionColumn.getSelections().stream()
 											.map(it->it.getObject()).map(Issue::getId).collect(toList());
-									getTimeTrackingManager().requestToSyncTimes(issueIds, false);
+									getTimeTrackingManager().requestToSyncTimes(issueIds);
 									selectionColumn.getSelections().clear();
 									Session.get().success("Requested to sync estimated/spent time");
 								}
@@ -1035,7 +1035,7 @@ public abstract class IssueListPanel extends Panel {
 									Collection<Long> issueIds = new ArrayList<>();
 									for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 										issueIds.add(it.next().getId());
-									getTimeTrackingManager().requestToSyncTimes(issueIds, false);
+									getTimeTrackingManager().requestToSyncTimes(issueIds);
 									Session.get().success("Requested to sync estimated/spent time");
 								}
 								

@@ -2,13 +2,13 @@ package io.onedev.server.ee.timetracking;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.manager.SubscriptionManager;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.SubscriptionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWork;
@@ -76,12 +76,12 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 						if (issueLink.getSpec().getName().equals(aggregationLink))
 							affectedIssueIds.add(issueLink.getSource().getId());
 					}
-					requestToSyncTimes(affectedIssueIds, true);
+					requestToSyncTimes(affectedIssueIds);
 				}
 			} else if (event.getEntity() instanceof IssueWork) {
 				var issue = ((IssueWork) event.getEntity()).getIssue();
 				if (issue.getProject().isTimeTracking())
-					requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+					requestToSyncTimes(Sets.newHashSet(issue.getId()));
 			}
 		}
 	}
@@ -93,18 +93,18 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 			if (event.getEntity() instanceof IssueWork) {
 				var issue = ((IssueWork) event.getEntity()).getIssue();
 				if (issue.getProject().isTimeTracking())
-					requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+					requestToSyncTimes(Sets.newHashSet(issue.getId()));
 			} else if (event.getEntity() instanceof IssueChange) {
 				IssueChange change = (IssueChange) event.getEntity();
 				var issue = change.getIssue();
 				if (issue.getProject().isTimeTracking()) {
 					if (change.getData() instanceof IssueOwnEstimatedTimeChangeData) {
-						requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+						requestToSyncTimes(Sets.newHashSet(issue.getId()));
 					} else if (change.getData() instanceof IssueLinkChangeData) {
 						IssueLinkChangeData changeData = (IssueLinkChangeData) change.getData();
 						var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 						if (changeData.getLinkName().equals(aggregationLink))
-							requestToSyncTimes(Sets.newHashSet(issue.getId()), true);
+							requestToSyncTimes(Sets.newHashSet(issue.getId()));
 					}
 				}
 			}
@@ -113,14 +113,16 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 
 	@Transactional
 	@Override
-	public void requestToSyncTimes(Collection<Long> issueIds, boolean postChangeEvent) {
-		transactionManager.runAfterCommit(() -> {
-			executorService.execute(() -> {
-				var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
-				for (var issueId: issueIds) 
-					syncTimes(issueId, aggregationLink, new HashSet<>());
+	public void requestToSyncTimes(Collection<Long> issueIds) {
+		if (!issueIds.isEmpty()) {
+			transactionManager.runAfterCommit(() -> {
+				executorService.execute(() -> {
+					var aggregationLink = settingManager.getIssueSetting().getTimeTrackingSetting().getAggregationLink();
+					for (var issueId : issueIds)
+						syncTimes(issueId, aggregationLink, new HashSet<>());
+				});
 			});
-		});
+		}
 	}
 	
 	private void syncTimes(Long issueId, @Nullable String aggregationLink, Set<Long> processedIssueIds) {

@@ -8,7 +8,7 @@ import java.util.Collection;
 
 public interface TimeTrackingManager {
 	
-	void requestToSyncTimes(Collection<Long> issueIds, boolean postChangeEvent);
+	void requestToSyncTimes(Collection<Long> issueIds);
 	
 	int aggregateSourceLinkEstimatedTime(Issue issue, String linkName);
 	

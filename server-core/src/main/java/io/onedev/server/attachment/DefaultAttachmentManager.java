@@ -9,24 +9,29 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.build.BuildSubmitted;
+import io.onedev.server.event.project.codecomment.CodeCommentCreated;
+import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.issue.IssuesCopied;
+import io.onedev.server.event.project.issue.IssuesImported;
 import io.onedev.server.event.project.issue.IssuesMoved;
+import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.AttachmentTooLargeException;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.artifact.FileInfo;
 import org.apache.commons.compress.utils.IOUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.quartz.CronScheduleBuilder;
@@ -74,18 +79,22 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 	private final SettingManager settingManager;
 	
+	private final IssueManager issueManager;
+	
     private String taskId;
     
 	@Inject
 	public DefaultAttachmentManager(Dao dao, TransactionManager transactionManager,
 									TaskScheduler taskScheduler, SettingManager settingManager, 
-									ProjectManager projectManager, ClusterManager clusterManager) {
+									ProjectManager projectManager, ClusterManager clusterManager, 
+									IssueManager issueManager) {
 		this.dao = dao;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
 		this.clusterManager = clusterManager;
+		this.issueManager = issueManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -347,36 +356,44 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
-	@Transactional
 	@Listen
-	public void on(EntityPersisted event) {
-		if (event.isNew() && event.getEntity() instanceof AttachmentStorageSupport) {
-			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
-			Long projectId = storageSupport.getAttachmentProject().getId();
-			String attachmentGroup = storageSupport.getAttachmentGroup();
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					projectManager.runOnActiveServer(projectId, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() {
-							permanentizeAttachmentGroup(projectId, attachmentGroup);
-							return null;
-						}
-						
-					});
-				}
-				
-			});
+	@Sessional
+	public void on(IssuesImported event) {
+		for (var issueId: event.getIssueIds()) {
+			var issue = issueManager.load(issueId);
+			var attachmentGroup = issue.getAttachmentGroup();
+			permanentizeAttachmentGroup(issue.getProject().getId(), attachmentGroup);
 		}
 	}
 
+	@Listen
+	@Sessional
+	public void on(IssueOpened event) {
+		var issue = event.getIssue();
+		permanentizeAttachmentGroup(issue.getProject().getId(), issue.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(PullRequestOpened event) {
+		var request = event.getRequest();
+		permanentizeAttachmentGroup(request.getProject().getId(), request.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(BuildSubmitted event) {
+		var build = event.getBuild();
+		permanentizeAttachmentGroup(build.getProject().getId(), build.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(CodeCommentCreated event) {
+		var comment = event.getComment();
+		permanentizeAttachmentGroup(comment.getProject().getId(), comment.getAttachmentGroup());
+	}
+	
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
