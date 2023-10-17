@@ -3,7 +3,7 @@ package io.onedev.server.agent;
 import io.onedev.agent.Agent;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.manager.AgentTokenManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.security.SecurityUtils;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;

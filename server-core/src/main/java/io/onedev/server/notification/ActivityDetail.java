@@ -1,7 +1,7 @@
 package io.onedev.server.notification;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

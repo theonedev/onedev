@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.builds.detail.artifacts;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;

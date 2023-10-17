@@ -15,9 +15,9 @@ import javax.persistence.criteria.Predicate;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

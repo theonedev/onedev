@@ -1,7 +1,7 @@
 package io.onedev.server.web.util;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SubscriptionManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;

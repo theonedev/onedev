@@ -18,12 +18,12 @@ import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.util.FileUpload;
+import io.onedev.server.web.upload.FileUpload;
 
 @SuppressWarnings("serial")
 public abstract class BlobUploadPanel extends Panel {

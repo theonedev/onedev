@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SubscriptionManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.AllGroups;

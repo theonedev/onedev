@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.report.html;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;

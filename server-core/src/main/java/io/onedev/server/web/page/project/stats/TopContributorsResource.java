@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import io.onedev.server.manager.EmailAddressManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.search.commit.AfterCriteria;
 import io.onedev.server.search.commit.AuthorCriteria;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;

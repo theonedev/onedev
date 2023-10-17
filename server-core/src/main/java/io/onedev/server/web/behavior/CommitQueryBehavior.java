@@ -20,7 +20,7 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;

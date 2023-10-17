@@ -7,7 +7,7 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.markdown.ExternalLinkFormatter;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.manager.ChannelNotificationManager;
+import io.onedev.server.notification.ChannelNotificationManager;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.util.commenttext.PlainText;

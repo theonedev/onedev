@@ -1,12 +1,12 @@
 package io.onedev.server.rest;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.manager.MilestoneManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UrlManager;
+import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;

@@ -26,9 +26,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.manager.EmailAddressManager;
-import io.onedev.server.manager.SshKeyManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.CommitQueryPersonalization;

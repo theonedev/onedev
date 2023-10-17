@@ -16,7 +16,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.web.util.FileUpload;
+import io.onedev.server.web.upload.FileUpload;
 
 public interface BlobRenderContext extends Serializable {
 

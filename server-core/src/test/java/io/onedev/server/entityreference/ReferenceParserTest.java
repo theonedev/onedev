@@ -2,7 +2,7 @@ package io.onedev.server.entityreference;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

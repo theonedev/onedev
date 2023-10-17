@@ -2,10 +2,10 @@ package io.onedev.server.web.component.issue.progress;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueWorkManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.StopwatchManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueWorkManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.StopwatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;

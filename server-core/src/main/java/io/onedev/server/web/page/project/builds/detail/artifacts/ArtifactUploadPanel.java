@@ -5,13 +5,13 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.manager.StorageManager;
+import io.onedev.server.StorageManager;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.util.FileUpload;
+import io.onedev.server.web.upload.FileUpload;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -108,6 +108,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 							var artifactsDir = storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
 							for (FileUpload upload: uploads) {
 								String filePath = getArtifactPath(upload);
+								System.out.println(filePath);
+								
 								File file = new File(artifactsDir, filePath);
 								FileUtils.createDir(file.getParentFile());
 								try (	InputStream is = upload.getInputStream();

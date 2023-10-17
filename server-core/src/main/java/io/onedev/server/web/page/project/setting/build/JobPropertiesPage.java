@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.setting.build;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.web.editable.PropertyContext;
 import org.apache.wicket.Component;

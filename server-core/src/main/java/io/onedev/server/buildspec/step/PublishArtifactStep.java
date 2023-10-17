@@ -10,9 +10,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.SafePath;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.manager.StorageManager;
+import io.onedev.server.StorageManager;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.validation.constraints.NotEmpty;

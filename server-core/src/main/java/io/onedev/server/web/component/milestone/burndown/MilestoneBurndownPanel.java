@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.milestone.burndown;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueInfoManager;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.xodus.IssueInfoManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
@@ -12,7 +12,6 @@ import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
-import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;

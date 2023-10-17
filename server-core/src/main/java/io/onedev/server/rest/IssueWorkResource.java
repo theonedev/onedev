@@ -1,7 +1,7 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.manager.SubscriptionManager;
-import io.onedev.server.manager.IssueWorkManager;
+import io.onedev.server.SubscriptionManager;
+import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.DateUtils;

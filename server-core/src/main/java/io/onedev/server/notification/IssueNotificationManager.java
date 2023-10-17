@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.manager.*;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.util.ProjectScope;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.event.Listen;
-import io.onedev.server.manager.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;

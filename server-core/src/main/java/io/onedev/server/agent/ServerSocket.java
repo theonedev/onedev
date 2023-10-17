@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import io.onedev.agent.*;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.AgentManager;
+import io.onedev.server.entitymanager.AgentManager;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;

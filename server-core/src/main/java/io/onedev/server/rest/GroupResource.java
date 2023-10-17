@@ -21,7 +21,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;

@@ -2,10 +2,10 @@ package io.onedev.server.web.page.project.issues.list;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueLinkManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.IssueQueryPersonalizationManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueSchedule;

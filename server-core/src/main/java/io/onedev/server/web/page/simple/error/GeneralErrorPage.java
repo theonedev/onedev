@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.ws.rs.core.Response;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ServerNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;

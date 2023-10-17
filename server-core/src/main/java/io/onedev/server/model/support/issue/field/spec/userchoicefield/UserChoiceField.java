@@ -6,7 +6,7 @@ import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.manager.SubscriptionManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.SpecifiedDefaultMultiValue;

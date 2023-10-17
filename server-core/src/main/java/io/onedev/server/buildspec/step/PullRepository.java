@@ -19,7 +19,7 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.CommandUtils;

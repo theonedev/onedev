@@ -18,8 +18,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.manager.AgentAttributeManager;
-import io.onedev.server.manager.AgentManager;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;

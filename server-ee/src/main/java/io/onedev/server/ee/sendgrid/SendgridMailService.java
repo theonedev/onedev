@@ -2,7 +2,7 @@ package io.onedev.server.ee.sendgrid;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.SubscriptionRequired;
-import io.onedev.server.manager.SubscriptionManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.ee.NoSubscriptionException;
 import io.onedev.server.mail.BasicAuthPassword;

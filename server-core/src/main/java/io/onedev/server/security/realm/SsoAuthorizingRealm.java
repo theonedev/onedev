@@ -1,7 +1,7 @@
 package io.onedev.server.security.realm;
 
 import com.google.common.collect.Sets;
-import io.onedev.server.manager.*;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;

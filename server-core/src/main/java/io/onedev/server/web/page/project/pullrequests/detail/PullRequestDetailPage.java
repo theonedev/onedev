@@ -2,11 +2,11 @@ package io.onedev.server.web.page.project.pullrequests.detail;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.*;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.manager.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.EntityWatch;

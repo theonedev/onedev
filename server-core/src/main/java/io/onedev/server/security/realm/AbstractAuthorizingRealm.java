@@ -20,10 +20,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;

@@ -1,7 +1,7 @@
 package io.onedev.server.rest;
 
-import io.onedev.server.manager.AgentManager;
-import io.onedev.server.manager.AgentTokenManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.persistence.dao.EntityCriteria;

@@ -25,9 +25,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UploadItemManager;
+import io.onedev.server.web.upload.UploadItemManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.util.FileUpload;
+import io.onedev.server.web.upload.FileUpload;
 
 @SuppressWarnings("serial")
 public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {

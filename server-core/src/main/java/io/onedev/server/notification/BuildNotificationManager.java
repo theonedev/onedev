@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UrlManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildUpdated;
