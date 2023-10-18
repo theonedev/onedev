@@ -53,7 +53,7 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfRegister = enableSelfRegister;
 	}
 
-	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
 	@ShowCondition("isEnableSelfRegisterEnabled")
 	public boolean isSelfRegisterAsGuest() {
 		return selfRegisterAsGuest;

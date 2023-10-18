@@ -487,7 +487,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.ssoConnector = ssoConnector;
 	}
 
-	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
 	public boolean isGuest() {
 		return guest;
 	}

@@ -39,7 +39,7 @@ public class NewInvitationBean implements Serializable, Validatable {
 		this.emailAddresses = emailAddresses;
 	}
 
-	@Editable(order=200, description = "Whether or not to invite the user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	@Editable(order=200, description = "Whether or not to invite the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
 	public boolean isInviteAsGuest() {
 		return inviteAsGuest;
 	}

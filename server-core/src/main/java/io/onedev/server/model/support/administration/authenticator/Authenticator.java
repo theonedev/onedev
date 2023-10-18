@@ -24,7 +24,7 @@ public abstract class Authenticator implements Serializable {
 	
 	private int timeout = 300;
 
-	@Editable(order=10000, description = "Whether or not to create authenticated user as <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>guest</a>")
+	@Editable(order=10000, description = "Whether or not to create authenticated user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
 	public boolean isCreateUserAsGuest() {
 		return createUserAsGuest;
 	}
