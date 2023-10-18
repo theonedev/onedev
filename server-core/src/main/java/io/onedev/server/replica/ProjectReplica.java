@@ -42,10 +42,15 @@ public class ProjectReplica implements Serializable {
 	public void loadType(File projectDir) {
 		try {
 			var typeFile = new File(projectDir, TYPE);
-			if (typeFile.exists()) 
-				type = Type.valueOf(readFileToString(typeFile, UTF_8).toUpperCase().trim());
-			else 
+			if (typeFile.exists()) {
+				var typeName = readFileToString(typeFile, UTF_8).toUpperCase().trim();
+				if (typeName.length() != 0)
+					type = Type.valueOf(typeName);
+				else
+					type = PRIMARY;
+			} else {
 				type = PRIMARY;
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
