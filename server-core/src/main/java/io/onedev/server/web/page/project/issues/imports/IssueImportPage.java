@@ -7,7 +7,6 @@ import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -64,7 +63,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 			@Override
 			protected WebMarkupContainer newEndActions(String componentId) {
 				Fragment fragment = new Fragment(componentId, "endActionsFrag", IssueImportPage.this);
-				
+				var projectId = getProject().getId();
 				fragment.add(new TaskButton("import") {
 
 					@Override
@@ -84,7 +83,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 					@Override
 					protected TaskResult runTask(TaskLogger logger) {
-						return OneDev.getInstance(TransactionManager.class).call(() -> importer.doImport(getProject(), false, logger));
+						return importer.doImport(projectId, false, logger);
 					}
 					
 					@Override
@@ -104,7 +103,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 					@Override
 					protected TaskResult runTask(TaskLogger logger) {
-						return OneDev.getInstance(TransactionManager.class).call(() -> importer.doImport(getProject(), true, logger));
+						return importer.doImport(getProject().getId(), true, logger);
 					}
 					
 					@Override

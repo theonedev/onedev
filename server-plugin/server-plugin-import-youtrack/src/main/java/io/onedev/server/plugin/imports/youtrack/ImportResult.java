@@ -25,9 +25,9 @@ public class ImportResult {
 	
 	Set<String> tooLargeAttachments = new LinkedHashSet<>();
 	
-	Map<String, Issue> issueMapping = new HashMap<>();
+	Map<String, Long> issueMapping = new HashMap<>();
 
-	Map<String, Pair<LinkSpec, List<String>>> linkedIssuesMapping = new HashMap<>();
+	Map<String, Pair<Long, List<String>>> linkedIssuesMapping = new HashMap<>();
 	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {

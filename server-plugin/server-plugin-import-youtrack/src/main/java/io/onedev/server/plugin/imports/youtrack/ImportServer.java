@@ -21,6 +21,7 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -988,8 +989,12 @@ public class ImportServer implements Serializable, Validatable {
 			result.unmappedIssueStates.addAll(unmappedIssueStates);
 			result.unmappedIssueLinks.addAll(unmappedIssueLinks);
 			result.unmappedIssueTags.addAll(unmappedIssueTags);
-			result.issueMapping.putAll(issueMapping);
-			result.linkedIssuesMapping.putAll(linkedIssuesMapping);
+			for (var entry: issueMapping.entrySet())
+				result.issueMapping.put(entry.getKey(), entry.getValue().getId());
+			for (var entry: linkedIssuesMapping.entrySet()) {
+				result.linkedIssuesMapping.put(entry.getKey(), 
+						new Pair<>(entry.getValue().getLeft().getId(), entry.getValue().getRight()));
+			}
 
 			return result;
 		} finally {
@@ -1015,7 +1020,7 @@ public class ImportServer implements Serializable, Validatable {
 		}, logger);
 		return result;
 	}
-
+	
 	TaskResult importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, String> youTrackProjectIds = new HashMap<>();
 		Map<String, String> youTrackProjectDescriptions = new HashMap<>();
@@ -1031,46 +1036,48 @@ public class ImportServer implements Serializable, Validatable {
 			ImportResult result = new ImportResult();
 
 			for (var youTrackProject : projects.getImportProjects()) {
-				String oneDevProjectPath;
-				if (projects.getParentOneDevProject() != null)
-					oneDevProjectPath = projects.getParentOneDevProject() + "/" + youTrackProject;
-				else
-					oneDevProjectPath = youTrackProject;
+				OneDev.getInstance(TransactionManager.class).run(() -> {
+					String oneDevProjectPath;
+					if (projects.getParentOneDevProject() != null)
+						oneDevProjectPath = projects.getParentOneDevProject() + "/" + youTrackProject;
+					else
+						oneDevProjectPath = youTrackProject;
 
-				logger.log("Importing from '" + youTrackProject + "' to '" + oneDevProjectPath + "'...");
+					logger.log("Importing from '" + youTrackProject + "' to '" + oneDevProjectPath + "'...");
 
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				Project project = projectManager.setup(oneDevProjectPath);
+					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+					Project project = projectManager.setup(oneDevProjectPath);
 
-				if (!project.isNew() && !SecurityUtils.canManage(project)) {
-					throw new UnauthorizedException("Import target already exists. " +
-							"You need to have project management privilege over it");
-				}
+					if (!project.isNew() && !SecurityUtils.canManage(project)) {
+						throw new UnauthorizedException("Import target already exists. " +
+								"You need to have project management privilege over it");
+					}
 
-				String youTrackProjectId = youTrackProjectIds.get(youTrackProject);
-				if (youTrackProjectId == null)
-					throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
+					String youTrackProjectId = youTrackProjectIds.get(youTrackProject);
+					if (youTrackProjectId == null)
+						throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
 
-				project.setDescription(youTrackProjectDescriptions.get(youTrackProject));
-				project.setIssueManagement(true);
+					project.setDescription(youTrackProjectDescriptions.get(youTrackProject));
+					project.setIssueManagement(true);
 
-				boolean newlyCreated = project.isNew();
-				if (!dryRun && newlyCreated)
-					projectManager.create(project);
+					boolean newlyCreated = project.isNew();
+					if (!dryRun && newlyCreated)
+						projectManager.create(project);
 
-				logger.log("Importing issues...");
-				ImportResult currentResult = doImportIssues(youTrackProjectId, project,
-						option, dryRun, logger);
-				
-				result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
-				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-				result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
-				result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
-				result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
-				result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
-				result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
-				result.issueMapping.putAll(currentResult.issueMapping);
-				result.linkedIssuesMapping.putAll(currentResult.linkedIssuesMapping);
+					logger.log("Importing issues...");
+					ImportResult currentResult = doImportIssues(youTrackProjectId, project,
+							option, dryRun, logger);
+
+					result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
+					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
+					result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
+					result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
+					result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
+					result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
+					result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
+					result.issueMapping.putAll(currentResult.issueMapping);
+					result.linkedIssuesMapping.putAll(currentResult.linkedIssuesMapping);
+				});
 			}
 			
 			setupIssueLinksAndPostImportedEvent(result, dryRun);
@@ -1082,36 +1089,39 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	private void setupIssueLinksAndPostImportedEvent(ImportResult result, boolean dryRun) {
-		Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
-		for (var entry : result.linkedIssuesMapping.entrySet()) {
-			Issue source = result.issueMapping.get(entry.getKey());
-			if (source != null) {
-				for (String targetId : entry.getValue().getRight()) {
-					Issue target = result.issueMapping.get(targetId);
-					if (target != null) {
-						var triple = new ImmutableTriple<>(
-								source.getId(), target.getId(),
-								entry.getValue().getLeft().getId());
-						if (linkTriples.add(triple)) {
-							if (entry.getValue().getLeft().getOpposite() == null) {
-								linkTriples.add(new ImmutableTriple<>(
-										target.getId(), source.getId(),
-										entry.getValue().getLeft().getId()));
+		OneDev.getInstance(TransactionManager.class).run(() -> {
+			Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
+			var issueManager = OneDev.getInstance(IssueManager.class);
+			var linkSpecManager = OneDev.getInstance(LinkSpecManager.class);
+			for (var entry : result.linkedIssuesMapping.entrySet()) {
+				Long sourceIssueId = result.issueMapping.get(entry.getKey());
+				if (sourceIssueId != null) {
+					for (String targetYouTrackIssueId : entry.getValue().getRight()) {
+						Long targetIssueId = result.issueMapping.get(targetYouTrackIssueId);
+						if (targetIssueId != null) {
+							var triple = new ImmutableTriple<>(sourceIssueId, targetIssueId, entry.getValue().getLeft());
+							if (linkTriples.add(triple)) {
+								var linkSpec = linkSpecManager.load(entry.getValue().getLeft());
+								if (linkSpec.getOpposite() == null) {
+									linkTriples.add(new ImmutableTriple<>(targetIssueId, sourceIssueId, 
+											entry.getValue().getLeft()));
+								}
+								IssueLink link = new IssueLink();
+								link.setSource(issueManager.load(sourceIssueId));
+								link.setTarget(issueManager.load(targetIssueId));
+								link.setSpec(linkSpec);
+								OneDev.getInstance(IssueLinkManager.class).create(link);
 							}
-							IssueLink link = new IssueLink();
-							link.setSource(source);
-							link.setTarget(target);
-							link.setSpec(entry.getValue().getLeft());
-							OneDev.getInstance(IssueLinkManager.class).create(link);
 						}
 					}
 				}
 			}
-		}
-		for (var entry: result.issueMapping.values().stream().collect(groupingBy(Issue::getProject)).entrySet()) {
-			if (!dryRun)
-				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(entry.getKey(), entry.getValue()));
-		}
+			if (!dryRun) {
+				for (var entry : result.issueMapping.values().stream().map(issueManager::load).collect(groupingBy(Issue::getProject)).entrySet()) {
+					OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(entry.getKey(), entry.getValue()));
+				}
+			}
+		});
 	}
 
 	private void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, TaskLogger logger) {
@@ -1141,23 +1151,30 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	TaskResult importIssues(Project project, String youTrackProject, ImportOption option,
+	TaskResult importIssues(Long projectId, String youTrackProject, ImportOption option,
 						boolean dryRun, TaskLogger logger) {
-		logger.log("Importing issues from '" + youTrackProject + "'...");
-		Client client = newClient();
-		try {
-			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name");
-			for (JsonNode projectNode : list(client, apiEndpoint, logger)) {
-				if (youTrackProject.equals(projectNode.get("name").asText())) {
-					ImportResult result = doImportIssues(projectNode.get("id").asText(),
-							project, option, dryRun, logger);
-					setupIssueLinksAndPostImportedEvent(result, dryRun);
-					return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
+		var result = OneDev.getInstance(TransactionManager.class).call(() -> {
+			var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			logger.log("Importing issues from '" + youTrackProject + "'...");
+			Client client = newClient();
+			try {
+				String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name");
+				for (JsonNode projectNode : list(client, apiEndpoint, logger)) {
+					if (youTrackProject.equals(projectNode.get("name").asText())) {
+						return doImportIssues(projectNode.get("id").asText(),
+								project, option, dryRun, logger);
+					}
 				}
+				return null;
+			} finally {
+				client.close();
 			}
+		});
+		if (result != null) {
+			setupIssueLinksAndPostImportedEvent(result, dryRun);
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
+		} else {
 			return new TaskResult(false, new PlainMessage("Unable to find YouTrack project: " + youTrackProject));
-		} finally {
-			client.close();
 		}
 	}
 

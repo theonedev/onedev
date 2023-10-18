@@ -1,14 +1,13 @@
 package io.onedev.server.plugin.imports.url;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class UrlProjectImporter implements ProjectImporter {
 

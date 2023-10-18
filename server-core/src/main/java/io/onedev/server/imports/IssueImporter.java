@@ -14,6 +14,6 @@ public interface IssueImporter extends Serializable {
 
 	List<ImportStep<? extends Serializable>> getSteps();
 	
-	public abstract TaskResult doImport(Project project, boolean dryRun, TaskLogger logger);
+	public abstract TaskResult doImport(Long projectId, boolean dryRun, TaskLogger logger);
 	
 }

@@ -12,6 +12,7 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
@@ -177,68 +178,72 @@ public class ImportServer implements Serializable, Validatable {
 	TaskResult importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
-			for (var bitbucketRepository: repositories.getImportRepositories()) {
-				String oneDevProjectPath;
-				if (repositories.getParentOneDevProject() != null)
-					oneDevProjectPath = repositories.getParentOneDevProject() + "/" + bitbucketRepository;
-				else
-					oneDevProjectPath = bitbucketRepository;
-
-				logger.log("Importing from '" + bitbucketRepository + "' to '" + oneDevProjectPath + "'...");
-						
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);                               
-				Project project = projectManager.setup(oneDevProjectPath);
-
-				if (!project.isNew() && !SecurityUtils.canManage(project)) {
-					throw new UnauthorizedException("Import target already exists. " +
-							"You need to have project management privilege over it");
-				}
-
-				String apiEndpoint = getApiEndpoint("/repositories/" + bitbucketRepository);
-				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
-				
-				project.setDescription(repoNode.get("description").asText(null));
-				
-				boolean isPrivate = repoNode.get("is_private").asBoolean();
-				if (!isPrivate && option.getPublicRole() != null)
-					project.setDefaultRole(option.getPublicRole());
-
-				boolean newlyCreated = project.isNew();
-				if (newlyCreated || project.getDefaultBranch() == null) {
-					logger.log("Cloning code...");
-					
-					String cloneUrl = null;
-					for (JsonNode cloneNode: repoNode.get("links").get("clone")) {
-						if (cloneNode.get("name").asText().equals("https")) {
-							cloneUrl = cloneNode.get("href").asText();
-							break;
-						}
-					}
-					if (cloneUrl == null)
-						throw new ExplicitException("Https clone url not found");
-					
-					URIBuilder builder = new URIBuilder(cloneUrl);
-					builder.setUserInfo(getUserName(), getAppPassword());
-					
-					SensitiveMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
+			for (var bitbucketRepository : repositories.getImportRepositories()) {
+				OneDev.getInstance(TransactionManager.class).run(() -> {
 					try {
-						if (dryRun) {
-							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-						} else {
-							if (newlyCreated)
-								projectManager.create(project);
-							projectManager.clone(project, builder.build().toString());
+						String oneDevProjectPath;
+						if (repositories.getParentOneDevProject() != null)
+							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + bitbucketRepository;
+						else
+							oneDevProjectPath = bitbucketRepository;
+
+						logger.log("Importing from '" + bitbucketRepository + "' to '" + oneDevProjectPath + "'...");
+
+						ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+						Project project = projectManager.setup(oneDevProjectPath);
+
+						if (!project.isNew() && !SecurityUtils.canManage(project)) {
+							throw new UnauthorizedException("Import target already exists. " +
+									"You need to have project management privilege over it");
 						}
-					} finally {
-						SensitiveMasker.pop();
+
+						String apiEndpoint = getApiEndpoint("/repositories/" + bitbucketRepository);
+						JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
+
+						project.setDescription(repoNode.get("description").asText(null));
+
+						boolean isPrivate = repoNode.get("is_private").asBoolean();
+						if (!isPrivate && option.getPublicRole() != null)
+							project.setDefaultRole(option.getPublicRole());
+
+						boolean newlyCreated = project.isNew();
+						if (newlyCreated || project.getDefaultBranch() == null) {
+							logger.log("Cloning code...");
+
+							String cloneUrl = null;
+							for (JsonNode cloneNode : repoNode.get("links").get("clone")) {
+								if (cloneNode.get("name").asText().equals("https")) {
+									cloneUrl = cloneNode.get("href").asText();
+									break;
+								}
+							}
+							if (cloneUrl == null)
+								throw new ExplicitException("Https clone url not found");
+
+							URIBuilder builder = new URIBuilder(cloneUrl);
+							builder.setUserInfo(getUserName(), getAppPassword());
+
+							SensitiveMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
+							try {
+								if (dryRun) {
+									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
+								} else {
+									if (newlyCreated)
+										projectManager.create(project);
+									projectManager.clone(project, builder.build().toString());
+								}
+							} finally {
+								SensitiveMasker.pop();
+							}
+						} else {
+							logger.warning("Skipping code clone as the project already has code");
+						}
+					} catch (URISyntaxException e) {
+						throw new RuntimeException(e);
 					}
-				} else {
-					logger.warning("Skipping code clone as the project already has code");
-				}
+				});
 			}
 			return new TaskResult(true, new PlainMessage("Repositories imported successfully"));
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
 		} finally {
 			client.close();
 		}

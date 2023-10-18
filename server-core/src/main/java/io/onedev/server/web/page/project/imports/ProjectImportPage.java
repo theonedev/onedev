@@ -4,7 +4,6 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -70,7 +69,7 @@ public class ProjectImportPage extends LayoutPage {
 
 					@Override
 					protected TaskResult runTask(TaskLogger logger) {
-						return OneDev.getInstance(TransactionManager.class).call(() -> importer.doImport(false, logger));
+						return importer.doImport(false, logger);
 					}
 					
 					@Override
@@ -90,7 +89,7 @@ public class ProjectImportPage extends LayoutPage {
 
 					@Override
 					protected TaskResult runTask(TaskLogger logger) {
-						return OneDev.getInstance(TransactionManager.class).call(() -> importer.doImport(true, logger));
+						return importer.doImport(true, logger);
 					}
 					
 					@Override
