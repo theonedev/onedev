@@ -28,10 +28,15 @@ public class DirectoryVersionUtils {
 	public static long readVersion(File directory) {
 		return callWithVersionLock(directory.toPath(), () -> {
 			var versionFile = new File(directory, FILE_VERSION);
-			if (versionFile.exists())
-				return Long.parseLong(FileUtils.readFileToString(versionFile, UTF_8).trim());
-			else
+			if (versionFile.exists()) {
+				try {
+					return Long.parseLong(FileUtils.readFileToString(versionFile, UTF_8).trim());
+				} catch (Exception e) {
+					throw new RuntimeException("Error reading directory version from file: " + versionFile, e);
+				}
+			} else {
 				return 0L;
+			}
 		});
 	}
 

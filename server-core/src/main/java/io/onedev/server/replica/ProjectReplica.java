@@ -5,7 +5,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
@@ -14,8 +13,8 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 
 public class ProjectReplica implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-	private static final String TYPE = "type";
+	
+	private static final String TYPE_FILE = "type";
 
 	public static enum Type {PRIMARY, BACKUP, REDUNDANT};
 
@@ -40,24 +39,20 @@ public class ProjectReplica implements Serializable {
 	}
 
 	public void loadType(File projectDir) {
-		try {
-			var typeFile = new File(projectDir, TYPE);
-			if (typeFile.exists()) {
-				var typeName = readFileToString(typeFile, UTF_8).toUpperCase().trim();
-				if (typeName.length() != 0)
-					type = Type.valueOf(typeName);
-				else
-					type = PRIMARY;
-			} else {
-				type = PRIMARY;
+		var typeFile = new File(projectDir, TYPE_FILE);
+		if (typeFile.exists()) {
+			try {
+				type = Type.valueOf(readFileToString(typeFile, UTF_8).toUpperCase().trim());
+			} catch (Exception e) {
+				throw new RuntimeException("Error reading replica type from file: " + typeFile, e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		} else {
+			type = PRIMARY;
 		}
 	}
 	
 	public void saveType(File projectDir) {
-		FileUtils.writeFile(new File(projectDir, TYPE), type.name());
+		FileUtils.writeFile(new File(projectDir, TYPE_FILE), type.name());
 	}
 	
 	@Override

@@ -1,27 +1,18 @@
 package io.onedev.server.xodus;
 
+import io.onedev.commons.utils.FileUtils;
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.*;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.lib.ObjectId;
-
-import io.onedev.commons.utils.FileUtils;
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
 
 import static java.nio.charset.Charset.defaultCharset;
 
@@ -38,9 +29,13 @@ public abstract class AbstractEnvironmentManager {
 		int versionFromFile;
 		if (versionFile.exists()) {
 			try {
-				versionFromFile = Integer.parseInt(FileUtils.readFileToString(versionFile, defaultCharset()).trim());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+				var versionString = FileUtils.readFileToString(versionFile, defaultCharset()).trim();
+				if (versionString.length() != 0)
+					versionFromFile = Integer.parseInt(versionString);
+				else
+					versionFromFile = 0;
+			} catch (Exception e) {
+				throw new RuntimeException("Error reading version from file: " + versionFile, e);
 			}
 		} else {
 			versionFromFile = 0;
