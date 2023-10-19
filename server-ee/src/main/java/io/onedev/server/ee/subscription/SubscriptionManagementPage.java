@@ -5,7 +5,6 @@ import io.onedev.license.LicenseeUpdate;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -33,24 +32,23 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 @SuppressWarnings("serial")
 public class SubscriptionManagementPage extends AdministrationPage {
-	
+
 	public SubscriptionManagementPage(PageParameters params) {
 		super(params);
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var userCount = OneDev.getInstance(UserManager.class).countNonGuests();
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription == null) {
 			var fragment = new Fragment("content", "noSubscriptionFrag", this);
 			fragment.add(newSubscriptionKeyInstallLink("installSubscriptionKey", subscriptionSetting));
-			
+
 			if (subscriptionSetting.getUsedSubscriptionKeyUUIDs().isEmpty()) {
-				var firstTrialSubscriptionRequestFragment = new Fragment("requestTrialSubscription", 
+				var firstTrialSubscriptionRequestFragment = new Fragment("requestTrialSubscription",
 						"firstTrialSubscriptionRequestFrag", SubscriptionManagementPage.this);
 				firstTrialSubscriptionRequestFragment.add(new WebMarkupContainer("subscriptionKeyUUID") {
 					@Override
@@ -69,25 +67,32 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			add(fragment);
 		} else if (subscription.isTrial()) {
 			var fragment = new Fragment("content", "trialSubscriptionFrag", this);
-			
+
 			var detail = new WebMarkupContainer("detail");
 			fragment.add(detail);
-			
+
 			detail.add(new Label("licensee", subscription.getLicensee()));
-			
-			var expirationDate = subscription.getExpirationDate(userCount);
+			var licenseGroup = subscription.getLicenseGroup();
+			detail.add(new Label("licenseGroup", licenseGroup)
+					.setVisible(licenseGroup != null));
+			detail.add(new WebMarkupContainer("licenseGroupNotFound")
+					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
+
+			var expirationDate = subscription.getExpirationDate(subscription.countUsers());
 			if (expirationDate != null) {
+				detail.add(new Label("title", "This installation has a trial subscription and runs as enterprise edition"));
 				detail.add(new Label("expirationDate", DateUtils.formatDate(expirationDate)));
 				detail.add(new WebMarkupContainer("alert").setVisible(false));
 				detail.add(AttributeAppender.append("class", "alert-light-warning"));
 			} else {
+				detail.add(new Label("title", "This installation has an expired trial subscription and runs as community edition"));
 				detail.add(new WebMarkupContainer("expirationDate").setVisible(false));
-				detail.add(new Label("alert", "** Enterprise features are currently disabled as trial " +
+				detail.add(new Label("alert", "** Enterprise edition is disabled as the trial " +
 						"subscription was expired, order subscription to enable or contact support@onedev.io " +
-						"if you need to extend your trial**"));
+						"if you need to extend your trial **"));
 				detail.add(AttributeAppender.append("class", "alert-light-danger"));
 			}
-			
+
 			fragment.add(newSubscriptionKeyInstallLink("installSubscriptionKey", subscriptionSetting));
 			fragment.add(newSubscriptionDeactivateLink("deactivateSubscription", subscriptionSetting));
 			add(fragment);
@@ -95,29 +100,42 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			var fragment = new Fragment("content", "subscriptionFrag", this);
 			var detail = new WebMarkupContainer("detail");
 			fragment.add(detail);
-			
+
 			if (subscription.isExpired()) {
-				var alertMessage = "** Enterprise features are currently disabled as there is no remaining user months. " +
+				detail.add(new Label("title", "This installation has an expired subscription, and runs as community edition"));
+				var alertMessage = "** Enterprise edition is disabled as there is no remaining user months. " +
 						"Order more to enable **";
 				detail.add(AttributeAppender.append("class", "alert-light-danger"));
 				detail.add(new Label("alert", alertMessage));
 			} else {
+				detail.add(new Label("title", "This installation has an active subscription and runs as enterprise edition"));
 				detail.add(AttributeAppender.append("class", "alert-light-success"));
 				detail.add(new WebMarkupContainer("alert").setVisible(false));
 			}
-			
+
 			detail.add(new Label("licensee", subscription.getLicensee()));
+			var licenseGroup = subscription.getLicenseGroup();
+			detail.add(new Label("licenseGroup", licenseGroup)
+					.setVisible(licenseGroup != null));
+			detail.add(new WebMarkupContainer("licenseGroupNotFound")
+					.setVisible(licenseGroup != null && getGroupManager().find(licenseGroup) == null));
 			detail.add(new Label("userMonths", Math.ceil(subscription.getUserDays()/31.0)));
+			
+			var userCount = subscription.countUsers();
 			var expirationDate = subscription.getExpirationDate(userCount);
 			if (expirationDate != null) {
-				String message = "With current number of non-guest users (" + userCount + "), ";
-					
+				String message;
+				if (licenseGroup != null && getGroupManager().find(licenseGroup) != null)
+					message = "With current number of users (" + userCount + ") in group '" + licenseGroup + "', ";
+				else
+					message = "With current number of non-guest users (" + userCount + "), ";
+
 				message += "the subscription will be active until <b>" + DateUtils.formatDate(expirationDate) + "</b>";
 				detail.add(new Label("expirationInfo", message).setEscapeModelStrings(false));
 			} else {
 				detail.add(new WebMarkupContainer("expirationInfo").setVisible(false));
 			}
-			
+
 			fragment.add(newSubscriptionKeyInstallLink("installSubscriptionKey", subscriptionSetting));
 			fragment.add(newSubscriptionDeactivateLink("deactivateSubscription", subscriptionSetting));
 			add(fragment);
@@ -151,7 +169,7 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			}
 		};
 	}
-	
+
 	private Component newSubscriptionDeactivateLink(String componentId, SubscriptionSetting subscriptionSetting) {
 		return new AjaxLink<Void>(componentId) {
 			@Override
@@ -168,11 +186,11 @@ public class SubscriptionManagementPage extends AdministrationPage {
 			}
 		};
 	}
-	
+
 	private GroupManager getGroupManager() {
 		return OneDev.getInstance(GroupManager.class);
 	}
-	
+
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		return new org.apache.wicket.markup.html.basic.Label(componentId, "Subscription Management");

@@ -79,7 +79,7 @@ public class SupportRequestPanel extends Panel {
 		});
 		add(new Label("productVersion", siteInfo.getProductVersion()));
 		add(new Label("agentCount", siteInfo.getAgentCount()));
-		add(new Label("userCount", siteInfo.getUserCount()));
+		add(new Label("licenseUserCount", siteInfo.getUserCount()));
 		
 		if (siteInfo.isTrialSubscription()) {
 			add(new Label("remainingUserMonthsOrTrialExpirationDateLabel", "Trial Expiration Date"));
@@ -124,7 +124,7 @@ public class SupportRequestPanel extends Panel {
 		var siteInfo = new SiteInfo();
 		siteInfo.setProductVersion(AppLoader.getProduct().getVersion());
 		siteInfo.setAgentCount(OneDev.getInstance(AgentManager.class).getOnlineAgents().size());
-		siteInfo.setUserCount(OneDev.getInstance(UserManager.class).countNonGuests());
+		siteInfo.setUserCount(subscription.countUsers());
 		siteInfo.setTrialSubscription(subscription.isTrial());
 		if (subscription.isTrial()) {
 			var expirationDate = subscription.getExpirationDate(siteInfo.getUserCount());

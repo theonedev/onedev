@@ -9,7 +9,18 @@ public class SubscriptionCharge extends LicensePayload {
 
     private static final long serialVersionUID = 1L;
 
+	private String licenseGroup;
+
 	private int userMonths;
+
+	@Editable(order=50)
+	public String getLicenseGroup() {
+		return licenseGroup;
+	}
+
+	public void setLicenseGroup(String licenseGroup) {
+		this.licenseGroup = licenseGroup;
+	}
 
 	@Editable(name="User Months", order=100)
     @Min(1)

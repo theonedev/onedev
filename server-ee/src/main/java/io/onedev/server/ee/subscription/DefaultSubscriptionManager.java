@@ -1,13 +1,12 @@
 package io.onedev.server.ee.subscription;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.SubscriptionManager;
+import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.entitymanager.AlertManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
@@ -35,17 +34,13 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	
 	private final SettingManager settingManager;
 	
-	private final UserManager userManager;
-	
 	private String taskId;
 	
 	@Inject
-	public DefaultSubscriptionManager(AlertManager alertManager, TaskScheduler taskScheduler, 
-									  SettingManager settingManager, UserManager userManager) {
+	public DefaultSubscriptionManager(AlertManager alertManager, TaskScheduler taskScheduler, SettingManager settingManager) {
 		this.taskScheduler = taskScheduler;
 		this.alertManager = alertManager;
 		this.settingManager = settingManager;
-		this.userManager = userManager;
 	}
 	
 	@Override
@@ -86,8 +81,8 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 		if (subscription != null) {
 			var alertSetting = settingManager.getAlertSetting();
 			var now = new DateTime();
-			var userCount = userManager.countNonGuests();
 			var userDays = subscription.getUserDays();
+			var userCount = subscription.countUsers();
 			if (subscription.isTrial()) {
 				if (userDays > 0)
 					userDays--;

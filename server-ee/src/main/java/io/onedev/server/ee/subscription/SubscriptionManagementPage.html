@@ -6,7 +6,7 @@
 	</div>
 	<wicket:fragment wicket:id="noSubscriptionFrag">
 		<div class="alert alert-notice alert-light h6 mb-4">
-			This installation does not have an active subscription and runs as community edition. 
+			This installation does not have an active subscription and runs as community edition.
 			To access <a href="https://onedev.io/pricing">enterprise features</a>, an active subscription is required
 		</div>
 		<div wicket:id="feedback"></div>
@@ -18,17 +18,20 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="trialSubscriptionFrag">
 		<div wicket:id="detail" class="alert alert-notice font-weight-bold mb-4">
-			<h6>
-				This installation has a trial subscription and runs as enterprise edition
-			</h6>
+			<h6 wicket:id="title"></h6>
 			<ul class="mb-0">
 				<li class="mb-2">
 					Licensed To: <span wicket:id="licensee"></span>
 				</li>
+				<wicket:enclosure child="licenseGroup">
+					<li class="mb-2">
+						License Group: <span wicket:id="licenseGroup"></span> <span wicket:id="licenseGroupNotFound" class="ml-1 badge badge-sm badge-danger">not found</span>
+					</li>
+				</wicket:enclosure>
 				<wicket:enclosure child="expirationDate">
-				<li>
-					Expiration Date: <span wicket:id="expirationDate"></span>
-				</li>
+					<li>
+						Expiration Date: <span wicket:id="expirationDate"></span>
+					</li>
 				</wicket:enclosure>
 			</ul>
 			<div wicket:id="alert" class="font-weight-bolder mt-3"></div>
@@ -42,14 +45,18 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="subscriptionFrag">
 		<div wicket:id="detail" class="alert alert-notice font-weight-bold mb-4">
-			<h6>
-				This installation has an active subscription and runs as enterprise edition
-			</h6>				
+			<h6 wicket:id="title"></h6>
 			<ul class="mb-0">
 				<li class="mb-2">
 					Licensed To: <span wicket:id="licensee"></span>
 					<a href="mailto:support@onedev.io" class="alert-link ml-2">request to change</a>
 				</li>
+				<wicket:enclosure child="licenseGroup">
+					<li class="mb-2">
+						License Group: <span wicket:id="licenseGroup"></span> <span wicket:id="licenseGroupNotFound" class="ml-1 badge badge-sm badge-danger">not found</span>
+						<div class="text-warning"><b>NOTE:</b> By using this license, you agree that all staff users shall be added to this group for user-month check</div>
+					</li>
+				</wicket:enclosure>
 				<li class="mb-2">
 					Remaining User Months: <span wicket:id="userMonths"></span>
 					<a href="https://onedev.io/pricing" class="alert-link ml-2">order more</a>

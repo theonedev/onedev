@@ -23,17 +23,17 @@ import static org.apache.commons.lang3.SerializationUtils.serialize;
 public class SubscriptionSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	static final CipherService cipherService = new AesCipherService();
-	
+
 	/*
-	 * OneDev license (https://code.onedev.io/onedev/server/~files/main/license.txt) does NOT allow 
+	 * OneDev license (https://code.onedev.io/onedev/server/~files/main/license.txt) does NOT allow
 	 * anyone to encrypt/decrypt custom data with below key
 	 */
 	static final String ENCRYPTION_KEY = "5pV39IaAmO88SI3frAcadT/uwdh/WtrKqho/Opp+nNg=";
 
 	private Set<String> usedSubscriptionKeyUUIDs = new LinkedHashSet<>();
-	
+
 	private Subscription subscription;
 
 	public Set<String> getUsedSubscriptionKeyUUIDs() {
@@ -56,6 +56,7 @@ public class SubscriptionSetting implements Serializable {
 			if (!usedSubscriptionKeyUUIDs.contains(payload.getUuid())) {
 				var now = new DateTime();
 				if (payload.getValidUntil().after(now.toDate())) {
+					var licenseGroup = subscription != null? subscription.getLicenseGroup(): null;
 					if (subscription == null || subscription.isTrial()) {
 						if (payload instanceof TrialSubscription) {
 							TrialSubscription trialSubscription = (TrialSubscription) payload;
@@ -64,6 +65,10 @@ public class SubscriptionSetting implements Serializable {
 							} else {
 								subscription = new Subscription();
 								subscription.setLicensee(trialSubscription.getLicensee());
+								if (trialSubscription.getLicenseGroup() != null)
+									subscription.setLicenseGroup(trialSubscription.getLicenseGroup());
+								else
+									subscription.setLicenseGroup(licenseGroup);
 								subscription.setUserDays(trialSubscription.getDays());
 								subscription.setTrial(true);
 								usedSubscriptionKeyUUIDs.add(payload.getUuid());
@@ -82,6 +87,10 @@ public class SubscriptionSetting implements Serializable {
 							SubscriptionCharge subscriptionCharge = (SubscriptionCharge) payload;
 							subscription = new Subscription();
 							subscription.setLicensee(subscriptionCharge.getLicensee());
+							if (subscriptionCharge.getLicenseGroup() != null)
+								subscription.setLicenseGroup(subscriptionCharge.getLicenseGroup());
+							else
+								subscription.setLicenseGroup(licenseGroup);
 							subscription.setUserDays(subscriptionCharge.getUserMonths() * 31);
 							usedSubscriptionKeyUUIDs.add(payload.getUuid());
 							return null;
@@ -96,6 +105,10 @@ public class SubscriptionSetting implements Serializable {
 					} else {
 						SubscriptionCharge subscriptionCharge = (SubscriptionCharge) payload;
 						subscription.setUserDays(subscription.getUserDays() + subscriptionCharge.getUserMonths() * 31);
+						if (subscriptionCharge.getLicenseGroup() != null)
+							subscription.setLicenseGroup(subscriptionCharge.getLicenseGroup());
+						else
+							subscription.setLicenseGroup(licenseGroup);
 						usedSubscriptionKeyUUIDs.add(payload.getUuid());
 						return null;
 					}
@@ -109,11 +122,11 @@ public class SubscriptionSetting implements Serializable {
 			return "Invalid subscription key";
 		}
 	}
-	
+
 	private static SettingManager getSettingManager() {
 		return OneDev.getInstance(SettingManager.class);
 	}
-	
+
 	public static SubscriptionSetting load() {
 		var data = getSettingManager().getSubscriptionData();
 		if (data == null)
@@ -121,9 +134,9 @@ public class SubscriptionSetting implements Serializable {
 		else
 			return deserialize(cipherService.decrypt(decodeBase64(data), decodeBase64(ENCRYPTION_KEY)).getBytes());
 	}
-	
+
 	public void save() {
 		getSettingManager().saveSubscriptionData(encodeBase64String(cipherService.encrypt(serialize(this), decodeBase64(ENCRYPTION_KEY)).getBytes()));
-	} 
-	
+	}
+
 }

@@ -1,5 +1,8 @@
 package io.onedev.server.ee.subscription;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.UserManager;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
@@ -12,6 +15,8 @@ public class Subscription implements Serializable {
 	
 	private String licensee;
 	
+	private String licenseGroup;
+	
 	private int userDays;
 	
 	private boolean trial;
@@ -23,6 +28,14 @@ public class Subscription implements Serializable {
 
 	public void setLicensee(String licensee) {
 		this.licensee = licensee;
+	}
+
+	public String getLicenseGroup() {
+		return licenseGroup;
+	}
+
+	public void setLicenseGroup(String licenseGroup) {
+		this.licenseGroup = licenseGroup;
 	}
 
 	public int getUserDays() {
@@ -55,6 +68,25 @@ public class Subscription implements Serializable {
 	
 	public boolean isExpired() {
 		return getUserDays() == 0;
+	}
+
+	public int countUsers() {
+		var userManager = OneDev.getInstance(UserManager.class);
+		var groupManager = OneDev.getInstance(GroupManager.class);
+
+		int userCount;
+		if (getLicenseGroup() != null) {
+			var licenseGroup = groupManager.find(getLicenseGroup());
+			if (licenseGroup == null)
+				userCount = userManager.countNonGuests();
+			else
+				userCount = licenseGroup.getMemberships().size();
+		} else {
+			userCount = userManager.cloneCache().size();
+		}
+		if (userCount == 0)
+			userCount = 1;
+		return userCount;
 	}
 	
 }
