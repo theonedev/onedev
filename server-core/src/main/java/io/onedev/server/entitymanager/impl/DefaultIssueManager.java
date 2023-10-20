@@ -62,6 +62,7 @@ import java.util.*;
 
 import static io.onedev.server.model.Issue.PROP_OWN_ESTIMATED_TIME;
 import static io.onedev.server.model.Issue.PROP_OWN_SPENT_TIME;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Singleton
@@ -1101,8 +1102,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			dao.persist(issue);
 		}
 
-		for (var issue: issues)
-			touchManager.touch(sourceProject, issue.getId());
+		touchManager.touch(sourceProject, issues.stream().map(Issue::getId).collect(toList()), false);
 		
 		listenerRegistry.post(new IssuesMoved(sourceProject, targetProject, issues));
 	}

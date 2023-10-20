@@ -144,6 +144,7 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.type.Type;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 import javax.persistence.*;
@@ -156,7 +157,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static com.google.common.collect.Lists.newArrayList;

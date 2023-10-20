@@ -57,8 +57,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.stream.Collectors.groupingBy;
-
 @Editable
 @ClassValidating
 public class ImportServer implements Serializable, Validatable {
@@ -996,6 +994,9 @@ public class ImportServer implements Serializable, Validatable {
 						new Pair<>(entry.getValue().getLeft().getId(), entry.getValue().getRight()));
 			}
 
+			if (!dryRun && !issues.isEmpty())
+				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
+			
 			return result;
 		} finally {
 			if (!dryRun)
@@ -1080,7 +1081,8 @@ public class ImportServer implements Serializable, Validatable {
 				});
 			}
 			
-			setupIssueLinksAndPostImportedEvent(result, dryRun);
+			if (!dryRun)
+				setupIssueLinks(result);
 			
 			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} finally {
@@ -1088,7 +1090,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	private void setupIssueLinksAndPostImportedEvent(ImportResult result, boolean dryRun) {
+	private void setupIssueLinks(ImportResult result) {
 		OneDev.getInstance(TransactionManager.class).run(() -> {
 			Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
 			var issueManager = OneDev.getInstance(IssueManager.class);
@@ -1114,11 +1116,6 @@ public class ImportServer implements Serializable, Validatable {
 							}
 						}
 					}
-				}
-			}
-			if (!dryRun) {
-				for (var entry : result.issueMapping.values().stream().map(issueManager::load).collect(groupingBy(Issue::getProject)).entrySet()) {
-					OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(entry.getKey(), entry.getValue()));
 				}
 			}
 		});
@@ -1171,7 +1168,8 @@ public class ImportServer implements Serializable, Validatable {
 			}
 		});
 		if (result != null) {
-			setupIssueLinksAndPostImportedEvent(result, dryRun);
+			if (!dryRun)
+				setupIssueLinks(result);
 			return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
 		} else {
 			return new TaskResult(false, new PlainMessage("Unable to find YouTrack project: " + youTrackProject));

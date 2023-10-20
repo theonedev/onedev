@@ -4,15 +4,15 @@ import io.onedev.server.model.AbstractEntity;
 
 public class EntityPersisted extends EntityEvent {
 	
-	private final boolean isNew;
+	private final boolean newEntity;
 	
-	public EntityPersisted(AbstractEntity entity, boolean isNew) {
+	public EntityPersisted(AbstractEntity entity, boolean newEntity) {
 		super(entity);
-		this.isNew = isNew;
+		this.newEntity = newEntity;
 	}
 
-	public boolean isNew() {
-		return isNew;
+	public boolean isNewEntity() {
+		return newEntity;
 	}
 	
 }

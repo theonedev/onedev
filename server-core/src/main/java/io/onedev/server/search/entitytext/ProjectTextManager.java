@@ -8,7 +8,6 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.system.SystemStarted;
@@ -20,7 +19,6 @@ import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.ReflectionUtils;
@@ -228,24 +226,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			return null;
 		});
 	}
-
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof EntityTouch) {
-			EntityTouch touch = (EntityTouch) event.getEntity();
-			if (touch.getEntityClass() == entityClass) {
-				var projectId = touch.getProjectId();
-				transactionManager.runAfterCommit(() -> {
-					projectManager.submitToActiveServer(projectId, () -> {
-						requestToIndex(projectId);
-						return null;
-					});
-				});
-			}
-		}
-	}
-
+	
 	@Listen
 	public void on(ActiveServerChanged event) {
 		for(var projectId: event.getProjectIds()) 	
