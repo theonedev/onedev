@@ -332,6 +332,14 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		else
 			return null;
     }
+
+	@Sessional
+	@Override
+	public User findByPasswordResetCode(String passwordResetCode) {
+		var criteria = newCriteria();
+		criteria.add(Restrictions.eq("passwordResetCode", passwordResetCode));
+		return find(criteria);
+	}
 	
 	@Sessional
     @Override

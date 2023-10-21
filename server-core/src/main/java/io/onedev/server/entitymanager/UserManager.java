@@ -8,6 +8,7 @@ import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.Collection;
 import java.util.List;
 
@@ -83,6 +84,9 @@ public interface UserManager extends EntityManager<User> {
 
 	@Nullable
 	User findByAccessToken(String accessTokenValue);
+	
+	@Nullable
+	User findByPasswordResetCode(String passwordResetCode);
 
 	String createTemporalAccessToken(Long userId, long secondsToExpire);
 	

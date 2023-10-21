@@ -85,6 +85,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
     private String name;
+	
+	private String passwordResetCode;
 
     @Column(length=1024, nullable=false)
     @JsonIgnore
@@ -465,7 +467,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	this.password = password;
     }
 
-    public boolean isExternalManaged() {
+	public String getPasswordResetCode() {
+		return passwordResetCode;
+	}
+
+	public void setPasswordResetCode(String passwordResetCode) {
+		this.passwordResetCode = passwordResetCode;
+	}
+
+	public boolean isExternalManaged() {
     	return getPassword().equals(EXTERNAL_MANAGED);
     }
     
