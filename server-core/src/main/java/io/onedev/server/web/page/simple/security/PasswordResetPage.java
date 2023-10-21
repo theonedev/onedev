@@ -166,7 +166,7 @@ public class PasswordResetPage extends SimplePage {
 						user.setSsoConnector(null);
 						user.setPassword(OneDev.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 						getUserManager().update(user, null);
-						Session.get().success("Your password has been changed");
+						Session.get().success("Password changed. Please login with your new password");
 						setResponsePage(LoginPage.class);
 					}
 				};
