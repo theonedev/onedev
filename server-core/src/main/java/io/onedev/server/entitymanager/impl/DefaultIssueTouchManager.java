@@ -24,6 +24,7 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import static io.onedev.server.model.IssueTouch.PROP_ISSUE_ID;
@@ -127,7 +128,7 @@ public class DefaultIssueTouchManager extends BaseEntityManager<IssueTouch>
 	@Transactional
 	@Listen
 	public void on(IssuesCopied event) {
-		touch(event.getProject(), event.getIssueIdMapping().values(), true);
+		touch(event.getProject(), new HashSet<>(event.getIssueIdMapping().values()), true);
 	}
 	
 	@Transactional
