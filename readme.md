@@ -139,6 +139,14 @@ or make it public for everyone.
 
 ![dashboard](doc/images/dashboard.png)
 
+## Time Tracking and Reporting (Enterprise Edition)
+
+Track issue, milestone and project progress with estimated time and spent time. Log works directly, 
+or start stopwatch while working. Aggregate estimate/spent time from subtasks to parent task 
+automatically. Generate timesheets for work statistics and billing.
+
+![timetrack](doc/images/timetrack.png)
+
 ## Cross Project Fast Code Search (Enterprise Edition)
 
 Cross project fast code search to find information scattered in multiple projects. Support to search by symbol and regular
