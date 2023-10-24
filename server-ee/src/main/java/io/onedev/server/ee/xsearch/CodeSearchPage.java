@@ -164,6 +164,7 @@ public abstract class CodeSearchPage<T extends Serializable> extends LayoutPage 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									runTaskBehavior.requestRun(target);
+									target.focusComponent(null);
 								}
 
 							}.setVisible(blobMatches.size() == PAGE_SIZE));
