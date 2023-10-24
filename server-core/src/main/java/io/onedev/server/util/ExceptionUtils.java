@@ -30,7 +30,10 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 					for (Object value: entry.getValue())
 						httpServletResponse.addHeader(entry.getKey(), value.toString());
 				}
-				httpServletResponse.sendError(response.getStatus(), (String)response.getEntity());
+				if (response.getEntity() instanceof String)
+					httpServletResponse.sendError(response.getStatus(), (String)response.getEntity());
+				else
+					httpServletResponse.sendError(response.getStatus());					
 			} else {
 				if (RequestCycle.get() == null)
 					logger.error("Error serving request", exception);
@@ -49,18 +52,13 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 		List<ExceptionHandler<? extends Throwable>> handlers = new ArrayList<>();
 		for (ExceptionHandler<? extends Throwable> handler: OneDev.getExtensions(ExceptionHandler.class)) 
 			handlers.add(handler);
-		Collections.sort(handlers, new Comparator<ExceptionHandler<? extends Throwable>>() {
-
-			@Override
-			public int compare(ExceptionHandler<? extends Throwable> o1, ExceptionHandler<? extends Throwable> o2) {
-				if (o1.getExceptionClass().isAssignableFrom(o2.getExceptionClass()))
-					return 1;
-				else if (o2.getExceptionClass().isAssignableFrom(o1.getExceptionClass()))
-					return -1;
-				else 
-					return 0;
-			}
-			
+		Collections.sort(handlers, (Comparator<ExceptionHandler<? extends Throwable>>) (o1, o2) -> {
+			if (o1.getExceptionClass().isAssignableFrom(o2.getExceptionClass()))
+				return 1;
+			else if (o2.getExceptionClass().isAssignableFrom(o1.getExceptionClass()))
+				return -1;
+			else 
+				return 0;
 		});
 		for (ExceptionHandler<? extends Throwable> handler: handlers) {
 			Throwable expectedException = ExceptionUtils.find(exception, handler.getExceptionClass());
