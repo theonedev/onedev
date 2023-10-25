@@ -378,7 +378,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (term.contains("#")) {
 			String projectPath = StringUtils.substringBefore(term, "#");
 			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
 				project = specifiedProject;
 				term = StringUtils.substringAfter(term, "#");
 			}

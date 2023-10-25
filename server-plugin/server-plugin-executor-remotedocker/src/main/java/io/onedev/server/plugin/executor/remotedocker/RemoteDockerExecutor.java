@@ -9,9 +9,9 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
-import io.onedev.server.buildspec.Service;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
@@ -25,10 +25,6 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -110,16 +106,14 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
 					var imageMappings = getImageMappings().stream().map(ImageMapping::getFacade).collect(toList());
 					
-					List<Map<String, Serializable>> services = new ArrayList<>();
-					for (Service service : jobContext.getServices())
-						services.add(service.toMap());
-
 					String jobToken = jobContext.getJobToken();
+					var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
-							services, registryLogins, imageMappings, isMountDockerSock(), getDockerSockPath(),
-							getCpuLimit(), getMemoryLimit(), getRunOptions(), getNetworkOptions());
+							jobContext.getServices(), registryLogins, builtInRegistryUrl, imageMappings, 
+							isMountDockerSock(), getDockerSockPath(), getCpuLimit(), getMemoryLimit(),
+							getRunOptions(), getNetworkOptions());
 
 					try {
 						call(agentSession, jobData, jobContext.getTimeout()*1000L);
@@ -181,9 +175,9 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 
 				currentJobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
 
-				var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
-						testData.getDockerImage(), getDockerSockPath(), registryLogins, 
+						testData.getDockerImage(), getDockerSockPath(), getRegistryLoginFacades(), 
+						OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl(),
 						getRunOptions());
 
 				long timeout = 300*1000L;

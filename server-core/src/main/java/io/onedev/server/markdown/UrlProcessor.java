@@ -78,7 +78,7 @@ public class UrlProcessor implements MarkdownProcessor {
 										BlobIdent blobIdent = blobRenderContext.getBlobIdent();
 										Mode mode = blobRenderContext.getMode();
 										if (mode != Mode.ADD && mode != Mode.EDIT 
-												&& SecurityUtils.canModify(project, blobIdent.revision, referencedPath)) {
+												&& SecurityUtils.canModifyFile(project, blobIdent.revision, referencedPath)) {
 											ProjectBlobPage.State state = new ProjectBlobPage.State();
 											state.blobIdent = blobRenderContext.getBlobIdent();
 											state.mode = Mode.ADD;

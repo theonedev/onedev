@@ -506,7 +506,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		AtomicInteger maxRetries = new AtomicInteger(0);
 		AtomicInteger retryDelay = new AtomicInteger(0);
 		List<CacheSpec> caches = new ArrayList<>();
-		List<Service> services = new ArrayList<>();
+		List<ServiceFacade> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
 		long timeout;
 
@@ -526,7 +526,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			for (String serviceName : job.getRequiredServices()) {
 				Service service = buildSpec.getServiceMap().get(serviceName);
-				services.add(interpolator.interpolateProperties(service));
+				services.add(interpolator.interpolateProperties(service).getFacade(build, jobToken));
 			}
 
 			maxRetries.set(job.getMaxRetries());
@@ -629,10 +629,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		var jobServer = jobServers.get(jobToken);
 		if (mustExist && jobServer == null)
 			throw new ExplicitException("No job context found for specified job token");
-		var jobContext = clusterManager.runOnServer(jobServer, () -> jobContexts.get(jobToken));
-		if (mustExist && jobContext == null)
-			throw new ExplicitException("No job context found for specified job token");
-		return jobContext;
+		if (jobServer != null) {
+			var jobContext = clusterManager.runOnServer(jobServer, () -> jobContexts.get(jobToken));
+			if (mustExist && jobContext == null)
+				throw new ExplicitException("No job context found for specified job token");
+			return jobContext;
+		} else {
+			return null;
+		}
 	}
 
 	private void markBuildError(Build build, String errorMessage) {

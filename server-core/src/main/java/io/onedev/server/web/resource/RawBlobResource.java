@@ -11,7 +11,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.LongRange;

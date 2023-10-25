@@ -330,7 +330,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				for (Project ancestor: projectScope.getProject().getAncestors()) {
 					if (SecurityUtils.canAccessConfidentialIssues(ancestor)) {
 						projectPredicates.add(builder.equal(projectPath, ancestor));
-					} else if (SecurityUtils.canAccess(ancestor)) { 
+					} else if (SecurityUtils.canAccessProject(ancestor)) { 
 						projectPredicates.add(buildNonConfidentialPredicate(builder, issue, ancestor));
 						projectPredicates.add(buildAuthorizationPredicate(query, builder, issue, ancestor));
 					}
@@ -805,7 +805,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		if (term.contains("#")) {
 			String projectPath = StringUtils.substringBefore(term, "#");
 			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
 				project = specifiedProject;
 				term = StringUtils.substringAfter(term, "#");
 			}
@@ -831,7 +831,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Project forkParent: project.getForkParents()) {
 			if (SecurityUtils.canAccessConfidentialIssues(forkParent)) {
 				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
-			} else if (SecurityUtils.canAccess(forkParent)) {
+			} else if (SecurityUtils.canAccessProject(forkParent)) {
 				projectPredicates.add(buildNonConfidentialPredicate(builder, root, forkParent));
 				projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, forkParent));
 			}
@@ -1240,7 +1240,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		
 		var issues = query.getResultList();
 		for (var it = issues.iterator(); it.hasNext();) {
-			if (!SecurityUtils.canAccess(it.next()))
+			if (!SecurityUtils.canAccessIssue(it.next()))
 				it.remove();
 		}
 		return issues;

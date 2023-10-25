@@ -25,7 +25,6 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
@@ -41,6 +40,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -1018,4 +1018,5 @@ public class Build extends ProjectBelonging
 		}
 		return null;
 	}
+	
 }

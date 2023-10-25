@@ -19,8 +19,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Horizontal;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -69,7 +67,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "settings as job pods need to access it to download source and artifacts")
 @Horizontal
-public class KubernetesExecutor extends JobExecutor implements DockerAware, Testable<TestData> {
+public class KubernetesExecutor extends JobExecutor implements RegistryLoginAware, Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -88,6 +86,8 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 	private String clusterRole;
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
+	
+	private String builtInRegistryAccessToken;
 	
 	private List<ServiceLocator> serviceLocators = new ArrayList<>();
 
@@ -546,29 +546,59 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 	}
 	
 	@Nullable
-	private String createImagePullSecret(String namespace, TaskLogger jobLogger) {
-		if (!getRegistryLogins().isEmpty()) {
-			Map<Object, Object> auths = new LinkedHashMap<>();
-			for (RegistryLogin login: getRegistryLogins()) {
-				String auth = login.getUserName() + ":" + login.getPassword();
-				String registryUrl = login.getRegistryUrl();
-				if (registryUrl == null)
-					registryUrl = "https://index.docker.io/v1/";
-				auths.put(registryUrl, newLinkedHashMap(
-						"auth", encodeBase64String(auth.getBytes(UTF_8))));
+	private String createImagePullSecret(String namespace, @Nullable JobContext jobContext, TaskLogger jobLogger) {
+		Map<Object, Object> auths = new LinkedHashMap<>();
+		for (RegistryLogin login: getRegistryLogins()) {
+			String auth = login.getUserName() + ":" + login.getPassword();
+			String registryUrl = login.getRegistryUrl();
+			if (registryUrl == null)
+				registryUrl = "https://index.docker.io/v1/";
+			auths.put(registryUrl, newLinkedHashMap(
+					"auth", encodeBase64String(auth.getBytes(UTF_8))));
+		}
+		
+		if (jobContext != null) {
+			var accessTokens = new HashSet<String>();
+			new CompositeFacade(jobContext.getActions()).traverse((facade, position) -> {
+				if (facade instanceof CommandFacade) {
+					CommandFacade commandFacade = (CommandFacade) facade;
+					if (commandFacade.getBuiltInRegistryAccessToken() != null)
+						accessTokens.add(commandFacade.getBuiltInRegistryAccessToken());
+				}
+				return null;
+			}, new ArrayList<>());
+			
+			if (accessTokens.size() > 1) {
+				throw new ExplicitException("Built-in registry access token should be the same " +
+						"for all command steps to be executed by Kubernetes executor");
 			}
+						
+			for (var service: jobContext.getServices()) {
+				if (service.getBuiltInRegistryAccessToken() != null)
+					accessTokens.add(service.getBuiltInRegistryAccessToken());
+			}
+			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			var auth = new StringBuilder();
+			auth.append(jobContext.getJobToken()).append(":");
+			if (!accessTokens.isEmpty())
+				auth.append(accessTokens.iterator().next());
+			auths.put(serverUrl, newLinkedHashMap(
+					"auth", encodeBase64String(auth.toString().getBytes(UTF_8))));
+		}
+		
+		if (!auths.isEmpty()) {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {
 				String dockerConfig = mapper.writeValueAsString(newLinkedHashMap("auths", auths));
-				
+
 				String secretName = "image-pull-secret";
 				Map<String, String> encodedSecrets = new LinkedHashMap<>();
 				Map<Object, Object> secretDef = newLinkedHashMap(
-						"apiVersion", "v1", 
-						"kind", "Secret", 
+						"apiVersion", "v1",
+						"kind", "Secret",
 						"metadata", newLinkedHashMap(
-								"name", secretName, 
-								"namespace", namespace), 
+								"name", secretName,
+								"namespace", namespace),
 						"data", newLinkedHashMap(
 								".dockerconfigjson", encodeBase64String(dockerConfig.getBytes(UTF_8))));
 				secretDef.put("type", "kubernetes.io/dockerconfigjson");
@@ -653,7 +683,7 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 		}
 	}
 
-	private void startService(String namespace, JobContext jobContext, Service jobService, 
+	private void startService(String namespace, JobContext jobContext, ServiceFacade jobService, 
 			@Nullable String imagePullSecretName, TaskLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
 		
@@ -682,10 +712,10 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 			resourcesSpec.put("limits", limitsSpec);
 		containerSpec.put("resources", resourcesSpec);
 		List<Map<Object, Object>> envs = new ArrayList<>();
-		for (EnvVar envVar: jobService.getEnvVars()) {
+		for (var entry: jobService.getEnvs().entrySet()) {
 			envs.add(newLinkedHashMap(
-					"name", envVar.getName(), 
-					"value", envVar.getValue()));
+					"name", entry.getKey(), 
+					"value", entry.getValue()));
 		}
 		if (jobService.getArguments() != null) {
 			List<String> argList = new ArrayList<>();
@@ -856,9 +886,9 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 			jobLogger.log(String.format("Preparing job (executor: %s, namespace: %s)...", 
 					getName(), namespace));
 			try {
-				String imagePullSecretName = createImagePullSecret(namespace, jobLogger);
+				String imagePullSecretName = createImagePullSecret(namespace, jobContext, jobLogger);
 				if (jobContext != null) {
-					for (Service jobService: jobContext.getServices()) {
+					for (var jobService: jobContext.getServices()) {
 						jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 						startService(namespace, jobContext, jobService, imagePullSecretName, jobLogger);
 					}
@@ -924,7 +954,7 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 					entryFacade = new CompositeFacade(jobContext.getActions());
 				} else {
 					List<Action> actions = new ArrayList<>();
-					CommandFacade facade = new CommandFacade((String) executionContext, 
+					CommandFacade facade = new CommandFacade((String) executionContext, null,
 							Lists.newArrayList("this does not matter"), false);
 					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
 					entryFacade = new CompositeFacade(actions);
@@ -961,7 +991,7 @@ public class KubernetesExecutor extends JobExecutor implements DockerAware, Test
 						"value", containerWorkspace
 						));
 
-				entryFacade.traverse((LeafVisitor<Void>) (facade, position) -> {
+				entryFacade.traverse((facade, position) -> {
 					String containerName = getContainerName(position);
 					containerNames.add(containerName);
 					Map<Object, Object> stepContainerSpec;

@@ -243,7 +243,7 @@ public abstract class ProjectInfoPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()) 
+						setVisible(SecurityUtils.canManageProject(getProject()) 
 								&& item.getModelObject().getValue().getVersion() < latestVersion);
 					}
 				});

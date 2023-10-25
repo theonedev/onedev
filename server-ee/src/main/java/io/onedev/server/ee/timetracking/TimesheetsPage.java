@@ -189,7 +189,7 @@ public class TimesheetsPage extends ProjectIssuesPage {
 						
 					});
 
-					if (SecurityUtils.canManage(getProject())) {
+					if (SecurityUtils.canManageProject(getProject())) {
 						choiceFragment.add(new SortBehavior() {
 
 							@Override

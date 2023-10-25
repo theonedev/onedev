@@ -1622,7 +1622,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				PullRequest request = getPullRequest();
 				if (request != null) {
 					if (request.isOpen()) {
-						if (SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), mark.getPath())) {
+						if (SecurityUtils.canModifyFile(request.getSourceProject(), request.getSourceBranch(), mark.getPath())) {
 							return new ApplySupport() {
 
 								@Override

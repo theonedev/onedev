@@ -9,7 +9,7 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;

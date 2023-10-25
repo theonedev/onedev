@@ -432,7 +432,7 @@ public class GitLfsFilter implements Filter {
 									lockManager.delete(lock);
 									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 								} else if (force) {
-									if (SecurityUtils.canManage(project)) {
+									if (SecurityUtils.canManageProject(project)) {
 										lockManager.delete(lock);
 										writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 									} else {

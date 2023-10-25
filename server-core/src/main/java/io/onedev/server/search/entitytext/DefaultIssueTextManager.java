@@ -126,7 +126,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 					applicableProjectIds.addAll(projectManager.getSubtreeIds(project.getId()));
 				if (projectScope.isInherited()) {
 					for (var ancestor: project.getAncestors()) {
-						if (SecurityUtils.canAccess(ancestor))
+						if (SecurityUtils.canAccessProject(ancestor))
 							applicableProjectIds.add(ancestor.getId());
 					}
 				}

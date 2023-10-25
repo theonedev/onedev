@@ -11,7 +11,7 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.rest.jersey.JerseyConfigurator;
+import io.onedev.server.rest.JerseyConfigurator;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

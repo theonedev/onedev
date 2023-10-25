@@ -45,7 +45,7 @@ public abstract class JobListPanel extends Panel {
 		protected List<Job> load() {
 			List<Job> accessibleJobs = new ArrayList<>();
 			for (Job job: jobs) {
-				if (SecurityUtils.canAccess(getProject(), job.getName()))
+				if (SecurityUtils.canAccessJob(getProject(), job.getName()))
 					accessibleJobs.add(job);
 			}
 			return accessibleJobs;

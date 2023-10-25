@@ -20,7 +20,6 @@ import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.exception.AttachmentTooLargeException;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;

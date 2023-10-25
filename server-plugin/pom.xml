@@ -58,5 +58,6 @@
 		<module>server-plugin-notification-slack</module>
     	<module>server-plugin-notification-discord</module>
 		<module>server-plugin-notification-ntfy</module>
+		<module>server-plugin-pack-container</module>
     </modules>
 </project>

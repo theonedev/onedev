@@ -93,7 +93,6 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 
 		ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
 	    errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/~errors/404");
-	    errorHandler.addErrorPage(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "/~errors/405");
 	    servletContextHandler.setErrorHandler(errorHandler);
 
         GzipHandler gzipHandler = new GzipHandler();

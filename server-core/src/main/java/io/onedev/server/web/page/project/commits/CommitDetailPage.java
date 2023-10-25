@@ -300,7 +300,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
 					if (buildSpec != null) {
 						for (Job job : buildSpec.getJobMap().values()) {
-							if (SecurityUtils.canAccess(getProject(), job.getName()))
+							if (SecurityUtils.canAccessJob(getProject(), job.getName()))
 								jobs.add(job);
 						}
 					}

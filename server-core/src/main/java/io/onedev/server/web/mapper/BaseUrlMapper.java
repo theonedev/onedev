@@ -97,6 +97,10 @@ import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.*;
+import io.onedev.server.web.page.project.packs.NewPackPage;
+import io.onedev.server.web.page.project.packs.PackDetailPage;
+import io.onedev.server.web.page.project.packs.PackEditPage;
+import io.onedev.server.web.page.project.packs.PackListPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -121,7 +125,6 @@ import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
-import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.simple.security.*;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
@@ -200,7 +203,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	
 	private void addErrorPages() {
 		add(new BasePageMapper("/~errors/404", PageNotFoundErrorPage.class));
-		add(new BasePageMapper("/~errors/405", MethodNotAllowedErrorPage.class));
 	}
 	
 	private void addSecurityPages() {
@@ -361,6 +363,11 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~builds/${build}/fixed-issues", FixedIssuesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/artifacts", BuildArtifactsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/invalid", InvalidBuildPage.class));
+
+		add(new ProjectPageMapper("${project}/~packs", PackListPage.class));
+		add(new ProjectPageMapper("${project}/~packs/new", NewPackPage.class));
+		add(new ProjectPageMapper("${project}/~packs/${pack}", PackDetailPage.class));
+		add(new ProjectPageMapper("${project}/~packs/${pack}/edit", PackEditPage.class));
 		
 		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		

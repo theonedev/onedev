@@ -334,7 +334,7 @@ public class ProjectListPanel extends Panel {
 										String errorMessage = null;
 										for (IModel<Project> each: selectionColumn.getSelections()) {
 											Project eachProject = each.getObject();
-											if (!SecurityUtils.canManage(eachProject)) {
+											if (!SecurityUtils.canManageProject(eachProject)) {
 												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
@@ -426,7 +426,7 @@ public class ProjectListPanel extends Panel {
 									String errorMessage = null;
 									for (IModel<Project> each: selectionColumn.getSelections()) {
 										Project eachProject = each.getObject();
-										if (!SecurityUtils.canManage(eachProject)) {
+										if (!SecurityUtils.canManageProject(eachProject)) {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
 										} else {
@@ -507,7 +507,7 @@ public class ProjectListPanel extends Panel {
 								String errorMessage = null;
 								for (IModel<Project> each: selectionColumn.getSelections()) { 
 									Project eachProject = each.getObject();
-									if (!SecurityUtils.canManage(eachProject)) {
+									if (!SecurityUtils.canManageProject(eachProject)) {
 										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
 										break;
 									}
@@ -594,7 +594,7 @@ public class ProjectListPanel extends Panel {
 										String errorMessage = null;
 										for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 											Project eachProject = it.next();
-											if (!SecurityUtils.canManage(eachProject)) {
+											if (!SecurityUtils.canManageProject(eachProject)) {
 												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
@@ -687,7 +687,7 @@ public class ProjectListPanel extends Panel {
 									String errorMessage = null;
 									for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 										Project eachProject = it.next();
-										if (!SecurityUtils.canManage(eachProject)) {
+										if (!SecurityUtils.canManageProject(eachProject)) {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
 										} else {
@@ -771,7 +771,7 @@ public class ProjectListPanel extends Panel {
 								String errorMessage = null;
 								for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 									Project eachProject = it.next();
-									if (!SecurityUtils.canManage(eachProject)) {
+									if (!SecurityUtils.canManageProject(eachProject)) {
 										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
 										break;
 									}

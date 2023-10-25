@@ -75,7 +75,7 @@ public class GitPackConfigPage extends ProjectSettingPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (SecurityUtils.canManage(project)) 
+		if (SecurityUtils.canManageProject(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, GitPackConfigPage.class, paramsOf(project.getId()));
 		else 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));

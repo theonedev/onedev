@@ -109,7 +109,7 @@ public class BurnDownChartWidget extends Widget {
 		Project project = getProjectManager().findByPath(projectPath);
 		if (project == null)
 			throw new ExplicitException("Project not found: " + projectPath);
-		if (SecurityUtils.canAccess(project)) 
+		if (SecurityUtils.canAccessProject(project)) 
 			return project;
 		else 
 			throw new ExplicitException("Permission denied");

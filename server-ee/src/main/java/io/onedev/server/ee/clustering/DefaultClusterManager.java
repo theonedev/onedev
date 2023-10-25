@@ -22,7 +22,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
-import io.onedev.server.exception.ServerNotFoundException;
+import io.onedev.server.cluster.ServerNotFoundException;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.replica.ProjectReplica;
 import org.eclipse.jetty.server.session.SessionData;

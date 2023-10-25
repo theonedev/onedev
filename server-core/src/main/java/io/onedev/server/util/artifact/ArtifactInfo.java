@@ -1,8 +1,6 @@
 package io.onedev.server.util.artifact;
 
-import io.onedev.server.rest.ArtifactResource;
 import io.onedev.server.rest.annotation.Api;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nullable;

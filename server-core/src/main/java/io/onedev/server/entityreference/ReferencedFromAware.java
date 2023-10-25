@@ -16,7 +16,7 @@ public interface ReferencedFromAware<T extends AbstractEntity> {
 	public static boolean canDisplay(ReferencedFromAware<?> referencedFromAware) {
 		AbstractEntity referencedFrom = referencedFromAware.getReferencedFrom();
 		if (referencedFrom instanceof Issue) 
-			return SecurityUtils.canAccess((Issue) referencedFrom);
+			return SecurityUtils.canAccessIssue((Issue) referencedFrom);
 		else if (referencedFrom instanceof PullRequest) 
 			return SecurityUtils.canReadCode(((PullRequest) referencedFrom).getProject());
 		else if (referencedFrom instanceof CodeComment) 

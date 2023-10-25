@@ -1,32 +1,25 @@
 package io.onedev.server.security;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
-
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.ExceptionUtils;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
 
 @Singleton
-public class BasicAuthenticationFilter extends PathMatchingFilter {
+public class BasicAuthenticationFilter extends ExceptionHandleFilter {
 	
 	private final UserManager userManager;
 	
@@ -62,19 +55,6 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 		} 
 		
 		return true;
-	}
-
-	@Override
-	protected void cleanup(ServletRequest request, ServletResponse response, Exception existing) 
-			throws ServletException, IOException {
-
-        HttpServletResponse httpResponse = WebUtils.toHttp(response);
-		if (existing != null && !httpResponse.isCommitted()) { 
-			ExceptionUtils.handle(httpResponse, existing);
-			existing = null;
-		}
-		
-		super.cleanup(request, response, existing);
 	}
 
 }

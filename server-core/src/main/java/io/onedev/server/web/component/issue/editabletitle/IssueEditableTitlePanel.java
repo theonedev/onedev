@@ -148,7 +148,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(SecurityUtils.canModify(getIssue()));
+				setVisible(SecurityUtils.canModifyIssue(getIssue()));
 			}
 			
 		});

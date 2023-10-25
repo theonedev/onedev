@@ -618,7 +618,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()) 
+						setVisible(SecurityUtils.canManageProject(getProject()) 
 								&& !branch.equals(getProject().getDefaultBranch()));
 					}
 					

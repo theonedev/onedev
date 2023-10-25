@@ -1,0 +1,17 @@
+<wicket:extend>
+	<div class="card pack-list m-2 m-sm-5">
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-4">
+				<div class="clearable-wrapper flex-grow-1">
+					<input wicket:id="filterPacks" class="form-control search" placeholder="Filter by name">
+				</div>
+				<input wicket:id="type" type="hidden" placeholder="Filter by type" class="form-control flex-shrink-0 ml-3">
+				<a wicket:id="addNew" title="Create package" class="btn btn-icon btn-primary flex-shrink-0 ml-3"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			</div>
+			<table wicket:id="packs" class="packs table table-hover"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+</wicket:extend>

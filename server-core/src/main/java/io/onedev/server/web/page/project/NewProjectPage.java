@@ -50,7 +50,8 @@ public class NewProjectPage extends LayoutPage {
 		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
+				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING, 
+				PROP_PACK_MANAGEMENT);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		LabelsBean labelsBean = new LabelsBean();

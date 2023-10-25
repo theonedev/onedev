@@ -1,24 +1,7 @@
 package io.onedev.server.product;
 
-import java.io.File;
-import java.util.EnumSet;
-
-import javax.inject.Inject;
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
-import io.onedev.server.OneDev;
-import org.apache.shiro.web.env.EnvironmentLoader;
-import org.apache.shiro.web.env.EnvironmentLoaderListener;
-import org.apache.shiro.web.servlet.ShiroFilter;
-import org.apache.wicket.protocol.http.WicketServlet;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.servlet.ServletContainer;
-
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.server.OneDev;
 import io.onedev.server.agent.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
@@ -32,6 +15,21 @@ import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.websocket.WebSocketManager;
+import org.apache.shiro.web.env.EnvironmentLoader;
+import org.apache.shiro.web.env.EnvironmentLoaderListener;
+import org.apache.shiro.web.servlet.ShiroFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
+
+import javax.inject.Inject;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+import java.io.File;
+import java.util.EnumSet;
 
 public class ProductServletConfigurator implements ServletConfigurator {
 
@@ -58,11 +56,11 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final ServerSocketServlet serverServlet;
 	
 	@Inject
-	public ProductServletConfigurator(ShiroFilter shiroFilter, 
-			GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet, 
-			GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet, 
-			WebSocketManager webSocketManager, ServletContainer jerseyServlet, 
-			ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
+	public ProductServletConfigurator(ShiroFilter shiroFilter,
+									  GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
+									  GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
+									  WebSocketManager webSocketManager, ServletContainer jerseyServlet,
+									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
         this.gitLfsFilter = gitLfsFilter;
@@ -90,7 +88,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
         context.addFilter(new FilterHolder(goGetFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
 		context.addServlet(new ServletHolder(preReceiveServlet), GitPreReceiveCallback.PATH + "/*");
-        
         context.addServlet(new ServletHolder(postReceiveServlet), GitPostReceiveCallback.PATH + "/*");
         
 		/*

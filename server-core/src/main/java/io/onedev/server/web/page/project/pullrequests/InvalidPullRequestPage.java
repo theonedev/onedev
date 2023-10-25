@@ -96,7 +96,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getPullRequest().getTargetProject()));
+				setVisible(SecurityUtils.canManageProject(getPullRequest().getTargetProject()));
 			}
 			
 		}.add(new ConfirmClickModifier("Do you really want to delete pull request #" + getPullRequest().getNumber() + "?")));

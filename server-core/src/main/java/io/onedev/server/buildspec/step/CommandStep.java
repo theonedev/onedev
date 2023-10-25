@@ -1,23 +1,21 @@
 package io.onedev.server.buildspec.step;
 
-import javax.validation.constraints.NotNull;
-
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ShowCondition;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
@@ -32,6 +30,8 @@ public class CommandStep extends Step {
 	private boolean runInContainer = true;
 	
 	private String image;
+	
+	private String builtInRegistryAccessTokenSecret;
 	
 	private Interpreter interpreter = new DefaultInterpreter();
 	
@@ -63,6 +63,23 @@ public class CommandStep extends Step {
 		this.image = image;
 	}
 
+	@Editable(order=105, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isRunInContainerEnabled")
+	@Password
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return builtInRegistryAccessTokenSecret;
+	}
+
+	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
+		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+
+	protected static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
@@ -86,10 +103,19 @@ public class CommandStep extends Step {
 	public void setUseTTY(boolean useTTY) {
 		this.useTTY = useTTY;
 	}
-
+	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		return getInterpreter().getExecutable(jobExecutor, isRunInContainer()?getImage():null, isUseTTY());
+		if (isRunInContainer()) {
+			String builtInRegistryAccessToken;
+			if (getBuiltInRegistryAccessTokenSecret() != null)
+				builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
+			else
+				builtInRegistryAccessToken = null;
+			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), builtInRegistryAccessToken, isUseTTY());
+		} else {
+			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, isUseTTY());
+		}
 	}
 	
 }

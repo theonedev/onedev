@@ -45,6 +45,10 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.packs.NewPackPage;
+import io.onedev.server.web.page.project.packs.PackDetailPage;
+import io.onedev.server.web.page.project.packs.PackEditPage;
+import io.onedev.server.web.page.project.packs.PackListPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -175,7 +179,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getProject());
+		return SecurityUtils.canAccessProject(getProject());
 	}
 	
 	@Override
@@ -228,11 +232,17 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
-		
+
 		if (getProject().isCodeManagement()) {
-			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
-					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
+			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds",
+					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
+		}
+		
+		if (getProject().isPackManagement()) {
+			menuItems.add(new SidebarMenuItem.Page("package", "Packages", 
+					PackListPage.class, PackListPage.paramsOf(getProject()), 
+					Lists.newArrayList(PackDetailPage.class, NewPackPage.class, PackEditPage.class)));
 		}
 		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
@@ -256,7 +266,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canManageProject(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Settings", 
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
@@ -453,7 +463,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			@Override
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
-				if (SecurityUtils.canAccess(project)) {
+				if (SecurityUtils.canAccessProject(project)) {
 					WebMarkupContainer link = navToProject("link", project);
 					link.add(new Label("label", project.getName()));
 					item.add(link);

@@ -139,6 +139,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_ISSUE_MANAGEMENT = "issueManagement";
 
 	public static final String PROP_TIME_TRACKING = "timeTracking";
+
+	public static final String PROP_PACK_MANAGEMENT = "packManagement";
 	
 	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
 	
@@ -293,6 +295,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private boolean issueManagement = true;
 
 	private boolean timeTracking = false;
+	
+	private boolean packManagement = true;
+	
 	@Lob
 	@Column(length=65535)
 	private GitPackConfig gitPackConfig = new GitPackConfig();
@@ -931,6 +936,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
 	}
 
+	@Editable(order=400, name="Package Management", description="Whether or not to enable package management for the project")
+	public boolean isPackManagement() {
+		return packManagement;
+	}
+
+	public void setPackManagement(boolean packManagement) {
+		this.packManagement = packManagement;
+	}
+	
 	private static boolean isSubscriptionActiveAndIssueManagementEnabled() {
 		return isIssueManagementEnabled() && OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}

@@ -346,7 +346,7 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (SecurityUtils.canAccess(project)) {
+				if (SecurityUtils.canAccessProject(project)) {
 					for (Issue issue: OneDev.getInstance(IssueManager.class).query(null, project, matchWith, count)) {
 						String title = Emojis.getInstance().apply(issue.getTitle());
 						suggestions.add(new InputSuggestion("#" + issue.getNumber(), title, null));

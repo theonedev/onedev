@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;

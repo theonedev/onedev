@@ -1,65 +1,5 @@
 package io.onedev.server.web;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.wicket.Application;
-import org.apache.wicket.Component;
-import org.apache.wicket.DefaultExceptionMapper;
-import org.apache.wicket.IRequestCycleProvider;
-import org.apache.wicket.Page;
-import org.apache.wicket.RuntimeConfigurationType;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.application.IComponentInstantiationListener;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.behavior.InvalidBehaviorIdException;
-import org.apache.wicket.core.request.handler.ComponentNotFoundException;
-import org.apache.wicket.core.request.handler.EmptyAjaxRequestHandler;
-import org.apache.wicket.core.request.handler.ListenerInvocationNotAllowedException;
-import org.apache.wicket.core.request.handler.PageProvider;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
-import org.apache.wicket.core.request.mapper.HomePageMapper;
-import org.apache.wicket.core.request.mapper.ResourceMapper;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.pages.AbstractErrorPage;
-import org.apache.wicket.markup.html.pages.BrowserInfoPage;
-import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
-import org.apache.wicket.protocol.ws.WebSocketSettings;
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
-import org.apache.wicket.protocol.ws.api.WebSocketResponse;
-import org.apache.wicket.request.IExceptionMapper;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.Response;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.UrlRenderer;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.cycle.RequestCycleContext;
-import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
-import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.request.mapper.info.PageComponentInfo;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.resource.JQueryResourceReference;
-import org.apache.wicket.util.IProvider;
-import org.apache.wicket.util.file.IResourceFinder;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.time.Duration;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -79,6 +19,47 @@ import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketMessages;
+import org.apache.wicket.*;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.InvalidBehaviorIdException;
+import org.apache.wicket.core.request.handler.*;
+import org.apache.wicket.core.request.mapper.HomePageMapper;
+import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.pages.AbstractErrorPage;
+import org.apache.wicket.markup.html.pages.BrowserInfoPage;
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.apache.wicket.protocol.ws.WebSocketSettings;
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.apache.wicket.protocol.ws.api.WebSocketResponse;
+import org.apache.wicket.request.*;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.mapper.info.PageComponentInfo;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.resource.JQueryResourceReference;
+import org.apache.wicket.util.IProvider;
+import org.apache.wicket.util.file.IResourceFinder;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.time.Duration;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Singleton
 public class WebApplication extends org.apache.wicket.protocol.http.WebApplication {
@@ -217,18 +198,11 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 			new ResourceBundleReferences(resourcePackScopes.toArray(new Class<?>[0])).installInto(this);
 		}
 		
-		setRequestCycleProvider(new IRequestCycleProvider() {
+		setRequestCycleProvider(context -> new RequestCycle(context) {
 
 			@Override
-			public RequestCycle get(RequestCycleContext context) {
-				return new RequestCycle(context) {
-
-					@Override
-					protected UrlRenderer newUrlRenderer() {
-						return new AbsoluteUrlRenderer(getRequest());
-					}
-					
-				};
+			protected UrlRenderer newUrlRenderer() {
+				return new AbsoluteUrlRenderer(getRequest());
 			}
 			
 		});
@@ -248,7 +222,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 
 	@Override
 	public final IProvider<IExceptionMapper> getExceptionMapperProvider() {
-		return new IProvider<IExceptionMapper>() {
+		return new IProvider<>() {
 
 			@Override
 			public IExceptionMapper get() {
@@ -257,14 +231,14 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 					@Override
 					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
 						RequestCycle requestCycle = RequestCycle.get();
-						boolean isAjax = ((WebRequest)requestCycle.getRequest()).isAjax();
+						boolean isAjax = ((WebRequest) requestCycle.getRequest()).isAjax();
 						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException || e instanceof InvalidBehaviorIdException))
 							return EmptyAjaxRequestHandler.getInstance();
-						
+
 						IRequestMapper mapper = Application.get().getRootRequestMapper();
 						if (mapper.mapRequest(requestCycle.getRequest()) instanceof ResourceReferenceRequestHandler)
 							return new ResourceErrorRequestHandler(e);
-						
+
 						HttpServletResponse response = (HttpServletResponse) requestCycle.getResponse().getContainerResponse();
 						if (!response.isCommitted()) {
 							InUseException inUseException = ExceptionUtils.find(e, InUseException.class);
@@ -276,10 +250,10 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 							return super.mapExpectedExceptions(e, application);
 						}
 					}
-					
+
 				};
 			}
-			
+
 		};
 	}
 	

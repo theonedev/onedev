@@ -67,7 +67,7 @@ public class IssueListWidget extends Widget {
 			Project project = getProjectManager().findByPath(projectPath);
 			if (project == null)
 				throw new ExplicitException("Project not found: " + projectPath);
-			else if (!SecurityUtils.canAccess(project))
+			else if (!SecurityUtils.canAccessProject(project))
 				throw new ExplicitException("Permission denied");
 			else
 				projectId = project.getId();

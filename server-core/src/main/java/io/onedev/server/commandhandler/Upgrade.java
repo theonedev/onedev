@@ -14,7 +14,7 @@ import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;

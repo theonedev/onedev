@@ -1049,7 +1049,7 @@ public class ImportServer implements Serializable, Validatable {
 					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 					Project project = projectManager.setup(oneDevProjectPath);
 
-					if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
 						throw new UnauthorizedException("Import target already exists. " +
 								"You need to have project management privilege over it");
 					}

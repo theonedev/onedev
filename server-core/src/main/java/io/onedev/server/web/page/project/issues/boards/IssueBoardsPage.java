@@ -357,7 +357,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						
 					});
 					
-					if (SecurityUtils.canManage(getProject())) {
+					if (SecurityUtils.canManageProject(getProject())) {
 						menuFragment.add(new SortBehavior() {
 							
 							@Override
@@ -445,7 +445,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment menuFragment = new Fragment(id, "milestoneMenuFrag", IssueBoardsPage.this);
-					if (SecurityUtils.canManage(getProject()))
+					if (SecurityUtils.canManageProject(getProject()))
 						menuFragment.add(AttributeAppender.append("class", "administrative"));
 
 					menuFragment.add(new ListView<Milestone>("milestones", new LoadableDetachableModel<List<Milestone>>() {

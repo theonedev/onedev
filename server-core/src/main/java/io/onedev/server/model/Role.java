@@ -8,10 +8,7 @@ import io.onedev.server.annotation.RoleName;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.role.AllIssueFields;
-import io.onedev.server.model.support.role.CodePrivilege;
-import io.onedev.server.model.support.role.IssueFieldSet;
-import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.model.support.role.*;
 import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
@@ -70,6 +67,12 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
+	
+	private boolean managePacks;
+	
+	@Lob
+	@Column(length = 65535, nullable = false)
+	private ArrayList<PackPrivilege> packPrivileges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="defaultRole")
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -265,7 +268,32 @@ public class Role extends AbstractEntity implements BasePermission {
 	public void setJobPrivileges(List<JobPrivilege> jobPrivileges) {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
-	
+
+	@Editable(order=750, name="Package Management")
+	@ShowCondition("isManageProjectDisabled")
+	public boolean isManagePacks() {
+		return managePacks;
+	}
+
+	public void setManagePacks(boolean managePacks) {
+		this.managePacks = managePacks;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isManagePacksDisabled() {
+		return !(boolean)EditContext.get().getInputValue("managePacks");
+	}
+
+	@Editable(order=800)
+	@ShowCondition("isManagePacksDisabled")
+	public List<PackPrivilege> getPackPrivileges() {
+		return packPrivileges;
+	}
+
+	public void setPackPrivileges(List<PackPrivilege> packPrivileges) {
+		this.packPrivileges = (ArrayList<PackPrivilege>) packPrivileges;
+	}
+
 	public Collection<Project> getDefaultProjects() {
 		return defaultProjects;
 	}
@@ -334,7 +362,7 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 		if (manageBuilds)
 			permissions.add(new ManageBuilds());
-		for (JobPrivilege jobPrivilege: jobPrivileges) {
+		for (var jobPrivilege: jobPrivileges) {
 			permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
 			if (jobPrivilege.isManageJob()) 
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new ManageJob()));
@@ -346,6 +374,13 @@ public class Role extends AbstractEntity implements BasePermission {
 				AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
 			}
+		}
+		if (managePacks)
+			permissions.add(new ManagePacks());
+		for (var packPrivilege: packPrivileges) {
+			permissions.add(new PackPermission(packPrivilege.getPackNames(), new AccessPack()));
+			if (packPrivilege.isWritePack())
+				permissions.add(new PackPermission(packPrivilege.getPackNames(), new WritePack()));
 		}
 		return permissions;
 	}

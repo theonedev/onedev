@@ -89,24 +89,24 @@ public class UseTemplateStep extends Step {
 		
 		List<Action> actions = new ArrayList<>();
 		AtomicInteger repeatRef = new AtomicInteger(0);
-		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, paramCombination, getParams())) {
-			
+		new MatrixRunner<>(ParamUtils.getParamMatrix(build, paramCombination, getParams())) {
+
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
 				int repeat = repeatRef.incrementAndGet();
 				ParamUtils.validateParamMap(template.getParamSpecs(), paramMap);
-				
+
 				ParamCombination newParamCombination = new ParamCombination(template.getParamSpecs(), paramMap);
 				VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);
-				for (Step step: template.getSteps()) {
+				for (Step step : template.getSteps()) {
 					step = interpolator.interpolateProperties(step);
 					String actionName = step.getName();
-					if (repeat != 1) 
+					if (repeat != 1)
 						actionName += " (" + repeat + ")";
 					actions.add(step.getAction(actionName, build, jobExecutor, jobToken, newParamCombination));
 				}
 			}
-			
+
 		}.run();
 		
 		return new CompositeFacade(actions);

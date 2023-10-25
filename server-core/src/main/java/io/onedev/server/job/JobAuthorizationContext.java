@@ -1,6 +1,7 @@
 package io.onedev.server.job;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.job.match.BranchCriteria;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
@@ -9,7 +10,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 import org.eclipse.jgit.lib.ObjectId;

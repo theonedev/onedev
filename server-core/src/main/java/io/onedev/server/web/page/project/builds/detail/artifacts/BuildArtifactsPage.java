@@ -88,7 +88,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getBuild()));
+				setVisible(SecurityUtils.canManageBuild(getBuild()));
 			}
 
 		});
@@ -120,7 +120,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 		});
-		if (SecurityUtils.canManage(getBuild())) {
+		if (SecurityUtils.canManageBuild(getBuild())) {
 			columns.add(new AbstractColumn<>(Model.of("")) {
 
 				@Override

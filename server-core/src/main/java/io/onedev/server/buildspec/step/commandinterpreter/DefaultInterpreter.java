@@ -31,8 +31,9 @@ public class DefaultInterpreter extends Interpreter {
 	}
 
 	@Override
-	public CommandFacade getExecutable(JobExecutor jobExecutor, String image, boolean useTTY) {
-		return new CommandFacade(image, getCommands(), useTTY);
+	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
+									   String builtInRegistryAccessToken, boolean useTTY) {
+		return new CommandFacade(image, builtInRegistryAccessToken, getCommands(), useTTY);
 	}
 	
 }

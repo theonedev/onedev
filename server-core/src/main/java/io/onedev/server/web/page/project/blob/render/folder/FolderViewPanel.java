@@ -249,7 +249,7 @@ public class FolderViewPanel extends Panel {
 				super.onConfigure();
 				BlobIdent blobIdent = readmeModel.getObject();
 				setVisible(context.isOnBranch()
-						&& SecurityUtils.canModify(context.getProject(), blobIdent.revision, blobIdent.path));
+						&& SecurityUtils.canModifyFile(context.getProject(), blobIdent.revision, blobIdent.path));
 			}
 			
 		});

@@ -1,21 +1,20 @@
 package io.onedev.server.buildspec;
 
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.ServiceFacade;
+import io.onedev.server.annotation.*;
+import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.job.EnvVar;
-import io.onedev.server.annotation.DnsName;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.SuggestionProvider;
+import java.util.stream.Collectors;
 
 @Editable
 public class Service implements NamedElement, Serializable {
@@ -31,6 +30,8 @@ public class Service implements NamedElement, Serializable {
 	private List<EnvVar> envVars = new ArrayList<>();
 	
 	private String readinessCheckCommand;
+	
+	private String builtInRegistryAccessTokenSecret;
 	
 	@Editable(order=100, description="Specify name of the service, which will be used as host name to access the service")
 	@SuggestionProvider("getNameSuggestions")
@@ -99,25 +100,33 @@ public class Service implements NamedElement, Serializable {
 	public void setReadinessCheckCommand(String readinessCheckCommand) {
 		this.readinessCheckCommand = readinessCheckCommand;
 	}
+
+	@Editable(order=500, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@Password
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return builtInRegistryAccessTokenSecret;
+	}
+
+	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
+		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+
+	private static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
-	public Map<String, Serializable> toMap() {
-		Map<String, Serializable> serviceMap = new HashMap<>();
-		
-		serviceMap.put("name", getName());
-		serviceMap.put("image", getImage());
-		serviceMap.put("readinessCheckCommand", getReadinessCheckCommand());
-		serviceMap.put("arguments", getArguments());
-		Map<String, String> envVars = new HashMap<>();
-		for (EnvVar var: getEnvVars())
-			envVars.put(var.getName(), var.getValue());
-		serviceMap.put("envVars", (Serializable) envVars);
-		
-		return serviceMap;
+	public ServiceFacade getFacade(Build build, String jobToken) {
+		var envs = new HashMap<String, String>();
+		for (var envVar: getEnvVars())
+			envs.put(envVar.getName(), envVar.getValue());
+		return new ServiceFacade(getName(), getImage(), getArguments(), envs, getReadinessCheckCommand(), getBuiltInRegistryAccessTokenSecret());		
 	}
 	
 }

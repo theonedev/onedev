@@ -117,7 +117,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
 				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
@@ -145,7 +145,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
 				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
@@ -248,7 +248,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					&& (visitDate == null || visitDate.before(event.getDate()))
 					&& !notifiedUsers.contains(watch.getUser())
 					&& !isNotified(notifiedEmailAddresses, watch.getUser())
-					&& SecurityUtils.canAccess(watch.getUser().asSubject(), issue)) {
+					&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
 				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 				if (emailAddress != null && emailAddress.isVerified())
 					bccEmailAddresses.add(emailAddress.getValue());

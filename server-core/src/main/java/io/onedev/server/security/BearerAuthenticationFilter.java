@@ -1,27 +1,19 @@
 package io.onedev.server.security;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.web.filter.PathMatchingFilter;
-import org.apache.shiro.web.util.WebUtils;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.ExceptionUtils;
+import org.apache.shiro.subject.Subject;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 @Singleton
-public class BearerAuthenticationFilter extends PathMatchingFilter {
+public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	
 	private final UserManager userManager;
 	
@@ -51,19 +43,6 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 		} 
 		
 		return true;
-	}
-
-	@Override
-	protected void cleanup(ServletRequest request, ServletResponse response, Exception existing) 
-			throws ServletException, IOException {
-
-        HttpServletResponse httpResponse = WebUtils.toHttp(response);
-		if (existing != null && !httpResponse.isCommitted()) { 
-			ExceptionUtils.handle(httpResponse, existing);
-			existing = null;
-		}
-		
-		super.cleanup(request, response, existing);
 	}
 
 }

@@ -12,13 +12,12 @@ import org.apache.wicket.request.resource.AbstractResource;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static io.onedev.agent.job.LogRequest.readLog;
 import static io.onedev.commons.bootstrap.Bootstrap.installDir;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ServerLogResource extends AbstractResource {
 
@@ -35,19 +34,15 @@ public class ServerLogResource extends AbstractResource {
 		response.setContentType(MimeTypes.OCTET_STREAM);
 		
 		response.disableCaching();
-		
-		try {
-			response.setFileName(URLEncoder.encode("server-log.txt", StandardCharsets.UTF_8.name()));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+
+		response.setFileName(URLEncoder.encode("server-log.txt", UTF_8));
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				var server = attributes.getParameters().get(PARAM_SERVER).toString();
 				String content = Joiner.on("\n").join(readServerLog(server));
-				attributes.getResponse().getOutputStream().write(content.getBytes(StandardCharsets.UTF_8));
+				attributes.getResponse().getOutputStream().write(content.getBytes(UTF_8));
 			}				
 		});
 

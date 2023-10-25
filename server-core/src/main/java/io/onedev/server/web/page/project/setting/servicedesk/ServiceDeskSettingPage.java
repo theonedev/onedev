@@ -71,7 +71,7 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (SecurityUtils.canManage(project)) {
+		if (SecurityUtils.canManageProject(project)) {
 			if (project.isIssueManagement())
 				return new ViewStateAwarePageLink<Void>(componentId, ServiceDeskSettingPage.class, paramsOf(project.getId()));
 			else

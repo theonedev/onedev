@@ -1,0 +1,18 @@
+<wicket:extend>
+	<div class="pack-detail card m-2 m-sm-5">
+		<div class="card-body">
+			<div wicket:id="pack" class="mb-4"></div>
+			<div wicket:id="actions" class="d-flex align-items-center">
+				<a wicket:id="edit" class="btn btn-primary mr-3">Edit</a>
+				<a wicket:id="delete" class="btn btn-danger ml-auto">Delete</a>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<span class="d-flex align-items-center">
+			<a wicket:id="packs">Packages</a>
+			<span class="dot"></span>
+			<span wicket:id="packName" class="text-nowrap"></span>
+		</span>
+	</wicket:fragment>
+</wicket:extend>
