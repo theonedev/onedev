@@ -2,11 +2,13 @@ package io.onedev.server.web.page.admin.usermanagement;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.EmailAddressCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -51,10 +53,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
@@ -68,14 +67,23 @@ public class UserListPage extends AdministrationPage {
 
 		@Override
 		protected List<User> load() {
-			UserCache cache = getUserManager().cloneCache();
-			List<User> users = new ArrayList<>(cache.getUsers());
-			users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+			var userCache = getUserManager().cloneCache();
+			var emailAddressCache = getEmailAddressManager().cloneCache();
+			var emailAddresses = new HashMap<Long, Collection<String>>();
+			for (var emailAddress: emailAddressCache.values()) 
+				emailAddresses.computeIfAbsent(emailAddress.getOwnerId(), key -> new HashSet<>()).add(emailAddress.getValue());
+			List<User> users = new ArrayList<>(userCache.getUsers());
+			users.sort(userCache.comparingDisplayName(Sets.newHashSet()));
 			users = new Similarities<>(users) {
 
 				@Override
 				protected double getSimilarScore(User item) {
-					return cache.getSimilarScore(item, query);
+					var nameScore =  userCache.getSimilarScore(item, query);
+					var emailScoreOptional = emailAddresses.getOrDefault(item.getId(), new HashSet<>())
+							.stream()
+							.mapToDouble(it -> Similarities.getSimilarScore(it, query))
+							.max();
+					return Math.max(nameScore, emailScoreOptional.orElse(-1));
 				}
 
 			};
@@ -971,6 +979,10 @@ public class UserListPage extends AdministrationPage {
 	
 	private UserManager getUserManager() {
 		return OneDev.getInstance(UserManager.class);
+	}
+	
+	private EmailAddressManager getEmailAddressManager() {
+		return OneDev.getInstance(EmailAddressManager.class);
 	}
 
 	@Override
