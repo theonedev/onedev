@@ -5,7 +5,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
@@ -15,15 +14,14 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
@@ -34,7 +32,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -761,23 +758,8 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 				});
 				
-				WebMarkupContainer link;
-				if (!comment.isValid()) {
-					link = new ActionablePageLink("description", InvalidCodeCommentPage.class, 
-							InvalidCodeCommentPage.paramsOf(comment)) {
-
-						@Override
-						protected void doBeforeNav(AjaxRequestTarget target) {
-							String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-									getPage().getClass(), getPage().getPageParameters()).toString();
-							WebSession.get().setRedirectUrlAfterDelete(CodeComment.class, redirectUrlAfterDelete);
-						}
-						
-					};
-				} else {
-					String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
-					link = new ExternalLink("description", UrlUtils.makeRelative(url));
-				}
+				String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
+				var link = new ExternalLink("description", UrlUtils.makeRelative(url));
 				link.add(new Label("label", StringUtils.abbreviate(comment.getContent(), MAX_DESCRIPTION_LEN)));
 				fragment.add(link);
 				
