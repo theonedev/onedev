@@ -201,16 +201,18 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Tags", 
 					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Pull Requests", 
-					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0), 
-					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Comments", 
 					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Compare", 
 					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
 			
 			menuItems.add(new SidebarMenuItem.SubMenu("git", "Code", codeMenuItems));
-		}		
+		}
+		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests",
+					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0),
+					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
+		}
 		if (getProject().isIssueManagement()) {
 			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
 			
