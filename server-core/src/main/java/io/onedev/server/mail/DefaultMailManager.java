@@ -14,11 +14,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
@@ -118,8 +118,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private final EmailAddressManager emailAddressManager;
 	
-	private final AttachmentManager attachmentManager;
-	
 	private final ClusterManager clusterManager;
 	
 	private volatile Thread thread;
@@ -132,7 +130,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 							  PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
 							  PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 							  EmailAddressManager emailAddressManager, IssueAuthorizationManager issueAuthorizationManager, 
-							  AttachmentManager attachmentManager, ClusterManager clusterManager) {
+							  ClusterManager clusterManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
 		this.userManager = userManager;
@@ -147,7 +145,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.executorService = executorService;
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
-		this.attachmentManager = attachmentManager;
 		this.clusterManager = clusterManager;
 	}
 

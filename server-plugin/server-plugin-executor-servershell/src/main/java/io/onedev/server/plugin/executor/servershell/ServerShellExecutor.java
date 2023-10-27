@@ -119,7 +119,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								+ "directly on bare metal/virtual machine");
 					}
 
-					buildHome = FileUtils.createTempDir("onedev-build");
+					buildHome = new File(Bootstrap.getTempDir(),
+							"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+					FileUtils.createDir(buildHome);
 					File workspaceDir = new File(buildHome, "workspace");
 					try {
 						String serverAddress = getClusterManager().getLocalServerAddress();

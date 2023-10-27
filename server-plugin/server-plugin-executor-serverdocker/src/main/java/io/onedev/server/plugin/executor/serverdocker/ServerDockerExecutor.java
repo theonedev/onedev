@@ -260,7 +260,9 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								+ "Please use kubernetes executor instead");
 					}
 
-					hostBuildHome = FileUtils.createTempDir("onedev-build");
+					hostBuildHome = new File(Bootstrap.getTempDir(),
+							"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+					FileUtils.createDir(hostBuildHome);					
 					try {
 						String network = getName() + "-" + jobContext.getProjectId() + "-"
 								+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
