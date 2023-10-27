@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
-import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -1553,7 +1553,7 @@ public abstract class IssueListPanel extends Panel {
 				});
 				
 				fragment.add(new CopyToClipboardLink("copy",
-						Model.of(issue.getTitle() + " (#" + issue.getNumber() + ")")));
+						Model.of(StringUtils.uncapitalize(issue.getTitle()) + " (" + issue.getReference(getProject()) + ")")));
 
 				fragment.add(new AjaxLink<Void>("pin") {
 

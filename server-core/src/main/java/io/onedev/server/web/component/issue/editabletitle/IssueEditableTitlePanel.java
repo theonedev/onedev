@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.editabletitle;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
@@ -152,7 +153,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			
 		});
 		titleViewer.add(new CopyToClipboardLink("copy", 
-				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
+				Model.of(StringUtils.uncapitalize(getIssue().getTitle()) + " (#" + getIssue().getNumber() + ")")));
 		
 		titleViewer.add(new IssueProgressPanel("progress") {
 

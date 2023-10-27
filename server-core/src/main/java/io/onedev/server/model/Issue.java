@@ -813,6 +813,10 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		}
 		return participants;
 	}
+	
+	public String getReference(@Nullable Project currentProject) {
+		return Referenceable.asReference(this, currentProject);
+	}
 
 	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {
 		if (!checkedFieldNames.add(fieldName))
