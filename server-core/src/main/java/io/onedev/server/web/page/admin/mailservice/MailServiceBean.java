@@ -12,7 +12,7 @@ public class MailServiceBean implements Serializable {
 
 	private MailService mailService;
 
-	@Editable(placeholder="Not configured")
+	@Editable(placeholder="No mail service")
 	public MailService getMailService() {
 		return mailService;
 	}
