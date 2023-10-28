@@ -46,9 +46,9 @@ public class SendgridMailService implements MailService {
 		this.apiKey = apiKey;
 	}
 
-	@Editable(order=410, name="System Email Address", description="System email address should be <code>verified sender</code> in " +
-			"SendGrid to send various notifications. One can also reply to this address to post issue or pull request " +
-			"comments if <code>Receive Posted Email</code> option is enabled below")
+	@Editable(order=410, name="System Email Address", description="This address should be <code>verified sender</code> " +
+			"in SendGrid and will be used as sender address of various email notifications. One can also reply to this " +
+			"address to post issue or pull request comments if <code>Receive Posted Email</code> option is enabled below")
 	@Email
 	@NotEmpty
 	@Override
@@ -70,7 +70,7 @@ public class SendgridMailService implements MailService {
 		this.timeout = timeout;
 	}
 
-	@Editable(order=600, name="Receive Posted Email")
+	@Editable(order=600, name="Receive Posted Email", description = "Enable this to process issue or pull request comments posted via email")
 	public SendgridWebhookSetting getWebhookSetting() {
 		return webhookSetting;
 	}
@@ -114,6 +114,11 @@ public class SendgridMailService implements MailService {
 							throw new NoSubscriptionException();
 						}
 					});
+				}
+
+				@Override
+				public boolean isMonitorSystemAddressOnly() {
+					return webhookSetting.isMonitorSystemAddressOnly();
 				}
 			};
 		} else {

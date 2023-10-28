@@ -9,18 +9,19 @@ import io.onedev.server.model.support.administration.mailservice.SmtpExplicitSsl
 import io.onedev.server.model.support.administration.mailservice.SmtpSslSetting;
 import org.jetbrains.annotations.Nullable;
 
+import javax.mail.Message;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 @Editable(name="SMTP/IMAP", order=100)
 public class SmtpImapMailService implements MailService {
 
 	private static final long serialVersionUID = 1L;
-	
-	private String systemAddress;
 	
 	private String smtpHost;
 
@@ -29,6 +30,8 @@ public class SmtpImapMailService implements MailService {
 	private String smtpUser;
 
 	private String smtpPassword;
+	
+	private String systemAddress;
 
 	private InboxPollSetting inboxPollSetting;
 
@@ -75,9 +78,9 @@ public class SmtpImapMailService implements MailService {
 		this.smtpPassword = smtpPassword;
 	}
 
-	@Editable(order=425, name="System Email Address", description="This address will be used as sender address of "
-			+ "various notifications. Emails targeting this address and its sub addressing in the IMAP inbox will "
-			+ "also be checked if <code>Check Incoming Email</code> option is enabled below")
+	@Editable(order=425, name="System Email Address", description="This address will be used as sender address of " +
+			"various email notifications. User can also reply to this address to post issue or pull request comments " +
+			"via email if <code>Check Incoming Email</code> option is enabled below")
 	@Email
 	@NotEmpty
 	@Override
@@ -89,9 +92,9 @@ public class SmtpImapMailService implements MailService {
 		this.systemAddress = systemAddress;
 	}
 
-	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email. "
+	@Editable(order=450, name="Check Incoming Email", description="Enable this to process issue or pull request comments posted via email. "
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
-			+ "needs to be enabled for above email address, as OneDev uses it to track issue and pull request contexts")
+			+ "needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts")
 	public InboxPollSetting getInboxPollSetting() {
 		return inboxPollSetting;
 	}
@@ -118,18 +121,6 @@ public class SmtpImapMailService implements MailService {
 			smtpCredential = null;
 		return new SmtpSetting(smtpHost, sslSetting, smtpUser, smtpCredential, getTimeout());
 	}
-
-	@Nullable
-	private ImapSetting getImapSetting() {
-		if (inboxPollSetting != null) {
-			String imapUser = inboxPollSetting.getImapUser();
-			MailCredential imapCredential = new BasicAuthPassword(inboxPollSetting.getImapPassword());
-			return new ImapSetting(inboxPollSetting.getImapHost(), inboxPollSetting.getSslSetting(),
-					imapUser, imapCredential, inboxPollSetting.getPollInterval(), getTimeout());
-		} else {
-			return null;
-		}
-	}
 	
 	@Override
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
@@ -141,16 +132,27 @@ public class SmtpImapMailService implements MailService {
 
 	@Override
 	public InboxMonitor getInboxMonitor() {
-		var imapSetting = getImapSetting();
-		if (imapSetting != null) {
-			return (messageConsumer, testMode) -> {
-				if (mailPosition == null)
-					mailPosition = new MailPosition();
-				return getMailManager().monitorInbox(getImapSetting(), getSystemAddress(), 
-						messageConsumer, mailPosition, testMode);
+		if (inboxPollSetting != null) {
+			var imapUser = inboxPollSetting.getImapUser();
+			var imapCredential = new BasicAuthPassword(inboxPollSetting.getImapPassword());
+			var imapSetting = new ImapSetting(inboxPollSetting.getImapHost(), inboxPollSetting.getSslSetting(),
+					imapUser, imapCredential, inboxPollSetting.getPollInterval(), getTimeout());
+			return new InboxMonitor() {
+				@Override
+				public Future<?> monitor(Consumer<Message> messageConsumer, boolean testMode) {
+					if (mailPosition == null)
+						mailPosition = new MailPosition();
+					return getMailManager().monitorInbox(imapSetting, getSystemAddress(),
+							messageConsumer, mailPosition, testMode);
+				}
+
+				@Override
+				public boolean isMonitorSystemAddressOnly() {
+					return inboxPollSetting.isMonitorSystemAddressOnly();
+				}
 			};
 		} else {
-			return null;			
+			return null;
 		}
 	}
 

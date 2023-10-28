@@ -25,6 +25,8 @@ public class InboxPollSetting implements Serializable {
 	
 	private int pollInterval = 60;
 	
+	private boolean monitorSystemAddressOnly = true;
+	
 	@Editable(order=100, name="IMAP Host")
 	@NotEmpty
 	public String getImapHost() {
@@ -77,5 +79,15 @@ public class InboxPollSetting implements Serializable {
 	public void setPollInterval(int pollInterval) {
 		this.pollInterval = pollInterval;
 	}
-	
+
+	@Editable(order=600, description = "Check this to only monitor system address above for incoming " +
+			"email processing; if not checked, all emails in the inbox will be processed")
+	public boolean isMonitorSystemAddressOnly() {
+		return monitorSystemAddressOnly;
+	}
+
+	public void setMonitorSystemAddressOnly(boolean monitorSystemAddressOnly) {
+		this.monitorSystemAddressOnly = monitorSystemAddressOnly;
+	}
+
 }

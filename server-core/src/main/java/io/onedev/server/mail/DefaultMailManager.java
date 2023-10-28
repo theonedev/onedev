@@ -338,13 +338,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
-	public void handleMessage(Message message, String systemAddress) {
+	public void handleMessage(Message message, String systemAddress, boolean monitorSystemAddressOnly) {
 		var fromInternetAddresses = getAddresses(message, "From");
 		var toInternetAddresses = getAddresses(message, "To");
 		if (fromInternetAddresses.length != 0 && toInternetAddresses.length != 0) {
 			var fromInternetAddress = fromInternetAddresses[0];
 			var fromAddress = fromInternetAddress.getAddress();
-			var parsedSystemAddress = ParsedEmailAddress.parse(systemAddress);
 			if (!fromAddress.equalsIgnoreCase(systemAddress)) {
 				EmailAddress fromAddressEntity = emailAddressManager.findByValue(fromAddress);
 				if (fromAddressEntity != null && !fromAddressEntity.isVerified()) {
@@ -359,6 +358,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 						designatedProject = serviceDeskSetting.getDesignatedProject(fromAddress);
 					}
 
+					var parsedSystemAddress = ParsedEmailAddress.parse(systemAddress);
+					
 					Collection<Issue> issues = new ArrayList<>();
 					Collection<PullRequest> pullRequests = new ArrayList<>();
 					Collection<InternetAddress> involved = new ArrayList<>();
@@ -366,16 +367,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 					List<InternetAddress> receiverInternetAddresses = new ArrayList<>();
 					receiverInternetAddresses.addAll(asList(toInternetAddresses));
 					receiverInternetAddresses.addAll(asList(getAddresses(message, "Cc")));
-					
 					for (InternetAddress receiverInternetAddress : receiverInternetAddresses) {
-						logger.trace("Processing on behalf of receiver '" + receiverInternetAddress.getAddress() + "'");
-
 						ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiverInternetAddress.getAddress());
-
-						logger.trace("Parsed receiver address: " + parsedReceiverAddress);
-
-						if (parsedReceiverAddress.toString().equals(systemAddress)) {
-							logger.trace("Message is targeting system address");
+						if (monitorSystemAddressOnly && parsedReceiverAddress.toString().equals(systemAddress) 
+								|| !monitorSystemAddressOnly && !parsedReceiverAddress.getName().contains("+")) {
 							if (serviceDeskSetting != null) {
 								if (designatedProject == null)
 									throw new ExplicitException("No project designated for sender: " + fromInternetAddress.getAddress());
@@ -391,14 +386,12 @@ public class DefaultMailManager implements MailManager, Serializable {
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
-						} else if (parsedReceiverAddress.getDomain().equals(parsedSystemAddress.getDomain())
-								&& parsedReceiverAddress.getName().startsWith(parsedSystemAddress.getName() + "+")) {
-							String subAddress = parsedReceiverAddress.getName().substring(parsedSystemAddress.getName().length() + 1);
+						} else if (monitorSystemAddressOnly && parsedReceiverAddress.getDomain().equals(parsedSystemAddress.getDomain()) && parsedReceiverAddress.getName().startsWith(parsedSystemAddress.getName() + "+")
+								|| !monitorSystemAddressOnly && parsedReceiverAddress.getName().contains("+")) {
+							String subAddress = StringUtils.substringAfter(parsedReceiverAddress.getName(), "+");
 							if (subAddress.equals(MailManager.TEST_SUB_ADDRESS)) {
 								continue;
 							} else if (subAddress.contains("~")) {
-								logger.trace("Message is targeting a sub address");
-
 								Long entityId;
 								try {
 									entityId = Long.parseLong(StringUtils.substringAfter(subAddress, "~"));
@@ -406,8 +399,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 									throw new ExplicitException("Invalid id specified in receipient address: " + parsedReceiverAddress);
 								}
 								if (subAddress.contains("issue")) {
-									logger.trace("Message is an issue reply");
-
 									Issue issue = issueManager.get(entityId);
 									if (issue == null)
 										throw new ExplicitException("Non-existent issue specified in receipient address: " + parsedReceiverAddress);
@@ -436,8 +427,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 										issues.add(issue);
 									}
 								} else if (subAddress.contains("pullrequest")) {
-									logger.trace("Message is a pull request reply");
-
 									PullRequest pullRequest = pullRequestManager.get(entityId);
 									if (pullRequest == null)
 										throw new ExplicitException("Non-existent pull request specified in receipient address: " + parsedReceiverAddress);
@@ -467,8 +456,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 									throw new ExplicitException("Invalid receipient address: " + parsedReceiverAddress);
 								}
 							} else {
-								logger.trace("Message is targeting service desk '" + subAddress + "'...");
-
 								Project project = projectManager.findByServiceDeskName(subAddress);
 								if (project == null)
 									project = projectManager.findByPath(subAddress);
@@ -484,7 +471,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 								}
 							}
 						} else {
-							logger.trace("Adding receiver to involved list");
 							involved.add(receiverInternetAddress);
 						}
 					}
@@ -623,7 +609,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		comment.setIssue(issue);
 		if (author == null)
 			author = createUser(authorAddress, issue.getProject(), authorization.getAuthorizedRole());
-		logger.trace("Creating issue comment on behalf of user '" + author.getName() + "'");
 		comment.setUser(author);
 		String content = parseBody(message, issue.getProject(), issue.getUUID());
 		if (content != null) {
@@ -640,7 +625,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		comment.setRequest(pullRequest);
 		if (author == null)
 			author = createUser(authorAddress, pullRequest.getProject(), authorization.getAuthorizedRole());
-		logger.trace("Creating pull request comment on behalf of user '" + author.getName() + "'");
 		comment.setUser(author);
 		String content = parseBody(message, pullRequest.getProject(), pullRequest.getUUID());
 		if (content != null) {
@@ -767,7 +751,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 						var systemAddress = mailService.getSystemAddress();
 						while (thread != null) {
 							Future<?> future = inboxMonitor.monitor(message -> {
-								handleMessage(message, systemAddress);
+								handleMessage(message, systemAddress, inboxMonitor.isMonitorSystemAddressOnly());
 							}, false);
 							try {
 								future.get();

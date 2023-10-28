@@ -8,4 +8,6 @@ public interface InboxMonitor {
 	
 	Future<?> monitor(Consumer<Message> messageConsumer, boolean testMode);
 	
+	boolean isMonitorSystemAddressOnly();
+	
 }

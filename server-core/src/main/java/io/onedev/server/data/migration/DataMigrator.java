@@ -5876,5 +5876,30 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate145(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL_SERVICE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var inboxPollSettingElement = valueElement.element("inboxPollSetting");
+							if (inboxPollSettingElement != null)
+								inboxPollSettingElement.addElement("monitorSystemAddressOnly").setText("true");
+							var webhookSettingElement = valueElement.element("webhookSetting");
+							if (webhookSettingElement != null)
+								webhookSettingElement.addElement("monitorSystemAddressOnly").setText("true");
+							if (valueElement.attributeValue("class").contains("GmailMailService")) 
+								valueElement.addElement("systemAddress").setText(valueElement.elementText("accountName").trim());
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

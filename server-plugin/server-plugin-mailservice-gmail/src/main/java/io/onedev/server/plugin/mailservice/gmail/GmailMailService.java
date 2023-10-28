@@ -13,12 +13,15 @@ import io.onedev.server.model.support.administration.mailservice.SmtpExplicitSsl
 import io.onedev.server.util.EditContext;
 import org.jetbrains.annotations.Nullable;
 
+import javax.mail.Message;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 @Editable(name="Gmail", order=300)
 public class GmailMailService implements MailService {
@@ -36,6 +39,8 @@ public class GmailMailService implements MailService {
 	private String accountName;
 
 	private String refreshToken;
+	
+	private String systemAddress;
 	
 	private InboxPollSetting inboxPollSetting;
 	
@@ -64,9 +69,7 @@ public class GmailMailService implements MailService {
 		this.clientSecret = clientSecret;
 	}
 
-	@Editable(order=300, description="Specify account name to login to Gmail. This should be a Gmail address, and "
-			+ "will be taken as system email address, whose inbox will be checked to post various comments from "
-			+ "email if <code>Check Incoming Email</code> option is enabled below")
+	@Editable(order=300, description="Specify account name to login to Gmail to send/receive email")
 	@Email
 	@NotEmpty
 	public String getAccountName() {
@@ -91,8 +94,20 @@ public class GmailMailService implements MailService {
 		this.refreshToken = refreshToken;
 	}
 
-	@Editable(order=500, name="Check Incoming Email", description="Enable this to check inbox of above account "
-			+ "to open issues, post issue comments, or post pull request comments from email")
+	@Editable(order=410, name="System Email Address", description="Primary or alias email address of above account " +
+			"to be used as sender address of various email notifications. User can also reply to this address to post " +
+			"issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below")
+	@Email
+	@NotEmpty
+	public String getSystemAddress() {
+		return systemAddress;
+	}
+
+	public void setSystemAddress(String systemAddress) {
+		this.systemAddress = systemAddress;
+	}
+	
+	@Editable(order=500, name="Check Incoming Email", description="Enable this to process issue or pull request comments posted via email")
 	public InboxPollSetting getInboxPollSetting() {
 		return inboxPollSetting;
 	}
@@ -162,20 +177,6 @@ public class GmailMailService implements MailService {
 				getTimeout());
 	}
 	
-	@Nullable
-	public ImapSetting getImapSetting() {
-		if (inboxPollSetting != null) {
-			MailCredential imapCredential = new OAuthAccessToken(
-					TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
-
-			return new ImapSetting("imap.gmail.com",
-					new ImapImplicitSsl(), accountName, imapCredential,
-					inboxPollSetting.getPollInterval(), getTimeout());
-		} else {
-			return null;
-		}
-	}
-	
 	@Editable(order=10000, description="Specify timeout in seconds when communicating with mail server")
 	@Min(value=5, message="This value should not be less than 5")
 	public int getTimeout() {
@@ -184,11 +185,6 @@ public class GmailMailService implements MailService {
 
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
-	}
-
-	@Override
-	public String getSystemAddress() {
-		return accountName;
 	}
 
 	@Override
@@ -201,16 +197,28 @@ public class GmailMailService implements MailService {
 
 	@Override
 	public InboxMonitor getInboxMonitor() {
-		var imapSetting = getImapSetting();
-		if (imapSetting != null) {
-			return (messageConsumer, testMode) -> {
-				if (mailPosition == null)
-					mailPosition = new MailPosition();
-				return getMailManager().monitorInbox(getImapSetting(), getSystemAddress(), 
-						messageConsumer, mailPosition, testMode);
+		if (inboxPollSetting != null) {
+			var imapCredential = new OAuthAccessToken(
+					TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
+			var imapSetting = new ImapSetting("imap.gmail.com",
+					new ImapImplicitSsl(), accountName, imapCredential,
+					inboxPollSetting.getPollInterval(), getTimeout());
+			return new InboxMonitor() {
+				@Override
+				public Future<?> monitor(Consumer<Message> messageConsumer, boolean testMode) {
+					if (mailPosition == null)
+						mailPosition = new MailPosition();
+					return getMailManager().monitorInbox(imapSetting, getSystemAddress(),
+							messageConsumer, mailPosition, testMode);
+				}
+
+				@Override
+				public boolean isMonitorSystemAddressOnly() {
+					return inboxPollSetting.isMonitorSystemAddressOnly();
+				}
 			};
 		} else {
-			return null;			
+			return null;
 		}
 	}
 

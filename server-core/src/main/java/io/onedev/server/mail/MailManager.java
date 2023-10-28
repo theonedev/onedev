@@ -44,10 +44,10 @@ public interface MailManager {
 	
 	String toPlainText(String mailContent);
 	
-	Future<?> monitorInbox(ImapSetting imapSetting, String systemAddress, 
+	Future<?> monitorInbox(ImapSetting imapSetting, String systemAddress,
 						   Consumer<Message> messageConsumer, 
 						   MailPosition lastPosition, boolean testMode);
 
-	void handleMessage(Message message, String systemAddress);
+	void handleMessage(Message message, String systemAddress, boolean onlyMonitorSystemAddress);
 	
 }

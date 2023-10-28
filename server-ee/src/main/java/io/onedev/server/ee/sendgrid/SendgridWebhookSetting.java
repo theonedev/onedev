@@ -13,8 +13,10 @@ public class SendgridWebhookSetting implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String secret;
-
-	@Editable(description = "" +
+	
+	private boolean monitorSystemAddressOnly;
+	
+	@Editable(order=100, description = "" +
 			"Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:" +
 			"<ul>" +
 			"<li>" +
@@ -34,6 +36,16 @@ public class SendgridWebhookSetting implements Serializable {
 
 	public void setSecret(String secret) {
 		this.secret = secret;
+	}
+
+	@Editable(order=200, description = "Check this to only monitor system address above for incoming " +
+			"email processing; if not checked, all emails in the inbox will be processed")
+	public boolean isMonitorSystemAddressOnly() {
+		return monitorSystemAddressOnly;
+	}
+
+	public void setMonitorSystemAddressOnly(boolean monitorSystemAddressOnly) {
+		this.monitorSystemAddressOnly = monitorSystemAddressOnly;
 	}
 	
 }
