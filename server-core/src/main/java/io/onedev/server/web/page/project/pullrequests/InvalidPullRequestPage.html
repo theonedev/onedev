@@ -1,13 +1,24 @@
 <wicket:extend>
 	<div class="card m-2 m-sm-5">
-		<div class="card-body text-center">
-			<wicket:svg href="sad-panda" class="icon icon-hero flex-shrink-0 mb-4"/>		
-			<h4 class="mb-3">
-				Some commits of the pull request are missing
-			</h4>
+		<div class="card-body">
+			<h2>
+				Some related commits of the pull request are missing
+			</h2>
 			<p>
 			This might happen when project points to a wrong git repository, or these commits are garbage collected. 
 			</p>
+			<div class="bg-light rounded p-4 mb-5">
+				<div class="h6 mb-2">Missing Commits</div>
+				<div wicket:id="missingCommits" class="text-monospace font-size-sm mb-4"></div>
+				<div class="h6 mb-2">Pull Request Branches</div>
+				<div wicket:id="requestBranches" class="mb-4"></div>
+				<div class="h6 mb-2">Pull Request Title</div>
+				<div wicket:id="requestTitle"></div>
+				<wicket:enclosure child="requestDescription">
+					<div class="h6 mb-2">Pull Request Description</div>
+					<div wicket:id="requestDescription"></div>
+				</wicket:enclosure>
+			</div>
 			<a wicket:id="delete" class="btn btn-danger">Delete Pull Request</a>	
 		</div>
 	</div>

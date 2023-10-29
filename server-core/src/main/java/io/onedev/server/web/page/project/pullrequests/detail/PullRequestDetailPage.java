@@ -850,7 +850,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						@Override
 						protected void onComponentTag(ComponentTag tag) {
 							super.onComponentTag(tag);
-							tag.setName("span");
+							tag.setName("em");
 						}
 						
 					});

@@ -1,13 +1,20 @@
 <wicket:extend>
 	<div class="card m-2 m-sm-5">
-		<div class="card-body text-center">
-			<wicket:svg href="sad-panda" class="icon icon-hero flex-shrink-0 mb-4"/>		
-			<h4 class="mb-3">
-				Commit of the code comment is missing
-			</h4>
+		<div class="card-body">
+			<h2 class="text-danger">
+				Some related commits of the code comment is missing
+			</h2>
 			<p>
-			This might happen when project points to a wrong git repository, or the commit is garbage collected. 
+				This might happen when project points to a wrong git repository, or the commit is garbage collected. 
 			</p>
+			<div class="bg-light rounded p-4 mb-5">
+				<div class="h6 mb-2">Missing Commits</div>
+				<div wicket:id="missingCommits" class="text-monospace font-size-sm mb-4"></div>
+				<div class="h6 mb-2">Comment on File</div>
+				<div wicket:id="commentFile" class="mb-4"></div>
+				<div class="h6 mb-2">Comment Content</div>
+				<div wicket:id="commentContent"></div>
+			</div>
 			<a wicket:id="delete" class="btn btn-danger">Delete Comment</a>	
 		</div>
 	</div>

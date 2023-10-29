@@ -2,15 +2,20 @@ package io.onedev.server.web.page.project.pullrequests;
 
 import javax.persistence.EntityNotFoundException;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -25,6 +30,13 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
+import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.html.HtmlEscape;
+
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public class InvalidPullRequestPage extends ProjectPage {
@@ -54,6 +66,18 @@ public class InvalidPullRequestPage extends ProjectPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		var request = getPullRequest();
+		add(new Label("missingCommits", StringUtils.join(request.getMissingCommits().stream().map(ObjectId::getName).collect(toList()), " ")));
+		add(new Label("requestBranches", escapeHtml5(request.getTargetBranch()) + " &larr; " + escapeHtml5(request.getSourceBranch())).setEscapeModelStrings(false));
+		if (request.getDescription() != null) {
+			add(new Label("requestTitle", request.getTitle()).add(AttributeAppender.append("class", "mb-4")));
+			add(new MarkdownViewer("requestDescription", Model.of(request.getDescription()), null));
+		} else {
+			add(new Label("requestTitle", request.getTitle()));
+			add(new WebMarkupContainer("requestDescription").setVisible(false));
+		}
+		
 		add(new Link<Void>("delete") {
 
 			@Override

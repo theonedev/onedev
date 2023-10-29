@@ -1081,6 +1081,21 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
+	public Collection<ObjectId> filterNonExistants(Project project, Collection<ObjectId> objIds) {
+		Long projectId = project.getId();
+
+		return runOnProjectServer(projectId, () -> {
+			var nonExistants = new ArrayList<ObjectId>();
+			ObjectDatabase database = getRepository(projectId).getObjectDatabase();
+			for (var objId: objIds) {
+				if (!database.has(objId))
+					nonExistants.add(objId);
+			}
+			return nonExistants;
+		});
+	}
+	
+	@Override
 	public List<BlobIdent> getChildren(Project project, ObjectId revId, String path, 
 			BlobIdentFilter filter, boolean expandSingle) {
 		Long projectId = project.getId();

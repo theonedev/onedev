@@ -55,6 +55,11 @@ public class InvalidBuildPage extends ProjectPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		var build = getBuild();
+		add(new Label("missingCommit", build.getCommitHash()));
+		add(new Label("jobName", build.getJobName()));
+		
 		add(new Link<Void>("delete") {
 
 			@Override

@@ -25,6 +25,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
+import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -89,6 +90,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
@@ -878,6 +880,20 @@ public abstract class PullRequestListPanel extends Panel {
 				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				fragment.add(new RequestStatusBadge("status", rowModel));
+				fragment.add(new BranchLink("targetBranch", request.getTarget()));
+				if (request.getSourceProject() != null) {
+					fragment.add(new BranchLink("sourceBranch", request.getSource()));
+				} else {
+					fragment.add(new Label("sourceBranch", "unknown") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("em");
+						}
+
+					});
+				}
 				
 				LastActivity lastActivity = request.getLastActivity();
 				if (lastActivity.getUser() != null) 

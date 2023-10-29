@@ -116,6 +116,8 @@ public interface GitService {
 	
 	boolean hasObjects(Project project, ObjectId... objIds);
 
+	Collection<ObjectId> filterNonExistants(Project project, Collection<ObjectId> objIds);
+	
 	List<BlobIdent> getChildren(Project project, ObjectId revId, @Nullable String path, 
 			BlobIdentFilter filter, boolean expandSingle);
 	
