@@ -1,21 +1,16 @@
 package io.onedev.server.plugin.pack.container;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.exception.ChallengeAwareUnauthenticatedException;
-import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.HttpResponseAwareException;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.pack.PackServlet;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
-import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
