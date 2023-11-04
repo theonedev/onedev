@@ -13,10 +13,13 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.build.BuildSubmitted;
 import io.onedev.server.event.project.codecomment.CodeCommentCreated;
-import io.onedev.server.event.project.issue.IssueOpened;
-import io.onedev.server.event.project.issue.IssuesCopied;
-import io.onedev.server.event.project.issue.IssuesImported;
-import io.onedev.server.event.project.issue.IssuesMoved;
+import io.onedev.server.event.project.codecomment.CodeCommentEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyCreated;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyEdited;
+import io.onedev.server.event.project.issue.*;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -24,6 +27,8 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -371,7 +376,30 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		var issue = event.getIssue();
 		permanentizeAttachmentGroup(issue.getProject().getId(), issue.getAttachmentGroup());
 	}
+	
+	@Listen
+	@Sessional
+	public void on(IssueChanged event) {
+		if (event.getChange().getData() instanceof IssueDescriptionChangeData) {
+			var issue = event.getIssue();
+			permanentizeAttachmentGroup(issue.getProject().getId(), issue.getAttachmentGroup());
+		}
+	}
 
+	@Listen
+	@Sessional
+	public void on(IssueCommentCreated event) {
+		var issue = event.getIssue();
+		permanentizeAttachmentGroup(issue.getProject().getId(), issue.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(IssueCommentEdited event) {
+		var issue = event.getIssue();
+		permanentizeAttachmentGroup(issue.getProject().getId(), issue.getAttachmentGroup());
+	}
+	
 	@Listen
 	@Sessional
 	public void on(PullRequestOpened event) {
@@ -379,6 +407,29 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		permanentizeAttachmentGroup(request.getProject().getId(), request.getAttachmentGroup());
 	}
 
+	@Listen
+	@Sessional
+	public void on(PullRequestChanged event) {
+		if (event.getChange().getData() instanceof PullRequestDescriptionChangeData) {
+			var request = event.getRequest();
+			permanentizeAttachmentGroup(request.getProject().getId(), request.getAttachmentGroup());
+		}
+	}	
+	
+	@Listen
+	@Sessional
+	public void on(PullRequestCommentCreated event) {
+		var request = event.getRequest();
+		permanentizeAttachmentGroup(request.getProject().getId(), request.getAttachmentGroup());
+	}
+	
+	@Listen
+	@Sessional
+	public void on(PullRequestCommentEdited event) {
+		var request = event.getRequest();
+		permanentizeAttachmentGroup(request.getProject().getId(), request.getAttachmentGroup());
+	}
+	
 	@Listen
 	@Sessional
 	public void on(BuildSubmitted event) {
@@ -389,6 +440,27 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Listen
 	@Sessional
 	public void on(CodeCommentCreated event) {
+		var comment = event.getComment();
+		permanentizeAttachmentGroup(comment.getProject().getId(), comment.getAttachmentGroup());
+	}
+	
+	@Listen
+	@Sessional
+	public void on(CodeCommentEdited event) {
+		var comment = event.getComment();
+		permanentizeAttachmentGroup(comment.getProject().getId(), comment.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(CodeCommentReplyCreated event) {
+		var comment = event.getComment();
+		permanentizeAttachmentGroup(comment.getProject().getId(), comment.getAttachmentGroup());
+	}
+
+	@Listen
+	@Sessional
+	public void on(CodeCommentReplyEdited event) {
 		var comment = event.getComment();
 		permanentizeAttachmentGroup(comment.getProject().getId(), comment.getAttachmentGroup());
 	}
