@@ -59,6 +59,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
@@ -66,8 +68,6 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import nl.altindag.ssl.SSLFactory;
@@ -413,7 +413,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
 		projectManager.runOnActiveServer(projectId, () -> {
-			FileUtils.cleanDir(buildManager.getStorageDir(projectId, buildNumber));
+			FileUtils.cleanDir(buildManager.getBuildDir(projectId, buildNumber));
 			return null;
 		});
 		listenerRegistry.post(new BuildSubmitted(build));
@@ -964,8 +964,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(SystemStarted event) {
 		var localServer = clusterManager.getLocalServerAddress();
 		for (var projectId: projectManager.getIds()) {
-			if (localServer.equals(projectManager.getActiveServer(projectId, false))) 
+			if (localServer.equals(projectManager.getActiveServer(projectId, false))) {
 				schedule(projectManager.load(projectId), false);
+			}
 		}
 		thread = new Thread(this);
 		thread.start();

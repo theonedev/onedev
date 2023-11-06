@@ -25,7 +25,7 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getStorageDir(), UnitTestReport.CATEGORY + "/" + getReportName());
+		File reportDir = new File(build.getDir(), UnitTestReport.CATEGORY + "/" + getReportName());
 
 		UnitTestReport report = write(getReportLockName(build), () -> {
 			UnitTestReport aReport = createReport(build, inputDir, logger);

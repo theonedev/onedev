@@ -56,7 +56,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	IssueTimes queryTimes(ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
 	
-	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String term, int count);
+	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String fuzzyQuery, int count);
 
 	Collection<String> getUndefinedStates();
 	

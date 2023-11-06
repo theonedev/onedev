@@ -5,20 +5,20 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
-import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.MimeUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -31,16 +31,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -143,40 +139,27 @@ public class RawBlobResource extends AbstractResource {
 							return GitUtils.getInputStream(repository, commitId, blob.getIdent().path);
 						}
 					} else {
-						Client client = ClientBuilder.newClient();
+						// Use JDK api instead of jersey client api to get input stream directly as otherwise
+						// jersey will throw exception when close the response
 						try {
-							String serverUrl = getClusterManager().getServerUrl(activeServer);
-							WebTarget target = client.target(serverUrl);
+							var builder = new URIBuilder(getClusterManager().getServerUrl(activeServer));
 							if (blob.getLfsPointer() != null) {
-								target = target.path("~api/cluster/lfs")
-										.queryParam("projectId", project.getId())
-										.queryParam("objectId", blob.getLfsPointer().getObjectId());
+								builder.setPath("~api/cluster/lfs")
+										.addParameter("projectId", String.valueOf(project.getId()))
+										.addParameter("objectId", blob.getLfsPointer().getObjectId());
 							} else {
 								ObjectId commitId = project.getObjectId(blob.getIdent().revision, true);
-								target = target.path("~api/cluster/blob")
-										.queryParam("projectId", project.getId())
-										.queryParam("revId", commitId.name())
-										.queryParam("path", blob.getIdent().path);
+								builder.setPath("~api/cluster/blob")
+										.addParameter("projectId", String.valueOf(project.getId()))
+										.addParameter("revId", commitId.name())
+										.addParameter("path", blob.getIdent().path);
 							}
-							Invocation.Builder builder =  target.request();
-							builder.header(HttpHeaders.AUTHORIZATION, 
+							var conn = builder.build().toURL().openConnection();
+							conn.setRequestProperty(HttpHeaders.AUTHORIZATION,
 									KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
-							Response response = builder.get();
-							try {
-								KubernetesHelper.checkStatus(response);
-								return new InputStreamWrapper(response.readEntity(InputStream.class)) {
-									@Override
-									public void close() throws IOException {
-										super.close();
-										response.close();
-									}
-								};
-							} catch (Exception e) {
-								response.close();
-								throw e;
-							}
-						} finally {
-							client.close();
+							return conn.getInputStream();
+						} catch (URISyntaxException | IOException e) {
+							throw new RuntimeException(e);
 						}
 					}
 				}

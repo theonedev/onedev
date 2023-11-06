@@ -19,8 +19,6 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +30,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SecurityUtils.class);
 	
 	@Nullable
 	public static User getUser() {
@@ -213,14 +209,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canManageIssues(@Nullable User user, Project project) {
 		return asSubject(user).isPermitted(new ProjectPermission(project, new ManageIssues()));
 	}
-
-	public static boolean canManagePacks(Project project) {
-		return canManagePacks(getUser(), project);
-	}
-
-	public static boolean canManagePacks(@Nullable User user, Project project) {
-		return asSubject(user).isPermitted(new ProjectPermission(project, new ManagePacks()));
-	}
 	
 	public static boolean canManageBuilds(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ManageBuilds()));
@@ -253,13 +241,18 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				new JobPermission(jobName, new AccessBuild())));
 	}
 
-	public static boolean canAccessPackage(Project project, String packageName) {
-		return getSubject().isPermitted(new ProjectPermission(project,
-				new PackPermission(packageName, new AccessPack())));
+	public static boolean canReadPack(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ReadPack()));
 	}
-
-	public static boolean canAccessPackage(Pack pack) {
-		return canAccessPackage(pack.getProject(), pack.getName());
+	
+	public static boolean canReadPackBlob(PackBlob packBlob) {
+		if (canReadPack(packBlob.getProject()))
+			return true;
+		for (var authorization: packBlob.getAuthorizations()) {
+			if (canReadPack(authorization.getProject()))
+				return true;
+		}
+		return false;
 	}
 	
 	public static boolean canAccessReport(Build build, String reportName) {
@@ -272,17 +265,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				new JobPermission(jobName, new RunJob())));
 	}
 
-	public static boolean canWritePackage(Project project, String packageName) {
-		return getSubject().isPermitted(new ProjectPermission(project,
-				new PackPermission(packageName, new WritePack())));
-	}
-
-	public static boolean canWritePackage(Pack pack) {
-		return canWritePackage(pack.getProject(), pack.getName());
+	public static boolean canWritePack(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new WritePack()));
 	}
 	
 	public static boolean isAdministrator() {
 		return getSubject().isPermitted(new SystemAdministration());
+	}
+	
+	public static boolean isSystem() {
+		return getUserId().equals(User.SYSTEM_ID);
 	}
 	
 	public static boolean canModifyOrDelete(CodeComment comment) {

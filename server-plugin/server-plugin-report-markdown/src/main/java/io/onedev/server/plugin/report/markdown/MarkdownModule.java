@@ -6,6 +6,7 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
@@ -26,8 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativeStoragePath;
-import static io.onedev.server.model.Build.getStorageDir;
+import static io.onedev.server.model.Build.getProjectRelativeDirPath;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
 /**
@@ -102,10 +102,10 @@ public class MarkdownModule extends AbstractPluginModule {
 
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
 			getProjectManager().syncDirectory(projectId, 
-					getProjectRelativeStoragePath(buildNumber) + "/" + PublishMarkdownReportStep.CATEGORY,
+					getProjectRelativeDirPath(buildNumber) + "/" + PublishMarkdownReportStep.CATEGORY,
 					PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), activeServer);
 			getProjectManager().syncDirectory(projectId, 
-					getProjectRelativeStoragePath(buildNumber) + "/" + PublishPullRequestMarkdownReportStep.CATEGORY,
+					getProjectRelativeDirPath(buildNumber) + "/" + PublishPullRequestMarkdownReportStep.CATEGORY,
 					PublishPullRequestMarkdownReportStep.getReportLockName(projectId, buildNumber), activeServer);
 		}));
 		
@@ -132,7 +132,7 @@ public class MarkdownModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(getStorageDir(projectId, buildNumber), PublishMarkdownReportStep.CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), PublishMarkdownReportStep.CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir))
@@ -163,7 +163,7 @@ public class MarkdownModule extends AbstractPluginModule {
 		public List<PullRequestSummaryPart> call() {
 			return read(PublishPullRequestMarkdownReportStep.getReportLockName(projectId, buildNumber), () -> {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
-				File categoryDir = new File(getStorageDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir))

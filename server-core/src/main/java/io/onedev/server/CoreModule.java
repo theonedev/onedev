@@ -282,7 +282,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AlertManager.class).to(DefaultAlertManager.class);
 		bind(UpdateCheckManager.class).to(DefaultUpdateCheckManager.class);
 		bind(StopwatchManager.class).to(DefaultStopwatchManager.class);
-		bind(PackManager.class).to(DefaultPackManager.class);
+		bind(PackVersionManager.class).to(DefaultPackVersionManager.class);
+		bind(PackBlobManager.class).to(DefaultPackBlobManager.class);
+		bind(PackBlobReferenceManager.class).to(DefaultPackBlobReferenceManager.class);
+		bind(PackBlobAuthorizationManager.class).to(DefaultPackBlobAuthorizationManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -406,6 +409,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
 		bind(AlertEventBroadcaster.class);
+		bind(ProjectDeleteEventBroadcaster.class);
 		bind(UploadManager.class).to(DefaultUploadManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);

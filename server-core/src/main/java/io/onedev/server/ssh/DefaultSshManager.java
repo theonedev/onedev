@@ -29,6 +29,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 @Singleton
 public class DefaultSshManager implements SshManager {
 
@@ -75,15 +77,7 @@ public class DefaultSshManager implements SshManager {
 			throw new RuntimeException(e);
 		}
         
-        server.setKeyPairProvider(new KeyPairProvider() {
-
-			@Override
-			public Iterable<KeyPair> loadKeys(SessionContext session) 
-					throws IOException, GeneralSecurityException {
-	            return Lists.newArrayList(new KeyPair(publicKey, privateKey));
-			}
-        	
-        });
+        server.setKeyPairProvider(session -> newArrayList(new KeyPair(publicKey, privateKey)));
         
         server.setShellFactory(new DisableShellAccess());
         

@@ -49,6 +49,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
+	private PackPrivilege packPrivilege = PackPrivilege.NONE;
+	
 	private boolean manageIssues;
 	
 	private boolean accessConfidentialIssues;
@@ -67,12 +69,6 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
-	
-	private boolean managePacks;
-	
-	@Lob
-	@Column(length = 65535, nullable = false)
-	private ArrayList<PackPrivilege> packPrivileges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="defaultRole")
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -167,7 +163,17 @@ public class Role extends AbstractEntity implements BasePermission {
 		return !(boolean)EditContext.get().getInputValue("managePullRequests")
 				&& !(boolean)EditContext.get().getInputValue("manageCodeComments");
 	}
-	
+
+	@Editable(order=350)
+	@NotNull
+	public PackPrivilege getPackPrivilege() {
+		return packPrivilege;
+	}
+
+	public void setPackPrivilege(PackPrivilege packPrivilege) {
+		this.packPrivilege = packPrivilege;
+	}
+
 	@Editable(order=400, name="Issue Management", description="Issue administrative permission inside a project, including batch "
 			+ "operations over multiple issues")
 	@ShowCondition("isManageProjectDisabled")
@@ -269,31 +275,6 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
 
-	@Editable(order=750, name="Package Management")
-	@ShowCondition("isManageProjectDisabled")
-	public boolean isManagePacks() {
-		return managePacks;
-	}
-
-	public void setManagePacks(boolean managePacks) {
-		this.managePacks = managePacks;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isManagePacksDisabled() {
-		return !(boolean)EditContext.get().getInputValue("managePacks");
-	}
-
-	@Editable(order=800)
-	@ShowCondition("isManagePacksDisabled")
-	public List<PackPrivilege> getPackPrivileges() {
-		return packPrivileges;
-	}
-
-	public void setPackPrivileges(List<PackPrivilege> packPrivileges) {
-		this.packPrivileges = (ArrayList<PackPrivilege>) packPrivileges;
-	}
-
 	public Collection<Project> getDefaultProjects() {
 		return defaultProjects;
 	}
@@ -351,6 +332,10 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new ReadCode());
 		if (codePrivilege == CodePrivilege.WRITE)
 			permissions.add(new WriteCode());
+		if (packPrivilege == PackPrivilege.READ)
+			permissions.add(new ReadPack());
+		if (packPrivilege == PackPrivilege.WRITE)
+			permissions.add(new WritePack());
 		if (manageIssues) 
 			permissions.add(new ManageIssues());
 		if (accessConfidentialIssues)
@@ -374,13 +359,6 @@ public class Role extends AbstractEntity implements BasePermission {
 				AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
 			}
-		}
-		if (managePacks)
-			permissions.add(new ManagePacks());
-		for (var packPrivilege: packPrivileges) {
-			permissions.add(new PackPermission(packPrivilege.getPackNames(), new AccessPack()));
-			if (packPrivilege.isWritePack())
-				permissions.add(new PackPermission(packPrivilege.getPackNames(), new WritePack()));
 		}
 		return permissions;
 	}

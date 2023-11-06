@@ -45,11 +45,7 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	
 	@Override
 	public boolean isSubscriptionActive() {
-		var subscription = SubscriptionSetting.load().getSubscription();
-		if (subscription != null) 
-			return subscription.getUserDays() > 0;
-		else 
-			return false;
+		return SubscriptionSetting.load().isSubscriptionActive();
 	}
 
 	@Nullable

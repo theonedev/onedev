@@ -29,7 +29,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		ProcessResult result = write(getReportLockName(build), () -> {
-			File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
+			File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
 
 			FileUtils.createDir(reportDir);
 			try {
@@ -76,7 +76,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	private void writeLineStatuses(Build build, String blobPath, Map<Integer, CoverageStatus> lineStatuses) {
 		lineStatuses.entrySet().removeIf(it -> it.getValue() == CoverageStatus.NOT_COVERED);
 		if (!lineStatuses.isEmpty()) {
-			File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
+			File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
 			File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
 			FileUtils.createDir(lineCoverageFile.getParentFile());
 			try (OutputStream os = new FileOutputStream(lineCoverageFile)) {

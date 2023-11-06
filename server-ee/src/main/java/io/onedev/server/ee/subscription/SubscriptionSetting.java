@@ -128,13 +128,20 @@ public class SubscriptionSetting implements Serializable {
 	}
 
 	public static SubscriptionSetting load() {
-		var data = getSettingManager().getSubscriptionData();
-		if (data == null)
-			return new SubscriptionSetting();
-		else
-			return deserialize(cipherService.decrypt(decodeBase64(data), decodeBase64(ENCRYPTION_KEY)).getBytes());
+		return of(getSettingManager().getSubscriptionData());
 	}
 
+	public static SubscriptionSetting of(@Nullable String subscriptionData) {
+		if (subscriptionData == null)
+			return new SubscriptionSetting();
+		else
+			return deserialize(cipherService.decrypt(decodeBase64(subscriptionData), decodeBase64(ENCRYPTION_KEY)).getBytes());
+	}
+	
+	public boolean isSubscriptionActive() {
+		return subscription != null && subscription.getUserDays() > 0;
+	}
+	
 	public void save() {
 		getSettingManager().saveSubscriptionData(encodeBase64String(cipherService.encrypt(serialize(this), decodeBase64(ENCRYPTION_KEY)).getBytes()));
 	}

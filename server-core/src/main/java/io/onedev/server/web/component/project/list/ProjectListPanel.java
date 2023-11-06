@@ -7,7 +7,6 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntitySort;
@@ -34,6 +33,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.ProjectAvatar;
+import io.onedev.server.web.component.project.DeleteStatusLabel;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.project.stats.build.BuildStatsPanel;
@@ -42,6 +42,7 @@ import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -520,11 +521,18 @@ public class ProjectListPanel extends Panel {
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
 											Collection<Project> projects = new ArrayList<>();
-											for (IModel<Project> each: selectionColumn.getSelections())  
-												projects.add(each.getObject());
-											getProjectManager().delete(projects);
+											Collection<String> observables = new ArrayList<>(); 
+											for (IModel<Project> each: selectionColumn.getSelections()) {
+												var project = each.getObject();
+												projects.add(project);
+												observables.add(project.getDeleteChangeObservable());
+											}
+											getProjectManager().requestToDelete(projects);
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											Session.get().success("Requested to delete projects");
+											var page = (BasePage) getPage();
+											page.notifyObservablesChange(target, observables);
 										}
 										
 										@Override
@@ -785,12 +793,19 @@ public class ProjectListPanel extends Panel {
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
 											Collection<Project> projects = new ArrayList<>();
-											for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
-												projects.add(it.next());
-											getProjectManager().delete(projects);
+											Collection<String> observables = new ArrayList<>();
+											for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
+												var project = it.next();
+												projects.add(project);
+												observables.add(project.getDeleteChangeObservable());
+											}
+											getProjectManager().requestToDelete(projects);
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(body);
+											Session.get().success("Requested to delete projects");
+											var page = (BasePage) getPage();
+											page.notifyObservablesChange(target, observables);
 										}
 										
 										@Override
@@ -1026,9 +1041,10 @@ public class ProjectListPanel extends Panel {
 					projectLink.add(new Label("text", project.getPath().substring(getParentProject().getPath().length()+1)));
 				else
 					projectLink.add(new Label("text", project.getPath()));
+				projectLink.add(new DeleteStatusLabel("deleteStatus", projectId));
 				fragment.add(projectLink);
 
-				fragment.add(new EntityLabelsPanel<ProjectLabel>("labels", rowModel));
+				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 				
 				if (project.getActiveServer(false) != null) {
 					if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {

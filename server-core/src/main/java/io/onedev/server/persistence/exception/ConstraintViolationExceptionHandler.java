@@ -15,7 +15,7 @@ public class ConstraintViolationExceptionHandler extends AbstractExceptionHandle
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Database constraint violation";
-		return new HttpResponse(HttpServletResponse.SC_CONFLICT, errorMessage);
+		return new HttpResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage);
     }
     
 }

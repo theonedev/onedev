@@ -262,7 +262,8 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
+				var blob = context.getProject().getBlob(context.getBlobIdent(), true);
+				setVisible(blob.getLfsPointer() == null && blob.getText() != null);
 			}
 
 		}.add(new OnChangeAjaxBehavior() {

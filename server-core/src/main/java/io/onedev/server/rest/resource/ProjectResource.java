@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -336,7 +337,7 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
-    	projectManager.delete(project);
+    	projectManager.requestToDelete(Sets.newHashSet(project));
     	return Response.ok().build();
     }
 	

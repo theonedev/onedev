@@ -15,7 +15,7 @@ public class StaleStateExceptionHandler extends AbstractExceptionHandler<StaleSt
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Persistence state staled";
-		return new HttpResponse(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+		return new HttpResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage);
     }
     
 }

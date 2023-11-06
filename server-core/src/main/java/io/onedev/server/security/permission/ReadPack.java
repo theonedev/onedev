@@ -4,11 +4,11 @@ import io.onedev.server.model.User;
 import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;
 
-public class AccessPack implements BasePermission {
+public class ReadPack implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof AccessPack;
+		return p instanceof ReadPack;
 	}
 
 	@Override

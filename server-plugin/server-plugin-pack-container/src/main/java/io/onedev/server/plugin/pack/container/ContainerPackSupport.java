@@ -1,8 +1,17 @@
 package io.onedev.server.plugin.pack.container;
 
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.model.support.PackSupport;
+import io.onedev.server.pack.PackSupport;
 
-@Editable(order=100, name="OCI Image")
+import javax.inject.Singleton;
+
+@Singleton
 public class ContainerPackSupport implements PackSupport {
+
+	public static final String TYPE = "Container Image";
+
+	@Override
+	public String getPackType() {
+		return TYPE;
+	}
+
 }

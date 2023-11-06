@@ -1,19 +1,18 @@
 package io.onedev.server.plugin.report.markdown;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestSummaryPart;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.Model;
 
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestSummaryPart;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 
@@ -38,7 +37,7 @@ public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 
 			@Override
 			public String call() throws Exception {
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
 				File file = new File(new File(categoryDir, getReportName()), PublishPullRequestMarkdownReportStep.CONTENT);
 				return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			}

@@ -1,20 +1,18 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.usage.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.GroupChoice;
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 @Editable
 public class SecuritySetting implements Serializable {

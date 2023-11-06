@@ -1,12 +1,12 @@
 package io.onedev.server.entitymanager;
 
-import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.usage.Usage;
@@ -23,7 +23,7 @@ import java.util.Map;
 public interface SettingManager extends EntityManager<Setting> {
 	
 	@Nullable
-	Setting getSetting(Key key);
+	Setting findSetting(Key key);
 	
 	/**
 	 * Get system setting.

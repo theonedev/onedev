@@ -8,7 +8,7 @@ public class WritePack implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof WritePack || new AccessPack().implies(p);
+		return p instanceof WritePack || new ReadPack().implies(p);
 	}
 
 	@Override

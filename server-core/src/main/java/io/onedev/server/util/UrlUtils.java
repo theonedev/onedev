@@ -1,17 +1,16 @@
 package io.onedev.server.util;
 
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.apache.wicket.util.encoding.UrlDecoder;
 import org.apache.wicket.util.encoding.UrlEncoder;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class UrlUtils {
 
@@ -70,6 +69,10 @@ public class UrlUtils {
 	
 	public static String toString(Url url) {
 		return StringUtils.stripEnd(url.toString(StringMode.FULL), "/");
+	}
+	
+	public static String getRootUrl(String url) {
+		return url.substring(0, url.indexOf('/', url.indexOf("//") + 2));
 	}
 	
 }

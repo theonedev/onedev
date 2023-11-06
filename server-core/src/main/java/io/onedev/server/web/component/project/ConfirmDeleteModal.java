@@ -1,16 +1,16 @@
 package io.onedev.server.web.component.project;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-
+import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 
 @SuppressWarnings("serial")
-public abstract class ConfirmDeleteProjectModal extends ConfirmModalPanel {
+public abstract class ConfirmDeleteModal extends ConfirmModalPanel {
 
-	public ConfirmDeleteProjectModal(AjaxRequestTarget target) {
+	public ConfirmDeleteModal(AjaxRequestTarget target) {
 		super(target);
 	}
 
@@ -18,13 +18,9 @@ public abstract class ConfirmDeleteProjectModal extends ConfirmModalPanel {
 	protected void onConfirm(AjaxRequestTarget target) {
 		Project project = getProject();
 		
-		OneDev.getInstance(ProjectManager.class).delete(project);
+		OneDev.getInstance(ProjectManager.class).requestToDelete(Sets.newHashSet(project));
 		getSession().success("Project '" + project.getPath() + "' deleted");
-		
-		onDeleted(target);
 	}
-
-	protected abstract void onDeleted(AjaxRequestTarget target);
 	
 	@Override
 	protected String getConfirmMessage() {
