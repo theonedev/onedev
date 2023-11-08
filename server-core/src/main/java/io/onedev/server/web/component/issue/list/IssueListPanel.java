@@ -1553,7 +1553,7 @@ public abstract class IssueListPanel extends Panel {
 				});
 				
 				fragment.add(new CopyToClipboardLink("copy",
-						Model.of(StringUtils.uncapitalize(issue.getTitle()) + " (" + issue.getReference(getProject()) + ")")));
+						Model.of(issue.getTitle() + " (" + issue.getReference(getProject()) + ")")));
 
 				fragment.add(new AjaxLink<Void>("pin") {
 

@@ -153,7 +153,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			
 		});
 		titleViewer.add(new CopyToClipboardLink("copy", 
-				Model.of(StringUtils.uncapitalize(getIssue().getTitle()) + " (#" + getIssue().getNumber() + ")")));
+				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
 		
 		titleViewer.add(new IssueProgressPanel("progress") {
 
