@@ -40,7 +40,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 		Issue issue = getModelObject();
 		
 		Emojis emojis = Emojis.getInstance();
-		if (SecurityUtils.canAccess(issue.getProject())) {
+		if (SecurityUtils.canAccessProject(issue.getProject())) {
 			String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(issue)).toString();
 			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), url);

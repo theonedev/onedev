@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.markdown;
 
 import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -8,10 +9,9 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -567,7 +567,7 @@ abstract class InsertUrlPanel extends Panel {
 						markdownEditor.insertUrl(target, isImage, url, linkText!=null?linkText:fileName, null);
 						upload.clear();
 						onClose(target);
-					} catch (GitException e) {
+					} catch (ExplicitException e) {
 						form.error(e.getMessage());
 						target.add(feedback);
 					} catch (Exception e) {

@@ -78,7 +78,7 @@ public class InvalidBuildPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getBuild()));
+				setVisible(SecurityUtils.canManageBuild(getBuild()));
 			}
 			
 		}.add(new ConfirmClickModifier("Do you really want to delete build #" + getBuild().getNumber() + "?")));
@@ -102,7 +102,7 @@ public class InvalidBuildPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getBuild());
+		return SecurityUtils.canAccessBuild(getBuild());
 	}
 	
 	@Override

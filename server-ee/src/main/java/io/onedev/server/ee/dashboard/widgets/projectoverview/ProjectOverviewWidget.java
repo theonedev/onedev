@@ -55,7 +55,7 @@ public class ProjectOverviewWidget extends Widget {
 		else
 			projectId = project.getId();
 		
-		if (SecurityUtils.canAccess(project)) {
+		if (SecurityUtils.canAccessProject(project)) {
 			return new ProjectOverviewPanel(componentId, new LoadableDetachableModel<Project>() {
 
 				private static final long serialVersionUID = 1L;

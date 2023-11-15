@@ -8,10 +8,7 @@ import io.onedev.server.annotation.RoleName;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.role.AllIssueFields;
-import io.onedev.server.model.support.role.CodePrivilege;
-import io.onedev.server.model.support.role.IssueFieldSet;
-import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.model.support.role.*;
 import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
@@ -51,6 +48,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean manageCodeComments;
 	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
+	
+	private PackPrivilege packPrivilege = PackPrivilege.NONE;
 	
 	private boolean manageIssues;
 	
@@ -164,7 +163,17 @@ public class Role extends AbstractEntity implements BasePermission {
 		return !(boolean)EditContext.get().getInputValue("managePullRequests")
 				&& !(boolean)EditContext.get().getInputValue("manageCodeComments");
 	}
-	
+
+	@Editable(order=350)
+	@NotNull
+	public PackPrivilege getPackPrivilege() {
+		return packPrivilege;
+	}
+
+	public void setPackPrivilege(PackPrivilege packPrivilege) {
+		this.packPrivilege = packPrivilege;
+	}
+
 	@Editable(order=400, name="Issue Management", description="Issue administrative permission inside a project, including batch "
 			+ "operations over multiple issues")
 	@ShowCondition("isManageProjectDisabled")
@@ -265,7 +274,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	public void setJobPrivileges(List<JobPrivilege> jobPrivileges) {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
-	
+
 	public Collection<Project> getDefaultProjects() {
 		return defaultProjects;
 	}
@@ -323,6 +332,10 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new ReadCode());
 		if (codePrivilege == CodePrivilege.WRITE)
 			permissions.add(new WriteCode());
+		if (packPrivilege == PackPrivilege.READ)
+			permissions.add(new ReadPack());
+		if (packPrivilege == PackPrivilege.WRITE)
+			permissions.add(new WritePack());
 		if (manageIssues) 
 			permissions.add(new ManageIssues());
 		if (accessConfidentialIssues)
@@ -334,7 +347,7 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 		if (manageBuilds)
 			permissions.add(new ManageBuilds());
-		for (JobPrivilege jobPrivilege: jobPrivileges) {
+		for (var jobPrivilege: jobPrivileges) {
 			permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
 			if (jobPrivilege.isManageJob()) 
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new ManageJob()));

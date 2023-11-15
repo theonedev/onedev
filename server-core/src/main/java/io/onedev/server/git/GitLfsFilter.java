@@ -17,6 +17,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.utils.IOUtils;
@@ -37,6 +38,8 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -111,9 +114,17 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
+		var serverUrl = settingManager.getSystemSetting().getServerUrl();
+		try {
+			var host = new URL(serverUrl).getHost();
+			if (host.equals("localhost") || host.equals("127.0.0.1"))
+				serverUrl = UrlUtils.getRootUrl(request.getRequestURL().toString());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+		
 		return String.format("%s/%s.git/lfs/objects/%s?lfs-objects=true", 
-				StringUtils.stripEnd(settingManager.getSystemSetting().getServerUrl(), "/\\"), 
-				projectPath, objectId);
+				StringUtils.stripEnd(serverUrl, "/\\"), projectPath, objectId);
 	}
 
 	private String getProjectPath(String pathInfo) {
@@ -432,7 +443,7 @@ public class GitLfsFilter implements Filter {
 									lockManager.delete(lock);
 									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 								} else if (force) {
-									if (SecurityUtils.canManage(project)) {
+									if (SecurityUtils.canManageProject(project)) {
 										lockManager.delete(lock);
 										writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 									} else {

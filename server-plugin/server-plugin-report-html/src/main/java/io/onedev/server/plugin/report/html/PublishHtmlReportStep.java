@@ -57,7 +57,7 @@ public class PublishHtmlReportStep extends PublishReportStep {
 		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
 		if (jobContext.getJobExecutor().isHtmlReportPublishEnabled()) {
 			return write(getReportLockName(build), () -> {
-				File reportDir = new File(build.getStorageDir(), CATEGORY + "/" + getReportName());
+				File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 				File startPage = new File(inputDir, getStartPage());
 				if (startPage.exists()) {
 					FileUtils.createDir(reportDir);

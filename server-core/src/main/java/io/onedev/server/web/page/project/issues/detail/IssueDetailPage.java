@@ -111,7 +111,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getIssue());
+		return SecurityUtils.canAccessIssue(getIssue());
 	}
 
 	@Override
@@ -168,7 +168,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
 				}
 
-				if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
+				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue()))
 					tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
 
 				return tabs;

@@ -5,14 +5,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.*;
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.*;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;
@@ -20,9 +18,6 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signatureverification.SignatureVerificationManager;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.build.*;
@@ -49,9 +44,11 @@ import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.SerializationUtils;
@@ -71,6 +68,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.Validator;
 import javax.validation.constraints.NotEmpty;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -95,14 +93,14 @@ import static io.onedev.server.util.match.WildcardUtils.matchPath;
 public class Project extends AbstractEntity implements LabelSupport<ProjectLabel> {
 
 	private static final long serialVersionUID = 1L;
-
-	public static String BUILDS_DIR = "builds";
-
-	public static String ATTACHMENT_DIR = "attachment";
-
-	public static String SITE_DIR = "site";
 	
-	public static String SHARE_TEST_DIR = ".onedev-share-test";
+	public static final String BUILDS_DIR = "builds";
+
+	public static final String ATTACHMENT_DIR = "attachment";
+
+	public static final String SITE_DIR = "site";
+	
+	public static final String SHARE_TEST_DIR = ".onedev-share-test";
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
@@ -143,6 +141,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
 	
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
+	
+	public static final String PROP_PENDING_DELETE = "pendingDelete";
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
@@ -208,7 +208,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy= "project")
+	private Collection<PackBlob> packBlobs = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PackVersion> packVersions = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PackBlobAuthorization> packBlobAuthorizations = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -293,6 +302,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private boolean issueManagement = true;
 
 	private boolean timeTracking = false;
+	
+	private boolean pendingDelete;
+	
 	@Lob
 	@Column(length=65535)
 	private GitPackConfig gitPackConfig = new GitPackConfig();
@@ -643,7 +655,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
-				lastEventDate.getId(), idOf(getDefaultRole()), idOf(getParent()));
+				lastEventDate.getId(), idOf(getDefaultRole()), isPendingDelete(), idOf(getParent()));
 	}
 	
 	/**
@@ -930,11 +942,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private static boolean isIssueManagementEnabled() {
 		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
 	}
-
+	
 	private static boolean isSubscriptionActiveAndIssueManagementEnabled() {
 		return isIssueManagementEnabled() && OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
-	
+
+	public boolean isPendingDelete() {
+		return pendingDelete;
+	}
+
+	public void setPendingDelete(boolean pendingDelete) {
+		this.pendingDelete = pendingDelete;
+	}
+
 	@Nullable
 	public String getServiceDeskName() {
 		if (serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
@@ -1118,6 +1138,30 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
+	}
+
+	public Collection<PackBlob> getPackBlobs() {
+		return packBlobs;
+	}
+
+	public void setPackBlobs(Collection<PackBlob> packBlobs) {
+		this.packBlobs = packBlobs;
+	}
+
+	public Collection<PackVersion> getPackVersions() {
+		return packVersions;
+	}
+
+	public void setPackVersions(Collection<PackVersion> packVersions) {
+		this.packVersions = packVersions;
+	}
+
+	public Collection<PackBlobAuthorization> getPackBlobAuthorizations() {
+		return packBlobAuthorizations;
+	}
+
+	public void setPackBlobAuthorizations(Collection<PackBlobAuthorization> packBlobAuthorizations) {
+		this.packBlobAuthorizations = packBlobAuthorizations;
 	}
 
 	public List<BlobIdent> getBlobChildren(BlobIdent blobIdent, BlobIdentFilter filter) {
@@ -1726,4 +1770,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return builds;
 	}
 
+	public static String getDeleteChangeObservable(Long projectId) {
+		return Project.class.getName() + ":delete:" + projectId;
+	}
+
+	public String getDeleteChangeObservable() {
+		return getDeleteChangeObservable(getId());
+	}
+	
+	public File getDir() {
+		return OneDev.getInstance(ProjectManager.class).getProjectDir(getId());
+	}
+	
 }

@@ -79,7 +79,7 @@ public class ArtifactResource extends AbstractResource {
 				throw new EntityNotFoundException(message);
 			}
 			
-			if (!SecurityUtils.canAccess(build))
+			if (!SecurityUtils.canAccessBuild(build))
 				throw new UnauthorizedException();
 			
 			fileInfo = (FileInfo) getBuildManager().getArtifactInfo(build, artifactPath);
@@ -114,7 +114,7 @@ public class ArtifactResource extends AbstractResource {
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
 				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 					read(getArtifactsLockName(projectId, buildNumber), () -> {
-						File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
+						File artifactFile = new File(getBuildManager().getArtifactsDir(projectId, buildNumber), artifactPath);
 						try (
 								InputStream is = new FileInputStream(artifactFile);
 								OutputStream os = attributes.getResponse().getOutputStream()) {

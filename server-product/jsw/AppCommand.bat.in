@@ -85,7 +85,7 @@ set _REALPATH="%_WRAPPER_DIR_QUOTED:"=%"
 
 :pathfound
 rem
-rem Decide on the specific Wrapper binary to use (See delta-pack)
+rem Decide on the specific Wrapper binary to use (See delta-packVersion)
 rem
 if "%PROCESSOR_ARCHITEW6432%"=="AMD64" goto amd64
 if "%PROCESSOR_ARCHITECTURE%"=="AMD64" goto amd64

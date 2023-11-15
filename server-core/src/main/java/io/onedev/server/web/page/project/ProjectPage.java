@@ -17,6 +17,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.project.DeleteStatusLabel;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
@@ -175,7 +176,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getProject());
+		return SecurityUtils.canAccessProject(getProject());
 	}
 	
 	@Override
@@ -228,10 +229,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
-		
+
 		if (getProject().isCodeManagement()) {
-			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
-					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
+			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds",
+					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		}
 		
@@ -256,7 +257,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canManageProject(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Settings", 
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
@@ -453,9 +454,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			@Override
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
-				if (SecurityUtils.canAccess(project)) {
+				if (SecurityUtils.canAccessProject(project)) {
 					WebMarkupContainer link = navToProject("link", project);
 					link.add(new Label("label", project.getName()));
+					if (project.equals(getProject()))
+						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
+					else
+						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					
 					List<ProjectFacade> children = getProjectManager().getChildren(project.getId());
@@ -492,6 +497,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						
 					};
 					link.add(new Label("label", project.getName()));
+					if (project.equals(getProject()))
+						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
+					else
+						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					item.add(new WebMarkupContainer("children").setVisible(false));
 					item.add(new Label("dot").add(AttributeAppender.append("class", "dot")));

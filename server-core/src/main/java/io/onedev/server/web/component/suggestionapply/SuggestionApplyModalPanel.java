@@ -50,7 +50,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 		else
 			project = comment.getProject();
 		Mark mark = comment.getMark();
-		if (SecurityUtils.canModify(project, branch, mark.getPath())) {
+		if (SecurityUtils.canModifyFile(project, branch, mark.getPath())) {
 			ObjectId commitId = project.getObjectId(branch, true);
 			try {
 				blobEdits.applySuggestion(project, mark, getSuggestion(), commitId);

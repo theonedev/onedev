@@ -330,7 +330,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				for (Project ancestor: projectScope.getProject().getAncestors()) {
 					if (SecurityUtils.canAccessConfidentialIssues(ancestor)) {
 						projectPredicates.add(builder.equal(projectPath, ancestor));
-					} else if (SecurityUtils.canAccess(ancestor)) { 
+					} else if (SecurityUtils.canAccessProject(ancestor)) { 
 						projectPredicates.add(buildNonConfidentialPredicate(builder, issue, ancestor));
 						projectPredicates.add(buildAuthorizationPredicate(query, builder, issue, ancestor));
 					}
@@ -801,13 +801,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(EntityQuery<Issue> scope, Project project, String term, int count) {
-		if (term.contains("#")) {
-			String projectPath = StringUtils.substringBefore(term, "#");
+	public List<Issue> query(EntityQuery<Issue> scope, Project project, String fuzzyQuery, int count) {
+		if (fuzzyQuery.contains("#")) {
+			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
 			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
 				project = specifiedProject;
-				term = StringUtils.substringAfter(term, "#");
+				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
 			}
 		}
 				
@@ -831,23 +831,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Project forkParent: project.getForkParents()) {
 			if (SecurityUtils.canAccessConfidentialIssues(forkParent)) {
 				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
-			} else if (SecurityUtils.canAccess(forkParent)) {
+			} else if (SecurityUtils.canAccessProject(forkParent)) {
 				projectPredicates.add(buildNonConfidentialPredicate(builder, root, forkParent));
 				projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, forkParent));
 			}
 		}
 		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		
-		if (term.startsWith("#"))
-			term = term.substring(1);
-		if (term.length() != 0) {
+		if (fuzzyQuery.startsWith("#"))
+			fuzzyQuery = fuzzyQuery.substring(1);
+		if (fuzzyQuery.length() != 0) {
 			try {
-				long buildNumber = Long.parseLong(term);
+				long buildNumber = Long.parseLong(fuzzyQuery);
 				predicates.add(builder.equal(root.get(Issue.PROP_NUMBER), buildNumber));
 			} catch (NumberFormatException e) {
 				predicates.add(builder.or(
-						builder.like(builder.lower(root.get(Issue.PROP_TITLE)), "%" + term.toLowerCase() + "%"),
-						builder.like(builder.lower(root.get(Issue.PROP_NO_SPACE_TITLE)), "%" + term.toLowerCase() + "%")));
+						builder.like(builder.lower(root.get(Issue.PROP_TITLE)), "%" + fuzzyQuery.toLowerCase() + "%"),
+						builder.like(builder.lower(root.get(Issue.PROP_NO_SPACE_TITLE)), "%" + fuzzyQuery.toLowerCase() + "%")));
 			}
 		}
 
@@ -1240,7 +1240,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		
 		var issues = query.getResultList();
 		for (var it = issues.iterator(); it.hasNext();) {
-			if (!SecurityUtils.canAccess(it.next()))
+			if (!SecurityUtils.canAccessIssue(it.next()))
 				it.remove();
 		}
 		return issues;

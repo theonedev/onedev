@@ -19,8 +19,6 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +30,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SecurityUtils.class);
 	
 	@Nullable
 	public static User getUser() {
@@ -108,7 +104,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return canCreateBranch(getUser(), project, branchName);
 	}
 	
-	public static boolean canModify(Project project, String branch, String file) {
+	public static boolean canModifyFile(Project project, String branch, String file) {
 		User user = getUser();
 		return canWriteCode(project) 
 				&& !project.isCommitSignatureRequiredButNoSigningKey(user, branch) 
@@ -116,7 +112,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				&& !project.isBuildRequiredForModification(user, branch, file); 
 	}
 	
-	public static boolean canPush(Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
+	public static boolean canPushCode(Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
 		User user = getUser();
 		return canWriteCode(project) 
 				&& !project.isReviewRequiredForPush(user, branch, oldObjectId, newObjectId, null)
@@ -164,26 +160,26 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return role.getDefaultProjects().stream().anyMatch(it->it.isSelfOrAncestorOf(project));
 	}
 	
-	public static boolean canAccess(Project project) {
-		return canAccess(getSubject(), project);
+	public static boolean canAccessProject(Project project) {
+		return canAccessProject(getSubject(), project);
 	}
 	
 	public static boolean canAccessConfidentialIssues(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new AccessConfidentialIssues()));
 	}
 	
-	public static boolean canAccess(Issue issue) {
-		return canAccess(SecurityUtils.getSubject(), issue);
+	public static boolean canAccessIssue(Issue issue) {
+		return canAccessIssue(SecurityUtils.getSubject(), issue);
 	}
 	
-	public static boolean canAccess(Subject subject, Project project) {
+	public static boolean canAccessProject(Subject subject, Project project) {
 		return subject.isPermitted(new ProjectPermission(project, new AccessProject()));
 	}
 	
-	public static boolean canAccess(Subject subject, Issue issue) {
+	public static boolean canAccessIssue(Subject subject, Issue issue) {
 		Permission permission = new ProjectPermission(issue.getProject(), new ConfidentialIssuePermission(issue));
 		return issue.isConfidential() && subject.isPermitted(permission)
-				|| !issue.isConfidential() && canAccess(subject, issue.getProject());
+				|| !issue.isConfidential() && canAccessProject(subject, issue.getProject());
 	}
 	
 	public static boolean canCreateChildren(Project project) {
@@ -202,7 +198,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return asSubject(user).isPermitted(new ProjectPermission(project, new WriteCode()));
 	}
 	
-	public static boolean canManage(Project project) {
+	public static boolean canManageProject(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ManageProject()));
 	}
 	
@@ -226,7 +222,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new ManageCodeComments()));
 	}
 	
-	public static boolean canManage(Build build) {
+	public static boolean canManageBuild(Build build) {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new ManageJob())));
 	}
@@ -236,14 +232,27 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				new JobPermission(build.getJobName(), new AccessBuildLog())));
 	}
 	
-	public static boolean canAccess(Build build) {
-		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
-				new JobPermission(build.getJobName(), new AccessBuild())));
+	public static boolean canAccessBuild(Build build) {
+		return canAccessJob(build.getProject(), build.getJobName());
 	}
 	
-	public static boolean canAccess(Project project, String jobName) {
+	public static boolean canAccessJob(Project project, String jobName) {
 		return getSubject().isPermitted(new ProjectPermission(project, 
 				new JobPermission(jobName, new AccessBuild())));
+	}
+
+	public static boolean canReadPack(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ReadPack()));
+	}
+	
+	public static boolean canReadPackBlob(PackBlob packBlob) {
+		if (canReadPack(packBlob.getProject()))
+			return true;
+		for (var authorization: packBlob.getAuthorizations()) {
+			if (canReadPack(authorization.getProject()))
+				return true;
+		}
+		return false;
 	}
 	
 	public static boolean canAccessReport(Build build, String reportName) {
@@ -255,9 +264,17 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, 
 				new JobPermission(jobName, new RunJob())));
 	}
+
+	public static boolean canWritePack(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new WritePack()));
+	}
 	
 	public static boolean isAdministrator() {
 		return getSubject().isPermitted(new SystemAdministration());
+	}
+	
+	public static boolean isSystem() {
+		return getUserId().equals(User.SYSTEM_ID);
 	}
 	
 	public static boolean canModifyOrDelete(CodeComment comment) {
@@ -302,14 +319,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				|| canManageIssues(watch.getIssue().getProject());
 	}
 	
-	public static boolean canModify(PullRequest request) {
+	public static boolean canModifyPullRequest(PullRequest request) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(request.getSubmitter()) 
 				|| user != null && request.getAssignees().contains(user)
 				|| canManagePullRequests(request.getTargetProject());
 	}
 	
-	public static boolean canModify(Issue issue) {
+	public static boolean canModifyIssue(Issue issue) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(issue.getSubmitter()) 
 				|| canManageIssues(issue.getProject());
@@ -387,14 +404,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static <T> Callable<T> inheritSubject(Callable<T> callable) {
 		Subject subject = SecurityUtils.getSubject();
-		return new Callable<T>() {
-
-			@Override
-			public T call() throws Exception {
-				ThreadContext.bind(subject);
-				return callable.call();
-			}
-
+		return () -> {
+			ThreadContext.bind(subject);
+			return callable.call();
 		};
 	}
 	
@@ -402,14 +414,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Subject subject = SecurityUtils.getSubject();
 		Collection<Callable<T>> wrappedTasks = new ArrayList<>();
 		for (Callable<T> task: callables) {
-			wrappedTasks.add(new Callable<T>() {
-
-				@Override
-				public T call() throws Exception {
-					ThreadContext.bind(subject);
-					return task.call();
-				}
-				
+			wrappedTasks.add(() -> {
+				ThreadContext.bind(subject);
+				return task.call();
 			});
 		}
 		return wrappedTasks;

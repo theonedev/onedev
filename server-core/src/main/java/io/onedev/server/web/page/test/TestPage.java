@@ -18,10 +18,11 @@ public class TestPage extends BasePage {
 		super.onInitialize();
 
 		add(new Link<Void>("test") {
+
 			@Override
 			public void onClick() {
 			}
-
+			
 		});
 		
 	}

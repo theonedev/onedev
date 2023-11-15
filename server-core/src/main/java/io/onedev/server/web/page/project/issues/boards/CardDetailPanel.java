@@ -181,7 +181,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				
 			});
 			
-			if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue())) {
+			if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue())) {
 				tabs.add(new AjaxActionTab(Model.of("Authorizations")) {
 
 					@Override

@@ -1,12 +1,18 @@
 package io.onedev.server.plugin.report.unittest;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.BuildTab;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -17,18 +23,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.tabbable.PageTabHead;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.page.project.builds.detail.BuildTab;
-import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class UnitTestReportPage extends BuildReportPage {
@@ -133,7 +131,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		@Override
 		public UnitTestReport call() throws Exception {
 			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), () -> {
-				File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
+				File reportDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
 				return UnitTestReport.readFrom(reportDir);
 			});
 		}

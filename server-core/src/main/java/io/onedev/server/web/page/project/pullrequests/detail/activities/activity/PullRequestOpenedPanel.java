@@ -75,7 +75,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 
 			@Override
 			protected boolean canManageComment() {
-				return SecurityUtils.canModify(getPullRequest());
+				return SecurityUtils.canModifyPullRequest(getPullRequest());
 			}
 
 			@Override

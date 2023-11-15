@@ -16,18 +16,9 @@
  */
 package org.apache.wicket.request.cycle;
 
-import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.wicket.Application;
-import org.apache.wicket.MetaDataEntry;
-import org.apache.wicket.MetaDataKey;
-import org.apache.wicket.Page;
-import org.apache.wicket.Session;
-import org.apache.wicket.ThreadContext;
-import org.apache.wicket.WicketRuntimeException;
+import org.apache.wicket.*;
 import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
 import org.apache.wicket.core.request.handler.IPageProvider;
 import org.apache.wicket.core.request.handler.PageProvider;
@@ -35,15 +26,7 @@ import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.event.IEventSink;
 import org.apache.wicket.protocol.http.IRequestLogger;
-import org.apache.wicket.request.IExceptionMapper;
-import org.apache.wicket.request.IRequestCycle;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.RequestHandlerStack;
-import org.apache.wicket.request.Response;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.UrlRenderer;
+import org.apache.wicket.request.*;
 import org.apache.wicket.request.component.IRequestablePage;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.handler.resource.ResourceRequestHandler;
@@ -54,6 +37,9 @@ import org.apache.wicket.request.resource.caching.IStaticCacheableResource;
 import org.apache.wicket.util.lang.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link RequestCycle} consists of two steps:
@@ -345,18 +331,6 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	 */
 	protected IRequestHandler handleException(final Exception e)
 	{
-
-		if (Application.exists() && Application.get().usesDevelopmentConfig())
-		{
-			/*
-			 * Call out the fact that we are processing an exception in a loud way, helps to notice
-			 * them when developing even if they get wrapped or processed in a custom handler.
-			 */
-			logExtra.warn("********************************");
-			logExtra.warn("Handling the following exception", e);
-			logExtra.warn("********************************");
-		}
-
 		IRequestHandler handler = listeners.onException(this, e);
 		if (handler != null)
 		{

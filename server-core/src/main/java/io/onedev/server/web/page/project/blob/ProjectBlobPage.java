@@ -204,7 +204,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			var revision = state.blobIdent.revision;
 			if (revision == null)
 				revision = "main";
-			if (!SecurityUtils.canModify(getProject(), revision, path))
+			if (!SecurityUtils.canModifyFile(getProject(), revision, path))
 				unauthorized();
 		}
 		

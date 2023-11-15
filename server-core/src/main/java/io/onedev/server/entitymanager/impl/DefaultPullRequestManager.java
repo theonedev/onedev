@@ -938,17 +938,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project project, String term, int count) {
+	public List<PullRequest> query(Project project, String fuzzyQuery, int count) {
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
 
-		if (term.contains("#")) {
-			String projectPath = StringUtils.substringBefore(term, "#");
+		if (fuzzyQuery.contains("#")) {
+			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
 			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
 				project = specifiedProject;
-				term = StringUtils.substringAfter(term, "#");
+				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
 			}
 		}
 		
@@ -956,16 +956,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
 		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));
 		
-		if (term.startsWith("#"))
-			term = term.substring(1);
-		if (term.length() != 0) {
+		if (fuzzyQuery.startsWith("#"))
+			fuzzyQuery = fuzzyQuery.substring(1);
+		if (fuzzyQuery.length() != 0) {
 			try {
-				long buildNumber = Long.parseLong(term);
+				long buildNumber = Long.parseLong(fuzzyQuery);
 				criteria.add(Restrictions.eq(PullRequest.PROP_NUMBER, buildNumber));
 			} catch (NumberFormatException e) {
 				criteria.add(Restrictions.or(
-						Restrictions.ilike(PullRequest.PROP_TITLE, term, MatchMode.ANYWHERE),
-						Restrictions.ilike(PullRequest.PROP_NO_SPACE_TITLE, term, MatchMode.ANYWHERE)));
+						Restrictions.ilike(PullRequest.PROP_TITLE, fuzzyQuery, MatchMode.ANYWHERE),
+						Restrictions.ilike(PullRequest.PROP_NO_SPACE_TITLE, fuzzyQuery, MatchMode.ANYWHERE)));
 			}
 		}
 		

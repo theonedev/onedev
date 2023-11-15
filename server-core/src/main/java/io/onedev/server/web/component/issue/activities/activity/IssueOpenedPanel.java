@@ -75,7 +75,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected boolean canManageComment() {
-				return SecurityUtils.canModify(getIssue());
+				return SecurityUtils.canModifyIssue(getIssue());
 			}
 
 			@Override

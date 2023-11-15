@@ -89,4 +89,11 @@ public class Subscription implements Serializable {
 		return userCount;
 	}
 	
+	public static boolean isActive(@Nullable Subscription subscription) {
+		if (subscription != null)
+			return subscription.getUserDays() > 0;
+		else
+			return false;
+	}
+	
 }

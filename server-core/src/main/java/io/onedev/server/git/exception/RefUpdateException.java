@@ -1,8 +1,9 @@
 package io.onedev.server.git.exception;
 
+import io.onedev.commons.utils.ExplicitException;
 import org.eclipse.jgit.lib.RefUpdate;
 
-public class RefUpdateException extends GitException {
+public class RefUpdateException extends ExplicitException {
 
 	private static final long serialVersionUID = 1L;
 	

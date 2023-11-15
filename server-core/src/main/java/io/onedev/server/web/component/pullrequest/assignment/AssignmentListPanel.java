@@ -66,7 +66,7 @@ public abstract class AssignmentListPanel extends Panel {
 		super.onConfigure();
 		
 		PullRequest request = getPullRequest();
-		setVisible(!assignmentsModel.getObject().isEmpty() || SecurityUtils.canModify(request) && !request.isMerged());
+		setVisible(!assignmentsModel.getObject().isEmpty() || SecurityUtils.canModifyPullRequest(request) && !request.isMerged());
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public abstract class AssignmentListPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						setVisible(SecurityUtils.canModify(getPullRequest()) && !request.isMerged());
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && !request.isMerged());
 					}
 
 				});
@@ -126,7 +126,7 @@ public abstract class AssignmentListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 			}
 
 			@Override

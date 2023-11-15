@@ -5,7 +5,7 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

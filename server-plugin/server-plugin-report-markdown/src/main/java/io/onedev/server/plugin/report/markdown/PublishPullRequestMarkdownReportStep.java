@@ -60,7 +60,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 			write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
 				File file = new File(workspace, getFile()); 
 				if (file.exists()) {
-					File reportDir = new File(build.getStorageDir(), CATEGORY + "/" + getReportName());
+					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 					String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 					FileUtils.createDir(reportDir);
 					FileUtils.writeFile(new File(reportDir, CONTENT), markdown, StandardCharsets.UTF_8.name());

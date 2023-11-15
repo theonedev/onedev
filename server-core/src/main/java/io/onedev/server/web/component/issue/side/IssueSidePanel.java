@@ -126,7 +126,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected boolean isAuthorized(User user) {
-				return SecurityUtils.canAccess(user.asSubject(), getIssue());
+				return SecurityUtils.canAccessIssue(user.asSubject(), getIssue());
 			}
 			
 		});
@@ -239,7 +239,7 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		});
-		confidentialInput.setVisible(SecurityUtils.canModify(getIssue()));
+		confidentialInput.setVisible(SecurityUtils.canModifyIssue(getIssue()));
 		
 		return confidentialInput;
 	}
@@ -483,7 +483,7 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
 			@Nullable LinkDeleteListener deleteListener) {
-		if (SecurityUtils.canAccess(linkedIssue)) {
+		if (SecurityUtils.canAccessIssue(linkedIssue)) {
 			Long linkedIssueId = linkedIssue.getId();
 			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
 			Link<Void> link = new BookmarkablePageLink<Void>("number", IssueActivitiesPage.class, 

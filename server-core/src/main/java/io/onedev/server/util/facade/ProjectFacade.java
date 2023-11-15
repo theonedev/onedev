@@ -24,13 +24,15 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final Long defaultRoleId;
 	
+	private final boolean pendingDelete;
+	
 	private final Long parentId;
 	
 	public ProjectFacade(Long id, String name, String path,
 						 @Nullable String serviceDeskName, boolean codeManagement, 
 						 boolean issueManagement, GitPackConfig gitPackConfig,
 						 Long lastEventDateId, @Nullable Long defaultRoleId, 
-						 @Nullable Long parentId) {
+						 boolean pendingDelete, @Nullable Long parentId) {
 		super(id);
 		this.name = name;
 		this.path = path;
@@ -40,6 +42,7 @@ public class ProjectFacade extends EntityFacade {
 		this.gitPackConfig = gitPackConfig;
 		this.lastEventDateId = lastEventDateId;
 		this.defaultRoleId = defaultRoleId;
+		this.pendingDelete = pendingDelete;
 		this.parentId = parentId;
 	}
 
@@ -57,6 +60,10 @@ public class ProjectFacade extends EntityFacade {
 
 	public boolean isIssueManagement() {
 		return issueManagement;
+	}
+
+	public boolean isPendingDelete() {
+		return pendingDelete;
 	}
 
 	@Nullable

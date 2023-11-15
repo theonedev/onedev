@@ -6,7 +6,7 @@ import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.git.signatureverification.VerificationResult;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.digests.SHA256Digest;

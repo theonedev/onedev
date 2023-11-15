@@ -1,12 +1,17 @@
 package io.onedev.server.web.page.simple.error;
 
-import java.io.Serializable;
-
-import javax.ws.rs.core.Response;
-
+import com.google.common.base.Throwables;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ServerNotFoundException;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.exception.ServerNotFoundException;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.HomePage;
+import io.onedev.server.web.page.simple.SimplePage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -20,24 +25,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
+import java.io.Serializable;
 
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ExceptionUtils;
-import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.HomePage;
-import io.onedev.server.web.page.simple.SimplePage;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 @SuppressWarnings("serial")
 public class GeneralErrorPage extends SimplePage {
 
+	private static final Logger logger = LoggerFactory.getLogger(GeneralErrorPage.class);
+	
 	private static final int MAX_TITLE_LEN = 240;
 	
-	private static final Logger logger = LoggerFactory.getLogger(GeneralErrorPage.class);
-
 	private boolean serverNotFound;
 	
 	private String title;
@@ -51,17 +49,17 @@ public class GeneralErrorPage extends SimplePage {
 
 		serverNotFound = ExceptionUtils.find(exception, ServerNotFoundException.class) != null;
 		
-		Response response = ExceptionUtils.buildResponse(exception);
+		var response = ExceptionUtils.buildResponse(exception);
 		if (response != null) {
-			title = response.getEntity().toString();
-			statusCode = response.getStatus();
+			title = response.getResponseBody();
+			statusCode = response.getStatusCode();
 		} else {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);
-			statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
-			if (!SecurityUtils.isAdministrator()) 
-				logger.error("Error serving request", exception);
+			statusCode = SC_INTERNAL_SERVER_ERROR;
 		}
+		if (statusCode >= SC_INTERNAL_SERVER_ERROR)
+			logger.error("Error processing wicket request", exception);
 	}
 
 	@Override

@@ -177,7 +177,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 	
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (SecurityUtils.canManage(project)) 
+		if (SecurityUtils.canManageProject(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, ContributedProjectSettingPage.class, paramsOf(project, settingClass));
 		else 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));

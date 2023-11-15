@@ -8,6 +8,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
@@ -34,7 +35,8 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.StorageManager;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
@@ -43,8 +45,6 @@ import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
@@ -227,7 +227,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				if (activeServer != null) {
 					clusterManager.submitToServer(activeServer, () -> {
 						try {
-							var buildDir = getStorageDir(projectId, buildNumber);
+							var buildDir = getBuildDir(projectId, buildNumber);
 							FileUtils.deleteDir(buildDir);
 							projectManager.directoryModified(projectId, buildDir.getParentFile());
 						} catch (Exception e) {
@@ -297,7 +297,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Map<Long, Long> queryUnfinished() {
 		Query<?> query = getSession().createQuery("select id, project.id from Build where "
-				+ "status=:waiting or status=:pending or status=:running");
+				+ "project.pendingDelete = false and (status=:waiting or status=:pending or status=:running)");
 		query.setParameter("waiting", Build.Status.WAITING);
 		query.setParameter("pending", Build.Status.PENDING);
 		query.setParameter("running", Build.Status.RUNNING);
@@ -370,17 +370,17 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Sessional
 	@Override
-	public List<Build> query(Project project, String term, int count) {
+	public List<Build> query(Project project, String fuzzyQuery, int count) {
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
 
-		if (term.contains("#")) {
-			String projectPath = StringUtils.substringBefore(term, "#");
+		if (fuzzyQuery.contains("#")) {
+			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
 			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
 				project = specifiedProject;
-				term = StringUtils.substringAfter(term, "#");
+				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
 			}
 		}
 		
@@ -410,16 +410,16 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (!projectCriterions.isEmpty()) {
 			criteria.add(Restrictions.or(projectCriterions.toArray(new Criterion[0])));
 			
-			if (term.startsWith("#"))
-				term = term.substring(1);
-			if (term.length() != 0) {
+			if (fuzzyQuery.startsWith("#"))
+				fuzzyQuery = fuzzyQuery.substring(1);
+			if (fuzzyQuery.length() != 0) {
 				try {
-					long buildNumber = Long.parseLong(term);
+					long buildNumber = Long.parseLong(fuzzyQuery);
 					criteria.add(Restrictions.eq(Build.PROP_NUMBER, buildNumber));
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
-							Restrictions.ilike(Build.PROP_VERSION, term, MatchMode.ANYWHERE),
-							Restrictions.ilike(Build.PROP_JOB, term, MatchMode.ANYWHERE)));
+							Restrictions.ilike(Build.PROP_VERSION, fuzzyQuery, MatchMode.ANYWHERE),
+							Restrictions.ilike(Build.PROP_JOB, fuzzyQuery, MatchMode.ANYWHERE)));
 				}
 			}
 
@@ -716,7 +716,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+		return CronScheduleBuilder.dailyAtHourAndMinute(2, 0);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1071,23 +1071,13 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		projectManager.syncDirectory(projectId, BUILDS_DIR, (suffix) -> {
 			projectManager.syncDirectory(projectId, BUILDS_DIR + "/" + suffix, (buildNumberString) -> {
 				var buildNumber = valueOf(buildNumberString);
-				var buildPath = getProjectRelativeStoragePath(buildNumber);
+				var buildPath = getProjectRelativeDirPath(buildNumber);
 				projectManager.syncFile(projectId, buildPath + "/" + LOG_FILE, 
 						getLogLockName(projectId, buildNumber), activeServer);
 				if (clusterManager.runOnServer(activeServer, () -> getArtifactsDir(projectId, buildNumber).exists())) {
 					var artifactsDir = storageManager.initArtifactsDir(projectId, buildNumber);
-					boolean artifactsDirShared;
-					var testFile = new File(artifactsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
-					FileUtils.touchFile(testFile);
-					try {
-						artifactsDirShared = clusterManager.runOnServer(activeServer, () -> {
-							var remoteArtifactsDir = getArtifactsDir(projectId, buildNumber);
-							return new File(remoteArtifactsDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
-						});
-					} finally {
-						FileUtils.deleteFile(testFile);
-					}
-					if (!artifactsDirShared) {
+					var artifactsPath = Build.getProjectRelativeDirPath(buildNumber) + "/" + ARTIFACTS_DIR;
+					if (!projectManager.isSharedDir(artifactsDir, activeServer, projectId, artifactsPath)) {
 						projectManager.syncDirectory(projectId, buildPath + "/" + ARTIFACTS_DIR,
 								getArtifactsLockName(projectId, buildNumber), activeServer);
 					}
@@ -1098,8 +1088,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 
 	@Override
-	public File getStorageDir(Long projectId, Long buildNumber) {
-		return projectManager.getSubDir(projectId, Build.getProjectRelativeStoragePath(buildNumber));
+	public File getBuildDir(Long projectId, Long buildNumber) {
+		return projectManager.getSubDir(projectId, Build.getProjectRelativeDirPath(buildNumber));
 	}
-	
+
+	@Override
+	public File getArtifactsDir(Long projectId, Long buildNumber) {
+		return new File(getBuildDir(projectId, buildNumber), ARTIFACTS_DIR);
+	}
 }

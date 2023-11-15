@@ -6,6 +6,7 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.replica.BuildStorageSyncer;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativeStoragePath;
+import static io.onedev.server.model.Build.getProjectRelativeDirPath;
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.CATEGORY;
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.getReportLockName;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
@@ -81,7 +82,7 @@ public class HtmlModule extends AbstractPluginModule {
 		
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
 			getProjectManager().syncDirectory(projectId, 
-					getProjectRelativeStoragePath(buildNumber) + "/" + CATEGORY,
+					getProjectRelativeDirPath(buildNumber) + "/" + CATEGORY,
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 	}
@@ -107,7 +108,7 @@ public class HtmlModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {

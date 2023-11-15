@@ -6,11 +6,13 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.StorageManager;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 
@@ -24,7 +26,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 
 import static io.onedev.commons.bootstrap.Bootstrap.getSiteDir;
-import static io.onedev.server.model.Build.getArtifactsDir;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager, Serializable {
@@ -39,25 +40,28 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	
 	private final SubscriptionManager subscriptionManager;
 	
+	private final BuildManager buildManager;
+	
 	@Inject
 	public DefaultStorageManager(SettingManager settingManager, TransactionManager transactionManager,
-								 ClusterManager clusterManager, ProjectManager projectManager,
-								 SubscriptionManager subscriptionManager) { 
+								 ClusterManager clusterManager, ProjectManager projectManager, 
+								 SubscriptionManager subscriptionManager, BuildManager buildManager) { 
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
 		this.clusterManager = clusterManager;
 		this.projectManager = projectManager;
 		this.subscriptionManager = subscriptionManager;
+		this.buildManager = buildManager;
 	}
 	
 	@Nullable
 	private File getLfsStorageDir(Long projectId) {
-		StorageSetting storageSetting = settingManager.getContributedSetting(StorageSetting.class);
+		var storageSetting = settingManager.getContributedSetting(StorageSetting.class);
 		if (storageSetting != null && storageSetting.getLfsStore() != null) {
-			var lfsStoreDir = getSiteDir().toPath().resolve(storageSetting.getLfsStore()).toFile();
-			if (!lfsStoreDir.exists())
-				throw new ExplicitException("Lfs store directory not exist");
-			return new File(lfsStoreDir, String.valueOf(projectId));
+			var lfsStorageDir = getSiteDir().toPath().resolve(storageSetting.getLfsStore()).toFile();
+			if (!lfsStorageDir.exists())
+				throw new ExplicitException("Git Lfs storage directory not exist");
+			return new File(lfsStorageDir, String.valueOf(projectId));
 		} else {
 			return null;
 		}
@@ -65,15 +69,28 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 
 	@Nullable
 	private File getArtifactsStorageDir(Long projectId, @Nullable Long buildNumber) {
-		StorageSetting storageSetting = settingManager.getContributedSetting(StorageSetting.class);
+		var storageSetting = settingManager.getContributedSetting(StorageSetting.class);
 		if (storageSetting != null && storageSetting.getArtifactStore() != null) {
-			var artifactsStoreDir = getSiteDir().toPath().resolve(storageSetting.getArtifactStore()).toFile();
-			if (!artifactsStoreDir.exists())
-				throw new ExplicitException("Artifacts store directory not exist");
+			var artifactsStorageDir = getSiteDir().toPath().resolve(storageSetting.getArtifactStore()).toFile();
+			if (!artifactsStorageDir.exists())
+				throw new ExplicitException("Artifact storage directory not exist");
 			String subpath = String.valueOf(projectId);
 			if (buildNumber != null)
-				subpath += "/" + Build.getStoragePath(buildNumber);
-			return new File(artifactsStoreDir, subpath);
+				subpath += "/" + Build.getRelativeDirPath(buildNumber);
+			return new File(artifactsStorageDir, subpath);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	private File getPackStorageDir(Long projectId) {
+		var storageSetting = settingManager.getContributedSetting(StorageSetting.class);
+		if (storageSetting != null && storageSetting.getPackStore() != null) {
+			var packTypeStorageDir = getSiteDir().toPath().resolve(storageSetting.getPackStore()).toFile();
+			if (!packTypeStorageDir.exists())
+				throw new ExplicitException("Package storage directory not exist");
+			return new File(packTypeStorageDir, String.valueOf(projectId));
 		} else {
 			return null;
 		}
@@ -109,7 +126,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	public File initArtifactsDir(Long projectId, Long buildNumber) {
 		if (subscriptionManager.isSubscriptionActive()) {
 			File artifactsStorageDir = getArtifactsStorageDir(projectId, buildNumber);
-			File artifactsDir = getArtifactsDir(projectId, buildNumber);
+			File artifactsDir = buildManager.getArtifactsDir(projectId, buildNumber);
 			if (artifactsStorageDir != null) {
 				if (!artifactsDir.exists()) {
 					FileUtils.createDir(artifactsStorageDir);
@@ -126,9 +143,35 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 			}
 			return artifactsDir;
 		} else {
-			var artifactsDir = getArtifactsDir(projectId, buildNumber);
+			var artifactsDir = buildManager.getArtifactsDir(projectId, buildNumber);
 			FileUtils.createDir(artifactsDir);
 			return artifactsDir;
+		}
+	}
+
+	@Override
+	public File initPacksDir(Long projectId) {
+		File packsDir = projectManager.getSubDir(projectId, PackBlob.PACKS_DIR, false);
+		if (packsDir.exists()) {
+			return packsDir;
+		} else if (subscriptionManager.isSubscriptionActive()) {
+			File packsStorageDir = getPackStorageDir(projectId);
+			if (packsStorageDir != null) {
+				FileUtils.createDir(packsStorageDir);
+				try {
+					Files.createSymbolicLink(
+							packsDir.toPath(),
+							packsStorageDir.toPath());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				FileUtils.createDir(packsDir);
+			}
+			return packsDir;
+		} else {
+			FileUtils.createDir(packsDir);
+			return packsDir;
 		}
 	}
 	
@@ -160,6 +203,9 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 						File artifactsStorageDir = getArtifactsStorageDir(projectId, null);
 						if (artifactsStorageDir != null && artifactsStorageDir.exists())
 							FileUtils.deleteDir(artifactsStorageDir);
+						File packStorageDir = getPackStorageDir(projectId);
+						if (packStorageDir != null && packStorageDir.exists())
+							FileUtils.deleteDir(packStorageDir);
 						return null;
 					}));
 				}

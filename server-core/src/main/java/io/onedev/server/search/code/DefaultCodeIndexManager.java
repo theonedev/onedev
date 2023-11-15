@@ -388,7 +388,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (File file: projectManager.getStorageDir().listFiles()) {
+		for (File file: projectManager.getProjectsDir().listFiles()) {
 			Long projectId = Long.valueOf(file.getName());
 			File indexDir = projectManager.getIndexDir(projectId);
 			if (indexDir.exists()) {

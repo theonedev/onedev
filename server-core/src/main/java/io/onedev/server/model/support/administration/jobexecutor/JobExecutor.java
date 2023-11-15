@@ -4,24 +4,23 @@ import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DnsName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildRunning;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.DnsName;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.web.util.WicketUtils;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -209,9 +208,9 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	protected String getErrorMessage(Exception exception) {
-		Response response = ExceptionUtils.buildResponse(exception);
+		var response = ExceptionUtils.buildResponse(exception);
 		if (response != null) 
-			return response.getEntity().toString();
+			return response.getResponseBody();
 		else
 			return Throwables.getStackTraceAsString(exception);
 	}

@@ -6,10 +6,11 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -447,7 +448,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(Build.getStorageDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
+					return CoverageReport.readFrom(new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
 				}
 				
 			});

@@ -662,7 +662,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			}
 		}
 		
-		Setting setting = settingManager.getSetting(Key.SYSTEM);
+		Setting setting = settingManager.findSetting(Key.SYSTEM);
 		SystemSetting systemSetting;
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
@@ -712,11 +712,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		setting = settingManager.getSetting(Key.SYSTEM_UUID);
+		setting = settingManager.findSetting(Key.SYSTEM_UUID);
 		if (setting == null || setting.getValue() == null) 
 			settingManager.saveSystemUUID(UUID.randomUUID().toString());
 
-		setting = settingManager.getSetting(Key.SSH);
+		setting = settingManager.findSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
 			SshSetting sshSetting = new SshSetting();
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
@@ -724,17 +724,17 @@ public class DefaultDataManager implements DataManager, Serializable {
             settingManager.saveSshSetting(sshSetting);
         }
 		
-		setting = settingManager.getSetting(Key.GPG);
+		setting = settingManager.findSetting(Key.GPG);
 		if (setting == null || setting.getValue() == null) {
 			GpgSetting gpgSetting = new GpgSetting();
             settingManager.saveGpgSetting(gpgSetting);
         }
 		
-		setting = settingManager.getSetting(Key.SECURITY);
+		setting = settingManager.findSetting(Key.SECURITY);
 		if (setting == null) {
 			settingManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		setting = settingManager.getSetting(Key.ISSUE);
+		setting = settingManager.findSetting(Key.ISSUE);
 		if (setting == null) {
 			LinkSpec link = new LinkSpec();
 			link.setName("Child Issue");
@@ -755,50 +755,50 @@ public class DefaultDataManager implements DataManager, Serializable {
 			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 
-		setting = settingManager.getSetting(Key.PERFORMANCE);
+		setting = settingManager.findSetting(Key.PERFORMANCE);
 		if (setting == null) {
 			settingManager.savePerformanceSetting(new PerformanceSetting());
 		} 
-		setting = settingManager.getSetting(Key.AUTHENTICATOR);
+		setting = settingManager.findSetting(Key.AUTHENTICATOR);
 		if (setting == null) {
 			settingManager.saveAuthenticator(null);
 		}
-		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
+		setting = settingManager.findSetting(Key.JOB_EXECUTORS);
 		if (setting == null) 
 			settingManager.saveJobExecutors(new ArrayList<>());
-		setting = settingManager.getSetting(Key.SSO_CONNECTORS);
+		setting = settingManager.findSetting(Key.SSO_CONNECTORS);
 		if (setting == null) {
 			settingManager.saveSsoConnectors(Lists.newArrayList());
 		}
-		setting = settingManager.getSetting(Key.GROOVY_SCRIPTS);
+		setting = settingManager.findSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());
 		}
-		setting = settingManager.getSetting(Key.PULL_REQUEST);
+		setting = settingManager.findSetting(Key.PULL_REQUEST);
 		if (setting == null) {
 			settingManager.savePullRequestSetting(new GlobalPullRequestSetting());
 		}
-		setting = settingManager.getSetting(Key.BUILD);
+		setting = settingManager.findSetting(Key.BUILD);
 		if (setting == null) {
 			settingManager.saveBuildSetting(new GlobalBuildSetting());
 		}
-		setting = settingManager.getSetting(Key.PROJECT);
+		setting = settingManager.findSetting(Key.PROJECT);
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
-		setting = settingManager.getSetting(Key.SUBSCRIPTION_DATA);
+		setting = settingManager.findSetting(Key.SUBSCRIPTION_DATA);
 		if (setting == null) {
 			settingManager.saveSubscriptionData(null);
 		}
-		setting = settingManager.getSetting(Key.ALERT);
+		setting = settingManager.findSetting(Key.ALERT);
 		if (setting == null) {
 			settingManager.saveAlertSetting(new AlertSetting());
 		}
-		setting = settingManager.getSetting(Key.AGENT);
+		setting = settingManager.findSetting(Key.AGENT);
 		if (setting == null) {
 			settingManager.saveAgentSetting(new AgentSetting());
 		}
-		setting = settingManager.getSetting(Key.SERVICE_DESK_SETTING);
+		setting = settingManager.findSetting(Key.SERVICE_DESK_SETTING);
 		if (setting == null) { 
 			settingManager.saveServiceDeskSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -812,7 +812,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		setting = settingManager.getSetting(Key.EMAIL_TEMPLATES);
+		setting = settingManager.findSetting(Key.EMAIL_TEMPLATES);
 		if (setting == null) {
 			settingManager.saveEmailTemplates(new EmailTemplates());
 		} else {
@@ -821,17 +821,18 @@ public class DefaultDataManager implements DataManager, Serializable {
 				emailTemplates.setStopwatchOverdue(EmailTemplates.DEFAULT_STOPWATCH_OVERDUE);
 			if (emailTemplates.getPasswordReset() == null)
 				emailTemplates.setPasswordReset(EmailTemplates.DEFAULT_PASSWORD_RESET);
+			settingManager.saveEmailTemplates(emailTemplates);
 		}
 		
-		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);
+		setting = settingManager.findSetting(Key.CONTRIBUTED_SETTINGS);
 		if (setting == null) 
 			settingManager.saveContributedSettings(new LinkedHashMap<>());
 		
-		setting = settingManager.getSetting(Key.MAIL_SERVICE);
+		setting = settingManager.findSetting(Key.MAIL_SERVICE);
 		if (setting == null) 
 			settingManager.saveMailService(null);
 		
-		setting = settingManager.getSetting(Key.BACKUP);
+		setting = settingManager.findSetting(Key.BACKUP);
 		if (setting == null) {
 			settingManager.saveBackupSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -846,11 +847,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		setting = settingManager.getSetting(Key.BRANDING);
+		setting = settingManager.findSetting(Key.BRANDING);
 		if (setting == null) 
 			settingManager.saveBrandingSetting(new BrandingSetting());
 
-		setting = settingManager.getSetting(Key.CLUSTER_SETTING);
+		setting = settingManager.findSetting(Key.CLUSTER_SETTING);
 		if (setting == null) {
 			ClusterSetting clusterSetting = new ClusterSetting();
 			clusterSetting.setReplicaCount(1);

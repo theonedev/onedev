@@ -149,7 +149,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getBuild());
+		return SecurityUtils.canAccessBuild(getBuild());
 	}
 	
 	@Override
@@ -308,7 +308,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getBuild()));
+						setVisible(SecurityUtils.canManageBuild(getBuild()));
 					}
 
 				});
@@ -469,7 +469,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canReadCode(getProject())) 
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
 				
-				if (SecurityUtils.canManage(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
+				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
 					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
 				}
 				

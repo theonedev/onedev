@@ -1,14 +1,19 @@
 package io.onedev.server.entitymanager.impl;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.mailservice.MailService;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -24,46 +29,60 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.onedev.server.model.Setting.PROP_KEY;
 import static org.hibernate.criterion.Restrictions.eq;
 
 @Singleton
-public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager {
+public class DefaultSettingManager extends BaseEntityManager<Setting> 
+		implements SettingManager, Serializable {
 	
-	private final Map<Key, Long> idCache = new ConcurrentHashMap<>();
+	private final Map<Key, Optional<Serializable>> cache = new ConcurrentHashMap<>();
+	
+	private final ClusterManager clusterManager;
 	
 	@Inject
-	public DefaultSettingManager(Dao dao) {
+	public DefaultSettingManager(Dao dao, ClusterManager clusterManager) {
 		super(dao);
+		this.clusterManager = clusterManager;
 	}
 	
 	@Sessional
-	protected Serializable getSettingValue(Key key) {
-		var setting = getSetting(key);
-		return setting != null? setting.getValue(): null;
+	@Listen
+	public void on(SystemStarting event) {
+		for (var setting: query()) {
+			cache.put(setting.getKey(), Optional.ofNullable(setting.getValue()));
+		}
+	}
+	
+	@Sessional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Setting) {
+			Setting setting = (Setting) event.getEntity();
+			var settingValue = setting.getValue();
+			clusterManager.runOnAllServers(() -> {
+				cache.put(setting.getKey(), Optional.ofNullable(settingValue));
+				return null;
+			});
+		}
 	}
 	
 	@Sessional
 	@Override
-	public Setting getSetting(Key key) {
-		Setting setting;
-		Long id = idCache.get(key);
-		if (id == null) {
-			setting = find(newCriteria().add(eq(PROP_KEY, key)));
-			if (setting != null)
-				idCache.put(key, setting.getId());
-		} else {
-			setting = load(id);
-		}
-		return setting;
+	public Setting findSetting(Key key) {
+		return find(newCriteria().add(eq(PROP_KEY, key)));
+	}
+	
+	@Nullable
+	private Serializable getSettingValue(Key key) {
+		var settingValue = cache.get(key);	
+		return settingValue != null? settingValue.orElse(null): null;
 	}
 	
 	@Override
@@ -88,7 +107,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	
 	@Transactional
 	protected void saveSetting(Key key, Serializable value) {
-		var setting = getSetting(key);
+		var setting = findSetting(key);
 		if (setting == null) {
 			setting = new Setting();
 			setting.setKey(key);
@@ -539,4 +558,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		return usage.prefix("administration");
 	}
 
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(SettingManager.class);
+	}
+	
 }

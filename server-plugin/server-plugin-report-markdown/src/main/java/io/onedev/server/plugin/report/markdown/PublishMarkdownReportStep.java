@@ -61,7 +61,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 		write(getReportLockName(build), () -> {
 			File startPage = new File(inputDir, getStartPage()); 
 			if (startPage.exists()) {
-				File reportDir = new File(build.getStorageDir(), CATEGORY + "/" + getReportName());
+				File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 
 				FileUtils.createDir(reportDir);
 				File startPageFile = new File(reportDir, START_PAGE);

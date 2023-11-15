@@ -121,7 +121,6 @@ import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
-import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.simple.security.*;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
@@ -200,7 +199,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	
 	private void addErrorPages() {
 		add(new BasePageMapper("/~errors/404", PageNotFoundErrorPage.class));
-		add(new BasePageMapper("/~errors/405", MethodNotAllowedErrorPage.class));
 	}
 	
 	private void addSecurityPages() {
@@ -361,7 +359,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~builds/${build}/fixed-issues", FixedIssuesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/artifacts", BuildArtifactsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/invalid", InvalidBuildPage.class));
-		
+
 		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		
 		add(new ProjectPageMapper("${project}/~settings/general", GeneralProjectSettingPage.class));

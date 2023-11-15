@@ -2,6 +2,7 @@ package io.onedev.server.job;
 
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -37,7 +38,7 @@ public class JobContext implements Serializable {
 	
 	private final Collection<CacheSpec> cacheSpecs; 
 	
-	private final List<Service> services;
+	private final List<ServiceFacade> services;
 	
 	private final long timeout;
 	
@@ -46,7 +47,7 @@ public class JobContext implements Serializable {
 	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath, 
 			String projectGitDir, Long buildId, Long buildNumber, List<Action> actions, 
 			String refName, ObjectId commitId, Collection<CacheSpec> caches, 
-			List<Service> services, long timeout, int retried) {
+			List<ServiceFacade> services, long timeout, int retried) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -91,7 +92,7 @@ public class JobContext implements Serializable {
 		return cacheSpecs;
 	}
 
-	public List<Service> getServices() {
+	public List<ServiceFacade> getServices() {
 		return services;
 	}
 

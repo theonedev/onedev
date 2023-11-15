@@ -112,8 +112,9 @@ public class BeanViewer extends Panel {
 				Serializable bean = (Serializable) BeanViewer.this.getDefaultModelObject();
 				Serializable propertyValue = (Serializable) property.getPropertyValue(bean);
 				valueTd.add(property.renderForView("content", Model.of(propertyValue)));
-				
 				propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
+				if (property.isPropertyHidden())
+					propertyContainer.add(AttributeAppender.append("class", "d-none"));
 			}
 			groupContainer.add(propertiesView);
 		}

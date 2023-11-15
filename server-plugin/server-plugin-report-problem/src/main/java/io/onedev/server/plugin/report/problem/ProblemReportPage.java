@@ -1,16 +1,33 @@
 package io.onedev.server.plugin.report.problem;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.util.ExceptionUtils;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
+import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -38,35 +55,16 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Callable;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
-import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
-import io.onedev.server.web.util.SuggestionUtils;
-
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public class ProblemReportPage extends BuildReportPage {
@@ -424,7 +422,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				public ProblemReport call() throws Exception {
-					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
+					File reportDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
 					return ProblemReport.readFrom(reportDir);
 				}
 				

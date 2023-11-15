@@ -1,6 +1,7 @@
 package io.onedev.server.git;
 
 import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -8,14 +9,12 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
-import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
@@ -23,7 +22,6 @@ import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
@@ -100,7 +98,7 @@ public class GitFilter implements Filter {
 		
 		if (facade == null) {
 			if (clusterAccess || upload) { 
-				throw new GitException(String.format("Unable to find project '%s'", projectPath));
+				throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));
 			} else {
 				Project project = projectManager.setup(projectPath);
 				Preconditions.checkState(project.isNew());
@@ -357,27 +355,23 @@ public class GitFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		
-		try {
-			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
-				if (onedev.isReady())
-					processRefs(httpRequest, httpResponse);
-				else
-					throw new ServerNotReadyException();
-			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
-				if (onedev.isReady())
+		if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
+			if (onedev.isReady())
+				processRefs(httpRequest, httpResponse);
+			else
+				throw new ServerNotReadyException();
+		} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
+			if (onedev.isReady()) {
+				try {
 					processPack(httpRequest, httpResponse);
-				else
-					throw new ServerNotReadyException();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new RuntimeException(e);
+				}
 			} else {
-				chain.doFilter(request, response);
+				throw new ServerNotReadyException();
 			}
-		} catch (ServerNotReadyException e) {
-			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_SERVICE_UNAVAILABLE, e.getMessage());
-		} catch (UnauthorizedException|AuthenticationException e) {
-			throw e;
-		} catch (Exception e) {
-			logger.error("Error serving git request", e);
-			throw ExceptionUtils.unchecked(e);
+		} else {
+			chain.doFilter(request, response);
 		}
 	}
 	

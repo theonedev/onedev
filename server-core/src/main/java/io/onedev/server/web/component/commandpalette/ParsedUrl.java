@@ -118,7 +118,7 @@ public abstract class ParsedUrl implements Serializable {
 		String segment2 = segments.size()>1? segments.get(1): "";
 		switch (segment1) {
 		case "~settings":
-			if (SecurityUtils.canManage(project)) {
+			if (SecurityUtils.canManageProject(project)) {
 				if (segment2.equals("service-desk")) {
 					return OneDev.getInstance(SettingManager.class).getServiceDeskSetting() != null 
 							&& project.isIssueManagement();
