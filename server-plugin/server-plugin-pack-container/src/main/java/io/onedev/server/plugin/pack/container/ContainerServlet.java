@@ -202,6 +202,7 @@ public class ContainerServlet extends PackServlet {
 							if (packBlobManager.finishUpload(projectId, uuid, digest.getHash())) {
 								response.setStatus(SC_CREATED);
 								response.setHeader("Location", getBlobUrl(projectPath, digestString));
+								response.setHeader("Docker-Content-Digest", digestString);
 							} else {
 								throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
 										"Invalid blob digest");
