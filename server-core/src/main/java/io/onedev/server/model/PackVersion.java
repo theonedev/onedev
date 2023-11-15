@@ -47,6 +47,8 @@ public class PackVersion extends AbstractEntity {
 	@Column(nullable=false)
 	private String dataHash;
 	
+	private String extraInfo;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Build build;
 
@@ -91,6 +93,14 @@ public class PackVersion extends AbstractEntity {
 
 	public void setDataHash(String dataHash) {
 		this.dataHash = dataHash;
+	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public void setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
 	}
 
 	@Nullable

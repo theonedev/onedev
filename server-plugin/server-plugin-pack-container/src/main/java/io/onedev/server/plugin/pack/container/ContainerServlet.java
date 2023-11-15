@@ -17,6 +17,7 @@ import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Digest;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.UrlUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -267,6 +268,9 @@ public class ContainerServlet extends PackServlet {
 						case "PUT":
 							var projectId = sessionManager.call(() -> getProject(projectPath, true).getId());
 							var baos = new ByteArrayOutputStream();
+							var contentType = request.getContentType();
+							if (contentType == null)
+								throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_INVALID, "No content type specified");
 							try (var is = request.getInputStream()) {
 								if (copyLarge(is, baos, 0, MAX_DATA_LEN, new byte[BUFFER_SIZE]) >= MAX_DATA_LEN) 
 									throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");									
@@ -285,7 +289,7 @@ public class ContainerServlet extends PackServlet {
 									hash = Digest.sha256Of(bytes).getHash();
 								}
 
-								var data = new ContainerData(bytes);
+								var data = new ContainerData(bytes, contentType);
 								var manifest = data.getManifest();
 								var project = projectManager.load(projectId);
 								Collection<PackBlob> packBlobs = new HashSet<>();
@@ -329,6 +333,7 @@ public class ContainerServlet extends PackServlet {
 								}
 								packVersion.setDataBytes(bytes);
 								packVersion.setDataHash(hash);
+								packVersion.setExtraInfo(contentType);
 
 								packVersionManager.createOrUpdate(packVersion, packBlobs);
 
@@ -348,15 +353,15 @@ public class ContainerServlet extends PackServlet {
 								else
 									packVersion = packVersionManager.findByDataHash(project, TYPE, parseDigest(reference).getHash());
 								if (packVersion != null)
-									return new Pair<>(packVersion.getDataBytes(), packVersion.getDataHash());
+									return new ImmutableTriple<>(packVersion.getDataBytes(), packVersion.getDataHash(), packVersion.getExtraInfo());
 								else
 									return null;
 							});
 							if (versionInfo != null) {
 								response.setStatus(SC_OK);
-								response.setContentType(new ContainerData(versionInfo.getLeft()).getMediaType());
+								response.setContentType(versionInfo.getRight());
 								response.setHeader("Docker-Content-Digest",
-										"sha256:" + versionInfo.getRight());
+										"sha256:" + versionInfo.getMiddle());
 								response.setContentLength(versionInfo.getLeft().length);
 								if (method.equals("GET")) {
 									try (var os = response.getOutputStream()) {
