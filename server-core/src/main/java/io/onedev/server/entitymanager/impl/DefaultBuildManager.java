@@ -157,7 +157,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public Build findLastFinished(Project project, String jobName, @Nullable String refName) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
-		criteria.add(Restrictions.eq(Build.PROP_JOB, jobName));
+		criteria.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
 		if (refName != null) {
 			refName = refName.replace("*", "%");
 			criteria.add(Restrictions.ilike(Build.PROP_REF_NAME, refName));
@@ -268,7 +268,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (pipeline != null)
 			predicates.add(builder.equal(root.get(Build.PROP_PIPELINE), pipeline));
 		if (jobName != null)
-			predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+			predicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 		if (refName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
 
@@ -323,7 +323,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				builder.equal(root.get(Build.PROP_STATUS), Build.Status.RUNNING),
 				builder.equal(root.get(Build.PROP_STATUS), Build.Status.WAITING)));
 		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-		predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+		predicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 		
 		if (refName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
@@ -397,7 +397,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				} else {
 					List<Criterion> jobCriterions = new ArrayList<>();
 					for (String jobName: accessibleJobNames) 
-						jobCriterions.add(Restrictions.eq(Build.PROP_JOB, jobName));
+						jobCriterions.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
 					if (!jobCriterions.isEmpty()) {
 						projectCriterions.add(Restrictions.and(
 								Restrictions.eq(Build.PROP_PROJECT, each), 
@@ -419,7 +419,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
 							Restrictions.ilike(Build.PROP_VERSION, fuzzyQuery, MatchMode.ANYWHERE),
-							Restrictions.ilike(Build.PROP_JOB, fuzzyQuery, MatchMode.ANYWHERE)));
+							Restrictions.ilike(Build.PROP_JOB_NAME, fuzzyQuery, MatchMode.ANYWHERE)));
 				}
 			}
 
@@ -479,7 +479,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				if (availableJobNames != null && !accessibleJobNames.containsAll(availableJobNames)) {
 					List<Predicate> jobPredicates = new ArrayList<>();
 					for (String jobName: accessibleJobNames) 
-						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 					predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 				}
 			}
@@ -501,7 +501,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 						} else {
 							List<Predicate> jobPredicates = new ArrayList<>();
 							for (String jobName: accessibleJobNamesOfProject) 
-								jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+								jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 							projectPredicates.add(builder.and(
 									builder.equal(root.get(Build.PROP_PROJECT), project), 
 									builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));

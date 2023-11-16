@@ -66,7 +66,7 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="o_request_id"),  
 				@Index(columnList= PROP_COMMIT_HASH), @Index(columnList=PROP_PIPELINE),
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList= PROP_JOB_NAME), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
@@ -100,7 +100,7 @@ public class Build extends ProjectBelonging
 	
 	public static final String NAME_LABEL = "Label";
 	
-	public static final String PROP_JOB = "jobName";
+	public static final String PROP_JOB_NAME = "jobName";
 	
 	public static final String NAME_STATUS = "Status";
 	
@@ -173,7 +173,7 @@ public class Build extends ProjectBelonging
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
 	
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_JOB, PROP_JOB,
+			NAME_JOB, PROP_JOB_NAME,
 			NAME_STATUS, PROP_STATUS,
 			NAME_NUMBER, PROP_NUMBER,
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
@@ -589,11 +589,11 @@ public class Build extends ProjectBelonging
 		this.params = params;
 	}
 
-	public Collection<PackVersion> getPacks() {
+	public Collection<PackVersion> getPackVersions() {
 		return packVersions;
 	}
 
-	public void setPacks(Collection<PackVersion> packVersions) {
+	public void setPackVersions(Collection<PackVersion> packVersions) {
 		this.packVersions = packVersions;
 	}
 

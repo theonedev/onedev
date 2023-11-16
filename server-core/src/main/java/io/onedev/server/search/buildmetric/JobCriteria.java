@@ -20,7 +20,7 @@ public class JobCriteria extends BuildMetricCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<?> metricRoot, Join<?, ?> buildJoin, CriteriaBuilder builder) {
-		Path<String> attribute = buildJoin.get(Build.PROP_JOB);
+		Path<String> attribute = buildJoin.get(Build.PROP_JOB_NAME);
 		String normalized = jobName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}

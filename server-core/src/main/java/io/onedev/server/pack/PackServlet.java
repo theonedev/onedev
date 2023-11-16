@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,8 +30,8 @@ public abstract class PackServlet extends HttpServlet {
 		this.objectMapper = objectMapper;
 	}
 
-	protected String getPossibleJobToken(HttpServletRequest req) {
-		var auth = req.getHeader("Authorization");
+	protected String getPossibleJobToken(HttpServletRequest request) {
+		var auth = request.getHeader("Authorization");
 		if (auth != null && auth.startsWith("Basic ")) {
 			var basicAuth = auth.substring("Basic ".length());
 			basicAuth = new String(Base64.decodeBase64(basicAuth), UTF_8);
@@ -37,6 +39,15 @@ public abstract class PackServlet extends HttpServlet {
 		} else {
 			return UUID.randomUUID().toString();
 		}
+	}
+	
+	@Nullable
+	protected Build getBuild(String possibleJobToken) {
+		var jobContext = jobManager.getJobContext(possibleJobToken, false);
+		if (jobContext != null)
+			return buildManager.load(jobContext.getBuildId());
+		else 
+			return null;
 	}
 	
 	protected void sendResponse(HttpServletResponse response, int statusCode, Object jsonObj) {

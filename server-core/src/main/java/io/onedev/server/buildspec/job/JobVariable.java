@@ -12,21 +12,6 @@ import java.net.URL;
 
 public enum JobVariable {
 
-	SERVER {
-		@Override
-		public String getValue(Build build) {
-			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-			try {
-				var url = new URL(serverUrl);
-				if (url.getPort() != -1)
-					return url.getHost() + ":" + url.getPort();
-				else
-					return url.getHost();
-			} catch (MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	},
 	PROJECT_NAME {
 
 		@Override
@@ -120,6 +105,21 @@ public enum JobVariable {
 				return String.valueOf(build.getIssue().getNumber());
 			else
 				return null;
+		}
+	},
+	SERVER {
+		@Override
+		public String getValue(Build build) {
+			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			try {
+				var url = new URL(serverUrl);
+				if (url.getPort() != -1)
+					return url.getHost() + ":" + url.getPort();
+				else
+					return url.getHost();
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}; 
 	

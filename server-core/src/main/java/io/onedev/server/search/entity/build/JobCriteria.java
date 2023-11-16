@@ -22,7 +22,7 @@ public class JobCriteria extends Criteria<Build> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		Path<String> attribute = from.get(Build.PROP_JOB);
+		Path<String> attribute = from.get(Build.PROP_JOB_NAME);
 		String normalized = jobName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}

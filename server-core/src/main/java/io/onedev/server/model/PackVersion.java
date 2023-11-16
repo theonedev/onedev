@@ -5,9 +5,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static io.onedev.server.model.PackVersion.PROP_NAME;
-import static io.onedev.server.model.PackVersion.PROP_TYPE;
-import static io.onedev.server.model.PackVersion.PROP_DATA_HASH;
+import static io.onedev.server.model.PackVersion.*;
 
 @Entity
 @Table(
@@ -119,5 +117,5 @@ public class PackVersion extends AbstractEntity {
 	public void setBlobReferences(Collection<PackBlobReference> blobReferences) {
 		this.blobReferences = blobReferences;
 	}
-	
+
 }

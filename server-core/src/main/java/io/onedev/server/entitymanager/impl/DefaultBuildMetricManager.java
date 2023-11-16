@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.ExceptionUtils.unchecked;
-import static io.onedev.server.model.Build.PROP_JOB;
+import static io.onedev.server.model.Build.PROP_JOB_NAME;
 import static io.onedev.server.model.Build.PROP_PROJECT;
 import static io.onedev.server.model.support.BuildMetric.PROP_BUILD;
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
@@ -98,13 +98,13 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 					if (availableReportNamesOfJob != null) {
 						if (entry.getValue().containsAll(availableReportNamesOfJob)) {
 							jobsWithAllReports.add(entry.getKey());
-							jobPredicates.add(builder.equal(buildJoin.get(PROP_JOB), entry.getKey()));
+							jobPredicates.add(builder.equal(buildJoin.get(PROP_JOB_NAME), entry.getKey()));
 						} else {
 							List<Predicate> reportPredicates = new ArrayList<>();
 							for (String reportName: entry.getValue()) 
 								reportPredicates.add(builder.equal(metricRoot.get(PROP_REPORT), reportName));
 							jobPredicates.add(builder.and(
-									builder.equal(buildJoin.get(PROP_JOB), entry.getKey()), 
+									builder.equal(buildJoin.get(PROP_JOB_NAME), entry.getKey()), 
 									builder.or(reportPredicates.toArray(new Predicate[reportPredicates.size()]))));
 						}
 					} else {
@@ -168,7 +168,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 				Class<?> entityClass = entityType.getJavaType();
 				if (BuildMetric.class.isAssignableFrom(entityClass)) {
 					String queryString = String.format("select build.%s.id, build.%s, metric.%s from %s metric inner join metric.%s build",
-							PROP_PROJECT, PROP_JOB, PROP_REPORT, entityClass.getSimpleName(), PROP_BUILD);
+							PROP_PROJECT, PROP_JOB_NAME, PROP_REPORT, entityClass.getSimpleName(), PROP_BUILD);
 					Query<?> query = dao.getSession().createQuery(queryString);
 					for (Object[] fields: (List<Object[]>)query.list())
 						populateReportNames(new Key((Long)fields[0], entityClass), (String)fields[1], (String)fields[2]);

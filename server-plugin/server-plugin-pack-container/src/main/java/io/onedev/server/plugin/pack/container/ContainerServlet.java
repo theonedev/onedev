@@ -99,6 +99,8 @@ public class ContainerServlet extends PackServlet {
 				var user = userManager.findByAccessToken(accessToken);
 				if (user != null)
 					userId = user.getId();
+			} else {
+				possibleJobToken = UUID.randomUUID().toString();
 			}
 
 			if (userId != null)
@@ -331,6 +333,7 @@ public class ContainerServlet extends PackServlet {
 									packVersion.setType(TYPE);
 									packVersion.setName(reference);
 								}
+								packVersion.setBuild(getBuild(possibleJobToken));
 								packVersion.setDataBytes(bytes);
 								packVersion.setDataHash(hash);
 								packVersion.setExtraInfo(contentType);
@@ -352,9 +355,9 @@ public class ContainerServlet extends PackServlet {
 									packVersion = packVersionManager.findByName(project, TYPE, reference);
 								else
 									packVersion = packVersionManager.findByDataHash(project, TYPE, parseDigest(reference).getHash());
-								if (packVersion != null)
+								if (packVersion != null) 
 									return new ImmutableTriple<>(packVersion.getDataBytes(), packVersion.getDataHash(), packVersion.getExtraInfo());
-								else
+								else 
 									return null;
 							});
 							if (versionInfo != null) {
