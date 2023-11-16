@@ -164,7 +164,7 @@ public class Role extends AbstractEntity implements BasePermission {
 				&& !(boolean)EditContext.get().getInputValue("manageCodeComments");
 	}
 
-	@Editable(order=350)
+	@Editable(order=350, name="Package Privilege")
 	@NotNull
 	public PackPrivilege getPackPrivilege() {
 		return packPrivilege;
