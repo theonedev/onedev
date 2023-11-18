@@ -8,6 +8,7 @@ import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.pack.PackEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.*;
@@ -33,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 public abstract class ChannelNotificationManager<T extends ChannelNotificationSetting> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChannelNotificationManager.class);
@@ -55,7 +58,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			Issue issue = event.getIssue();
 			User user = event.getUser();
 
-			String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle());
+			String issueInfo = format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle());
 
 			String eventDescription;
 			if (user != null) 
@@ -74,7 +77,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
 
-			String pullRequestInfo = String.format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle());
+			String pullRequestInfo = format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle());
 
 			String eventDescription;
 			if (user != null) eventDescription = user.getDisplayName() + " " + event.getActivity();
@@ -91,12 +94,22 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		Build build = event.getBuild();
 
 		String eventDescription = build.getStatus().toString();
-		if (build.getVersion() != null) eventDescription = build.getVersion() + " " + eventDescription;
+		if (build.getVersion() != null) 
+			eventDescription = build.getVersion() + " " + eventDescription;
 
-		String buildInfo = String.format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
+		String buildInfo = format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
 		postIfApplicable(buildInfo + " " + eventDescription, event);
 	}
 
+	@Sessional
+	@Listen
+	public void on(PackEvent event) {
+		Pack pack = event.getPack();
+		var title = format("[%s] %s:%s created", 
+				pack.getType(), pack.getProject().getPath(), pack.getVersion());
+		postIfApplicable(title, event);
+	}
+	
 	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
@@ -110,7 +123,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 					if (target == null) target = event.getRefName();
 				}
 
-				String commitInfo = String.format("[Commit] (%s:%s - %s)", project.getPath(), GitUtils.abbreviateSHA(commit.name()), target);
+				String commitInfo = format("[Commit] (%s:%s - %s)", project.getPath(), GitUtils.abbreviateSHA(commit.name()), target);
 				postIfApplicable(commitInfo + " " + commit.getShortMessage(), event);
 			}
 		}
@@ -122,9 +135,9 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		if (!(event instanceof CodeCommentEdited)) {
 			CodeComment comment = event.getComment();
 
-			String commentInfo = String.format("[Code Comment] (%s:%s)", event.getProject().getPath(), comment.getMark().getPath());
+			String commentInfo = format("[Code Comment] (%s:%s)", event.getProject().getPath(), comment.getMark().getPath());
 
-			String eventDescription = String.format("%s %s", event.getUser().getDisplayName(), event.getActivity());
+			String eventDescription = format("%s %s", event.getUser().getDisplayName(), event.getActivity());
 
 			postIfApplicable(commentInfo + " " + eventDescription, event);
 		}
@@ -154,9 +167,9 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 							String errorMessage;
 							if (responseEntity != null) {
 								String content = IOUtils.readInputStreamToString(responseEntity.getContent());
-								errorMessage = String.format("Error sending channel notification (status code: %d, response: %s)", response.getStatusLine().getStatusCode(), content);
+								errorMessage = format("Error sending channel notification (status code: %d, response: %s)", response.getStatusLine().getStatusCode(), content);
 							} else {
-								errorMessage = String.format("Error sending channel notification (status code: %d)", response.getStatusLine().getStatusCode());
+								errorMessage = format("Error sending channel notification (status code: %d)", response.getStatusLine().getStatusCode());
 							}
 							logger.error(errorMessage);
 						}

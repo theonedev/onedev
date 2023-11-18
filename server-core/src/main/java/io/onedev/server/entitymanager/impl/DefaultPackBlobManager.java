@@ -332,8 +332,8 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				continue;
 			}
 			
-			packBlob.setProject(reference.getPackVersion().getProject());
-			var newProjectId = reference.getPackVersion().getProject().getId();
+			packBlob.setProject(reference.getPack().getProject());
+			var newProjectId = reference.getPack().getProject().getId();
 			if (!projectManager.getActiveServer(projectId, true)
 					.equals(projectManager.getActiveServer(newProjectId, true))) {
 				projectManager.runOnActiveServer(newProjectId, () -> {

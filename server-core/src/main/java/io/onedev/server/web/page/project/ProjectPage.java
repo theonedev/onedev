@@ -46,6 +46,8 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -234,6 +236,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds",
 					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
+		}
+		
+		if (SecurityUtils.canReadPack(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("package", "Packages",
+					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
+					Lists.newArrayList(PackDetailPage.class)));
 		}
 		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();

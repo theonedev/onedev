@@ -50,7 +50,8 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	@Inject
 	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
-			UserManager userManager, SettingManager settingManager, MarkdownManager markdownManager) {
+									UserManager userManager, SettingManager settingManager, 
+									MarkdownManager markdownManager) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;

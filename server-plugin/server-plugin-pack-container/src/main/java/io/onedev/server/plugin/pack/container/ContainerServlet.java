@@ -7,8 +7,8 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ChallengeAwareUnauthenticatedException;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.PackVersion;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackServlet;
 import io.onedev.server.persistence.SessionManager;
@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-import static io.onedev.server.model.PackVersion.MAX_DATA_LEN;
+import static io.onedev.server.model.Pack.MAX_DATA_LEN;
 import static io.onedev.server.plugin.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.util.Digest.SHA256;
 import static java.lang.Long.parseLong;
@@ -61,21 +61,21 @@ public class ContainerServlet extends PackServlet {
 	
 	private final PackBlobManager packBlobManager;
 	
-	private final PackVersionManager packVersionManager;
+	private final PackManager packManager;
 	
 	@Inject
 	public ContainerServlet(SettingManager settingManager, JobManager jobManager, 
 							BuildManager buildManager, ObjectMapper objectMapper, 
 							SessionManager sessionManager, UserManager userManager, 
 							ProjectManager projectManager, PackBlobManager packBlobManager, 
-							PackVersionManager packVersionManager) {
+							PackManager packManager) {
 		super(jobManager, buildManager, objectMapper);
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.userManager = userManager;
 		this.projectManager = projectManager;
 		this.packBlobManager = packBlobManager;
-		this.packVersionManager = packVersionManager;
+		this.packManager = packManager;
 	}
 	
 	@Override
@@ -318,31 +318,32 @@ public class ContainerServlet extends PackServlet {
 									for (var manifestNode : manifest.get("manifests")) {
 										var digest = parseDigest(manifestNode.get("digest").asText());
 										var size = manifestNode.get("size").asLong();
-										var packVersion = packVersionManager.findByDataHash(project, TYPE, digest.getHash());
-										if (packVersion == null)
+										var pack = packManager.findByDataHash(project, TYPE, digest.getHash());
+										if (pack == null)
 											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
-										else if (packVersion.getDataBytes().length != size)
+										else if (pack.getDataBytes().length != size)
 											throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
 									}
 								}
 
-								var packVersion = packVersionManager.findByName(project, TYPE, reference);
-								if (packVersion == null) {
-									packVersion = new PackVersion();
-									packVersion.setProject(project);
-									packVersion.setType(TYPE);
-									packVersion.setName(reference);
+								var pack = packManager.findByVersion(project, TYPE, reference);
+								if (pack == null) {
+									pack = new Pack();
+									pack.setProject(project);
+									pack.setType(TYPE);
+									pack.setVersion(reference);
 								}
-								packVersion.setBuild(getBuild(possibleJobToken));
-								packVersion.setDataBytes(bytes);
-								packVersion.setDataHash(hash);
-								packVersion.setExtraInfo(contentType);
+								pack.setBuild(getBuild(possibleJobToken));
+								pack.setDataBytes(bytes);
+								pack.setDataHash(hash);
+								pack.setCreateDate(new Date());
+								pack.setExtraInfo(contentType);
 
-								packVersionManager.createOrUpdate(packVersion, packBlobs);
+								packManager.createOrUpdate(pack, packBlobs);
 
 								response.setStatus(SC_OK);
 								response.setHeader("Docker-Content-Digest",
-										"sha256:" + packVersion.getDataHash());
+										"sha256:" + pack.getDataHash());
 								response.setHeader("Location", getManifestUrl(projectPath, reference));
 							});
 							break;
@@ -350,13 +351,13 @@ public class ContainerServlet extends PackServlet {
 						case "HEAD":
 							var versionInfo = sessionManager.call(() -> {
 								var project = getProject(projectPath, false);
-								PackVersion packVersion;
+								Pack pack;
 								if (isTag(reference))
-									packVersion = packVersionManager.findByName(project, TYPE, reference);
+									pack = packManager.findByVersion(project, TYPE, reference);
 								else
-									packVersion = packVersionManager.findByDataHash(project, TYPE, parseDigest(reference).getHash());
-								if (packVersion != null) 
-									return new ImmutableTriple<>(packVersion.getDataBytes(), packVersion.getDataHash(), packVersion.getExtraInfo());
+									pack = packManager.findByDataHash(project, TYPE, parseDigest(reference).getHash());
+								if (pack != null) 
+									return new ImmutableTriple<>(pack.getDataBytes(), pack.getDataHash(), pack.getExtraInfo());
 								else 
 									return null;
 							});
@@ -379,9 +380,9 @@ public class ContainerServlet extends PackServlet {
 							sessionManager.run(() -> {
 								var project = getProject(projectPath, true);
 								if (isTag(reference)) 
-									packVersionManager.deleteByName(project, TYPE, reference);
+									packManager.deleteByName(project, TYPE, reference);
 								else 
-									packVersionManager.deleteByDataHash(project, TYPE, parseDigest(reference).getHash());									
+									packManager.deleteByDataHash(project, TYPE, parseDigest(reference).getHash());									
 								response.setStatus(SC_ACCEPTED);
 							});
 							break;
@@ -404,7 +405,7 @@ public class ContainerServlet extends PackServlet {
 							count = Integer.parseInt(countParam);
 						if (count != 0) {
 							var lastTag = request.getParameter("last");
-							tags.addAll(packVersionManager.queryTags(project, TYPE, lastTag, count));
+							tags.addAll(packManager.queryTags(project, TYPE, lastTag, count));
 						}
 
 						response.setStatus(SC_OK);

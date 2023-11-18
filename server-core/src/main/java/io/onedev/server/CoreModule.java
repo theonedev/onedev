@@ -242,6 +242,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestNotificationManager.class);
 		bind(CommitNotificationManager.class);
 		bind(BuildNotificationManager.class);
+		bind(PackNotificationManager.class);
 		bind(IssueNotificationManager.class);
 		bind(CodeCommentNotificationManager.class);
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
@@ -256,6 +257,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentQueryPersonalizationManager.class).to(DefaultCodeCommentQueryPersonalizationManager.class);
 		bind(CommitQueryPersonalizationManager.class).to(DefaultCommitQueryPersonalizationManager.class);
 		bind(BuildQueryPersonalizationManager.class).to(DefaultBuildQueryPersonalizationManager.class);
+		bind(PackQueryPersonalizationManager.class).to(DefaultPackQueryPersonalizationManager.class);
 		bind(PullRequestAssignmentManager.class).to(DefaultPullRequestAssignmentManager.class);
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
 		bind(BuildMetricManager.class).to(DefaultBuildMetricManager.class);
@@ -282,7 +284,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AlertManager.class).to(DefaultAlertManager.class);
 		bind(UpdateCheckManager.class).to(DefaultUpdateCheckManager.class);
 		bind(StopwatchManager.class).to(DefaultStopwatchManager.class);
-		bind(PackVersionManager.class).to(DefaultPackVersionManager.class);
+		bind(PackManager.class).to(DefaultPackManager.class);
 		bind(PackBlobManager.class).to(DefaultPackBlobManager.class);
 		bind(PackBlobReferenceManager.class).to(DefaultPackBlobReferenceManager.class);
 		bind(PackBlobAuthorizationManager.class).to(DefaultPackBlobAuthorizationManager.class);

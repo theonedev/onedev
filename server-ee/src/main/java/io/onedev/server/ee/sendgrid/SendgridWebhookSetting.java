@@ -38,7 +38,7 @@ public class SendgridWebhookSetting implements Serializable {
 		this.secret = secret;
 	}
 
-	@Editable(order=200, description = "Check this to only monitor system address above for incoming " +
+	@Editable(order=200, name="Monitor System Email Only", description = "Check this to only monitor system email address above for incoming " +
 			"email processing; if not checked, all emails in the inbox will be processed")
 	public boolean isMonitorSystemAddressOnly() {
 		return monitorSystemAddressOnly;

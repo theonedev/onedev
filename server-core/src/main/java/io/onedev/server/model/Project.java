@@ -31,6 +31,8 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.issue.TimesheetSetting;
+import io.onedev.server.model.support.pack.NamedPackQuery;
+import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
@@ -216,7 +218,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private Collection<PackBlob> packBlobs = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<PackVersion> packVersions = new ArrayList<>();
+	private Collection<Pack> packs = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<PackBlobAuthorization> packBlobAuthorizations = new ArrayList<>();
@@ -295,6 +297,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -336,7 +341,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
-	
+
+	@JsonIgnore
+	@Lob
+	@Column(length=65535, nullable=false)
+	private ProjectPackSetting packSetting = new ProjectPackSetting();
 	@JsonIgnore
 	@Lob
 	@Column(length=65535)
@@ -371,7 +380,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     private transient Optional<CodeCommentQueryPersonalization> codeCommentQueryPersonalizationOfCurrentUserHolder;
     
     private transient Optional<BuildQueryPersonalization> buildQueryPersonalizationOfCurrentUserHolder;
-    
+
+	private transient Optional<PackQueryPersonalization> packQueryPersonalizationOfCurrentUserHolder;
+	
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
 	private transient List<Milestone> sortedMilestones;
@@ -1005,6 +1016,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.buildSetting = buildSetting;
 	}
 
+	public ProjectPackSetting getPackSetting() {
+		return packSetting;
+	}
+
+	public void setPackSetting(ProjectPackSetting packSetting) {
+		this.packSetting = packSetting;
+	}
+
 	public List<JobSecret> getHierarchyJobSecrets() {
 		List<JobSecret> jobSecrets = new ArrayList<>(getBuildSetting().getJobSecrets());
 		if (getParent() != null) {
@@ -1135,6 +1154,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.buildQueryPersonalizations = buildQueryPersonalizations;
 	}
 
+	public Collection<PackQueryPersonalization> getPackQueryPersonalizations() {
+		return packQueryPersonalizations;
+	}
+
+	public void setPackQueryPersonalizations(Collection<PackQueryPersonalization> packQueryPersonalizations) {
+		this.packQueryPersonalizations = packQueryPersonalizations;
+	}
+
 	public Collection<Build> getBuilds() {
 		return builds;
 	}
@@ -1151,12 +1178,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.packBlobs = packBlobs;
 	}
 
-	public Collection<PackVersion> getPackVersions() {
-		return packVersions;
+	public Collection<Pack> getPacks() {
+		return packs;
 	}
 
-	public void setPackVersions(Collection<PackVersion> packVersions) {
-		this.packVersions = packVersions;
+	public void setPacks(Collection<Pack> packs) {
+		this.packs = packs;
 	}
 
 	public Collection<PackBlobAuthorization> getPackBlobAuthorizations() {
@@ -1372,6 +1399,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 		}
 		return buildQueryPersonalizationOfCurrentUserHolder.orNull();
+	}
+
+	@Nullable
+	public PackQueryPersonalization getPackQueryPersonalizationOfCurrentUser() {
+		if (packQueryPersonalizationOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				PackQueryPersonalization personalization =
+						OneDev.getInstance(PackQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new PackQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
+				}
+				packQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
+			} else {
+				packQueryPersonalizationOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return packQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable
@@ -1623,6 +1670,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 		return null;
 	}
+
+	@Nullable
+	public NamedPackQuery getNamedPackQuery(String name) {
+		for (NamedPackQuery namedQuery: getNamedPackQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
 	
 	@Nullable
 	public NamedPullRequestQuery getNamedPullRequestQuery(String name) {
@@ -1655,6 +1711,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null); 
 		
 		return getSettingManager().getBuildSetting().getNamedQueries();
+	}
+
+	public List<NamedPackQuery> getNamedPackQueries() {
+		Project current = this;
+		do {
+			List<NamedPackQuery> namedQueries = current.getPackSetting().getNamedQueries();
+			if (namedQueries != null)
+				return namedQueries;
+			current = current.getParent();
+		} while (current != null);
+
+		return getSettingManager().getPackSetting().getNamedQueries();
 	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {

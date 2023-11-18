@@ -11,7 +11,7 @@ criteria
     | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|InPipelineOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | Hash? number=Number #NumberCriteria
+    | PoundSign? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -112,11 +112,11 @@ IsLessThan
 	;
 	
 IsSince
-	: 'is since'
+	: 'is' WS+ 'since'
 	;
 
 IsUntil
-	: 'is until'
+	: 'is' WS+ 'until'
 	;
 	
 And
@@ -147,7 +147,7 @@ RParens
 	: ')'
 	;
 
-Hash
+PoundSign
     : '#'
     ;
 

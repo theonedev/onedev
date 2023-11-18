@@ -320,7 +320,7 @@ public class Build extends ProjectBelonging
 	private Collection<BuildParam> params = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<PackVersion> packVersions = new ArrayList<>();
+	private Collection<Pack> packs = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependent", cascade=CascadeType.REMOVE)
 	private Collection<BuildDependence> dependencies = new ArrayList<>();
@@ -589,12 +589,12 @@ public class Build extends ProjectBelonging
 		this.params = params;
 	}
 
-	public Collection<PackVersion> getPackVersions() {
-		return packVersions;
+	public Collection<Pack> getPacks() {
+		return packs;
 	}
 
-	public void setPackVersions(Collection<PackVersion> packVersions) {
-		this.packVersions = packVersions;
+	public void setPacks(Collection<Pack> packs) {
+		this.packs = packs;
 	}
 
 	public Collection<BuildLabel> getLabels() {

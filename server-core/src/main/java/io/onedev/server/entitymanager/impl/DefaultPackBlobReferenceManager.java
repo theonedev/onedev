@@ -16,8 +16,8 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
-import static io.onedev.server.model.PackBlobReference.PROP_PACK_VERSION;
-import static io.onedev.server.model.PackVersion.PROP_PROJECT;
+import static io.onedev.server.model.PackBlobReference.PROP_PACK;
+import static io.onedev.server.model.Pack.PROP_PROJECT;
 import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
 
 @Singleton
@@ -40,7 +40,7 @@ public class DefaultPackBlobReferenceManager extends BaseEntityManager<PackBlobR
 	public PackBlobReference findNotPendingDelete(PackBlob packBlob) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PACK_BLOB, packBlob));
-		criteria.createCriteria(PROP_PACK_VERSION).createCriteria(PROP_PROJECT).add(Restrictions.eq(PROP_PENDING_DELETE, false));
+		criteria.createCriteria(PROP_PACK).createCriteria(PROP_PROJECT).add(Restrictions.eq(PROP_PENDING_DELETE, false));
 		return find(criteria);
 	}
 

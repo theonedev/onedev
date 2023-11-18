@@ -82,7 +82,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		lastActivity.setDate(comment.getCreateDate());
 		comment.setLastActivity(lastActivity);
 		dao.persist(comment);
-		
+
 		listenerRegistry.post(new CodeCommentCreated(comment));
 		
 		PullRequest request = comment.getCompareContext().getPullRequest();
@@ -127,7 +127,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		for (ObjectId commitId: commitIds) {
 			criterions.add(Restrictions.eq(CodeComment.PROP_MARK + "." + Mark.PROP_COMMIT_HASH, commitId.name()));
 		}
-		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
+		criteria.add(Restrictions.or(criterions.toArray(new Criterion[0])));
 		return query(criteria);
 	}
 	

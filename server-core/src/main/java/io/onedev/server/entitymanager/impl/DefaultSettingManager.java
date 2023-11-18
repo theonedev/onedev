@@ -179,6 +179,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	}
 
 	@Override
+	public GlobalPackSetting getPackSetting() {
+		return (GlobalPackSetting) getSettingValue(Key.PACK);
+	}
+	
+	@Override
 	public GlobalProjectSetting getProjectSetting() {
 		return (GlobalProjectSetting) getSettingValue(Key.PROJECT);
 	}
@@ -316,6 +321,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 		saveSetting(Key.BUILD, buildSetting);
 	}
 
+	@Transactional
+	@Override
+	public void savePackSetting(GlobalPackSetting packSetting) {
+		saveSetting(Key.PACK, packSetting);
+	}
+	
 	@Transactional
 	@Override
 	public void saveProjectSetting(GlobalProjectSetting projectSetting) {

@@ -70,6 +70,7 @@ import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.packs.PackListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.NoProjectStoragePage;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -97,6 +98,8 @@ import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.*;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -147,6 +150,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~issues", IssueListPage.class));
 		add(new BasePageMapper("~pulls", PullRequestListPage.class));
 		add(new BasePageMapper("~builds", BuildListPage.class));
+		add(new BasePageMapper("~packages", PackListPage.class));
 		addAdministrationPages();
 		addMyPages();
 		addSecurityPages();
@@ -360,6 +364,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~builds/${build}/artifacts", BuildArtifactsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/invalid", InvalidBuildPage.class));
 
+		add(new ProjectPageMapper("${project}/~packages", ProjectPacksPage.class));
+		add(new ProjectPageMapper("${project}/~packages/${pack}", PackDetailPage.class));
+		
 		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		
 		add(new ProjectPageMapper("${project}/~settings/general", GeneralProjectSettingPage.class));

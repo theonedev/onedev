@@ -1,18 +1,7 @@
 package io.onedev.server.web;
 
+import io.onedev.server.model.*;
 import org.eclipse.jgit.lib.ObjectId;
-
-import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
 
 public interface UrlManager {
 	
@@ -40,6 +29,8 @@ public interface UrlManager {
 	
 	String urlFor(CodeComment comment);
 
+	String urlFor(Pack pack);
+	
 	String urlFor(CodeCommentReply reply);
 	
 	String urlFor(CodeCommentStatusChange change);

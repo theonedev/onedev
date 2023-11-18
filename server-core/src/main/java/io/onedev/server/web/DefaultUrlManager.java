@@ -6,7 +6,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
@@ -160,6 +159,11 @@ public class DefaultUrlManager implements UrlManager {
 	@Override
 	public String urlFor(Build build) {
 		return urlFor(build.getProject()) + "/~builds/" + build.getNumber();
+	}
+
+	@Override
+	public String urlFor(Pack pack) {
+		return urlFor(pack.getProject()) + "/~packages/" + pack.getId();
 	}
 	
 	@Override

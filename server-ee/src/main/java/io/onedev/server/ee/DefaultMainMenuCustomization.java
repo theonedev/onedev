@@ -9,6 +9,7 @@ import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
+import io.onedev.server.web.page.packs.PackListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
@@ -48,6 +49,8 @@ public class DefaultMainMenuCustomization implements MainMenuCustomization {
 				IssueListPage.paramsOf(0)));
 		menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", BuildListPage.class,
 				BuildListPage.paramsOf(0, 0)));
+		menuItems.add(new SidebarMenuItem.Page("package", "Packages", PackListPage.class,
+				PackListPage.paramsOf(0)));
 		
 		if (WicketUtils.getPage().isSubscriptionActive()) {
 			var codeSearchMenuItems = new ArrayList<SidebarMenuItem>();

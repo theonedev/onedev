@@ -443,7 +443,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		predicates.add(builder.like(
 				builder.lower(root.get(Build.PROP_VERSION)), 
 				"%" + matchWith.toLowerCase() + "%"));
-		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		criteriaQuery.orderBy(builder.asc(root.get(Build.PROP_VERSION)));
 
 		Query<String> query = getSession().createQuery(criteriaQuery);
@@ -480,7 +480,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 					List<Predicate> jobPredicates = new ArrayList<>();
 					for (String jobName: accessibleJobNames) 
 						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
-					predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
+					predicates.add(builder.or(jobPredicates.toArray(new Predicate[0])));
 				}
 			}
 		} else if (!SecurityUtils.isAdministrator()) {
@@ -504,7 +504,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 								jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 							projectPredicates.add(builder.and(
 									builder.equal(root.get(Build.PROP_PROJECT), project), 
-									builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));
+									builder.or(jobPredicates.toArray(new Predicate[0]))));
 						}
 					} else {
 						projectsWithAllJobs.add(project.getId());
@@ -512,7 +512,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				}
 			}
 			if (!projectsWithAllJobs.containsAll(jobNames.keySet()))
-				predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
+				predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		}
 		
 		return predicates;

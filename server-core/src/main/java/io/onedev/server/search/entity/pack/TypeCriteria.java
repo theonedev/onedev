@@ -1,0 +1,47 @@
+package io.onedev.server.search.entity.pack;
+
+import io.onedev.server.model.Pack;
+import io.onedev.server.util.criteria.Criteria;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
+public class TypeCriteria extends Criteria<Pack> {
+
+	private static final long serialVersionUID = 1L;
+
+	private final String value;
+	
+	private final int operator;
+	
+	public TypeCriteria(String value, int operator) {
+		this.value = value;
+		this.operator = operator;
+	}
+
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
+		var predicate = builder.equal(from.get(Pack.PROP_TYPE), value);
+		if (operator == PackQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
+	}
+
+	@Override
+	public boolean matches(Pack pack) {
+		var matches = pack.getType().equals(value);
+		if (operator == PackQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
+	}
+
+	@Override
+	public String toStringWithoutParens() {
+		return quote(Pack.NAME_TYPE) + " " 
+				+ PackQuery.getRuleName(operator) + " " 
+				+ quote(value);
+	}
+
+}

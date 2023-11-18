@@ -782,6 +782,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveBuildSetting(new GlobalBuildSetting());
 		}
+		setting = settingManager.findSetting(Key.PACK);
+		if (setting == null) {
+			settingManager.savePackSetting(new GlobalPackSetting());
+		}
 		setting = settingManager.findSetting(Key.PROJECT);
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());

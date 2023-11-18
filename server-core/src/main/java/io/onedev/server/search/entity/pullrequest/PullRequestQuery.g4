@@ -10,7 +10,7 @@ criteria
 	: operator=(Open|Merged|Discarded|NeedMyAction|AssignedToMe|SubmittedByMe|WatchedByMe|CommentedByMe|ToBeReviewedByMe|ToBeChangedByMe|ToBeMergedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|ReadyToMerge|SomeoneRequestedForChanges|HasPendingReviews|HasUnsuccessfulBuilds|HasUnfinishedBuilds|HasMergeConflicts) #OperatorCriteria
     | operator=(NeedActionOf|ToBeReviewedBy|ToBeChangedBy|ToBeMergedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|WatchedBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | Hash? number=Number #NumberCriteria
+    | PoundSign? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -210,7 +210,7 @@ RParens
 	: ')'
 	;
 
-Hash
+PoundSign
     : '#'
     ;
 

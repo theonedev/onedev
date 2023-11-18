@@ -105,14 +105,14 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 								reportPredicates.add(builder.equal(metricRoot.get(PROP_REPORT), reportName));
 							jobPredicates.add(builder.and(
 									builder.equal(buildJoin.get(PROP_JOB_NAME), entry.getKey()), 
-									builder.or(reportPredicates.toArray(new Predicate[reportPredicates.size()]))));
+									builder.or(reportPredicates.toArray(new Predicate[0]))));
 						}
 					} else {
 						jobsWithAllReports.add(entry.getKey());
 					}
 				}
 				if (!jobsWithAllReports.containsAll(availableReportNames.keySet()))
-					predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
+					predicates.add(builder.or(jobPredicates.toArray(new Predicate[0])));
 			}
 		}
 		

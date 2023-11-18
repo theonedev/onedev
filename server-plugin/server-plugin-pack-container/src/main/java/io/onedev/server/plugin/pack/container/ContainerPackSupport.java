@@ -10,6 +10,11 @@ public class ContainerPackSupport implements PackSupport {
 	public static final String TYPE = "Container Image";
 
 	@Override
+	public int getOrder() {
+		return 100;
+	}
+
+	@Override
 	public String getPackType() {
 		return TYPE;
 	}

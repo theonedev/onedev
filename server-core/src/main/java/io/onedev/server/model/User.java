@@ -19,6 +19,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
@@ -160,7 +161,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
+	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations = new ArrayList<>();
     
@@ -217,6 +221,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedBuildQuery> buildQueries = new ArrayList<>();
 
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedPackQuery> packQueries = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -231,6 +240,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
+
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> packQuerySubscriptions = new LinkedHashSet<>();
 	
     private transient Collection<Group> groups;
     
@@ -422,6 +436,54 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 				OneDev.getInstance(UserManager.class).update(User.this, null);
 			}
 			
+		};
+	}
+
+	public QueryPersonalization<NamedPackQuery> getPackQueryPersonalization() {
+		return new QueryPersonalization<>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedPackQuery> getQueries() {
+				return packQueries;
+			}
+
+			@Override
+			public void setQueries(ArrayList<NamedPackQuery> userQueries) {
+				packQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedPackQuery> getQueryWatchSupport() {
+				return null;
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedPackQuery> getQuerySubscriptionSupport() {
+				return new QuerySubscriptionSupport<>() {
+
+					@Override
+					public LinkedHashSet<String> getQuerySubscriptions() {
+						return packQuerySubscriptions;
+					}
+
+				};
+			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).update(User.this, null);
+			}
+
 		};
 	}
 	
@@ -786,6 +848,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.buildQueryPersonalizations = buildQueryPersonalizations;
 	}
 
+	public Collection<PackQueryPersonalization> getPackQueryPersonalizations() {
+		return packQueryPersonalizations;
+	}
+
+	public void setPackQueryPersonalizations(Collection<PackQueryPersonalization> packQueryPersonalizations) {
+		this.packQueryPersonalizations = packQueryPersonalizations;
+	}
+
 	public Collection<PullRequestQueryPersonalization> getPullRequestQueryPersonalizations() {
 		return pullRequestQueryPersonalizations;
 	}
@@ -865,7 +935,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setBuildQuerySubscriptions(LinkedHashSet<String> buildQuerySubscriptions) {
 		this.buildQuerySubscriptions = buildQuerySubscriptions;
 	}
-	
+
+	public LinkedHashSet<String> getPackQuerySubscriptions() {
+		return packQuerySubscriptions;
+	}
+
+	public void setPackQuerySubscriptions(LinkedHashSet<String> packQuerySubscriptions) {
+		this.packQuerySubscriptions = packQuerySubscriptions;
+	}
+
 	public boolean isEnforce2FA() {
 		return OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnforce2FA() 
 				|| getGroups().stream().anyMatch(it->it.isEnforce2FA());

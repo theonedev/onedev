@@ -127,6 +127,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveBuildSetting(GlobalBuildSetting buildSetting);
 	
+	GlobalPackSetting getPackSetting();
+
+	void savePackSetting(GlobalPackSetting packSetting);
+	
 	GlobalProjectSetting getProjectSetting();
 	
 	void saveProjectSetting(GlobalProjectSetting projectSetting);

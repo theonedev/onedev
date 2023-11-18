@@ -1,0 +1,18 @@
+<wicket:extend>
+	<div class="build-detail d-flex flex-column card m-2 m-sm-5 flex-grow-1">
+		<div class="card-header flex-shrink-0 flex-nowrap">
+            <div class="card-title flex-wrap">
+				<span wicket:id="title" class="mr-4 text-break"></span>
+			</div>
+		</div>
+		<div class="card-body d-flex flex-grow-1 position-relative">
+		</div>
+	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<span class="d-flex align-items-center">
+			<a wicket:id="packs" class="text-nowrap">Packages</a> 
+			<span class="dot"></span>
+			<span wicket:id="packInfo"></span>
+		</span>
+	</wicket:fragment>
+</wicket:extend>

@@ -412,10 +412,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
 												docker.addArgs("--isolation=process");
 
-											docker.addArgs(options.toArray(new String[options.size()]));
+											docker.addArgs(options.toArray(new String[0]));
 
 											docker.addArgs(image);
-											docker.addArgs(arguments.toArray(new String[arguments.size()]));
+											docker.addArgs(arguments.toArray(new String[0]));
 											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
 											ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
 													ExecutorUtils.newWarningLogger(jobLogger), null);
