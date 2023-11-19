@@ -6,7 +6,7 @@ import io.onedev.server.entitymanager.PackBlobReferenceManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.pack.PackCreated;
+import io.onedev.server.event.project.pack.PackPublished;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
@@ -220,7 +220,7 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 
 	@Sessional
 	@Override
-	public Pack findByVersion(Project project, String type, String version) {
+	public Pack find(Project project, String type, String version) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(PROP_TYPE, type));
@@ -228,32 +228,11 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		return find(criteria);
 	}
 
-	@Sessional
-	@Override
-	public Pack findByDataHash(Project project, String type, String dataHash) {
-		var criteria = newCriteria();
-		criteria.add(Restrictions.eq(PROP_PROJECT, project));
-		criteria.add(Restrictions.eq(PROP_TYPE, type));
-		criteria.add(Restrictions.eq(PROP_DATA_HASH, dataHash));
-		return find(criteria);
-	}
-
 	@Transactional
 	@Override
-	public void deleteByName(Project project, String type, String name) {
-		var pack = findByVersion(project, type, name);
+	public void delete(Project project, String type, String version) {
+		var pack = find(project, type, version);
 		if (pack != null)
-			delete(pack);
-	}
-	
-	@Transactional
-	@Override
-	public void deleteByDataHash(Project project, String type, String dataHash) {
-		var criteria = newCriteria();
-		criteria.add(Restrictions.eq(PROP_PROJECT, project));
-		criteria.add(Restrictions.eq(PROP_TYPE, type));
-		criteria.add(Restrictions.eq(PROP_DATA_HASH, dataHash));
-		for (var pack: query(criteria)) 
 			delete(pack);
 	}
 	
@@ -274,7 +253,7 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 			if (packBlobs.stream().noneMatch(it -> it.equals(blobReference.getPackBlob())))
 				blobReferenceManager.delete(blobReference);
 		}
-		listenerRegistry.post(new PackCreated(pack));
+		listenerRegistry.post(new PackPublished(pack));
 	}
 
 	@Transactional

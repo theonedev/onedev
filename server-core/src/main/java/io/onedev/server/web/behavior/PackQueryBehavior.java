@@ -86,7 +86,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									PackQuery.checkField(project, fieldName, operator);
-									if (fieldName.equals(Pack.NAME_CREATE_DATE)) {
+									if (fieldName.equals(Pack.NAME_PUBLISH_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(Pack.NAME_PROJECT)) {

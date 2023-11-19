@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.util.Pair;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -23,10 +24,13 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	long getUploadFileSize(Long projectId, String uuid);
 	
 	long uploadBlob(Long projectId, String uuid, InputStream is);
+	
+	Long uploadBlob(Long projectId, byte[] blobBytes, String blobHash);
 
 	void cancelUpload(Long projectId, String uuid);
-
-	boolean finishUpload(Long projectId, String uuid, String hash);
+	
+	@Nullable
+	Long finishUpload(Long projectId, String uuid, String hash);
 	
 	void downloadBlob(Long projectId, String hash, OutputStream os);
 	

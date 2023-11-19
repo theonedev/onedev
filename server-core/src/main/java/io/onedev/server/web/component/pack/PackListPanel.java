@@ -542,7 +542,7 @@ public abstract class PackListPanel extends Panel {
 			}
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Created")) {
+		columns.add(new AbstractColumn<>(Model.of("Last Published")) {
 
 			@Override
 			public String getCssClass() {
@@ -551,7 +551,7 @@ public abstract class PackListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getCreateDate())));
+				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getPublishDate())));
 			}
 		});		
 		

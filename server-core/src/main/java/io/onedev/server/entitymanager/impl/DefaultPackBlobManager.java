@@ -23,11 +23,13 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Digest;
+import io.onedev.server.util.Pair;
 import org.glassfish.jersey.client.ClientProperties;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -58,7 +60,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	
 	private static final String TEMP_BLOB_SUFFIX = ".temp";
 	
-	private static final int EXPIRE_MILLIS = 24*3600*1000;
+	private static final int EXPIRE_MILLIS = 60*1000;
 	
 	private static final String UPLOADS_DIR = "uploads";
 	
@@ -223,7 +225,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public boolean finishUpload(Long projectId, String uuid, String hash) {
+	public Long finishUpload(Long projectId, String uuid, String hash) {
 		var uploadFileSize = projectManager.runOnActiveServer(projectId, () -> {
 			var digest = new Digest(SHA256, hash);
 			var uploadFile = getUploadFile(projectId, uuid);
@@ -238,30 +240,10 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 		});
 		
 		if (uploadFileSize != -1) {
-			var useUploadFile = transactionManager.call(() -> {
-				var project = projectManager.load(projectId);
-				var packBlob = find(hash);
-				if (packBlob == null) {
-					packBlob = new PackBlob();
-					packBlob.setProject(project);
-					packBlob.setHash(hash);
-					packBlob.setSize(uploadFileSize);
-					packBlob.setCreateDate(new Date());
-					dao.persist(packBlob);
-					return true;
-				} else if (checkPackBlobFile(packBlob.getProject().getId(), hash, uploadFileSize)) {
-					authorizationManager.authorize(project, packBlob);
-					return false;
-				} else {
-					authorizationManager.authorize(packBlob.getProject(), packBlob);
-					packBlob.setProject(project);
-					dao.persist(packBlob);
-					return true;
-				}				
-			});
+			var result = createBlob(projectId, hash, uploadFileSize);
 			projectManager.runOnActiveServer(projectId, () -> {
 				var uploadFile = getUploadFile(projectId, uuid);
-				if (useUploadFile) {
+				if (result.getRight()) {
 					var blobFile = getPackBlobFile(projectId, hash);
 					FileUtils.createDir(blobFile.getParentFile());
 					write(getFileLockName(projectId, hash), () -> {
@@ -276,10 +258,52 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				}
 				return null;
 			});
-			return true;
+			return result.getLeft();
 		} else {
-			return false;
+			return null;
 		}
+	}
+
+	@Override
+	public Long uploadBlob(Long projectId, byte[] blobBytes, String blobHash) {
+		var result = createBlob(projectId, blobHash, blobBytes.length);
+		if (result.getRight()) {
+			projectManager.runOnActiveServer(projectId, () -> {
+				var blobFile = getPackBlobFile(projectId, blobHash);
+				FileUtils.createDir(blobFile.getParentFile());
+				write(getFileLockName(projectId, blobHash), () -> {
+					FileUtils.writeByteArrayToFile(blobFile, blobBytes);
+					return null;
+				});
+				projectManager.directoryModified(projectId, blobFile.getParentFile());
+				return null;
+			});						
+		}
+		return result.getLeft();
+	}
+
+	private Pair<Long, Boolean> createBlob(Long projectId, String blobHash, long blobSize) {
+		return transactionManager.call(() -> {
+			var project = projectManager.load(projectId);
+			var packBlob = find(blobHash);
+			if (packBlob == null) {
+				packBlob = new PackBlob();
+				packBlob.setProject(project);
+				packBlob.setHash(blobHash);
+				packBlob.setSize(blobSize);
+				packBlob.setCreateDate(new Date());
+				dao.persist(packBlob);
+				return new Pair<>(packBlob.getId(), true);
+			} else if (checkPackBlobFile(packBlob.getProject().getId(), blobHash, blobSize)) {
+				authorizationManager.authorize(project, packBlob);
+				return new Pair<>(packBlob.getId(), false);
+			} else {
+				authorizationManager.authorize(packBlob.getProject(), packBlob);
+				packBlob.setProject(project);
+				dao.persist(packBlob);
+				return new Pair<>(packBlob.getId(), true);
+			}
+		});
 	}
 	
 	@Override
@@ -315,7 +339,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 			}
 		}
 	}
-
+	
 	@Transactional
 	@Override
 	public void onDeleteProject(Project project) {
@@ -462,7 +486,8 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(0, 30);
+//		return CronScheduleBuilder.dailyAtHourAndMinute(0, 30);
+		return SimpleScheduleBuilder.repeatMinutelyForever(1);
 	}
 
 	public Object writeReplace() throws ObjectStreamException {

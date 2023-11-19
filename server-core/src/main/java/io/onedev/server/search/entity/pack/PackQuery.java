@@ -86,8 +86,8 @@ public class PackQuery extends EntityQuery<Pack> {
 						switch (operator) {
 							case PackQueryLexer.IsUntil:
 							case PackQueryLexer.IsSince:
-								if (fieldName.equals(NAME_CREATE_DATE))
-									return new CreateDateCriteria(value, operator);
+								if (fieldName.equals(NAME_PUBLISH_DATE))
+									return new PublishDateCriteria(value, operator);
 								else
 									throw new IllegalStateException();
 							case PackQueryLexer.Is:
@@ -160,7 +160,7 @@ public class PackQuery extends EntityQuery<Pack> {
 		switch (operator) {
 		case PackQueryLexer.IsUntil:
 		case PackQueryLexer.IsSince:
-			if (!fieldName.equals(NAME_CREATE_DATE)) 
+			if (!fieldName.equals(NAME_PUBLISH_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case PackQueryLexer.Is:

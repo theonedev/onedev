@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class ContainerData {
 	
 	private final JsonNode manifest;
-
-	private final String contentType;
 	
-	public ContainerData(byte[] manifestBytes, String contentType) {
+	public ContainerData(byte[] manifestBytes) {
 		try {
 			manifest = OneDev.getInstance(ObjectMapper.class).readTree(manifestBytes);
 			var schemaVersionNode = manifest.get("schemaVersion");
@@ -21,17 +20,31 @@ public class ContainerData {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		this.contentType = contentType;
+	}
+	
+	@Nullable
+	public String getMediaType() {
+		var mediaTypeNode = manifest.get("mediaType");
+		if (mediaTypeNode != null)
+			return mediaTypeNode.asText();
+		else if (manifest.get("config") != null)
+			return "application/vnd.oci.image.manifest.v1+json";
+		else if (manifest.get("manifests") != null)
+			return "application/vnd.oci.image.index.v1+json";
+		else 
+			return null;
 	}
 	
 	public boolean isImageManifest() {
-		return contentType.equals("application/vnd.oci.image.manifest.v1+json") 
-				|| contentType.equals("application/vnd.docker.distribution.manifest.v2+json");
+		var mediaType = getMediaType();
+		return "application/vnd.oci.image.manifest.v1+json".equals(mediaType) 
+				|| "application/vnd.docker.distribution.manifest.v2+json".equals(mediaType);
 	}
 
 	public boolean isImageIndex() {
-		return contentType.equals("application/vnd.oci.image.index.v1+json")
-				|| contentType.equals("application/vnd.docker.distribution.manifest.list.v2+json");
+		var mediaType = getMediaType();
+		return "application/vnd.oci.image.index.v1+json".equals(mediaType)
+				|| "application/vnd.docker.distribution.manifest.list.v2+json".equals(mediaType);
 	}
 	
 	public JsonNode getManifest() {

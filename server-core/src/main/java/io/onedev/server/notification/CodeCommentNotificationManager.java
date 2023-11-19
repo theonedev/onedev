@@ -11,7 +11,9 @@ import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityComment;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.commenttext.MarkdownText;
 
@@ -21,6 +23,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class CodeCommentNotificationManager extends AbstractNotificationManager {
@@ -51,8 +55,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 			Collection<User> notifyUsers = new HashSet<>();
 
 			notifyUsers.add(comment.getUser());
-			notifyUsers.addAll(comment.getReplies().stream().map(it -> it.getUser()).collect(Collectors.toSet()));
-			notifyUsers.addAll(comment.getChanges().stream().map(it -> it.getUser()).collect(Collectors.toSet()));
+			notifyUsers.addAll(comment.getReplies().stream().map(EntityComment::getUser).collect(toSet()));
+			notifyUsers.addAll(comment.getChanges().stream().map(CodeCommentStatusChange::getUser).collect(toSet()));
 
 			if (markdown != null) {
 				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
@@ -70,7 +74,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 							&& it.getPrimaryEmailAddress() != null
 							&& it.getPrimaryEmailAddress().isVerified())
 					.map(it -> it.getPrimaryEmailAddress().getValue())
-					.collect(Collectors.toSet());
+					.collect(toSet());
 
 			if (!emailAddresses.isEmpty() && !(event instanceof CodeCommentEdited)) {
 				String url = event.getUrl();

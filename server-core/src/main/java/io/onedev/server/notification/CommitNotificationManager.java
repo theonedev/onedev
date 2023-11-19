@@ -125,10 +125,12 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 
 				String threadingReferences = "<commit-" + commit.name() + "@onedev>";
 				
-				mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject, 
-						getEmailBody(true, event, summary, event.getHtmlBody(), url, false, null), 
-						getEmailBody(false, event, summary, event.getTextBody(), url, false, null), 
-						null, commit.getAuthorIdent().getName(), threadingReferences);
+				if (!notifyEmails.isEmpty()) {
+					mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject,
+							getEmailBody(true, event, summary, event.getHtmlBody(), url, false, null),
+							getEmailBody(false, event, summary, event.getTextBody(), url, false, null),
+							null, commit.getAuthorIdent().getName(), threadingReferences);
+				}
 			}
 		}
 	}

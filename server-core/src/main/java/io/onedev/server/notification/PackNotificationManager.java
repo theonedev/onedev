@@ -65,18 +65,20 @@ public class PackNotificationManager extends AbstractNotificationManager {
 	public void notify(PackEvent event, Collection<String> emails) {
 		emails = emails.stream().filter(it -> !it.equals(User.SYSTEM_EMAIL_ADDRESS)).collect(toList());
 		
-		Pack pack = event.getPack();
-		String subject = String.format("[%s] %s:%s", pack.getType(), 
-				pack.getProject().getPath(), pack.getVersion());
+		if (!emails.isEmpty()) {
+			Pack pack = event.getPack();
+			String subject = String.format("[%s] %s:%s", pack.getType(),
+					pack.getProject().getPath(), pack.getVersion());
 
-		String summary = "Package created";
-		
-		String url = urlManager.urlFor(pack);
-		String threadingReferences = "<" + pack.getProject().getPath() + "-pack-" + pack.getId() + "@onedev>";
-		String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
-		String textBody = getEmailBody(false, event, summary, null, url, false, null);
-		mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody, 
-				textBody, null, null, threadingReferences);
+			String summary = "Package published";
+
+			String url = urlManager.urlFor(pack);
+			String threadingReferences = "<" + pack.getProject().getPath() + "-pack-" + pack.getId() + "@onedev>";
+			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
+			String textBody = getEmailBody(false, event, summary, null, url, false, null);
+			mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
+					textBody, null, null, threadingReferences);
+		}
 	}
 	
 	@Sessional

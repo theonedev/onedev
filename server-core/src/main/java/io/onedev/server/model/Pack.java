@@ -14,7 +14,7 @@ import static io.onedev.server.model.Pack.*;
 @Table(
 		indexes={
 				@Index(columnList="o_project_id"), @Index(columnList= PROP_TYPE), 
-				@Index(columnList= PROP_VERSION), @Index(columnList= PROP_DATA_HASH)},
+				@Index(columnList= PROP_VERSION)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_TYPE, PROP_VERSION})}
 )
 public class Pack extends AbstractEntity {
@@ -35,22 +35,20 @@ public class Pack extends AbstractEntity {
 	
 	public static final String PROP_VERSION = "version";
 	
-	public static final String PROP_DATA_HASH = "dataHash";
+	public static final String NAME_PUBLISH_DATE = "Publish Date";
 	
-	public static final String NAME_CREATE_DATE = "Create Date";
-	
-	public static final String PROP_CREATE_DATE = "createDate";
+	public static final String PROP_PUBLISH_DATE = "publishDate";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_CREATE_DATE);
+			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_CREATE_DATE);
+			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_TYPE, PROP_TYPE,
 			NAME_VERSION, PROP_VERSION,
-			NAME_CREATE_DATE, PROP_CREATE_DATE,
+			NAME_PUBLISH_DATE, PROP_PUBLISH_DATE,
 			NAME_PROJECT, PROP_PROJECT);
 
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -63,19 +61,13 @@ public class Pack extends AbstractEntity {
 	@Column(nullable=false)
 	private String version;
 	
-	@Lob
-	@Column(nullable=false, length = MAX_DATA_LEN)
-	private byte[] dataBytes;
-	
 	@Column(nullable=false)
-	private String dataHash;
-	
-	private String extraInfo;
+	private String blobHash;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Build build;
 	
-	private Date createDate;
+	private Date publishDate;
 
 	@OneToMany(mappedBy="pack", cascade=CascadeType.REMOVE)
 	private Collection<PackBlobReference> blobReferences = new ArrayList<>();
@@ -103,29 +95,13 @@ public class Pack extends AbstractEntity {
 	public void setType(String type) {
 		this.type = type;
 	}
-
-	public byte[] getDataBytes() {
-		return dataBytes;
+	
+	public String getBlobHash() {
+		return blobHash;
 	}
 
-	public void setDataBytes(byte[] dataBytes) {
-		this.dataBytes = dataBytes;
-	}
-
-	public String getDataHash() {
-		return dataHash;
-	}
-
-	public void setDataHash(String dataHash) {
-		this.dataHash = dataHash;
-	}
-
-	public String getExtraInfo() {
-		return extraInfo;
-	}
-
-	public void setExtraInfo(String extraInfo) {
-		this.extraInfo = extraInfo;
+	public void setBlobHash(String blobHash) {
+		this.blobHash = blobHash;
 	}
 
 	@Nullable
@@ -145,12 +121,12 @@ public class Pack extends AbstractEntity {
 		this.blobReferences = blobReferences;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getPublishDate() {
+		return publishDate;
 	}
 
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+	public void setPublishDate(Date publishDate) {
+		this.publishDate = publishDate;
 	}
 	
 }

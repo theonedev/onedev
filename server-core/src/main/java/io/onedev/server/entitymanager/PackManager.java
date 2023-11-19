@@ -27,14 +27,9 @@ public interface PackManager extends EntityManager<Pack> {
 	int count(Project project, String type, @Nullable String query);
 
 	@Nullable
-    Pack findByVersion(Project project, String type, String name);
+    Pack find(Project project, String type, String version);
 
-	@Nullable
-    Pack findByDataHash(Project project, String type, String dataHash);
-
-	void deleteByName(Project project, String type, String name);
-	
-	void deleteByDataHash(Project project, String type, String dataHash);
+	void delete(Project project, String type, String version);
 	
     void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs);
 

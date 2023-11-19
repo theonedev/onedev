@@ -7,7 +7,7 @@ import io.onedev.server.util.criteria.Criteria;
 import javax.persistence.criteria.*;
 import java.util.Date;
 
-public class CreateDateCriteria extends Criteria<Pack> {
+public class PublishDateCriteria extends Criteria<Pack> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class CreateDateCriteria extends Criteria<Pack> {
 	
 	private final Date date;
 	
-	public CreateDateCriteria(String value, int operator) {
+	public PublishDateCriteria(String value, int operator) {
 		date = EntityQuery.getDateValue(value);
 		this.operator = operator;
 		this.value = value;
@@ -25,7 +25,7 @@ public class CreateDateCriteria extends Criteria<Pack> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
-		Path<Date> attribute = from.get(Pack.PROP_CREATE_DATE);
+		Path<Date> attribute = from.get(Pack.PROP_PUBLISH_DATE);
 		if (operator == PackQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
@@ -35,14 +35,14 @@ public class CreateDateCriteria extends Criteria<Pack> {
 	@Override
 	public boolean matches(Pack pack) {
 		if (operator == PackQueryLexer.IsUntil)
-			return pack.getCreateDate().before(date);
+			return pack.getPublishDate().before(date);
 		else
-			return pack.getCreateDate().after(date);
+			return pack.getPublishDate().after(date);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Pack.NAME_CREATE_DATE) + " " 
+		return quote(Pack.NAME_PUBLISH_DATE) + " " 
 				+ PackQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

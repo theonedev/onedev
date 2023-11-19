@@ -2,6 +2,7 @@ package io.onedev.server.plugin.pack.container;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ChallengeAwareUnauthenticatedException;
@@ -17,7 +18,6 @@ import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Digest;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.UrlUtils;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -26,7 +26,6 @@ import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -41,7 +40,6 @@ import static io.onedev.server.util.Digest.SHA256;
 import static java.lang.Long.parseLong;
 import static java.util.regex.Pattern.compile;
 import static javax.servlet.http.HttpServletResponse.*;
-import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -88,7 +86,7 @@ public class ContainerServlet extends PackServlet {
 				pathInfo = "";
 			else
 				pathInfo = StringUtils.strip(pathInfo, "/");
-
+			
 			String possibleJobToken;
 			Long userId = null;
 			var auth = request.getHeader("Authorization");
@@ -202,7 +200,7 @@ public class ContainerServlet extends PackServlet {
 							}
 
 							var digest = parseDigest(digestString);
-							if (packBlobManager.finishUpload(projectId, uuid, digest.getHash())) {
+							if (packBlobManager.finishUpload(projectId, uuid, digest.getHash()) != null) {
 								response.setStatus(SC_CREATED);
 								response.setHeader("Location", getBlobUrl(projectPath, digestString));
 								response.setHeader("Docker-Content-Digest", digestString);
@@ -246,7 +244,6 @@ public class ContainerServlet extends PackServlet {
 									response.setHeader("Docker-Content-Digest", digestString);
 									return new Pair<>(packBlob.getProject().getId(), packBlob.getHash());
 								} else {
-									packBlobManager.delete(packBlob);
 									throw new NotFoundException(ErrorCode.BLOB_UNKNOWN);
 								}
 							} else {
@@ -270,106 +267,131 @@ public class ContainerServlet extends PackServlet {
 						case "PUT":
 							var projectId = sessionManager.call(() -> getProject(projectPath, true).getId());
 							var baos = new ByteArrayOutputStream();
-							var contentType = request.getContentType();
-							if (contentType == null)
-								throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_INVALID, "No content type specified");
 							try (var is = request.getInputStream()) {
 								if (copyLarge(is, baos, 0, MAX_DATA_LEN, new byte[BUFFER_SIZE]) >= MAX_DATA_LEN) 
 									throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");									
 							}
-							sessionManager.run(() -> {
-								var bytes = baos.toByteArray();
-								String hash;
-								if (!isTag(reference)) {
-									var digest = parseDigest(reference);
-									if (!digest.matches(bytes)) {
-										throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
-												"Invalid manifest digest");
-									}
-									hash = digest.getHash();
-								} else {
-									hash = Digest.sha256Of(bytes).getHash();
+							
+							var bytes = baos.toByteArray();
+							String hash;
+							if (!isTag(reference)) {
+								var digest = parseDigest(reference);
+								if (!digest.matches(bytes)) {
+									throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
+											"Invalid manifest digest");
 								}
-
-								var data = new ContainerData(bytes, contentType);
-								var manifest = data.getManifest();
-								var project = projectManager.load(projectId);
-								Collection<PackBlob> packBlobs = new HashSet<>();
-
-								if (data.isImageManifest()) {
-									var blobNodes = new ArrayList<JsonNode>();
-									blobNodes.add(manifest.get("config"));
-									for (var layerNode : manifest.get("layers"))
-										blobNodes.add(layerNode);
-
-									for (var blobNode : blobNodes) {
-										var digest = parseDigest(blobNode.get("digest").asText());
-										var size = blobNode.get("size").asLong();
-										var packBlob = packBlobManager.find(digest.getHash());
+								hash = digest.getHash();
+							} else {
+								hash = Digest.sha256Of(bytes).getHash();
+							}
+							
+							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, hash);
+							
+							sessionManager.run(new Runnable() {
+								
+								private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
+									var packBlob = packBlobs.get(hash);
+									if (packBlob == null) {
+										packBlob = packBlobManager.find(hash);
 										if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-											if (size != packBlob.getSize())
+											if (packBlob.getSize() == size) 
+												packBlobs.put(hash, packBlob);
+											else
 												throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
-											packBlobs.add(packBlob);
 										} else {
 											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
 										}
 									}
-								} else if (data.isImageIndex()) {
-									for (var manifestNode : manifest.get("manifests")) {
-										var digest = parseDigest(manifestNode.get("digest").asText());
-										var size = manifestNode.get("size").asLong();
-										var pack = packManager.findByDataHash(project, TYPE, digest.getHash());
-										if (pack == null)
-											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
-										else if (pack.getDataBytes().length != size)
-											throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
+									return packBlob;
+								}
+								
+								private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs, 
+																	 byte[] bytes) {
+									var data = new ContainerData(bytes);
+									if (data.isImageIndex()) {
+										for (var manifestNode : data.getManifest().get("manifests")) {
+											var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
+											var size = manifestNode.get("size").asLong();
+											var packBlob = loadPackBlob(packBlobs, hash, size);
+											var baos = new ByteArrayOutputStream();
+											packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+											loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+										}
+									} else if (data.isImageManifest()) {
+										var blobNodes = new ArrayList<JsonNode>();
+										blobNodes.add(data.getManifest().get("config"));
+										for (var layerNode: data.getManifest().get("layers"))
+											blobNodes.add(layerNode);
+										for (var blobNode : blobNodes) {
+											var hash = parseDigest(blobNode.get("digest").asText()).getHash();
+											var size = blobNode.get("size").asLong();
+											loadPackBlob(packBlobs, hash, size);
+										}
 									}
 								}
+								
+								@Override
+								public void run() {
+									if (isTag(reference)) {
+										var packBlobs = new HashMap<String, PackBlob>();
+										loadReferencedPackBlobs(packBlobs, bytes);
+										packBlobs.put(hash, packBlobManager.load(packBlobId));
 
-								var pack = packManager.findByVersion(project, TYPE, reference);
-								if (pack == null) {
-									pack = new Pack();
-									pack.setProject(project);
-									pack.setType(TYPE);
-									pack.setVersion(reference);
+										var project = projectManager.load(projectId);
+										var pack = packManager.find(project, TYPE, reference);
+										if (pack == null) {
+											pack = new Pack();
+											pack.setProject(project);
+											pack.setType(TYPE);
+											pack.setVersion(reference);
+										}
+										pack.setBuild(getBuild(possibleJobToken));
+										pack.setBlobHash(hash);
+										pack.setPublishDate(new Date());
+
+										packManager.createOrUpdate(pack, packBlobs.values());
+									}
+
+									response.setStatus(SC_OK);
+									response.setHeader("Docker-Content-Digest",
+											"sha256:" + hash);
+									response.setHeader("Location", getManifestUrl(projectPath, reference));
 								}
-								pack.setBuild(getBuild(possibleJobToken));
-								pack.setDataBytes(bytes);
-								pack.setDataHash(hash);
-								pack.setCreateDate(new Date());
-								pack.setExtraInfo(contentType);
-
-								packManager.createOrUpdate(pack, packBlobs);
-
-								response.setStatus(SC_OK);
-								response.setHeader("Docker-Content-Digest",
-										"sha256:" + pack.getDataHash());
-								response.setHeader("Location", getManifestUrl(projectPath, reference));
 							});
 							break;
 						case "GET":
 						case "HEAD":
-							var versionInfo = sessionManager.call(() -> {
+							var manifestInfo = sessionManager.call(() -> {
+								PackBlob packBlob;
 								var project = getProject(projectPath, false);
-								Pack pack;
-								if (isTag(reference))
-									pack = packManager.findByVersion(project, TYPE, reference);
-								else
-									pack = packManager.findByDataHash(project, TYPE, parseDigest(reference).getHash());
-								if (pack != null) 
-									return new ImmutableTriple<>(pack.getDataBytes(), pack.getDataHash(), pack.getExtraInfo());
-								else 
+								if (isTag(reference)) {
+									var pack = packManager.find(project, TYPE, reference);
+									if (pack != null)
+										packBlob = packBlobManager.find(pack.getBlobHash());
+									else
+										packBlob = null;
+								} else {
+									packBlob = packBlobManager.find(parseDigest(reference).getHash());
+								}
+								if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob) 
+										&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getHash(), packBlob.getSize())) {
+									response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getHash());
+									response.setContentLengthLong(packBlob.getSize());
+									return new Pair<>(packBlob.getProject().getId(), packBlob.getHash());
+								} else {
 									return null;
+								}
 							});
-							if (versionInfo != null) {
+							if (manifestInfo != null) {
 								response.setStatus(SC_OK);
-								response.setContentType(versionInfo.getRight());
-								response.setHeader("Docker-Content-Digest",
-										"sha256:" + versionInfo.getMiddle());
-								response.setContentLength(versionInfo.getLeft().length);
+								baos = new ByteArrayOutputStream();
+								packBlobManager.downloadBlob(manifestInfo.getLeft(), manifestInfo.getRight(), baos);
+								bytes = baos.toByteArray();
+								String manifest = new String(bytes);
+								response.setContentType(new ContainerData(bytes).getMediaType());
 								if (method.equals("GET")) {
 									try (var os = response.getOutputStream()) {
-										copy(new ByteArrayInputStream(versionInfo.getLeft()), os, BUFFER_SIZE);
+										os.write(bytes);
 									}
 								}
 							} else {
@@ -380,9 +402,7 @@ public class ContainerServlet extends PackServlet {
 							sessionManager.run(() -> {
 								var project = getProject(projectPath, true);
 								if (isTag(reference)) 
-									packManager.deleteByName(project, TYPE, reference);
-								else 
-									packManager.deleteByDataHash(project, TYPE, parseDigest(reference).getHash());									
+									packManager.delete(project, TYPE, reference);
 								response.setStatus(SC_ACCEPTED);
 							});
 							break;
