@@ -2,6 +2,8 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.pack.PackSupport;
 import io.onedev.server.util.CollectionUtils;
 
 import javax.annotation.Nullable;
@@ -39,9 +41,6 @@ public class Pack extends AbstractEntity {
 	
 	public static final String PROP_PUBLISH_DATE = "publishDate";
 	
-	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
-
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
 
@@ -63,11 +62,17 @@ public class Pack extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String blobHash;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable = false)
+	private User user;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Build build;
 	
 	private Date publishDate;
+	
+	private transient PackSupport support;
 
 	@OneToMany(mappedBy="pack", cascade=CascadeType.REMOVE)
 	private Collection<PackBlobReference> blobReferences = new ArrayList<>();
@@ -113,6 +118,14 @@ public class Pack extends AbstractEntity {
 		this.build = build;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
 	public Collection<PackBlobReference> getBlobReferences() {
 		return blobReferences;
 	}
@@ -127,6 +140,14 @@ public class Pack extends AbstractEntity {
 
 	public void setPublishDate(Date publishDate) {
 		this.publishDate = publishDate;
+	}
+	
+	public PackSupport getSupport() {
+		if (support == null) {
+			support = OneDev.getExtensions(PackSupport.class).stream()
+					.filter(it -> it.getPackType().equals(type)).findFirst().get();
+		}
+		return support;
 	}
 	
 }

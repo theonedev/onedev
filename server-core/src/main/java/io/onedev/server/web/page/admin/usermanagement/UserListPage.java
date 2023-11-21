@@ -232,7 +232,7 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected String getConfirmMessage() {
-										return "Change records of these users will be removed as result of set to guest. Type <code>yes</code> to confirm";
+										return "Change records of these users will be removed as result of setting to guest. Type <code>yes</code> to confirm";
 									}
 
 									@Override
@@ -536,7 +536,7 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected String getConfirmMessage() {
-										return "Change records of these users will be removed as result of set to guest. Type <code>yes</code> to confirm";
+										return "Change records of these users will be removed as result of setting to guest. Type <code>yes</code> to confirm";
 									}
 
 									@Override

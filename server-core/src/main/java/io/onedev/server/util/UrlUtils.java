@@ -2,13 +2,17 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.apache.wicket.util.encoding.UrlDecoder;
 import org.apache.wicket.util.encoding.UrlEncoder;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -73,6 +77,18 @@ public class UrlUtils {
 	
 	public static String getRootUrl(String url) {
 		return url.substring(0, url.indexOf('/', url.indexOf("//") + 2));
+	}
+	
+	public static String getServer(String url) {
+		try {
+			var parsedUrl = new URL(url);
+			if (parsedUrl.getPort() != -1)
+				return parsedUrl.getHost() + ":" + parsedUrl.getPort();
+			else
+				return parsedUrl.getHost();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

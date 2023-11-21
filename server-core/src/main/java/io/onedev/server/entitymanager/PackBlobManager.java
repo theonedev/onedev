@@ -34,6 +34,8 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	void downloadBlob(Long projectId, String hash, OutputStream os);
 	
+	byte[] readBlob(String hash);
+	
 	void onDeleteProject(Project project);
 
 	void syncPacks(Long projectId, String activeServer);

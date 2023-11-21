@@ -1,0 +1,27 @@
+<wicket:panel>
+	<div class="pack-side">
+        <div class="properties">
+        	<div>
+        		<div class="name">Published By</div>
+        		<div class="value">
+					<a wicket:id="publisher" class="text-break"></a>
+        		</div>
+        	</div>
+			<div>
+				<div class="name">Published At</div>
+				<div class="value">
+					<span wicket:id="publishDate"></span>
+				</div>
+			</div>
+        </div>
+		<div>
+			<a class="btn btn-sm btn-block btn-outline-secondary">Fixed Issues Since <wicket:svg href="arrow4" class="ml-1 icon"/></a>
+			<a class="btn btn-sm btn-block btn-outline-secondary">Commits Since <wicket:svg href="arrow4" class="ml-1 icon"/></a>
+		</div>
+		<wicket:enclosure child="delete">
+			<div class="actions">
+				<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>
+			</div>
+		</wicket:enclosure>
+	</div>
+</wicket:panel>

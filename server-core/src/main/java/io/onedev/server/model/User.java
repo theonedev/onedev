@@ -61,7 +61,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String SYSTEM_EMAIL_ADDRESS = "system@onedev";
 	
-	public static final String UNKNOWN_NAME = "Unknown";
+	public static final String UNKNOWN_NAME = "unknown";
 	
 	public static final String EXTERNAL_MANAGED = "external_managed";
 	

@@ -1076,5 +1076,9 @@ public class PullRequest extends ProjectBelonging
 	public static String getSerialLockName(Long requestId) {
 		return "pull-request-" + requestId + "-serial";
 	}
+
+	public String getReference(@Nullable Project currentProject) {
+		return Referenceable.asReference(this, currentProject);
+	}
 	
 }

@@ -789,6 +789,20 @@ span.keycap {
 .d-empty-none:empty {
 	display: none !important;
 }
+
+.mb-last-child-0:last-child {
+	margin-bottom: 0 !important;
+}
+.mr-last-child-0:last-child {
+	margin-right: 0 !important;
+}
+.mt-first-child-0:first-child {
+	margin-top: 0 !important;
+}
+.ml-first-child-0:first-child {
+	margin-left: 0 !important;
+}
+
 .d-last-child-none:last-child {
 	display: none !important;
 }

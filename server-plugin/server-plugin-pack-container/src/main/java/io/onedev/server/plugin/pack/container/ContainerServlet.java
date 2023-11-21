@@ -2,7 +2,6 @@ package io.onedev.server.plugin.pack.container;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ChallengeAwareUnauthenticatedException;
@@ -346,6 +345,7 @@ public class ContainerServlet extends PackServlet {
 											pack.setVersion(reference);
 										}
 										pack.setBuild(getBuild(possibleJobToken));
+										pack.setUser(SecurityUtils.getUser());
 										pack.setBlobHash(hash);
 										pack.setPublishDate(new Date());
 

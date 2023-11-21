@@ -1,0 +1,68 @@
+<wicket:panel>
+	<div>
+		<b>Digest</b>
+		<div wicket:id="digest" class="text-monospace text-break font-size-sm mt-2 mr-1"></div>
+	</div>
+	<div class="mt-4">
+		<b>Pull Command</b>
+		<div class="mt-2">
+			<span wicket:id="pullCommand" class="text-monospace text-break font-size-sm"></span>
+			<a wicket:id="copyPullCommand"><wicket:svg href="copy" class="icon"/></a>
+		</div>
+		<wicket:enclosure child="insecureRegistry">
+			<div class="font-size-sm mt-2">
+				<b class="text-warning">WARNING: </b> 
+				<span class="text-muted">
+					This server is currently accessed via http protocol,
+					please configure your docker daemon to <a href="https://stackoverflow.com/questions/42211380/add-insecure-registry-to-docker" target="_blank">turn on insecure flag</a> for registry entry 
+					<em wicket:id="insecureRegistry"></em>
+				</span>
+			</div>
+		</wicket:enclosure>
+	</div>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="imageIndexFrag">
+		<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4 mt-4"></ul>
+		<div wicket:id="content"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="imageManifestFrag">
+		<wicket:enclosure child="pullArchCommand">
+			<div class="mt-4">
+				<b>Pull Command</b>
+				<div class="mt-2">
+					<span wicket:id="pullArchCommand" class="text-monospace text-break font-size-sm"></span>
+					<a wicket:id="copyPullArchCommand"><wicket:svg href="copy" class="icon"/></a>
+				</div>
+				<wicket:enclosure child="insecureRegistry">
+					<div class="font-size-sm mt-2">
+						<b class="text-warning">WARNING: </b>
+						<span class="text-muted">
+							This server is currently accessed via http protocol,
+							please configure your docker daemon to <a href="https://stackoverflow.com/questions/42211380/add-insecure-registry-to-docker" target="_blank">turn on insecure flag</a> for registry entry 
+							<em wicket:id="insecureRegistry"></em>
+						</span>
+					</div>
+				</wicket:enclosure>
+			</div>
+		</wicket:enclosure>
+		<div class="mt-4">
+			<b>Image Manifest</b>
+			<pre wicket:id="manifest" class="code text-break mt-2 mb-0"></pre>
+		</div>
+		<div wicket:id="labels" class="mt-4">
+			<b>Image Labels</b>
+			<table class="table table-bordered mt-2 mb-0">
+				<tbody>
+					<tr wicket:id="labels">
+						<td wicket:id="name"></td>
+						<td wicket:id="value"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="unknownManifestFrag">
+		<div class="alert alert-light-warning alert-notice mt-4">Unknown manifest</div>
+		<pre wicket:id="manifest" class="code mt-2 mb-0"></pre>
+	</wicket:fragment>
+</wicket:panel>

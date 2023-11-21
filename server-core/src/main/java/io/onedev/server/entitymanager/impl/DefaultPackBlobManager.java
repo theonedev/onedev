@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.StorageManager;
@@ -20,6 +21,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Digest;
@@ -29,7 +31,6 @@ import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -60,7 +61,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	
 	private static final String TEMP_BLOB_SUFFIX = ".temp";
 	
-	private static final int EXPIRE_MILLIS = 60*1000;
+	private static final int EXPIRE_MILLIS = 24*3600*1000;
 	
 	private static final String UPLOADS_DIR = "uploads";
 	
@@ -305,7 +306,22 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 			}
 		});
 	}
-	
+
+	@Override
+	public byte[] readBlob(String hash) {
+		var packBlob = find(hash);
+		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+			var baos = new ByteArrayOutputStream();
+			downloadBlob(packBlob.getProject().getId(), hash, baos);
+			var bytes = baos.toByteArray();
+			if (bytes.length != packBlob.getSize())
+				throw new ExplicitException("Invalid blob size: " + hash);
+			return bytes;
+		} else {
+			throw new ExplicitException("Blob not found: " + hash);
+		}
+	}
+
 	@Override
 	public void downloadBlob(Long projectId, String hash, OutputStream os) {
 		var activeServer = projectManager.getActiveServer(projectId, true);
@@ -486,8 +502,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-//		return CronScheduleBuilder.dailyAtHourAndMinute(0, 30);
-		return SimpleScheduleBuilder.repeatMinutelyForever(1);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 30);
 	}
 
 	public Object writeReplace() throws ObjectStreamException {

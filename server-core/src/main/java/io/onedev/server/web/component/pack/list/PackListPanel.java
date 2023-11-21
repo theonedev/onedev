@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.pack;
+package io.onedev.server.web.component.pack.list;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -25,6 +25,7 @@ import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -500,7 +501,7 @@ public abstract class PackListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
-				Fragment fragment = new Fragment(componentId, "linkFrag", PackListPanel.this);
+				Fragment fragment = new Fragment(componentId, "packFrag", PackListPanel.this);
 				Pack pack = rowModel.getObject();
 
 				WebMarkupContainer link = new ActionablePageLink("link",
@@ -519,6 +520,8 @@ public abstract class PackListPanel extends Panel {
 					}
 
 				};
+				
+				link.add(new SpriteImage("icon", pack.getSupport().getPackIcon()));
 				if (getProject() == null)
 					link.add(new Label("label", pack.getProject().getPath() + ":" + pack.getVersion()));
 				else

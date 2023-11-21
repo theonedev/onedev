@@ -83,6 +83,7 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
@@ -362,6 +363,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~builds/${build}/changes", BuildChangesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/fixed-issues", FixedIssuesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/artifacts", BuildArtifactsPage.class));
+		add(new ProjectPageMapper("${project}/~builds/${build}/packages/${type}", BuildPacksPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/invalid", InvalidBuildPage.class));
 
 		add(new ProjectPageMapper("${project}/~packages", ProjectPacksPage.class));

@@ -11,7 +11,7 @@ import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.pack.PackListPanel;
+import io.onedev.server.web.component.pack.list.PackListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;

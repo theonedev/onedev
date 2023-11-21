@@ -628,6 +628,10 @@ public class Build extends ProjectBelonging
 	public void setRefName(String refName) {
 		this.refName = refName;
 	}
+
+	public String getReference(@Nullable Project currentProject) {
+		return Referenceable.asReference(this, currentProject);
+	}
 	
 	@Nullable
 	public String getBranch() {
