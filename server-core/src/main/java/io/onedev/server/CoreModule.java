@@ -279,6 +279,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(LabelSpecManager.class).to(DefaultLabelSpecManager.class);
 		bind(ProjectLabelManager.class).to(DefaultProjectLabelManager.class);
 		bind(BuildLabelManager.class).to(DefaultBuildLabelManager.class);
+		bind(PackLabelManager.class).to(DefaultPackLabelManager.class);
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);
 		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
 		bind(AlertManager.class).to(DefaultAlertManager.class);

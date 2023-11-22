@@ -4,9 +4,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
@@ -45,10 +47,13 @@ public class BuildPacksPage extends BuildDetailPage {
 			@Override
 			protected void populateItem(ListItem<Pack> item) {
 				var pack = item.getModelObject();
-				var title = pack.getVersion();
+				var label = pack.getVersion();
 				if (!pack.getProject().equals(getProject()))
-					title = pack.getProject().getPath() + ":" + title;
-				item.add(new Label("title", title));
+					label = pack.getProject().getPath() + ":" + label;
+				var link = new BookmarkablePageLink<Void>("title", PackDetailPage.class, 
+						PackDetailPage.paramsOf(pack));
+				link.add(new Label("label", label));
+				item.add(link);
 				item.add(pack.getSupport().render("body", pack));
 			}
 		});

@@ -1,24 +1,17 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.LabelSpec.PROP_NAME;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-
+import io.onedev.server.annotation.Color;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.rest.annotation.Api;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import io.onedev.server.annotation.Color;
-import io.onedev.server.annotation.Editable;
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static io.onedev.server.model.LabelSpec.PROP_NAME;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME)})
@@ -42,6 +35,9 @@ public class LabelSpec extends AbstractEntity {
 	
 	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)
 	private Collection<BuildLabel> buildLabels = new ArrayList<>();
+
+	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)
+	private Collection<PackLabel> packLabels = new ArrayList<>();
 	
 	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestLabel> pullRequestLabels = new ArrayList<>();
@@ -92,6 +88,14 @@ public class LabelSpec extends AbstractEntity {
 
 	public void setBuildLabels(Collection<BuildLabel> buildLabels) {
 		this.buildLabels = buildLabels;
+	}
+
+	public Collection<PackLabel> getPackLabels() {
+		return packLabels;
+	}
+
+	public void setPackLabels(Collection<PackLabel> packLabels) {
+		this.packLabels = packLabels;
 	}
 
 	public Collection<PullRequestLabel> getPullRequestLabels() {

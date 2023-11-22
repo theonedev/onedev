@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.util.CollectionUtils;
@@ -10,7 +9,8 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.util.*;
 
-import static io.onedev.server.model.Pack.*;
+import static io.onedev.server.model.Pack.PROP_TYPE;
+import static io.onedev.server.model.Pack.PROP_VERSION;
 
 @Entity
 @Table(
@@ -78,6 +78,9 @@ public class Pack extends AbstractEntity {
 
 	@OneToMany(mappedBy="pack", cascade=CascadeType.REMOVE)
 	private Collection<PackBlobReference> blobReferences = new ArrayList<>();
+
+	@OneToMany(mappedBy="pack", cascade=CascadeType.REMOVE)
+	private Collection<PackLabel> labels = new ArrayList<>();
 	
 	public Project getProject() {
 		return project;
@@ -134,6 +137,14 @@ public class Pack extends AbstractEntity {
 
 	public void setBlobReferences(Collection<PackBlobReference> blobReferences) {
 		this.blobReferences = blobReferences;
+	}
+
+	public Collection<PackLabel> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(Collection<PackLabel> labels) {
+		this.labels = labels;
 	}
 
 	public Date getPublishDate() {

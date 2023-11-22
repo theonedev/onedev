@@ -36,10 +36,15 @@ public abstract class ApiHelpPage extends LayoutPage {
 	}
 	
 	protected String getResourceTitle(Class<?> resourceClass) {
-		return WordUtils.capitalize(
-				WordUtils.uncamel(
-						StringUtils.substringBeforeLast(
-								resourceClass.getSimpleName(), "Resource")));
+		var api = resourceClass.getAnnotation(Api.class);
+		if (api != null && api.name().length() != 0) {
+			return api.name();
+		} else {
+			return WordUtils.capitalize(
+					WordUtils.uncamel(
+							StringUtils.substringBeforeLast(
+									resourceClass.getSimpleName(), "Resource")));
+		}
 	}
 	
 	@Nullable

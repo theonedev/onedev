@@ -15,6 +15,8 @@ public @interface Api {
 	
 	String example() default "";
 	
+	String name() default "";
+	
 	String description() default "";
 	
 	boolean readOnly() default false;
