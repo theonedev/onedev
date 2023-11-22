@@ -2,8 +2,10 @@ package io.onedev.server.web.component.pack.side;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PackLabelManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -14,18 +16,21 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.pack.choice.PackChoiceProvider;
 import io.onedev.server.web.component.pack.choice.SelectPackToActChoice;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -33,10 +38,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
@@ -154,6 +161,64 @@ public abstract class PackSidePanel extends Panel {
 			add(new WebMarkupContainer("fixedIssuesSince").setVisible(false));
 			add(new WebMarkupContainer("changesSince").setVisible(false));
 		}
+
+		WebMarkupContainer labelsContainer = new WebMarkupContainer("labels") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPack().getLabels().isEmpty() || SecurityUtils.canWritePack(getPack().getProject()));
+			}
+
+		};
+		labelsContainer.setOutputMarkupId(true);
+
+		if (SecurityUtils.canWritePack(getPack().getProject())) {
+			labelsContainer.add(new InplacePropertyEditLink("head") {
+
+				@Override
+				protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
+					LabelsBean labelsBean = (LabelsBean) bean;
+					OneDev.getInstance(PackLabelManager.class).sync(getPack(), labelsBean.getLabels());
+					handler.add(labelsContainer);
+				}
+
+				@Override
+				protected String getPropertyName() {
+					return "labels";
+				}
+
+				@Override
+				protected Project getProject() {
+					return getPack().getProject();
+				}
+
+				@Override
+				protected Serializable getBean() {
+					return LabelsBean.of(getPack());
+				}
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("a");
+				}
+
+			});
+		} else {
+			labelsContainer.add(new WebMarkupContainer("head"));
+		}
+		labelsContainer.add(new EntityLabelsPanel<>("body", new AbstractReadOnlyModel<Pack>() {
+
+			@Override
+			public Pack getObject() {
+				return getPack();
+			}
+
+		}));
+		labelsContainer.add(new WebMarkupContainer("labelsHelp")
+				.setVisible(SecurityUtils.canWritePack(getPack().getProject())));
+		add(labelsContainer);
 		
 		if (SecurityUtils.canWritePack(getPack().getProject()))
 			add(newDeleteLink("delete"));

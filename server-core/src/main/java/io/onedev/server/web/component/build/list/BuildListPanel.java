@@ -1040,7 +1040,7 @@ public abstract class BuildListPanel extends Panel {
 				}));
 				fragment.add(link);
 
-				fragment.add(new EntityLabelsPanel<BuildLabel>("labels", rowModel));
+				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);

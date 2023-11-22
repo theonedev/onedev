@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
+import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.util.CollectionUtils;
 
@@ -19,7 +20,7 @@ import static io.onedev.server.model.Pack.PROP_VERSION;
 				@Index(columnList= PROP_VERSION)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_TYPE, PROP_VERSION})}
 )
-public class Pack extends AbstractEntity {
+public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -28,6 +29,8 @@ public class Pack extends AbstractEntity {
 	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";
+
+	public static final String NAME_LABEL = "Label";
 	
 	public static final String NAME_TYPE = "Type";
 	
@@ -44,7 +47,7 @@ public class Pack extends AbstractEntity {
 	public static final String PROP_BUILD = "build";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
+			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_LABEL, NAME_PUBLISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_TYPE, PROP_TYPE,
@@ -139,6 +142,7 @@ public class Pack extends AbstractEntity {
 		this.blobReferences = blobReferences;
 	}
 
+	@Override
 	public Collection<PackLabel> getLabels() {
 		return labels;
 	}

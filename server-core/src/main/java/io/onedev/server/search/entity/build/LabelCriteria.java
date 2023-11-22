@@ -1,15 +1,14 @@
 package io.onedev.server.search.entity.build;
 
+import io.onedev.server.model.Build;
+import io.onedev.server.model.BuildLabel;
+import io.onedev.server.model.LabelSpec;
+import io.onedev.server.util.criteria.Criteria;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-
-import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildLabel;
-import io.onedev.server.model.LabelSpec;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.criteria.Criteria;
 
 public class LabelCriteria extends Criteria<Build> {
 
@@ -39,7 +38,7 @@ public class LabelCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return Criteria.quote(Project.NAME_LABEL) + " " 
+		return Criteria.quote(Build.NAME_LABEL) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ Criteria.quote(labelSpec.getName());
 	}

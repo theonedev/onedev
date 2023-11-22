@@ -101,6 +101,8 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestPackVersions(project, matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Pack.NAME_LABEL)) {
+										return SuggestionUtils.suggestLabels(matchWith);
 									} else {
 										return null;
 									}

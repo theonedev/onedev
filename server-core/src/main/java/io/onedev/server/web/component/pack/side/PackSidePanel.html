@@ -24,6 +24,14 @@
 				<input wicket:id="changesSince" type="hidden" class="form-control">
 			</div>
 		</wicket:enclosure>
+		<div wicket:id="labels" class="labels">
+			<div wicket:id="head" class="d-flex align-items-center justify-content-between mb-3">
+				<span class="font-weight-bolder">Labels</span>
+				<wicket:svg href="gear" class="icon icon-sm"></wicket:svg>
+			</div>
+			<div wicket:id="body" class="body d-flex align-items-center"></div>
+			<span wicket:id="labelsHelp" class="form-text font-size-sm text-muted"><wicket:svg href="bulb" class="icon icon-sm"/> Labels can be defined in Administration / Label Management</span>
+		</div>
 		<wicket:enclosure child="delete">
 			<div class="actions">
 				<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>

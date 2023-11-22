@@ -99,6 +99,8 @@ public class PackQuery extends EntityQuery<Pack> {
 										return new VersionCriteria(value, operator);
 									case NAME_TYPE:
 										return new TypeCriteria(value, operator);
+									case NAME_LABEL:
+										return new LabelCriteria(getLabelSpec(value), operator);
 									default:
 										throw new IllegalStateException();
 								}
@@ -112,7 +114,7 @@ public class PackQuery extends EntityQuery<Pack> {
 						List<Criteria<Pack>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<Pack>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -120,12 +122,12 @@ public class PackQuery extends EntityQuery<Pack> {
 						List<Criteria<Pack>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<Pack>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<Pack> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<Pack>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -158,17 +160,18 @@ public class PackQuery extends EntityQuery<Pack> {
 		if (!QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case PackQueryLexer.IsUntil:
-		case PackQueryLexer.IsSince:
-			if (!fieldName.equals(NAME_PUBLISH_DATE)) 
-				throw newOperatorException(fieldName, operator);
-			break;
-		case PackQueryLexer.Is:
-			if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_TYPE) 
-					&& !fieldName.equals(NAME_VERSION)) {
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
+			case PackQueryLexer.IsUntil:
+			case PackQueryLexer.IsSince:
+				if (!fieldName.equals(NAME_PUBLISH_DATE))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case PackQueryLexer.Is:
+			case PackQueryLexer.IsNot:
+				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_TYPE)
+						&& !fieldName.equals(NAME_VERSION) && !fieldName.equals(NAME_LABEL)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
 		}
 	}
 	

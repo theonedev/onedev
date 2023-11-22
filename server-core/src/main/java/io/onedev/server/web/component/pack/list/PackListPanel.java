@@ -16,6 +16,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.PackQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -526,7 +527,9 @@ public abstract class PackListPanel extends Panel {
 					link.add(new Label("label", pack.getProject().getPath() + ":" + pack.getVersion()));
 				else
 					link.add(new Label("label", pack.getVersion()));
-					
+
+				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
+				
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
