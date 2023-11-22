@@ -58,7 +58,7 @@ RanBuild
 	;
 
 OrderBy
-    : 'order by'
+    : 'order' WS+ 'by'
     ;
 
 Is

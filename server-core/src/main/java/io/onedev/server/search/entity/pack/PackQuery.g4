@@ -7,7 +7,9 @@ query
     ;
 
 criteria
-    : criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+	: operator=PublishedByMe #OperatorCriteria
+	| operator=(PublishedByUser|PublishedByBuild|PublishedByProject) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -19,8 +21,24 @@ order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
 
+PublishedByMe
+    : 'published' WS+ 'by' WS+ 'me'
+    ;
+
+PublishedByUser
+    : 'published' WS+ 'by' WS+ 'user'
+    ;
+
+PublishedByBuild
+    : 'published' WS+ 'by' WS+ 'build'
+    ;
+
+PublishedByProject
+    : 'published' WS+ 'by' WS+ 'project'
+    ;
+
 OrderBy
-    : 'order by'
+    : 'order' WS+ 'by'
     ;
 
 Is

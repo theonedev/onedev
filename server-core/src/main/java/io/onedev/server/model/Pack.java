@@ -44,6 +44,8 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 	
 	public static final String PROP_PUBLISH_DATE = "publishDate";
 	
+	public static final String PROP_USER = "user";
+	
 	public static final String PROP_BUILD = "build";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(

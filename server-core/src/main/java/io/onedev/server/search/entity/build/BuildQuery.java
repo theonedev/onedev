@@ -144,7 +144,7 @@ public class BuildQuery extends EntityQuery<Build> {
 					
 					@Override
 					public Criteria<Build> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Build>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override

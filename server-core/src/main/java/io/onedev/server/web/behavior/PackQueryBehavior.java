@@ -2,6 +2,7 @@ package io.onedev.server.web.behavior;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -10,6 +11,7 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.buildspec.job.action.condition.ActionConditionLexer;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.pack.PackQuery;
@@ -17,6 +19,7 @@ import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.PackQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -82,7 +85,18 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = PackQuery.getOperator(operatorName);							
-							if (!fieldElements.isEmpty()) {
+							if (fieldElements.isEmpty()) {
+								if (operator == PackQueryLexer.PublishedByUser) {
+									return SuggestionUtils.suggestUsers(matchWith);
+								} else if (operator == PackQueryLexer.PublishedByBuild) {
+									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								} else {
+									if (!matchWith.contains("*"))
+										return SuggestionUtils.suggestProjectPaths(matchWith);
+									else
+										return null;
+								}
+							} else {
 								String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									PackQuery.checkField(project, fieldName, operator);
@@ -164,6 +178,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Pack.NAME_PROJECT)) {
@@ -172,6 +187,12 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}
+				}
+				if (!operatorElements.isEmpty()) {
+					String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+					int operator = AntlrUtils.getLexerRule(PackQueryLexer.ruleNames, operatorName);
+					if (operator == PackQueryLexer.PublishedByProject) 
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 				}
 			}
 		} 

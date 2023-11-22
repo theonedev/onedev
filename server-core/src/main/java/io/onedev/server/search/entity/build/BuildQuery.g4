@@ -92,7 +92,7 @@ FixedIssue
 	;
 	
 OrderBy
-    : 'order by'
+    : 'order' WS+ 'by'
     ;
 
 Is

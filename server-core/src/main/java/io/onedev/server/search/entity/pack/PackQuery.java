@@ -7,7 +7,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.pack.PackQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -71,11 +70,28 @@ public class PackQuery extends EntityQuery<Pack> {
 						return new FuzzyCriteria(getValue(ctx.getText()));
 					}
 					
-					@Override
-					public Criteria<Pack> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Pack>) visit(ctx.criteria()).withParens(true);
+					public Criteria<Pack> visitOperatorCriteria(PackQueryParser.OperatorCriteriaContext ctx) {
+						switch (ctx.operator.getType()) {
+							case PackQueryLexer.PublishedByMe:
+								return new PublishedByMeCriteria();
+							default:
+								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
+						}
 					}
 
+					@Override
+					public Criteria<Pack> visitOperatorValueCriteria(PackQueryParser.OperatorValueCriteriaContext ctx) {
+						String value = getValue(ctx.Quoted().getText());
+						if (ctx.PublishedByUser() != null)
+							return new PublishedByUserCriteria(getUser(value));
+						else if (ctx.PublishedByBuild() != null)
+							return new PublishedByBuildCriteria(project, value);
+						else if (ctx.PublishedByProject() != null)
+							return new PublishedByProjectCriteria(value);
+						else
+							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+					}
+					
 					@Override
 					public Criteria<Pack> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
@@ -107,6 +123,11 @@ public class PackQuery extends EntityQuery<Pack> {
 							default:
 								throw new IllegalStateException();
 						}
+					}
+
+					@Override
+					public Criteria<Pack> visitParensCriteria(ParensCriteriaContext ctx) {
+						return visit(ctx.criteria()).withParens(true);
 					}
 					
 					@Override
