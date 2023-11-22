@@ -193,7 +193,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "General Setting").add(AttributeAppender.replace("class", "text-truncate"));
+		return new Label(componentId, "General Settings").add(AttributeAppender.replace("class", "text-truncate"));
 	}
 
 }
