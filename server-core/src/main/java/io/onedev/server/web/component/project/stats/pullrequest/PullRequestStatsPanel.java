@@ -36,7 +36,7 @@ public class PullRequestStatsPanel extends Panel {
 	}
 	
 	private long getTotalCount() {
-		return getStats().values().stream().collect(Collectors.summingLong(Long::longValue));
+		return getStats().values().stream().mapToLong(Long::longValue).sum();
 	}
 	
 	@Override

@@ -19,6 +19,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.util.ProjectPackStats;
 import io.onedev.server.util.criteria.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
@@ -181,6 +182,26 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		}
 	}
 
+	@Sessional
+	@Override
+	public List<ProjectPackStats> queryStats(Collection<Project> projects) {
+		if (projects.isEmpty()) {
+			return new ArrayList<>();
+		} else {
+			CriteriaBuilder builder = getSession().getCriteriaBuilder();
+			CriteriaQuery<ProjectPackStats> criteriaQuery = builder.createQuery(ProjectPackStats.class);
+			Root<Pack> root = criteriaQuery.from(Pack.class);
+			criteriaQuery.multiselect(
+					root.get(Pack.PROP_PROJECT).get(Project.PROP_ID),
+					root.get(Pack.PROP_TYPE), builder.count(root));
+			criteriaQuery.groupBy(root.get(PROP_PROJECT), root.get(Pack.PROP_TYPE));
+
+			criteriaQuery.where(root.get(PROP_PROJECT).in(projects));
+			criteriaQuery.orderBy(builder.asc(root.get(Pack.PROP_TYPE)));
+			return getSession().createQuery(criteriaQuery).getResultList();
+		}
+	}
+	
 	private Predicate[] getPredicates(@Nullable Project project, @Nullable Criteria<Pack> criteria,
 									  CriteriaQuery<?> query, From<Pack, Pack> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);

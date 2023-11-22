@@ -16,6 +16,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectPackStats;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -32,13 +33,14 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.DeleteStatusLabel;
+import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.project.stats.build.BuildStatsPanel;
 import io.onedev.server.web.component.project.stats.code.CodeStatsPanel;
 import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
+import io.onedev.server.web.component.project.stats.pack.PackStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -93,7 +95,7 @@ public class ProjectListPanel extends Panel {
 	
 	private final int expectedCount;
 	
-	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<ProjectQuery>() {
+	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected ProjectQuery load() {
@@ -102,47 +104,60 @@ public class ProjectListPanel extends Panel {
 				baseQuery = ProjectQuery.merge(baseQuery, new ProjectQuery(new ChildrenOfCriteria(getParentProject().getPath())));
 			return parse(queryStringModel.getObject(), baseQuery);
 		}
-		
+
 	};
 	
-	private final IModel<List<ProjectIssueStats>> issueStatsModel = 
-			new LoadableDetachableModel<List<ProjectIssueStats>>() {
+	private final IModel<List<ProjectIssueStats>> issueStatsModel =
+			new LoadableDetachableModel<>() {
 
-		@Override
-		protected List<ProjectIssueStats> load() {
-			List<Project> projects = new ArrayList<>();
-			for (Component row: (WebMarkupContainer)projectsTable.get("body").get("rows")) 
-				projects.add((Project) row.getDefaultModelObject());
-			return OneDev.getInstance(IssueManager.class).queryStats(projects);
-		}
-		
-	}; 
+				@Override
+				protected List<ProjectIssueStats> load() {
+					List<Project> projects = new ArrayList<>();
+					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
+						projects.add((Project) row.getDefaultModelObject());
+					return OneDev.getInstance(IssueManager.class).queryStats(projects);
+				}
+
+			}; 
 	
-	private final IModel<List<ProjectBuildStats>> buildStatsModel = 
-			new LoadableDetachableModel<List<ProjectBuildStats>>() {
+	private final IModel<List<ProjectBuildStats>> buildStatsModel =
+			new LoadableDetachableModel<>() {
 
-		@Override
-		protected List<ProjectBuildStats> load() {
-			List<Project> projects = new ArrayList<>();
-			for (Component row: (WebMarkupContainer)projectsTable.get("body").get("rows")) 
-				projects.add((Project) row.getDefaultModelObject());
-			return OneDev.getInstance(BuildManager.class).queryStats(projects);
-		}
-		
-	}; 
-	
-	private final IModel<List<ProjectPullRequestStats>> pullRequestStatsModel = 
-			new LoadableDetachableModel<List<ProjectPullRequestStats>>() {
+				@Override
+				protected List<ProjectBuildStats> load() {
+					List<Project> projects = new ArrayList<>();
+					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
+						projects.add((Project) row.getDefaultModelObject());
+					return OneDev.getInstance(BuildManager.class).queryStats(projects);
+				}
 
-		@Override
-		protected List<ProjectPullRequestStats> load() {
-			List<Project> projects = new ArrayList<>();
-			for (Component row: (WebMarkupContainer)projectsTable.get("body").get("rows")) 
-				projects.add((Project) row.getDefaultModelObject());
-			return OneDev.getInstance(PullRequestManager.class).queryStats(projects);
-		}
-		
-	}; 
+			};
+
+	private final IModel<List<ProjectPackStats>> packStatsModel =
+			new LoadableDetachableModel<>() {
+
+				@Override
+				protected List<ProjectPackStats> load() {
+					List<Project> projects = new ArrayList<>();
+					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
+						projects.add((Project) row.getDefaultModelObject());
+					return OneDev.getInstance(PackManager.class).queryStats(projects);
+				}
+
+			};
+
+	private final IModel<List<ProjectPullRequestStats>> pullRequestStatsModel =
+			new LoadableDetachableModel<>() {
+
+				@Override
+				protected List<ProjectPullRequestStats> load() {
+					List<Project> projects = new ArrayList<>();
+					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
+						projects.add((Project) row.getDefaultModelObject());
+					return OneDev.getInstance(PullRequestManager.class).queryStats(projects);
+				}
+
+			}; 
 	
 	private DataTable<Project, Void> projectsTable;	
 	
@@ -1107,12 +1122,28 @@ public class ProjectListPanel extends Panel {
 					} else {
 						fragment.add(new WebMarkupContainer("buildStats").setVisible(false));
 					}
+
+					fragment.add(new PackStatsPanel("packStats", rowModel, new LoadableDetachableModel<Map<String, Long>>() {
+
+						@Override
+						protected Map<String, Long> load() {
+							Map<String, Long> statusCounts = new LinkedHashMap<>();
+							for (ProjectPackStats stats: packStatsModel.getObject()) {
+								if (stats.getProjectId().equals(projectId))
+									statusCounts.put(stats.getType(), stats.getTypeCount());
+							}
+							return statusCounts;
+						}
+
+					}));
+					
 					fragment.add(new WebMarkupContainer("noStorage").setVisible(false));
 				} else {
 					fragment.add(new WebMarkupContainer("codeStats").setVisible(false));
 					fragment.add(new WebMarkupContainer("pullRequestStats").setVisible(false));
 					fragment.add(new WebMarkupContainer("issueStats").setVisible(false));
 					fragment.add(new WebMarkupContainer("buildStats").setVisible(false));
+					fragment.add(new WebMarkupContainer("packStats").setVisible(false));
 					fragment.add(new WebMarkupContainer("noStorage"));
 				}
 				
@@ -1176,7 +1207,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(projectsTable = new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(projectsTable = new DefaultDataTable<>("projects", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);
