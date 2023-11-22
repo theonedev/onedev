@@ -51,7 +51,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
@@ -103,7 +103,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 			
 		});
 		
-		add(new SelectToAddChoice<User>("addNew", new AbstractUserChoiceProvider() {
+		add(new SelectToActChoice<User>("addNew", new AbstractUserChoiceProvider() {
 
 			@Override
 			public void query(String term, int page, Response<User> response) {

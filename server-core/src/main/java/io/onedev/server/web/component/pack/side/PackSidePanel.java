@@ -1,12 +1,31 @@
 package io.onedev.server.web.component.pack.side;
 
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
+import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.search.commit.Revision;
+import io.onedev.server.search.commit.RevisionCriteria;
+import io.onedev.server.search.entity.issue.FixedBetweenCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.pack.choice.PackChoiceProvider;
+import io.onedev.server.web.component.pack.choice.SelectPackToActChoice;
+import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,6 +36,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+
+import java.util.List;
+
+import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 
 @SuppressWarnings("serial")
 public abstract class PackSidePanel extends Panel {
@@ -65,7 +88,73 @@ public abstract class PackSidePanel extends Panel {
 			}
 
 		}));
+		
+		if (build != null) {
+			var choiceProvider = new PackChoiceProvider() {
 
+				@Override
+				public void query(String term, int page, Response<Pack> response) {
+					int count = (page+1) * WebConstants.PAGE_SIZE + 1;
+					var packManager = OneDev.getInstance(PackManager.class);
+					if (term.length() == 0)
+						term = null;
+					List<Pack> packs = packManager.queryPrevComparables(getPack(), term, count);
+					new ResponseFiller<>(response).fill(packs, page, WebConstants.PAGE_SIZE);
+				}
+			};
+			if (SecurityUtils.canAccessProject(build.getProject())) {
+				add(new SelectPackToActChoice("fixedIssuesSince", choiceProvider) {
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Pack selection) {
+						var build = getPack().getBuild();
+						
+						var parseOption = new IssueQueryParseOption()
+								.withCurrentUserCriteria(true)
+								.withCurrentProjectCriteria(true);
+						var baseQuery = IssueQuery.parse(
+								build.getProject(), 
+								build.getProject().getHierarchyDefaultFixedIssueQuery(build.getJobName()), 
+								parseOption, true);
+						FixedBetweenCriteria fixedBetweenCriteria = new FixedBetweenCriteria(
+								build.getProject(),
+								IssueQueryLexer.Commit, selection.getBuild().getCommitHash(), 
+								IssueQueryLexer.Commit, build.getCommitHash());
+						var queryString = merge(baseQuery, new IssueQuery(fixedBetweenCriteria)).toString();
+						setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(build.getProject(), queryString, 0));
+					}
+
+					@Override
+					protected String getPlaceholder() {
+						return "Fixed issues since...";
+					}
+				});
+			} else {
+				add(new WebMarkupContainer("fixedIssuesSince").setVisible(false));
+			}
+			if (SecurityUtils.canReadCode(build.getProject())) {
+				add(new SelectPackToActChoice("changesSince", choiceProvider) {
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Pack selection) {
+						var revisionCriteria = new RevisionCriteria(Lists.newArrayList(
+								new Revision(selection.getBuild().getCommitHash(), Revision.Scope.SINCE),
+								new Revision(getPack().getBuild().getCommitHash(), Revision.Scope.UNTIL)));
+						var commitQuery = new CommitQuery(Lists.newArrayList(revisionCriteria));
+						setResponsePage(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getPack().getBuild().getProject(), commitQuery.toString(), null));
+					}
+
+					@Override
+					protected String getPlaceholder() {
+						return "Changes since...";
+					}
+				});
+			} else {
+				add(new WebMarkupContainer("changesSince").setVisible(false));
+			}
+		} else {
+			add(new WebMarkupContainer("fixedIssuesSince").setVisible(false));
+			add(new WebMarkupContainer("changesSince").setVisible(false));
+		}
+		
 		if (SecurityUtils.canWritePack(getPack().getProject()))
 			add(newDeleteLink("delete"));
 		else

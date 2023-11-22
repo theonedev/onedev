@@ -14,10 +14,16 @@
 				</div>
 			</div>
         </div>
-		<div>
-			<a class="btn btn-sm btn-block btn-outline-secondary">Fixed Issues Since <wicket:svg href="arrow4" class="ml-1 icon"/></a>
-			<a class="btn btn-sm btn-block btn-outline-secondary">Commits Since <wicket:svg href="arrow4" class="ml-1 icon"/></a>
-		</div>
+		<wicket:enclosure child="fixedIssuesSince">
+			<div>
+				<input wicket:id="fixedIssuesSince" type="hidden" class="form-control">
+			</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="changesSince">
+			<div>
+				<input wicket:id="changesSince" type="hidden" class="form-control">
+			</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="delete">
 			<div class="actions">
 				<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>

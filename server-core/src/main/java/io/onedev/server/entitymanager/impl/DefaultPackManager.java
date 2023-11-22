@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
 import io.onedev.server.entitymanager.PackBlobReferenceManager;
@@ -7,10 +8,7 @@ import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.PackBlobReference;
-import io.onedev.server.model.Project;
+import io.onedev.server.model.*;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -24,7 +22,6 @@ import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.util.criteria.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
@@ -39,7 +36,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.onedev.server.model.AbstractEntity.PROP_ID;
 import static io.onedev.server.model.Pack.*;
 import static java.lang.Math.min;
 
@@ -84,15 +80,15 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 
 		query.where(getPredicates(project, packQuery.getCriteria(), query, root, builder));
 
-		applyOrders(root, query, builder, packQuery);
+		applyOrders(root, query, builder, packQuery.getSorts());
 
 		return query;
 	}
 
 	private void applyOrders(From<Pack, Pack> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder,
-							 EntityQuery<Pack> packQuery) {
+							 List<EntitySort> sorts) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: packQuery.getSorts()) {
+		for (EntitySort sort: sorts) {
 			if (sort.getDirection() == EntitySort.Direction.ASCENDING)
 				orders.add(builder.asc(PackQuery.getPath(root, Pack.ORDER_FIELDS.get(sort.getField()))));
 			else
@@ -116,11 +112,33 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 
 	@Sessional
 	@Override
-	public List<Pack> query(Project project, String type, @Nullable String query,
-                            int firstResult, int maxResults) {
-		var criteria = newCriteria(project, type, query);
-		criteria.addOrder(Order.desc(PROP_ID));
-		return query(criteria, firstResult, maxResults);
+	public List<Pack> queryPrevComparables(Pack compareWith, String fuzzyQuery, int count) {
+		Preconditions.checkState(compareWith.getBuild() != null);
+		
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Pack> criteriaQuery = builder.createQuery(Pack.class);
+		Root<Pack> root = criteriaQuery.from(Pack.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+		
+		predicates.add(builder.equal(root.get(Pack.PROP_PROJECT), compareWith.getProject()));
+		predicates.add(builder.equal(root.get(PROP_TYPE), compareWith.getType()));
+		predicates.add(builder.equal(root.get(PROP_BUILD).get(Build.PROP_PROJECT), compareWith.getBuild().getProject()));		
+		predicates.add(builder.lessThan(root.get(PROP_ID), compareWith.getId()));
+		
+		if (fuzzyQuery != null) {
+			predicates.add(builder.like(
+					builder.lower(root.get(PROP_VERSION)), 
+					"%" + fuzzyQuery.toLowerCase() + "%"));
+		}
+
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		applyOrders(root, criteriaQuery, builder, new ArrayList<>());			
+
+		Query<Pack> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(0);
+		query.setMaxResults(count);
+		return query.getResultList();
 	}
 
 	@Sessional
@@ -210,12 +228,6 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		query.setMaxResults(count);
 
 		return query.getResultList();
-	}
-
-	@Sessional
-	@Override
-	public int count(Project project, String type, @Nullable String query) {
-		return count(newCriteria(project, type, query));
 	}
 
 	@Sessional

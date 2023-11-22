@@ -52,7 +52,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 
@@ -105,7 +105,7 @@ public class UserMembershipsPage extends UserPage {
 			
 		});
 		
-		add(new SelectToAddChoice<Group>("addNew", new AbstractGroupChoiceProvider() {
+		add(new SelectToActChoice<Group>("addNew", new AbstractGroupChoiceProvider() {
 
 			@Override
 			public void query(String term, int page, Response<Group> response) {

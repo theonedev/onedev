@@ -38,7 +38,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -632,7 +632,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		container.add(new SelectToAddChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
+		container.add(new SelectToActChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
 			
 			@Override
 			public void query(String term, int page, Response<Milestone> response) {

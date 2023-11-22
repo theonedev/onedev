@@ -16,16 +16,13 @@ public interface PackManager extends EntityManager<Pack> {
 	List<Pack> query(@Nullable Project project, EntityQuery<Pack> packQuery, int firstResult, int maxResults);
 
 	int count(@Nullable Project project, Criteria<Pack> packCriteria);
-	
-	List<Pack> query(Project project, String type, @Nullable String fuzzyQuery,
-                     int firstResult, int maxResults);
+
+	List<Pack> queryPrevComparables(Pack compareWith, String fuzzyQuery, int count);
 	
 	List<String> queryTags(Project project, String type, @Nullable String lastTag, int count);
 
 	List<String> queryVersions(Project project, String matchWith, int count);
 	
-	int count(Project project, String type, @Nullable String query);
-
 	@Nullable
     Pack find(Project project, String type, String version);
 
@@ -34,5 +31,5 @@ public interface PackManager extends EntityManager<Pack> {
     void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs);
 
 	void delete(Collection<Pack> packs);
-	
+
 }

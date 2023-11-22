@@ -41,6 +41,8 @@ public class Pack extends AbstractEntity {
 	
 	public static final String PROP_PUBLISH_DATE = "publishDate";
 	
+	public static final String PROP_BUILD = "build";
+	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_TYPE, NAME_VERSION, NAME_PUBLISH_DATE);
 

@@ -5,16 +5,16 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
-public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
+public abstract class SelectToActChoice<T> extends Select2Choice<T> {
 
 	private transient T selection;
 	
-	public SelectToAddChoice(String id, ChoiceProvider<T> choiceProvider) {
+	public SelectToActChoice(String id, ChoiceProvider<T> choiceProvider) {
 		this(id);
 		setProvider(choiceProvider);
 	}
 
-	public SelectToAddChoice(String id) {
+	public SelectToActChoice(String id) {
 		super(id);
 		
 		setModel(new IModel<T>() {
