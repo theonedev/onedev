@@ -88,7 +88,7 @@ public class SpriteImage extends WebComponent {
 						BaseResourceMapper baseMapper = (BaseResourceMapper) mapper;
 						if (StringUtils.strip(baseMapper.getPath(), "/").equalsIgnoreCase(mountPath)) {
 							if (baseMapper.getResourceReference() instanceof SpriteResourceReference) {
-								scope = ((SpriteResourceReference) baseMapper.getResourceReference()).getScope();
+								scope = baseMapper.getResourceReference().getScope();
 							} else {
 								throw new ExplicitException("Path '" + mountPath 
 										+ "' should be mounted to a svg sprite resource reference");

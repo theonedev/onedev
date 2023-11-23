@@ -60,10 +60,11 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 			message = "Milestone start and due date should be specified to show burndown chart";
 		}
 		if (message != null) {
-			String messageCssClasses = "alert alert-notice alert-light-warning";
-			add(new Label("content", message).add(AttributeAppender.append("class", messageCssClasses)));
+			var fragment = new Fragment("content", "messageFrag", this);
+			fragment.add(new Label("message", message));
+			add(fragment);
 		} else {
-			Fragment fragment = new Fragment("content", "chartFrag", this);
+			var fragment = new Fragment("content", "chartFrag", this);
 			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<>() {
 
 				private String getXAxisValue(LocalDate date) {
