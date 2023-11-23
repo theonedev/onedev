@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.pack.container;
+package io.onedev.server.ee.pack.container;
 
 import javax.annotation.Nullable;
 

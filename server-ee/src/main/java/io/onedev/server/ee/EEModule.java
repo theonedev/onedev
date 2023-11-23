@@ -11,6 +11,8 @@ import io.onedev.server.ee.clustering.ClusterManagementPage;
 import io.onedev.server.ee.clustering.DefaultClusterManager;
 import io.onedev.server.ee.dashboard.DashboardPage;
 import io.onedev.server.ee.dashboard.widgets.WidgetGroup;
+import io.onedev.server.ee.pack.container.ContainerPackSupport;
+import io.onedev.server.ee.pack.container.ContainerServlet;
 import io.onedev.server.ee.sendgrid.*;
 import io.onedev.server.ee.storage.DefaultStorageManager;
 import io.onedev.server.ee.storage.StorageSetting;
@@ -26,6 +28,7 @@ import io.onedev.server.StorageManager;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.model.support.administration.mailservice.MailService;
+import io.onedev.server.pack.PackSupport;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.WebApplicationConfigurator;
@@ -33,6 +36,7 @@ import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.layout.*;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,7 +122,13 @@ public class EEModule extends AbstractPluginModule {
 		bind(MessageManager.class).to(DefaultMessageManager.class);
 		bind(SendgridServlet.class);
 		contribute(ServletConfigurator.class, SendgridServletConfigurator.class);
-		
+
+		bind(ContainerServlet.class);
+		contribute(ServletConfigurator.class, context -> context.addServlet(
+				new ServletHolder(OneDev.getInstance(ContainerServlet.class)),
+				ContainerServlet.PATH + "/*"));
+		bind(ContainerPackSupport.class);
+		contribute(PackSupport.class, ContainerPackSupport.class);
 	}
 
 	@Override

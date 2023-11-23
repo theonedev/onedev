@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.pack.container;
+package io.onedev.server.ee.pack.container;
 
 public enum ErrorCode {
 	BLOB_UNKNOWN, BLOB_UPLOAD_INVALID, BLOB_UPLOAD_UNKNOWN, DIGEST_INVALID, MANIFEST_BLOB_UNKNOWN,

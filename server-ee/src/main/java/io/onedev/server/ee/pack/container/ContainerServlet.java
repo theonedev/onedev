@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.pack.container;
+package io.onedev.server.ee.pack.container;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import static io.onedev.server.model.Pack.MAX_DATA_LEN;
-import static io.onedev.server.plugin.pack.container.ContainerPackSupport.TYPE;
+import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.util.Digest.SHA256;
 import static java.lang.Long.parseLong;
 import static java.util.regex.Pattern.compile;

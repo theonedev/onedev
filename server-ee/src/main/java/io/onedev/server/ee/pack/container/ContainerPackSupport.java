@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.pack.container;
+package io.onedev.server.ee.pack.container;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
