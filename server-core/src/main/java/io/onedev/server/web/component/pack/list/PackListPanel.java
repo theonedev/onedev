@@ -9,6 +9,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pack.PackQuery;
+import io.onedev.server.search.entity.pack.PackQueryLexer;
+import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -72,11 +74,13 @@ public abstract class PackListPanel extends Panel {
 	
 	private final IModel<String> queryStringModel;
 	
+	private final boolean showType;
+	
 	private final IModel<PackQuery> queryModel = new LoadableDetachableModel<PackQuery>() {
 
 		@Override
 		protected PackQuery load() {
-			return parse(queryStringModel.getObject(), getBaseQuery());
+			return parse(queryStringModel.getObject(), getBaseQuery(), getPackType());
 		}
 		
 	};
@@ -95,9 +99,10 @@ public abstract class PackListPanel extends Panel {
 	
 	private boolean querySubmitted = true;
 	
-	public PackListPanel(String id, IModel<String> queryModel) {
+	public PackListPanel(String id, IModel<String> queryModel, boolean showType) {
 		super(id);
 		this.queryStringModel = queryModel;
+		this.showType = showType;
 	}
 	
 	private PackManager getPackManager() {
@@ -105,9 +110,12 @@ public abstract class PackListPanel extends Panel {
 	}
 	
 	@Nullable
-	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery) {
+	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery, @Nullable String packType) {
 		try {
-			return PackQuery.merge(baseQuery, PackQuery.parse(getProject(), queryString));
+			var query = PackQuery.merge(baseQuery, PackQuery.parse(getProject(), queryString, true));
+			if (packType != null)
+				query = PackQuery.merge(query, new PackQuery(new TypeCriteria(packType, PackQueryLexer.Is)));
+			return query;
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
 			if (e instanceof ExplicitException)
@@ -127,6 +135,11 @@ public abstract class PackListPanel extends Panel {
 	
 	@Nullable
 	protected abstract Project getProject();
+	
+	@Nullable
+	protected String getPackType() {
+		return null;
+	}
 
 	protected PackQuery getBaseQuery() {
 		return new PackQuery();
@@ -372,7 +385,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						PackQuery query = parse(queryStringModel.getObject(), new PackQuery());
+						PackQuery query = parse(queryStringModel.getObject(), new PackQuery(), null);
 						PackListPanel.this.getFeedbackMessages().clear();
 						if (query != null)
 							return query.getSorts();
@@ -382,7 +395,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						PackQuery query = parse(queryStringModel.getObject(), new PackQuery());
+						PackQuery query = parse(queryStringModel.getObject(), new PackQuery(), null);
 						PackListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new PackQuery();
@@ -407,7 +420,7 @@ public abstract class PackListPanel extends Panel {
 				return getProject();
 			}
 
-		}, true, true) {
+		}, getPackType(), true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
@@ -535,18 +548,20 @@ public abstract class PackListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Type")) {
+		if (showType) {
+			columns.add(new AbstractColumn<>(Model.of("Type")) {
 
-			@Override
-			public String getCssClass() {
-				return "type d-none d-xl-table-cell";
-			}
+				@Override
+				public String getCssClass() {
+					return "type d-none d-xl-table-cell";
+				}
 
-			@Override
-			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getType()));
-			}
-		});
+				@Override
+				public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
+					cellItem.add(new Label(componentId, rowModel.getObject().getType()));
+				}
+			});
+		}
 
 		columns.add(new AbstractColumn<>(Model.of("Last Published")) {
 

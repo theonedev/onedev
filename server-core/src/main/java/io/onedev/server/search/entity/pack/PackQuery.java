@@ -41,7 +41,7 @@ public class PackQuery extends EntityQuery<Pack> {
 		this(null);
 	}
 	
-	public static PackQuery parse(@Nullable Project project, @Nullable String queryString) {
+	public static PackQuery parse(@Nullable Project project, @Nullable String queryString, boolean withCurrentUserCriteria) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			PackQueryLexer lexer = new PackQueryLexer(is);
@@ -73,6 +73,8 @@ public class PackQuery extends EntityQuery<Pack> {
 					public Criteria<Pack> visitOperatorCriteria(PackQueryParser.OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
 							case PackQueryLexer.PublishedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new PublishedByMeCriteria();
 							default:
 								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());

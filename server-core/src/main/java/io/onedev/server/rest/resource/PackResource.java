@@ -78,7 +78,7 @@ public class PackResource {
 
     	PackQuery parsedQuery;
 		try {
-			parsedQuery = PackQuery.parse(null, query);
+			parsedQuery = PackQuery.parse(null, query, true);
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}

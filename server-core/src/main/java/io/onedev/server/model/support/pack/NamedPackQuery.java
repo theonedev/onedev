@@ -35,7 +35,7 @@ public class NamedPackQuery implements NamedQuery {
 	}
 
 	@Editable(placeholder="All")
-	@PackQuery
+	@PackQuery(withCurrentUserCriteria = true)
 	@Override
 	public String getQuery() {
 		return query;

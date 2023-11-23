@@ -132,7 +132,7 @@ public class ProjectPacksPage extends ProjectPage {
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
 			}
 			
-		}) {
+		}, true) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

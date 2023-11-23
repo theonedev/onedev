@@ -11,9 +11,12 @@ public class PackQueryValidator implements ConstraintValidator<PackQuery, String
 
 	private String message;
 	
+	private boolean withCurrentUserCriteria;
+	
 	@Override
 	public void initialize(PackQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}
 
 	@Override
@@ -23,7 +26,7 @@ public class PackQueryValidator implements ConstraintValidator<PackQuery, String
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.pack.PackQuery.parse(project, value);
+				io.onedev.server.search.entity.pack.PackQuery.parse(project, value, withCurrentUserCriteria);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

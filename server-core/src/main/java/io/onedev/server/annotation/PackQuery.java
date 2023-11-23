@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=PackQueryValidator.class) 
 public @interface PackQuery {
+
+	boolean withCurrentUserCriteria() default false;
 	
 	boolean withOrder() default true;
 	

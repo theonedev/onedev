@@ -127,7 +127,7 @@ public class PackDetailPage extends ProjectPage {
 
 					@Override
 					protected EntityQuery<Pack> parse(String queryString, Project project) {
-						return PackQuery.parse(project, queryString);
+						return PackQuery.parse(project, queryString, true);
 					}
 
 					@Override

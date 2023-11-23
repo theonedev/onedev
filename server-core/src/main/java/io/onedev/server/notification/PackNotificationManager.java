@@ -110,7 +110,7 @@ public class PackNotificationManager extends AbstractNotificationManager {
 				for (String queryString: entry.getValue()) {
 					User.push(user);
 					try {
-						if (PackQuery.parse(event.getProject(), queryString).matches(pack)) {
+						if (PackQuery.parse(event.getProject(), queryString, true).matches(pack)) {
 							EmailAddress emailAddress = user.getPrimaryEmailAddress();
 							if (emailAddress != null && emailAddress.isVerified())
 								notifyEmails.add(emailAddress.getValue());
@@ -150,7 +150,7 @@ public class PackNotificationManager extends AbstractNotificationManager {
 				for (String queryString: entry.getValue()) {
 					User.push(user);
 					try {
-						if (PackQuery.parse(null, queryString).matches(pack)) {
+						if (PackQuery.parse(null, queryString, true).matches(pack)) {
 							EmailAddress emailAddress = user.getPrimaryEmailAddress();
 							if (emailAddress != null && emailAddress.isVerified())
 								notifyEmails.add(emailAddress.getValue());

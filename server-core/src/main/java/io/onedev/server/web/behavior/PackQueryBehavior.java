@@ -36,16 +36,20 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final IModel<Project> projectModel;
 	
+	private final String packType;
+	
 	private final boolean withOrder;
 	
-	public PackQueryBehavior(IModel<Project> projectModel, boolean withOrder, boolean hideIfBlank) {
+	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, 
+							 boolean withOrder, boolean hideIfBlank) {
 		super(PackQueryParser.class, "query", false, hideIfBlank);
 		this.projectModel = projectModel;
+		this.packType = packType;
 		this.withOrder = withOrder;
 	}
 
-	public PackQueryBehavior(IModel<Project> projectModel, boolean withOrder) {
-		this(projectModel, withOrder, false);
+	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, boolean withOrder) {
+		this(projectModel, packType, withOrder, false);
 	}
 	
 	@Override
@@ -73,6 +77,8 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 							List<String> fields = new ArrayList<>(Pack.QUERY_FIELDS);
 							if (getProject() != null)
 								fields.remove(Pack.NAME_PROJECT);
+							if (packType != null)
+								fields.remove(Pack.NAME_TYPE);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Pack.ORDER_FIELDS.keySet());
