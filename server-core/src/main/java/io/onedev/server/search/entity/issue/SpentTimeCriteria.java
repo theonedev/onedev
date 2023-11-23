@@ -28,6 +28,8 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 		Path<Integer> spentTimeAttribute = from.get(PROP_TOTAL_SPENT_TIME);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(spentTimeAttribute, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return builder.not(builder.equal(spentTimeAttribute, value));
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return builder.greaterThan(spentTimeAttribute, value);
 		else
@@ -38,6 +40,8 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
 			return issue.getTotalSpentTime() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getTotalSpentTime() != value;			
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return issue.getTotalSpentTime() > value;
 		else

@@ -27,6 +27,8 @@ public class ReplyCountCriteria extends Criteria<CodeComment> {
 		Path<Integer> attribute = from.get(CodeComment.PROP_REPLY_COUNT);
 		if (operator == CodeCommentQueryLexer.Is)
 			return builder.equal(attribute, value);
+		else if (operator == CodeCommentQueryLexer.IsNot)
+			return builder.not(builder.equal(attribute, value));
 		else if (operator == CodeCommentQueryLexer.IsLessThan)
 			return builder.lessThan(attribute, value);
 		else
@@ -37,6 +39,8 @@ public class ReplyCountCriteria extends Criteria<CodeComment> {
 	public boolean matches(CodeComment comment) {
 		if (operator == CodeCommentQueryLexer.Is)
 			return comment.getReplyCount() == value;
+		else if (operator == CodeCommentQueryLexer.IsNot)
+			return comment.getReplyCount() != value;
 		else if (operator == CodeCommentQueryLexer.IsLessThan)
 			return comment.getReplyCount() < value;
 		else

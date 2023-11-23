@@ -21,12 +21,15 @@ public class CommitFieldCriteria extends FieldCriteria {
 	
 	private final String value;
 	
+	private final int operator;
+	
 	private transient ProjectScopedCommit commit;
 	
-	public CommitFieldCriteria(String name, @Nullable Project project, String value) {
+	public CommitFieldCriteria(String name, @Nullable Project project, String value, int operator) {
 		super(name);
 		this.project = project;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	private ProjectScopedCommit getCommit() {
@@ -37,22 +40,28 @@ public class CommitFieldCriteria extends FieldCriteria {
 	
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
-		return builder.and(
+		var predicate = builder.and(
 				builder.equal(issueFrom.get(Issue.PROP_PROJECT), getCommit().getProject()),
 				builder.equal(fieldFrom.get(IssueField.PROP_VALUE), getCommit().getCommitId().name()));
+		if (operator == IssueQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(getCommit().getProject()) 
+		var matches = issue.getProject().equals(getCommit().getProject()) 
 				&& Objects.equals(fieldValue, getCommit().getCommitId().name());
+		if (operator == IssueQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(getFieldName()) + " " 
-				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

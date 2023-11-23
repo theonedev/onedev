@@ -35,6 +35,8 @@ public class NumberCriteria extends Criteria<Build> {
 		Predicate numberPredicate;
 		if (operator == BuildQueryLexer.Is)
 			numberPredicate = builder.equal(attribute, number.getNumber());
+		else if (operator == BuildQueryLexer.IsNot)
+			numberPredicate = builder.not(builder.equal(attribute, number.getNumber()));
 		else if (operator == BuildQueryLexer.IsGreaterThan)
 			numberPredicate = builder.greaterThan(attribute, number.getNumber());
 		else
@@ -49,6 +51,8 @@ public class NumberCriteria extends Criteria<Build> {
 		if (build.getProject().equals(number.getProject())) {
 			if (operator == BuildQueryLexer.Is)
 				return build.getNumber() == number.getNumber();
+			else if (operator == BuildQueryLexer.IsNot)
+				return build.getNumber() != number.getNumber();
 			else if (operator == BuildQueryLexer.IsGreaterThan)
 				return build.getNumber() > number.getNumber();
 			else

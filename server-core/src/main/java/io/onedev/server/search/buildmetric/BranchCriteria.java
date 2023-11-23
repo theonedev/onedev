@@ -16,21 +16,27 @@ public class BranchCriteria extends BuildMetricCriteria {
 
 	private final String value;
 	
-	public BranchCriteria(String value) {
+	private final int operator;
+	
+	public BranchCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<?> metricRoot, Join<?, ?> buildJoin, CriteriaBuilder builder) {
 		Path<String> attribute = buildJoin.get(Build.PROP_REF_NAME);
 		String normalized = Constants.R_HEADS + value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildMetricQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_BRANCH) + " " 
-				+ BuildMetricQuery.getRuleName(BuildMetricQueryLexer.Is) + " " 
+				+ BuildMetricQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

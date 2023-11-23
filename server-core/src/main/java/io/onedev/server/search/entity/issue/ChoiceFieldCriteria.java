@@ -42,14 +42,20 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
-		if (allowMultiple)
+		if (allowMultiple) {	
+			if (operator == IssueQueryLexer.Is)
+				return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value);
+			else
+				return builder.not(builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value));				
+		} else if (operator == IssueQueryLexer.Is) {
 			return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value);
-		else if (operator == IssueQueryLexer.Is) 
-			return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value);
-		else if (operator == IssueQueryLexer.IsGreaterThan) 
+		} else if (operator == IssueQueryLexer.IsNot) {
+			return builder.not(builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value));
+		} else if (operator == IssueQueryLexer.IsGreaterThan) {
 			return builder.greaterThan(fieldFrom.get(IssueField.PROP_ORDINAL), ordinal);
-		else
+		} else {
 			return builder.lessThan(fieldFrom.get(IssueField.PROP_ORDINAL), ordinal);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -57,14 +63,20 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (fieldValue != null) {
-			if (allowMultiple)
-				return ((List<String>) fieldValue).contains(value);
-			else if (operator == IssueQueryLexer.Is)
+			if (allowMultiple) {
+				if (operator == IssueQueryLexer.Is)
+					return ((List<String>) fieldValue).contains(value);
+				else
+					return !((List<String>) fieldValue).contains(value);
+			} else if (operator == IssueQueryLexer.Is) {
 				return Objects.equals(fieldValue, value);
-			else if (operator == IssueQueryLexer.IsGreaterThan)
+			} else if (operator == IssueQueryLexer.IsNot) {
+				return !Objects.equals(fieldValue, value);
+			} else if (operator == IssueQueryLexer.IsGreaterThan) {
 				return issue.getFieldOrdinal(getFieldName(), (String) fieldValue) > ordinal;
-			else
+			} else {
 				return issue.getFieldOrdinal(getFieldName(), (String) fieldValue) < ordinal;
+			}
 		} else {
 			return false;
 		}
@@ -104,14 +116,16 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@SuppressWarnings({"unchecked" })
 	@Override
 	public void fill(Issue issue) {
-		if (allowMultiple) {
-			List<String> valueFromIssue = (List<String>) issue.getFieldValue(getFieldName());
-			if (valueFromIssue == null)
-				valueFromIssue = new ArrayList<>();
-			valueFromIssue.add(value);
-			issue.setFieldValue(getFieldName(), valueFromIssue);
-		} else {
-			issue.setFieldValue(getFieldName(), value);
+		if (operator == IssueQueryLexer.Is) {
+			if (allowMultiple) {
+				List<String> valueFromIssue = (List<String>) issue.getFieldValue(getFieldName());
+				if (valueFromIssue == null)
+					valueFromIssue = new ArrayList<>();
+				valueFromIssue.add(value);
+				issue.setFieldValue(getFieldName(), valueFromIssue);
+			} else {
+				issue.setFieldValue(getFieldName(), value);
+			}
 		}
 	}
 

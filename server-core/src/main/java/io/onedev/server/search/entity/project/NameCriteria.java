@@ -16,25 +16,34 @@ public class NameCriteria extends Criteria<Project> {
 
 	private final String value;
 	
-	public NameCriteria(String value) {
+	private final int operator;
+	
+	public NameCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Project.PROP_NAME);
-		return builder.like(builder.lower(attribute), value.toLowerCase().replace("*", "%"));
+		var predicate = builder.like(builder.lower(attribute), value.toLowerCase().replace("*", "%"));
+		if (operator == ProjectQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return WildcardUtils.matchString(value.toLowerCase(), project.getName().toLowerCase());
+		var matches = WildcardUtils.matchString(value.toLowerCase(), project.getName().toLowerCase());
+		if (operator == ProjectQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return Criteria.quote(Project.NAME_NAME) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
+				+ ProjectQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(value);
 	}
 

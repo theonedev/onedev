@@ -17,13 +17,19 @@ public class ProjectCriteria extends Criteria<JobMatchContext> {
 	
 	private String projectPath;
 	
-	public ProjectCriteria(String projectPath) {
+	private final int operator;
+	
+	public ProjectCriteria(String projectPath, int operator) {
 		this.projectPath = projectPath;
+		this.operator = operator;
 	}
 
 	@Override
 	public boolean matches(JobMatchContext context) {
-		return WildcardUtils.matchPath(projectPath, context.getProject().getPath());
+		var matches = WildcardUtils.matchPath(projectPath, context.getProject().getPath());
+		if (operator == JobMatchLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
@@ -38,7 +44,9 @@ public class ProjectCriteria extends Criteria<JobMatchContext> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(NAME_PROJECT) + " " + JobMatch.getRuleName(JobMatchLexer.Is) + " " + quote(projectPath);
+		return quote(NAME_PROJECT) + " " 
+				+ JobMatch.getRuleName(operator) + " " 
+				+ quote(projectPath);
 	}
 
 	@Override

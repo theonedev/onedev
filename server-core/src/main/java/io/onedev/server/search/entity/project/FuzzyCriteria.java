@@ -36,9 +36,9 @@ public class FuzzyCriteria extends Criteria<Project> {
 		var criterias = new ArrayList<Criteria<Project>>();
 		for (var part: Splitter.on(' ').omitEmptyStrings().trimResults().split(value)) {
 			if (Project.get() != null)
-				criterias.add(new NameCriteria("*" + part + "*"));
+				criterias.add(new NameCriteria("*" + part + "*", ProjectQueryLexer.Is));
 			else
-				criterias.add(new PathCriteria("**/*" + part + "*/**"));
+				criterias.add(new PathCriteria("**/*" + part + "*/**", ProjectQueryLexer.Is));
 		}
 		return new AndCriteria<>(criterias);
 	}

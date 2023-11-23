@@ -5,6 +5,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
+import com.hazelcast.internal.monitor.impl.GlobalPerIndexStats;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLabel;
@@ -16,8 +17,11 @@ public class LabelCriteria extends Criteria<Project> {
 
 	private final LabelSpec labelSpec;
 	
-	public LabelCriteria(LabelSpec labelSpec) {
+	private final int operator;
+	
+	public LabelCriteria(LabelSpec labelSpec, int operator) {
 		this.labelSpec = labelSpec;
+		this.operator = operator;
 	}
 
 	@Override
@@ -26,20 +30,27 @@ public class LabelCriteria extends Criteria<Project> {
 		var labelRoot = labelQuery.from(ProjectLabel.class);
 		labelQuery.select(labelRoot);
 
-		return builder.exists(labelQuery.where(
+		var predicate = builder.exists(labelQuery.where(
 				builder.equal(labelRoot.get(ProjectLabel.PROP_PROJECT), from), 
 				builder.equal(labelRoot.get(ProjectLabel.PROP_SPEC), labelSpec)));
+		
+		if (operator == ProjectQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return project.getLabels().stream().anyMatch(it->it.getSpec().equals(labelSpec));
+		var matches = project.getLabels().stream().anyMatch(it->it.getSpec().equals(labelSpec));
+		if (operator == ProjectQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return Criteria.quote(Project.NAME_LABEL) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
+				+ ProjectQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(labelSpec.getName());
 	}
 

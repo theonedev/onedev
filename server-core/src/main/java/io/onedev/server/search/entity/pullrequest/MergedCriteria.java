@@ -14,7 +14,7 @@ public class MergedCriteria extends Criteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	private Criteria<PullRequest> getCriteria() {
-		return new StatusCriteria(Status.MERGED);
+		return new StatusCriteria(Status.MERGED, PullRequestQueryLexer.Is);
 	}
 	
 	@Override

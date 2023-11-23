@@ -8,11 +8,7 @@ import java.util.Map;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.search.entity.agent.NameCriteria;
-import io.onedev.server.search.entity.agent.OsArchCriteria;
-import io.onedev.server.search.entity.agent.OsCriteria;
-import io.onedev.server.search.entity.agent.OsVersionCriteria;
+import io.onedev.server.search.entity.agent.*;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
@@ -34,10 +30,10 @@ public class AgentParam extends ParamSegment {
 			query = new AgentQuery();
 		} else {
 			List<Criteria<Agent>> criterias = new ArrayList<>();
-			criterias.add(new NameCriteria("*" + matchWith + "*"));
-			criterias.add(new OsCriteria("*" + matchWith + "*"));
-			criterias.add(new OsVersionCriteria("*" + matchWith + "*"));
-			criterias.add(new OsArchCriteria("*" + matchWith + "*"));
+			criterias.add(new NameCriteria("*" + matchWith + "*", AgentQueryLexer.Is));
+			criterias.add(new OsCriteria("*" + matchWith + "*", AgentQueryLexer.Is));
+			criterias.add(new OsVersionCriteria("*" + matchWith + "*", AgentQueryLexer.Is));
+			criterias.add(new OsArchCriteria("*" + matchWith + "*", AgentQueryLexer.Is));
 			query = new AgentQuery(new OrCriteria<Agent>(criterias));
 		}
 		

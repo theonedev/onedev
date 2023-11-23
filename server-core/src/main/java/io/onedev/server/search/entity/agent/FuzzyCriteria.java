@@ -32,11 +32,11 @@ public class FuzzyCriteria extends Criteria<Agent> {
 	
 	private Criteria<Agent> parse(String value) {
 		return new OrCriteria<>(
-				new NameCriteria("*" + value + "*"),
-				new IpAddressCriteria("*" + value + "*"),
-				new OsCriteria("*" + value + "*"),
-				new OsVersionCriteria("*" + value + "*"),
-				new OsArchCriteria("*" + value + "*"));
+				new NameCriteria("*" + value + "*", AgentQueryLexer.Is),
+				new IpAddressCriteria("*" + value + "*", AgentQueryLexer.Is),
+				new OsCriteria("*" + value + "*", AgentQueryLexer.Is),
+				new OsVersionCriteria("*" + value + "*", AgentQueryLexer.Is),
+				new OsArchCriteria("*" + value + "*", AgentQueryLexer.Is));
 	}
 
 	@Override

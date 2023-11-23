@@ -14,29 +14,38 @@ public class OsVersionCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String value;
+	private final String value;
 	
-	public OsVersionCriteria(String value) {
+	private final int operator;
+	
+	public OsVersionCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Agent.PROP_OS_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == AgentQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Agent agent) {
 		String name = agent.getName();
-		return name != null && WildcardUtils.matchString(value.toLowerCase(), name.toLowerCase());
+		var matches = name != null && WildcardUtils.matchString(value.toLowerCase(), name.toLowerCase());
+		if (operator == AgentQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Agent.NAME_OS_VERSION) + " " 
-				+ AgentQuery.getRuleName(AgentQueryLexer.Is) + " " 
+				+ AgentQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 	

@@ -21,12 +21,15 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	
 	private final String value;
 	
+	private final int operator;
+	
 	private transient PullRequest request;
 	
-	public PullRequestFieldCriteria(String name, @Nullable Project project, String value) {
+	public PullRequestFieldCriteria(String name, @Nullable Project project, String value, int operator) {
 		super(name);
 		this.project = project;
 		this.value = value;
+		this.operator = operator;
 	}
 	
 	private PullRequest getRequest() {
@@ -38,25 +41,32 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, 
 			CriteriaBuilder builder) {
-		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), getRequest().getId());
+		var predicate = builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), getRequest().getId());
+		if (operator == IssueQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(getRequest().getTargetProject()) 
+		var matches = issue.getProject().equals(getRequest().getTargetProject()) 
 				&& Objects.equals(fieldValue, getRequest().getId());
+		if (operator == IssueQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setFieldValue(getFieldName(), getRequest().getId());
+		if (operator == IssueQueryLexer.Is)
+			issue.setFieldValue(getFieldName(), getRequest().getId());
 	}
 	
 	@Override
 	public String toStringWithoutParens() {
 		return quote(getFieldName()) + " " 
-				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

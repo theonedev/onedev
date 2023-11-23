@@ -14,28 +14,37 @@ public class JobCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String jobName;
+	private final String jobName;
 	
-	public JobCriteria(String jobName) {
+	private final int operator;
+	
+	public JobCriteria(String jobName, int operator) {
 		this.jobName = jobName;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_JOB_NAME);
 		String normalized = jobName.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return WildcardUtils.matchString(jobName.toLowerCase(), build.getJobName().toLowerCase());
+		var matches = WildcardUtils.matchString(jobName.toLowerCase(), build.getJobName().toLowerCase());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_JOB) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(jobName);
 	}
 

@@ -14,27 +14,36 @@ public class MergeStrategyCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private MergeStrategy value;
+	private final MergeStrategy value;
 	
-	public MergeStrategyCriteria(MergeStrategy value) {
+	private final int operator;
+	
+	public MergeStrategyCriteria(MergeStrategy value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Path<?> attribute = from.get(PullRequest.PROP_MERGE_STRATEGY);
-		return builder.equal(attribute, value);
+		var predicate = builder.equal(attribute, value);
+		if (operator == PullRequestQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getMergeStrategy() == value;
+		var matches = request.getMergeStrategy() == value;
+		if (operator == PullRequestQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(PullRequest.NAME_MERGE_STRATEGY) + " " 
-				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value.toString());
 	}
 

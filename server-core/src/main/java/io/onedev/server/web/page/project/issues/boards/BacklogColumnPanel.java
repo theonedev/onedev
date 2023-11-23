@@ -8,6 +8,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
@@ -58,7 +59,7 @@ abstract class BacklogColumnPanel extends Panel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new NotCriteria<Issue>(new MilestoneCriteria(getMilestone().getName())));
+				criterias.add(new NotCriteria<Issue>(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is)));
 				return new IssueQuery(Criteria.andCriterias(criterias), backlogQuery.getSorts());
 			} else {
 				return null;

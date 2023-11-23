@@ -20,29 +20,38 @@ public class CommitCriteria extends Criteria<Build>  {
 	
 	private final ObjectId commitId;
 	
-	public CommitCriteria(Project project, ObjectId commitId) {
+	private final int operator;
+	
+	public CommitCriteria(Project project, ObjectId commitId, int operator) {
 		this.project = project;
 		this.commitId = commitId;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<?> projectAttribute = BuildQuery.getPath(from, Build.PROP_PROJECT);
 		Path<?> commitAttribute = BuildQuery.getPath(from, Build.PROP_COMMIT_HASH);
-		return builder.and(
+		var predicate = builder.and(
 				builder.equal(projectAttribute, project), 
 				builder.equal(commitAttribute, commitId.name()));
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return build.getProject().equals(project) && build.getCommitHash().equals(commitId.name());
+		var matches = build.getProject().equals(project) && build.getCommitHash().equals(commitId.name());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_COMMIT) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(commitId.name());
 	}
 

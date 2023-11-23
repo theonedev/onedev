@@ -28,6 +28,8 @@ public class EstimatedTimeCriteria extends Criteria<Issue> {
 		Path<Integer> estimatedTimeAttribute = from.get(PROP_TOTAL_ESTIMATED_TIME);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(estimatedTimeAttribute, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return builder.not(builder.equal(estimatedTimeAttribute, value));
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return builder.greaterThan(estimatedTimeAttribute, value);
 		else
@@ -38,6 +40,8 @@ public class EstimatedTimeCriteria extends Criteria<Issue> {
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
 			return issue.getTotalEstimatedTime() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getTotalEstimatedTime() != value;
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return issue.getTotalEstimatedTime() > value;
 		else

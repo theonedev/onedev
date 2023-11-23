@@ -32,8 +32,8 @@ public class FuzzyCriteria extends Criteria<Build> {
 	
 	private Criteria<Build> parse(String value) {
 		return new OrCriteria<>(
-				new VersionCriteria("*" + value + "*"), 
-				new JobCriteria("*" + value + "*"));
+				new VersionCriteria("*" + value + "*", BuildQueryLexer.Is), 
+				new JobCriteria("*" + value + "*", BuildQueryLexer.Is));
 	}
 
 	@Override

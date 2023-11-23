@@ -33,6 +33,8 @@ public class StringFieldCriteria extends FieldCriteria {
 		Path<String> attribute = fieldFrom.get(IssueField.PROP_VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(builder.lower(attribute), value.toLowerCase());
+		else if (operator == IssueQueryLexer.IsNot)
+			return builder.not(builder.equal(builder.lower(attribute), value.toLowerCase()));			
 		else 
 			return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}
@@ -42,6 +44,8 @@ public class StringFieldCriteria extends FieldCriteria {
 		String fieldValue = (String) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return value.equalsIgnoreCase(fieldValue);
+		else if (operator == IssueQueryLexer.IsNot)
+			return !value.equalsIgnoreCase(fieldValue);
 		else 
 			return fieldValue != null && fieldValue.toLowerCase().contains(value.toLowerCase());
 	}

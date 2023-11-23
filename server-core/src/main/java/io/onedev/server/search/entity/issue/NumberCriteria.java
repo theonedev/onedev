@@ -44,6 +44,8 @@ public class NumberCriteria extends Criteria<Issue> {
 		
 		if (operator == IssueQueryLexer.Is)
 			numberPredicate = builder.equal(attribute, getNumber().getNumber());
+		else if (operator == IssueQueryLexer.IsNot)
+			numberPredicate = builder.not(builder.equal(attribute, getNumber().getNumber()));			
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			numberPredicate = builder.greaterThan(attribute, getNumber().getNumber());
 		else
@@ -59,6 +61,8 @@ public class NumberCriteria extends Criteria<Issue> {
 		if (issue.getProject().equals(getNumber().getProject())) {
 			if (operator == IssueQueryLexer.Is)
 				return issue.getNumber() == getNumber().getNumber();
+			else if (operator == IssueQueryLexer.IsNot)
+				return issue.getNumber() != getNumber().getNumber();				
 			else if (operator == IssueQueryLexer.IsGreaterThan)
 				return issue.getNumber() > getNumber().getNumber();
 			else

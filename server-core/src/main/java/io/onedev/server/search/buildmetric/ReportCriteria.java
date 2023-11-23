@@ -14,21 +14,27 @@ public class ReportCriteria extends BuildMetricCriteria {
 
 	private final String value;
 	
-	public ReportCriteria(String value) {
+	private final int operator;
+	
+	public ReportCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<?> metricRoot, Join<?, ?> buildJoin, CriteriaBuilder builder) {
 		Path<String> attribute = metricRoot.get(BuildMetric.PROP_REPORT);
 		String normalized = value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildMetricQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(BuildMetric.PROP_REPORT) + " " 
-				+ BuildMetricQuery.getRuleName(BuildMetricQueryLexer.Is) + " " 
+				+ BuildMetricQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

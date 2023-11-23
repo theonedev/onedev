@@ -242,10 +242,11 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new StringFieldCriteria(fieldName, value, operator);
 								}
 							case IssueQueryLexer.Is:
+							case IssueQueryLexer.IsNot:
 								if (fieldName.equals(Issue.NAME_PROJECT)) {
-									return new ProjectCriteria(value);
+									return new ProjectCriteria(value, operator);
 								} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-									return new MilestoneCriteria(value);
+									return new MilestoneCriteria(value, operator);
 								} else if (fieldName.equals(Issue.NAME_STATE)) {
 									return new StateCriteria(value, operator);
 								} else if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
@@ -263,15 +264,15 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IssueChoiceField) {
-										return new IssueFieldCriteria(fieldName, project, value);
+										return new IssueFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof BuildChoiceField) {
-										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple());
+										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple(), operator);
 									} else if (field instanceof PullRequestChoiceField) {
-										return new PullRequestFieldCriteria(fieldName, project, value);
+										return new PullRequestFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof CommitField) {
-										return new CommitFieldCriteria(fieldName, project, value);
+										return new CommitFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof BooleanField) {
-										return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
+										return new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator);
 									} else if (field instanceof IntegerField) {
 										return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 									} else if (field instanceof ChoiceField) {
@@ -430,6 +431,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				}
 				break;
 			case IssueQueryLexer.Is:
+			case IssueQueryLexer.IsNot:
 				if (!fieldName.equals(Issue.NAME_PROJECT)
 						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
 						&& !fieldName.equals(NAME_SPENT_TIME)

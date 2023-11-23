@@ -15,13 +15,16 @@ public class AttributeCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	private String value;
+	private final String value;
 	
-	public AttributeCriteria(String name, String value) {
+	private final int operator;
+	
+	public AttributeCriteria(String name, String value, int operator) {
 		this.name = name;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -30,21 +33,28 @@ public class AttributeCriteria extends Criteria<Agent> {
 		Root<AgentAttribute> attributeRoot = attributeQuery.from(AgentAttribute.class);
 		attributeQuery.select(attributeRoot);
 
-		return builder.exists(attributeQuery.where(
+		var predicate = builder.exists(attributeQuery.where(
 				builder.equal(attributeRoot.get(AgentAttribute.PROP_AGENT), from), 
 				builder.equal(attributeRoot.get(AgentAttribute.PROP_NAME), name), 
 				builder.equal(attributeRoot.get(AgentAttribute.PROP_VALUE), value)));
+		
+		if (operator == AgentQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Agent agent) {
-		return value.equals(agent.getAttributeMap().get(name));
+		var matches = value.equals(agent.getAttributeMap().get(name));
+		if (operator == AgentQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(name) + " " 
-				+ AgentQuery.getRuleName(AgentQueryLexer.Is) + " " 
+				+ AgentQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 	

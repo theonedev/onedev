@@ -18,27 +18,36 @@ public class TagCriteria extends Criteria<Build> {
 
 	private final String value;
 	
-	public TagCriteria(String value) {
+	private final int operator;
+	
+	public TagCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_REF_NAME);
 		String normalized = Constants.R_TAGS + value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		String tag = build.getTag();
-		return tag != null && WildcardUtils.matchString(value.toLowerCase(), tag.toLowerCase());
+		var matches = tag != null && WildcardUtils.matchString(value.toLowerCase(), tag.toLowerCase());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_TAG) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

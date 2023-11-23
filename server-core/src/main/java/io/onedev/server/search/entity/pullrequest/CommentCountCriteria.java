@@ -6,6 +6,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import com.hazelcast.internal.monitor.impl.GlobalPerIndexStats;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -27,6 +28,8 @@ public class CommentCountCriteria extends Criteria<PullRequest> {
 		Path<Long> attribute = from.get(PullRequest.PROP_COMMENT_COUNT);
 		if (operator == PullRequestQueryLexer.Is)
 			return builder.equal(attribute, value);
+		else if (operator == PullRequestQueryLexer.IsNot)
+			return builder.not(builder.equal(attribute, value));
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
 			return builder.greaterThan(attribute, value);
 		else
@@ -37,6 +40,8 @@ public class CommentCountCriteria extends Criteria<PullRequest> {
 	public boolean matches(PullRequest request) {
 		if (operator == PullRequestQueryLexer.Is)
 			return request.getCommentCount() == value;
+		else if (operator == PullRequestQueryLexer.IsNot)
+			return request.getCommentCount() != value;
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
 			return request.getCommentCount() > value;
 		else

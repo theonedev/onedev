@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.PathCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 
 public class ProjectParam extends ParamSegment {
@@ -26,7 +27,7 @@ public class ProjectParam extends ParamSegment {
 		if (matchWith.length() == 0)
 			query = new ProjectQuery();
 		else
-			query = new ProjectQuery(new PathCriteria("**/*" + matchWith + "*/**"));
+			query = new ProjectQuery(new PathCriteria("**/*" + matchWith + "*/**", ProjectQueryLexer.Is));
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		for (Project project: projectManager.query(query, 0, count))
 			suggestions.put(project.getPath(), String.valueOf(project.getPath()));

@@ -59,7 +59,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getLexerRule(ruleNames, operatorName);							
-							if (operator == Is) {
+							if (operator == Is || operator == IsNot) {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());

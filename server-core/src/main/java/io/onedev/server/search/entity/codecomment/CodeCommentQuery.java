@@ -149,9 +149,10 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 										throw new IllegalStateException();
 								}
 							case CodeCommentQueryLexer.Is:
+							case CodeCommentQueryLexer.IsNot:
 								switch (fieldName) {
 									case NAME_PATH:
-										return new PathCriteria(value);
+										return new PathCriteria(value, operator);
 									case NAME_REPLY_COUNT:
 										return new ReplyCountCriteria(getIntValue(value), operator);
 									default:
@@ -228,6 +229,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					throw newOperatorException(fieldName, operator);
 				break;
 			case CodeCommentQueryLexer.Is:
+			case CodeCommentQueryLexer.IsNot:
 				if (!fieldName.equals(NAME_REPLY_COUNT) && !fieldName.equals(NAME_PATH))
 					throw newOperatorException(fieldName, operator);
 				break;

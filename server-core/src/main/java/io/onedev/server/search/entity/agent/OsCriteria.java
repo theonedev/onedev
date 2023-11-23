@@ -12,27 +12,36 @@ public class OsCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String value;
+	private final String value;
 	
-	public OsCriteria(String value) {
+	private final int operator;
+	
+	public OsCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		String normalized = value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(from.get(Agent.PROP_OS_NAME)), normalized); 
+		var predicate = builder.like(builder.lower(from.get(Agent.PROP_OS_NAME)), normalized); 
+		if (operator == AgentQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Agent agent) {
-		return agent.getOsName().equals(value);
+		var matches = agent.getOsName().equals(value);
+		if (operator == AgentQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Agent.NAME_OS_NAME) + " " 
-				+ AgentQuery.getRuleName(AgentQueryLexer.Is) + " " 
+				+ AgentQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 	

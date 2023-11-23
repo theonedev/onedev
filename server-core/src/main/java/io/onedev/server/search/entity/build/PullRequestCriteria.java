@@ -21,26 +21,35 @@ public class PullRequestCriteria extends Criteria<Build> {
 	
 	private final String value;
 	
-	public PullRequestCriteria(@Nullable Project project, String value) {
+	private final int operator;
+	
+	public PullRequestCriteria(@Nullable Project project, String value, int operator) {
 		request = EntityQuery.getPullRequest(project, value);
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<PullRequest> attribute = from.get(Build.PROP_PULL_REQUEST);
-		return builder.equal(attribute, request);
+		var predicate = builder.equal(attribute, request);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return build.getProject().equals(request.getTargetProject()) && request.equals(build.getRequest());
+		var matches = build.getProject().equals(request.getTargetProject()) && request.equals(build.getRequest());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_PULL_REQUEST) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

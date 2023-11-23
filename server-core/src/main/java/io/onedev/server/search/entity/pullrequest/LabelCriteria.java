@@ -16,8 +16,11 @@ public class LabelCriteria extends Criteria<PullRequest> {
 
 	private final LabelSpec labelSpec;
 	
-	public LabelCriteria(LabelSpec labelSpec) {
+	private int operator;
+	
+	public LabelCriteria(LabelSpec labelSpec, int operator) {
 		this.labelSpec = labelSpec;
+		this.operator = operator;
 	}
 
 	@Override
@@ -26,20 +29,26 @@ public class LabelCriteria extends Criteria<PullRequest> {
 		var labelRoot = labelQuery.from(PullRequestLabel.class);
 		labelQuery.select(labelRoot);
 
-		return builder.exists(labelQuery.where(
+		var predicate = builder.exists(labelQuery.where(
 				builder.equal(labelRoot.get(PullRequestLabel.PROP_REQUEST), from), 
 				builder.equal(labelRoot.get(PullRequestLabel.PROP_SPEC), labelSpec)));
+		if (operator == PullRequestQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getLabels().stream().anyMatch(it->it.getSpec().equals(labelSpec));
+		var matches = request.getLabels().stream().anyMatch(it->it.getSpec().equals(labelSpec));
+		if (operator == PullRequestQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return Criteria.quote(PullRequest.NAME_LABEL) + " " 
-				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(labelSpec.getName());
 	}
 

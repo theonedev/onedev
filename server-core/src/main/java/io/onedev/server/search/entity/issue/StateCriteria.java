@@ -22,7 +22,7 @@ public class StateCriteria extends Criteria<Issue> {
 
 	private String value;
 	
-	private int operator;
+	private final int operator;
 	
 	private transient Integer ordinal;
 	
@@ -37,8 +37,10 @@ public class StateCriteria extends Criteria<Issue> {
 			return builder.lt(from.get(Issue.PROP_STATE_ORDINAL), getOrdinal());
 		else if (operator == IssueQueryLexer.IsAfter)
 			return builder.gt(from.get(Issue.PROP_STATE_ORDINAL), getOrdinal());
-		else
+		else if (operator == IssueQueryLexer.Is)
 			return builder.equal(from.get(Issue.PROP_STATE), value);
+		else 
+			return builder.not(builder.equal(from.get(Issue.PROP_STATE), value));
 	}
 
 	@Override
@@ -47,8 +49,10 @@ public class StateCriteria extends Criteria<Issue> {
 			return issue.getStateOrdinal() < getOrdinal();
 		else if (operator == IssueQueryLexer.IsAfter)
 			return issue.getStateOrdinal() > getOrdinal();
-		else
+		else if (operator == IssueQueryLexer.Is)
 			return issue.getState().equals(value);
+		else
+			return !issue.getState().equals(value);
 	}
 	
 	private long getOrdinal() {

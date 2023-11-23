@@ -13,13 +13,16 @@ public class ParamCriteria extends BuildMetricCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	private String value;
+	private final String value;
 	
-	public ParamCriteria(String name, String value) {
+	private final int operator;
+	
+	public ParamCriteria(String name, String value, int operator) {
 		this.name = name;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -28,13 +31,16 @@ public class ParamCriteria extends BuildMetricCriteria {
 		paramJoin.on(builder.and(
 				builder.equal(paramJoin.get(BuildParam.PROP_NAME), name)),
 				builder.equal(paramJoin.get(BuildParam.PROP_VALUE), value));
-		return paramJoin.isNotNull();
+		var predicate = paramJoin.isNotNull();
+		if (operator == BuildMetricQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(name) + " " 
-				+ BuildMetricQuery.getRuleName(BuildMetricQueryLexer.Is) + " " 
+				+ BuildMetricQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 	

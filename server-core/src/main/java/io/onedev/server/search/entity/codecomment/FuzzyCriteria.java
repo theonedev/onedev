@@ -34,7 +34,7 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 		return new OrCriteria<>(
 				new ContentCriteria(value), 
 				new ReplyCriteria(value), 
-				new PathCriteria("*" + value + "*"));
+				new PathCriteria("*" + value + "*", CodeCommentQueryLexer.Is));
 	}
 
 	@Override

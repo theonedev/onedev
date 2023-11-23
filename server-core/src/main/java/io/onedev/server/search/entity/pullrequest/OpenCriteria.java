@@ -14,7 +14,7 @@ public class OpenCriteria extends Criteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	private Criteria<PullRequest> getCriteria() {
-		return new StatusCriteria(Status.OPEN);
+		return new StatusCriteria(Status.OPEN, PullRequestQueryLexer.Is);
 	}
 	
 	@Override
