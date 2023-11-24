@@ -6,22 +6,19 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackServlet;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.Digest;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.UrlUtils;
-import org.apache.shiro.authz.UnauthenticatedException;
+import io.onedev.server.util.*;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -32,18 +29,19 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.ee.pack.container.ContainerAuthenticationFilter.ATTR_JOB_TOKEN;
 import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.model.Pack.MAX_DATA_LEN;
 import static io.onedev.server.util.Digest.SHA256;
 import static java.lang.Long.parseLong;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
 import static javax.servlet.http.HttpServletResponse.*;
 import static org.apache.commons.io.IOUtils.copyLarge;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @Singleton
-public class ContainerServlet extends PackServlet {
+public class ContainerServlet extends HttpServlet {
 	
 	public static final String PATH = "/v2";
 
@@ -59,19 +57,27 @@ public class ContainerServlet extends PackServlet {
 	
 	private final PackManager packManager;
 	
+	private final JobManager jobManager;
+	
+	private final BuildManager buildManager;
+	
+	private final ObjectMapper objectMapper;
+	
 	@Inject
 	public ContainerServlet(SettingManager settingManager, JobManager jobManager, 
 							BuildManager buildManager, ObjectMapper objectMapper, 
 							SessionManager sessionManager, UserManager userManager, 
 							ProjectManager projectManager, PackBlobManager packBlobManager, 
 							PackManager packManager) {
-		super(jobManager, buildManager, objectMapper);
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.userManager = userManager;
 		this.projectManager = projectManager;
 		this.packBlobManager = packBlobManager;
 		this.packManager = packManager;
+		this.objectMapper = objectMapper;
+		this.jobManager = jobManager;
+		this.buildManager = buildManager;
 	}
 	
 	@Override
@@ -84,22 +90,6 @@ public class ContainerServlet extends PackServlet {
 		else
 			pathInfo = StringUtils.strip(pathInfo, "/");
 		
-		String possibleJobToken;
-		Long userId = null;
-		var auth = request.getHeader("Authorization");
-		if (auth != null && auth.startsWith("Bearer ")) {
-			var bearerAuth = auth.substring("Bearer ".length());
-			possibleJobToken = substringBefore(bearerAuth, ":");
-			var accessToken = substringAfter(bearerAuth, ":");
-			var user = userManager.findByAccessToken(accessToken);
-			if (user != null)
-				userId = user.getId();
-		} else {
-			possibleJobToken = UUID.randomUUID().toString();
-		}
-
-		if (userId != null)
-			SecurityUtils.getSubject().runAs(SecurityUtils.asPrincipal(userId));
 		try {
 			Matcher matcher;
 			if (pathInfo.equals("")) {
@@ -112,13 +102,23 @@ public class ContainerServlet extends PackServlet {
 			} else if (pathInfo.equals("token")) {
 				var jsonObj = new HashMap<String, String>();
 				String accessToken;
-				var user = SecurityUtils.getUser();
-				if (user != null)
-					accessToken = userManager.createTemporalAccessToken(user.getId(), 3600);
+				var userId = SecurityUtils.getUserId();
+				if (!userId.equals(0L))
+					accessToken = userManager.createTemporalAccessToken(userId, 3600);
 				else
 					accessToken = CryptoUtils.generateSecret();
-				jsonObj.put("token", getPossibleJobToken(request) + ":" + accessToken);
-				sendResponse(response, SC_OK, jsonObj);
+				
+				var jobToken = HttpUtils.getAuthBasicUser(request);
+				if (jobToken == null)
+					jobToken = UUID.randomUUID().toString();
+				jsonObj.put("token", jobToken + ":" + accessToken);
+				
+				response.setStatus(SC_OK);
+				try (var out = response.getOutputStream()) {
+					out.write(objectMapper.writeValueAsString(jsonObj).getBytes(UTF_8));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			} else if ((matcher = compile("(.+)/blobs/uploads").matcher(pathInfo)).matches()) {
 				var projectPath = matcher.group(1);
 				var digestString = request.getParameter("mount");
@@ -344,7 +344,15 @@ public class ContainerServlet extends PackServlet {
 										pack.setType(TYPE);
 										pack.setVersion(reference);
 									}
-									pack.setBuild(getBuild(possibleJobToken));
+									
+									Build build = null;
+									String jobToken = (String) request.getAttribute(ATTR_JOB_TOKEN);
+									if (jobToken != null) {
+										var jobContext = jobManager.getJobContext(jobToken, false);
+										if (jobContext != null)
+											build = buildManager.load(jobContext.getBuildId());
+									}
+									pack.setBuild(build);
 									pack.setUser(SecurityUtils.getUser());
 									pack.setBlobHash(hash);
 									pack.setPublishDate(new Date());
@@ -459,10 +467,7 @@ public class ContainerServlet extends PackServlet {
 				}
 			}
 			throw e;
-		} finally {
-			if (userId != null)
-				SecurityUtils.getSubject().releaseRunAs();
-		}
+		} 
 	}
 	
 	private String getUploadUrl(String projectPath, String uuid) {

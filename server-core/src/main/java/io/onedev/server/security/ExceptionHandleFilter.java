@@ -14,7 +14,7 @@ import java.io.IOException;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-public class ExceptionHandleFilter extends PathMatchingFilter {
+public abstract class ExceptionHandleFilter extends PathMatchingFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExceptionHandleFilter.class);
 	

@@ -6,11 +6,14 @@ import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.ee.clustering.ClusterManagementPage;
 import io.onedev.server.ee.clustering.DefaultClusterManager;
 import io.onedev.server.ee.dashboard.DashboardPage;
 import io.onedev.server.ee.dashboard.widgets.WidgetGroup;
+import io.onedev.server.ee.pack.container.ContainerAuthenticationFilter;
 import io.onedev.server.ee.pack.container.ContainerPackSupport;
 import io.onedev.server.ee.pack.container.ContainerServlet;
 import io.onedev.server.ee.sendgrid.*;
@@ -24,11 +27,10 @@ import io.onedev.server.ee.timetracking.DefaultTimeTrackingManager;
 import io.onedev.server.ee.timetracking.TimesheetsPage;
 import io.onedev.server.ee.xsearch.*;
 import io.onedev.server.jetty.ServletConfigurator;
-import io.onedev.server.StorageManager;
-import io.onedev.server.SubscriptionManager;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.pack.PackSupport;
+import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.web.WebApplicationConfigurator;
@@ -120,15 +122,33 @@ public class EEModule extends AbstractPluginModule {
 		});
 
 		bind(MessageManager.class).to(DefaultMessageManager.class);
-		bind(SendgridServlet.class);
-		contribute(ServletConfigurator.class, SendgridServletConfigurator.class);
-
-		bind(ContainerServlet.class);
-		contribute(ServletConfigurator.class, context -> context.addServlet(
-				new ServletHolder(OneDev.getInstance(ContainerServlet.class)),
-				ContainerServlet.PATH + "/*"));
+		
 		bind(ContainerPackSupport.class);
 		contribute(PackSupport.class, ContainerPackSupport.class);
+
+		bind(SendgridServlet.class);
+		bind(ContainerServlet.class);
+
+		contribute(ServletConfigurator.class, context -> {
+			context.addServlet(
+					new ServletHolder(OneDev.getInstance(SendgridServlet.class)),
+					"/~sendgrid/*");
+			context.addServlet(
+					new ServletHolder(OneDev.getInstance(ContainerServlet.class)),
+					ContainerServlet.PATH + "/*");
+		});
+
+		bind(ContainerAuthenticationFilter.class);
+		contribute(FilterChainConfigurator.class, filterChainManager -> {
+			filterChainManager.createChain(
+					"/~sendgrid/**", 
+					"noSessionCreation, authcBasic, authcBearer");
+			filterChainManager.addFilter("containerAuthc", 
+					OneDev.getInstance(ContainerAuthenticationFilter.class));
+			filterChainManager.createChain(
+					ContainerServlet.PATH + "/**", 
+					"noSessionCreation, containerAuthc");
+		});
 	}
 
 	@Override

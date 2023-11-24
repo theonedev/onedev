@@ -13,6 +13,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
+import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.trustCertificates = trustCertificates;
 	}
 
-	@Editable(order=340, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
+	@Editable(order=340, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Password
 	@Override
@@ -105,6 +106,13 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		super.setBuiltInRegistryAccessTokenSecret(builtInRegistryAccessTokenSecret);
 	}
 
+	private static String getBuiltInRegistryAccessTokenSecretDescription() {
+		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		var server = UrlUtils.getServer(serverUrl);
+		return "Optionally specify a secret to be used as access token for built-in registry server " +
+				"<code>" + server + "</code>";
+	}
+	
 	@Editable(order=350, description="Optionally specify additional options to build image, " +
 			"separated by spaces")
 	@Interpolative(variableSuggester="suggestVariables")

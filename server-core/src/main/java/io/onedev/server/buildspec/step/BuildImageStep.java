@@ -3,12 +3,15 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
@@ -82,7 +85,7 @@ public class BuildImageStep extends Step {
 		this.publish = publish;
 	}
 
-	@Editable(order=335, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
+	@Editable(order=335, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Password
 	public String getBuiltInRegistryAccessTokenSecret() {
@@ -96,6 +99,13 @@ public class BuildImageStep extends Step {
 	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
+	private static String getBuiltInRegistryAccessTokenSecretDescription() {
+		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		var server = UrlUtils.getServer(serverUrl);
+		return "Optionally specify a secret to be used as access token for built-in registry server " +
+				"<code>" + server + "</code>";
 	}
 	
 	@Editable(order=340, name="Remove Dangling Images After Build")
