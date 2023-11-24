@@ -163,31 +163,26 @@ class SshCommand implements Command, ServerSessionAware {
 			});
 		} else {
 			ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
-			future = executorService.submit(new Runnable() {
-
-				@Override
-				public void run() {
-					SshManager sshManager = OneDev.getInstance(SshManager.class);
-					try (	var clientSession = sshManager.ssh(activeServerAddress); 
-							var clientChannel = clientSession.createExecChannel(commandString)) {
-						clientChannel.setIn(in);
-						clientChannel.setOut(out);
-						clientChannel.setErr(err);
-						clientChannel.open().await(CHANNEL_OPEN_TIMEOUT);
-						
-						// Do not use clientChannel.waitFor here as it can not be interrupted
-						while (!clientChannel.isClosed())
-							Thread.sleep(1000);
-						if (clientChannel.getExitStatus() != null)
-							onExit(clientChannel.getExitStatus(), null);
-						else
-							onExit(-1, null);
-					} catch (Exception e) {
-						logger.error("Error ssh to storage server", e);
-						onExit(-1, e.getMessage());
-					}
+			future = executorService.submit(() -> {
+				SshManager sshManager = OneDev.getInstance(SshManager.class);
+				try (	var clientSession = sshManager.ssh(activeServerAddress); 
+						var clientChannel = clientSession.createExecChannel(commandString)) {
+					clientChannel.setIn(in);
+					clientChannel.setOut(out);
+					clientChannel.setErr(err);
+					clientChannel.open().await(CHANNEL_OPEN_TIMEOUT);
+					
+					// Do not use clientChannel.waitFor here as it can not be interrupted
+					while (!clientChannel.isClosed())
+						Thread.sleep(1000);
+					if (clientChannel.getExitStatus() != null)
+						onExit(clientChannel.getExitStatus(), null);
+					else
+						onExit(-1, null);
+				} catch (Exception e) {
+					logger.error("Error ssh to storage server", e);
+					onExit(-1, e.getMessage());
 				}
-				
 			});
 		}
 	}
