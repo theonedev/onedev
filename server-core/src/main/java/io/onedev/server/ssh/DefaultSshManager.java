@@ -74,46 +74,50 @@ public class DefaultSshManager implements SshManager, Serializable {
 		start();
 	}
 	
-	private void start() {
-        server = SshServer.setUpDefaultServer();
-
-        server.setPort(serverConfig.getSshPort());
-        
-        PrivateKey privateKey = settingManager.getSshSetting().getPrivateKey();
-        PublicKey publicKey;
+	private synchronized void start() {
+		PrivateKey privateKey = settingManager.getSshSetting().getPrivateKey();
+		PublicKey publicKey;
 		try {
 			publicKey = KeyUtils.recoverPublicKey(privateKey);
 		} catch (GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
-        
-        server.setKeyPairProvider(session -> newArrayList(new KeyPair(publicKey, privateKey)));
-        
-        server.setShellFactory(new DisableShellAccess());
-        
-        server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
-        server.setKeyboardInteractiveAuthenticator(null);
-        
-        server.setCommandFactory((channel, commandString) -> {
-        	for (CommandCreator creator: commandCreators) {
-        		Command command = creator.createCommand(commandString, channel.getEnvironment().getEnv());
-        		if (command != null)
-        			return command;
-        	}
-            return new UnknownCommand(commandString);
-        });
 
-        try {
-			server.start();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if (server == null) {
+			server = SshServer.setUpDefaultServer();
+
+			server.setPort(serverConfig.getSshPort());
+
+			server.setKeyPairProvider(session -> newArrayList(new KeyPair(publicKey, privateKey)));
+
+			server.setShellFactory(new DisableShellAccess());
+
+			server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
+			server.setKeyboardInteractiveAuthenticator(null);
+
+			server.setCommandFactory((channel, commandString) -> {
+				for (CommandCreator creator : commandCreators) {
+					Command command = creator.createCommand(commandString, channel.getEnvironment().getEnv());
+					if (command != null)
+						return command;
+				}
+				return new UnknownCommand(commandString);
+			});
+
+			try {
+				server.start();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
         
-		client = SshClient.setUpDefaultClient();
-		client.setKeyIdentityProvider(KeyIdentityProvider.wrapKeyPairs(
-				new KeyPair(publicKey, privateKey)));
-		client.setServerKeyVerifier(new RequiredServerKeyVerifier(publicKey));
-		client.start();
+		if (client == null) {
+			client = SshClient.setUpDefaultClient();
+			client.setKeyIdentityProvider(KeyIdentityProvider.wrapKeyPairs(
+					new KeyPair(publicKey, privateKey)));
+			client.setServerKeyVerifier(new RequiredServerKeyVerifier(publicKey));
+			client.start();
+		}
 	}
 
     @Listen
@@ -121,7 +125,7 @@ public class DefaultSshManager implements SshManager, Serializable {
 		stop();
     }
 	
-	private void stop() {
+	private synchronized void stop() {
 		try {
 			if (client != null) {
 				if (client.isStarted())

@@ -40,7 +40,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
@@ -299,7 +301,13 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			return "http://" + serviceHost;
 		} else {
 			ServerConfig serverConfig = serverConfigProvider.get();
-			var serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
+			String hostName;
+			try {
+				hostName = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				hostName = "localhost";
+			}
+			var serverUrl = buildServerUrl(hostName, "http", serverConfig.getHttpPort());
 			return UrlUtils.toString(serverUrl);
 		}
 	}

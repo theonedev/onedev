@@ -48,7 +48,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
+				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
+				PROP_TIME_TRACKING);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());

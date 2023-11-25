@@ -138,6 +138,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
 	
 	public static final String PROP_CODE_MANAGEMENT = "codeManagement";
+
+	public static final String PROP_PACK_MANAGEMENT = "packManagement";
 	
 	public static final String PROP_ISSUE_MANAGEMENT = "issueManagement";
 
@@ -190,7 +192,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private Project forkedFrom;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=true)
+	@JoinColumn
 	@Api(description="Represents the parent project. Remove this property if the project does not " +
 			"have a parent project. May be null")
 	private Project parent;
@@ -306,7 +308,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	private boolean codeManagement = true;
-
+	
+	private boolean packManagement;
+	
 	private boolean issueManagement = true;
 
 	private boolean timeTracking = false;
@@ -945,7 +949,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	private static String getTimeTrackingDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
-			return "<b class='text-danger'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. " +
+			return "<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. " +
 					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
 		} else {
 			return "Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this " +
@@ -956,9 +960,24 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private static boolean isIssueManagementEnabled() {
 		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
 	}
-	
-	private static boolean isSubscriptionActiveAndIssueManagementEnabled() {
-		return isIssueManagementEnabled() && OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+
+	@Editable(order=400, name="Package Management", descriptionProvider = "getPackManagementDescription")
+	@SubscriptionRequired
+	public boolean isPackManagement() {
+		return packManagement;
+	}
+
+	public void setPackManagement(boolean packManagement) {
+		this.packManagement = packManagement;
+	}
+
+	private static String getPackManagementDescription() {
+		if (!WicketUtils.isSubscriptionActive()) {
+			return "<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>Package management</a> is an enterprise feature. " +
+					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
+		} else {
+			return "Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project";
+		}
 	}
 
 	public boolean isPendingDelete() {

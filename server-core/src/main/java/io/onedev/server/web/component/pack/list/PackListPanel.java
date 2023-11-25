@@ -7,6 +7,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
+import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
@@ -29,6 +30,7 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -49,14 +51,19 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -64,10 +71,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class PackListPanel extends Panel {
@@ -577,9 +581,52 @@ public abstract class PackListPanel extends Panel {
 		});		
 		
 		body.add(packsTable = new DefaultDataTable<>("packs", columns, dataProvider,
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!shouldShowHelp());
+			}
+		});
+		
+		var helpContainer = new WebMarkupContainer("help") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(shouldShowHelp());
+			}
+		};
+		body.add(helpContainer);
+		helpContainer.add(new ListView<PackSupport>("types", new LoadableDetachableModel<>() {
+			@Override
+			protected List<PackSupport> load() {
+				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+				return packSupports;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<PackSupport> item) {
+				var packSupport = item.getModelObject();
+				item.add(new SpriteImage("icon", packSupport.getPackIcon()));
+				item.add(new Label("title", packSupport.getPackType()));
+				item.add(packSupport.renderHelp("body", getProject()));
+			}
+		});
 		
 		setOutputMarkupId(true);
 	}
 	
+	private boolean shouldShowHelp() {
+		return packsTable.getItemCount() == 0 && getPage() instanceof ProjectPacksPage
+				&& queryModel.getObject().getCriteria() == null;
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new PackListCssResourceReference()));
+	}
 }

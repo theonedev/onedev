@@ -54,7 +54,7 @@ public class BuildPacksPage extends BuildDetailPage {
 						PackDetailPage.paramsOf(pack));
 				link.add(new Label("label", label));
 				item.add(link);
-				item.add(pack.getSupport().render("body", pack));
+				item.add(pack.getSupport().renderContent("body", pack));
 			}
 		});
 	}

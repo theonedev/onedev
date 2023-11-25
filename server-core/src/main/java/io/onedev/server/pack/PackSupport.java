@@ -1,9 +1,8 @@
 package io.onedev.server.pack;
 
 import io.onedev.server.model.Pack;
+import io.onedev.server.model.Project;
 import org.apache.wicket.Component;
-
-import java.util.Comparator;
 
 public interface PackSupport {
 	
@@ -13,6 +12,8 @@ public interface PackSupport {
 	
 	String getPackIcon();
 	
-	Component render(String componentId, Pack pack);
+	Component renderContent(String componentId, Pack pack);
+	
+	Component renderHelp(String componentId, Project project);
 	
 }

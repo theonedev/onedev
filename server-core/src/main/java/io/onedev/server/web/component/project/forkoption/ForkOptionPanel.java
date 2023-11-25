@@ -68,8 +68,8 @@ public abstract class ForkOptionPanel extends Panel {
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT, 
-				PROP_TIME_TRACKING);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_PACK_MANAGEMENT, 
+				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
@@ -102,6 +102,7 @@ public abstract class ForkOptionPanel extends Panel {
 					} else {
 						newProject.setForkedFrom(getProject());
 						newProject.setDescription(editProject.getDescription());
+						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setDefaultRole(defaultRoleBean.getRole());

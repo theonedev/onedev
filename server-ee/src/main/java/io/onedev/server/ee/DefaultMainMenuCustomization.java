@@ -49,10 +49,11 @@ public class DefaultMainMenuCustomization implements MainMenuCustomization {
 				IssueListPage.paramsOf(0)));
 		menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", BuildListPage.class,
 				BuildListPage.paramsOf(0, 0)));
-		menuItems.add(new SidebarMenuItem.Page("package", "Packages", PackListPage.class,
-				PackListPage.paramsOf(0)));
 		
 		if (WicketUtils.getPage().isSubscriptionActive()) {
+			menuItems.add(new SidebarMenuItem.Page("package", "Packages", PackListPage.class,
+					PackListPage.paramsOf(0)));
+			
 			var codeSearchMenuItems = new ArrayList<SidebarMenuItem>();
 			codeSearchMenuItems.add(new SidebarMenuItem.Page(null, "Text", TextSearchPage.class, new PageParameters()));
 			codeSearchMenuItems.add(new SidebarMenuItem.Page(null, "Files", FileSearchPage.class, new PageParameters()));

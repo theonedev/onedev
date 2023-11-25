@@ -5,7 +5,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -106,8 +105,6 @@ import java.util.*;
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected final IModel<Project> projectModel;
-	
-	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
@@ -238,7 +235,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		}
 		
-		if (SecurityUtils.canReadPack(getProject())) {
+		if (getProject().isPackManagement() && SecurityUtils.canReadPack(getProject())) {
 			menuItems.add(new SidebarMenuItem.Page("package", "Packages",
 					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(PackDetailPage.class)));

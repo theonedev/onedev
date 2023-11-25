@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Pack;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -20,7 +17,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -31,7 +28,7 @@ import java.util.ArrayList;
 
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
-public class ContainerPackPanel extends GenericPanel<Pack> {
+public class ContainerPackPanel extends Panel {
 	
 	private final String serverAndNamespace;
 	
@@ -74,25 +71,16 @@ public class ContainerPackPanel extends GenericPanel<Pack> {
 		}
 	}
 	
-	private Component newInsecureRegistryLabel(String componentId) {
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		if (serverUrl.startsWith("http://"))
-			return new Label(componentId, UrlUtils.getServer(serverUrl));
-		else
-			return new WebMarkupContainer(componentId).setVisible(false);
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		var digest = "sha256:" + manifestHash;
 		add(new Label("digest", digest));
-
+		
 		var pullCommand = "docker pull " + serverAndNamespace + ":" + tag;
 		add(new Label("pullCommand", pullCommand));
 		add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
-		add(newInsecureRegistryLabel("insecureRegistry"));
 		
 		var data = dataModel.getObject();
 		if (data.isImageManifest()) {
@@ -135,6 +123,8 @@ public class ContainerPackPanel extends GenericPanel<Pack> {
 			fragment.add(new Label("manifest", formatJson(data.getManifest())));
 			add(fragment);
 		}
+		
+		add(new InsecureRegistryNotePanel("insecureRegistryNote"));
 	}
 	
 	private Component newArchImageManifestPanel(String componentId, String archDigest) {
@@ -149,7 +139,6 @@ public class ContainerPackPanel extends GenericPanel<Pack> {
 			var pullArchCommand = "docker pull " + serverAndNamespace + "@" + archDigest;
 			fragment.add(new Label("pullArchCommand", pullArchCommand));
 			fragment.add(new CopyToClipboardLink("copyPullArchCommand", Model.of(pullArchCommand)));
-			fragment.add(newInsecureRegistryLabel("insecureRegistry"));
 		} else {
 			fragment.add(new WebMarkupContainer("pullArchCommand").setVisible(false));
 			fragment.add(new WebMarkupContainer("copyPullArchCommand").setVisible(false));

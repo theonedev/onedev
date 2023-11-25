@@ -9,18 +9,9 @@
 			<span wicket:id="pullCommand" class="text-monospace text-break font-size-sm"></span>
 			<a wicket:id="copyPullCommand"><wicket:svg href="copy" class="icon"/></a>
 		</div>
-		<wicket:enclosure child="insecureRegistry">
-			<div class="font-size-sm mt-2">
-				<b class="text-warning">WARNING: </b> 
-				<span class="text-muted">
-					This server is currently accessed via http protocol,
-					please configure your docker daemon to <a href="https://stackoverflow.com/questions/42211380/add-insecure-registry-to-docker" target="_blank">turn on insecure flag</a> for registry entry 
-					<em wicket:id="insecureRegistry"></em>
-				</span>
-			</div>
-		</wicket:enclosure>
 	</div>
 	<div wicket:id="content"></div>
+	<div wicket:id="insecureRegistryNote" class="mt-4"></div>
 	<wicket:fragment wicket:id="imageIndexFrag">
 		<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4 mt-4"></ul>
 		<div wicket:id="content"></div>
@@ -33,16 +24,6 @@
 					<span wicket:id="pullArchCommand" class="text-monospace text-break font-size-sm"></span>
 					<a wicket:id="copyPullArchCommand"><wicket:svg href="copy" class="icon"/></a>
 				</div>
-				<wicket:enclosure child="insecureRegistry">
-					<div class="font-size-sm mt-2">
-						<b class="text-warning">WARNING: </b>
-						<span class="text-muted">
-							This server is currently accessed via http protocol,
-							please configure your docker daemon to <a href="https://stackoverflow.com/questions/42211380/add-insecure-registry-to-docker" target="_blank">turn on insecure flag</a> for registry entry 
-							<em wicket:id="insecureRegistry"></em>
-						</span>
-					</div>
-				</wicket:enclosure>
 			</div>
 		</wicket:enclosure>
 		<div class="mt-4">

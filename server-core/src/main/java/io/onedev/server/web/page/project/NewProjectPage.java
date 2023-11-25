@@ -1,16 +1,6 @@
 package io.onedev.server.web.page.project;
 
-import java.util.Collection;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -25,9 +15,18 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editablebean.LabelsBean;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.Collection;
 
 import static io.onedev.server.model.Project.*;
 
@@ -50,7 +49,8 @@ public class NewProjectPage extends LayoutPage {
 		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
+				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
+				PROP_TIME_TRACKING);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		LabelsBean labelsBean = new LabelsBean();
@@ -100,6 +100,8 @@ public class NewProjectPage extends LayoutPage {
 							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
 						else if (newProject.isIssueManagement())
 							setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(newProject));
+						else if (newProject.isPackManagement())
+							setResponsePage(ProjectPacksPage.class, ProjectPacksPage.paramsOf(newProject));
 						else
 							setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(newProject));
 					}

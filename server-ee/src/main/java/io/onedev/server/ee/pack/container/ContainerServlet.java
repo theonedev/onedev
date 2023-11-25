@@ -3,6 +3,7 @@ package io.onedev.server.ee.pack.container;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobManager;
@@ -12,7 +13,10 @@ import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.*;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.Digest;
+import io.onedev.server.util.HttpUtils;
+import io.onedev.server.util.Pair;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;
@@ -23,8 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -63,12 +65,14 @@ public class ContainerServlet extends HttpServlet {
 	
 	private final ObjectMapper objectMapper;
 	
+	private final SubscriptionManager subscriptionManager;
+	
 	@Inject
 	public ContainerServlet(SettingManager settingManager, JobManager jobManager, 
 							BuildManager buildManager, ObjectMapper objectMapper, 
 							SessionManager sessionManager, UserManager userManager, 
 							ProjectManager projectManager, PackBlobManager packBlobManager, 
-							PackManager packManager) {
+							PackManager packManager, SubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.userManager = userManager;
@@ -78,11 +82,17 @@ public class ContainerServlet extends HttpServlet {
 		this.objectMapper = objectMapper;
 		this.jobManager = jobManager;
 		this.buildManager = buildManager;
+		this.subscriptionManager = subscriptionManager;
 	}
 	
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
+		if (!subscriptionManager.isSubscriptionActive()) {
+			throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, 
+					"This feature requires an active subscription. Visit https://onedev.io/pricing to get a 30 days free trial");
+		}
+					
 		var method = request.getMethod();
 		var pathInfo = request.getPathInfo();
 		if (pathInfo == null)
@@ -499,6 +509,8 @@ public class ContainerServlet extends HttpServlet {
 		var project = projectManager.findByPath(projectPath);
 		if (project == null) 
 			throw new NotFoundException(ErrorCode.NAME_UNKNOWN, "Unknown project: " + projectPath);
+		else if (!project.isPackManagement())
+			throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, "Package management not enabled for project: " + projectPath);
 		else if (needsToPush && !SecurityUtils.canWritePack(project))
 			throw new UnauthorizedException("Not authorized to push to project: " + projectPath);
 		else if (!needsToPush && !SecurityUtils.canReadPack(project))
@@ -509,14 +521,7 @@ public class ContainerServlet extends HttpServlet {
 
 	private String getChallenge(HttpServletRequest request) {
 		var serverUrl = settingManager.getSystemSetting().getServerUrl();
-		try {
-			var host = new URL(serverUrl).getHost();
-			if (host.equals("localhost") || host.equals("127.0.0.1"))
-				serverUrl = UrlUtils.getRootUrl(request.getRequestURL().toString());
-			return "Bearer realm=\"" + serverUrl + "/v2/token\",service=\"onedev\",scope=\"*\"";
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		return "Bearer realm=\"" + serverUrl + "/v2/token\",service=\"onedev\",scope=\"*\"";
 	}
 	
 }

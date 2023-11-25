@@ -85,7 +85,7 @@ public class PackDetailPage extends ProjectPage {
 
 		add(new SideInfoLink("moreInfo"));
 				
-		add(getPack().getSupport().render("content", getPack()));
+		add(getPack().getSupport().renderContent("content", getPack()));
 
 		add(new SideInfoPanel("side") {
 
