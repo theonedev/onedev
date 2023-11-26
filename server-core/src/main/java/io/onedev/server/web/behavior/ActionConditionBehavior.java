@@ -1,14 +1,7 @@
 package io.onedev.server.web.behavior;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -20,15 +13,25 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
-import io.onedev.server.buildspec.job.action.condition.ActionConditionLexer;
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
+import static io.onedev.server.buildspec.job.action.condition.ActionCondition.checkField;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.*;
+import static io.onedev.server.model.Build.*;
 
 @SuppressWarnings("serial")
 public class ActionConditionBehavior extends ANTLRAssistBehavior {
@@ -47,30 +50,38 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = Lists.newArrayList(Build.NAME_LOG, Build.NAME_PULL_REQUEST);
+							Map<String, String> fields = new LinkedHashMap<>();
+							fields.put(NAME_BRANCH, "branch the job is running against");
+							fields.put(NAME_TAG, "tag the job is running against");
+							fields.put(NAME_PULL_REQUEST, null);
+							fields.put(NAME_LOG, null);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
-							fields.addAll(job.getParamSpecMap().keySet());
+							for (var param: job.getParamSpecs())
+								fields.put(param.getName(), null);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = AntlrUtils.getLexerRule(ActionConditionLexer.ruleNames, operatorName);							
-							if (operator == ActionConditionLexer.OnBranch) {
-								List<String> branchNames = new ArrayList<>();
-								for (RefFacade ref: Project.get().getBranchRefs())
-									branchNames.add(GitUtils.ref2branch(ref.getName()));
-								return SuggestionUtils.suggest(branchNames, matchWith);
-							} else if (operator == ActionConditionLexer.Is) {
+							int operator = getLexerRule(ruleNames, operatorName);							
+							if (operator == OnBranch) {
+								return SuggestionUtils.suggestBranches(Project.get(), matchWith);
+							} else if (operator == Is) {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = ActionCondition.getValue(fieldElements.get(0).getMatchedText());
-								JobAware jobAware = getComponent().findParent(JobAware.class);
-								Job job = jobAware.getJob();
-								ParamSpec paramSpec = job.getParamSpecMap().get(fieldName);
-								if (paramSpec != null) 
-									return SuggestionUtils.suggest(paramSpec.getPossibleValues(), matchWith);
+								if (fieldName.equals(NAME_BRANCH)) {
+									return SuggestionUtils.suggestBranches(Project.get(), matchWith);	
+								} else if (fieldName.equals(NAME_TAG)) {
+									return SuggestionUtils.suggestTags(Project.get(), matchWith);
+								} else {
+									JobAware jobAware = getComponent().findParent(JobAware.class);
+									Job job = jobAware.getJob();
+									ParamSpec paramSpec = job.getParamSpecMap().get(fieldName);
+									if (paramSpec != null)
+										return SuggestionUtils.suggest(paramSpec.getPossibleValues(), matchWith);
+								}
 							}
 						} 
 						return null;
@@ -89,6 +100,8 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (suggestedLiteral.equals(AntlrUtils.getLexerRuleName(ruleNames, OnBranch)))
+			return Optional.of("branch the build commit is merged into");
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
@@ -97,8 +110,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 				Job job = jobAware.getJob();
 				String fieldName = ActionCondition.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					ActionCondition.checkField(job, fieldName, 
-							AntlrUtils.getLexerRule(ActionConditionLexer.ruleNames, suggestedLiteral));
+					checkField(job, fieldName, getLexerRule(ruleNames, suggestedLiteral));
 				} catch (ExplicitException e) {
 					return null;
 				}
@@ -113,9 +125,21 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
-				String unmatched = terminalExpect.getUnmatchedText();
-				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) // only when we input criteria value
-					hints.add("Use '*' for wildcard match");
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG))
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+					else if (fieldName.equals(Build.NAME_LOG))
+						hints.add("Use '*' for wildcard match");
+				} else {
+					List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+					Preconditions.checkState(operatorElements.size() == 1);
+					String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+					int operator = getLexerRule(ruleNames, operatorName);
+					if (operator == OnBranch)
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+				}
 			}
 		} 
 		return hints;

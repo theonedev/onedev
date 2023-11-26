@@ -1,31 +1,31 @@
 package io.onedev.server.buildspec.job.action.condition;
 
-import java.util.List;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.match.PathMatcher;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.model.Build;
-import io.onedev.server.util.criteria.Criteria;
+import static io.onedev.server.buildspec.job.action.condition.ActionCondition.getRuleName;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.Is;
+import static io.onedev.server.model.Build.NAME_BRANCH;
 
-public class ParamCriteria extends Criteria<Build> {
+public class BranchCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
-
-	private final String name;
 	
-	private final String value;
+	private final String branch;
 	
 	private final int operator;
 	
-	public ParamCriteria(String name, String value, int operator) {
-		this.name = name;
-		this.value = value;
+	public BranchCriteria(String branch, int operator) {
+		this.branch = branch;
 		this.operator = operator;
 	}
-
+	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
@@ -33,8 +33,7 @@ public class ParamCriteria extends Criteria<Build> {
 	
 	@Override
 	public boolean matches(Build build) {
-		List<String> paramValues = build.getParamMap().get(name);
-		var matches = paramValues != null && paramValues.contains(value);
+		var matches = build.getBranch() != null && new PathMatcher().matches(branch, build.getBranch());
 		if (operator == ActionConditionLexer.IsNot)
 			matches = !matches;
 		return matches;
@@ -42,9 +41,7 @@ public class ParamCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(name) + " " 
-				+ ActionCondition.getRuleName(operator) + " "
-				+ quote(value);
+		return quote(NAME_BRANCH) + " " + getRuleName(operator) + " " + quote(branch);
 	}
 	
 }

@@ -2,7 +2,7 @@ package io.onedev.server.job;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.job.match.BranchCriteria;
+import io.onedev.server.job.match.OnBranchCriteria;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.Project;
@@ -63,7 +63,7 @@ public class JobAuthorizationContext {
 				if (secret.getName().equals(secretName)) {
 					String authorization = secret.getAuthorization();
 					if (authorization == null)
-						authorization = new BranchCriteria("**").toString();
+						authorization = new OnBranchCriteria("**").toString();
 					JobMatch jobMatch = JobMatch.parse(authorization, false, false);
 					if (request != null) {
 						if (project.equals(request.getSourceProject())) {

@@ -37,6 +37,9 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.*;
+import static io.onedev.server.model.Build.*;
+
 public class ActionCondition extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
@@ -116,10 +119,14 @@ public class ActionCondition extends Criteria<Build> {
 					String fieldName = getValue(ctx.Quoted().getText());
 					int operator = ctx.operator.getType();
 					checkField(job, fieldName, operator);
-					if (fieldName.equals(Build.NAME_PULL_REQUEST))
-						return new PullRequestIsEmptyCriteria();
+					if (fieldName.equals(NAME_BRANCH))
+						return new BranchEmptyCriteria(operator);
+					else if (fieldName.equals(NAME_TAG))
+						return new TagEmptyCriteria(operator);
+					else if (fieldName.equals(NAME_PULL_REQUEST))
+						return new PullRequestEmptyCriteria(operator);
 					else
-						return new ParamIsEmptyCriteria(fieldName);
+						return new ParamEmptyCriteria(fieldName, operator);
 				}
 				
 				@Override
@@ -130,10 +137,14 @@ public class ActionCondition extends Criteria<Build> {
 					checkField(job, fieldName, operator);
 					
 					switch (fieldName) {
-					case Build.NAME_LOG:
-						return new LogCriteria(fieldValue);
-					default:
-						return new ParamCriteria(fieldName, fieldValue);
+						case NAME_BRANCH:
+							return new BranchCriteria(fieldValue, operator);
+						case NAME_TAG:
+							return new TagCriteria(fieldValue, operator);
+						case NAME_LOG:
+							return new LogCriteria(fieldValue);
+						default:
+							return new ParamCriteria(fieldName, fieldValue, operator);
 					}
 				}
 				
@@ -148,7 +159,7 @@ public class ActionCondition extends Criteria<Build> {
 					List<Criteria<Build>> childCriterias = new ArrayList<>();
 					for (CriteriaContext childCtx: ctx.criteria())
 						childCriterias.add(visit(childCtx));
-					return new OrCriteria<Build>(childCriterias);
+					return new OrCriteria<>(childCriterias);
 				}
 	
 				@Override
@@ -156,12 +167,12 @@ public class ActionCondition extends Criteria<Build> {
 					List<Criteria<Build>> childCriterias = new ArrayList<>();
 					for (CriteriaContext childCtx: ctx.criteria())
 						childCriterias.add(visit(childCtx));
-					return new AndCriteria<Build>(childCriterias);
+					return new AndCriteria<>(childCriterias);
 				}
 	
 				@Override
 				public Criteria<Build> visitNotCriteria(NotCriteriaContext ctx) {
-					return new NotCriteria<Build>(visit(ctx.criteria()));
+					return new NotCriteria<>(visit(ctx.criteria()));
 				}
 	
 			}.visit(conditionContext.criteria());
@@ -170,14 +181,17 @@ public class ActionCondition extends Criteria<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (fieldName.equals(Build.NAME_LOG)) {
-			if (operator != ActionConditionLexer.Contains)
+		if (fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG)) {
+			if (operator != Is && operator != IsNot && operator != IsEmpty && operator != IsNotEmpty)
 				throw newOperatorException(fieldName, operator);
-		} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {
-			if (operator != ActionConditionLexer.IsEmpty)
+		} else if (fieldName.equals(NAME_PULL_REQUEST)) {
+			if (operator != IsEmpty && operator != IsNotEmpty)
+				throw newOperatorException(fieldName, operator);
+		} else if (fieldName.equals(NAME_LOG)) {
+			if (operator != Contains)
 				throw newOperatorException(fieldName, operator);
 		} else if (job.getParamSpecMap().containsKey(fieldName)) {
-			if (operator != ActionConditionLexer.IsEmpty && operator != ActionConditionLexer.Is)
+			if (operator != Is && operator != IsNot && operator != IsEmpty && operator != IsNotEmpty)
 				throw newOperatorException(fieldName, operator);
 		} else {
 			throw new ExplicitException("Param not found: " + fieldName);

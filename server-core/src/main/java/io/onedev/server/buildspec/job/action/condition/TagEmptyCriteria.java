@@ -1,25 +1,26 @@
 package io.onedev.server.buildspec.job.action.condition;
 
-import java.util.List;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.model.Build;
-import io.onedev.server.util.criteria.Criteria;
+import static io.onedev.server.buildspec.job.action.condition.ActionCondition.getRuleName;
+import static io.onedev.server.model.Build.NAME_TAG;
 
-public class ParamIsEmptyCriteria extends Criteria<Build> {
+public class TagEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
-
-	private String name;
 	
-	public ParamIsEmptyCriteria(String name) {
-		this.name = name;
+	private final int operator;
+	
+	public TagEmptyCriteria(int operator) {
+		this.operator = operator;
 	}
-
+	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
@@ -27,13 +28,15 @@ public class ParamIsEmptyCriteria extends Criteria<Build> {
 	
 	@Override
 	public boolean matches(Build build) {
-		List<String> paramValues = build.getParamMap().get(name);
-		return paramValues == null || paramValues.isEmpty();
+		var matches = build.getTag() == null;
+		if (operator == ActionConditionLexer.IsNotEmpty)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(name) + " " + ActionCondition.getRuleName(ActionConditionLexer.IsEmpty);
+		return quote(NAME_TAG) + " " + getRuleName(operator);
 	}
 	
 }

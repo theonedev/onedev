@@ -10,19 +10,16 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
 
-public class ParamCriteria extends Criteria<Build> {
+public class ParamEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String name;
 	
-	private final String value;
-	
 	private final int operator;
 	
-	public ParamCriteria(String name, String value, int operator) {
+	public ParamEmptyCriteria(String name, int operator) {
 		this.name = name;
-		this.value = value;
 		this.operator = operator;
 	}
 
@@ -34,17 +31,15 @@ public class ParamCriteria extends Criteria<Build> {
 	@Override
 	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		var matches = paramValues != null && paramValues.contains(value);
-		if (operator == ActionConditionLexer.IsNot)
+		var matches = paramValues == null || paramValues.isEmpty();
+		if (operator == ActionConditionLexer.IsNotEmpty)
 			matches = !matches;
 		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(name) + " " 
-				+ ActionCondition.getRuleName(operator) + " "
-				+ quote(value);
+		return quote(name) + " " + ActionCondition.getRuleName(operator);
 	}
 	
 }

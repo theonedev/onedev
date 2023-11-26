@@ -80,7 +80,7 @@ public class JobMatch extends Criteria<JobMatchContext> {
 				String fieldValue = getValue(ctx.Quoted().getText());
 				switch (ctx.operator.getType()) {
 					case JobMatchParser.OnBranch:
-						return new BranchCriteria(fieldValue);
+						return new OnBranchCriteria(fieldValue);
 					case JobMatchParser.SubmittedByGroup:
 						var group = OneDev.getInstance(GroupManager.class).find(fieldValue);
 						if (group != null)

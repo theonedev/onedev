@@ -9,13 +9,13 @@ import javax.persistence.criteria.Predicate;
 
 import static io.onedev.server.util.match.WildcardUtils.matchPath;
 
-public class BranchCriteria extends Criteria<JobMatchContext> {
+public class OnBranchCriteria extends Criteria<JobMatchContext> {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final String branch;
 	
-	public BranchCriteria(String branch) {
+	public OnBranchCriteria(String branch) {
 		this.branch = branch;
 	}
 	
