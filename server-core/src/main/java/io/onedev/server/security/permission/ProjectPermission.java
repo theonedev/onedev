@@ -1,9 +1,8 @@
 package io.onedev.server.security.permission;
 
-import io.onedev.server.model.User;
-import org.apache.shiro.authz.Permission;
-
 import io.onedev.server.model.Project;
+import io.onedev.server.util.facade.UserFacade;
+import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;
 
 public class ProjectPermission implements BasePermission {
@@ -37,7 +36,7 @@ public class ProjectPermission implements BasePermission {
 	}
 
 	@Override
-	public boolean isApplicable(@Nullable User user) {
+	public boolean isApplicable(@Nullable UserFacade user) {
 		return privilege.isApplicable(user);
 	}
 }

@@ -5,12 +5,12 @@ import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
@@ -490,7 +490,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	}
 
 	private Collection<User> filterApplicable(Collection<User> users, BasePermission permission) {
-		return users.stream().filter(permission::isApplicable).collect(toList());
+		return users.stream().filter(it -> permission.isApplicable(it.getFacade())).collect(toList());
 	}
 	
 	@Override

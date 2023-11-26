@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.AccessToken;
 
 import javax.annotation.Nullable;
@@ -46,6 +47,29 @@ public class UserFacade extends EntityFacade {
 			return getFullName();
 		else
 			return getName();
+	}
+
+	public boolean isRoot() {
+		return User.ROOT_ID.equals(getId());
+	}
+
+	public boolean isSystem() {
+		return User.SYSTEM_ID.equals(getId());
+	}
+
+	public boolean isUnknown() {
+		return User.UNKNOWN_ID.equals(getId());
+	}
+
+	public boolean isEffectiveGuest() {
+		return guest && !isRoot() && !isSystem();
+	}
+	
+	public static UserFacade of(@Nullable User user) {
+		if (user != null)
+			return user.getFacade();
+		else 
+			return null;
 	}
 	
 }

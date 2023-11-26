@@ -71,6 +71,7 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -958,7 +959,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public Collection<Project> getPermittedProjects(BasePermission permission) {
 		User user = SecurityUtils.getUser();
-		if (permission.isApplicable(user)) {
+		if (permission.isApplicable(UserFacade.of(user))) {
 			ProjectCache cacheClone = cache.clone();
 			Collection<Long> permittedProjectIds;
 			if (user != null) {

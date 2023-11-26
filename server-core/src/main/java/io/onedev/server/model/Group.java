@@ -8,6 +8,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -174,7 +175,7 @@ public class Group extends AbstractEntity implements BasePermission {
 	}
 
 	@Override
-	public boolean isApplicable(@Nullable User user) {
+	public boolean isApplicable(@Nullable UserFacade user) {
 		return getPermissions().stream().allMatch(it -> it.isApplicable(user));
 	}
 	

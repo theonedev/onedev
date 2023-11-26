@@ -12,6 +12,7 @@ import io.onedev.server.model.support.role.*;
 import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
+import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -364,7 +365,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 
 	@Override
-	public boolean isApplicable(@Nullable User user) {
+	public boolean isApplicable(@Nullable UserFacade user) {
 		return getPermissions().stream().allMatch(it -> it.isApplicable(user));
 	}
 	
