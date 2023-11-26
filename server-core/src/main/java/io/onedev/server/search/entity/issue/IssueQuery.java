@@ -156,7 +156,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						if (fieldName.equals(Issue.NAME_PROJECT)) {
 							return new ProjectIsCurrentCriteria();
 						} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-							return new MilestoneIsEmptyCriteria();
+							return new MilestoneEmptyCriteria(operator);
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 							if (fieldSpec != null)
@@ -393,12 +393,14 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 			case IssueQueryLexer.IsEmpty:
+			case IssueQueryLexer.IsNotEmpty:
 				if (Issue.QUERY_FIELDS.contains(fieldName)
 						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
 			case IssueQueryLexer.IsMe:
+			case IssueQueryLexer.IsNotMe:
 				if (!(fieldSpec instanceof UserChoiceField && option.withCurrentUserCriteria()))
 					throw newOperatorException(fieldName, operator);
 				break;

@@ -9,14 +9,17 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 
-public class ParamIsEmptyCriteria extends BuildMetricCriteria {
+public class ParamEmptyCriteria extends BuildMetricCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	public ParamIsEmptyCriteria(String name) {
+	private final int operator;
+	
+	public ParamEmptyCriteria(String name, int operator) {
 		this.name = name;
+		this.operator = operator;
 	}
 
 	@Override
@@ -27,12 +30,15 @@ public class ParamIsEmptyCriteria extends BuildMetricCriteria {
 				builder.isNull(join1.get(BuildParam.PROP_VALUE)));
 		Join<?, ?> join2 = buildJoin.join(Build.PROP_PARAMS, JoinType.LEFT);
 		join2.on(builder.equal(join2.get(BuildParam.PROP_NAME), name));
-		return builder.or(join1.isNotNull(), join2.isNull());
+		var predicate = builder.or(join1.isNotNull(), join2.isNull());
+		if (operator == BuildMetricQueryLexer.IsNotEmpty)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(name) + " " + BuildMetricQuery.getRuleName(BuildMetricQueryLexer.IsEmpty);
+		return quote(name) + " " + BuildMetricQuery.getRuleName(operator);
 	}
 	
 }

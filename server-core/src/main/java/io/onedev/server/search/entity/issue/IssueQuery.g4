@@ -10,7 +10,7 @@ criteria
     : operator=(Confidential|SubmittedByMe|WatchedByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
     | operator=(SubmittedBy|WatchedBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
-    | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | PoundSign? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
@@ -121,6 +121,10 @@ IsMe
 	: 'is' WS+  'me'
 	;
 
+IsNotMe
+	: 'is' WS+ 'not' WS+ 'me'
+	;
+
 Contains
 	: 'contains'
 	;
@@ -152,6 +156,10 @@ IsUntil
 IsEmpty
 	: 'is' WS+ 'empty'
 	;
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
+    ;
 
 Build
 	: 'build'

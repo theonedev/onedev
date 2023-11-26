@@ -99,9 +99,9 @@ public class BuildMetricQuery implements Serializable {
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						if (fieldName.equals(NAME_PULL_REQUEST))
-							return new PullRequestIsEmptyCriteria();
+							return new PullRequestEmptyCriteria(operator);
 						else
-							return new ParamIsEmptyCriteria(fieldName);
+							return new ParamEmptyCriteria(fieldName, operator);
 					}
 					
 					@Override
@@ -182,6 +182,7 @@ public class BuildMetricQuery implements Serializable {
 				}
 				break;
 			case BuildMetricQueryLexer.IsEmpty:
+			case BuildMetricQueryLexer.IsNotEmpty:
 				if (!fieldName.equals(NAME_PULL_REQUEST) && !paramNames.contains(fieldName))
 					throw newOperatorException(fieldName, operator);
 				break;

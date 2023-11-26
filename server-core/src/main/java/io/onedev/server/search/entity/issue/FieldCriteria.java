@@ -1,20 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
@@ -23,6 +9,14 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import org.hibernate.query.criteria.internal.predicate.NullnessPredicate;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class FieldCriteria extends Criteria<Issue> {
 
@@ -51,8 +45,8 @@ public abstract class FieldCriteria extends Criteria<Issue> {
 			return builder.exists(fieldQuery.where(issuePredicate, namePredicate, valuePredicate));
 		} else {
 			return builder.not(builder.exists(fieldQuery.where(
-					issuePredicate, 
-					namePredicate, 
+					issuePredicate,
+					namePredicate,
 					builder.isNotNull(fieldRoot.get(IssueField.PROP_VALUE)))));
 		}
 	}

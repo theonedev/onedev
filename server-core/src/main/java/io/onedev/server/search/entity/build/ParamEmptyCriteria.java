@@ -13,14 +13,17 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.util.criteria.Criteria;
 
-public class ParamIsEmptyCriteria extends Criteria<Build> {
+public class ParamEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	public ParamIsEmptyCriteria(String name) {
+	private final int operator;
+	
+	public ParamEmptyCriteria(String name, int operator) {
 		this.name = name;
+		this.operator = operator;
 	}
 
 	@Override
@@ -29,21 +32,27 @@ public class ParamIsEmptyCriteria extends Criteria<Build> {
 		Root<BuildParam> paramRoot = paramQuery.from(BuildParam.class);
 		paramQuery.select(paramRoot);
 
-		return builder.not(builder.exists(paramQuery.where(
+		var predicate = builder.not(builder.exists(paramQuery.where(
 				builder.equal(paramRoot.get(BuildParam.PROP_BUILD), from), 
 				builder.equal(paramRoot.get(BuildParam.PROP_NAME), name), 
 				builder.isNotNull(paramRoot.get(BuildParam.PROP_VALUE)))));
+		if (operator == BuildQueryLexer.IsNotEmpty)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		return paramValues == null || paramValues.isEmpty();
+		var matches = paramValues == null || paramValues.isEmpty();
+		if (operator == BuildQueryLexer.IsNotEmpty)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(name) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
+		return quote(name) + " " + BuildQuery.getRuleName(operator);
 	}
 	
 }

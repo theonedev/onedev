@@ -11,27 +11,38 @@ import org.eclipse.jgit.lib.Constants;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
 
-public class BranchIsEmptyCriteria extends Criteria<Build> {
+public class TagEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
+	private final int operator;
+	
+	public TagEmptyCriteria(int operator) {
+		this.operator = operator;
+	}
+	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_REF_NAME);
-		return builder.or(
+		var predicate = builder.or(
 				builder.isNull(attribute), 
-				builder.not(builder.like(attribute, Constants.R_HEADS + "%")));
+				builder.not(builder.like(attribute, Constants.R_TAGS + "%")));
+		if (operator == BuildQueryLexer.IsNotEmpty)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return build.getBranch() == null;
-		
+		var matches = build.getTag() == null;
+		if (operator == BuildQueryLexer.IsNotEmpty)
+			matches = !matches;
+		return matches;
 	}
 	
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.NAME_BRANCH) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
+		return quote(Build.NAME_TAG) + " " + BuildQuery.getRuleName(operator);
 	}
 
 }

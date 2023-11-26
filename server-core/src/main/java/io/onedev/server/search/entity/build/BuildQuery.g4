@@ -8,7 +8,7 @@ query
 
 criteria
 	: operator=(Successful|Failed|Cancelled|Running|Finished|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
-    | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|InPipelineOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | PoundSign? number=Number #NumberCriteria
@@ -106,7 +106,11 @@ IsNot
 IsEmpty
 	: 'is' WS+ 'empty'
 	;	
-	
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
+    ;
+
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'
 	;

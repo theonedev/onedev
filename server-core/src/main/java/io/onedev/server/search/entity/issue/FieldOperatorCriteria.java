@@ -40,11 +40,19 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		Path<?> projectAttribute = issueFrom.get(Issue.PROP_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
 			return null;
+		} else if (operator == IssueQueryLexer.IsNotEmpty) {
+			return builder.isNotNull(fieldFrom.get(IssueField.PROP_VALUE));
 		} else if (operator == IssueQueryLexer.IsMe) {
-			if (User.get() != null)
+			if (User.get() != null) 
 				return builder.equal(valueAttribute, User.get().getName());
-			else
+			else 
 				throw new ExplicitException("Please login to perform this query");
+		} else if (operator == IssueQueryLexer.IsNotMe) {
+			if (User.get() != null) {
+				return builder.not(builder.equal(valueAttribute, User.get().getName()));
+			} else {
+				throw new ExplicitException("Please login to perform this query");
+			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {
 				Build build = Build.get();

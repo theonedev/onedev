@@ -13,13 +13,16 @@ public class ParamCriteria extends Criteria<RetryContext> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	private String value;
+	private final String value;
 	
-	public ParamCriteria(String name, String value) {
+	private final int operator;
+	
+	public ParamCriteria(String name, String value, int operator) {
 		this.name = name;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -30,13 +33,16 @@ public class ParamCriteria extends Criteria<RetryContext> {
 	@Override
 	public boolean matches(RetryContext context) {
 		List<String> paramValues = context.getBuild().getParamMap().get(name);
-		return paramValues != null && paramValues.contains(value);
+		var matches = paramValues != null && paramValues.contains(value);
+		if (operator == RetryConditionLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(name) + " " 
-				+ RetryCondition.getRuleName(RetryConditionLexer.Is) + " "
+				+ RetryCondition.getRuleName(operator) + " "
 				+ quote(value);
 	}
 	

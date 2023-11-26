@@ -153,15 +153,15 @@ public class BuildQuery extends EntityQuery<Build> {
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						if (fieldName.equals(NAME_VERSION))
-							return new VersionIsEmptyCriteria();
+							return new VersionEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_PULL_REQUEST))
-							return new PullRequestIsEmptyCriteria();
+							return new PullRequestEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_BRANCH))
-							return new BranchIsEmptyCriteria();
+							return new BranchEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_TAG))
-							return new TagIsEmptyCriteria();
+							return new TagEmptyCriteria(operator);
 						else
-							return new ParamIsEmptyCriteria(fieldName);
+							return new ParamEmptyCriteria(fieldName, operator);
 					}
 					
 					@Override
@@ -295,6 +295,7 @@ public class BuildQuery extends EntityQuery<Build> {
 				}
 				break;
 			case BuildQueryLexer.IsEmpty:
+			case BuildQueryLexer.IsNotEmpty:
 				if (!fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)
 						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
 						&& !paramNames.contains(fieldName)) {
