@@ -122,7 +122,7 @@ public class SSHCommandStep extends CommandStep {
 				var commands = newArrayList(
 						"mkdir /root/.ssh",
 						"cat <<EOF>> /root/.ssh/id_rsa");
-				var privateKey = Build.get().getJobSecretAuthorizationContext().getSecretValue(getPrivateKeySecret());
+				var privateKey = Build.get().getJobAuthorizationContext().getSecretValue(getPrivateKeySecret());
 				commands.addAll(StringUtils.splitToLines(privateKey));
 				
 				var sshBuilder = new StringBuilder("ssh -o StrictHostKeyChecking=no ");

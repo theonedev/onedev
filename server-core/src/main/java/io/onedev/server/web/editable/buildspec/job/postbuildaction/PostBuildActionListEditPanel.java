@@ -102,7 +102,7 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<PostBuildAction, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PostBuildAction>> cellItem, String componentId, IModel<PostBuildAction> rowModel) {
@@ -114,18 +114,18 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<>(Model.of("Description")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PostBuildAction>> cellItem, String componentId, IModel<PostBuildAction> rowModel) {
@@ -133,7 +133,7 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of("Condition")) {
+		columns.add(new AbstractColumn<>(Model.of("Condition")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PostBuildAction>> cellItem, String componentId, IModel<PostBuildAction> rowModel) {
@@ -141,7 +141,7 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PostBuildAction>> cellItem, String componentId, IModel<PostBuildAction> rowModel) {
@@ -177,12 +177,12 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 
 							@Override
 							public List<ParamSpec> getParamSpecs() {
-								return getJob()!=null? getJob().getParamSpecs(): null;
+								return getJob() != null ? getJob().getParamSpecs() : null;
 							}
-							
+
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -193,7 +193,7 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 						onPropertyUpdating(target);
 						target.add(PostBuildActionListEditPanel.this);
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
@@ -202,7 +202,7 @@ class PostBuildActionListEditPanel extends PropertyEditor<List<Serializable>> {
 			public String getCssClass() {
 				return "actions minimum";
 			}
-			
+
 		});		
 		
 		IDataProvider<PostBuildAction> dataProvider = new ListDataProvider<PostBuildAction>() {

@@ -1045,13 +1045,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<JobSecret> getHierarchyJobSecrets() {
 		List<JobSecret> jobSecrets = new ArrayList<>(getBuildSetting().getJobSecrets());
-		if (getParent() != null) {
-			Set<String> names = jobSecrets.stream().map(it->it.getName()).collect(Collectors.toSet());
-			for (JobSecret secret: getParent().getHierarchyJobSecrets()) {
-				if (!names.contains(secret.getName()))
-					jobSecrets.add(secret);
-			}
-		}
+		if (getParent() != null) 
+			jobSecrets.addAll(getParent().getHierarchyJobSecrets());
 		return jobSecrets;
 	}
 

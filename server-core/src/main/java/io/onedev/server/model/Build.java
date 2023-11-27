@@ -765,11 +765,8 @@ public class Build extends ProjectBelonging
 					secretValuesToMask.add(param.getValue().substring(SecretInput.LITERAL_VALUE_PREFIX.length()));
 			}
 		}
-		
-		for (Iterator<String> it = secretValuesToMask.iterator(); it.hasNext();) {
-			if (it.next().length() < SecretInput.MASK.length())
-				it.remove();
-		}
+
+		secretValuesToMask.removeIf(s -> s.length() < SecretInput.MASK.length());
 		return secretValuesToMask;
 	}
 	

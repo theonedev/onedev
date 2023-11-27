@@ -9,6 +9,7 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("serial")
 public class JobPropertiesPage extends ProjectBuildSettingPage {
 	
-	private Component showArchivedButton;
+	private boolean showArchived;
 	
 	private Form<?> form;
 	
@@ -52,11 +53,21 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(editor);
 		
-		form.add(showArchivedButton = new Link<Void>("showArchived") {
+		form.add(new Link<Void>("toggleArchived") {
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
+					@Override
+					public String getObject() {
+						return showArchived? "Hide Archived": "Show Archived";
+					}
+				}));
+			}
 
 			@Override
 			public void onClick() {
-				showArchivedButton.setVisibilityAllowed(false);
+				showArchived = !showArchived;
 				bean.setProperties(getDisplayProperties());
 				var editor = PropertyContext.edit("editor", bean, "properties");
 				form.replace(editor);
@@ -76,15 +87,8 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 	private List<JobProperty> getDisplayProperties() {
 		return getProject().getBuildSetting().getJobProperties()
 			.stream()
-			.filter(it -> showArchivedButton != null && !showArchivedButton.isVisibilityAllowed() || !it.isArchived())
-			.sorted((o1, o2) -> {
-				if (o1.isArchived() && !o2.isArchived())
-					return 1;
-				else if (!o1.isArchived() && o2.isArchived())
-					return -1;
-				else
-					return 0;
-			}).collect(toList());
+			.filter(it -> showArchived || !it.isArchived())
+			.collect(toList());
 	}
 	
 	@Override

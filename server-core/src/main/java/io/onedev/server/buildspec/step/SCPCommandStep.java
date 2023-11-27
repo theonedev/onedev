@@ -4,7 +4,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
@@ -104,7 +103,7 @@ public class SCPCommandStep extends CommandStep {
 				var commands = newArrayList(
 						"mkdir /root/.ssh",
 						"cat <<EOF>> /root/.ssh/id_rsa");
-				var privateKey = Build.get().getJobSecretAuthorizationContext().getSecretValue(getPrivateKeySecret());
+				var privateKey = Build.get().getJobAuthorizationContext().getSecretValue(getPrivateKeySecret());
 				commands.addAll(StringUtils.splitToLines(privateKey));
 				var scpBuilder = new StringBuilder("scp -o StrictHostKeyChecking=no ");
 				if (getOptions() != null)

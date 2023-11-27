@@ -81,13 +81,10 @@ public class JobAuthorizationContext {
 						if (jobMatch.matches(matchContext)) 
 							return normalizeSecretValue(secret.getValue());
 					}
-					throw new ExplicitException(String.format(
-							"Job secret not authorized (project: %s, job secret: %s)",
-							project.getPath(), secretName));
 				}
 			}
 			throw new ExplicitException(String.format(
-					"Job secret not found (project: %s, job secret: %s)",
+					"No authorized job secret found (project: %s, job secret: %s)",
 					project.getPath(), secretName));
 		}
 	}

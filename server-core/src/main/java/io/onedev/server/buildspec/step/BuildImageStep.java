@@ -15,7 +15,8 @@ import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker daemon. " +
 		"This step can only be executed by server docker executor or remote docker executor, and " +
@@ -98,7 +99,7 @@ public class BuildImageStep extends Step {
 
 	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
+				.stream().map(it->it.getName()).distinct().collect(toList());
 	}
 
 	private static String getBuiltInRegistryAccessTokenSecretDescription() {
