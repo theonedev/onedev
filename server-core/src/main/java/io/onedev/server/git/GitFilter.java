@@ -87,8 +87,10 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) throws IOException {
+	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) {
 		String projectPath = StringUtils.strip(projectInfo, "/");
+		if (projectPath.endsWith(".git"))
+			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
 
 		ProjectFacade facade = projectManager.findFacadeByPath(projectPath);
 		if (facade == null && projectPath.startsWith("projects/")) {

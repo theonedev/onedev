@@ -82,6 +82,8 @@ class SshCommand implements Command, ServerSessionAware {
 
 		String tempStr = StringUtils.substringAfter(commandString, "'/");   
 		String projectPath = StringUtils.substringBefore(tempStr, "'");
+		if (projectPath.endsWith(".git"))
+			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
         ProjectFacade projectFacade = projectManager.findFacadeByPath(projectPath);
 		if (projectFacade == null && projectPath.startsWith("projects/")) {
 			projectPath = projectPath.substring("projects/".length());
@@ -204,7 +206,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.in = new InputStreamWrapper(in) {
 
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};
@@ -215,7 +217,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.out = new OutputStreamWrapper(out) {
 			
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};
@@ -227,7 +229,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.err = new OutputStreamWrapper(err) {
 			
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};

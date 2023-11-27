@@ -98,6 +98,8 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 				String accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(userId, 300);
 				String projectPath = StringUtils.strip(StringUtils.substringBefore(
 						commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
+				if (projectPath.endsWith(".git"))
+					projectPath = StringUtils.substringBeforeLast(projectPath, ".");
 				Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 				if (project == null)
 					throw new ExplicitException("Project not found: " + projectPath);
