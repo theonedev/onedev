@@ -433,7 +433,7 @@ public class CoreModule extends AbstractPluginModule {
 			public GroovyScript getScript() {
 				GroovyScript script = new GroovyScript();
 				script.setName("determine-build-failure-investigator");
-				script.setContent(newArrayList("io.onedev.server.util.script.ScriptContribution.determineBuildFailureInvestigator()"));
+				script.setContent(newArrayList("io.onedev.server.util.ScriptContribution.determineBuildFailureInvestigator()"));
 				return script;
 			}
 			
@@ -444,10 +444,21 @@ public class CoreModule extends AbstractPluginModule {
 			public GroovyScript getScript() {
 				GroovyScript script = new GroovyScript();
 				script.setName("get-build-number");
-				script.setContent(newArrayList("io.onedev.server.util.script.ScriptContribution.getBuildNumber()"));
+				script.setContent(newArrayList("io.onedev.server.util.ScriptContribution.getBuildNumber()"));
 				return script;
 			}
 			
+		});
+		contribute(ScriptContribution.class, new ScriptContribution() {
+
+			@Override
+			public GroovyScript getScript() {
+				GroovyScript script = new GroovyScript();
+				script.setName("get-current-user");
+				script.setContent(newArrayList("io.onedev.server.util.ScriptContribution.getCurrentUser()"));
+				return script;
+			}
+
 		});
 	}
 	
