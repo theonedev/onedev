@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
@@ -115,6 +116,7 @@ public class ProjectResource {
 		setting.branchProtections = project.getBranchProtections();
 		setting.tagProtections = project.getTagProtections();
 		setting.buildSetting = project.getBuildSetting();
+		setting.packSetting = project.getPackSetting();
 		setting.issueSetting = project.getIssueSetting();
 		setting.namedCodeCommentQueries = project.getNamedCodeCommentQueries();
 		setting.namedCommitQueries = project.getNamedCommitQueries();
@@ -321,6 +323,7 @@ public class ProjectResource {
 		project.setBranchProtections(setting.branchProtections);
 		project.setTagProtections(setting.tagProtections);
 		project.setBuildSetting(setting.buildSetting);
+		project.setPackSetting(setting.packSetting);
 		project.setIssueSetting(setting.issueSetting);
 		project.setNamedCodeCommentQueries(setting.namedCodeCommentQueries);
 		project.setNamedCommitQueries(setting.namedCommitQueries);
@@ -381,6 +384,8 @@ public class ProjectResource {
 		
 		private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
 		
+		private ProjectPackSetting packSetting = new ProjectPackSetting();
+		
 		private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 		
 		private ArrayList<NamedCommitQuery> namedCommitQueries = new ArrayList<>();
@@ -429,6 +434,14 @@ public class ProjectResource {
 
 		public void setBuildSetting(ProjectBuildSetting buildSetting) {
 			this.buildSetting = buildSetting;
+		}
+
+		public ProjectPackSetting getPackSetting() {
+			return packSetting;
+		}
+
+		public void setPackSetting(ProjectPackSetting packSetting) {
+			this.packSetting = packSetting;
 		}
 
 		public ProjectPullRequestSetting getPullRequestSetting() {

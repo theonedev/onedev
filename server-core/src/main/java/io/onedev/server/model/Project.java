@@ -350,6 +350,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPackSetting packSetting = new ProjectPackSetting();
+	
 	@JsonIgnore
 	@Lob
 	@Column(length=65535)

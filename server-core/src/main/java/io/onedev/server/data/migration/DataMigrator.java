@@ -5901,5 +5901,33 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate146(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("packManagement").setText("false");
+					element.addElement("pendingDelete").setText("false");
+					element.addElement("packSetting");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var codePrivilege = element.elementTextTrim("codePrivilege");
+					element.addElement("packPrivilege").setText(codePrivilege);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("packQueries");
+					element.addElement("packQuerySubscriptions");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
