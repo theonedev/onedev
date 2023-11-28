@@ -103,7 +103,6 @@ public class Service implements NamedElement, Serializable {
 
 	@Editable(order=500, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@Password
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}

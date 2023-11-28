@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
 import static javax.ws.rs.client.Entity.entity;

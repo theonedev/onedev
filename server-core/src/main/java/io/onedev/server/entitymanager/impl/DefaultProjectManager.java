@@ -110,7 +110,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.FileUtils.cleanDir;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;

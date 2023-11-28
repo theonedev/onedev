@@ -39,7 +39,7 @@ import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.FileUtils.tar;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;

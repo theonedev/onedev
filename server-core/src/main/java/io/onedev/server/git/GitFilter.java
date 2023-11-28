@@ -47,7 +47,7 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 @Singleton
 public class GitFilter implements Filter {

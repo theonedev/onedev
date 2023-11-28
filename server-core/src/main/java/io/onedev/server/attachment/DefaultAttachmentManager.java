@@ -1,6 +1,5 @@
 package io.onedev.server.attachment;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
@@ -52,7 +51,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.util.*;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
@@ -569,7 +568,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			Exception ex = null;
 			File file = new File(attachmentDir, attachmentName);
 			try (OutputStream os = new FileOutputStream(file)) {
-				byte[] buffer = new byte[Bootstrap.BUFFER_SIZE];
+				byte[] buffer = new byte[io.onedev.server.util.IOUtils.BUFFER_SIZE];
 				long count = 0;
 				int n = 0;
 				while (-1 != (n = attachmentStream.read(buffer))) {

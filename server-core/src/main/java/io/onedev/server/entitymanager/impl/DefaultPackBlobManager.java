@@ -43,7 +43,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.UUID;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;

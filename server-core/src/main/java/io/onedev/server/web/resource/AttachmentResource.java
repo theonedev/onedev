@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URLEncoder;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static java.nio.charset.StandardCharsets.UTF_8;
 

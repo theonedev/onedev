@@ -12,9 +12,7 @@ import io.onedev.server.model.Project;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Null;
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -161,13 +159,9 @@ public abstract class SyncRepository extends ServerSideStep {
 	@Nullable
 	protected static File writeCertificate(@Nullable String certificate) {
 		if (certificate != null) {
-			try {
-				var file = File.createTempFile("certificate", "pem");
-				FileUtils.writeFile(file, certificate);
-				return file;
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			var file = FileUtils.createTempFile("certificate", "pem");
+			FileUtils.writeFile(file, certificate);
+			return file;
 		} else {
 			return null;
 		}

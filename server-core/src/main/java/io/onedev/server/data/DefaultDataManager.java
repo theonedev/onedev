@@ -35,10 +35,10 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.util.editablebean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
@@ -210,7 +210,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (dbDataVersion == null) {
 			File tempFile = null;
         	try {
-            	tempFile = File.createTempFile("schema", ".sql");
+            	tempFile = FileUtils.createTempFile("schema", ".sql");
 	        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
 	        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
 	        	List<String> sqls = new ArrayList<String>();
@@ -481,7 +481,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void applyConstraints(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -503,7 +503,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void createTables(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -524,7 +524,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void dropConstraints(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -545,7 +545,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void cleanDatabase(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();

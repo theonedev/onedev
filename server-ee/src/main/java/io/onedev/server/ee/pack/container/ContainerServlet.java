@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.ee.pack.container.ContainerAuthenticationFilter.ATTR_JOB_TOKEN;
 import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.model.Pack.MAX_DATA_LEN;

@@ -88,7 +88,6 @@ public class BuildImageStep extends Step {
 
 	@Editable(order=335, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@Password
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}

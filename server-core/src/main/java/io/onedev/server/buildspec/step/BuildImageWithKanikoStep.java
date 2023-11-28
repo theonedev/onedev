@@ -10,9 +10,9 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
@@ -95,7 +95,6 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	@Editable(order=340, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@Password
 	@Override
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return super.getBuiltInRegistryAccessTokenSecret();

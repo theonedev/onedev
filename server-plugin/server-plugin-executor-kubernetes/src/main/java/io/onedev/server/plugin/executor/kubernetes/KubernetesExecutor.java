@@ -87,8 +87,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
-	private String builtInRegistryAccessToken;
-	
 	private List<ServiceLocator> serviceLocators = new ArrayList<>();
 
 	private String configFile;
@@ -377,7 +375,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		File file = null;
 		try {
 			AtomicReference<String> resourceNameRef = new AtomicReference<String>(null);
-			file = File.createTempFile("k8s", ".yaml");
+			file = FileUtils.createTempFile("k8s", ".yaml");
 			
 			String resourceYaml = new Yaml().dump(resourceDef);
 			
@@ -405,8 +403,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			}).checkReturnCode();
 			
 			return Preconditions.checkNotNull(resourceNameRef.get());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		} finally {
 			if (file != null)
 				file.delete();
@@ -567,16 +563,17 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				}
 				return null;
 			}, new ArrayList<>());
-			
-			if (accessTokens.size() > 1) {
-				throw new ExplicitException("Built-in registry access token should be the same " +
-						"for all command steps to be executed by Kubernetes executor");
-			}
-						
+
 			for (var service: jobContext.getServices()) {
 				if (service.getBuiltInRegistryAccessToken() != null)
 					accessTokens.add(service.getBuiltInRegistryAccessToken());
 			}
+			
+			if (accessTokens.size() > 1) {
+				throw new ExplicitException("Built-in registry access token should be the same " +
+						"for all command steps and services executing via Kubernetes executor");
+			}
+						
 			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 			var auth = new StringBuilder();
 			auth.append(jobContext.getJobToken()).append(":");

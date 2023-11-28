@@ -6,7 +6,6 @@ import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.ibm.icu.impl.locale.XCldrStub.Splitter;
 import com.sun.mail.imap.IMAPFolder;
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -83,6 +82,8 @@ import static java.util.stream.Collectors.toList;
 public class DefaultMailManager implements MailManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
+
+	private static final int SOCKET_CONNECT_TIMEOUT = 60000;
 	
 	private static final int MAX_INBOX_LIFE = 3600;
 	
@@ -215,7 +216,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		
 		smtpSetting.getSslSetting().configure(properties);
  
-		properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
+		properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(SOCKET_CONNECT_TIMEOUT));
 		properties.setProperty("mail.smtp.timeout", String.valueOf(smtpSetting.getTimeout()*1000));
 		
 		Authenticator authenticator;
@@ -844,7 +845,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		        
 		        properties.setProperty("mail.imap.host", imapSetting.getImapHost());
 				imapSetting.getSslSetting().configure(properties);
-		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
+		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(SOCKET_CONNECT_TIMEOUT));
 		        properties.setProperty("mail.imap.timeout", String.valueOf(imapSetting.getTimeout()*1000));
 	        	if (imapSetting.getImapCredential() instanceof OAuthAccessToken)
 	        		properties.setProperty("mail.imap.auth.mechanisms", "XOAUTH2");
