@@ -148,15 +148,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							onEnabled(target);
-						}
-						
-					});
-					fragment.add(new AjaxLink<Void>("close") {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							onEnabled(target);
+							onConfigured(target);
 						}
 						
 					});
@@ -166,24 +158,6 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 			}
 			
 		});
-		form.add(new AjaxLink<Void>("cancel") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onCancelled(target);
-			}
-			
-		});
-		
-		form.add(new AjaxLink<Void>("close") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onCancelled(target);
-			}
-			
-		});
-		
 		form.setOutputMarkupId(true);
 		
 		fragment.add(form);	
@@ -202,8 +176,6 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 	
 	protected abstract User getUser();
 	
-	protected abstract void onEnabled(AjaxRequestTarget target);
-	
-	protected abstract void onCancelled(AjaxRequestTarget target);
+	protected abstract void onConfigured(AjaxRequestTarget target);
 	
 }

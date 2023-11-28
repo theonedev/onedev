@@ -799,7 +799,13 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyAccessTokensPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class));
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser().isEnforce2FA() && getLoginUser().getSsoConnector() == null);
+			}
+		});
 		if (getPage() instanceof MyTwoFactorAuthenticationPage)
 			item.add(AttributeAppender.append("class", "active"));
 

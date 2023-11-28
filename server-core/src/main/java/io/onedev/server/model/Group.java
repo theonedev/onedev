@@ -102,9 +102,8 @@ public class Group extends AbstractEntity implements BasePermission {
 		this.createRootProjects = createRootProjects;
 	}
 
-	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce "
-			+ "all users in this group to set up two-factor authentication upon next login. Users will "
-			+ "not be able to disable two-factor authentication themselves if this option is set")
+	@Editable(order=400, name="Enable Two-factor Authentication", description="Check this to enable "
+			+ "two-factor authentication for all users in this group")
 	public boolean isEnforce2FA() {
 		return enforce2FA;
 	}

@@ -1,23 +1,6 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
@@ -33,7 +16,21 @@ import io.onedev.server.web.page.admin.usermanagement.membership.UserMemberships
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
-import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class UserPage extends AdministrationPage {
@@ -78,7 +75,6 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("SSH Keys", "key", UserSshKeysPage.class));
 		tabs.add(new UserTab("GPG Keys", "key", UserGpgKeysPage.class));
 		tabs.add(new UserTab("Access Tokens", "token", UserAccessTokensPage.class));
-		tabs.add(new UserTab("Two-factor Authentication", "shield", UserTwoFactorAuthenticationPage.class));
 		
 		add(new Tabbable("userTabs", tabs));
 	}

@@ -83,14 +83,16 @@ public class LoginPage extends SimplePage {
 					PrincipalCollection principals = OneDev.getInstance(PasswordAuthorizingRealm.class)
 							.getAuthenticationInfo(token).getPrincipals();
 					User user = Preconditions.checkNotNull(SecurityUtils.toUser(principals));
-					if (user.getTwoFactorAuthentication() != null) {
-						subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
-								+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
-								+ "authenticator is in sync";
-						newPasscodeVerifyFrag(user.getId());
-					} else if (user.isEnforce2FA()) {
-						subTitle = "Set up two-factor authentication";
-						newTwoFactorAuthenticationSetup(user.getId());
+					if (user.isEnforce2FA()) {
+						if (user.getTwoFactorAuthentication() != null) {
+							subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
+									+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
+									+ "authenticator is in sync";
+							newPasscodeVerifyFrag(user.getId());
+						} else {
+							subTitle = "Set up two-factor authentication";
+							newTwoFactorAuthenticationSetup(user.getId());
+						}
 					} else {
 						afterLogin(user);
 					}
@@ -215,13 +217,8 @@ public class LoginPage extends SimplePage {
 		replace(new TwoFactorAuthenticationSetupPanel("content") {
 			
 			@Override
-			protected void onEnabled(AjaxRequestTarget target) {
+			protected void onConfigured(AjaxRequestTarget target) {
 				afterLogin(getUser());
-			}
-			
-			@Override
-			protected void onCancelled(AjaxRequestTarget target) {
-				setResponsePage(LoginPage.class);
 			}
 			
 			@Override
