@@ -200,13 +200,19 @@ jobs:
     image: ubuntu
     interpreter: !DefaultInterpreter
       commands:
-      - cp onedev-*.zip onedev-latest.zip
-      - cp onedev-*.tar.gz onedev-latest.tar.gz
+      - buildVersion=`ls onedev-*.zip | grep -Po 'onedev-\K.*(?=.zip)'`
+      - cp onedev-$buildVersion.zip onedev-latest.zip
+      - cp onedve-$buildVersion.tar.gz onedev-latest.tar.gz
+      - echo $buildVersion > build_version
     useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: set version
+    buildVersion: '@file:build_version@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishSiteStep
     name: publish
-    artifacts: '*.zip *.tar.gz'
+    artifacts: onedev-latest*
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   jobDependencies:
   - jobName: Release
