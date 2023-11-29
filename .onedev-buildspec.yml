@@ -200,9 +200,13 @@ jobs:
     image: ubuntu
     interpreter: !DefaultInterpreter
       commands:
-      - buildVersion=`ls onedev-*.zip | grep -Po 'onedev-\K.*(?=.zip)'`
-      - cp onedev-$buildVersion.zip onedev-latest.zip
-      - cp onedve-$buildVersion.tar.gz onedev-latest.tar.gz
+      - 'apt update '
+      - apt install -y zip
+      - buildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\K.*(?=.tar.gz)'`
+      - tar zxvf onedev-$buildVersion.tar.gz
+      - mv onedev-$buildVersion onedev-latest
+      - tar zcvf onedev-latest.tar.gz onedev-latest
+      - zip -r onedev-latest.zip onedev-latest
       - echo $buildVersion > build_version
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
