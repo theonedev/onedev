@@ -192,7 +192,7 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-- name: publish site
+- name: Publish Site
   steps:
   - !CommandStep
     name: build
