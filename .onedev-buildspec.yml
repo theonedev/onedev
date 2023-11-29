@@ -192,3 +192,27 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+- name: publish site
+  steps:
+  - !CommandStep
+    name: build
+    runInContainer: true
+    image: ubuntu
+    interpreter: !DefaultInterpreter
+      commands:
+      - cp onedev-*.zip onedev-latest.zip
+      - cp onedev-*.tar.gz onedev-latest.tar.gz
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishSiteStep
+    name: publish
+    artifacts: '*.zip *.tar.gz'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  jobDependencies:
+  - jobName: Release
+    requireSuccessful: true
+    artifacts: onedev-*.zip onedev-*.tar.gz
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
