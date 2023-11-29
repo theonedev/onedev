@@ -123,7 +123,7 @@ public class PackDetailPage extends ProjectPage {
 
 			@Override
 			protected Component newTitle(String componentId) {
-				return new EntityNavPanel<Pack>(componentId) {
+				return new EntityNavPanel<Pack>(componentId, "package") {
 
 					@Override
 					protected EntityQuery<Pack> parse(String queryString, Project project) {

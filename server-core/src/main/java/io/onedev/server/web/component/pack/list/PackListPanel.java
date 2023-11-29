@@ -557,7 +557,7 @@ public abstract class PackListPanel extends Panel {
 
 				@Override
 				public String getCssClass() {
-					return "type d-none d-xl-table-cell";
+					return "type d-none d-lg-table-cell";
 				}
 
 				@Override
@@ -571,7 +571,7 @@ public abstract class PackListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "date d-none d-xl-table-cell";
+				return "date d-none d-lg-table-cell";
 			}
 
 			@Override

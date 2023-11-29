@@ -26,13 +26,20 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 	private final String entityName;
 	
-	public EntityNavPanel(String id) {
+	public EntityNavPanel(String id, @Nullable String entityName) {
 		super(id);
 		
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(EntityNavPanel.class, getClass());
-		entityName = WordUtils.uncamel(typeArguments.get(0).getSimpleName()).toLowerCase();
+		if (entityName != null)
+			this.entityName = entityName;
+		else
+			this.entityName = WordUtils.uncamel(typeArguments.get(0).getSimpleName()).toLowerCase();
 	}
 
+	public EntityNavPanel(String id) {
+		this(id, null);
+	}
+	
 	private Cursor getCursor() {
 		if (getCursorSupport() != null)
 			return getCursorSupport().getCursor();

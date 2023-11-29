@@ -41,7 +41,7 @@ public class DefaultPackQueryPersonalizationManager extends BaseEntityManager<Pa
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
-		retainNames.addAll(personalization.getProject().getNamedBuildQueries().stream()
+		retainNames.addAll(personalization.getProject().getNamedPackQueries().stream()
 				.map(it->NamedQuery.COMMON_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		personalization.getQuerySubscriptionSupport().getQuerySubscriptions().retainAll(retainNames);
 		

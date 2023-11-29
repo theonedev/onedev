@@ -161,22 +161,25 @@ public class ProjectPacksPage extends ProjectPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id, (PersonalQuerySupport) (target1, name) -> {
-									PackQueryPersonalization setting = getProject().getPackQueryPersonalizationOfCurrentUser();
-									NamedPackQuery namedQuery = NamedQuery.find(setting.getQueries(), name);
-									if (namedQuery == null) {
-										namedQuery = new NamedPackQuery(name, query);
-										setting.getQueries().add(namedQuery);
-									} else {
-										namedQuery.setQuery(query);
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
+									@Override
+									public void onSave(AjaxRequestTarget target, String name) {
+										PackQueryPersonalization setting = getProject().getPackQueryPersonalizationOfCurrentUser();
+										NamedPackQuery namedQuery = NamedQuery.find(setting.getQueries(), name);
+										if (namedQuery == null) {
+											namedQuery = new NamedPackQuery(name, query);
+											setting.getQueries().add(namedQuery);
+										} else {
+											namedQuery.setQuery(query);
+										}
+										if (setting.isNew())
+											getPackQueryPersonalizationManager().create(setting);
+										else
+											getPackQueryPersonalizationManager().update(setting);
+
+										target.add(savedQueries);
+										close();
 									}
-									if (setting.isNew())
-										getPackQueryPersonalizationManager().create(setting);
-									else
-										getPackQueryPersonalizationManager().update(setting);
-										
-									target1.add(savedQueries);
-									close();
 								}) {
 
 									@Override
