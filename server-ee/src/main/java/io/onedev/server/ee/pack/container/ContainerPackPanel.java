@@ -135,21 +135,27 @@ public class ContainerPackPanel extends Panel {
 	
 	private Component newImageManifestPanel(String componentId, JsonNode manifest, @Nullable String archDigest) {
 		var fragment = new Fragment(componentId, "imageManifestFrag", this);
+		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
+		var config = readJson(getPackBlobManager().readBlob(configHash));
 		if (archDigest != null) {
+			fragment.add(new WebMarkupContainer("osArch").setVisible(false));
 			var pullArchCommand = "docker pull " + serverAndNamespace + "@" + archDigest;
 			fragment.add(new Label("pullArchCommand", pullArchCommand));
 			fragment.add(new CopyToClipboardLink("copyPullArchCommand", Model.of(pullArchCommand)));
 		} else {
+			var osNode = config.get("os");
+			var architectureNode = config.get("architecture");
+			if (osNode != null && architectureNode != null) 
+				fragment.add(new Label("osArch", osNode.asText() + "/" + architectureNode.asText()));
+			else
+				fragment.add(new WebMarkupContainer("osArch").setVisible(false));
 			fragment.add(new WebMarkupContainer("pullArchCommand").setVisible(false));
 			fragment.add(new WebMarkupContainer("copyPullArchCommand").setVisible(false));
-			fragment.add(new WebMarkupContainer("insecureRegistry").setVisible(false));
 		}
 
 		fragment.add(new Label("manifest", formatJson(manifest)));
 
 		var labels = new ArrayList<Pair<String, String>>();
-		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
-		var config = readJson(getPackBlobManager().readBlob(configHash));
 		var labelsNode = config.get("config").get("Labels");
 		if (labelsNode != null) {
 			for (var it = labelsNode.fields(); it.hasNext();) {

@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div>
 		<b>Digest</b>
-		<div wicket:id="digest" class="text-monospace text-break font-size-sm mt-2 mr-1"></div>
+		<div wicket:id="digest" class="text-monospace text-break font-size-sm mt-2"></div>
 	</div>
 	<div class="mt-4">
 		<b>Pull Command</b>
@@ -17,6 +17,12 @@
 		<div wicket:id="content"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="imageManifestFrag">
+		<wicket:enclosure child="osArch">
+			<div class="mt-4">
+				<b>OS/ARCH</b>
+				<div wicket:id="osArch" class="mt-2"></div>
+			</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="pullArchCommand">
 			<div class="mt-4">
 				<b>Pull Command</b>
