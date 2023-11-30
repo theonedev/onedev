@@ -192,3 +192,37 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+- name: Publish Site
+  steps:
+  - !CommandStep
+    name: build
+    runInContainer: true
+    image: ubuntu
+    interpreter: !DefaultInterpreter
+      commands:
+      - 'apt update '
+      - apt install -y zip
+      - buildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\K.*(?=.tar.gz)'`
+      - tar zxvf onedev-$buildVersion.tar.gz
+      - mv onedev-$buildVersion onedev-latest
+      - tar zcvf onedev-latest.tar.gz onedev-latest
+      - zip -r onedev-latest.zip onedev-latest
+      - echo $buildVersion > build_version
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: set version
+    buildVersion: '@file:build_version@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishSiteStep
+    name: publish
+    artifacts: onedev-latest*
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  jobDependencies:
+  - jobName: Release
+    requireSuccessful: true
+    artifacts: onedev-*.zip onedev-*.tar.gz
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
