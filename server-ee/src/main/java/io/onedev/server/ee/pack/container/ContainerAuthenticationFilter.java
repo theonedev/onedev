@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -42,7 +41,7 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) {
 		Subject subject = SecurityUtils.getSubject();
-		HttpServletRequest httpRequest = WebUtils.toHttp(request);
+		var httpRequest = WebUtils.toHttp(request);
 		String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
 		if (authHeader != null) {
 			if (authHeader.toLowerCase().startsWith("basic ")) {

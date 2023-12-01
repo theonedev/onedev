@@ -88,6 +88,7 @@ public class ContainerServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
+		response.setHeader("Docker-Distribution-Api-Version", "registry/2.0");
 		if (!subscriptionManager.isSubscriptionActive()) {
 			throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, 
 					"This feature requires an active subscription. Visit https://onedev.io/pricing to get a 30 days free trial");
@@ -105,29 +106,33 @@ public class ContainerServlet extends HttpServlet {
 			if (pathInfo.equals("")) {
 				if (SecurityUtils.getUserId().equals(0L)) {
 					response.setStatus(SC_UNAUTHORIZED);
-					response.setHeader("WWW-Authenticate", getChallenge(request));
+					response.setHeader("WWW-Authenticate", getChallenge());
 				} else {
 					response.setStatus(SC_OK);
 				}
 			} else if (pathInfo.equals("token")) {
-				var jsonObj = new HashMap<String, String>();
-				String accessToken;
-				var userId = SecurityUtils.getUserId();
-				if (!userId.equals(0L))
-					accessToken = userManager.createTemporalAccessToken(userId, 3600);
-				else
-					accessToken = CryptoUtils.generateSecret();
-				
-				var jobToken = HttpUtils.getAuthBasicUser(request);
-				if (jobToken == null)
-					jobToken = UUID.randomUUID().toString();
-				jsonObj.put("token", jobToken + ":" + accessToken);
-				
-				response.setStatus(SC_OK);
-				try (var out = response.getOutputStream()) {
-					out.write(objectMapper.writeValueAsString(jsonObj).getBytes(UTF_8));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				if (method.equals("GET")) {
+					var jsonObj = new HashMap<String, String>();
+					String accessToken;
+					var userId = SecurityUtils.getUserId();
+					if (!userId.equals(0L))
+						accessToken = userManager.createTemporalAccessToken(userId, 3600);
+					else
+						accessToken = CryptoUtils.generateSecret();
+
+					var jobToken = HttpUtils.getAuthBasicUser(request);
+					if (jobToken == null)
+						jobToken = UUID.randomUUID().toString();
+					jsonObj.put("token", jobToken + ":" + accessToken);
+
+					response.setStatus(SC_OK);
+					try (var out = response.getOutputStream()) {
+						out.write(objectMapper.writeValueAsString(jsonObj).getBytes(UTF_8));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				} else {
+					throw new ClientException(SC_METHOD_NOT_ALLOWED, ErrorCode.UNSUPPORTED);
 				}
 			} else if ((matcher = compile("(.+)/blobs/uploads").matcher(pathInfo)).matches()) {
 				var projectPath = matcher.group(1);
@@ -465,7 +470,7 @@ public class ContainerServlet extends HttpServlet {
 				throw new ClientException(SC_FORBIDDEN, ErrorCode.UNAUTHORIZED, e.getMessage());
 			} else {
 				response.setStatus(SC_UNAUTHORIZED);
-				response.setHeader("WWW-Authenticate", getChallenge(request));
+				response.setHeader("WWW-Authenticate", getChallenge());
 			}
 		} catch (Exception e) {
 			var httpResponse = ExceptionUtils.buildResponse(e);
@@ -519,7 +524,7 @@ public class ContainerServlet extends HttpServlet {
 			return project;
 	}
 
-	private String getChallenge(HttpServletRequest request) {
+	private String getChallenge() {
 		var serverUrl = settingManager.getSystemSetting().getServerUrl();
 		return "Bearer realm=\"" + serverUrl + "/v2/token\",service=\"onedev\",scope=\"*\"";
 	}
