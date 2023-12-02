@@ -25,6 +25,7 @@ import org.apache.wicket.model.Model;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
@@ -78,63 +79,88 @@ public class ContainerPackPanel extends Panel {
 		var digest = "sha256:" + manifestHash;
 		add(new Label("digest", digest));
 		
-		var pullCommand = "docker pull " + serverAndNamespace + ":" + tag;
-		add(new Label("pullCommand", pullCommand));
-		add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
-		
 		var data = dataModel.getObject();
 		if (data.isImageManifest()) {
-			add(newImageManifestPanel("content", data.getManifest(), null));
+			add(newImagePanel("content", data.getManifest(), null));
 		} else if (data.isImageIndex()) {
-			var fragment = new Fragment("content", "imageIndexFrag", this);
-			
-			String firstArchDigest = null;
-			var tabs = new ArrayList<Tab>();
+			var archDigests = new LinkedHashMap<String, String>();
 			for (var manifestNode: data.getManifest().get("manifests")) {
 				var platformNode = manifestNode.get("platform");
 				if (platformNode != null) {
 					var arch = platformNode.get("os").asText() + "/" + platformNode.get("architecture").asText();
-					if (!arch.equals("unknown/unknown")) {
-						var archDigest = manifestNode.get("digest").asText();
-						firstArchDigest = archDigest;
-						tabs.add(new AjaxActionTab(Model.of(arch)) {
-
-							@Override
-							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-								Component content = newArchImageManifestPanel("content", archDigest);
-								target.add(content);
-								fragment.replace(content);
-							}
-
-						});
-					}
+					if (!arch.equals("unknown/unknown")) 
+						archDigests.put(arch, manifestNode.get("digest").asText());
 				}
 			}
-			fragment.add(new Tabbable("tabs", tabs));
-			
-			if (firstArchDigest != null)
-				fragment.add(newArchImageManifestPanel("content", firstArchDigest));
-			else 
-				fragment.add(new WebMarkupContainer("content").setVisible(false));
-			
-			add(fragment);
+			if (archDigests.size() > 1) {
+				var fragment = new Fragment("content", "multiArchFrag", this);
+				var pullCommand = "docker pull " + serverAndNamespace + ":" + tag;
+				fragment.add(new Label("pullCommand", pullCommand));
+				fragment.add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
+				var tabs = new ArrayList<Tab>();
+				for (var entry : archDigests.entrySet()) {
+					var archDigest = entry.getValue();
+					tabs.add(new AjaxActionTab(Model.of(entry.getKey())) {
+
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							Component content = newArchImagePanel("content", archDigest);
+							target.add(content);
+							fragment.replace(content);
+						}
+
+					});
+				}
+				fragment.add(new Tabbable("tabs", tabs));
+				fragment.add(newArchImagePanel("content", archDigests.values().iterator().next()));
+				add(fragment);
+			} else if (archDigests.size() == 1) {
+				var archHash = substringAfter(archDigests.values().iterator().next(), ":");
+				var archManifestBytes = getPackBlobManager().readBlob(archHash);
+				add(newImagePanel("content", readJson(archManifestBytes), null));
+			} else {
+				boolean cache = false;
+				for (var manifestNode: data.getManifest().get("manifests")) {
+					if (manifestNode.get("mediaType").asText().startsWith("application/vnd.buildkit.cacheconfig")) {
+						cache = true;
+						break;
+					}
+				}	
+				
+				if (cache) {
+					var fragment = new Fragment("content", "cacheFrag", this);
+					var cacheFromOption = "--cache-from type=registry,ref=" + serverAndNamespace + ":" + tag;
+					fragment.add(new Label("cacheFromOption", cacheFromOption));
+					fragment.add(new CopyToClipboardLink("copyCacheFromOption", Model.of(cacheFromOption)));
+					fragment.add(new Label("manifest", formatJson(data.getManifest())));
+					add(fragment);
+				} else {
+					var fragment = new Fragment("content", "manifestFrag", this);
+					fragment.add(new Label("manifest", formatJson(data.getManifest())));
+					add(fragment);
+				}
+			}
 		} else {
-			var fragment = new Fragment("content", "unknownManifestFrag", this);
+			var fragment = new Fragment("content", "manifestFrag", this);
 			fragment.add(new Label("manifest", formatJson(data.getManifest())));
 			add(fragment);
 		}
-		
+
 		add(new InsecureRegistryNotePanel("insecureRegistryNote"));
 	}
 	
-	private Component newArchImageManifestPanel(String componentId, String archDigest) {
+	private Component newArchImagePanel(String componentId, String archDigest) {
 		var archHash = substringAfter(archDigest, ":");
 		var archManifestBytes = getPackBlobManager().readBlob(archHash);
-		return newImageManifestPanel(componentId, readJson(archManifestBytes), archDigest);
+		return newImagePanel(componentId, readJson(archManifestBytes), archDigest);
 	}
 	
-	private Component newImageManifestPanel(String componentId, JsonNode manifest, @Nullable String archDigest) {
-		var fragment = new Fragment(componentId, "imageManifestFrag", this);
+	private Component newImagePanel(String componentId, JsonNode manifest, @Nullable String archDigest) {
+		var fragment = new Fragment(componentId, "imageFrag", this);
+		var pullCommand = "docker pull " + serverAndNamespace + ":" + tag;
+		fragment.add(new Label("pullCommand", pullCommand));
+		fragment.add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
+		
 		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
 		var config = readJson(getPackBlobManager().readBlob(configHash));
 		if (archDigest != null) {

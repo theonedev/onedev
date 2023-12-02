@@ -30,11 +30,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.ee.pack.container.ContainerAuthenticationFilter.ATTR_JOB_TOKEN;
+import static io.onedev.server.ee.pack.container.ContainerData.isImageIndex;
+import static io.onedev.server.ee.pack.container.ContainerData.isImageManifest;
 import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
-import static io.onedev.server.model.Pack.MAX_DATA_LEN;
 import static io.onedev.server.util.Digest.SHA256;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
@@ -46,6 +47,8 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 public class ContainerServlet extends HttpServlet {
 	
 	public static final String PATH = "/v2";
+	
+	private static final int MAX_MANIFEST_SIZE = 10000000;
 
 	private final SettingManager settingManager;
 	
@@ -282,7 +285,7 @@ public class ContainerServlet extends HttpServlet {
 						var projectId = sessionManager.call(() -> getProject(projectPath, true).getId());
 						var baos = new ByteArrayOutputStream();
 						try (var is = request.getInputStream()) {
-							if (copyLarge(is, baos, 0, MAX_DATA_LEN, new byte[BUFFER_SIZE]) >= MAX_DATA_LEN)
+							if (copyLarge(is, baos, 0, MAX_MANIFEST_SIZE, new byte[BUFFER_SIZE]) >= MAX_MANIFEST_SIZE)
 								throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");
 						}
 
@@ -327,9 +330,12 @@ public class ContainerServlet extends HttpServlet {
 										var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
 										var size = manifestNode.get("size").asLong();
 										var packBlob = loadPackBlob(packBlobs, hash, size);
-										var baos = new ByteArrayOutputStream();
-										packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
-										loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+										var mediaType = manifestNode.get("mediaType").asText();
+										if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
+											var baos = new ByteArrayOutputStream();
+											packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+											loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+										}
 									}
 								} else if (data.isImageManifest()) {
 									var blobNodes = new ArrayList<JsonNode>();
@@ -396,7 +402,8 @@ public class ContainerServlet extends HttpServlet {
 							} else {
 								packBlob = packBlobManager.find(parseDigest(reference).getHash());
 							}
-							if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)
+							if (packBlob != null && packBlob.getSize() < MAX_MANIFEST_SIZE 
+									&& SecurityUtils.canReadPackBlob(packBlob)
 									&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getHash(), packBlob.getSize())) {
 								response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getHash());
 								response.setContentLengthLong(packBlob.getSize());
@@ -410,7 +417,6 @@ public class ContainerServlet extends HttpServlet {
 							baos = new ByteArrayOutputStream();
 							packBlobManager.downloadBlob(manifestInfo.getLeft(), manifestInfo.getRight(), baos);
 							bytes = baos.toByteArray();
-							String manifest = new String(bytes);
 							response.setContentType(new ContainerData(bytes).getMediaType());
 							if (method.equals("GET")) {
 								try (var os = response.getOutputStream()) {

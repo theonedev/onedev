@@ -24,8 +24,6 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final int MAX_DATA_LEN = 10000000;
-
 	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";

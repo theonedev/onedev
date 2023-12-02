@@ -36,13 +36,19 @@ public class ContainerData {
 	}
 	
 	public boolean isImageManifest() {
-		var mediaType = getMediaType();
-		return "application/vnd.oci.image.manifest.v1+json".equals(mediaType) 
-				|| "application/vnd.docker.distribution.manifest.v2+json".equals(mediaType);
+		return isImageManifest(getMediaType());
 	}
 
 	public boolean isImageIndex() {
-		var mediaType = getMediaType();
+		return isImageIndex(getMediaType());
+	}
+
+	public static boolean isImageManifest(@Nullable String mediaType) {
+		return "application/vnd.oci.image.manifest.v1+json".equals(mediaType)
+				|| "application/vnd.docker.distribution.manifest.v2+json".equals(mediaType);
+	}
+
+	public static boolean isImageIndex(@Nullable String mediaType) {
 		return "application/vnd.oci.image.index.v1+json".equals(mediaType)
 				|| "application/vnd.docker.distribution.manifest.list.v2+json".equals(mediaType);
 	}
