@@ -82,6 +82,7 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setDescription(editProject.getDescription());
 						newProject.setCodeManagement(editProject.isCodeManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
+						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						
