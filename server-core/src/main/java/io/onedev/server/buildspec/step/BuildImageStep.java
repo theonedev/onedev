@@ -18,9 +18,8 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker daemon. " +
-		"This step can only be executed by server docker executor or remote docker executor, and " +
-		"<code>mount docker sock</code> option needs to be enabled on the executor. To build image with " +
+@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker buildx. " +
+		"This step can only be executed by server docker executor or remote docker executor. To build image with " +
 		"Kubernetes executor, please use kaniko step instead")
 public class BuildImageStep extends Step {
 
@@ -118,9 +117,10 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=350, description="Optionally specify additional options to build image, " +
-			"separated by spaces")
+			"separated by spaces. For instance <code>--builder</code> and <code>--platform</code> can be " +
+			"used to build multi-arch images")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"-f", "(--file)=.*", "-t", "(--tag)=.*"})
+	@ReservedOptions({"--push", "-f", "(--file)=.*", "-t", "(--tag)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
@@ -128,8 +128,7 @@ public class BuildImageStep extends Step {
 	public void setMoreOptions(String moreOptions) {
 		this.moreOptions = moreOptions;
 	}
-
-
+	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
