@@ -468,7 +468,17 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
 														jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
 												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-													buildImage(docker, (BuildImageFacade) facade, hostBuildHome, jobLogger);
+													buildImage(docker, buildImageFacade, hostBuildHome, jobLogger);
+													return null;
+												});
+											} else if (facade instanceof RunImagetoolsFacade) {
+												var runImagetoolsFacade = (RunImagetoolsFacade) facade;
+												var docker = newDocker();
+												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl,
+														jobContext.getJobToken(), runImagetoolsFacade.getBuiltInRegistryAccessToken());
+												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+													runImagetools(docker, runImagetoolsFacade, hostBuildHome, jobLogger);
 													return null;
 												});
 											} else if (facade instanceof RunContainerFacade) {

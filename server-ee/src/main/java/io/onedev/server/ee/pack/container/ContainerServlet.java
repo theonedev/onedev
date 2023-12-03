@@ -2,6 +2,7 @@ package io.onedev.server.ee.pack.container;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.*;
@@ -291,68 +292,57 @@ public class ContainerServlet extends HttpServlet {
 
 						var bytes = baos.toByteArray();
 						String hash;
-						if (!isTag(reference)) {
-							var digest = parseDigest(reference);
-							if (!digest.matches(bytes)) {
-								throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
-										"Invalid manifest digest");
-							}
-							hash = digest.getHash();
-						} else {
+						if (isTag(reference)) {
 							hash = Digest.sha256Of(bytes).getHash();
-						}
+							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, hash);
+							var runnable = new Runnable() {
 
-						var packBlobId = packBlobManager.uploadBlob(projectId, bytes, hash);
-
-						sessionManager.run(new Runnable() {
-
-							private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
-								var packBlob = packBlobs.get(hash);
-								if (packBlob == null) {
-									packBlob = packBlobManager.find(hash);
-									if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-										if (packBlob.getSize() == size)
-											packBlobs.put(hash, packBlob);
-										else
-											throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
-									} else {
-										throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
-									}
-								}
-								return packBlob;
-							}
-
-							private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs,
-																 byte[] bytes) {
-								var data = new ContainerData(bytes);
-								if (data.isImageIndex()) {
-									for (var manifestNode : data.getManifest().get("manifests")) {
-										var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
-										var size = manifestNode.get("size").asLong();
-										var packBlob = loadPackBlob(packBlobs, hash, size);
-										var mediaType = manifestNode.get("mediaType").asText();
-										if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
-											var baos = new ByteArrayOutputStream();
-											packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
-											loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+								private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
+									var packBlob = packBlobs.get(hash);
+									if (packBlob == null) {
+										packBlob = packBlobManager.find(hash);
+										if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+											if (packBlob.getSize() == size)
+												packBlobs.put(hash, packBlob);
+											else
+												throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
+										} else {
+											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
 										}
 									}
-								} else if (data.isImageManifest()) {
-									var blobNodes = new ArrayList<JsonNode>();
-									blobNodes.add(data.getManifest().get("config"));
-									for (var layerNode : data.getManifest().get("layers"))
-										blobNodes.add(layerNode);
-									for (var blobNode : blobNodes) {
-										var hash = parseDigest(blobNode.get("digest").asText()).getHash();
-										var size = blobNode.get("size").asLong();
-										loadPackBlob(packBlobs, hash, size);
+									return packBlob;
+								}
+
+								private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs,
+																	 byte[] bytes) {
+									var data = new ContainerData(bytes);
+									if (data.isImageIndex()) {
+										for (var manifestNode : data.getManifest().get("manifests")) {
+											var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
+											var size = manifestNode.get("size").asLong();
+											var packBlob = loadPackBlob(packBlobs, hash, size);
+											var mediaType = manifestNode.get("mediaType").asText();
+											if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
+												var baos = new ByteArrayOutputStream();
+												packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+												loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+											}
+										}
+									} else if (data.isImageManifest()) {
+										var blobNodes = new ArrayList<JsonNode>();
+										blobNodes.add(data.getManifest().get("config"));
+										for (var layerNode : data.getManifest().get("layers"))
+											blobNodes.add(layerNode);
+										for (var blobNode : blobNodes) {
+											var hash = parseDigest(blobNode.get("digest").asText()).getHash();
+											var size = blobNode.get("size").asLong();
+											loadPackBlob(packBlobs, hash, size);
+										}
 									}
 								}
-							}
 
-							@Override
-							public void run() {
-								if (isTag(reference)) {
+								@Override
+								public void run() {
 									var packBlobs = new HashMap<String, PackBlob>();
 									loadReferencedPackBlobs(packBlobs, bytes);
 									packBlobs.put(hash, packBlobManager.load(packBlobId));
@@ -365,7 +355,7 @@ public class ContainerServlet extends HttpServlet {
 										pack.setType(TYPE);
 										pack.setVersion(reference);
 									}
-									
+
 									Build build = null;
 									String jobToken = (String) request.getAttribute(ATTR_JOB_TOKEN);
 									if (jobToken != null) {
@@ -380,13 +370,25 @@ public class ContainerServlet extends HttpServlet {
 
 									packManager.createOrUpdate(pack, packBlobs.values());
 								}
-
-								response.setStatus(SC_OK);
-								response.setHeader("Docker-Content-Digest",
-										"sha256:" + hash);
-								response.setHeader("Location", getManifestUrl(projectPath, reference));
+							};
+							LockUtils.call("update-pack:" + projectId + ":" + TYPE + ":" + reference, () -> {
+								runnable.run();
+								return null;
+							});
+						} else {
+							var digest = parseDigest(reference);
+							if (!digest.matches(bytes)) {
+								throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
+										"Invalid manifest digest");
 							}
-						});
+							hash = digest.getHash();
+							packBlobManager.uploadBlob(projectId, bytes, hash);
+						}
+						
+						response.setStatus(SC_OK);
+						response.setHeader("Docker-Content-Digest",
+								"sha256:" + hash);
+						response.setHeader("Location", getManifestUrl(projectPath, reference));
 						break;
 					case "GET":
 					case "HEAD":

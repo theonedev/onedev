@@ -93,7 +93,7 @@ public abstract class PackListPanel extends Panel {
 	
 	private SelectionColumn<Pack, Void> selectionColumn;
 	
-	private SortableDataProvider<Pack, Void> dataProvider;	
+	private LoadableDetachableDataProvider<Pack, Void> dataProvider;	
 	
 	private TextField<String> queryInput;
 	
@@ -620,7 +620,7 @@ public abstract class PackListPanel extends Panel {
 	}
 	
 	private boolean shouldShowHelp() {
-		return packsTable.getItemCount() == 0 && getPage() instanceof ProjectPacksPage
+		return dataProvider.size() == 0 && getPage() instanceof ProjectPacksPage
 				&& queryModel.getObject().getCriteria() == null;
 	}
 

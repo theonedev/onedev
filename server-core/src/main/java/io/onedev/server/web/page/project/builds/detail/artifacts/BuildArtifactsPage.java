@@ -152,7 +152,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			});
 		}
 		
-		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<ArtifactInfo>() {
+		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<>() {
 
 			@Override
 			public void detach() {
@@ -160,12 +160,12 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 			@Override
 			public Iterator<? extends ArtifactInfo> getChildren(ArtifactInfo node) {
-				String artifactPath = node != null? node.getPath(): null;
-				DirectoryInfo directory = ((DirectoryInfo)getBuildManager()
+				String artifactPath = node != null ? node.getPath() : null;
+				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
 						.getArtifactInfo(getBuild(), artifactPath));
 				return directory.getChildren().iterator();
 			}
-			
+
 			@Override
 			public Iterator<? extends ArtifactInfo> getRoots() {
 				return getBuild().getRootArtifacts().iterator();
@@ -180,19 +180,19 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			public IModel<ArtifactInfo> model(ArtifactInfo object) {
 				return Model.of(object);
 			}
-			
+
 		};
 		
-		add(new TableTree<ArtifactInfo, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new TableTree<>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-			    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
-			    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));	
+				getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
+				getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));
 				getTable().add(new NoRecordsBehavior());
-			    getTable().add(AttributeAppender.append("class", "table"));
-			    add(new HumanTheme());
+				getTable().add(AttributeAppender.append("class", "table"));
+				add(new HumanTheme());
 				expand(null);
 				setOutputMarkupPlaceholderTag(true);
 			}
@@ -205,18 +205,18 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 			@Override
 			protected Item<ArtifactInfo> newRowItem(String id, int index, IModel<ArtifactInfo> model) {
-				return new OddEvenItem<ArtifactInfo>(id, index, model);
+				return new OddEvenItem<>(id, index, model);
 			}
 
 			@Override
 			public void expand(ArtifactInfo artifact) {
 				super.expand(artifact);
-				
-				String artifactPath = artifact != null? artifact.getPath(): null;
+
+				String artifactPath = artifact != null ? artifact.getPath() : null;
 				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
 						.getArtifactInfo(getBuild(), artifactPath));
-				if (directory != null 
-						&& directory.getChildren().size() == 1 
+				if (directory != null
+						&& directory.getChildren().size() == 1
 						&& directory.getChildren().get(0) instanceof DirectoryInfo) {
 					expand(directory.getChildren().get(0));
 				}
@@ -237,13 +237,13 @@ public class BuildArtifactsPage extends BuildDetailPage {
 							else
 								expand(artifact);
 						}
-						
+
 					};
 					link.add(new SpriteImage("icon", "folder"));
 					link.add(AttributeAppender.append("class", "folder"));
 				} else {
 					PageParameters params = ArtifactResource.paramsOf(
-							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath()); 
+							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath());
 					link = new ResourceLink<Void>("link", new ArtifactResourceReference(), params);
 					link.add(new SpriteImage("icon", "file"));
 					link.add(AttributeAppender.append("class", "file"));
@@ -253,10 +253,10 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					fileName = StringUtils.substringAfterLast(fileName, "/");
 				link.add(new Label("label", fileName));
 				fragment.add(link);
-				
+
 				return fragment;
-			}				
-			
+			}
+
 		});
 		add(new WebMarkupContainer("noArtifacts") {
 
