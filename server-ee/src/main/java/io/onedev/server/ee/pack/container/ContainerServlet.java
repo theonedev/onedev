@@ -295,84 +295,83 @@ public class ContainerServlet extends HttpServlet {
 						if (isTag(reference)) {
 							hash = Digest.sha256Of(bytes).getHash();
 							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, hash);
-							var runnable = new Runnable() {
-
-								private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
-									var packBlob = packBlobs.get(hash);
-									if (packBlob == null) {
-										packBlob = packBlobManager.find(hash);
-										if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-											if (packBlob.getSize() == size)
-												packBlobs.put(hash, packBlob);
-											else
-												throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
-										} else {
-											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
-										}
-									}
-									return packBlob;
-								}
-
-								private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs,
-																	 byte[] bytes) {
-									var data = new ContainerData(bytes);
-									if (data.isImageIndex()) {
-										for (var manifestNode : data.getManifest().get("manifests")) {
-											var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
-											var size = manifestNode.get("size").asLong();
-											var packBlob = loadPackBlob(packBlobs, hash, size);
-											var mediaType = manifestNode.get("mediaType").asText();
-											if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
-												var baos = new ByteArrayOutputStream();
-												packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
-												loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+							LockUtils.call("update-pack:" + projectId + ":" + TYPE + ":" + reference, () -> {
+								sessionManager.run(new Runnable() {
+									
+									private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
+										var packBlob = packBlobs.get(hash);
+										if (packBlob == null) {
+											packBlob = packBlobManager.find(hash);
+											if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+												if (packBlob.getSize() == size)
+													packBlobs.put(hash, packBlob);
+												else
+													throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
+											} else {
+												throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
 											}
 										}
-									} else if (data.isImageManifest()) {
-										var blobNodes = new ArrayList<JsonNode>();
-										blobNodes.add(data.getManifest().get("config"));
-										for (var layerNode : data.getManifest().get("layers"))
-											blobNodes.add(layerNode);
-										for (var blobNode : blobNodes) {
-											var hash = parseDigest(blobNode.get("digest").asText()).getHash();
-											var size = blobNode.get("size").asLong();
-											loadPackBlob(packBlobs, hash, size);
+										return packBlob;
+									}
+
+									private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs,
+									byte[] bytes) {
+										var data = new ContainerData(bytes);
+										if (data.isImageIndex()) {
+											for (var manifestNode : data.getManifest().get("manifests")) {
+												var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
+												var size = manifestNode.get("size").asLong();
+												var packBlob = loadPackBlob(packBlobs, hash, size);
+												var mediaType = manifestNode.get("mediaType").asText();
+												if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
+													var baos = new ByteArrayOutputStream();
+													packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+													loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+												}
+											}
+										} else if (data.isImageManifest()) {
+											var blobNodes = new ArrayList<JsonNode>();
+											blobNodes.add(data.getManifest().get("config"));
+											for (var layerNode : data.getManifest().get("layers"))
+												blobNodes.add(layerNode);
+											for (var blobNode : blobNodes) {
+												var hash = parseDigest(blobNode.get("digest").asText()).getHash();
+												var size = blobNode.get("size").asLong();
+												loadPackBlob(packBlobs, hash, size);
+											}
 										}
 									}
-								}
 
-								@Override
-								public void run() {
-									var packBlobs = new HashMap<String, PackBlob>();
-									loadReferencedPackBlobs(packBlobs, bytes);
-									packBlobs.put(hash, packBlobManager.load(packBlobId));
+									@Override
+									public void run() {
+										var packBlobs = new HashMap<String, PackBlob>();
+										loadReferencedPackBlobs(packBlobs, bytes);
+										packBlobs.put(hash, packBlobManager.load(packBlobId));
 
-									var project = projectManager.load(projectId);
-									var pack = packManager.find(project, TYPE, reference);
-									if (pack == null) {
-										pack = new Pack();
-										pack.setProject(project);
-										pack.setType(TYPE);
-										pack.setVersion(reference);
+										var project = projectManager.load(projectId);
+										var pack = packManager.find(project, TYPE, reference);
+										if (pack == null) {
+											pack = new Pack();
+											pack.setProject(project);
+											pack.setType(TYPE);
+											pack.setVersion(reference);
+										}
+
+										Build build = null;
+										String jobToken = (String) request.getAttribute(ATTR_JOB_TOKEN);
+										if (jobToken != null) {
+											var jobContext = jobManager.getJobContext(jobToken, false);
+											if (jobContext != null)
+												build = buildManager.load(jobContext.getBuildId());
+										}
+										pack.setBuild(build);
+										pack.setUser(SecurityUtils.getUser());
+										pack.setBlobHash(hash);
+										pack.setPublishDate(new Date());
+
+										packManager.createOrUpdate(pack, packBlobs.values());
 									}
-
-									Build build = null;
-									String jobToken = (String) request.getAttribute(ATTR_JOB_TOKEN);
-									if (jobToken != null) {
-										var jobContext = jobManager.getJobContext(jobToken, false);
-										if (jobContext != null)
-											build = buildManager.load(jobContext.getBuildId());
-									}
-									pack.setBuild(build);
-									pack.setUser(SecurityUtils.getUser());
-									pack.setBlobHash(hash);
-									pack.setPublishDate(new Date());
-
-									packManager.createOrUpdate(pack, packBlobs.values());
-								}
-							};
-							LockUtils.call("update-pack:" + projectId + ":" + TYPE + ":" + reference, () -> {
-								runnable.run();
+								});
 								return null;
 							});
 						} else {
