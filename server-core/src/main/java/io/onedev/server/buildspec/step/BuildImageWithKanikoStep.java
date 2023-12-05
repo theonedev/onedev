@@ -58,7 +58,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 			+ "Leave empty to use job workspace itself. The file <code>Dockerfile</code> is expected to exist in build context " +
 			"directory, unless you specify a different location with option <code>--dockerfile</code>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getBuildContext() {
 		return buildContext;
 	}

@@ -3,7 +3,9 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -66,7 +68,6 @@ public class RunContainerStep extends Step {
 
 	@Editable(order=300, name="Working Directory", description="Optionally specify working directory of the container. "
 			+ "Leave empty to use default working directory of the container")
-	@SafePath
 	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable
 	public String getWorkingDir() {

@@ -1,16 +1,17 @@
 package io.onedev.server.validation.validator;
 
+import io.onedev.server.annotation.SubPath;
+import org.apache.commons.io.FilenameUtils;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.annotation.SafePath;
-
-public class SafePathValidator implements ConstraintValidator<SafePath, String> {
+public class SubPathValidator implements ConstraintValidator<SubPath, String> {
 
 	private String message;
 	
 	@Override
-	public void initialize(SafePath constaintAnnotation) {
+	public void initialize(SubPath constaintAnnotation) {
 		message = constaintAnnotation.message();
 	}
 
@@ -19,7 +20,14 @@ public class SafePathValidator implements ConstraintValidator<SafePath, String> 
 		if (value == null) 
 			return true;
 
-		if (value.contains("..")) {
+		if (FilenameUtils.getPrefixLength(value) != 0) {
+			constraintContext.disableDefaultConstraintViolation();
+			String message = this.message;
+			if (message.length() == 0)
+				message = "Absolute path not allowed";
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
+		} else if (value.contains("..")) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0) 

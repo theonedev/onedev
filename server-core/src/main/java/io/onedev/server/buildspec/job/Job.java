@@ -121,8 +121,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, placeholder="Use Any Applicable Executor", description="Optionally specify authorized executor "
-			+ "for this job. Leave empty to use first authorized executor")
+	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", description="Optionally specify authorized " +
+			"executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if " +
+			"no executors are defined)")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -132,6 +133,13 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.jobExecutor = jobExecutor;
 	}
 
+	private static String getJobExecutorPlaceholder() {
+		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
+			return "Auto-discovered executor";
+		else 
+			return "First applicable executor";
+	}
+	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobExecutors(String matchWith) {
 		List<String> applicableJobExecutors = new ArrayList<>();

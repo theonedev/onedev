@@ -42,7 +42,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getBuildPath() {
 		return buildPath;
 	}
@@ -54,7 +54,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use file <tt>Dockerfile</tt> under build path specified above")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getDockerfile() {
 		return dockerfile;
 	}
@@ -120,7 +120,7 @@ public class BuildImageStep extends Step {
 			"separated by spaces. For instance <code>--builder</code> and <code>--platform</code> can be " +
 			"used to build multi-arch images")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"--push", "-f", "(--file)=.*", "-t", "(--tag)=.*"})
+	@ReservedOptions({"--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}

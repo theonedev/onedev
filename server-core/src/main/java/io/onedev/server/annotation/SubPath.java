@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.validation.validator.SafePathValidator;
+import io.onedev.server.validation.validator.SubPathValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=SafePathValidator.class) 
-public @interface SafePath {
+@Constraint(validatedBy= SubPathValidator.class) 
+public @interface SubPath {
 
 	String message() default "";
 	

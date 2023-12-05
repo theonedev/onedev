@@ -26,9 +26,9 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
@@ -360,13 +360,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 												docker.addArgs("-v", hostPath + ":" + entry.getValue());
 											}
 
-											if (entrypoint != null) {
+											if (entrypoint != null) 
 												docker.addArgs("-w", containerWorkspace);
-											} else if (workingDir != null) {
-												if (workingDir.contains(".."))
-													throw new ExplicitException("Container working dir should not contain '..'");
+											else if (workingDir != null) 
 												docker.addArgs("-w", workingDir);
-											}
 
 											for (Map.Entry<CacheInstance, String> entry : cache.getAllocations().entrySet()) {
 												String hostCachePath = new File(hostCacheHome, entry.getKey().toString()).getAbsolutePath();
