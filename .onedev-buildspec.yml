@@ -152,7 +152,7 @@ jobs:
     startPage: server-product/system/incompatibilities/incompatibilities.md
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
-    name: publish server docker image
+    name: build server docker image
     buildPath: docker
     dockerfile: docker/Dockerfile.server
     tags: 1dev/server 1dev/server:@build_version@
@@ -161,7 +161,7 @@ jobs:
     moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
-    name: publish agent docker image
+    name: build agent docker image
     buildPath: docker
     dockerfile: docker/Dockerfile.agent
     tags: 1dev/agent
