@@ -153,8 +153,8 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build server docker image
-    buildPath: docker
-    dockerfile: docker/Dockerfile.server
+    buildPath: server-product/target/docker
+    dockerfile: server-product/target/docker/Dockerfile.server
     tags: 1dev/server 1dev/server:@build_version@
     publish: true
     removeDanglingImages: true
@@ -162,8 +162,8 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build agent docker image
-    buildPath: docker
-    dockerfile: docker/Dockerfile.agent
+    buildPath: server-product/target/docker
+    dockerfile: server-product/target/docker/Dockerfile.agent
     tags: 1dev/agent
     publish: true
     removeDanglingImages: true
