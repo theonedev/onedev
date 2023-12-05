@@ -47,7 +47,7 @@ jobs:
 - name: Release
   steps:
   - !CheckoutStep
-    name: checkout
+    name: checkout code
     cloneCredential: !HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
@@ -69,7 +69,7 @@ jobs:
     buildVersion: '@file:buildVersion@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: build & deploy
+    name: build and deploy
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
@@ -150,6 +150,24 @@ jobs:
     reportName: Incompatibilities
     filePatterns: server-product/system/incompatibilities/**
     startPage: server-product/system/incompatibilities/incompatibilities.md
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: publish server docker image
+    buildPath: docker
+    dockerfile: docker/Dockerfile.server
+    tags: 1dev/server 1dev/server:@build_version@
+    publish: true
+    removeDanglingImages: true
+    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: publish agent docker image
+    buildPath: docker
+    dockerfile: docker/Dockerfile.agent
+    tags: 1dev/agent
+    publish: true
+    removeDanglingImages: true
+    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CloseMilestoneStep
     name: close milestone
