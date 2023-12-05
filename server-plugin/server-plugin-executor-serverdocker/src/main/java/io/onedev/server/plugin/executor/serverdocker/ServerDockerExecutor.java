@@ -301,9 +301,9 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 								var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
 										jobContext.getJobToken(), jobService.getBuiltInRegistryAccessToken());
 								callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-								startService(docker, network, jobService, osInfo, getImageMappingFacades(),
-										getCpuLimit(), getMemoryLimit(), jobLogger);
-									return null;
+									startService(docker, network, jobService, osInfo, getImageMappingFacades(),
+											getCpuLimit(), getMemoryLimit(), jobLogger);
+										return null;
 								});
 							}
 
@@ -343,6 +343,9 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										cache.uninstallSymbolinks(hostWorkspace);
 										containerName = network + "-step-" + stringifyStepPosition(position);
 										try {
+											var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
+											docker.clearArgs();
+								
 											docker.addArgs("run", "--name=" + containerName, "--network=" + network);
 											if (getCpuLimit() != null)
 												docker.addArgs("--cpus", getCpuLimit());
@@ -406,7 +409,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											if (entrypoint != null)
 												docker.addArgs("--entrypoint=" + entrypoint);
 
-											if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
+											if (useProcessIsolation)
 												docker.addArgs("--isolation=process");
 
 											docker.addArgs(options.toArray(new String[0]));
