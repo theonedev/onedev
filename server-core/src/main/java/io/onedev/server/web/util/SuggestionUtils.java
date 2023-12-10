@@ -525,13 +525,13 @@ public class SuggestionUtils {
 		return sortAndTruncate(suggestions, matchWith);
 	}
 
-	public static List<InputSuggestion> suggestPackVersions(Project project, String matchWith) {
-		Collection<String> packVersions = OneDev.getInstance(PackManager.class).queryVersions(
-				project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+	public static List<InputSuggestion> suggestPackProps(Project project, String propName, String matchWith) {
+		Collection<String> packProps = OneDev.getInstance(PackManager.class).queryProps(
+				project, propName, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (String packVersion: packVersions) {
-			LinearRange match = LinearRange.match(packVersion, matchWith);
-			suggestions.add(new InputSuggestion(packVersion, null, match));
+		for (String packProp: packProps) {
+			LinearRange match = LinearRange.match(packProp, matchWith);
+			suggestions.add(new InputSuggestion(packProp, null, match));
 		}
 
 		return sortAndTruncate(suggestions, matchWith);

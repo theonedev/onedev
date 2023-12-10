@@ -106,7 +106,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	public void on(PackEvent event) {
 		Pack pack = event.getPack();
 		var title = format("[%s] %s:%s published", 
-				pack.getType(), pack.getProject().getPath(), pack.getVersion());
+				pack.getType(), pack.getProject().getPath(), pack.getTag());
 		postIfApplicable(title, event);
 	}
 	

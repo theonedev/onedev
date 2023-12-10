@@ -29,16 +29,9 @@
 				<div wicket:id="feedback"></div>
 				<table wicket:id="packs" class="table"></table>
 				<div wicket:id="help">
-					<h6 class="text-info">No packages found. Follow below instructions to publish various packages:</h6>
-					<ul class="list-unstyled mb-0">
-						<li wicket:id="types" class="bg-light rounded p-3 mb-4 mb-last-child-0">
-							<div class="font-weight-bold font-size-h6 border-bottom pb-3 mb-3">
-								<svg wicket:id="icon" class="icon icon-lg"></svg>
-								<span wicket:id="title"></span>
-							</div>
-							<div wicket:id="body"></div>
-						</li>
-					</ul>
+					<div class="alert alert-notice alert-light-info">No packages found. Follow below instructions to publish packages</div>
+					<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
+					<div wicket:id="content"></div>
 				</div>
 			</div>
 		</div>

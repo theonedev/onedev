@@ -2,6 +2,7 @@ package io.onedev.server.ee.pack.container;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.BearerAuthenticationToken;
@@ -28,13 +29,16 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 @Singleton
 public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 	
-	static final String ATTR_JOB_TOKEN = "jobToken";
+	static final String ATTR_BUILD_ID = "buildId";
 	
 	private final UserManager userManager;
 	
+	private final JobManager jobManager;
+	
 	@Inject
-	public ContainerAuthenticationFilter(UserManager userManager) {
+	public ContainerAuthenticationFilter(UserManager userManager, JobManager jobManager) {
 		this.userManager = userManager;
+		this.jobManager = jobManager;
 	}
 	
 	@Sessional
@@ -65,7 +69,9 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				}
 			} else if (authHeader.toLowerCase().startsWith("bearer ")) {
 				var authValue = substringAfter(authHeader, " ");
-				request.setAttribute(ATTR_JOB_TOKEN, substringBefore(authValue, ":"));
+				var jobContext = jobManager.getJobContext(substringBefore(authValue, ":"), false);
+				if (jobContext != null)
+					request.setAttribute(ATTR_BUILD_ID, jobContext.getBuildId());
 				var accessToken = substringAfter(authValue, ":");
 				var user = userManager.findByAccessToken(accessToken);
 				if (user != null)
@@ -78,5 +84,5 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 		
 		return true;
 	}
- 
+
 }

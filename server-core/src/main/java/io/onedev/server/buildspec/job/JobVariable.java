@@ -1,10 +1,13 @@
 package io.onedev.server.buildspec.job;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.UrlUtils;
+
+import javax.annotation.Nullable;
 
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
@@ -35,6 +38,12 @@ public enum JobVariable {
 		}
 		
 	}, 
+	JOB_TOKEN {
+		@Override
+		public String getValue(Build build) {
+			return build.getJobToken();
+		}
+	},
 	REF {
 
 		@Override

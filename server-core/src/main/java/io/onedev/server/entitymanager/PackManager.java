@@ -6,7 +6,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectPackStats;
-import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.criteria.Criteria;
 
 import javax.annotation.Nullable;
@@ -22,18 +21,28 @@ public interface PackManager extends EntityManager<Pack> {
 	List<Pack> queryPrevComparables(Pack compareWith, String fuzzyQuery, int count);
 	
 	List<String> queryTags(Project project, String type, @Nullable String lastTag, int count);
-
-	List<String> queryVersions(Project project, String matchWith, int count);
-
+	
+	List<String> queryProps(Project project, String propName, String matchWith, int count);
+	
 	List<ProjectPackStats> queryStats(Collection<Project> projects);
 	
 	@Nullable
-    Pack find(Project project, String type, String version);
+    Pack findByTag(Project project, String type, String tag);
+	
+	@Nullable
+	Pack findByGWithoutAV(Project project, String type, String groupId);
 
-	void delete(Project project, String type, String version);
+	List<Pack> queryByGAWithV(Project project, String type, String groupId, String artifactId);
+
+	@Nullable
+	Pack findByGAV(Project project, String type, String groupId, String artifactId, String version);
+	
+	void deleteByTag(Project project, String type, String tag);
 	
     void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs);
 
+	void createOrUpdate(Pack pack);
+	
 	void delete(Collection<Pack> packs);
 
 }

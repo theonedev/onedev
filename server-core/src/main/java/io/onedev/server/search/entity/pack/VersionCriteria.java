@@ -2,9 +2,10 @@ package io.onedev.server.search.entity.pack;
 
 import io.onedev.server.model.Pack;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
 
 import javax.persistence.criteria.*;
+
+import static io.onedev.server.util.match.WildcardUtils.matchString;
 
 public class VersionCriteria extends Criteria<Pack> {
 
@@ -32,7 +33,7 @@ public class VersionCriteria extends Criteria<Pack> {
 	@Override
 	public boolean matches(Pack pack) {
 		String version = pack.getVersion();
-		var matches = WildcardUtils.matchString(value.toLowerCase(), version.toLowerCase());
+		var matches = version != null && matchString(value.toLowerCase(), version.toLowerCase());
 		if (operator == PackQueryLexer.IsNot)
 			matches = !matches;
 		return matches;

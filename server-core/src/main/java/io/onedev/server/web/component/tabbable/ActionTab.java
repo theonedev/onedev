@@ -4,20 +4,30 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 
+import javax.annotation.Nullable;
+
 public abstract class ActionTab extends Tab {
 
 	private static final long serialVersionUID = 1L;
 
-	private IModel<String> titleModel;
+	private final IModel<String> titleModel;
+	
+	private final IModel<String> iconModel;
 	
 	private boolean selected;
 	
-	public ActionTab(IModel<String> titleModel) {
+	public ActionTab(IModel<String> titleModel, @Nullable IModel<String> iconModel) {
 		this.titleModel = titleModel;
+		this.iconModel = iconModel;
 	}
 	
 	protected final IModel<String> getTitleModel() {
 		return titleModel;
+	}
+	
+	@Nullable
+	protected final IModel<String> getIconModel() {
+		return iconModel;
 	}
 	
 	@Override
@@ -44,7 +54,7 @@ public abstract class ActionTab extends Tab {
 		setSelected(true);
 		onSelect(tabLink);
 	}
-
+	
 	@Override
 	public String getTitle() {
 		return titleModel.getObject();

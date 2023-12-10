@@ -229,7 +229,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						return null;
 					});
 					write(getAttachmentLockName(targetProjectId, targetAttachmentGroup), () -> {
 						try {
@@ -238,7 +237,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						return null;
 					});
 				} finally {
 					FileUtils.deleteDir(tempGroupDir);
@@ -262,7 +260,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						return null;
 					});
 				} finally {
 					FileUtils.deleteDir(tempGroupDir);

@@ -268,6 +268,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setProject(project);
 		build.setCommitHash(commitId.name());
 		build.setJobName(jobName);
+		build.setJobToken(UUID.randomUUID().toString());
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
 		build.setSubmitReason(reason);
@@ -486,7 +487,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private JobExecution execute(Build build) {
-		String jobToken = UUID.randomUUID().toString();
+		String jobToken = build.getJobToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
 		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
@@ -748,6 +749,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 
 				build.setStatus(Build.Status.WAITING);
+				build.setJobToken(UUID.randomUUID().toString());
 				build.setFinishDate(null);
 				build.setPendingDate(null);
 				build.setRetryDate(null);

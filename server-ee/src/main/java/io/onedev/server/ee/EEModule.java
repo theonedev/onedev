@@ -16,7 +16,12 @@ import io.onedev.server.ee.dashboard.widgets.WidgetGroup;
 import io.onedev.server.ee.pack.container.ContainerAuthenticationFilter;
 import io.onedev.server.ee.pack.container.ContainerPackSupport;
 import io.onedev.server.ee.pack.container.ContainerServlet;
-import io.onedev.server.ee.sendgrid.*;
+import io.onedev.server.ee.pack.maven.MavenPackSupport;
+import io.onedev.server.ee.pack.maven.MavenService;
+import io.onedev.server.ee.sendgrid.DefaultMessageManager;
+import io.onedev.server.ee.sendgrid.MessageManager;
+import io.onedev.server.ee.sendgrid.SendgridMailService;
+import io.onedev.server.ee.sendgrid.SendgridServlet;
 import io.onedev.server.ee.storage.DefaultStorageManager;
 import io.onedev.server.ee.storage.StorageSetting;
 import io.onedev.server.ee.subscription.DefaultSubscriptionManager;
@@ -29,6 +34,7 @@ import io.onedev.server.ee.xsearch.*;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.model.support.Widget;
 import io.onedev.server.model.support.administration.mailservice.MailService;
+import io.onedev.server.pack.PackService;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.terminal.TerminalManager;
@@ -123,8 +129,7 @@ public class EEModule extends AbstractPluginModule {
 
 		bind(MessageManager.class).to(DefaultMessageManager.class);
 		
-		bind(ContainerPackSupport.class);
-		contribute(PackSupport.class, ContainerPackSupport.class);
+		contribute(PackSupport.class, new ContainerPackSupport());
 
 		bind(SendgridServlet.class);
 		bind(ContainerServlet.class);
@@ -149,6 +154,10 @@ public class EEModule extends AbstractPluginModule {
 					ContainerServlet.PATH + "/**", 
 					"noSessionCreation, containerAuthc");
 		});
+
+		bind(MavenService.class);
+		contribute(PackService.class, MavenService.class);
+		contribute(PackSupport.class, new MavenPackSupport());
 	}
 
 	@Override

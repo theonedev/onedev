@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -40,10 +41,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.util.Date;
 import java.util.UUID;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
@@ -52,7 +54,9 @@ import static io.onedev.server.model.PackBlob.*;
 import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
 import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
 import static io.onedev.server.util.Digest.SHA256;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
 import static org.apache.commons.io.IOUtils.copy;
 
 @Singleton
@@ -109,18 +113,78 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	
 	@Sessional
 	@Override
-	public PackBlob find(String hash) {
+	public PackBlob findBySha256Hash(String sha256Hash) {
 		var criteria = newCriteria();
-		criteria.add(Restrictions.eq(PROP_HASH, hash));
+		criteria.add(Restrictions.eq(PROP_SHA256_HASH, sha256Hash));
 		return find(criteria);
 	}
 
+	@Transactional
 	@Override
-	public boolean checkPackBlobFile(Long projectId, String hash, long size) {
+	public String getSha512Hash(PackBlob packBlob) {
+		if (packBlob.getSha512Hash() == null) {
+			var projectId = packBlob.getProject().getId();
+			var sha256Hash = packBlob.getSha256Hash();
+			var sha512Hash = projectManager.runOnActiveServer(projectId, () -> {
+				var fileLockName = getFileLockName(projectId, sha256Hash);
+				return read(fileLockName, () -> {
+					var file = getPackBlobFile(projectId, sha256Hash);
+					try (var is = new FileInputStream(file)) {
+						return Digest.sha512Of(is).getHash();
+					}
+				});
+			});
+			packBlob.setSha512Hash(sha512Hash);
+		}
+		return packBlob.getSha512Hash();
+	}
+
+	@Transactional
+	@Override
+	public String getSha1Hash(PackBlob packBlob) {
+		if (packBlob.getSha1Hash() == null) {
+			var projectId = packBlob.getProject().getId();
+			var sha256Hash = packBlob.getSha256Hash();
+			var sha1Hash = projectManager.runOnActiveServer(projectId, () -> {
+				var fileLockName = getFileLockName(projectId, sha256Hash);
+				return read(fileLockName, () -> {
+					var file = getPackBlobFile(projectId, sha256Hash);
+					try (var is = new FileInputStream(file)) {
+						return Digest.sha1Of(is).getHash();
+					}
+				});
+			});
+			packBlob.setSha1Hash(sha1Hash);
+		}
+		return packBlob.getSha1Hash();
+	}
+
+	@Transactional
+	@Override
+	public String getMd5Hash(PackBlob packBlob) {
+		if (packBlob.getMd5Hash() == null) {
+			var projectId = packBlob.getProject().getId();
+			var sha256Hash = packBlob.getSha256Hash();
+			var md5Hash = projectManager.runOnActiveServer(projectId, () -> {
+				var fileLockName = getFileLockName(projectId, sha256Hash);
+				return read(fileLockName, () -> {
+					var file = getPackBlobFile(projectId, sha256Hash);
+					try (var is = new FileInputStream(file)) {
+						return Digest.md5Of(is).getHash();
+					}
+				});
+			});
+			packBlob.setMd5Hash(md5Hash);
+		}
+		return packBlob.getMd5Hash();
+	}
+
+	@Override
+	public boolean checkPackBlobFile(Long projectId, String sha256Hash, long size) {
 		return projectManager.runOnActiveServer(projectId, () -> {
-			var fileLockName = getFileLockName(projectId, hash);
+			var fileLockName = getFileLockName(projectId, sha256Hash);
 			var actualSize = read(fileLockName, () -> {
-				var file = getPackBlobFile(projectId, hash);
+				var file = getPackBlobFile(projectId, sha256Hash);
 				if (file.exists())
 					return file.length();
 				else
@@ -128,7 +192,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 			});
 			if (actualSize != size) {
 				if (actualSize != -1) {
-					var blobFile = getPackBlobFile(projectId, hash);
+					var blobFile = getPackBlobFile(projectId, sha256Hash);
 					boolean deleted = write(fileLockName, () -> {
 						if (blobFile.exists()) {
 							FileUtils.deleteFile(blobFile);
@@ -153,9 +217,9 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public File getPackBlobFile(Long projectId, String hash) {
+	public File getPackBlobFile(Long projectId, String sha256Hash) {
 		var packsDir = storageManager.initPacksDir(projectId);
-		return new File(packsDir, getPacksRelativeDirPath(hash));
+		return new File(packsDir, getPacksRelativeDirPath(sha256Hash));
 	}
 
 	@Override
@@ -226,9 +290,9 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public Long finishUpload(Long projectId, String uuid, String hash) {
+	public Long finishUpload(Long projectId, String uuid, String sha256Hash) {
 		var uploadFileSize = projectManager.runOnActiveServer(projectId, () -> {
-			var digest = new Digest(SHA256, hash);
+			var digest = new Digest(SHA256, sha256Hash);
 			var uploadFile = getUploadFile(projectId, uuid);
 			try (var is = new FileInputStream(uploadFile)) {
 				if (digest.matches(is)) {
@@ -241,13 +305,13 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 		});
 		
 		if (uploadFileSize != -1) {
-			var result = createBlob(projectId, hash, uploadFileSize);
+			var result = createBlob(projectId, sha256Hash, uploadFileSize);
 			projectManager.runOnActiveServer(projectId, () -> {
 				var uploadFile = getUploadFile(projectId, uuid);
 				if (result.getRight()) {
-					var blobFile = getPackBlobFile(projectId, hash);
+					var blobFile = getPackBlobFile(projectId, sha256Hash);
 					FileUtils.createDir(blobFile.getParentFile());
-					write(getFileLockName(projectId, hash), () -> {
+					write(getFileLockName(projectId, sha256Hash), () -> {
 						if (blobFile.exists())
 							FileUtils.deleteFile(blobFile);
 						FileUtils.moveFile(uploadFile, blobFile);
@@ -266,13 +330,13 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public Long uploadBlob(Long projectId, byte[] blobBytes, String blobHash) {
-		var result = createBlob(projectId, blobHash, blobBytes.length);
+	public Long uploadBlob(Long projectId, byte[] blobBytes, String sha256Hash) {
+		var result = createBlob(projectId, sha256Hash, blobBytes.length);
 		if (result.getRight()) {
 			projectManager.runOnActiveServer(projectId, () -> {
-				var blobFile = getPackBlobFile(projectId, blobHash);
+				var blobFile = getPackBlobFile(projectId, sha256Hash);
 				FileUtils.createDir(blobFile.getParentFile());
-				write(getFileLockName(projectId, blobHash), () -> {
+				write(getFileLockName(projectId, sha256Hash), () -> {
 					FileUtils.writeByteArrayToFile(blobFile, blobBytes);
 					return null;
 				});
@@ -283,19 +347,32 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 		return result.getLeft();
 	}
 
-	private Pair<Long, Boolean> createBlob(Long projectId, String blobHash, long blobSize) {
+	@Override
+	public Long uploadBlob(Long projectId, InputStream is) {
+		var uuid = UUID.randomUUID().toString();
+		try (var dis = new DigestInputStream(is, MessageDigest.getInstance(SHA256))) {
+			uploadBlob(projectId, uuid, dis);
+			var sha256Hash = encodeHexString(dis.getMessageDigest().digest());
+			return finishUpload(projectId, uuid, sha256Hash);
+		} catch (Exception e) {
+			cancelUpload(projectId, uuid);
+			throw ExceptionUtils.unchecked(e);
+		} 
+	}
+
+	private Pair<Long, Boolean> createBlob(Long projectId, String sha256Hash, long blobSize) {
 		return transactionManager.call(() -> {
 			var project = projectManager.load(projectId);
-			var packBlob = find(blobHash);
+			var packBlob = findBySha256Hash(sha256Hash);
 			if (packBlob == null) {
 				packBlob = new PackBlob();
 				packBlob.setProject(project);
-				packBlob.setHash(blobHash);
+				packBlob.setSha256Hash(sha256Hash);
 				packBlob.setSize(blobSize);
 				packBlob.setCreateDate(new Date());
 				dao.persist(packBlob);
 				return new Pair<>(packBlob.getId(), true);
-			} else if (checkPackBlobFile(packBlob.getProject().getId(), blobHash, blobSize)) {
+			} else if (checkPackBlobFile(packBlob.getProject().getId(), sha256Hash, blobSize)) {
 				authorizationManager.authorize(project, packBlob);
 				return new Pair<>(packBlob.getId(), false);
 			} else {
@@ -308,26 +385,26 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public byte[] readBlob(String hash) {
-		var packBlob = find(hash);
+	public byte[] readBlob(String sha256Hash) {
+		var packBlob = findBySha256Hash(sha256Hash);
 		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
 			var baos = new ByteArrayOutputStream();
-			downloadBlob(packBlob.getProject().getId(), hash, baos);
+			downloadBlob(packBlob.getProject().getId(), sha256Hash, baos);
 			var bytes = baos.toByteArray();
 			if (bytes.length != packBlob.getSize())
-				throw new ExplicitException("Invalid blob size: " + hash);
+				throw new ExplicitException("Invalid blob size: " + sha256Hash);
 			return bytes;
 		} else {
-			throw new ExplicitException("Blob not found: " + hash);
+			throw new ExplicitException("Blob not found: " + sha256Hash);
 		}
 	}
 
 	@Override
-	public void downloadBlob(Long projectId, String hash, OutputStream os) {
+	public void downloadBlob(Long projectId, String sha256Hash, OutputStream os) {
 		var activeServer = projectManager.getActiveServer(projectId, true);
 		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			read(getFileLockName(projectId, hash), () -> {
-				try (var is = new FileInputStream(getPackBlobFile(projectId, hash))) {
+			read(getFileLockName(projectId, sha256Hash), () -> {
+				try (var is = new FileInputStream(getPackBlobFile(projectId, sha256Hash))) {
 					copy(is, os, BUFFER_SIZE);
 				}
 				return null;
@@ -338,7 +415,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				String serverUrl = clusterManager.getServerUrl(activeServer);
 				WebTarget target = client.target(serverUrl).path("~api/cluster/pack-blob")
 						.queryParam("projectId", projectId)
-						.queryParam("hash", hash);
+						.queryParam("hash", sha256Hash);
 				Invocation.Builder builder = target.request();
 				builder.header(AUTHORIZATION, BEARER + " "
 						+ clusterManager.getCredential());
@@ -361,7 +438,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	public void onDeleteProject(Project project) {
 		var projectId = project.getId();
 		for (var packBlob: project.getPackBlobs()) {
-			var hash = packBlob.getHash();
+			var hash = packBlob.getSha256Hash();
 			if (!checkPackBlobFile(projectId, hash, packBlob.getSize())) {
 				delete(packBlob);
 				continue;
@@ -479,7 +556,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				
 				for (var packBlob: getSession().createQuery(criteriaQuery).getResultList()) {
 					var projectId = packBlob.getProject().getId();
-					var hash = packBlob.getHash();
+					var hash = packBlob.getSha256Hash();
 					projectManager.runOnActiveServer(projectId, () -> {
 						var blobFile = getPackBlobFile(projectId, hash);
 						var deleted = write(getFileLockName(projectId, hash), () -> {

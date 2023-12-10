@@ -356,19 +356,6 @@ td.no-elements {
     font-style: italic;
 }
 
-.code {
-	border: 1px dashed #d7dae7;
-	border-radius: 0.42rem;
-    padding: 0.75rem 1rem;
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-	font-size: 0.9rem;
-	color: var(--gray-dark);
-}
-.dark-mode .code {
-	border-color: var(--dark-mode-lighter-dark);
-	color: var(--dark-mode-light-gray);
-}
-
 .icon {
 	fill: currentColor;
 	width: 16px;
@@ -539,12 +526,43 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 	min-width: 1px;
 }
 
+pre, div.code {
+	padding: 0.6rem;
+	border: 1px dashed var(--secondary);
+	position: relative;
+	border-radius: 0.42rem;
+}
 pre {
+	word-break: normal;
 	white-space: pre-wrap;
 }
+.dark-mode pre, .dark-mode div.code {
+	border-color: var(--dark-mode-lighter-dark);
+	color: var(--dark-mode-light-gray);
+}
+pre>code, div.code {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	font-size: 0.9em;
+	background: none;
+}
+.dark-mode pre>code {
+	background: none;
+}
 
-pre>code {
-	font-size: 0.925em;
+pre:hover>.actions {
+	display: block;
+}
+pre>.actions {
+	position: absolute;
+	right: 10px;
+	top: 8px;
+	display: none;
+}
+pre>.actions>a {
+	background: white;
+}
+.dark-mode pre>.actions>a {
+	background: var(--dark-mode-dark);
 }
 
 .spin {

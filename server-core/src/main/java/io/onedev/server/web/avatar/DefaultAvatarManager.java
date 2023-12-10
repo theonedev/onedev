@@ -128,7 +128,6 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 				} catch(NoSuchAlgorithmException | IOException e){
 					throw new RuntimeException(e);
 				}
-				return null;
 			});
 		}
 		
@@ -216,11 +215,13 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						return null;
 					});
 					write(getProjectUploadedLockName(toProjectId), () -> {
-						FileUtils.moveFile(tempFile, toFile);
-						return null;
+						try {
+							FileUtils.moveFile(tempFile, toFile);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 					});
 				} finally {
 					FileUtils.deleteFile(tempFile);

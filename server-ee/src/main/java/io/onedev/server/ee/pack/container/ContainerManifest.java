@@ -7,14 +7,14 @@ import io.onedev.server.OneDev;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-public class ContainerData {
+public class ContainerManifest {
 	
-	private final JsonNode manifest;
+	private final JsonNode json;
 	
-	public ContainerData(byte[] manifestBytes) {
+	public ContainerManifest(byte[] manifestBytes) {
 		try {
-			manifest = OneDev.getInstance(ObjectMapper.class).readTree(manifestBytes);
-			var schemaVersionNode = manifest.get("schemaVersion");
+			json = OneDev.getInstance(ObjectMapper.class).readTree(manifestBytes);
+			var schemaVersionNode = json.get("schemaVersion");
 			if (schemaVersionNode == null || !schemaVersionNode.asText().equals("2"))
 				throw new BadRequestException("Invalid manifest schema version");
 		} catch (IOException e) {
@@ -24,12 +24,12 @@ public class ContainerData {
 	
 	@Nullable
 	public String getMediaType() {
-		var mediaTypeNode = manifest.get("mediaType");
+		var mediaTypeNode = json.get("mediaType");
 		if (mediaTypeNode != null)
 			return mediaTypeNode.asText();
-		else if (manifest.get("config") != null)
+		else if (json.get("config") != null)
 			return "application/vnd.oci.image.manifest.v1+json";
-		else if (manifest.get("manifests") != null)
+		else if (json.get("manifests") != null)
 			return "application/vnd.oci.image.index.v1+json";
 		else 
 			return null;
@@ -53,8 +53,8 @@ public class ContainerData {
 				|| "application/vnd.docker.distribution.manifest.list.v2+json".equals(mediaType);
 	}
 	
-	public JsonNode getManifest() {
-		return manifest;
+	public JsonNode getJson() {
+		return json;
 	}
 	
 }

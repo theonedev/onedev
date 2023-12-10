@@ -31,7 +31,7 @@ public class PackBlobResource {
 	@Api(order=100, description = "Find package blob by hash")
 	@GET
 	public PackBlob findByHash(@QueryParam("hash") String hash) {
-		var packBlob = packBlobManager.find(hash);
+		var packBlob = packBlobManager.findBySha256Hash(hash);
 		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) 
 			return packBlob;			
 		else 
@@ -48,7 +48,7 @@ public class PackBlobResource {
 			throw new UnauthorizedException();
 		
 		var projectId = packBlob.getProject().getId();
-		var hash = packBlob.getHash();
+		var hash = packBlob.getSha256Hash();
 		return os -> {
 			packBlobManager.downloadBlob(projectId, hash, os);
 		};

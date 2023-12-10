@@ -8,9 +8,6 @@ import io.onedev.server.pack.PackSupport;
 import io.onedev.server.util.UrlUtils;
 import org.apache.wicket.Component;
 
-import javax.inject.Singleton;
-
-@Singleton
 public class ContainerPackSupport implements PackSupport {
 
 	public static final String TYPE = "Container Image";
@@ -31,11 +28,21 @@ public class ContainerPackSupport implements PackSupport {
 	}
 
 	@Override
+	public String getProjectSeparator() {
+		return ":";
+	}
+
+	@Override
+	public String getReference(Pack pack) {
+		return pack.getTag();
+	}
+
+	@Override
 	public Component renderContent(String componentId, Pack pack) {
 		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		var server = UrlUtils.getServer(serverUrl);
 		return new ContainerPackPanel(componentId, server + "/" + pack.getProject().getPath(), 
-				pack.getVersion(), pack.getBlobHash());
+				pack.getTag(), (String) pack.getData());
 	}
 
 	@Override

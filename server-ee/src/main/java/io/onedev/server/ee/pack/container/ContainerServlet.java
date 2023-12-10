@@ -7,7 +7,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -31,9 +30,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static io.onedev.server.ee.pack.container.ContainerAuthenticationFilter.ATTR_JOB_TOKEN;
-import static io.onedev.server.ee.pack.container.ContainerData.isImageIndex;
-import static io.onedev.server.ee.pack.container.ContainerData.isImageManifest;
+import static io.onedev.server.ee.pack.container.ContainerAuthenticationFilter.ATTR_BUILD_ID;
+import static io.onedev.server.ee.pack.container.ContainerManifest.isImageIndex;
+import static io.onedev.server.ee.pack.container.ContainerManifest.isImageManifest;
 import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.util.Digest.SHA256;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
@@ -63,8 +62,6 @@ public class ContainerServlet extends HttpServlet {
 	
 	private final PackManager packManager;
 	
-	private final JobManager jobManager;
-	
 	private final BuildManager buildManager;
 	
 	private final ObjectMapper objectMapper;
@@ -72,11 +69,11 @@ public class ContainerServlet extends HttpServlet {
 	private final SubscriptionManager subscriptionManager;
 	
 	@Inject
-	public ContainerServlet(SettingManager settingManager, JobManager jobManager, 
-							BuildManager buildManager, ObjectMapper objectMapper, 
-							SessionManager sessionManager, UserManager userManager, 
-							ProjectManager projectManager, PackBlobManager packBlobManager, 
-							PackManager packManager, SubscriptionManager subscriptionManager) {
+	public ContainerServlet(SettingManager settingManager, BuildManager buildManager, 
+							ObjectMapper objectMapper, SessionManager sessionManager, 
+							UserManager userManager, ProjectManager projectManager, 
+							PackBlobManager packBlobManager, PackManager packManager, 
+							SubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.userManager = userManager;
@@ -84,7 +81,6 @@ public class ContainerServlet extends HttpServlet {
 		this.packBlobManager = packBlobManager;
 		this.packManager = packManager;
 		this.objectMapper = objectMapper;
-		this.jobManager = jobManager;
 		this.buildManager = buildManager;
 		this.subscriptionManager = subscriptionManager;
 	}
@@ -130,8 +126,8 @@ public class ContainerServlet extends HttpServlet {
 					jsonObj.put("token", jobToken + ":" + accessToken);
 
 					response.setStatus(SC_OK);
-					try (var out = response.getOutputStream()) {
-						out.write(objectMapper.writeValueAsString(jsonObj).getBytes(UTF_8));
+					try {
+						response.getOutputStream().write(objectMapper.writeValueAsString(jsonObj).getBytes(UTF_8));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -145,7 +141,7 @@ public class ContainerServlet extends HttpServlet {
 					var project = getProject(projectPath, true);
 					if (digestString != null) {
 						var hash = parseDigest(digestString).getHash();
-						var packBlob = packBlobManager.find(hash);
+						var packBlob = packBlobManager.findBySha256Hash(hash);
 						if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
 							if (packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), hash, packBlob.getSize())) {
 								response.setStatus(SC_CREATED);
@@ -254,13 +250,13 @@ public class ContainerServlet extends HttpServlet {
 						getProject(projectPath, false);
 						var digest = parseDigest(digestString);
 						var hash = digest.getHash();
-						var packBlob = packBlobManager.find(hash);
+						var packBlob = packBlobManager.findBySha256Hash(hash);
 						if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
 							if (packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), hash, packBlob.getSize())) {
 								response.setStatus(SC_OK);
 								response.setHeader("Content-Length", String.valueOf(packBlob.getSize()));
 								response.setHeader("Docker-Content-Digest", digestString);
-								return new Pair<>(packBlob.getProject().getId(), packBlob.getHash());
+								return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
 							} else {
 								throw new NotFoundException(ErrorCode.BLOB_UNKNOWN);
 							}
@@ -269,9 +265,8 @@ public class ContainerServlet extends HttpServlet {
 						}
 					});
 					if (method.equals("GET")) {
-						try (var os = response.getOutputStream()) {
-							packBlobManager.downloadBlob(packBlobInfo.getLeft(), packBlobInfo.getRight(), os);
-						}
+						packBlobManager.downloadBlob(packBlobInfo.getLeft(), packBlobInfo.getRight(),
+								response.getOutputStream());
 					}
 				} else if (method.equals("DELETE")) {
 					throw new ClientException(SC_METHOD_NOT_ALLOWED, ErrorCode.UNSUPPORTED);
@@ -295,13 +290,13 @@ public class ContainerServlet extends HttpServlet {
 						if (isTag(reference)) {
 							hash = Digest.sha256Of(bytes).getHash();
 							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, hash);
-							LockUtils.call("update-pack:" + projectId + ":" + TYPE + ":" + reference, () -> {
+							LockUtils.run("update-pack:" + projectId + ":" + TYPE + ":" + reference, () -> {
 								sessionManager.run(new Runnable() {
 									
 									private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
 										var packBlob = packBlobs.get(hash);
 										if (packBlob == null) {
-											packBlob = packBlobManager.find(hash);
+											packBlob = packBlobManager.findBySha256Hash(hash);
 											if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
 												if (packBlob.getSize() == size)
 													packBlobs.put(hash, packBlob);
@@ -314,11 +309,10 @@ public class ContainerServlet extends HttpServlet {
 										return packBlob;
 									}
 
-									private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs,
-									byte[] bytes) {
-										var data = new ContainerData(bytes);
-										if (data.isImageIndex()) {
-											for (var manifestNode : data.getManifest().get("manifests")) {
+									private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs, byte[] bytes) {
+										var manifest = new ContainerManifest(bytes);
+										if (manifest.isImageIndex()) {
+											for (var manifestNode : manifest.getJson().get("manifests")) {
 												var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
 												var size = manifestNode.get("size").asLong();
 												var packBlob = loadPackBlob(packBlobs, hash, size);
@@ -329,10 +323,10 @@ public class ContainerServlet extends HttpServlet {
 													loadReferencedPackBlobs(packBlobs, baos.toByteArray());
 												}
 											}
-										} else if (data.isImageManifest()) {
+										} else if (manifest.isImageManifest()) {
 											var blobNodes = new ArrayList<JsonNode>();
-											blobNodes.add(data.getManifest().get("config"));
-											for (var layerNode : data.getManifest().get("layers"))
+											blobNodes.add(manifest.getJson().get("config"));
+											for (var layerNode : manifest.getJson().get("layers"))
 												blobNodes.add(layerNode);
 											for (var blobNode : blobNodes) {
 												var hash = parseDigest(blobNode.get("digest").asText()).getHash();
@@ -349,30 +343,26 @@ public class ContainerServlet extends HttpServlet {
 										packBlobs.put(hash, packBlobManager.load(packBlobId));
 
 										var project = projectManager.load(projectId);
-										var pack = packManager.find(project, TYPE, reference);
+										var pack = packManager.findByTag(project, TYPE, reference);
 										if (pack == null) {
 											pack = new Pack();
 											pack.setProject(project);
 											pack.setType(TYPE);
-											pack.setVersion(reference);
+											pack.setTag(reference);
 										}
 
 										Build build = null;
-										String jobToken = (String) request.getAttribute(ATTR_JOB_TOKEN);
-										if (jobToken != null) {
-											var jobContext = jobManager.getJobContext(jobToken, false);
-											if (jobContext != null)
-												build = buildManager.load(jobContext.getBuildId());
-										}
+										Long buildId = (Long) request.getAttribute(ATTR_BUILD_ID);
+										if (buildId != null) 
+											build = buildManager.load(buildId);
 										pack.setBuild(build);
 										pack.setUser(SecurityUtils.getUser());
-										pack.setBlobHash(hash);
+										pack.setData(hash);
 										pack.setPublishDate(new Date());
 
 										packManager.createOrUpdate(pack, packBlobs.values());
 									}
 								});
-								return null;
 							});
 						} else {
 							var digest = parseDigest(reference);
@@ -395,20 +385,20 @@ public class ContainerServlet extends HttpServlet {
 							PackBlob packBlob;
 							var project = getProject(projectPath, false);
 							if (isTag(reference)) {
-								var pack = packManager.find(project, TYPE, reference);
+								var pack = packManager.findByTag(project, TYPE, reference);
 								if (pack != null)
-									packBlob = packBlobManager.find(pack.getBlobHash());
+									packBlob = packBlobManager.findBySha256Hash((String)pack.getData());
 								else
 									packBlob = null;
 							} else {
-								packBlob = packBlobManager.find(parseDigest(reference).getHash());
+								packBlob = packBlobManager.findBySha256Hash(parseDigest(reference).getHash());
 							}
 							if (packBlob != null && packBlob.getSize() < MAX_MANIFEST_SIZE 
 									&& SecurityUtils.canReadPackBlob(packBlob)
-									&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getHash(), packBlob.getSize())) {
-								response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getHash());
+									&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getSha256Hash(), packBlob.getSize())) {
+								response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getSha256Hash());
 								response.setContentLengthLong(packBlob.getSize());
-								return new Pair<>(packBlob.getProject().getId(), packBlob.getHash());
+								return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
 							} else {
 								return null;
 							}
@@ -418,12 +408,9 @@ public class ContainerServlet extends HttpServlet {
 							baos = new ByteArrayOutputStream();
 							packBlobManager.downloadBlob(manifestInfo.getLeft(), manifestInfo.getRight(), baos);
 							bytes = baos.toByteArray();
-							response.setContentType(new ContainerData(bytes).getMediaType());
-							if (method.equals("GET")) {
-								try (var os = response.getOutputStream()) {
-									os.write(bytes);
-								}
-							}
+							response.setContentType(new ContainerManifest(bytes).getMediaType());
+							if (method.equals("GET")) 
+								response.getOutputStream().write(bytes);
 						} else {
 							throw new NotFoundException(ErrorCode.MANIFEST_UNKNOWN);
 						}
@@ -432,7 +419,7 @@ public class ContainerServlet extends HttpServlet {
 						sessionManager.run(() -> {
 							var project = getProject(projectPath, true);
 							if (isTag(reference))
-								packManager.delete(project, TYPE, reference);
+								packManager.deleteByTag(project, TYPE, reference);
 							response.setStatus(SC_ACCEPTED);
 						});
 						break;
@@ -459,8 +446,8 @@ public class ContainerServlet extends HttpServlet {
 					}
 
 					response.setStatus(SC_OK);
-					try (var os = response.getOutputStream()) {
-						os.write(objectMapper.writeValueAsBytes(result));
+					try {
+						response.getOutputStream().write(objectMapper.writeValueAsBytes(result));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -524,9 +511,9 @@ public class ContainerServlet extends HttpServlet {
 		else if (!project.isPackManagement())
 			throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, "Package management not enabled for project: " + projectPath);
 		else if (needsToPush && !SecurityUtils.canWritePack(project))
-			throw new UnauthorizedException("Not authorized to push to project: " + projectPath);
+			throw new UnauthorizedException("No package write permission for project: " + project.getPath());
 		else if (!needsToPush && !SecurityUtils.canReadPack(project))
-			throw new UnauthorizedException("Not authorized to pull from project: " + projectPath);
+			throw new UnauthorizedException("No package read permission for project: " + project.getPath());
 		else
 			return project;
 	}

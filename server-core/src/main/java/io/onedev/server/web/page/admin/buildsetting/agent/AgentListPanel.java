@@ -794,47 +794,47 @@ class AgentListPanel extends Panel {
 		
 		columns.add(selectionColumn = new SelectionColumn<Agent, Void>());
 		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
 				Fragment fragment = new Fragment(componentId, "agentLinkFrag", AgentListPanel.this);
 				Agent agent = rowModel.getObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", 
+				Link<Void> link = new BookmarkablePageLink<Void>("link",
 						AgentOverviewPage.class, AgentOverviewPage.paramsOf(agent));
 				link.add(new AgentIcon("icon", rowModel));
 				link.add(new Label("label", agent.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("IP Address")) {
+		columns.add(new AbstractColumn<>(Model.of("IP Address")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
 				Agent agent = rowModel.getObject();
 				cellItem.add(new Label(componentId, agent.getIpAddress()));
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "d-none d-xl-table-cell";
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("Status")) {
+		columns.add(new AbstractColumn<>(Model.of("Status")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
 				cellItem.add(new AgentStatusBadge(componentId, rowModel));
 			}
-			
+
 		});
 		
-		body.add(agentsTable = new DefaultDataTable<Agent, Void>("agents", columns, dataProvider, 
+		body.add(agentsTable = new DefaultDataTable<>("agents", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

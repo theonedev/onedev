@@ -4,13 +4,19 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import org.apache.wicket.Component;
 
-public interface PackSupport {
+import java.io.Serializable;
+
+public interface PackSupport extends Serializable {
 	
 	int getOrder();
 	
 	String getPackType();
 	
 	String getPackIcon();
+	
+	String getProjectSeparator();
+	
+	String getReference(Pack pack);
 	
 	Component renderContent(String componentId, Pack pack);
 	

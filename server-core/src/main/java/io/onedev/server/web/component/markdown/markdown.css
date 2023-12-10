@@ -277,36 +277,8 @@
 .dark-mode .markdown-rendered pre.code.suggestion>code>.head {
 	border-color: var(--dark-mode-lighter-dark);
 }
-.markdown-rendered pre.code {
-	padding: 0.6rem;
-	border: 1px dashed var(--secondary);
-	position: relative;
-	word-break: normal;
-	border-radius: 0.42rem;
-}
-.dark-mode .markdown-rendered pre.code {
-	border-color: var(--dark-mode-lighter-dark);
-}
-.markdown-rendered pre.code>.actions {
-	position: absolute;
-	right: 10px;
-	top: 8px;
-	display: none;
-}
 .markdown-rendered pre.code.suggestion>.actions {
 	display: block;
-}
-.markdown-rendered pre.code>.actions>a {
-	background: white;
-}
-.dark-mode .markdown-rendered pre.code>.actions>a {
-	background: var(--dark-mode-dark);
-}
-.markdown-rendered pre.code:hover>.actions {
-	display: block;
-}
-.markdown-rendered pre.code>code {
-	background: none;
 }
 .markdown-rendered blockquote {
 	font-size: 1.15rem; 
