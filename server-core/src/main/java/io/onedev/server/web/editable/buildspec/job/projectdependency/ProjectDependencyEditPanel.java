@@ -1,7 +1,11 @@
 package io.onedev.server.web.editable.buildspec.job.projectdependency;
 
-import java.util.List;
-
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -11,14 +15,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.buildspec.BuildSpecAware;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAware, JobAware {
@@ -78,18 +75,7 @@ abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAwar
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
-				if (dependencyIndex != -1) { 
-					ProjectDependency oldDependency = dependencies.get(dependencyIndex);
-					if (!dependency.getProjectPath().equals(oldDependency.getProjectPath()) && getDependency(dependency.getProjectPath()) != null) {
-						editor.error(new Path(new PathNode.Named("projectPath")),
-								"Dependency to this project is already defined");
-					}
-				} else if (getDependency(dependency.getProjectPath()) != null) {
-					editor.error(new Path(new PathNode.Named("projectPath")),
-							"Dependency to this project is already defined");
-				}
-
+				
 				if (editor.isValid()) {
 					if (dependencyIndex != -1) {
 						dependencies.set(dependencyIndex, dependency);

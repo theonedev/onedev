@@ -365,6 +365,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					throw new ExplicitException("Unable to access dependency build '"
 							+ dependencyBuild.getFQN() + "': permission denied");
 				}
+				
+				if (build.getDependencies().stream()
+						.anyMatch(it -> it.getDependency().equals(dependencyBuild))) {
+					throw new ExplicitException("Duplicate dependency build '"
+							+ dependencyBuild.getFQN() + "'");
+				}
 
 				BuildDependence dependence = new BuildDependence();
 				dependence.setDependency(dependencyBuild);
