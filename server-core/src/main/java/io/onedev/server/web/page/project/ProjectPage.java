@@ -235,7 +235,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		}
 		
-		if (getProject().isPackManagement() && SecurityUtils.canReadPack(getProject())) {
+		if (getProject().isPackManagement() && isSubscriptionActive() 
+				&& SecurityUtils.canReadPack(getProject())) {
 			menuItems.add(new SidebarMenuItem.Page("package", "Packages",
 					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(PackDetailPage.class)));

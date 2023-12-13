@@ -526,7 +526,7 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 	min-width: 1px;
 }
 
-pre, div.code {
+pre, .code {
 	padding: 0.6rem;
 	border: 1px dashed var(--secondary);
 	position: relative;
@@ -536,11 +536,11 @@ pre {
 	word-break: normal;
 	white-space: pre-wrap;
 }
-.dark-mode pre, .dark-mode div.code {
+.dark-mode pre, .dark-mode .code {
 	border-color: var(--dark-mode-lighter-dark);
 	color: var(--dark-mode-light-gray);
 }
-pre>code, div.code {
+pre>code, .code {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 0.9em;
 	background: none;
