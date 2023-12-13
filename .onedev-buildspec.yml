@@ -83,7 +83,7 @@ jobs:
       - docker login -u robinshen -p @secrets:dockerhub-password@
       - ''
       - '# Skip test as we''ve already tested in CI build'
-      - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
+      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
       - ''
       - cd $projectDir/server-product/docker
       - docker run --privileged --rm tonistiigi/binfmt --install all

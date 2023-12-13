@@ -192,8 +192,11 @@ public class PackDetailPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return String.format("%s:%s (%s)", 
-				getProject().getPath(), getPack().getTag(), getPack().getType());
+		return String.format("%s%s%s (%s)", 
+				getProject().getPath(), 
+				getPack().getSupport().getProjectSeparator(), 
+				getPack().getSupport().getReference(getPack()), 
+				getPack().getType());
 	}
 
 }
