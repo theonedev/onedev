@@ -439,15 +439,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void importData(File dataDir) {
 		var entityTypes = getEntityTypes();
 		Collections.reverse(entityTypes);
+		entityTypes.remove(ModelVersion.class);
+		entityTypes.add(0, ModelVersion.class);
 		for (Class<?> entityType: entityTypes) {
-			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
-
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.startsWith(entityType.getSimpleName() + "s.xml");
-				}
-				
-			});
+			File[] dataFiles = dataDir.listFiles((dir, name) -> name.startsWith(entityType.getSimpleName() + "s.xml"));
 			for (File file: dataFiles) {
 				Session session = dao.getSession();
 				Transaction transaction = session.beginTransaction();

@@ -84,7 +84,8 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 	private String artifactId;
 	
 	private String version;
-	
+
+	@Lob
 	@Column(length=65535)
 	private Serializable data;
 

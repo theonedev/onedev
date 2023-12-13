@@ -5929,5 +5929,42 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	// Migrate data to 9.4.0
+	private void migrate147(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("jobToken").setText(UUID.randomUUID().toString());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("version").setName("tag");
+					var blobHashElement = element.element("blobHash");
+					blobHashElement.setName("data");
+					blobHashElement.addAttribute("class", "string");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("version").setName("tag");
+					var blobHashElement = element.element("blobHash");
+					blobHashElement.setName("data");
+					blobHashElement.addAttribute("class", "string");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PackBlobs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("hash").setName("sha256Hash");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
