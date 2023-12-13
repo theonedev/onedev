@@ -96,6 +96,8 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 			if (pomElement != null) {
 				var packaging = pomElement.elementText("packaging");
+				if (packaging == null)
+					packaging = "jar";
 				var description = "<b>Packaging: " + packaging + "</b>";				
 				var descriptionElement = pomElement.element("description");
 				if (descriptionElement != null)
