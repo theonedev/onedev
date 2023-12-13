@@ -1,9 +1,8 @@
 <div class='d-none'>
 
 > **Note**
-> 1. OneDev introduced enterprise edition since 9.0, and is now using a [new license](https://github.com/theonedev/onedev/blob/main/license.txt) 
 > 1. Do not worry about security advisories above. They are fixed as soon as discovered and published to notify users</span>
-> 1. We develop OneDev at <a href="https://code.onedev.io/onedev/server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be submitted there
+> 1. We develop OneDev at <a href="https://code.onedev.io">code.onedev.io</a> for sake of dogfooding. Please submit issues there
 
 </div>
 
