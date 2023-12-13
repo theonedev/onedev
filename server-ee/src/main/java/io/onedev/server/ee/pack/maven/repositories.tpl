@@ -1,0 +1,16 @@
+<repositories>
+  <repository>
+    <id>onedev</id>
+    <url>${url}</url>
+  </repository>
+</repositories>
+<distributionManagement>
+  <repository>
+    <id>onedev</id>
+    <url>${url}</url>
+  </repository>
+  <snapshotRepository>
+    <id>onedev</id>
+    <url>${url}</url>
+  </snapshotRepository>
+</distributionManagement>

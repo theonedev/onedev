@@ -1106,29 +1106,29 @@ public class ProjectListPanel extends Panel {
 					}
 					
 					if (project.isCodeManagement()) {
-						fragment.add(new BuildStatsPanel("buildStats", rowModel, new LoadableDetachableModel<Map<Build.Status, Long>>() {
-	
+						fragment.add(new BuildStatsPanel("buildStats", rowModel, new LoadableDetachableModel<>() {
+
 							@Override
 							protected Map<Build.Status, Long> load() {
 								Map<Build.Status, Long> statusCounts = new LinkedHashMap<>();
-								for (ProjectBuildStats stats: buildStatsModel.getObject()) {
-									if (stats.getProjectId().equals(projectId)) 
+								for (ProjectBuildStats stats : buildStatsModel.getObject()) {
+									if (stats.getProjectId().equals(projectId))
 										statusCounts.put(stats.getBuildStatus(), stats.getStatusCount());
 								}
 								return statusCounts;
 							}
-							
+
 						}));
 					} else {
 						fragment.add(new WebMarkupContainer("buildStats").setVisible(false));
 					}
 
-					fragment.add(new PackStatsPanel("packStats", rowModel, new LoadableDetachableModel<Map<String, Long>>() {
+					fragment.add(new PackStatsPanel("packStats", rowModel, new LoadableDetachableModel<>() {
 
 						@Override
 						protected Map<String, Long> load() {
 							Map<String, Long> statusCounts = new LinkedHashMap<>();
-							for (ProjectPackStats stats: packStatsModel.getObject()) {
+							for (ProjectPackStats stats : packStatsModel.getObject()) {
 								if (stats.getProjectId().equals(projectId))
 									statusCounts.put(stats.getType(), stats.getTypeCount());
 							}

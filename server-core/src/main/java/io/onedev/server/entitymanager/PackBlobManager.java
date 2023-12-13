@@ -3,7 +3,6 @@ package io.onedev.server.entitymanager;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.Pair;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -13,9 +12,15 @@ import java.io.OutputStream;
 public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	@Nullable
-    PackBlob find(String hash);
+    PackBlob findBySha256Hash(String sha256Hash);
 	
-	boolean checkPackBlobFile(Long projectId, String hash, long size);
+	String getSha512Hash(PackBlob packBlob);
+	
+	String getSha1Hash(PackBlob packBlob);
+	
+	String getMd5Hash(PackBlob packBlob);
+	
+	boolean checkPackBlobFile(Long projectId, String sha256Hash, long size);
 	
 	void initUpload(Long projectId, String uuid);
 	
@@ -25,21 +30,23 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	long uploadBlob(Long projectId, String uuid, InputStream is);
 	
-	Long uploadBlob(Long projectId, byte[] blobBytes, String blobHash);
+	Long uploadBlob(Long projectId, byte[] blobBytes, String sha256Hash);
+	
+	Long uploadBlob(Long projectId, InputStream is);
 
 	void cancelUpload(Long projectId, String uuid);
 	
 	@Nullable
-	Long finishUpload(Long projectId, String uuid, String hash);
+	Long finishUpload(Long projectId, String uuid, String sha256Hash);
 	
-	void downloadBlob(Long projectId, String hash, OutputStream os);
+	void downloadBlob(Long projectId, String sha256Hash, OutputStream os);
 	
-	byte[] readBlob(String hash);
+	byte[] readBlob(String sha256Hash);
 	
 	void onDeleteProject(Project project);
 
 	void syncPacks(Long projectId, String activeServer);
 
-	File getPackBlobFile(Long projectId, String hash);
+	File getPackBlobFile(Long projectId, String sha256Hash);
 	
 }

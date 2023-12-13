@@ -47,9 +47,9 @@ public class BuildPacksPage extends BuildDetailPage {
 			@Override
 			protected void populateItem(ListItem<Pack> item) {
 				var pack = item.getModelObject();
-				var label = pack.getVersion();
+				var label = pack.getSupport().getReference(pack);
 				if (!pack.getProject().equals(getProject()))
-					label = pack.getProject().getPath() + ":" + label;
+					label = pack.getProject().getPath() + pack.getSupport().getProjectSeparator() + label;
 				var link = new BookmarkablePageLink<Void>("title", PackDetailPage.class, 
 						PackDetailPage.paramsOf(pack));
 				link.add(new Label("label", label));

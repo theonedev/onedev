@@ -37,5 +37,5 @@ public class PackBlobReference extends AbstractEntity {
 	public void setPackBlob(PackBlob packBlob) {
 		this.packBlob = packBlob;
 	}
-	
+
 }

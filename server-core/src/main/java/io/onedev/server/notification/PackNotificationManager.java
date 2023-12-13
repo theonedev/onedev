@@ -68,7 +68,7 @@ public class PackNotificationManager extends AbstractNotificationManager {
 		if (!emails.isEmpty()) {
 			Pack pack = event.getPack();
 			String subject = String.format("[%s] %s:%s", pack.getType(),
-					pack.getProject().getPath(), pack.getVersion());
+					pack.getProject().getPath(), pack.getTag());
 
 			String summary = "Package published";
 
@@ -118,7 +118,7 @@ public class PackNotificationManager extends AbstractNotificationManager {
 						}
 					} catch (Exception e) {
 						String message = String.format("Error processing package subscription (user: %s, %s: \"%s:%s\", query: %s)", 
-								user.getName(), pack.getType(), pack.getProject().getPath(), pack.getVersion(), queryString);
+								user.getName(), pack.getType(), pack.getProject().getPath(), pack.getTag(), queryString);
 						logger.error(message, e);
 					} finally {
 						User.pop();
@@ -158,7 +158,7 @@ public class PackNotificationManager extends AbstractNotificationManager {
 						}
 					} catch (Exception e) {
 						String message = String.format("Error processing package subscription (user: %s, package: %s, query: %s)", 
-								user.getName(), pack.getType() + " " + pack.getVersion(), queryString);
+								user.getName(), pack.getType() + " " + pack.getTag(), queryString);
 						logger.error(message, e);
 					} finally {
 						User.pop();

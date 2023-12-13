@@ -80,7 +80,7 @@ public class PackDetailPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("version", getPack().getVersion()));
+		add(new Label("reference", getPack().getSupport().getReference(getPack())));
 		add(new Label("type", "(" + getPack().getType() + ")"));
 
 		add(new SideInfoLink("moreInfo"));
@@ -106,7 +106,7 @@ public class PackDetailPage extends ProjectPage {
 							public void onClick() {
 								getPackManager().delete(getPack());
 
-								Session.get().success("Package " + getPack().getVersion() + " deleted");
+								Session.get().success("Package " + getPack().getTag() + " deleted");
 
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Pack.class);
 								if (redirectUrlAfterDelete != null)
@@ -186,14 +186,14 @@ public class PackDetailPage extends ProjectPage {
 		fragment.add(new BookmarkablePageLink<Void>("packs", ProjectPacksPage.class, 
 				ProjectPacksPage.paramsOf(getProject(), 0)));
 		fragment.add(new SpriteImage("packIcon", getPack().getSupport().getPackIcon()));
-		fragment.add(new Label("packVersion", getPack().getVersion()));
+		fragment.add(new Label("packVersion", getPack().getTag()));
 		return fragment;
 	}
 
 	@Override
 	protected String getPageTitle() {
 		return String.format("%s:%s (%s)", 
-				getProject().getPath(), getPack().getVersion(), getPack().getType());
+				getProject().getPath(), getPack().getTag(), getPack().getType());
 	}
 
 }

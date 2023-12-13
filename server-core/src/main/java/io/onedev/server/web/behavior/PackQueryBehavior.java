@@ -11,7 +11,6 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.buildspec.job.action.condition.ActionConditionLexer;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.pack.PackQuery;
@@ -28,6 +27,8 @@ import org.apache.wicket.model.IModel;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.onedev.server.model.Pack.*;
 
 @SuppressWarnings("serial")
 public class PackQueryBehavior extends ANTLRAssistBehavior {
@@ -78,7 +79,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								fields.remove(Pack.NAME_PROJECT);
 							if (packType != null)
-								fields.remove(Pack.NAME_TYPE);
+								fields.remove(NAME_TYPE);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Pack.ORDER_FIELDS.keySet());
@@ -114,14 +115,29 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjectPaths(matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(Pack.NAME_TYPE)) {
+									} else if (fieldName.equals(NAME_TYPE)) {
 										return SuggestionUtils.suggestPackTypes(matchWith);
-									} else if (fieldName.equals(Pack.NAME_VERSION)) {
+									} else if (fieldName.equals(NAME_TAG)) {
 										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestPackVersions(project, matchWith);
+											return SuggestionUtils.suggestPackProps(project, PROP_TAG, matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(Pack.NAME_LABEL)) {
+									} else if (fieldName.equals(NAME_GROUP_ID)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestPackProps(project, PROP_GROUP_ID, matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(NAME_ARTIFACT_ID)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestPackProps(project, PROP_ARTIFACT_ID, matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(NAME_VERSION)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestPackProps(project, PROP_VERSION, matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(NAME_LABEL)) {
 										return SuggestionUtils.suggestLabels(matchWith);
 									} else {
 										return null;
@@ -149,7 +165,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query version";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query tag";
 					}
 
 				}.suggest(terminalExpect);
@@ -189,7 +205,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Pack.NAME_PROJECT)) {
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
-					} else if (fieldName.equals(Pack.NAME_VERSION)) {
+					} else if (fieldName.equals(NAME_TAG)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

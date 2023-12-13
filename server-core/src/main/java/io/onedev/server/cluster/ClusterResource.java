@@ -101,7 +101,6 @@ public class ClusterResource {
 			PatternSet patternSet = PatternSet.parse(patterns);
 			patternSet.getExcludes().add(SHARE_TEST_DIR + "/**");
 			tar(directory, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
-			return null;
 		});
 		return ok(os).build();
 	}

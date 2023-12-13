@@ -1,0 +1,19 @@
+<wicket:panel>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="artifactFrag">
+		<div wicket:id="description" class="alert alert-notice alert-light mb-5"></div>
+		<div wicket:id="usage" class="mb-4"></div>
+		<table wicket:id="files" class="table"></table>			
+	</wicket:fragment>
+	<wicket:fragment wicket:id="usageFrag">
+		<div class="font-weight-bolder mb-3">1. To use this package, add below to project pom.xml</div>
+		<div wicket:id="pom" class="mb-5"></div>
+		<div class="font-weight-bolder mb-3">2. Also add below to $HOME/.m2/settings.xml if you want to compile project from command line</div>
+		<div wicket:id="settings" class="mb-5"></div>
+		<div class="font-weight-bolder mb-3">3. For CI/CD job, use below in a command step instead of modifying $HOME/.m2/settings.xml</div>
+		<div wicket:id="jobCommands"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="fileFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+</wicket:panel>

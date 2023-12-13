@@ -62,6 +62,7 @@ import io.onedev.server.markdown.MarkdownProcessor;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.notification.*;
+import io.onedev.server.pack.PackFilter;
 import io.onedev.server.persistence.*;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -324,6 +325,8 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
+		
+		bind(PackFilter.class);
 	}
 	
 	private void configureSecurity() {

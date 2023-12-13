@@ -113,6 +113,12 @@ public class PackQuery extends EntityQuery<Pack> {
 								switch (fieldName) {
 									case NAME_PROJECT:
 										return new ProjectCriteria(value, operator);
+									case NAME_TAG:
+										return new TagCriteria(value, operator);
+									case NAME_GROUP_ID:
+										return new GroupIdCriteria(value, operator);
+									case NAME_ARTIFACT_ID:
+										return new ArtiractIdCriteria(value, operator);
 									case NAME_VERSION:
 										return new VersionCriteria(value, operator);
 									case NAME_TYPE:
@@ -191,7 +197,9 @@ public class PackQuery extends EntityQuery<Pack> {
 			case PackQueryLexer.Is:
 			case PackQueryLexer.IsNot:
 				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_TYPE)
-						&& !fieldName.equals(NAME_VERSION) && !fieldName.equals(NAME_LABEL)) {
+						&& !fieldName.equals(NAME_TAG) && !fieldName.equals(NAME_GROUP_ID)
+						&& !fieldName.equals(NAME_ARTIFACT_ID) && !fieldName.equals(NAME_VERSION)
+						&& !fieldName.equals(NAME_LABEL)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;

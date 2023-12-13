@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,8 +8,8 @@ import java.util.Date;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_project_id"), @Index(columnList= PackBlob.PROP_HASH), 
-		@Index(columnList= PackBlob.PROP_CREATE_DATE)})
+		@Index(columnList="o_project_id"), @Index(columnList= PackBlob.PROP_SHA256_HASH),
+		@Index(columnList= PackBlob.PROP_SHA512_HASH), @Index(columnList= PackBlob.PROP_CREATE_DATE)})
 public class PackBlob extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -17,7 +18,9 @@ public class PackBlob extends AbstractEntity {
 
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String PROP_HASH = "hash";
+	public static final String PROP_SHA256_HASH = "sha256Hash";
+
+	public static final String PROP_SHA512_HASH = "sha512Hash";
 	
 	public static final String PROP_CREATE_DATE = "createDate";
 
@@ -26,7 +29,13 @@ public class PackBlob extends AbstractEntity {
 	private Project project;
 	
 	@Column(nullable=false, unique = true)
-	private String hash;
+	private String sha256Hash;
+	
+	private String sha512Hash;
+
+	private String md5Hash;
+
+	private String sha1Hash;
 	
 	private long size;
 	
@@ -47,12 +56,39 @@ public class PackBlob extends AbstractEntity {
 		this.project = project;
 	}
 
-	public String getHash() {
-		return hash;
+	public String getSha256Hash() {
+		return sha256Hash;
 	}
 
-	public void setHash(String hash) {
-		this.hash = hash;
+	public void setSha256Hash(String hash) {
+		this.sha256Hash = hash;
+	}
+
+	@Nullable
+	public String getSha512Hash() {
+		return sha512Hash;
+	}
+
+	public void setSha512Hash(@Nullable String sha512Hash) {
+		this.sha512Hash = sha512Hash;
+	}
+
+	@Nullable
+	public String getMd5Hash() {
+		return md5Hash;
+	}
+
+	public void setMd5Hash(@Nullable String md5Hash) {
+		this.md5Hash = md5Hash;
+	}
+
+	@Nullable
+	public String getSha1Hash() {
+		return sha1Hash;
+	}
+
+	public void setSha1Hash(@Nullable String sha1Hash) {
+		this.sha1Hash = sha1Hash;
 	}
 
 	public long getSize() {
@@ -79,13 +115,13 @@ public class PackBlob extends AbstractEntity {
 		this.authorizations = authorizations;
 	}
 	
-	public static String getFileLockName(Long projectId, String hash) {
-		return "pack-blob:" + projectId + ":" + hash;
+	public static String getFileLockName(Long projectId, String sha256Hash) {
+		return "pack-blob:" + projectId + ":" + sha256Hash;
 	}
 
-	public static String getPacksRelativeDirPath(String hash) {
-		return hash.substring(0, 2) + "/" 
-				+ hash.substring(2, 4) + "/" + hash;	
+	public static String getPacksRelativeDirPath(String sha256Hash) {
+		return sha256Hash.substring(0, 2) + "/" 
+				+ sha256Hash.substring(2, 4) + "/" + sha256Hash;	
 	}
 	
 }

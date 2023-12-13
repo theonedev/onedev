@@ -130,7 +130,7 @@ public class PageTab extends Tab {
 	}
 
 	@Nullable
-	public IModel<String> getIconModel() {
+	public final IModel<String> getIconModel() {
 		return iconModel;
 	}
 

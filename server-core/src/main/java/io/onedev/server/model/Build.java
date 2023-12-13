@@ -268,6 +268,10 @@ public class Build extends ProjectBelonging
 	@Column(nullable=false)
 	private String jobName;
 	
+	@JsonIgnore
+	@Column(nullable=false)
+	private String jobToken;
+	
 	@Lob
 	@Column(nullable=false)
 	private ArrayList<String> checkoutPaths = new ArrayList<>();
@@ -415,6 +419,14 @@ public class Build extends ProjectBelonging
 
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
+	}
+
+	public String getJobToken() {
+		return jobToken;
+	}
+
+	public void setJobToken(String jobToken) {
+		this.jobToken = jobToken;
 	}
 
 	public Collection<String> getCheckoutPaths() {
@@ -1002,7 +1014,7 @@ public class Build extends ProjectBelonging
 		}
 		return rootArtifacts;
 	}
-	
+
 	@Nullable
 	public String getBlobPath(String filePath) {
 		if (checkoutPaths.isEmpty())

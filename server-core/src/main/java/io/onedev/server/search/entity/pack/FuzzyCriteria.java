@@ -30,7 +30,7 @@ public class FuzzyCriteria extends Criteria<Pack> {
 	}
 	
 	private Criteria<Pack> parse(String value) {
-		return new VersionCriteria("*" + value + "*", PackQueryLexer.Is);
+		return new TagCriteria("*" + value + "*", PackQueryLexer.Is);
 	}
 
 	@Override

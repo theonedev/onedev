@@ -35,21 +35,22 @@ public class ContainerPackPanel extends Panel {
 	
 	private final String tag;
 	
-	private final String manifestHash;
+	private final String manifestSha256Hash;
 	
-	private final IModel<ContainerData> dataModel = new LoadableDetachableModel<>() {
+	private final IModel<ContainerManifest> manifestIModel = new LoadableDetachableModel<>() {
 		@Override
-		protected ContainerData load() {
-			return new ContainerData(getPackBlobManager().readBlob(manifestHash));
+		protected ContainerManifest load() {
+			return new ContainerManifest(getPackBlobManager().readBlob(manifestSha256Hash));
 		}
 
 	};
 	
-	public ContainerPackPanel(String id, String serverAndNamespace, String tag, String manifestHash) {
+	public ContainerPackPanel(String id, String serverAndNamespace, String tag, 
+							  String manifestSha256Hash) {
 		super(id);
 		this.serverAndNamespace = serverAndNamespace;
 		this.tag = tag;
-		this.manifestHash = manifestHash;
+		this.manifestSha256Hash = manifestSha256Hash;
 	}
 	
 	private PackBlobManager getPackBlobManager() {
@@ -76,15 +77,15 @@ public class ContainerPackPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var digest = "sha256:" + manifestHash;
+		var digest = "sha256:" + manifestSha256Hash;
 		add(new Label("digest", digest));
 		
-		var data = dataModel.getObject();
+		var data = manifestIModel.getObject();
 		if (data.isImageManifest()) {
-			add(newImagePanel("content", data.getManifest(), null));
+			add(newImagePanel("content", data.getJson(), null));
 		} else if (data.isImageIndex()) {
 			var archDigests = new LinkedHashMap<String, String>();
-			for (var manifestNode: data.getManifest().get("manifests")) {
+			for (var manifestNode: data.getJson().get("manifests")) {
 				var platformNode = manifestNode.get("platform");
 				if (platformNode != null) {
 					var arch = platformNode.get("os").asText() + "/" + platformNode.get("architecture").asText();
@@ -120,7 +121,7 @@ public class ContainerPackPanel extends Panel {
 				add(newImagePanel("content", readJson(archManifestBytes), null));
 			} else {
 				boolean cache = false;
-				for (var manifestNode: data.getManifest().get("manifests")) {
+				for (var manifestNode: data.getJson().get("manifests")) {
 					if (manifestNode.get("mediaType").asText().startsWith("application/vnd.buildkit.cacheconfig")) {
 						cache = true;
 						break;
@@ -132,17 +133,17 @@ public class ContainerPackPanel extends Panel {
 					var cacheFromOption = "--cache-from type=registry,ref=" + serverAndNamespace + ":" + tag;
 					fragment.add(new Label("cacheFromOption", cacheFromOption));
 					fragment.add(new CopyToClipboardLink("copyCacheFromOption", Model.of(cacheFromOption)));
-					fragment.add(new Label("manifest", formatJson(data.getManifest())));
+					fragment.add(new Label("manifest", formatJson(data.getJson())));
 					add(fragment);
 				} else {
 					var fragment = new Fragment("content", "manifestFrag", this);
-					fragment.add(new Label("manifest", formatJson(data.getManifest())));
+					fragment.add(new Label("manifest", formatJson(data.getJson())));
 					add(fragment);
 				}
 			}
 		} else {
 			var fragment = new Fragment("content", "manifestFrag", this);
-			fragment.add(new Label("manifest", formatJson(data.getManifest())));
+			fragment.add(new Label("manifest", formatJson(data.getJson())));
 			add(fragment);
 		}
 
@@ -217,7 +218,7 @@ public class ContainerPackPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		dataModel.detach();
+		manifestIModel.detach();
 		super.onDetach();
 	}
 }

@@ -30,6 +30,9 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.util.Cursor;
@@ -48,7 +51,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -57,13 +59,10 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -80,13 +79,13 @@ public abstract class PackListPanel extends Panel {
 	
 	private final boolean showType;
 	
-	private final IModel<PackQuery> queryModel = new LoadableDetachableModel<PackQuery>() {
+	private final IModel<PackQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected PackQuery load() {
 			return parse(queryStringModel.getObject(), getBaseQuery(), getPackType());
 		}
-		
+
 	};
 	
 	private DataTable<Pack, Void> packsTable;
@@ -541,9 +540,9 @@ public abstract class PackListPanel extends Panel {
 				
 				link.add(new SpriteImage("icon", pack.getSupport().getPackIcon()));
 				if (getProject() == null)
-					link.add(new Label("label", pack.getProject().getPath() + ":" + pack.getVersion()));
+					link.add(new Label("label", pack.getProject().getPath() + pack.getSupport().getProjectSeparator() + pack.getSupport().getReference(pack)));
 				else
-					link.add(new Label("label", pack.getVersion()));
+					link.add(new Label("label", pack.getSupport().getReference(pack)));
 
 				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 				
@@ -589,30 +588,37 @@ public abstract class PackListPanel extends Panel {
 			}
 		});
 		
-		var helpContainer = new WebMarkupContainer("help") {
+		body.add(new WebMarkupContainer("help") {
+			@Override
+			protected void onBeforeRender() {
+				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+				List<Tab> tabs = new ArrayList<>();
+				for (var packSupport: packSupports) {
+					tabs.add(new AjaxActionTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon())) {
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							var helpContent = packSupport.renderHelp("content", getProject())	;
+							helpContent.setOutputMarkupId(true);
+							replace(helpContent);
+							target.add(helpContent);
+						}
+
+					});
+				}
+				addOrReplace(new Tabbable("tabs", tabs));
+				
+				var helpContent = packSupports.iterator().next().renderHelp("content", getProject());
+				helpContent.setOutputMarkupId(true);
+				addOrReplace(helpContent);
+
+				super.onBeforeRender();
+			}
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(shouldShowHelp());
-			}
-		};
-		body.add(helpContainer);
-		helpContainer.add(new ListView<PackSupport>("types", new LoadableDetachableModel<>() {
-			@Override
-			protected List<PackSupport> load() {
-				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
-				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
-				return packSupports;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<PackSupport> item) {
-				var packSupport = item.getModelObject();
-				item.add(new SpriteImage("icon", packSupport.getPackIcon()));
-				item.add(new Label("title", packSupport.getPackType()));
-				item.add(packSupport.renderHelp("body", getProject()));
 			}
 		});
 		
@@ -621,7 +627,7 @@ public abstract class PackListPanel extends Panel {
 	
 	private boolean shouldShowHelp() {
 		return dataProvider.size() == 0 && getPage() instanceof ProjectPacksPage
-				&& queryModel.getObject().getCriteria() == null;
+				&& queryModel.getObject() != null && queryModel.getObject().getCriteria() == null;
 	}
 
 	@Override
