@@ -2,7 +2,7 @@ package io.onedev.server.ee.pack.maven;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
@@ -86,14 +86,14 @@ public class MavenService implements PackService {
 	
 	private final BuildManager buildManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	@Inject
 	public MavenService(SessionManager sessionManager, TransactionManager transactionManager, 
 						PackBlobManager packBlobManager, PackManager packManager, 
 						PackBlobReferenceManager packBlobReferenceManager, 
 						ProjectManager projectManager, ListenerRegistry listenerRegistry, 
-						BuildManager buildManager, SubscriptionManager subscriptionManager) {
+						BuildManager buildManager, EESubscriptionManager subscriptionManager) {
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.packBlobManager = packBlobManager;

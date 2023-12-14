@@ -14,15 +14,15 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.cluster.ServerNotFoundException;
 import io.onedev.server.data.DataManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
-import io.onedev.server.cluster.ServerNotFoundException;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.replica.ProjectReplica;
 import org.eclipse.jetty.server.session.SessionData;
@@ -66,7 +66,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	
 	private final SettingManager settingManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	private volatile Map<String, Integer> httpPorts;
 	
@@ -81,7 +81,7 @@ public class DefaultClusterManager implements ClusterManager, Serializable {
 	@Inject
 	public DefaultClusterManager(ServerConfig serverConfig, DataManager dataManager,
 								 ListenerRegistry listenerRegistry, HibernateConfig hibernateConfig,
-								 SettingManager settingManager, SubscriptionManager subscriptionManager) { 
+								 SettingManager settingManager, EESubscriptionManager subscriptionManager) { 
 		this.serverConfig = serverConfig;
 		this.dataManager = dataManager;
 		this.listenerRegistry = listenerRegistry;

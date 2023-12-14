@@ -11,6 +11,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
@@ -92,7 +93,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	private final TransactionManager transactionManager;
 	
@@ -103,7 +104,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Inject 
 	public DefaultCodeIndexManager(ProjectManager projectManager, SessionManager sessionManager, 
 								   ClusterManager clusterManager, BatchWorkManager batchWorkManager, 
-								   CodeSearchManager searchManager, SubscriptionManager subscriptionManager, 
+								   CodeSearchManager searchManager, EESubscriptionManager subscriptionManager, 
 								   TransactionManager transactionManager, ListenerRegistry listenerRegistry) {
 		this.projectManager = projectManager;
 		this.sessionManager = sessionManager;

@@ -2,10 +2,12 @@ package io.onedev.server.ee.sendgrid;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import org.apache.commons.fileupload.MultipartStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -32,8 +34,18 @@ public class DefaultMessageManager implements MessageManager {
 	
 	private final List<MessageTarget> messageTargets = new ArrayList<>();
 	
+	private final EESubscriptionManager subscriptionManager;
+	
+	@Inject
+	public DefaultMessageManager(EESubscriptionManager subscriptionManager) {
+		this.subscriptionManager = subscriptionManager;
+	}
+	
 	@Override
 	public void process(HttpServletRequest request, HttpServletResponse response) {
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new UnsupportedOperationException();
+		
 		var secret = request.getPathInfo().substring(1);
 		boolean hasAuthorizedTarget;
 		synchronized (messageTargets) {

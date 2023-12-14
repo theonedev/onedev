@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Build;
@@ -66,14 +66,14 @@ public class ContainerServlet extends HttpServlet {
 	
 	private final ObjectMapper objectMapper;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	@Inject
 	public ContainerServlet(SettingManager settingManager, BuildManager buildManager, 
 							ObjectMapper objectMapper, SessionManager sessionManager, 
 							UserManager userManager, ProjectManager projectManager, 
-							PackBlobManager packBlobManager, PackManager packManager, 
-							SubscriptionManager subscriptionManager) {
+							PackBlobManager packBlobManager, PackManager packManager,
+							EESubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.userManager = userManager;

@@ -2,6 +2,7 @@ package io.onedev.server.ee.dashboard;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ee.dashboard.widgets.ProjectListWidget;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.DashboardManager;
 import io.onedev.server.entitymanager.DashboardVisitManager;
 import io.onedev.server.model.*;
@@ -411,6 +412,8 @@ public class DashboardPage extends LayoutPage {
 	}
 	
 	private Component newDashboardEditor() {
+		if (!OneDev.getInstance(EESubscriptionManager.class).isSubscriptionActive())
+			throw new UnsupportedOperationException();
 		Fragment fragment = new Fragment("content", "dashboardEditFrag", this) {
 			
 			@Override

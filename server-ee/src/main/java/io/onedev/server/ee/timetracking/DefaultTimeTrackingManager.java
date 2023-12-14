@@ -2,6 +2,7 @@ package io.onedev.server.ee.timetracking;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -41,12 +42,12 @@ public class DefaultTimeTrackingManager implements TimeTrackingManager {
 	
 	private final IssueChangeManager issueChangeManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	@Inject
 	public DefaultTimeTrackingManager(SettingManager settingManager, TransactionManager transactionManager, 
 									  IssueManager issueManager, IssueChangeManager issueChangeManager, 
-									  ExecutorService executorService, SubscriptionManager subscriptionManager) {
+									  ExecutorService executorService, EESubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
 		this.issueManager = issueManager;

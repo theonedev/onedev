@@ -6,6 +6,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -50,7 +51,7 @@ public class DefaultTerminalManager implements TerminalManager, SchedulableTask,
 	
 	private final SessionManager sessionManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	private final Map<IWebSocketConnection, WebShell> shells = new ConcurrentHashMap<>();
 	
@@ -58,7 +59,7 @@ public class DefaultTerminalManager implements TerminalManager, SchedulableTask,
 	
 	@Inject
 	public DefaultTerminalManager(JobManager jobManager, TaskScheduler taskScheduler, ClusterManager clusterManager,
-								  SessionManager sessionManager, SubscriptionManager subscriptionManager) {
+								  SessionManager sessionManager, EESubscriptionManager subscriptionManager) {
 		this.jobManager = jobManager;
 		this.taskScheduler = taskScheduler;
 		this.clusterManager = clusterManager;

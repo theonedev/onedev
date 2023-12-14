@@ -7,6 +7,7 @@ import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.ee.NoSubscriptionException;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.ee.xsearch.match.BlobMatch;
 import io.onedev.server.ee.xsearch.query.BlobQuery;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -39,13 +40,13 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 	
 	private final ProjectManager projectManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	private volatile SearcherManager searcherManager;
 	
 	@Inject
-	public DefaultCodeSearchManager(ClusterManager clusterManager, ProjectManager projectManager, 
-									SubscriptionManager subscriptionManager) {
+	public DefaultCodeSearchManager(ClusterManager clusterManager, ProjectManager projectManager,
+									EESubscriptionManager subscriptionManager) {
 		this.clusterManager = clusterManager;
 		this.projectManager = projectManager;
 		this.subscriptionManager = subscriptionManager;

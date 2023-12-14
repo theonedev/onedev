@@ -3,6 +3,7 @@ package io.onedev.server.ee.clustering;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.data.DataManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.support.administration.ClusterSetting;
@@ -27,7 +28,7 @@ public class DefaultClusterManagerTest extends TestCase {
 		var persistenceManager = mock(DataManager.class);
 		var hibernateConfig = mock(HibernateConfig.class);
 		var settingManager = mock(SettingManager.class);
-		var subscriptionManager = mock(SubscriptionManager.class);
+		var subscriptionManager = mock(EESubscriptionManager.class);
 		
 		var clusterSetting = new ClusterSetting();
 		when(settingManager.getClusterSetting()).thenReturn(clusterSetting);

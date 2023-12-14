@@ -6,6 +6,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.StorageManager;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -38,14 +39,14 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	
 	private final ProjectManager projectManager;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final EESubscriptionManager subscriptionManager;
 	
 	private final BuildManager buildManager;
 	
 	@Inject
 	public DefaultStorageManager(SettingManager settingManager, TransactionManager transactionManager,
-								 ClusterManager clusterManager, ProjectManager projectManager, 
-								 SubscriptionManager subscriptionManager, BuildManager buildManager) { 
+								 ClusterManager clusterManager, ProjectManager projectManager,
+								 EESubscriptionManager subscriptionManager, BuildManager buildManager) { 
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
 		this.clusterManager = clusterManager;

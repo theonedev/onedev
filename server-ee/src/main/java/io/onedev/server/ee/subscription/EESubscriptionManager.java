@@ -1,7 +1,6 @@
 package io.onedev.server.ee.subscription;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
@@ -10,11 +9,6 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
@@ -26,7 +20,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 @Singleton
-public class DefaultSubscriptionManager implements SubscriptionManager, SchedulableTask, Serializable {
+public class EESubscriptionManager implements SchedulableTask, Serializable {
 	
 	private final TaskScheduler taskScheduler;
 	
@@ -37,20 +31,18 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	private String taskId;
 	
 	@Inject
-	public DefaultSubscriptionManager(AlertManager alertManager, TaskScheduler taskScheduler, SettingManager settingManager) {
+	public EESubscriptionManager(AlertManager alertManager, TaskScheduler taskScheduler, SettingManager settingManager) {
 		this.taskScheduler = taskScheduler;
 		this.alertManager = alertManager;
 		this.settingManager = settingManager;
 	}
 	
-	@Override
-	public boolean isSubscriptionActive() {
+	public final boolean isSubscriptionActive() {
 		return SubscriptionSetting.load().isSubscriptionActive();
 	}
 
 	@Nullable
-	@Override
-	public String getLicensee() {
+	public final String getLicensee() {
 		var subscription = SubscriptionSetting.load().getSubscription();
 		if (subscription != null)
 			return subscription.getLicensee();
@@ -59,19 +51,19 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	}
 
 	@Listen
-	public void on(SystemStarted event) {
+	public final void on(SystemStarted event) {
 		taskId = taskScheduler.schedule(this);
 	}
 	
 	@Listen
-	public void on(SystemStopping event) {
+	public final void on(SystemStopping event) {
 		if (taskId != null)
 			taskScheduler.unschedule(taskId);
 	}
 	
 	@Transactional
 	@Override
-	public void execute() {
+	public final void execute() {
 		var subscriptionSetting = SubscriptionSetting.load();
 		var subscription = subscriptionSetting.getSubscription();
 		if (subscription != null) {
@@ -127,28 +119,12 @@ public class DefaultSubscriptionManager implements SubscriptionManager, Schedula
 	}
 
 	@Override
-	public Component renderSupportRequestLink(String componentId) {
-		if (WicketUtils.isSubscriptionActive() && !"code.onedev.io".equals(getLicensee())) {
-			return new ModalLink(componentId) {
-
-				@Override
-				protected Component newContent(String id, ModalPanel modal) {
-					return new SupportRequestPanel(id, modal);
-				}
-
-			};
-		} else {
-			return new WebMarkupContainer(componentId).setVisible(false);
-		}
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
+	public final ScheduleBuilder<?> getScheduleBuilder() {
 		return CronScheduleBuilder.cronSchedule("0 0 1 * * ?");
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(DefaultSubscriptionManager.class);
+		return new ManagedSerializedForm(EESubscriptionManager.class);
 	}
 	
 }
