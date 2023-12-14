@@ -7,9 +7,9 @@ import io.onedev.server.annotation.BlobChoice;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.RevisionChoice;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -33,7 +33,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class MarkdownBlobWidget extends Widget {
 	private String revision;
 	
 	private String filePath;
-
+	
 	@Editable(order=100, name="Project")
 	@ProjectChoice("getPermittedProjects")
 	@NotEmpty

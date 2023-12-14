@@ -131,6 +131,15 @@ on other servers will become active immediately without data loss and service in
 
 ![replication](doc/images/replication.png)
 
+## Built-in Docker and Maven Registry (Enterprise Edition)
+
+The out-of-box integration of packages (current support docker and maven, more to come), CI/CD,
+code and issues makes information cross-reference a lot easier. For instance, different package
+versions can be compared to show code changes or fixed issues, published packages will be linked
+with CI/CD builds automatically etc
+
+![build-package](doc/images/package-tab.png)
+
 ## Customizable Dashboard (Enterprise Edition)
 
 Arrange gadgets in custom dashboard to get important information at a glance. Share dashboard with other users or groups, 
