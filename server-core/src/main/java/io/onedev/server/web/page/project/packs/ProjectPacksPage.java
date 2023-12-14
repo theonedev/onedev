@@ -111,7 +111,7 @@ public class ProjectPacksPage extends ProjectPage {
 
 		});
 		
-		add(packList = new PackListPanel("packs", new IModel<String>() {
+		add(packList = new PackListPanel("packs", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -131,7 +131,7 @@ public class ProjectPacksPage extends ProjectPage {
 				CharSequence url = RequestCycle.get().urlFor(ProjectPacksPage.class, params);
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
 			}
-			
+
 		}, true) {
 
 			@Override

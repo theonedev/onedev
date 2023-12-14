@@ -17,6 +17,11 @@ public class PublishedByBuildCriteria extends Criteria<Pack> {
 
 	private final String value;
 
+	public PublishedByBuildCriteria(Build build) {
+		this.build = build;
+		this.value = build.getFQN().toString();
+	}
+	
 	public PublishedByBuildCriteria(@Nullable Project project, String value) {
 		build = EntityQuery.getBuild(project, value);
 		this.value = value;

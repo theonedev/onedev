@@ -474,6 +474,20 @@ public abstract class BuildDetailPage extends ProjectPage
 					if (getBuild().getPacks().stream().anyMatch(it -> it.getType().equals(packType) && SecurityUtils.canReadPack(it.getProject()))) {
 						tabs.add(new BuildTab(packSupport.getPackType(), packSupport.getPackIcon(), BuildPacksPage.class) {
 							@Override
+							public boolean isActive(Page currentPage) {
+								if (super.isActive(currentPage)) {
+									if (currentPage instanceof BuildPacksPage) {
+										var buildPacksPage = (BuildPacksPage) currentPage;
+										return buildPacksPage.getPackType().equals(packSupport.getPackType());
+									} else {
+										return true;
+									}
+								} else {
+									return false;
+								}
+							}
+
+							@Override
 							public Component render(String componentId) {
 								return new PageTabHead(componentId, this) {
 

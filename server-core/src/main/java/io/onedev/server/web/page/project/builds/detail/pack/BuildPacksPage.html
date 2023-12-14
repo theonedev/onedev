@@ -1,10 +1,10 @@
 <wicket:extend>
-	<ul class="mb-0 list-unstyled">
-		<li wicket:id="packs" class="pack mb-5 mb-last-child-0">
-			<div class="head border-bottom font-weight-bold font-size-h5 py-2 mb-3">
-				<a wicket:id="title"><span wicket:id="label"></span></a>
-			</div>
-			<div wicket:id="body" class="body"></div>
-		</li>		
-	</ul>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="singlePackFrag">
+		<h4 wicket:id="title" class="mb-4"></h4>
+		<div wicket:id="content"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="multiPacksFrag">
+		<div wicket:id="packs"></div>
+	</wicket:fragment>
 </wicket:extend>
