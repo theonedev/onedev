@@ -10,6 +10,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.DataManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -17,6 +18,7 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.SessionManager;
@@ -74,6 +76,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private final ClusterManager clusterManager;
 	
+	private final SettingManager settingManager;
+	
 	private final IdManager idManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
@@ -92,7 +96,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
                   SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
                   DataManager dataManager, ExecutorService executorService,
                   ListenerRegistry listenerRegistry, ClusterManager clusterManager,
-                  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
+                  IdManager idManager, SessionFactoryManager sessionFactoryManager, 
+				  SettingManager settingManager) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
@@ -103,6 +108,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		this.clusterManager = clusterManager;
 		this.idManager = idManager;
 		this.sessionFactoryManager = sessionFactoryManager;
+		this.settingManager = settingManager;
 		
 		try {
 			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
@@ -235,7 +241,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		listenerRegistry.post(new SystemStarted());
 		clusterManager.postStart();
 		thread.start();
-		logger.info("Server is ready at " + guessServerUrl());
+
+		SystemSetting systemSetting = settingManager.getSystemSetting();
+		logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 	}
 
 	@Override

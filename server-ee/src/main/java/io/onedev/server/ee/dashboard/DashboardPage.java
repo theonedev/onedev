@@ -161,13 +161,13 @@ public class DashboardPage extends LayoutPage {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment fragment = new Fragment(id, "dashboardSelectorFrag", DashboardPage.this);
-					fragment.add(new ListView<Dashboard>("dashboards", new AbstractReadOnlyModel<List<Dashboard>>() {
+					fragment.add(new ListView<>("dashboards", new AbstractReadOnlyModel<List<Dashboard>>() {
 
 						@Override
 						public List<Dashboard> getObject() {
 							return getDashboards();
 						}
-						
+
 					}) {
 
 						@Override
@@ -182,9 +182,9 @@ public class DashboardPage extends LayoutPage {
 										visit(dashboard);
 									setResponsePage(DashboardPage.class, paramsOf(dashboard, failsafe));
 								}
-								
+
 							};
-							
+
 							if (dashboard.equals(getActiveDashboard()))
 								link.add(new SpriteImage("icon", "tick"));
 							else
@@ -195,10 +195,10 @@ public class DashboardPage extends LayoutPage {
 								link.add(new Label("note", "Shared by " + dashboard.getOwner().getDisplayName()));
 							else
 								link.add(new WebMarkupContainer("note").setVisible(false));
-							
+
 							item.add(link);
 						}
-						
+
 					});
 					return fragment;
 				}

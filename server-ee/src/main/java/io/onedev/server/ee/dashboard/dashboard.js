@@ -7,6 +7,9 @@ onedev.server.dashboard = {
 		var cellMargin = onedev.server.dashboard.cellMargin;
 		return ($(".dashboard>.body>.content>.grid").width() - (xCellCount+1)*cellMargin) / xCellCount;
 	},
+	isEditMode() {
+		return $(".dashboard").hasClass("dashboard-editor");	
+	},
 	placeWidgets: function() {
 		/* 
 		 * Reposition all widgets as long as there are something changed as add/move/resize of one widget  
@@ -15,55 +18,72 @@ onedev.server.dashboard = {
 		var cellMargin = onedev.server.dashboard.cellMargin;
 		var cellHeight = onedev.server.dashboard.cellHeight;
 		var cellWidth = onedev.server.dashboard.getCellWidth();
-		var bottomMost = onedev.server.dashboard.getBottomMost() * (cellHeight + cellMargin);
+
+		var $body = $(".dashboard>.body");
+		var $content = $body.children(".content");
 		
-		$(".dashboard>.body>.content>.widget").each(function() {
+		function isVerticalIntersect($widget1, $widget2) {
+			return $widget1[0] != $widget2[0] 
+				&& $widget1.data("right") > $widget2.data("left") 
+				&& $widget1.data("left") < $widget2.data("right")
+		}
+		$content.children(".widget").sort(function (a, b) {
+			return +a.dataset.top - +b.dataset.top;
+		}).each(function() {
 			var $widget = $(this);
 			
-			var left = $widget.data("left") * (cellWidth + cellMargin) + cellMargin; 
-			var top = $widget.data("top") * (cellHeight + cellMargin) + cellMargin; 
-			var right = $widget.data("right") * (cellWidth + cellMargin); 
-			var bottom = $widget.data("bottom") * (cellHeight + cellMargin);
-			
+			var left = $widget.data("left") * (cellWidth + cellMargin) + cellMargin;
+			var right = $widget.data("right") * (cellWidth + cellMargin);
 			$widget.outerWidth(right - left);
+			
+			var top = $widget.data("top") * (cellHeight + cellMargin) + cellMargin;
+			var bottom = $widget.data("bottom") * (cellHeight + cellMargin);
 			var height = bottom - top;
-			if ($(".dashboard").hasClass("dashboard-editor")) {
+			
+			if (onedev.server.dashboard.isEditMode()) {
 				$widget.outerHeight(height);
 			} else {
-				var hasBeneathWidgets = false;
-				var $body = $(".dashboard>.body");
-				var $content = $body.children(".content");
+				top = 0;
 				$content.children(".widget").each(function() {
-					if (this != $widget[0] 
-							&& $(this).data("bottom") > $widget.data("bottom") 
-							&& $(this).data("right") > $widget.data("left") 
-							&& $(this).data("left") < $widget.data("right")) {
-						hasBeneathWidgets = true;
-						return false;
-					}
+					var $this = $(this);
+					if (isVerticalIntersect($this, $widget) && $this.data("bottom") < $widget.data("bottom")) 
+						top = Math.max(top, $this.position().top + $this.outerHeight() + cellMargin);
 				});
-				
-				if (!hasBeneathWidgets) {
-					var marginTop = $content.css("margin-top");
-					marginTop = parseInt(marginTop.substring(0, marginTop.length-2));
-					var marginBottom = $content.css("margin-bottom");
-					marginBottom = parseInt(marginBottom.substring(0, marginBottom.length-2));
-					var screenBottom = $body.height() - marginTop - marginBottom;
-					if (bottomMost > screenBottom)
-						$widget.outerHeight(bottomMost - top);
-					else
-						$widget.outerHeight(screenBottom - top);
-				} else {
+
+				if ($widget.data("autoHeight")) 
+					$widget.css({height: "auto"});
+				else 
 					$widget.outerHeight(height);
-				}
 			}
-	
+			
 			$widget.css({
 				left: left,
 				top: top,
 				display: "flex"
 			});
-		});		
+		});
+
+		if (!onedev.server.dashboard.isEditMode()) {
+			var marginTop = $content.css("margin-top");
+			marginTop = parseInt(marginTop.substring(0, marginTop.length-2));
+			var marginBottom = $content.css("margin-bottom");
+			marginBottom = parseInt(marginBottom.substring(0, marginBottom.length-2));
+			var screenBottom = $body.height() - marginTop - marginBottom;
+			var bottomMost = Math.max(onedev.server.dashboard.getBottomMost(), screenBottom);
+
+			$content.children(".widget").each(function() {
+				var $widget = $(this);
+				if ($widget.data("autoHeight")) {
+					var bottom = bottomMost;
+					$content.children(".widget").each(function() {
+						var $this = $(this);
+						if (isVerticalIntersect($this, $widget) && $this.data("top") > $widget.data("top"))
+							bottom = Math.min(bottom, $this.position().top - cellMargin);
+					});
+					$widget.outerHeight(bottom - $widget.position().top);
+				}
+			});
+		}
 	},
 	drawAlignGrid: function() {
 		var $grid = $(".dashboard>.body>.content>.grid");
@@ -99,22 +119,21 @@ onedev.server.dashboard = {
 	getBottomMost: function() {
 		var bottomMost = 0;
 		$(".dashboard>.body>.content>.widget").each(function() {
-			if ($(this).data("bottom") > bottomMost)
-				bottomMost = $(this).data("bottom");
+			var $widget = $(this);
+			var bottom = $widget.position().top + $widget.outerHeight();
+			if (bottom > bottomMost)
+				bottomMost = bottom;
 		});
-		return bottomMost;		
+		return bottomMost;
 	},
 	adjustGridHeight: function() {
+		var gridHeight = onedev.server.dashboard.getBottomMost();
+		if (onedev.server.dashboard.isEditMode())
+			gridHeight += 8 * (onedev.server.dashboard.cellHeight + onedev.server.dashboard.cellMargin);
+		
 		var $grid = $(".dashboard>.body>.content>.grid");
-		
-		var bottomMost = onedev.server.dashboard.getBottomMost();
-		
-		if ($(".dashboard").hasClass("dashboard-editor"))
-			bottomMost += 8;
-		
-		var expectedHeight = bottomMost * (onedev.server.dashboard.cellHeight + onedev.server.dashboard.cellMargin);
-		if ($grid.height() != expectedHeight) {
-			$grid.height(expectedHeight);
+		if ($grid.height() != gridHeight) {
+			$grid.height(gridHeight);
 			return true;
 		} else {
 			return false;
@@ -122,28 +141,27 @@ onedev.server.dashboard = {
 	},
 	onLoad: function(xCellCount) {
 		onedev.server.dashboard.xCellCount = xCellCount;
-		onedev.server.dashboard.adjustGridHeight();
 		var $dashboard = $(".dashboard");
 		var $body = $dashboard.children(".body");
 		var $content = $body.children(".content");
 		
-		var editMode = $dashboard.hasClass("dashboard-editor");
-		if (editMode) 
+		if (onedev.server.dashboard.isEditMode()) 
 			onedev.server.dashboard.drawAlignGrid();
-		
 		onedev.server.dashboard.placeWidgets();
+		onedev.server.dashboard.adjustGridHeight();
 		
 		$content.on("resized", function() {
 			setTimeout(function() {
-				if (editMode) 
+				if (onedev.server.dashboard.isEditMode()) 
 					onedev.server.dashboard.drawAlignGrid();			
 				onedev.server.dashboard.placeWidgets();
+				onedev.server.dashboard.adjustGridHeight();
 			});
 		});
 	},
-	onWidgetDomReady: function(widgetId, left, top, right, bottom, callback) {
+	onWidgetDomReady: function(widgetId, left, top, right, bottom, autoHeight, callback) {
 		var $widget = $("#" + widgetId);
-		$widget.data("left", left).data("top", top).data("right", right).data("bottom", bottom).data("callback", callback);
+		$widget.data("left", left).data("top", top).data("right", right).data("bottom", bottom).data("autoHeight", autoHeight).data("callback", callback);
 		if (callback) {
 			var $dashboard = $(".dashboard");
 			var $body = $dashboard.children(".body");

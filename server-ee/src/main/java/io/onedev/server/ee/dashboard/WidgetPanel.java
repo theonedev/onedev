@@ -1,10 +1,11 @@
 package io.onedev.server.ee.dashboard;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.model.support.Widget;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -20,12 +21,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.model.support.Widget;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class WidgetPanel extends Panel {
@@ -245,8 +243,8 @@ class WidgetPanel extends Panel {
 		} else {
 			callback = "undefined";
 		}
-		String script = String.format("onedev.server.dashboard.onWidgetDomReady('%s', %d, %d, %d, %d, %s);", 
-				getMarkupId(), widget.getLeft(), widget.getTop(), widget.getRight(), widget.getBottom(), callback); 
+		String script = String.format("onedev.server.dashboard.onWidgetDomReady('%s', %d, %d, %d, %d, %b, %s);", 
+				getMarkupId(), widget.getLeft(), widget.getTop(), widget.getRight(), widget.getBottom(), widget.isAutoHeight(), callback); 
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

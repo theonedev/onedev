@@ -31,6 +31,8 @@ public abstract class Widget implements Serializable {
 	
 	private int bottom;
 	
+	private boolean autoHeight;
+	
 	@Editable(order=10)
 	@NotEmpty
 	public String getTitle() {
@@ -39,6 +41,15 @@ public abstract class Widget implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	@Editable(order=100000)
+	public boolean isAutoHeight() {
+		return autoHeight;
+	}
+
+	public void setAutoHeight(boolean autoHeight) {
+		this.autoHeight = autoHeight;
 	}
 
 	public int getLeft() {
