@@ -5966,5 +5966,17 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate148(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Dashboards.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var widgetElement: element.element("widgets").elements())
+						widgetElement.addElement("autoHeight").setText("true");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }
