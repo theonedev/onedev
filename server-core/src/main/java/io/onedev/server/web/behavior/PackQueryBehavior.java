@@ -38,19 +38,23 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 	private final IModel<Project> projectModel;
 	
 	private final String packType;
+
+	private final boolean withCurrentUserCriteria;
 	
 	private final boolean withOrder;
 	
 	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, 
-							 boolean withOrder, boolean hideIfBlank) {
+							 boolean withOrder, boolean withCurrentUserCriteria, boolean hideIfBlank) {
 		super(PackQueryParser.class, "query", false, hideIfBlank);
 		this.projectModel = projectModel;
 		this.packType = packType;
 		this.withOrder = withOrder;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}
 
-	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, boolean withOrder) {
-		this(projectModel, packType, withOrder, false);
+	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, boolean withOrder,
+							 boolean withCurrentUserCriteria) {
+		this(projectModel, packType, withOrder, withCurrentUserCriteria, false);
 	}
 	
 	@Override
@@ -177,6 +181,8 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(PackQuery.getRuleName(PackQueryLexer.OrderBy)))
+			return null;
+		if (!withCurrentUserCriteria && suggestedLiteral.equals(PackQuery.getRuleName(PackQueryLexer.PublishedByMe))) 
 			return null;
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

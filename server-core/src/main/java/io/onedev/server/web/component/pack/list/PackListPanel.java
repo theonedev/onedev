@@ -3,10 +3,8 @@ package io.onedev.server.web.component.pack.list;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pack.PackQuery;
@@ -156,10 +154,6 @@ public abstract class PackListPanel extends Panel {
 	@Nullable
 	protected QuerySaveSupport getQuerySaveSupport() {
 		return null;
-	}
-
-	private GlobalPackSetting getGlobalPackSetting() {
-		return OneDev.getInstance(SettingManager.class).getPackSetting();
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -423,7 +417,7 @@ public abstract class PackListPanel extends Panel {
 				return getProject();
 			}
 
-		}, getPackType(), true, true) {
+		}, getPackType(), true, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
