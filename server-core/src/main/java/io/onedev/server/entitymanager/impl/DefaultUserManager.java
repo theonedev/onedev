@@ -469,11 +469,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
-	@Override
-	public int countNonGuests() {
-		return (int) cache.values().stream().filter(it -> !it.isGuest()).count();
-	}
-
 	@Sessional
 	@Override
 	public User findByVerifiedEmailAddress(String emailAddressValue) {

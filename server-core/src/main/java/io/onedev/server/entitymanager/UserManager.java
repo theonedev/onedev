@@ -97,8 +97,6 @@ public interface UserManager extends EntityManager<User> {
 	
 	int count(String term);
 	
-	int countNonGuests();
-	
 	void onRenameSsoConnector(String oldName, String newName);
 	 
 	void onDeleteSsoConnector(String name);

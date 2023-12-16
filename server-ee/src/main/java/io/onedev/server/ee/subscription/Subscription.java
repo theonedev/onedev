@@ -77,8 +77,8 @@ public class Subscription implements Serializable {
 		int userCount;
 		if (getLicenseGroup() != null) {
 			var licenseGroup = groupManager.find(getLicenseGroup());
-			if (licenseGroup == null)
-				userCount = userManager.countNonGuests();
+			if (licenseGroup == null) 
+				userCount = (int) userManager.cloneCache().values().stream().filter(it -> !it.isGuest()).count();				
 			else
 				userCount = licenseGroup.getMemberships().size();
 		} else {
