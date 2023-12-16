@@ -31,7 +31,7 @@ public abstract class Widget implements Serializable {
 	
 	private int bottom;
 	
-	private boolean autoHeight;
+	private boolean autoHeight = true;
 	
 	@Editable(order=10)
 	@NotEmpty

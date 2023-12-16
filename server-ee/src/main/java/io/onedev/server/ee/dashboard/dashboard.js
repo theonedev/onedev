@@ -28,7 +28,7 @@ onedev.server.dashboard = {
 				&& $widget1.data("left") < $widget2.data("right")
 		}
 		$content.children(".widget").sort(function (a, b) {
-			return +a.dataset.top - +b.dataset.top;
+			return $(a).data("top") - $(b).data("top");
 		}).each(function() {
 			var $widget = $(this);
 			
@@ -49,7 +49,6 @@ onedev.server.dashboard = {
 					if (isVerticalIntersect($this, $widget) && $this.data("bottom") < $widget.data("bottom")) 
 						top = Math.max(top, $this.position().top + $this.outerHeight() + cellMargin);
 				});
-
 				if ($widget.data("autoHeight")) 
 					$widget.css({height: "auto"});
 				else 
@@ -62,7 +61,6 @@ onedev.server.dashboard = {
 				display: "flex"
 			});
 		});
-
 		if (!onedev.server.dashboard.isEditMode()) {
 			var marginTop = $content.css("margin-top");
 			marginTop = parseInt(marginTop.substring(0, marginTop.length-2));
@@ -280,9 +278,9 @@ onedev.server.dashboard = {
 	},
 	onWidgetAdded: function(widgetId) {
 		var $widget = $("#" + widgetId);
+		onedev.server.dashboard.placeWidgets();
 		if (onedev.server.dashboard.adjustGridHeight())
 			onedev.server.dashboard.drawAlignGrid();
-		onedev.server.dashboard.placeWidgets();
 		$widget[0].scrollIntoViewIfNeeded(false); 
 		$widget.effect("bounce", {distance: 10});
 		$(window).resize();
