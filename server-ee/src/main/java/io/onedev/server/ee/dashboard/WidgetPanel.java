@@ -101,8 +101,13 @@ class WidgetPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								
-								new BeanEditModalPanel<Widget>(target, widget) {
+
+								new BeanEditModalPanel<>(target, widget) {
+									
+									@Override
+									protected String getCssClass() {
+										return "widget-editor modal-lg";
+									}
 
 									@Override
 									protected void onSave(AjaxRequestTarget target, Widget bean) {
@@ -110,11 +115,11 @@ class WidgetPanel extends Panel {
 										Component body = widget.render("body", failsafe);
 										WidgetPanel.this.replace(body);
 										target.add(body);
-										
+
 										editCallback.onSave(target, WidgetPanel.this);
 										close();
 									}
-									
+
 								};
 							}
 							

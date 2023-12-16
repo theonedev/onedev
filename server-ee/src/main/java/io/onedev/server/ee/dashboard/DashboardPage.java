@@ -456,14 +456,18 @@ public class DashboardPage extends LayoutPage {
 								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							throw new RuntimeException(e);
 						}
-						new BeanEditModalPanel<Widget>(target, widget) {
+						new BeanEditModalPanel<>(target, widget) {
+							@Override
+							protected String getCssClass() {
+								return "widget-editor modal-lg";
+							}
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Widget bean) {
 								onWidgetAdded(target, form, widgetsView, bean);
 								close();
 							}
-							
+
 						};
 					}
 					

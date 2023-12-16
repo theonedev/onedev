@@ -56,7 +56,7 @@ public class ProjectOverviewWidget extends Widget {
 			projectId = project.getId();
 		
 		if (SecurityUtils.canAccessProject(project)) {
-			return new ProjectOverviewPanel(componentId, new LoadableDetachableModel<Project>() {
+			return new ProjectOverviewPanel(componentId, new LoadableDetachableModel<>() {
 
 				private static final long serialVersionUID = 1L;
 
@@ -64,7 +64,7 @@ public class ProjectOverviewWidget extends Widget {
 				protected Project load() {
 					return getProjectManager().load(projectId);
 				}
-				
+
 			});
 		} else {
 			throw new ExplicitException("Permission denied");

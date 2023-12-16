@@ -43,7 +43,9 @@ public abstract class Widget implements Serializable {
 		this.title = title;
 	}
 
-	@Editable(order=100000)
+	@Editable(order=100000, description = "Adjust widget height automatically to show its content " +
+			"in dashboard view mode. It also extend to fill the gap between current widget and " +
+			"the widget beneath it, or extend to page bottom if no widgets beneath it")
 	public boolean isAutoHeight() {
 		return autoHeight;
 	}

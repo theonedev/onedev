@@ -121,3 +121,7 @@
 .dashboard .card-body {
 	padding: 0;
 }
+
+.widget-editor .property-polymorphic .property-autoHeight {
+	display: none;
+}
