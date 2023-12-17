@@ -37,7 +37,7 @@
 	width: 100%;
 }
 
-.dashboard>.body>.content>.widget {
+.dashboard>.body .widget {
 	border-radius: 0.42rem;
 	display: none;
 	background: white;
@@ -47,31 +47,34 @@
 	z-index: 1;
 	box-sizing: border-box;
 }
+.dashboard>.body .widget.widget-dragging {
+	visibility: hidden;
+}
 
-.dark-mode .dashboard>.body>.content>.widget {
+.dark-mode .dashboard>.body .widget {
 	background: var(--dark-mode-dark);
 }
 
-.dashboard.dashboard-editor>.body>.content>.widget {
+.dashboard.dashboard-editor>.body .widget {
 	border: 1px solid var(--light-gray); 
 }
-.dashboard>.body>.content>.widget>.head .refresh {
+.dashboard>.body .widget>.head .refresh {
 	display: none;
 }
-.dashboard>.body>.content>.widget:hover>.head .refresh {
+.dashboard>.body .widget:hover>.head .refresh {
 	display: inline;
 }
-.dark-mode .dashboard.dashboard-editor>.body>.content>.widget {
+.dark-mode .dashboard.dashboard-editor>.body .widget {
 	border-color: var(--dark-mode-light-dark);
 }
 
-.dashboard>.body>.content>.widget>.head {
+.dashboard>.body .widget>.head {
 	border-bottom: 1px solid var(--light-gray); 
 	padding: 0.6rem 1.2rem;
 	font-weight: 600;
 	font-size: 1.2rem;
 }
-.dark-mode .dashboard>.body>.content>.widget>.head {
+.dark-mode .dashboard>.body .widget>.head {
 	border-color: var(--dark-mode-light-dark);
 }
 
@@ -92,26 +95,26 @@
 }
 }
 
-.dashboard.dashboard-editor>.body>.content>.widget {
+.dashboard.dashboard-editor>.body .widget {
 	cursor: move;
 }
-.dashboard.dashboard-editor>.body>.content>.widget .ui-icon-gripsmall-diagonal-se {
+.dashboard.dashboard-editor>.body .widget .ui-icon-gripsmall-diagonal-se {
 	background-image: none;
 }
-.dashboard.dashboard-editor>.body>.content>.widget .ui-resizable-se {
+.dashboard.dashboard-editor>.body .widget .ui-resizable-se {
 	width: 9px;
 	height: 9px;
 	right: -5px;
 	bottom: -5px;
 }
-.dashboard.dashboard-editor>.body>.content>.widget.ui-draggable-dragging, 
-.dashboard.dashboard-editor>.body>.content>.widget.ui-resizable-resizing {
+.dashboard.dashboard-editor>.body .widget.ui-draggable-dragging, 
+.dashboard.dashboard-editor>.body .widget.ui-resizable-resizing {
 	z-index: 10;
 }
-.dashboard>.body>.content>.widget>.body {
+.dashboard>.body .widget>.body {
 	padding: 1rem 1.6rem;
 }
-.dashboard.dashboard-editor>.body>.content>.widget>.head>.title {
+.dashboard.dashboard-editor>.body .widget>.head>.title {
 	margin-right: 0.4rem !important;
 }
 

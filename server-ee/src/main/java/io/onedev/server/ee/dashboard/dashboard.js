@@ -21,7 +21,12 @@ onedev.server.dashboard = {
 
 		var $body = $(".dashboard>.body");
 		var $content = $body.children(".content");
-		
+
+		var marginTop = $content.css("margin-top");
+		marginTop = parseInt(marginTop.substring(0, marginTop.length-2));
+		var marginBottom = $content.css("margin-bottom");
+		marginBottom = parseInt(marginBottom.substring(0, marginBottom.length-2));
+
 		function isVerticalIntersect($widget1, $widget2) {
 			return $widget1[0] != $widget2[0] 
 				&& $widget1.data("right") > $widget2.data("left") 
@@ -62,10 +67,6 @@ onedev.server.dashboard = {
 			});
 		});
 		if (!onedev.server.dashboard.isEditMode()) {
-			var marginTop = $content.css("margin-top");
-			marginTop = parseInt(marginTop.substring(0, marginTop.length-2));
-			var marginBottom = $content.css("margin-bottom");
-			marginBottom = parseInt(marginBottom.substring(0, marginBottom.length-2));
 			var screenBottom = $body.height() - marginTop - marginBottom;
 			var bottomMost = Math.max(onedev.server.dashboard.getBottomMost(), screenBottom);
 
@@ -207,34 +208,41 @@ onedev.server.dashboard = {
 				}
 			});
 
+			var lastUiHelperTop = undefined;
+			var containerContentHeight;
 			$widget.draggable({
-				appendTo: $content,
+				helper: "clone",
+				appendTo: $body,
 				scroll: false,
 				start: function(event, ui) {
-					$widget.outerWidth($widget.outerWidth());
-					$widget.outerHeight($widget.outerHeight());
+					$widget.addClass("widget-dragging");
+					containerContentHeight = $body.prop("scrollHeight");
 				},
 				drag: function(event, ui) {
-					var widgetTop = ui.position.top + $content.offset().top;
-					var bodyTop = $body.offset().top;
+					var uiHelperTop = $(ui.helper).offset().top;
+					if (lastUiHelperTop === undefined)
+						lastUiHelperTop = uiHelperTop;
+					
+					var containerTop = $body.offset().top;
 
-					var widgetBottom = widgetTop + $widget.outerHeight();
-					var bodyBottom = bodyTop + $body.outerHeight();
+					var uiHelperBottom = uiHelperTop + $(ui.helper).outerHeight();
+					var containerBottom = containerTop + $body.outerHeight();
 
-					var originalWidgetTop = ui.originalPosition.top + $content.offset().top;
-					var scrollThreshold = 10;
-					if (widgetTop < bodyTop && widgetTop < originalWidgetTop - scrollThreshold) {
-						var scrollChange = Math.min(originalWidgetTop - widgetTop, bodyTop - widgetTop);
+					if (uiHelperTop < containerTop && uiHelperTop < lastUiHelperTop) {
+						var scrollChange = Math.min(lastUiHelperTop - uiHelperTop, containerTop - uiHelperTop);
 						$body.scrollTop($body.scrollTop() - scrollChange);
 					}
-					if (widgetBottom > bodyBottom && widgetTop > originalWidgetTop + scrollThreshold) {
-						var scrollChange = Math.min(widgetTop - originalWidgetTop, widgetBottom - bodyBottom);
+					if (uiHelperBottom > containerBottom && uiHelperTop > lastUiHelperTop) {
+						var scrollChange = Math.min(uiHelperTop - lastUiHelperTop, uiHelperBottom - containerBottom);
 						$body.scrollTop($body.scrollTop() + scrollChange);
 					}
+					lastUiHelperTop = uiHelperTop;
 				},
 				stop: function(event, ui) {
-					var left = ui.position.left;
-					var top = ui.position.top;
+					lastUiHelperTop = undefined;
+					
+					var left = $(ui.helper).offset().left - $content.offset().left;
+					var top = $(ui.helper).offset().top - $content.offset().top;
 
 					var rect = {
 						left: left,
@@ -245,20 +253,24 @@ onedev.server.dashboard = {
 
 					var coordination = onedev.server.dashboard.getCoordination($widget, rect, true);
 					if (coordination) {
+						$widget.removeClass("widget-dragging");
 						$widget.data("left", coordination.left).data("top", coordination.top)
 							.data("right", coordination.right).data("bottom", coordination.bottom);
+						onedev.server.dashboard.placeWidgets();
 						if (onedev.server.dashboard.adjustGridHeight())
 							onedev.server.dashboard.drawAlignGrid();
-						onedev.server.dashboard.placeWidgets();
-
 						$widget.data("callback")(coordination.left, coordination.top, coordination.right, coordination.bottom);
-						var $content = $(".dashboard>.body>.content");
 						onedev.server.form.markDirty($content.closest(".body").prev().find("form"));
 					} else {
+						var originalPos = $widget.position();
+						$widget.css({left: left, top: top, "z-index": 10});
+						$widget.removeClass("widget-dragging");
 						$widget.animate({
-							left: ui.originalPosition.left + "px",
-							top: ui.originalPosition.top + "px"
-						}, 250);
+							left: originalPos.left,
+							top: originalPos.top
+						}, 250, function() {
+							$widget.css("z-index", 1);
+						});						
 					}
 				}
 			});

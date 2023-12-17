@@ -36,28 +36,28 @@ onedev.server.issueBoards = {
 					callback($card.data("issue"));
 				}, 
 				drag: function(event, ui) {
-					var cardLeft = $(ui.helper).offset().left;
+					var uiHelperLeft = $(ui.helper).offset().left;
 					var containerLeft = $container.offset().left;
 					
-					if (cardLeft < containerLeft) { 
+					if (uiHelperLeft < containerLeft) { 
 						var scrollLeft = $container.scrollLeft();
-						var newScrollLeft = scrollLeft - (containerLeft - cardLeft);
+						var newScrollLeft = scrollLeft - (containerLeft - uiHelperLeft);
 						if (newScrollLeft > 0)
 							$container.scrollLeft(newScrollLeft);
 						else
 							$container.scrollLeft(0);
 					}
 					
-					cardLeft = $(ui.helper).offset().left;
+					uiHelperLeft = $(ui.helper).offset().left;
 					containerLeft = $container.offset().left;
 					
-					var cardRight = cardLeft + $(ui.helper).outerWidth();
+					var uiHelperRight = uiHelperLeft + $(ui.helper).outerWidth();
 					var containerWidth = $container.outerWidth();
 					var containerRight = containerLeft + containerWidth;
 					
-					if (cardRight > containerRight) {
+					if (uiHelperRight > containerRight) {
 						var scrollLeft = $container.scrollLeft();
-						var newScrollLeft = scrollLeft + (cardRight - containerRight);
+						var newScrollLeft = scrollLeft + (uiHelperRight - containerRight);
 						if (newScrollLeft <= containerContentWidth - containerWidth)
 							$container.scrollLeft(newScrollLeft);
 						else
