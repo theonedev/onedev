@@ -27,7 +27,7 @@ public class SubscriptionSetting implements Serializable {
 	static final CipherService cipherService = new AesCipherService();
 
 	/*
-	 * OneDev license (https://code.onedev.io/onedev/server/~files/main/license.txt) does NOT allow
+	 * OneDev commercial license (https://onedev.io/license-agreement) does NOT allow
 	 * anyone to encrypt/decrypt custom data with below key
 	 */
 	static final String ENCRYPTION_KEY = "5pV39IaAmO88SI3frAcadT/uwdh/WtrKqho/Opp+nNg=";
