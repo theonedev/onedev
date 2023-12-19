@@ -54,7 +54,7 @@ public class DashboardPage extends LayoutPage {
 	
 	private static final String PARAM_DASHBOARD = "dashboard";
 	
-	private static final int HORIZONTAL_CELL_COUNT = 16;
+	public static final int HORIZONTAL_CELL_COUNT = 16;
 	
 	private final IModel<List<Dashboard>> dashboardsModel = new LoadableDetachableModel<>() {
 

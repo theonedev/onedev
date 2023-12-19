@@ -50,6 +50,16 @@
 .dashboard>.body .widget.widget-dragging {
 	visibility: hidden;
 }
+.dashboard>.body .widget.widget-dragging .checkbox,
+.dashboard>.body .widget.widget-dragging .checkbox>span {
+	transition: none;
+}
+
+.dashboard>.body .placeholder {
+	display: none;
+	opacity: 25%;
+	background: var(--gray);
+}
 
 .dark-mode .dashboard>.body .widget {
 	background: var(--dark-mode-dark);

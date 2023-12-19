@@ -27,7 +27,7 @@
 				<a wicket:id="addDashboard" class="btn btn-xs btn-icon btn-light btn-hover-primary ml-2" title="Add dashboard"><wicket:svg href="plus" class="icon"/></a>
 			</span>
 		</div>
-		<div class="body autofit flex-grow-1">
+		<div class="body autofit flex-grow-1 no-autofocus">
 			<div class="content resize-aware flex-grow-1 d-flex flex-column position-relative">
 				<div class="grid flex-grow-1"></div>
 				<div wicket:id="widgets" class="widget shadow flex-column"></div>
@@ -46,10 +46,11 @@
 				<div wicket:id="feedback" class="mt-2"></div>			
 			</form>
 		</div>
-		<div class="body autofit flex-grow-1 d-flex flex-column">
+		<div class="body autofit flex-grow-1 d-flex flex-column no-autofocus">
 			<div class="content m-2 m-sm-5 resize-aware flex-grow-1 d-flex flex-column position-relative">
 				<svg class="grid d-block flex-grow-1"></svg>
 				<div wicket:id="widgets" class="widget shadow d-flex flex-column"></div>
+				<div class="placeholder position-absolute"></div>
 			</div>
 		</div>
 	</wicket:fragment>
