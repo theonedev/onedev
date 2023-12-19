@@ -3,9 +3,12 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -102,6 +105,7 @@ public class RunContainerStep extends Step {
 			"access external container registry, login information should be configured in corresponding " +
 			"executor then")
 	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isSubscriptionActive")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}
@@ -113,6 +117,10 @@ public class RunContainerStep extends Step {
 	protected static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "

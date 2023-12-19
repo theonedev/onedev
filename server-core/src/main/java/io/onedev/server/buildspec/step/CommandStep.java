@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -71,7 +72,7 @@ public class CommandStep extends Step {
 
 	@Editable(order=105, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@ShowCondition("isRunInContainerEnabled")
+	@ShowCondition("isBuiltInRegistryAccessTokenSecretVisible")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}
@@ -90,6 +91,11 @@ public class CommandStep extends Step {
 		var server = UrlUtils.getServer(serverUrl);
 		return "Optionally specify a secret to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
+	}
+	
+	private static boolean isBuiltInRegistryAccessTokenSecretVisible() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive() 
+				&& isRunInContainerEnabled();
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {

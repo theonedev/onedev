@@ -4,6 +4,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -12,6 +13,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.util.WicketUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
@@ -86,6 +88,7 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=335, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@ShowCondition("isSubscriptionActive")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
@@ -93,6 +96,10 @@ public class BuildImageStep extends Step {
 
 	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
 		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 
 	private static List<String> getAccessTokenSecretChoices() {

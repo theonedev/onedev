@@ -5,6 +5,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
@@ -95,6 +96,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	@Editable(order=340, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isSubscriptionActive")
 	@Override
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return super.getBuiltInRegistryAccessTokenSecret();
@@ -110,6 +112,10 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		var server = UrlUtils.getServer(serverUrl);
 		return "Optionally specify a secret to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	@Editable(order=350, description="Optionally specify additional options to build image, " +

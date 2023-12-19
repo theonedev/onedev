@@ -4,6 +4,8 @@ import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.ServiceFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.model.Build;
@@ -103,6 +105,7 @@ public class Service implements NamedElement, Serializable {
 
 	@Editable(order=500, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
 	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isSubscriptionActive")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}
@@ -114,6 +117,10 @@ public class Service implements NamedElement, Serializable {
 	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	@SuppressWarnings("unused")

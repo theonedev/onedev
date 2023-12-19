@@ -4,9 +4,11 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.entitymanager.SettingManager;
@@ -45,6 +47,7 @@ public class RunImagetoolsStep extends Step {
 	
 	@Editable(order=200, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isSubscriptionActive")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}
@@ -63,6 +66,10 @@ public class RunImagetoolsStep extends Step {
 		var server = UrlUtils.getServer(serverUrl);
 		return "Optionally specify a secret to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
