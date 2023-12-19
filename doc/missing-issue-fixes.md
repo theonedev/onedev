@@ -33,3 +33,4 @@ issue #1533
 issue #1547 
 issue #1580
 issue #7
+issue #1693
