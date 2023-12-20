@@ -21,7 +21,7 @@ public abstract class PackChoiceProvider extends ChoiceProvider<Pack> {
 	public void toJson(Pack choice, JSONWriter writer) throws JSONException {
 		writer
 			.key("id").value(choice.getId())
-			.key("version").value(HtmlEscape.escapeHtml5(choice.getTag()));
+			.key("reference").value(HtmlEscape.escapeHtml5(choice.getSupport().getReference(choice)));
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 onedev.server.packChoiceFormatter = {
 	formatPack: function(pack) {
-		return pack.version;
+		return pack.reference;
 	},
 	formatSelection: function(pack) {
 		return onedev.server.packChoiceFormatter.formatPack(pack);
