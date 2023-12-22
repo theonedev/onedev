@@ -209,7 +209,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~login", LoginPage.class));
 		add(new BasePageMapper("~logout", LogoutPage.class));
 		add(new BasePageMapper("~signup", SignUpPage.class));
-		add(new BasePageMapper("~reset-password/${passwordResetCode}", PasswordResetPage.class));
+		add(new BasePageMapper("~reset-password/#{passwordResetCode}", PasswordResetPage.class));
 		add(new BasePageMapper("~verify-email-address/${emailAddress}/${verificationCode}", 
 				EmailAddressVerificationPage.class));
 		add(new BasePageMapper("~create-user-from-invitation/${emailAddress}/${invitationCode}", 
