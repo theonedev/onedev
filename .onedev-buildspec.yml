@@ -273,7 +273,7 @@ jobs:
   jobDependencies:
   - jobName: Release
     requireSuccessful: true
-    artifacts: onedev-*.zip onedev-*.tar.gz onedev-*.zip.sha256 onedev-*.tar.gz.sha256
+    artifacts: onedev-*.zip onedev-*.tar.gz
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
