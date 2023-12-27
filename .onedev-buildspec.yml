@@ -257,6 +257,8 @@ jobs:
       - mv onedev-$buildVersion onedev-latest
       - tar zcvf onedev-latest.tar.gz onedev-latest
       - zip -r onedev-latest.zip onedev-latest
+      - sha256sum onedev-latest.zip > onedev-latest.zip.sha256
+      - sha256sum onedev-latest.tar.gz > onedev-latest.tar.gz.sha256
       - echo $buildVersion > build_version
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
@@ -271,7 +273,7 @@ jobs:
   jobDependencies:
   - jobName: Release
     requireSuccessful: true
-    artifacts: onedev-*.zip onedev-*.tar.gz
+    artifacts: onedev-*.zip onedev-*.tar.gz onedev-*.zip.sha256 onedev-*.tar.gz.sha256
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
