@@ -125,7 +125,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	}
 
 	@Editable(order=520, group="More Settings", description="Whether or not to mount docker sock into job container to "
-			+ "support docker operations in job commands, for instance to build docker image.<br>"
+			+ "support docker operations in job commands<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
 			+ "by operating the mounted docker sock. You should configure job requirement above to make sure the " +
 			"executor can only be used by trusted jobs if this option is enabled")
