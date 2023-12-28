@@ -18,6 +18,26 @@
 .project-setting .tag-protection>.card-header .badge {
 	font-size: 0.9rem;
 }
+.project-setting .branch-protection>.card-header .toggle>.icon,
+.project-setting .tag-protection>.card-header .toggle>.icon {
+	width: 30px;
+	height: 30px;
+	margin-top: 2px;
+	margin-left: -8px;
+}
+.project-setting .branch-protection.expanded>.card-header .toggle>.icon,
+.project-setting .tag-protection.expanded>.card-header .toggle>.icon {
+	transform: rotate(0deg);
+}
+.project-setting .branch-protection>.card-body,
+.project-setting .tag-protection>.card-body {
+	display: none;
+}
+.project-setting .branch-protection.expanded>.card-body,
+.project-setting .tag-protection.expanded>.card-body {
+	display: block;
+}
+
 .project-setting .project-authorizations .bean-list td.property-userName {
 	width: 50%;
 }

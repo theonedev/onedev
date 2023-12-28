@@ -7,11 +7,30 @@
 	width: 50%;
 }
 
+.job-executor>.card-header .toggle {
+	vertical-align: bottom;
+}
+.job-executor>.card-header .toggle>.icon {
+	width: 30px;
+	height: 30px;
+	margin-top: 2px;
+	margin-left: -8px;
+}
+
 .job-executor>.card-header .badge {
 	font-size: 0.9rem;
 }
-.job-executors>.body>div>div>.card>.card-header {
-	border-bottom: none;
+.job-executor>.card-body {
+	display: none;
+}
+.job-executor.expanded>.card-header .toggle>.icon {
+	transform: rotate(0deg);
+}
+.job-executor.expanded>.card-body {
+	display: block;
+}
+.job-executor>.card-body .bean-viewer .type-description {
+	display: none;
 }
 
 .logo-preview img, .logo-preview svg {

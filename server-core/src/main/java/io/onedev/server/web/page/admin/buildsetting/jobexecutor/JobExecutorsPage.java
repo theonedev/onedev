@@ -66,8 +66,14 @@ public class JobExecutorsPage extends AdministrationPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						getSettingManager().saveJobExecutors(executors);
+						target.add(container);
 					}
-					
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						target.add(container);
+					}
+
 				});
 			}
 			
@@ -102,6 +108,7 @@ public class JobExecutorsPage extends AdministrationPage {
 					protected void onSave(AjaxRequestTarget target) {
 						getSettingManager().saveJobExecutors(executors);
 						container.replace(newAddNewFrag());
+						
 						target.add(container);
 					}
 

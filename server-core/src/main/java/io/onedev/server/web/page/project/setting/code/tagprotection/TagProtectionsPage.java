@@ -36,7 +36,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 		container = new WebMarkupContainer("tagProtectionSetting");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<TagProtection>("protections", new AbstractReadOnlyModel<List<TagProtection>>() {
+		container.add(new ListView<>("protections", new AbstractReadOnlyModel<List<TagProtection>>() {
 
 			@Override
 			public List<TagProtection> getObject() {
@@ -59,11 +59,17 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						getProject().getTagProtections().set(item.getIndex(), protection);
 						OneDev.getInstance(ProjectManager.class).update(getProject());
+						target.add(container);
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						target.add(container);
 					}
 					
 				});
 			}
-			
+
 		});
 		
 		container.add(new SortBehavior() {

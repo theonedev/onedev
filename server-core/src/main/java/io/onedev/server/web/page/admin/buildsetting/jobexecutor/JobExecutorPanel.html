@@ -2,9 +2,12 @@
 	<div class="job-executor card">
 		<div class="card-header">
 			<div class="card-title">
-				<span class="drag-indicator mr-2"><wicket:svg href="grip" class="icon"></wicket:svg></span>
+				<a class="toggle" onclick="$(this).closest('.job-executor').toggleClass('expanded');"><wicket:svg href="arrow4" class="icon rotate-270"/></a>
+				<span class="drag-indicator mr-2">
+					<wicket:svg href="grip" class="icon icon-lg"></wicket:svg>
+				</span>
 				<span wicket:id="name" class="name mr-3"></span>
-				<a wicket:id="edit" title="Edit this executor" class="btn btn-light btn-xs btn-icon btn-hover-primary text-muted mr-2">
+				<a wicket:id="edit" title="Edit this executor" onclick="$(this).closest('.job-executor').addClass('expanded');" class="btn btn-light btn-xs btn-icon btn-hover-primary text-muted mr-2">
 					<wicket:svg href="edit" class="icon"/>
 				</a>
 				<a wicket:id="delete" title="Delete this executor" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">

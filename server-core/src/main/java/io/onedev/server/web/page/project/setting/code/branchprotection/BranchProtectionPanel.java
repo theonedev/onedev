@@ -1,17 +1,17 @@
 package io.onedev.server.web.page.project.setting.code.branchprotection;
 
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.editable.BeanContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-
-import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.editable.BeanContext;
 
 @SuppressWarnings("serial")
 abstract class BranchProtectionPanel extends Panel {
@@ -28,6 +28,8 @@ abstract class BranchProtectionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new Label("branches", protection.getBranches()));
+		
 		add(new AjaxLink<Void>("edit") {
 
 			@Override
@@ -37,16 +39,11 @@ abstract class BranchProtectionPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						BranchProtectionPanel.this.onSave(target, protection);
-						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
-						BranchProtectionPanel.this.replace(protectionViewer);
-						target.add(protectionViewer);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
-						BranchProtectionPanel.this.replace(protectionViewer);
-						target.add(protectionViewer);
+						BranchProtectionPanel.this.onCancel(target);
 					}
 					
 				};
@@ -100,5 +97,7 @@ abstract class BranchProtectionPanel extends Panel {
 	protected abstract void onDelete(AjaxRequestTarget target);
 
 	protected abstract void onSave(AjaxRequestTarget target, BranchProtection protection);
+	
+	protected abstract void onCancel(AjaxRequestTarget target);
 	
 }

@@ -57,8 +57,14 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						getProject().getBranchProtections().set(item.getIndex(), protection);
 						getProjectManager().update(getProject());
+						target.add(container);
 					}
-					
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						target.add(container);
+					}
+
 				});
 			}
 			
