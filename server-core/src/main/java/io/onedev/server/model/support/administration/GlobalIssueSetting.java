@@ -6,13 +6,10 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
-import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.*;
-import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
@@ -82,16 +79,16 @@ public class GlobalIssueSetting implements Serializable {
 		bug.setValue("Bug");
 		bug.setColor("#F64E60");
 		choices.add(bug);
-
+		
 		Choice task = new Choice();
 		task.setValue("Task");
 		task.setColor("#8950FC");
 		choices.add(task);
 
-		Choice buildFailure = new Choice();
-		buildFailure.setValue("Build Failure");
-		buildFailure.setColor("#F64E60");
-		choices.add(buildFailure);
+		Choice supportRequest = new Choice();
+		supportRequest.setValue("Support Request");
+		supportRequest.setColor("#8950FC");
+		choices.add(supportRequest);
 		
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
@@ -149,20 +146,6 @@ public class GlobalIssueSetting implements Serializable {
 		assignees.setName("Assignees");
 		
 		fieldSpecs.add(assignees);
-		
-		BuildChoiceField failedBuild = new BuildChoiceField();
-		failedBuild.setName("Failed Build");
-		failedBuild.setAllowEmpty(true);
-		failedBuild.setNameOfEmptyValue("Not specified");
-		
-		fieldSpecs.add(failedBuild);
-		
-		ShowCondition showCondition = new ShowCondition();
-		showCondition.setInputName("Type");
-		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
-		showCondition.setValueMatcher(valueIsOneOf);
-		failedBuild.setShowCondition(showCondition);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
