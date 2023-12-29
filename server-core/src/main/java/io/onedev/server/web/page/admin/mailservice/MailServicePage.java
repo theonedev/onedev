@@ -126,7 +126,7 @@ public class MailServicePage extends AdministrationPage {
 						}, true));
 
 						var systemAddress = ParsedEmailAddress.parse(mailService.getSystemAddress());
-						String subAddressed = systemAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
+						String subAddressed = systemAddress.getSubaddress(MailManager.TEST_SUB_ADDRESS);
 						logger.log("Sending test mail to " + subAddressed + "...");
 						mailService.sendMail(Sets.newHashSet(subAddressed), Sets.newHashSet(), 
 								Sets.newHashSet(), uuid, "[Test] Test Email From OneDev", 

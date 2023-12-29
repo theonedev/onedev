@@ -6,6 +6,7 @@ import io.onedev.server.model.PullRequest;
 import javax.annotation.Nullable;
 import javax.mail.Message;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -48,6 +49,6 @@ public interface MailManager {
 						   Consumer<Message> messageConsumer, 
 						   MailPosition lastPosition, boolean testMode);
 
-	void handleMessage(Message message, String systemAddress, boolean onlyMonitorSystemAddress);
+	void handleMessage(Message message, String systemAddress, List<String> additionalTargetAddresses);
 	
 }

@@ -1,3 +1,11 @@
+# 9.4.7
+
+### Mail Service
+
+The option `Monitor System Email Only` is removed from various mail services. Instead, you will 
+need to specify additional email addresses to be monitored explicitly via option 
+`Additional Email Addresses to Monitor`
+
 # 9.3.2
 
 ### Agent

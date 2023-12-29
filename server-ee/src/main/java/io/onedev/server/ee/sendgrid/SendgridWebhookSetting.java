@@ -6,6 +6,8 @@ import io.onedev.server.annotation.Password;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable
 public class SendgridWebhookSetting implements Serializable {
@@ -14,7 +16,7 @@ public class SendgridWebhookSetting implements Serializable {
 	
 	private String secret;
 	
-	private boolean monitorSystemAddressOnly;
+	private List<String> additionalTargetAddresses = new ArrayList<>();
 	
 	@Editable(order=100, description = "" +
 			"Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:" +
@@ -38,14 +40,14 @@ public class SendgridWebhookSetting implements Serializable {
 		this.secret = secret;
 	}
 
-	@Editable(order=200, name="Monitor System Email Only", description = "Check this to only monitor system email address above for incoming " +
-			"email processing; if not checked, all emails in the inbox will be processed")
-	public boolean isMonitorSystemAddressOnly() {
-		return monitorSystemAddressOnly;
+	@Editable(order=200, name="Additional Email Addresses to Monitor", placeholder = "Input email address and press ENTER", description = "Emails sent to these " +
+			"email addresses will also be processed besides system email address specified above")
+	public List<String> getAdditionalTargetAddresses() {
+		return additionalTargetAddresses;
 	}
 
-	public void setMonitorSystemAddressOnly(boolean monitorSystemAddressOnly) {
-		this.monitorSystemAddressOnly = monitorSystemAddressOnly;
+	public void setAdditionalTargetAddresses(List<String> additionalTargetAddresses) {
+		this.additionalTargetAddresses = additionalTargetAddresses;
 	}
 	
 }

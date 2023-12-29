@@ -143,9 +143,9 @@ public abstract class ProjectInfoPanel extends Panel {
         	
 			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
 			if (getProject().getServiceDeskName() != null)
-				subAddressed = checkAddress.getSubAddressed(getProject().getServiceDeskName());
+				subAddressed = checkAddress.getSubaddress(getProject().getServiceDeskName());
 			else
-				subAddressed = checkAddress.getSubAddressed(getProject().getPath());
+				subAddressed = checkAddress.getSubaddress(getProject().getPath());
         	
         	add(new WebMarkupContainer("serviceDesk") {
 

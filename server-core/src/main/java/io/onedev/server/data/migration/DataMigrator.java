@@ -5978,5 +5978,33 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate149(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL_SERVICE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var inboxPollSettingElement = valueElement.element("inboxPollSetting");
+							if (inboxPollSettingElement != null) {
+								inboxPollSettingElement.element("monitorSystemAddressOnly").detach();
+								inboxPollSettingElement.addElement("additionalTargetAddresses");
+							}
+							var webhookSettingElement = valueElement.element("webhookSetting");
+							if (webhookSettingElement != null) {
+								webhookSettingElement.element("monitorSystemAddressOnly").detach();
+								webhookSettingElement.addElement("additionalTargetAddresses");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

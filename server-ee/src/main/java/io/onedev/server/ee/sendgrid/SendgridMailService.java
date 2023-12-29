@@ -1,9 +1,9 @@
 package io.onedev.server.ee.sendgrid;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.ee.NoSubscriptionException;
 import io.onedev.server.mail.BasicAuthPassword;
 import io.onedev.server.mail.InboxMonitor;
@@ -18,6 +18,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -117,8 +118,8 @@ public class SendgridMailService implements MailService {
 				}
 
 				@Override
-				public boolean isMonitorSystemAddressOnly() {
-					return webhookSetting.isMonitorSystemAddressOnly();
+				public List<String> getAdditionalTargetAddresses() {
+					return webhookSetting.getAdditionalTargetAddresses();
 				}
 			};
 		} else {
