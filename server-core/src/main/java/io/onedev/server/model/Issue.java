@@ -243,7 +243,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	private long number;
 	
-	private String threadingReference;
+	private String messageId;
 	
 	@Embedded
 	private LastActivity lastActivity;
@@ -379,19 +379,19 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	}
 
 	@Nullable
-	public String getThreadingReference() {
-		return threadingReference;
+	public String getMessageId() {
+		return messageId;
 	}
 
-	public void setThreadingReference(String threadingReference) {
-		this.threadingReference = threadingReference;
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 	
-	public String getEffectiveThreadingReference() {
-		String threadingReference = getThreadingReference();
-		if (threadingReference == null)
-			threadingReference = "<" + getUUID() + "@onedev>";
-		return threadingReference;
+	public String getThreadingReferences() {
+		var threadingReferences = "<" + getUUID() + "@onedev>";
+		if (getMessageId() != null)
+			threadingReferences = getMessageId() + " " + threadingReferences;
+		return threadingReferences;
 	}
 	
 	@Override

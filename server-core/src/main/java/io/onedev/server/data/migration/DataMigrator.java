@@ -6006,5 +6006,18 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate150(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var threadingReferenceElement = element.element("threadingReference");
+					if (threadingReferenceElement != null)
+						threadingReferenceElement.setName("messageId");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

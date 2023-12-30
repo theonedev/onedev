@@ -1,7 +1,6 @@
 package io.onedev.server.mail;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
@@ -75,6 +74,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.model.Setting.Key.MAIL_SERVICE;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -255,13 +255,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 			Message message = new MimeMessage(session);
 			
 			if (references != null) {
+				String firstReference = StringUtils.substringBefore(references, " ");
 				Map<String, String> headers = CollectionUtils.newHashMap(
 						"References", references, 
-						"In-Reply-To", references, 
-						"Thread-Index", getThreadIndex(references));
-				
-				for (Map.Entry<String, String> entry: headers.entrySet())
+						"In-Reply-To", firstReference, 
+						"Thread-Index", getThreadIndex(firstReference));
+				for (Map.Entry<String, String> entry: headers.entrySet()) {
 					message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
+				}
 			}
 			
 			var brandName = settingManager.getBrandingSetting().getName();
@@ -337,6 +338,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 	
+	private String getThreadingReferences(String uuid, @Nullable String messageId) {
+		var threadingReferences = "<" + uuid + "@onedev>";
+		if (messageId != null)
+			threadingReferences = messageId + " " + threadingReferences;
+		return threadingReferences;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
@@ -377,7 +385,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 						ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiverInternetAddress.getAddress());
 						if (targetAddresses.contains(parsedReceiverAddress.toString().toLowerCase())) {
 							if (involvedIssue == null && involvedPullRequest == null) {
-								if (serviceDeskSetting != null) {
+								if (isOriginatedFromOneDev(message)) {
+									logger.warn("Ignored opening issue from message as it is originated from OneDev");
+								} else if (serviceDeskSetting != null) {
 									if (designatedProject == null)
 										throw new ExplicitException("No project designated for sender: " + fromInternetAddress.getAddress());
 									Project project = projectManager.findByPath(designatedProject);
@@ -392,6 +402,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 								} else {
 									throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 								}
+							} else {
+								logger.warn("Ignored recipient '" + parsedReceiverAddress + "' as issue or pull request is processed");
 							}
 						} else if (parsedReceiverAddress.isSubaddress() && targetAddresses.contains(parsedReceiverAddress.getOriginalAddress().toLowerCase())) {
 							if (involvedIssue == null && involvedPullRequest == null) {
@@ -424,8 +436,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 													String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 													String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 
-													sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-															subject, htmlBody, textBody, null, null, getMessageId(message));
+													var threadingReferences = getThreadingReferences(UUID.randomUUID().toString(), getMessageId(message));
+													sendMailAsync(newArrayList(fromInternetAddress.getAddress()), newArrayList(), newArrayList(),
+															subject, htmlBody, textBody, null, null, threadingReferences);
 												}
 											}
 										} else {
@@ -449,8 +462,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 													bindings.put("pullRequest", involvedPullRequest);
 													String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 													String textBody = EmailTemplates.evalTemplate(false, template, bindings);
-													sendMailAsync(Lists.newArrayList(fromInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-															subject, htmlBody, textBody, null, null, getMessageId(message));
+													var threadingReferences = getThreadingReferences(UUID.randomUUID().toString(), getMessageId(message));
+													sendMailAsync(newArrayList(fromInternetAddress.getAddress()), newArrayList(), newArrayList(),
+															subject, htmlBody, textBody, null, null, threadingReferences);
 												}
 											}
 										} else {
@@ -461,20 +475,26 @@ public class DefaultMailManager implements MailManager, Serializable {
 										throw new ExplicitException("Invalid recipient address: " + parsedReceiverAddress);
 									}
 								} else {
-									Project project = projectManager.findByServiceDeskName(subAddress);
-									if (project == null)
-										project = projectManager.findByPath(subAddress);
-
-									if (project == null)
-										throw new ExplicitException("Non-existent project specified in receipient address: " + parsedReceiverAddress);
-									if (serviceDeskSetting != null) {
-										checkPermission(fromInternetAddress, project, new AccessProject(), fromUser, authorization);
-										logger.debug("Creating issue via email (project: {})...", project.getPath());
-										involvedIssue = openIssue(message, project, fromInternetAddress, fromUser, authorization, parsedSystemAddress);
+									if (isOriginatedFromOneDev(message)) {
+										logger.warn("Ignored opening issue from message as it is originated from OneDev");
 									} else {
-										throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
+										Project project = projectManager.findByServiceDeskName(subAddress);
+										if (project == null)
+											project = projectManager.findByPath(subAddress);
+
+										if (project == null)
+											throw new ExplicitException("Non-existent project specified in receipient address: " + parsedReceiverAddress);
+										if (serviceDeskSetting != null) {
+											checkPermission(fromInternetAddress, project, new AccessProject(), fromUser, authorization);
+											logger.debug("Creating issue via email (project: {})...", project.getPath());
+											involvedIssue = openIssue(message, project, fromInternetAddress, fromUser, authorization, parsedSystemAddress);
+										} else {
+											throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
+										}
 									}
 								}
+							} else {
+								logger.warn("Ignored recipient '" + parsedReceiverAddress + "' as issue or pull request is processed");
 							}
 						} else if (!receiverInternetAddress.equals(fromInternetAddress)) {
 							involvedInternetAddresses.add(receiverInternetAddress);
@@ -669,7 +689,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		
 		String messageId = getMessageId(message);
 		if (messageId != null)
-			issue.setThreadingReference(messageId);
+			issue.setMessageId(messageId);
 
 		String description = parseBody(message, project, issue.getUUID());
 		if (StringUtils.isNotBlank(description)) 
@@ -709,9 +729,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 			String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 			
 			var replyAddress = parsedSystemAddress.getSubaddress("issue~" + issue.getId());
-			sendMailAsync(Lists.newArrayList(submitterInternetAddress.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
+			sendMailAsync(newArrayList(submitterInternetAddress.getAddress()), newArrayList(), newArrayList(),
 					"Re: " + issue.getTitle(), htmlBody, textBody, replyAddress, 
-					submitterInternetAddress.getPersonal(), issue.getEffectiveThreadingReference()); 
+					submitterInternetAddress.getPersonal(), issue.getThreadingReferences()); 
 		}
 		return issue;
 	}
@@ -831,9 +851,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 								String htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 								String textBody = EmailTemplates.evalTemplate(false, template, bindings);
 								
-								sendMailAsync(Lists.newArrayList(from.getAddress()), new ArrayList<>(), 
+								var threadingReferences = getThreadingReferences(UUID.randomUUID().toString(), null);
+								sendMailAsync(newArrayList(from.getAddress()), new ArrayList<>(), 
 										new ArrayList<>(), "OneDev is unable to process your message", 
-										htmlBody, textBody, null, null, null);								
+										htmlBody, textBody, null, null, threadingReferences);								
 							}
 						} catch (Exception e2) {
 							logger.error("Error sending mail", e);
@@ -999,6 +1020,15 @@ public class DefaultMailManager implements MailManager, Serializable {
 				return InternetAddress.parse(values[0], true);
 			else 
 				return new InternetAddress[0];
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private boolean isOriginatedFromOneDev(Message message) {
+		try {
+			var references = message.getHeader("References");
+			return references != null && references.length != 0 && references[0].contains("@onedev>");
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}

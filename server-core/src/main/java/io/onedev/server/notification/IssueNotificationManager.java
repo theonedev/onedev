@@ -263,7 +263,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
 			String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
 
-			String threadingReferences = issue.getEffectiveThreadingReference();
+			String threadingReferences = issue.getThreadingReferences();
 			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
 					replyAddress, senderName, threadingReferences);
