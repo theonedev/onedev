@@ -182,16 +182,6 @@ public class GlobalIssueSetting implements Serializable {
 		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
 		transition.setToState("Closed");
-		BuildSuccessfulTrigger buildSuccessful = new BuildSuccessfulTrigger();
-		buildSuccessful.setBranches("main");
-		buildSuccessful.setIssueQuery("\"Type\" is \"Build Failure\" and (\"Failed Build\" is current or \"Failed Build\" is previous)");
-		transition.setTrigger(buildSuccessful);
-		
-		transitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
 		StateTransitionTrigger stateTransition = new StateTransitionTrigger();
 		stateTransition.setStates(Lists.newArrayList("Closed"));
 		stateTransition.setIssueQuery("any \"Child Issue\" matching(current issue) and all \"Child Issue\" matching(\"State\" is \"Closed\")");
