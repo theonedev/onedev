@@ -15,7 +15,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -38,7 +38,7 @@ public class IssueCreationSetting implements Serializable {
 	
 	private boolean confidential;
 	
-	private List<FieldSupply> issueFields = new ArrayList<>();
+	private List<FieldInstance> issueFields = new ArrayList<>();
 
 	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", 
 			description="Specify space-separated sender email addresses applicable for this entry. "
@@ -83,11 +83,11 @@ public class IssueCreationSetting implements Serializable {
 	@FieldNamesProvider("getFieldNames")
 	@OmitName
 	@Valid
-	public List<FieldSupply> getIssueFields() {
+	public List<FieldInstance> getIssueFields() {
 		return issueFields;
 	}
 
-	public void setIssueFields(List<FieldSupply> issueFields) {
+	public void setIssueFields(List<FieldInstance> issueFields) {
 		this.issueFields = issueFields;
 	}
 	
@@ -103,27 +103,27 @@ public class IssueCreationSetting implements Serializable {
 	
 	public Set<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		for (FieldSupply supply: getIssueFields()) 
-			undefinedFields.addAll(supply.getUndefinedFields());
+		for (FieldInstance instance: getIssueFields()) 
+			undefinedFields.addAll(instance.getUndefinedFields());
 		return undefinedFields;
 	}
 
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
-		for (FieldSupply supply: getIssueFields()) 
-			undefinedFieldValues.addAll(supply.getUndefinedFieldValues());
+		for (FieldInstance instance: getIssueFields()) 
+			undefinedFieldValues.addAll(instance.getUndefinedFieldValues());
 		return undefinedFieldValues;
 	}
 	
 	public void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		for (Iterator<FieldSupply> it = getIssueFields().iterator(); it.hasNext();) {
+		for (Iterator<FieldInstance> it = getIssueFields().iterator(); it.hasNext();) {
 			if (!it.next().fixUndefinedFields(resolutions))
 				it.remove();
 		}
 	}
 
 	public void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
-		for (Iterator<FieldSupply> it = getIssueFields().iterator(); it.hasNext();) {
+		for (Iterator<FieldInstance> it = getIssueFields().iterator(); it.hasNext();) {
 			if (!it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}

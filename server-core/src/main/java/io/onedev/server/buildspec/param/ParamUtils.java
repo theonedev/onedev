@@ -27,7 +27,7 @@ public class ParamUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ParamInstances.class);
 	
-	private static final String PARAM_BEAN_PREFIX = "ParamSupplyBean";
+	private static final String PARAM_BEAN_CLASS_NAME_PREFIX = "BuildParamBean";
 	
 	public static void validateParamValues(List<List<String>> values) {
 		if (values.isEmpty())
@@ -153,7 +153,7 @@ public class ParamUtils {
 	@SuppressWarnings("unchecked")
 	public static Class<? extends Serializable> defineBeanClass(Collection<ParamSpec> paramSpecs) {
 		byte[] bytes = SerializationUtils.serialize((Serializable) paramSpecs);
-		String className = PARAM_BEAN_PREFIX + "_" + Hex.encodeHexString(bytes);
+		String className = PARAM_BEAN_CLASS_NAME_PREFIX + "_" + Hex.encodeHexString(bytes);
 		
 		List<ParamSpec> paramSpecsCopy = new ArrayList<>();
 		for (var paramSpec: paramSpecs) {
@@ -176,10 +176,10 @@ public class ParamUtils {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public static Class<? extends Serializable> loadBeanClass(String className) {
-		if (className.startsWith(PARAM_BEAN_PREFIX)) {
+		if (className.startsWith(PARAM_BEAN_CLASS_NAME_PREFIX)) {
 			byte[] bytes;
 			try {
-				bytes = Hex.decodeHex(className.substring(PARAM_BEAN_PREFIX.length()+1).toCharArray());
+				bytes = Hex.decodeHex(className.substring(PARAM_BEAN_CLASS_NAME_PREFIX.length()+1).toCharArray());
 			} catch (DecoderException e) {
 				throw new RuntimeException(e);
 			}

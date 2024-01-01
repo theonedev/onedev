@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.issue.fieldsupply;
+package io.onedev.server.web.editable.issue.fieldinstance;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 

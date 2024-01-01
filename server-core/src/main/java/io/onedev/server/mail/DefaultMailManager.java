@@ -24,7 +24,7 @@ import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -709,10 +709,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting()
 				.getIssueCreationSetting(submitterInternetAddress.getAddress(), project);
 		issue.setConfidential(issueCreationSetting.isConfidential());
-		for (FieldSupply supply: issueCreationSetting.getIssueFields()) {
-			Object fieldValue = issueSetting.getFieldSpec(supply.getName())
-					.convertToObject(supply.getValueProvider().getValue());
-			issue.setFieldValue(supply.getName(), fieldValue);
+		for (FieldInstance instance: issueCreationSetting.getIssueFields()) {
+			Object fieldValue = issueSetting.getFieldSpec(instance.getName())
+					.convertToObject(instance.getValueProvider().getValue());
+			issue.setFieldValue(instance.getName(), fieldValue);
 		}
 		
 		issueManager.open(issue);

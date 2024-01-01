@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.issue.fieldsupply;
+package io.onedev.server.web.editable.issue.fieldinstance;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -33,11 +33,11 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
-import io.onedev.server.model.support.issue.field.supply.Ignore;
-import io.onedev.server.model.support.issue.field.supply.ScriptingValue;
-import io.onedev.server.model.support.issue.field.supply.SpecifiedValue;
-import io.onedev.server.model.support.issue.field.supply.ValueProvider;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.model.support.issue.field.instance.IgnoreValue;
+import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
+import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
+import io.onedev.server.model.support.issue.field.instance.ValueProvider;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.JobSecretEditBean;
@@ -54,7 +54,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private final String fieldNamesProviderMethodName;
 	
-	private final Map<String, FieldSupply> fields = new HashMap<>();
+	private final Map<String, FieldInstance> fields = new HashMap<>();
 	
 	private transient Serializable defaultFieldBean;
 	
@@ -68,7 +68,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 		fieldNamesProviderMethodName = fieldNamesProvider.value();
 		
 		for (Serializable each: model.getObject()) {
-			FieldSupply param = (FieldSupply) each;
+			FieldInstance param = (FieldInstance) each;
 			fields.put(param.getName(), param);
 		}
 	}
@@ -109,7 +109,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			for (PropertyDescriptor property: groupProperties) {
 				if (getFieldSpecs().containsKey(property.getDisplayName())) {
 					WebMarkupContainer container = new WebMarkupContainer(fieldsView.newChildId());
-					FieldSupply field = fields.get(property.getDisplayName());
+					FieldInstance field = fields.get(property.getDisplayName());
 					if (field != null) {
 						container.add(newValueEditor("value", property, field.getValueProvider()));
 						container.setDefaultModel(Model.of(field.getValueProvider().getClass()));
@@ -137,11 +137,11 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 					if (isSecret) {
 						choices.add(SpecifiedValue.SECRET_DISPLAY_NAME);
 						choices.add(ScriptingValue.SECRET_DISPLAY_NAME);
-						choices.add(Ignore.DISPLAY_NAME);
+						choices.add(IgnoreValue.DISPLAY_NAME);
 					} else {
 						choices.add(SpecifiedValue.DISPLAY_NAME);
 						choices.add(ScriptingValue.DISPLAY_NAME);
-						choices.add(Ignore.DISPLAY_NAME);
+						choices.add(IgnoreValue.DISPLAY_NAME);
 					}
 					DropDownChoice<String> valueProviderChoice = new DropDownChoice<String>("valueProvider", new IModel<String>() {
 						
@@ -157,7 +157,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							else if (valueProviderClass == ScriptingValue.class)
 								return isSecret?ScriptingValue.SECRET_DISPLAY_NAME:ScriptingValue.DISPLAY_NAME;
 							else
-								return Ignore.DISPLAY_NAME;
+								return IgnoreValue.DISPLAY_NAME;
 						}
 
 						@Override
@@ -168,7 +168,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							else if (object.equals(ScriptingValue.DISPLAY_NAME) || object.equals(ScriptingValue.SECRET_DISPLAY_NAME))
 								valueProvider = new ScriptingValue();
 							else
-								valueProvider = new Ignore();
+								valueProvider = new IgnoreValue();
 							container.replace(newValueEditor("value", property, valueProvider));
 							container.setDefaultModelObject(valueProvider.getClass());
 						}
@@ -267,7 +267,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 		List<Serializable> value = new ArrayList<>();
 		for (Component container: (WebMarkupContainer)get("fields")) {
 			Label label = (Label) container.get("name");
-			FieldSupply field = new FieldSupply();
+			FieldInstance field = new FieldInstance();
 			field.setName((String) label.getDefaultModelObject());
 			FieldSpec fieldSpec = Preconditions.checkNotNull(getFieldSpecs().get(field.getName()));
 			field.setSecret(fieldSpec instanceof SecretField);
@@ -285,7 +285,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 					field.setValueProvider(scriptingValue);
 				} 
 			} else {
-				field.setValueProvider(new Ignore());
+				field.setValueProvider(new IgnoreValue());
 			}
 			value.add(field);
 		}

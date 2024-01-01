@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.supply;
+package io.onedev.server.model.support.issue.field.instance;
 
 import java.util.ArrayList;
 import java.util.Collection;

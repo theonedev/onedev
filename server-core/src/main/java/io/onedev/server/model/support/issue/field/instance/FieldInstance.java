@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.supply;
+package io.onedev.server.model.support.issue.field.instance;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -25,7 +25,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.annotation.Editable;
 
 @Editable
-public class FieldSupply implements Serializable {
+public class FieldInstance implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -127,11 +127,11 @@ public class FieldSupply implements Serializable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof FieldSupply)) 
+		if (!(other instanceof FieldInstance)) 
 			return false;
 		if (this == other)
 			return true;
-		FieldSupply otherIssueField = (FieldSupply) other;
+		FieldInstance otherIssueField = (FieldInstance) other;
 		return new EqualsBuilder()
 			.append(name, otherIssueField.name)
 			.append(valueProvider, otherIssueField.valueProvider)

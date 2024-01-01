@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.supply;
+package io.onedev.server.model.support.issue.field.instance;
 
 import java.io.Serializable;
 import java.util.List;

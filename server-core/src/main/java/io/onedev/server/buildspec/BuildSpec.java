@@ -1731,8 +1731,19 @@ public class BuildSpec implements Serializable, Validatable {
 			MappingNode stepNode = (MappingNode) itStepNode.next();
 			for (NodeTuple stepTuple: stepNode.getValue()) {
 				var stepTupleKeyNode = (ScalarNode)stepTuple.getKeyNode();
-				if (stepTupleKeyNode.getValue().equals("params")) 
+				if (stepTupleKeyNode.getValue().equals("params")) {
 					stepTupleKeyNode.setValue("paramMatrix");
+					for (Node paramNode: ((SequenceNode)stepTuple.getValueNode()).getValue()) {
+						MappingNode paramMappingNode = (MappingNode) paramNode;
+						for (NodeTuple paramTuple: paramMappingNode.getValue()) {
+							if (((ScalarNode)paramTuple.getKeyNode()).getValue().equals("valuesProvider")) {
+								MappingNode valuesProviderNode = (MappingNode) paramTuple.getValueNode();
+								if (valuesProviderNode.getTag().getValue().equals("!Ignore"))
+									valuesProviderNode.setTag(new Tag("!IgnoreValues"));
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1758,6 +1769,16 @@ public class BuildSpec implements Serializable, Validatable {
 									if (propTupleKeyNode.getValue().equals("params")
 											|| propTupleKeyNode.getValue().equals("jobParams")) {
 										propTupleKeyNode.setValue("paramMatrix");
+										for (Node paramNode: ((SequenceNode)propTuple.getValueNode()).getValue()) {
+											MappingNode paramMappingNode = (MappingNode) paramNode;
+											for (NodeTuple paramTuple: paramMappingNode.getValue()) {
+												if (((ScalarNode)paramTuple.getKeyNode()).getValue().equals("valuesProvider")) {
+													MappingNode valuesProviderNode = (MappingNode) paramTuple.getValueNode();
+													if (valuesProviderNode.getTag().getValue().equals("!Ignore")) 
+														valuesProviderNode.setTag(new Tag("!IgnoreValues"));
+												}
+											}
+										}
 									}
 								}
 							}

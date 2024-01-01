@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.issue.fieldsupply;
+package io.onedev.server.web.editable.issue.fieldinstance;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.PropertyContext;
@@ -22,7 +22,7 @@ public class FieldListEditSupport implements EditSupport {
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == FieldSupply.class) {
+			if (elementClass == FieldInstance.class) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override

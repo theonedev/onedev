@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.issue.fieldsupply;
+package io.onedev.server.web.editable.issue.fieldinstance;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,21 +11,21 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
-import io.onedev.server.model.support.issue.field.supply.ScriptingValue;
-import io.onedev.server.model.support.issue.field.supply.SpecifiedValue;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
+import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.web.editable.PropertyContext;
 
 @SuppressWarnings("serial")
 class FieldListViewPanel extends Panel {
 
-	private final List<FieldSupply> fields = new ArrayList<>();
+	private final List<FieldInstance> fields = new ArrayList<>();
 	
 	public FieldListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			fields.add((FieldSupply) each);
+			fields.add((FieldInstance) each);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ class FieldListViewPanel extends Panel {
 		super.onInitialize();
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
-		for (FieldSupply field: fields) {
+		for (FieldInstance field: fields) {
 			WebMarkupContainer container = new WebMarkupContainer(fieldsView.newChildId());
 			container.add(new Label("name", field.getName()));
 			

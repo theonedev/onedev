@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.supply;
+package io.onedev.server.model.support.issue.field.instance;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import io.onedev.server.annotation.Editable;
 
-@Editable
-public class Ignore implements ValueProvider {
+@Editable(name="Ignore this field")
+public class IgnoreValue implements ValueProvider {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -16,7 +16,7 @@ public class Ignore implements ValueProvider {
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof Ignore; 
+		return other instanceof IgnoreValue; 
 	}
 
 	@Override
