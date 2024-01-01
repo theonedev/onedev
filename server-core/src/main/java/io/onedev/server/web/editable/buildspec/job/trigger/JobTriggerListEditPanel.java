@@ -130,7 +130,7 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getParams().size()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getParamMatrix().size()));
 			}
 			
 		});		

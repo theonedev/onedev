@@ -377,7 +377,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 			for (int triggerIndex=0; triggerIndex<getTriggers().size(); triggerIndex++) {
 				JobTrigger trigger = getTriggers().get(triggerIndex);
 				try {
-					ParamUtils.validateParams(getParamSpecs(), trigger.getParams());
+					ParamUtils.validateParamMatrix(getParamSpecs(), trigger.getParamMatrix());
+					for (var paramMap: trigger.getExcludeParamMaps())
+						ParamUtils.validateParamMap(getParamSpecs(), paramMap.getParams());
 				} catch (Exception e) {
 					String errorMessage = String.format("Error validating job parameters (item: #%s, error message: %s)", 
 							(triggerIndex+1), e.getMessage());

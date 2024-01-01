@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.param.supply;
+package io.onedev.server.buildspec.param.instance;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.annotation.Editable;
 
 @Editable(name="Ignore this param")
-public class Ignore implements ValuesProvider {
+public class IgnoreValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -18,7 +18,7 @@ public class Ignore implements ValuesProvider {
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof Ignore; 
+		return other instanceof IgnoreValues; 
 	}
 
 	@Override

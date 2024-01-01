@@ -1,12 +1,12 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import io.onedev.server.annotation.CronExpression;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.ScheduledTimeReaches;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.annotation.CronExpression;
-import io.onedev.server.annotation.Editable;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -33,7 +33,7 @@ public class ScheduleTrigger extends JobTrigger {
 	protected TriggerMatch triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof ScheduledTimeReaches) {
 			return new TriggerMatch(GitUtils.branch2ref(event.getProject().getDefaultBranch()), 
-					null, null, getParams(), "Scheduled");
+					null, null, getParamMatrix(), getExcludeParamMaps(), "Scheduled");
 		} else {
 			return null;
 		}

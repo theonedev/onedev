@@ -2,6 +2,8 @@ package io.onedev.server.buildspec.job.trigger;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
@@ -10,8 +12,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.Repository;
 
@@ -88,8 +88,8 @@ public abstract class PullRequestTrigger extends JobTrigger {
 		if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 				&& touchedFile(request)) {
 			
-			return new TriggerMatch(request.getMergeRef(), request, null, getParams(), 
-					"Pull request is opened/updated");
+			return new TriggerMatch(request.getMergeRef(), request, null, getParamMatrix(), 
+					getExcludeParamMaps(), "Pull request is opened/updated");
 		}
 		return null;
 	}

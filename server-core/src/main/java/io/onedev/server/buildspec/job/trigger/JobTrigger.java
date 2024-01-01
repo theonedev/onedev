@@ -1,54 +1,48 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.*;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.TriggerMatch;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.ParamMap;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.WicketUtils;
+import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-
-import io.onedev.server.buildspec.job.TriggerMatch;
-import org.apache.wicket.Component;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ParamSpecProvider;
-import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.VariableOption;
-import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.server.web.util.WicketUtils;
-
 @Editable
 public abstract class JobTrigger implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	public static Function<RevCommit, Boolean> SKIP_COMMIT = new Function<RevCommit, Boolean>() {
-
-		@Override
-		public Boolean apply(RevCommit commit) {
-			String message = commit.getFullMessage().toLowerCase();
-			return message.contains("[skip ci]") || message.contains("[ci skip]") || message.contains("[no ci]")
-					|| message.contains("[skip job]") || message.contains("[job skip]") || message.contains("[no job]");
-		}
-		
+	
+	public static Function<RevCommit, Boolean> SKIP_COMMIT = commit -> {
+		String message = commit.getFullMessage().toLowerCase();
+		return message.contains("[skip ci]") || message.contains("[ci skip]") || message.contains("[no ci]")
+				|| message.contains("[skip job]") || message.contains("[job skip]") || message.contains("[no job]");
 	};
 	
 	private String projects;
 	
-	private List<ParamSupply> params = new ArrayList<>();
+	private List<ParamInstances> paramMatrix = new ArrayList<>();
+	
+	private List<ParamMap> excludeParamMaps = new ArrayList<>();
 	
 	@Editable(name="Applicable Projects", order=900, placeholder="Any project", description=""
 			+ "Optionally specify space-separated projects applicable for this trigger. "
@@ -69,21 +63,39 @@ public abstract class JobTrigger implements Serializable {
 		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 
-	@Editable(name="Job Parameters", order=1000)
+	@Editable(order=1000)
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
 	@Valid
-	public List<ParamSupply> getParams() {
-		return params;
+	public List<ParamInstances> getParamMatrix() {
+		return paramMatrix;
 	}
 
-	public void setParams(List<ParamSupply> params) {
-		this.params = params;
+	public void setParamMatrix(List<ParamInstances> paramMatrix) {
+		this.paramMatrix = paramMatrix;
 	}
 	
-	@SuppressWarnings("unused")
-	private static List<ParamSpec> getParamSpecs() {
+	@Editable(order=1100, name="Exclude Param Combos")
+	@ShowCondition("isExcludeParamMapsVisible")
+	public List<ParamMap> getExcludeParamMaps() {
+		return excludeParamMaps;
+	}
+
+	public void setExcludeParamMaps(List<ParamMap> excludeParamMaps) {
+		this.excludeParamMaps = excludeParamMaps;
+	}
+
+	private static boolean isExcludeParamMapsVisible() {
+		var componentContext = ComponentContext.get();
+		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+			return !getParamSpecs().isEmpty();
+		} else {
+			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");
+			return !excludeParamMaps.isEmpty();
+		}
+	}
+
+	public static List<ParamSpec> getParamSpecs() {
 		Component component = ComponentContext.get().getComponent();
 		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
 		if (jobAware != null) {
@@ -93,7 +105,8 @@ public abstract class JobTrigger implements Serializable {
 		}
 		return new ArrayList<>();
 	}
-	
+
+	@SuppressWarnings("unused")
 	@Nullable
 	public TriggerMatch matches(ProjectEvent event, Job job) {
 		String projectPath = event.getProject().getPath();

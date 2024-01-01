@@ -65,7 +65,6 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
@@ -102,6 +101,7 @@ import java.util.function.Consumer;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
@@ -278,7 +278,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setIssue(issue);
 		build.setPipeline(pipeline);
 
-		ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
+		Project.push(project);
+		try {
+			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
+		} finally {
+			Project.pop();
+		}
 
 		Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
 		for (ParamSpec paramSpec : build.getJob().getParamSpecs()) {
@@ -314,24 +319,20 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 			for (JobDependency dependency : build.getJob().getJobDependencies()) {
 				JobDependency interpolated = interpolator.interpolateProperties(dependency);
-				new MatrixRunner<>(ParamUtils.getParamMatrix(build, build.getParamCombination(),
-						interpolated.getJobParams())) {
-
-					@Override
-					public void run(Map<String, List<String>> paramMap) {
-						Build dependencyBuild = doSubmit(project, commitId,
-								interpolated.getJobName(), paramMap, pipeline,
-								refName, submitter, request, issue, reason);
-						BuildDependence dependence = new BuildDependence();
-						dependence.setDependency(dependencyBuild);
-						dependence.setDependent(build);
-						dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
-						dependence.setArtifacts(interpolated.getArtifacts());
-						dependence.setDestinationPath(interpolated.getDestinationPath());
-						build.getDependencies().add(dependence);
-					}
-
-				}.run();
+				var dependencyParamMaps = resolveParams(build, build.getParamCombination(), 
+						interpolated.getParamMatrix(), interpolated.getExcludeParamMaps());
+				for (var dependencyParamMap: dependencyParamMaps) {
+					Build dependencyBuild = doSubmit(project, commitId,
+							interpolated.getJobName(), dependencyParamMap, pipeline,
+							refName, submitter, request, issue, reason);
+					BuildDependence dependence = new BuildDependence();
+					dependence.setDependency(dependencyBuild);
+					dependence.setDependent(build);
+					dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
+					dependence.setArtifacts(interpolated.getArtifacts());
+					dependence.setDestinationPath(interpolated.getDestinationPath());
+					build.getDependencies().add(dependence);
+				}
 			}
 
 			for (ProjectDependency dependency : build.getJob().getProjectDependencies()) {
@@ -688,8 +689,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						for (Job job : buildSpec.getJobMap().values()) {
 							TriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
-								Map<String, List<List<String>>> paramMatrix =
-										ParamUtils.getParamMatrix(null, null, match.getParams());
+								var paramMaps = resolveParams(null, null, 
+										match.getParamMatrix(), match.getExcludeParamMaps());
 								Long projectId = event.getProject().getId();
 
 								// run asynchrously as session may get closed due to exception
@@ -700,16 +701,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										SecurityUtils.bindAsSystem();
 										Project project = projectManager.load(projectId);
 										try {
-											new MatrixRunner<>(paramMatrix) {
-
-												@Override
-												public void run(Map<String, List<String>> paramMap) {
-													submit(project, commitId, job.getName(), paramMap,
-															pipeline, match.getRefName(), SecurityUtils.getUser(),
-															match.getRequest(), match.getIssue(), match.getReason());
-												}
-
-											}.run();
+											for (var paramMap: paramMaps) {
+												submit(project, commitId, job.getName(), paramMap,
+														pipeline, match.getRefName(), SecurityUtils.getUser(),
+														match.getRequest(), match.getIssue(), match.getReason());
+											}
 										} catch (Throwable e) {
 											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)",
 													project.getPath(), commitId.name(), job.getName());
@@ -1074,15 +1070,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						SecurityUtils.bindAsSystem();
 						Project aProject = projectManager.load(projectId);
 						String pipeline = UUID.randomUUID().toString();
-						new MatrixRunner<>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
-
-							@Override
-							public void run(Map<String, List<String>> paramMap) {
-								submit(aProject, commitId, job.getName(), paramMap, pipeline, 
-										refName, SecurityUtils.getUser(), null, null, reason);
-							}
-
-						}.run();
+						var paramMaps = resolveParams(null, null, 
+								trigger.getParamMatrix(), trigger.getExcludeParamMaps());
+						for (var paramMap: paramMaps) {
+							submit(aProject, commitId, job.getName(), paramMap, pipeline,
+									refName, SecurityUtils.getUser(), null, null, reason);
+						}
 					});
 				}
 			}

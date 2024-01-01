@@ -1,6 +1,8 @@
 package io.onedev.server.buildspec.job.trigger;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.event.project.ProjectEvent;
@@ -9,8 +11,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -72,8 +72,8 @@ public class TagCreateTrigger extends JobTrigger {
 			if (updatedTag != null && !commitId.equals(ObjectId.zeroId()) 
 					&& (tags == null || PatternSet.parse(tags).matches(new PathMatcher(), updatedTag))
 					&& (branches == null || project.isCommitOnBranches(commitId, PatternSet.parse(branches)))) {
-				return new TriggerMatch(refUpdated.getRefName(), null, null, getParams(),
-						"Tag '" + updatedTag + "' is created");
+				return new TriggerMatch(refUpdated.getRefName(), null, null, getParamMatrix(), 
+						getExcludeParamMaps(), "Tag '" + updatedTag + "' is created");
 			}
 		}
 		return null;

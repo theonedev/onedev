@@ -1,29 +1,24 @@
-package io.onedev.server.web.editable.buildspec.param.supply;
+package io.onedev.server.web.editable.buildspec.param.instance;
 
-import java.io.Serializable;
-import java.util.List;
-
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.buildspec.param.instance.ParamInstance;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.annotation.ParamSpecProvider;
+import java.io.Serializable;
+import java.util.List;
 
 @SuppressWarnings("serial")
-public class ParamListEditSupport implements EditSupport {
+public class ParamMapEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == ParamSupply.class && descriptor.getPropertyGetter().getAnnotation(ParamSpecProvider.class) != null) {
+			if (elementClass == ParamInstance.class && descriptor.getPropertyGetter().getAnnotation(ParamSpecProvider.class) != null) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override
@@ -33,7 +28,7 @@ public class ParamListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null && !model.getObject().isEmpty()) 
-									return new ParamListViewPanel(id, model.getObject());
+									return new ParamMapViewPanel(id, model.getObject());
 								else 
 									return new WebMarkupContainer(id);
 							}
@@ -43,7 +38,7 @@ public class ParamListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new ParamListEditPanel(componentId, descriptor, model);
+						return new ParamMapEditPanel(componentId, descriptor, model);
 					}
 					
 				};

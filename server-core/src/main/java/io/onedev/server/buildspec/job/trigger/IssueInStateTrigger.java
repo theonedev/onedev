@@ -87,8 +87,8 @@ public class IssueInStateTrigger extends JobTrigger {
 		var query = IssueQuery.parse(issue.getProject(), getApplicableIssues(), options, true);
 		if (query.matches(issue)) {
 			var refName = GitUtils.branch2ref(issue.getProject().getDefaultBranch());
-			return new TriggerMatch(refName, null, issue, getParams(),
-					"Issue state is '" + issue.getState() + "'");
+			return new TriggerMatch(refName, null, issue, getParamMatrix(), 
+					getExcludeParamMaps(), "Issue state is '" + issue.getState() + "'");
 		} else {
 			return null;
 		}

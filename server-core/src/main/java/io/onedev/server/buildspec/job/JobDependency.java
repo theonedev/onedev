@@ -1,27 +1,21 @@
 package io.onedev.server.buildspec.job;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.*;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.ParamMap;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.util.WicketUtils;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.wicket.Component;
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.BuildSpecAware;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ParamSpecProvider;
-import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.VariableOption;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class JobDependency implements Serializable {
@@ -32,7 +26,9 @@ public class JobDependency implements Serializable {
 	
 	private boolean requireSuccessful = true;
 	
-	private List<ParamSupply> jobParams = new ArrayList<>();
+	private List<ParamInstances> paramMatrix = new ArrayList<>();
+	
+	private List<ParamMap> excludeParamMaps = new ArrayList<>();
 	
 	private String artifacts = "**";
 	
@@ -59,16 +55,50 @@ public class JobDependency implements Serializable {
 		this.requireSuccessful = requireSuccessful;
 	}
 
-	@Editable(order=200, name="Job Parameters")
+	@Editable(order=200)
 	@ParamSpecProvider("getParamSpecs")
 	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
-	public List<ParamSupply> getJobParams() {
-		return jobParams;
+	@Valid
+	public List<ParamInstances> getParamMatrix() {
+		return paramMatrix;
 	}
 
-	public void setJobParams(List<ParamSupply> jobParams) {
-		this.jobParams = jobParams;
+	public void setParamMatrix(List<ParamInstances> paramMatrix) {
+		this.paramMatrix = paramMatrix;
+	}
+
+	@Editable(order=300, name="Exclude Param Combos")
+	@ShowCondition("isExcludeParamMapsVisible")
+	public List<ParamMap> getExcludeParamMaps() {
+		return excludeParamMaps;
+	}
+
+	public void setExcludeParamMaps(List<ParamMap> excludeParamMaps) {
+		this.excludeParamMaps = excludeParamMaps;
+	}
+
+	private static boolean isExcludeParamMapsVisible() {
+		var componentContext = ComponentContext.get();
+		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+			return !getParamSpecs().isEmpty();
+		} else {
+			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");
+			return !excludeParamMaps.isEmpty();
+		}
+	}
+	
+	public static List<ParamSpec> getParamSpecs() {
+		var buildSpec = BuildSpec.get();
+		if (buildSpec != null) {
+			String jobName = (String) EditContext.get().getInputValue("jobName");
+			if (jobName != null) {
+				Job job = buildSpec.getJobMap().get(jobName);
+				if (job != null)
+					return job.getParamSpecs();
+			}
+		}
+		return new ArrayList<>();
 	}
 	
 	@Editable(order=300, name="Artifacts to Retrieve", placeholder="Do not retrieve", description=""
@@ -108,22 +138,4 @@ public class JobDependency implements Serializable {
 		return Job.getChoices();
 	}
 	
-	@SuppressWarnings("unused")
-	private static List<ParamSpec> getParamSpecs() {
-		String jobName = (String) EditContext.get().getInputValue("jobName");
-		if (jobName != null) {
-			Component component = ComponentContext.get().getComponent();
-			BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
-			if (buildSpecAware != null) {
-				BuildSpec buildSpec = buildSpecAware.getBuildSpec();
-				if (buildSpec != null) {
-					Job job = buildSpec.getJobMap().get(jobName);
-					if (job != null)
-						return job.getParamSpecs();
-				}
-			}
-		} 
-		return new ArrayList<>();
-	}
-
 }

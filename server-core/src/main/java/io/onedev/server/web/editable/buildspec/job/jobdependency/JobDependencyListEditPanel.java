@@ -146,7 +146,7 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getParamMatrix().size()));
 			}
 			
 		});		

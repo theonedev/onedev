@@ -33,7 +33,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.*;
 
@@ -542,7 +541,9 @@ public class BuildSpec implements Serializable, Validatable {
 			if (template != null) {
 				if (templateChain.isEmpty()) {
 					try {
-						ParamUtils.validateParams(template.getParamSpecs(), step.getParams());
+						ParamUtils.validateParamMatrix(template.getParamSpecs(), step.getParamMatrix());
+						for (var paramMap: step.getExcludeParamMaps())
+							ParamUtils.validateParamMap(template.getParamSpecs(), paramMap.getParams());
 					} catch (Exception e) {
 						throw new ValidationException(String.format("Error validating step template parameters (%s)", e.getMessage()));
 					}
@@ -568,7 +569,9 @@ public class BuildSpec implements Serializable, Validatable {
 				if (dependencyJob != null) {
 					if (dependencyChain.isEmpty()) {
 						try {
-							ParamUtils.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
+							ParamUtils.validateParamMatrix(dependencyJob.getParamSpecs(), dependency.getParamMatrix());
+							for (var paramMap: dependency.getExcludeParamMaps())
+								ParamUtils.validateParamMap(dependencyJob.getParamSpecs(), paramMap.getParams());
 						} catch (ValidationException e) {
 							String message = String.format("Error validating dependency job parameters (dependency job: %s, error message: %s)", 
 									dependencyJob.getName(), e.getMessage());
@@ -1717,6 +1720,58 @@ public class BuildSpec implements Serializable, Validatable {
 						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
 						if (stepTemplateTupleKey.equals("steps"))
 							migrate25_steps((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
+
+	private void migrate26_steps(SequenceNode stepsNode) {
+		for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+			MappingNode stepNode = (MappingNode) itStepNode.next();
+			for (NodeTuple stepTuple: stepNode.getValue()) {
+				var stepTupleKeyNode = (ScalarNode)stepTuple.getKeyNode();
+				if (stepTupleKeyNode.getValue().equals("params")) 
+					stepTupleKeyNode.setValue("paramMatrix");
+			}
+		}
+	}
+	
+	private void migrate26(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps")) {
+							migrate26_steps((SequenceNode) jobTuple.getValueNode());
+						} else if (jobTupleKey.equals("triggers") || jobTupleKey.equals("jobDependencies")
+								|| jobTupleKey.equals("postBuildActions")) {
+							SequenceNode propsNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node propNodeItem: propsNode.getValue()) {
+								MappingNode propNode = (MappingNode) propNodeItem;
+								for (NodeTuple propTuple: propNode.getValue()) {
+									var propTupleKeyNode = (ScalarNode)propTuple.getKeyNode();
+									if (propTupleKeyNode.getValue().equals("params")
+											|| propTupleKeyNode.getValue().equals("jobParams")) {
+										propTupleKeyNode.setValue("paramMatrix");
+									}
+								}
+							}
+						}
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps"))
+							migrate26_steps((SequenceNode)stepTemplateTuple.getValueNode());
 					}
 				}
 			}

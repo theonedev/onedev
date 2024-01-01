@@ -18,7 +18,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-abstract class PostBuildActionEditPanel extends Panel implements BuildSpecAware, JobAware {
+public abstract class PostBuildActionEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<PostBuildAction> actions;
 	

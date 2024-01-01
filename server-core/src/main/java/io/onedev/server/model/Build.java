@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -16,8 +15,6 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -55,7 +52,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.*;
@@ -950,43 +946,6 @@ public class Build extends ProjectBelonging
 			}
 			return null;
 		}
-	}
-	
-	public boolean matchParams(List<ParamSupply> paramSupplies) {
-		AtomicBoolean matches = new AtomicBoolean(false);
-		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, paramSupplies)) {
-			
-			@Override
-			public void run(Map<String, List<String>> params) {
-				if (!matches.get()) {
-					boolean matching = true;
-					for (Map.Entry<String, List<String>> entry: params.entrySet()) {
-						if (!(getJob().getParamSpecMap().get(entry.getKey()) instanceof SecretParam)) {
-							List<String> paramValues = getParamMap().get(entry.getKey());
-							if (paramValues != null) {
-								if (!entry.getValue().isEmpty()) {
-									if (!Objects.equal(new HashSet<>(entry.getValue()), new HashSet<>(paramValues))) {
-										matching = false;
-										break;
-									}
-								} else if (paramValues.size() != 1 || paramValues.iterator().next() != null) {
-									matching = false;
-									break;
-								}
-							} else {
-								matching = false;
-								break;
-							}
-						}
-					}
-					if (matching)
-						matches.set(true);
-				}
-			}
-			
-		}.run();
-		
-		return matches.get();
 	}
 	
 	@Override

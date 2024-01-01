@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.buildspec.param.supply;
+package io.onedev.server.web.editable.buildspec.param.instance;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,23 +10,23 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.server.buildspec.param.supply.Ignore;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.buildspec.param.supply.PassthroughValues;
-import io.onedev.server.buildspec.param.supply.ScriptingValues;
-import io.onedev.server.buildspec.param.supply.SpecifiedValues;
+import io.onedev.server.buildspec.param.instance.IgnoreValues;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.PassthroughValues;
+import io.onedev.server.buildspec.param.instance.ScriptingValues;
+import io.onedev.server.buildspec.param.instance.SpecifiedValues;
 import io.onedev.server.web.editable.PropertyContext;
 
 @SuppressWarnings("serial")
-class ParamListViewPanel extends Panel {
+class ParamMatrixViewPanel extends Panel {
 
-	private final List<ParamSupply> params = new ArrayList<>();
+	private final List<ParamInstances> params = new ArrayList<>();
 	
-	public ParamListViewPanel(String id, List<Serializable> elements) {
+	public ParamMatrixViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			params.add((ParamSupply) each);
+			params.add((ParamInstances) each);
 	}
 
 	@Override
@@ -34,7 +34,7 @@ class ParamListViewPanel extends Panel {
 		super.onInitialize();
 		
 		RepeatingView paramsView = new RepeatingView("params");
-		for (ParamSupply param: params) {
+		for (ParamInstances param: params) {
 			WebMarkupContainer paramItem = new WebMarkupContainer(paramsView.newChildId());
 			paramItem.add(new Label("name", param.getName()));
 			
@@ -68,7 +68,7 @@ class ParamListViewPanel extends Panel {
 				paramItem.add(new Label("valuesProvider", PassthroughValues.DISPLAY_NAME));
 				paramItem.add(PropertyContext.view("values", param.getValuesProvider(), "paramName"));
 			} else {
-				paramItem.add(new Label("valuesProvider", Ignore.DISPLAY_NAME));
+				paramItem.add(new Label("valuesProvider", IgnoreValues.DISPLAY_NAME));
 				paramItem.add(new WebMarkupContainer("values"));
 			}
 			paramsView.add(paramItem);

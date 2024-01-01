@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.param.supply;
+package io.onedev.server.buildspec.param.instance;
 
 import java.io.Serializable;
 import java.util.List;

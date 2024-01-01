@@ -1,16 +1,22 @@
-package io.onedev.server.web.editable.buildspec.param.supply;
+package io.onedev.server.web.editable.buildspec.param.instance;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.validation.ValidationException;
-
+import com.google.common.collect.Lists;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.VariableOption;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.instance.*;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
+import io.onedev.server.web.editable.*;
+import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
+import io.onedev.server.web.editable.string.StringPropertyEditor;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -26,46 +32,22 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.apache.wicket.validation.INullAcceptingValidator;
-import org.apache.wicket.validation.IValidatable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import javax.validation.ValidationException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.param.ParamUtils;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.buildspec.param.supply.Ignore;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.buildspec.param.supply.PassthroughValues;
-import io.onedev.server.buildspec.param.supply.ScriptingValues;
-import io.onedev.server.buildspec.param.supply.SpecifiedValues;
-import io.onedev.server.buildspec.param.supply.ValuesProvider;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.JobSecretEditBean;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.ParamSpecProvider;
-import io.onedev.server.annotation.Password;
-import io.onedev.server.annotation.VariableOption;
-import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
-import io.onedev.server.web.editable.string.StringPropertyEditor;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressWarnings("serial")
-class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
+class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ParamListEditPanel.class);
+	private static final Logger logger = LoggerFactory.getLogger(ParamMatrixEditPanel.class);
 	
-	private final Map<String, ParamSupply> params = new HashMap<>();
+	private final Map<String, ParamInstances> params = new HashMap<>();
 	
 	private final String paramSpecProviderMethodName;
 	
@@ -77,15 +59,15 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private transient Serializable defaultParamBean;
 	
-	public ParamListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ParamMatrixEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		ParamSpecProvider paramSpecProvider = Preconditions.checkNotNull(
+		ParamSpecProvider paramSpecProvider = checkNotNull(
 				propertyDescriptor.getPropertyGetter().getAnnotation(ParamSpecProvider.class));
 		paramSpecProviderMethodName = paramSpecProvider.value();
 		
 		for (Serializable each: model.getObject()) {
-			ParamSupply param = (ParamSupply) each;
+			ParamInstances param = (ParamInstances) each;
 			params.put(param.getName(), param);
 		}
 		
@@ -138,7 +120,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				WebMarkupContainer container = new WebMarkupContainer(paramsView.newChildId());
 				container.add(new Label("name", property.getDisplayName()));
 
-				ParamSupply param = params.get(property.getDisplayName());
+				ParamInstances param = params.get(property.getDisplayName());
 				if (param != null) {
 					container.add(newValuesEditor("values", property, param.getValuesProvider()));
 					container.setDefaultModel(Model.of(param.getValuesProvider().getClass()));
@@ -166,13 +148,13 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					if (findParent(JobTriggerEditPanel.class) == null)
 						choices.add(PassthroughValues.DISPLAY_NAME);
 					choices.add(ScriptingValues.SECRET_DISPLAY_NAME);
-					choices.add(Ignore.DISPLAY_NAME);
+					choices.add(IgnoreValues.DISPLAY_NAME);
 				} else {
 					choices.add(SpecifiedValues.DISPLAY_NAME);
 					if (findParent(JobTriggerEditPanel.class) == null)
 						choices.add(PassthroughValues.DISPLAY_NAME);
 					choices.add(ScriptingValues.DISPLAY_NAME);
-					choices.add(Ignore.DISPLAY_NAME);
+					choices.add(IgnoreValues.DISPLAY_NAME);
 				}
 				DropDownChoice<String> valuesProviderChoice = new DropDownChoice<String>("valuesProvider", new IModel<String>() {
 					
@@ -190,7 +172,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						else if (valuesProviderClass == PassthroughValues.class)
 							return PassthroughValues.DISPLAY_NAME;
 						else
-							return Ignore.DISPLAY_NAME;
+							return IgnoreValues.DISPLAY_NAME;
 					}
 
 					@Override
@@ -203,7 +185,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						else if (object.equals(PassthroughValues.DISPLAY_NAME))
 							valuesProvider = new PassthroughValues();
 						else
-							valuesProvider = new Ignore();
+							valuesProvider = new IgnoreValues();
 						container.replace(newValuesEditor("values", property, valuesProvider));
 						container.setDefaultModelObject(valuesProvider.getClass());
 					}
@@ -247,39 +229,33 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		add(newParamsView(getDefaultParamBean().getClass()));
 		
-		add(new INullAcceptingValidator<List<Serializable>>() {
-
-			@SuppressWarnings("deprecation")
-			@Override
-			public void validate(IValidatable<List<Serializable>> validatable) {
-				int index = 0;
-				for (Serializable each: validatable.getValue()) {
-					ParamSupply param = (ParamSupply) each;
-					if (param.getValuesProvider() instanceof SpecifiedValues) {
-						SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
-						try {
-							ParamUtils.validateParamValues(specifiedValues.getValues());
-						} catch (ValidationException e) {
-							if (!getFlag(FLAG_RENDERING)) {
-								RepeatingView paramsView = (RepeatingView) get("params");
-								paramsView.get(index).get("values").error(e.getMessage());
-							}
+		add(validatable -> {
+			int index = 0;
+			for (Serializable each: validatable.getValue()) {
+				ParamInstances param = (ParamInstances) each;
+				if (param.getValuesProvider() instanceof SpecifiedValues) {
+					SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
+					try {
+						ParamUtils.validateParamValues(specifiedValues.getValues());
+					} catch (ValidationException e) {
+						if (!getFlag(FLAG_RENDERING)) {
+							RepeatingView paramsView = (RepeatingView) get("params");
+							paramsView.get(index).get("values").error(e.getMessage());
 						}
 					}
-					index++;
 				}
+				index++;
 			}
-			
 		});
 		
 		setOutputMarkupId(true);
 	}
-	
+	 
 	private SpecifiedValues newSpecifiedValuesProvider(PropertyDescriptor property) {
 		SpecifiedValues specifiedValues = new SpecifiedValues();
 		Object typedValue = property.getPropertyValue(getDefaultParamBean());
 		ParamSpec paramSpec = getParamSpecs().get(property.getDisplayName());
-		Preconditions.checkNotNull(paramSpec);
+		checkNotNull(paramSpec);
 		List<String> strings = paramSpec.convertToStrings(typedValue);
 		List<List<String>> values = new ArrayList<>();
 		values.add(strings);
@@ -287,9 +263,9 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		return specifiedValues;
 	}
 	
-	private Component newSpecifiedValueEditor(String componentId, PropertyDescriptor property, @Nullable List<String> value) {
-		WebMarkupContainer item = new WebMarkupContainer(componentId);
-		ParamSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(property.getDisplayName()));
+	private Component newSpecifiedValueEditor(String componentId, PropertyDescriptor property, List<String> value) {
+		var item = new WebMarkupContainer(componentId);
+		var paramSpec = checkNotNull(getParamSpecs().get(property.getDisplayName()));
 		
 		Serializable paramBean;
 		try {
@@ -300,8 +276,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		}
 		
 		try {
-			if (value != null) 
-				property.setPropertyValue(paramBean, paramSpec.convertToObject(value));
+			property.setPropertyValue(paramBean, paramSpec.convertToObject(value));
 		} catch (Exception e) {
 			logger.error("Error setting property value", e);
 		}
@@ -382,7 +357,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					Component newSpecifiedValueEditor = newSpecifiedValueEditor(valuesView.newChildId(), 
-							property, null);
+							property, new ArrayList<>());
 					valuesView.add(newSpecifiedValueEditor);
 					String script = String.format(""
 							+ "var $editor = $('#%s');"
@@ -414,9 +389,9 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		List<Serializable> value = new ArrayList<>();
 		for (Component paramContainer: (WebMarkupContainer)get("params")) {
 			Label label = (Label) paramContainer.get("name");
-			ParamSupply param = new ParamSupply();
+			ParamInstances param = new ParamInstances();
 			param.setName((String) label.getDefaultModelObject());
-			ParamSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
+			ParamSpec paramSpec = checkNotNull(getParamSpecs().get(param.getName()));
 			param.setSecret(paramSpec instanceof SecretParam);
 			Class<?> valuesProviderClass = (Class<?>) paramContainer.getDefaultModelObject();
 			Component valuesEditor = paramContainer.get("values");
@@ -436,7 +411,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				passthroughValues.setParamName((String) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
 				param.setValuesProvider(passthroughValues);
 			} else {
-				param.setValuesProvider(new Ignore());
+				param.setValuesProvider(new IgnoreValues());
 			}
 			value.add(param);
 		}

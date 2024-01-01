@@ -1,23 +1,22 @@
-package io.onedev.server.buildspec.param.supply;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import javax.validation.constraints.NotEmpty;
+package io.onedev.server.buildspec.param.instance;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.Input;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Editable(name="Use value of specified parameter/secret")
-public class PassthroughValues implements ValuesProvider {
+public class PassthroughValue implements ValueProvider {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,13 +45,11 @@ public class PassthroughValues implements ValuesProvider {
 	}
 	
 	@Override
-	public List<List<String>> getValues(Build build, ParamCombination paramCombination) {
+	public List<String> getValue(Build build, ParamCombination paramCombination) {
 		if (paramCombination != null) {
 			Input param = paramCombination.getParamInputs().get(paramName);
 			if (param != null) {
-				List<List<String>> values = new ArrayList<>();
-				values.add(param.getValues());
-				return values;
+				return param.getValues();
 			} else {
 				String message = String.format("Param not found: %s", paramName);
 				throw new ExplicitException(message);
@@ -64,11 +61,11 @@ public class PassthroughValues implements ValuesProvider {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof PassthroughValues)) 
+		if (!(other instanceof PassthroughValue)) 
 			return false;
 		if (this == other)
 			return true;
-		PassthroughValues otherPassthroughValues = (PassthroughValues) other;
+		PassthroughValue otherPassthroughValues = (PassthroughValue) other;
 		return new EqualsBuilder()
 			.append(paramName, otherPassthroughValues.paramName)
 			.isEquals();

@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.param.supply;
+package io.onedev.server.buildspec.param.instance;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.annotation.Editable;
 
 @Editable
-public class ParamSupply implements Serializable {
+public class ParamInstances implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -54,11 +54,11 @@ public class ParamSupply implements Serializable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof ParamSupply)) 
+		if (!(other instanceof ParamInstances)) 
 			return false;
 		if (this == other)
 			return true;
-		ParamSupply otherParamValue = (ParamSupply) other;
+		ParamInstances otherParamValue = (ParamInstances) other;
 		return new EqualsBuilder()
 			.append(name, otherParamValue.name)
 			.append(valuesProvider, otherParamValue.valuesProvider)
