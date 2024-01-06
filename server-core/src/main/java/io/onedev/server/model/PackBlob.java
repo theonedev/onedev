@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList= PackBlob.PROP_SHA256_HASH),
-		@Index(columnList= PackBlob.PROP_SHA512_HASH), @Index(columnList= PackBlob.PROP_CREATE_DATE)})
+		@Index(columnList= PackBlob.PROP_CREATE_DATE)})
 public class PackBlob extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

@@ -13,6 +13,7 @@ import io.onedev.server.security.BearerAuthenticationToken;
 import io.onedev.server.security.ExceptionHandleFilter;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
@@ -57,13 +58,13 @@ public class PackFilter extends ExceptionHandleFilter {
 		var httpRequest = (HttpServletRequest) request;
 		var httpResponse = (HttpServletResponse) response;
 		var pathSegments = Splitter.on('/').trimResults().omitEmptyStrings()
-				.splitToList(httpRequest.getServletPath());
+				.splitToList(httpRequest.getRequestURI());
 		for (var packService: packServices) {
 			var serviceMark = "~" + packService.getServiceId();
-			var index = pathSegments.indexOf(serviceMark);
-			if (index != -1) {
+			var serviceMarkIndex = pathSegments.indexOf(serviceMark);
+			if (serviceMarkIndex != -1) {
 				request.setAttribute(DefaultSubjectContext.SESSION_CREATION_ENABLED, Boolean.FALSE);
-				var projectPath = Joiner.on('/').join(pathSegments.subList(0, index));
+				var projectPath = Joiner.on('/').join(pathSegments.subList(0, serviceMarkIndex));
 				var projectId = sessionManager.call(() -> {
 					var project = projectManager.findByPath(projectPath);
 					if (project != null)
@@ -74,28 +75,53 @@ public class PackFilter extends ExceptionHandleFilter {
 				
 				var authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
 				Long buildId = null;
-				if (authzHeader != null && authzHeader.toLowerCase().startsWith("basic ")) {
-					String authValue = StringUtils.substringAfter(authzHeader, " ");
-					String decoded = Base64.decodeToString(authValue);
-					String userName = StringUtils.substringBefore(decoded, ":").trim();
-					String password = StringUtils.substringAfter(decoded, ":").trim();
-					if (userName.length() != 0) {
-						var jobContext = jobManager.getJobContext(userName, false);
-						if (jobContext != null)
-							buildId = jobContext.getBuildId();
-						if (password.length() != 0) {
-							User user = userManager.findByAccessToken(password);
-							Subject subject = SecurityUtils.getSubject();
-							if (user != null)
-								 subject.login(new BearerAuthenticationToken(user));
-							 else
-								 subject.login(new UsernamePasswordToken(userName, password));
-					 	}
+				if (authzHeader != null) {
+					if (authzHeader.toLowerCase().startsWith("basic ")) {
+						String authValue = StringUtils.substringAfter(authzHeader, " ");
+						String decoded = Base64.decodeToString(authValue);
+						String userName = StringUtils.substringBefore(decoded, ":").trim();
+						String password = StringUtils.substringAfter(decoded, ":").trim();
+						if (userName.length() != 0) {
+							var jobContext = jobManager.getJobContext(userName, false);
+							if (jobContext != null)
+								buildId = jobContext.getBuildId();
+							if (password.length() != 0) {
+								User user = userManager.findByAccessToken(password);
+								Subject subject = SecurityUtils.getSubject();
+								if (user != null)
+									subject.login(new BearerAuthenticationToken(user));
+								else
+									subject.login(new UsernamePasswordToken(userName, password));
+							}
+						}
+					} else if (authzHeader.toLowerCase().startsWith("bearer ")) {
+						String authValue = StringUtils.substringAfter(authzHeader, " ");
+						var colonIndex = authValue.indexOf(':');
+						String jobToken;
+						String accessToken;
+						if (colonIndex != -1) {
+							jobToken = authValue.substring(0, colonIndex);
+							accessToken = authValue.substring(colonIndex +1);
+						} else {
+							jobToken = null;
+							accessToken = authValue;
+						}
+						if (jobToken != null) {
+							var jobContext = jobManager.getJobContext(jobToken, false);
+							if (jobContext != null)
+								buildId = jobContext.getBuildId();
+						}
+						User user = userManager.findByAccessToken(accessToken);
+						Subject subject = SecurityUtils.getSubject();
+						if (user != null)
+							subject.login(new BearerAuthenticationToken(user));
+						else
+							throw new UnauthorizedException();
 					}
-				}
+				} 
 				
 				packService.service(httpRequest, httpResponse, projectId, buildId,
-						pathSegments.subList(index + 1, pathSegments.size()));
+						pathSegments.subList(serviceMarkIndex + 1, pathSegments.size()));
 				return false;
 			}
 		}

@@ -18,6 +18,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.util.WicketUtils;
+import org.eclipse.jetty.http.HttpStatus;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
@@ -210,7 +211,7 @@ public abstract class JobExecutor implements Serializable {
 	protected String getErrorMessage(Exception exception) {
 		var response = ExceptionUtils.buildResponse(exception);
 		if (response != null) 
-			return response.getResponseBody();
+			return response.getBody() != null? response.getBody().getText() : HttpStatus.getMessage(response.getStatus());
 		else
 			return Throwables.getStackTraceAsString(exception);
 	}

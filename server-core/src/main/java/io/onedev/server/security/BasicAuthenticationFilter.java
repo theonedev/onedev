@@ -31,6 +31,7 @@ public class BasicAuthenticationFilter extends ExceptionHandleFilter {
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
 		HttpServletRequest httpRequest = WebUtils.toHttp(request);
+
     	Subject subject = SecurityUtils.getSubject();
 		if (!subject.isAuthenticated()) {
 	        String authzHeader = httpRequest.getHeader(KubernetesHelper.AUTHORIZATION);

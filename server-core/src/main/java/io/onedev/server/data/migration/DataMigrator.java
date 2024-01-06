@@ -6040,5 +6040,23 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate151(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var dataElement = element.element("data");
+					if (dataElement != null) {
+						if (dataElement.attributeValue("class").contains("MavenData")) {
+							dataElement.element("sha256BlobHashes").attributeValue("class", "linked-hash-map");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

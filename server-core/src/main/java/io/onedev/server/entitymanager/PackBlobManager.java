@@ -22,6 +22,9 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	boolean checkPackBlobFile(Long projectId, String sha256Hash, long size);
 	
+	@Nullable
+	PackBlob checkPackBlob(String sha256Hash);
+	
 	void initUpload(Long projectId, String uuid);
 	
 	File getUploadFile(Long projectId, String uuid);

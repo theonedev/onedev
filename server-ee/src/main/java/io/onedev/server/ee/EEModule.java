@@ -18,6 +18,8 @@ import io.onedev.server.ee.pack.container.ContainerPackSupport;
 import io.onedev.server.ee.pack.container.ContainerServlet;
 import io.onedev.server.ee.pack.maven.MavenPackSupport;
 import io.onedev.server.ee.pack.maven.MavenService;
+import io.onedev.server.ee.pack.npm.NpmPackSupport;
+import io.onedev.server.ee.pack.npm.NpmService;
 import io.onedev.server.ee.sendgrid.DefaultMessageManager;
 import io.onedev.server.ee.sendgrid.MessageManager;
 import io.onedev.server.ee.sendgrid.SendgridMailService;
@@ -160,6 +162,10 @@ public class EEModule extends AbstractPluginModule {
 		bind(MavenService.class);
 		contribute(PackService.class, MavenService.class);
 		contribute(PackSupport.class, new MavenPackSupport());
+
+		bind(NpmService.class);
+		contribute(PackService.class, NpmService.class);
+		contribute(PackSupport.class, new NpmPackSupport());
 	}
 
 	@Override

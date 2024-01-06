@@ -47,7 +47,7 @@ import static org.apache.commons.io.IOUtils.copyLarge;
 @Singleton
 public class MavenService implements PackService {
 
-	private static final int MAX_CHECKSUM_SIZE = 1000;
+	private static final int MAX_CHECKSUM_LEN = 1000;
 	
 	static final String FILE_METADATA = "maven-metadata.xml";
 
@@ -114,9 +114,9 @@ public class MavenService implements PackService {
 	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		if (!subscriptionManager.isSubscriptionActive()) {
-			throw new HttpResponseAwareException(new HttpResponse(
+			throw new HttpResponseAwareException(
 					SC_NOT_ACCEPTABLE, 
-					"This feature requires an active subscription. Visit https://onedev.io/pricing to get a 30 days free trial"));
+					"This feature requires an active subscription. Visit https://onedev.io/pricing to get a 30 days free trial");
 		}
 		
 		var method = request.getMethod();
@@ -125,11 +125,11 @@ public class MavenService implements PackService {
 		var isGet = method.equals("GET");
 		
 		if (pathSegments.isEmpty())
-			throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST, "No file name"));
+			throw new HttpResponseAwareException(SC_BAD_REQUEST, "No file name");
 		var fileName = pathSegments.get(pathSegments.size() - 1);
 		pathSegments = pathSegments.subList(0, pathSegments.size() - 1);
 		if (pathSegments.isEmpty())
-			throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST, "No GAV info"));
+			throw new HttpResponseAwareException(SC_BAD_REQUEST, "No GAV info");
 		var prevSegment = pathSegments.get(pathSegments.size() - 1);
 		pathSegments = pathSegments.subList(0, pathSegments.size() - 1);
 		if (fileName.startsWith(FILE_METADATA)) {
@@ -147,7 +147,7 @@ public class MavenService implements PackService {
 			} else {
 				var groupId = getGroupId(pathSegments);
 				var versionInfos = sessionManager.call(() -> {
-					var project = getProject(projectId, false);
+					var project = checkProject(projectId, false);
 					var packs = packManager.queryByGAWithV(project, TYPE, groupId, prevSegment);
 					if (!packs.isEmpty() && fileName.equals(FILE_METADATA) && !isHead && !isGet) {
 						var latestPack = packs.get(packs.size()-1);
@@ -254,7 +254,7 @@ public class MavenService implements PackService {
 						   String groupId, @Nullable String artifactId,
 						   @Nullable String version, String fileName) {
 		var packInfo = sessionManager.call(() -> {
-			var project = getProject(projectId, false);
+			var project = checkProject(projectId, false);
 			var pack = findPack(project, groupId, artifactId, version);
 			if (pack != null)
 				return new Pair<>((MavenData)pack.getData(), pack.getPublishDate());
@@ -274,20 +274,11 @@ public class MavenService implements PackService {
 								blobHash = sha256BlobHash;
 							} else {
 								blobHash = sessionManager.call(() -> {
-									var packBlob = packBlobManager.findBySha256Hash(sha256BlobHash);
-									if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-										if (packBlobManager.checkPackBlobFile(
-												packBlob.getProject().getId(), sha256BlobHash, packBlob.getSize())) {
-											return getNonSha256Hash(packBlob, fileName);
-										} else {
-											packBlobManager.delete(packBlob);
-											throw new HttpResponseAwareException(new HttpResponse(
-													SC_NOT_FOUND, "Invalid file"));
-										}
-									} else {
-										throw new HttpResponseAwareException(new HttpResponse(
-												SC_NOT_FOUND, "Missing file"));
-									}
+									PackBlob packBlob;
+									if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) 
+										return getNonSha256Hash(packBlob, fileName);
+									else 
+										throw new HttpResponseAwareException(SC_NOT_FOUND);
 								});
 							}
 							response.setStatus(SC_OK);
@@ -295,20 +286,11 @@ public class MavenService implements PackService {
 							response.getOutputStream().write(blobHash.getBytes(UTF_8));
 						} else {
 							var packBlobInfo = sessionManager.call(() -> {
-								var packBlob = packBlobManager.findBySha256Hash(sha256BlobHash);
-								if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-									if (packBlobManager.checkPackBlobFile(
-											packBlob.getProject().getId(), sha256BlobHash, packBlob.getSize())) {
-										return new Pair<>(packBlob.getProject().getId(), packBlob.getSize());
-									} else {
-										packBlobManager.delete(packBlob);
-										throw new HttpResponseAwareException(new HttpResponse(
-												SC_NOT_FOUND, "Invalid file"));
-									}
-								} else {
-									throw new HttpResponseAwareException(new HttpResponse(
-											SC_NOT_FOUND, "Missing file"));
-								}
+								PackBlob packBlob;
+								if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) 
+									return new Pair<>(packBlob.getProject().getId(), packBlob.getSize());
+								else
+									throw new HttpResponseAwareException(SC_NOT_FOUND);
 							});
 							response.setContentLengthLong(packBlobInfo.getRight());
 							if (fileName.endsWith(EXT_XML))
@@ -323,20 +305,23 @@ public class MavenService implements PackService {
 						throw new RuntimeException(e);
 					}
 				} else {
-					throw new HttpResponseAwareException(new HttpResponse(SC_NOT_FOUND, "Unknown file"));
+					throw new HttpResponseAwareException(SC_NOT_FOUND, "Unknown file");
 				}
 			} else {
 				response.setStatus(SC_OK);
 				response.setDateHeader(LAST_MODIFIED, packInfo.getRight().getTime());
 			}
 		} else {
-			throw new HttpResponseAwareException(new HttpResponse(SC_NOT_FOUND, "Unknown GAV"));
+			throw new HttpResponseAwareException(SC_NOT_FOUND, "Unknown GAV");
 		}
 	}
 	
 	private void uploadBlob(HttpServletRequest request, HttpServletResponse response,
 							Long projectId, Long buildId, String groupId, @Nullable String artifactId, 
 							@Nullable String version, String fileName) {
+		sessionManager.run(() -> {
+			checkProject(projectId, true);
+		});
 		try (var is = request.getInputStream()) {
 			var lockName = "update-pack:" + projectId + ":" + TYPE + ":" + groupId;
 			if (artifactId != null && version != null)
@@ -344,57 +329,45 @@ public class MavenService implements PackService {
 			var blobName = getBlobName(fileName);
 			if (!blobName.equals(fileName)) { // checksum verification
 				var baos = new ByteArrayOutputStream();
-				if (copyLarge(is, baos, 0, MAX_CHECKSUM_SIZE, new byte[BUFFER_SIZE]) >= MAX_CHECKSUM_SIZE) {
-					throw new HttpResponseAwareException(new HttpResponse(SC_REQUEST_ENTITY_TOO_LARGE,
-							"Checksum is too large"));
+				if (copyLarge(is, baos, 0, MAX_CHECKSUM_LEN, new byte[BUFFER_SIZE]) >= MAX_CHECKSUM_LEN) {
+					throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE, "Checksum is too large");
 				}
 				var checksum = new String(baos.toByteArray(), UTF_8);
 				LockUtils.run(lockName, () -> transactionManager.run(() -> {
-					var project = getProject(projectId, true);
+					var project = projectManager.load(projectId);
 					Pack pack = findPack(project, groupId, artifactId, version);
 					if (pack != null) {
 						MavenData data = (MavenData) pack.getData();
 						var sha256BlobHash = data.getSha256BlobHashes().get(blobName);
 						if (sha256BlobHash != null) {
-							var packBlob = packBlobManager.findBySha256Hash(sha256BlobHash);
-							if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-								if (packBlobManager.checkPackBlobFile(
-										packBlob.getProject().getId(), sha256BlobHash, packBlob.getSize())) {
-									String blobHash;
-									if (fileName.endsWith(EXT_SHA256))
-										blobHash = sha256BlobHash;
-									else
-										blobHash = getNonSha256Hash(packBlob, fileName);
-									if (blobHash.equals(checksum)) {
-										packBlobReferenceManager.createIfNotExist(pack, packBlob);
-										response.setStatus(SC_OK);
-									} else {
-										throw new HttpResponseAwareException(new HttpResponse(
-												SC_BAD_REQUEST, "Checksum verification failed"));
-									}
+							PackBlob packBlob;
+							if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) {
+								String blobHash;
+								if (fileName.endsWith(EXT_SHA256))
+									blobHash = sha256BlobHash;
+								else
+									blobHash = getNonSha256Hash(packBlob, fileName);
+								if (blobHash.equals(checksum)) {
+									packBlobReferenceManager.createIfNotExist(pack, packBlob);
+									response.setStatus(SC_OK);
 								} else {
-									packBlobManager.delete(packBlob);
-									throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST,
-											"Invalid file to verify checksum"));
+									throw new HttpResponseAwareException(SC_BAD_REQUEST, "Checksum verification failed");
 								}
 							} else {
-								throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST,
-										"Missing file to verify checksum"));
+								throw new HttpResponseAwareException(SC_BAD_REQUEST);
 							}
 						} else {
-							throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST,
-									"Unknown file to verify checksum"));
+							throw new HttpResponseAwareException(SC_BAD_REQUEST, "Unknown file to verify checksum");
 						}
 					} else {
-						throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST,
-								"Unknown GAV to verify checksum"));
+						throw new HttpResponseAwareException(SC_BAD_REQUEST, "Unknown GAV to verify checksum");
 					}
 				}));			
 			} else {
 				var packBlobId = packBlobManager.uploadBlob(projectId, is);
 				var sha256BlobHash = sessionManager.call(() -> packBlobManager.load(packBlobId).getSha256Hash());
 				LockUtils.run(lockName, () -> transactionManager.run(() -> {
-					var project = getProject(projectId, true);
+					var project = projectManager.load(projectId);
 					Pack pack = findPack(project, groupId, artifactId, version);
 					if (pack == null) {
 						pack = new Pack();
@@ -431,10 +404,10 @@ public class MavenService implements PackService {
 		}
 	}
 	
-	private Project getProject(Long projectId, boolean needsToWrite) {
+	private Project checkProject(Long projectId, boolean needsToWrite) {
 		var project = projectManager.load(projectId);
 		if (!project.isPackManagement())
-			throw new HttpResponseAwareException(new HttpResponse(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'"));
+			throw new HttpResponseAwareException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		else if (needsToWrite && !SecurityUtils.canWritePack(project))
 			throw new UnauthorizedException("No package write permission for project: " + project.getPath());
 		else if (!needsToWrite && !SecurityUtils.canReadPack(project))
@@ -452,7 +425,7 @@ public class MavenService implements PackService {
 
 	private Pair<String, String> getGroupIdAndArtifactId(List<String> pathSegments) {
 		if (pathSegments.isEmpty())
-			throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST, "No artifact id"));
+			throw new HttpResponseAwareException(SC_BAD_REQUEST, "No artifact id");
 		var artifactId = pathSegments.get(pathSegments.size()-1);
 		pathSegments = pathSegments.subList(0, pathSegments.size()-1);
 		return new Pair<>(getGroupId(pathSegments), artifactId);
@@ -460,7 +433,7 @@ public class MavenService implements PackService {
 
 	private String getGroupId(List<String> pathSegments) {
 		if (pathSegments.isEmpty())
-			throw new HttpResponseAwareException(new HttpResponse(SC_BAD_REQUEST, "No group id"));
+			throw new HttpResponseAwareException(SC_BAD_REQUEST, "No group id");
 		return StringUtils.join(pathSegments, ".");
 	}
 	

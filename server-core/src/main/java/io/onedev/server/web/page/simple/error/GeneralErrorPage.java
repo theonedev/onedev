@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,8 @@ public class GeneralErrorPage extends SimplePage {
 		
 		var response = ExceptionUtils.buildResponse(exception);
 		if (response != null) {
-			title = response.getResponseBody();
-			statusCode = response.getStatusCode();
+			title = response.getBody() != null? response.getBody().getText(): HttpStatus.getMessage(response.getStatus());
+			statusCode = response.getStatus();
 		} else {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);

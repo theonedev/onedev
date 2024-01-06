@@ -1,52 +1,47 @@
 package io.onedev.server.exception;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import java.util.Map;
 
 public class HttpResponse {
 	
-	private final int statusCode;
+	private final int status;
 	
-	private final boolean jsonContent;
-	
-	private final String responseBody;
+	private final HttpResponseBody body;
 	
 	private final MultivaluedMap<String, String> headers;
 	
-	public HttpResponse(int statusCode, boolean jsonContent, String responseBody, 
+	public HttpResponse(int status, @Nullable HttpResponseBody body,
 						MultivaluedMap<String, String> headers) {
-		this.statusCode = statusCode;
-		this.jsonContent = jsonContent;
-		this.responseBody = responseBody;
+		this.status = status;
+		this.body = body;
 		this.headers = headers;
 	}
+	
+	public HttpResponse(int status, @Nullable HttpResponseBody body) {
+		this(status, body, new MultivaluedHashMap<>());
+	}
 
-	public HttpResponse(int statusCode, String responseBody,
-						MultivaluedMap<String, String> headers) {
-		this(statusCode, false, responseBody, headers);
+	public HttpResponse(int status) {
+		this(status, (HttpResponseBody) null);
+	}
+
+	public HttpResponse(int status, String responseBodyText) {
+		this(status, new HttpResponseBody(false, responseBodyText));
+	}
+
+	public HttpResponse(int status, Map<String, Object> responseBodyJsonValue) {
+		this(status, new HttpResponseBody(responseBodyJsonValue));
 	}
 	
-	public HttpResponse(int statusCode, boolean jsonContent, String responseBody) {
-		this(statusCode, jsonContent, responseBody, new MultivaluedHashMap<>());
+	public int getStatus() {
+		return status;
 	}
 
-	public HttpResponse(int statusCode, String responseBody) {
-		this(statusCode, false, responseBody);
-	}
-	
-	public int getStatusCode() {
-		return statusCode;
-	}
-
-	public String getContentType() {
-		return jsonContent? APPLICATION_JSON: TEXT_PLAIN;
-	}
-
-	public String getResponseBody() {
-		return responseBody;
+	public HttpResponseBody getBody() {
+		return body;
 	}
 
 	public MultivaluedMap<String, String> getHeaders() {

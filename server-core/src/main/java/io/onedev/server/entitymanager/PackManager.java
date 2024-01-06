@@ -29,11 +29,17 @@ public interface PackManager extends EntityManager<Pack> {
 	@Nullable
     Pack findByTag(Project project, String type, String tag);
 	
+	Pack findByNameAndVersion(Project project, String type, String name, String version);
+	
 	@Nullable
 	Pack findByGWithoutAV(Project project, String type, String groupId);
 
 	List<Pack> queryByGAWithV(Project project, String type, String groupId, String artifactId);
-
+	
+	List<Pack> queryByName(Project project, String type, String name);
+	
+	List<Pack> queryLatests(Project project, String type, String nameQuery, int firstResult, int maxResults);
+	
 	@Nullable
 	Pack findByGAV(Project project, String type, String groupId, String artifactId, String version);
 	

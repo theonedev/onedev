@@ -5,7 +5,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -23,10 +22,13 @@ public class JerseyExceptionMapper implements ExceptionMapper<Throwable> {
     	var httpResponse = ExceptionUtils.buildResponse(t);
 		Response jerseyResponse;
     	if (httpResponse != null) {
-			jerseyResponse = Response.status(httpResponse.getStatusCode())
-					.type(httpResponse.getContentType())
-					.entity(httpResponse.getResponseBody())
-					.build();
+			var jerseyResponseBuilder = Response.status(httpResponse.getStatus());
+			if (httpResponse.getBody() != null) {
+				jerseyResponseBuilder
+						.type(httpResponse.getBody().getContentType())
+						.entity(httpResponse.getBody().getText());
+			}
+			return jerseyResponseBuilder.build();
 		} else {
 			int statusCode = SC_INTERNAL_SERVER_ERROR;
 			jerseyResponse = Response.status(statusCode)

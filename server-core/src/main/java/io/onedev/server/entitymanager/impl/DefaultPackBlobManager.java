@@ -180,6 +180,21 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
+	public PackBlob checkPackBlob(String sha256Hash) {
+		var packBlob = findBySha256Hash(sha256Hash);
+		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+			if (checkPackBlobFile(packBlob.getProject().getId(), sha256Hash, packBlob.getSize())) {
+				return packBlob;
+			} else {
+				delete(packBlob);
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
 	public boolean checkPackBlobFile(Long projectId, String sha256Hash, long size) {
 		return projectManager.runOnActiveServer(projectId, () -> {
 			var fileLockName = getFileLockName(projectId, sha256Hash);

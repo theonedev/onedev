@@ -1,6 +1,7 @@
 package io.onedev.server.exception.handler;
 
 import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -22,7 +23,7 @@ public class UnauthorizedExceptionHandler extends AbstractExceptionHandler<Unaut
 		if (SecurityUtils.getUserId().equals(0L)) {
 			MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
 			headers.putSingle("WWW-Authenticate", HttpServletRequest.BASIC_AUTH + " realm=\"OneDev\"");
-			return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, errorMessage, headers);
+			return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, new HttpResponseBody(false, errorMessage), headers);
 		} else {
 			return new HttpResponse(HttpServletResponse.SC_FORBIDDEN, errorMessage);
 		}

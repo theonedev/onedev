@@ -1,6 +1,7 @@
 package io.onedev.server.rest;
 
 import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.exception.handler.AbstractExceptionHandler;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -16,7 +17,8 @@ public class WebApplicationExceptionHandler extends AbstractExceptionHandler<Web
 		var message = throwable.getMessage();
 		if (message == null)
 			message = HttpStatus.getMessage(jerseyResponse.getStatus());
-		return new HttpResponse(jerseyResponse.getStatus(), message, 
+		return new HttpResponse(jerseyResponse.getStatus(), 
+				new HttpResponseBody(false, message), 
 				jerseyResponse.getStringHeaders());
 	}
 

@@ -11,8 +11,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.web.component.pack.list.PackListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -53,35 +51,22 @@ public class BuildPacksPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (packsModel.getObject().size() == 1) {
-			var fragment = new Fragment("content", "singlePackFrag", this);
-			var pack = packsModel.getObject().iterator().next();
-			var title = pack.getSupport().getReference(pack);
-			if (!pack.getProject().equals(getProject()))
-				title = pack.getProject().getPath() + pack.getSupport().getProjectSeparator() + title;
-			fragment.add(new Label("title", title));
-			fragment.add(pack.getSupport().renderContent("content", pack));
-			add(fragment);
-		} else {
-			var fragment = new Fragment("content", "multiPacksFrag", this);
-			fragment.add(new PackListPanel("packs", Model.of((String)null), false) {
+		add(new PackListPanel("packs", Model.of((String)null), false) {
 
-				@Nullable
-				@Override
-				protected Project getProject() {
-					return null;
-				}
+			@Nullable
+			@Override
+			protected Project getProject() {
+				return null;
+			}
 
-				@Override
-				protected PackQuery getBaseQuery() {
-					return new PackQuery(new AndCriteria<>(
-							new PublishedByBuildCriteria(getBuild()), 
-							new TypeCriteria(packType, PackQueryLexer.Is)));
-				}
-				
-			});
-			add(fragment);
-		}
+			@Override
+			protected PackQuery getBaseQuery() {
+				return new PackQuery(new AndCriteria<>(
+						new PublishedByBuildCriteria(getBuild()), 
+						new TypeCriteria(packType, PackQueryLexer.Is)));
+			}
+			
+		});
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Pack.*;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -252,6 +253,17 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		return find(criteria);
 	}
 
+	@Sessional
+	@Override
+	public Pack findByNameAndVersion(Project project, String type, String name, String version) {
+		var criteria = newCriteria();
+		criteria.add(Restrictions.eq(PROP_PROJECT, project));
+		criteria.add(Restrictions.eq(PROP_TYPE, type));
+		criteria.add(Restrictions.eq(PROP_NAME, name));
+		criteria.add(Restrictions.eq(PROP_VERSION, version));
+		return find(criteria);
+	}
+	
 	private EntityCriteria<Pack> newGroupCriteria(Project project, String type, String groupId) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PROJECT, project));
@@ -295,6 +307,33 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		}
 		Collections.reverse(packs);
 		return packs;
+	}
+
+	@Sessional
+	@Override
+	public List<Pack> queryByName(Project project, String type, String name) {
+		var criteria = newCriteria();
+		criteria.add(Restrictions.eq(PROP_PROJECT, project));
+		criteria.add(Restrictions.eq(PROP_TYPE, type));
+		criteria.add(Restrictions.eq(PROP_NAME, name));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(PROP_ID));
+		return query(criteria);
+	}
+
+	@Sessional
+	@Override
+	public List<Pack> queryLatests(Project project, String type, String nameQuery,
+								   int firstResult, int maxResults) {
+		Query<Pack> query = getSession().createQuery("" +
+				"select p1 from Pack p1 " +
+				"left outer join Pack p2 " +
+				"	on p1.name = p2.name and p1.id < p2.id " +
+				"where p2.id is null and lower(p1.name) like :name " +
+				"order by p1.name");
+		query.setParameter("name", "%" + nameQuery + "%");
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		return query.list();
 	}
 
 	@Transactional

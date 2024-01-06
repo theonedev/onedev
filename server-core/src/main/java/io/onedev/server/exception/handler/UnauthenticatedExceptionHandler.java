@@ -1,6 +1,7 @@
 package io.onedev.server.exception.handler;
 
 import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.HttpResponseBody;
 import org.apache.shiro.authz.UnauthenticatedException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +24,8 @@ public class UnauthenticatedExceptionHandler extends AbstractExceptionHandler<Un
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Not authenticated";
-		return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, errorMessage, headers);
+		return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, 
+				new HttpResponseBody(false, errorMessage), headers);
     }
     
 }

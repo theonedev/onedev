@@ -8,10 +8,12 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 	
@@ -23,15 +25,15 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 					for (String value: entry.getValue())
 						servletResponse.addHeader(entry.getKey(), value);
 				}
-				servletResponse.setStatus(httpResponse.getStatusCode());
-				servletResponse.setContentType(httpResponse.getContentType());
-				if (httpResponse.getResponseBody() != null) {
+				servletResponse.setStatus(httpResponse.getStatus());
+				if (httpResponse.getBody() != null) {
+					servletResponse.setContentType(httpResponse.getBody().getContentType());
 					try (var os = servletResponse.getOutputStream()) {
-						os.write(httpResponse.getResponseBody().getBytes(StandardCharsets.UTF_8));
+						os.write(httpResponse.getBody().getText().getBytes(UTF_8));
 					}
 				}
 			} else {
-				servletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				servletResponse.setStatus(SC_INTERNAL_SERVER_ERROR);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

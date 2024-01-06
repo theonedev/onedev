@@ -18,6 +18,7 @@ import io.onedev.server.util.Digest;
 import io.onedev.server.util.HttpUtils;
 import io.onedev.server.util.Pair;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jetty.http.HttpStatus;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -141,14 +142,9 @@ public class ContainerServlet extends HttpServlet {
 					var project = getProject(projectPath, true);
 					if (digestString != null) {
 						var hash = parseDigest(digestString).getHash();
-						var packBlob = packBlobManager.findBySha256Hash(hash);
-						if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-							if (packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), hash, packBlob.getSize())) {
-								response.setStatus(SC_CREATED);
-								response.setHeader("Location", getBlobUrl(projectPath, digestString));
-							} else {
-								packBlobManager.delete(packBlob);
-							}
+						if (packBlobManager.checkPackBlob(hash) != null) {
+							response.setStatus(SC_CREATED);
+							response.setHeader("Location", getBlobUrl(projectPath, digestString));
 						}
 					}
 					if (response.getStatus() != SC_CREATED) {
@@ -250,16 +246,12 @@ public class ContainerServlet extends HttpServlet {
 						getProject(projectPath, false);
 						var digest = parseDigest(digestString);
 						var hash = digest.getHash();
-						var packBlob = packBlobManager.findBySha256Hash(hash);
-						if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-							if (packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), hash, packBlob.getSize())) {
-								response.setStatus(SC_OK);
-								response.setHeader("Content-Length", String.valueOf(packBlob.getSize()));
-								response.setHeader("Docker-Content-Digest", digestString);
-								return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
-							} else {
-								throw new NotFoundException(ErrorCode.BLOB_UNKNOWN);
-							}
+						PackBlob packBlob;
+						if ((packBlob = packBlobManager.checkPackBlob(hash)) != null) {
+							response.setStatus(SC_OK);
+							response.setHeader("Content-Length", String.valueOf(packBlob.getSize()));
+							response.setHeader("Docker-Content-Digest", digestString);
+							return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
 						} else {
 							throw new NotFoundException(ErrorCode.BLOB_UNKNOWN);
 						}
@@ -469,10 +461,10 @@ public class ContainerServlet extends HttpServlet {
 		} catch (Exception e) {
 			var httpResponse = ExceptionUtils.buildResponse(e);
 			if (httpResponse != null) {
-				var statusCode = httpResponse.getStatusCode();
+				var statusCode = httpResponse.getStatus();
 				if (statusCode >= 400 && statusCode < 500) {
 					throw new ClientException(statusCode, ErrorCode.DENIED,
-							httpResponse.getResponseBody());
+							httpResponse.getBody() != null? httpResponse.getBody().getText(): HttpStatus.getMessage(httpResponse.getStatus()));
 				}
 			}
 			throw e;
