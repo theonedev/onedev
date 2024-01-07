@@ -7,8 +7,10 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ee.subscription.EESubscriptionManager;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -60,11 +62,7 @@ public class NpmService implements PackService {
 	
 	private final PackManager packManager;
 	
-	private final PackBlobReferenceManager packBlobReferenceManager;
-	
 	private final ProjectManager projectManager;
-	
-	private final ListenerRegistry listenerRegistry;
 	
 	private final BuildManager buildManager;
 	
@@ -77,17 +75,14 @@ public class NpmService implements PackService {
 	@Inject
 	public NpmService(SessionManager sessionManager, TransactionManager transactionManager,
                       PackBlobManager packBlobManager, PackManager packManager,
-                      PackBlobReferenceManager packBlobReferenceManager,
-                      ProjectManager projectManager, ListenerRegistry listenerRegistry,
-                      BuildManager buildManager, ObjectMapper objectMapper,
-					  UrlManager urlManager, EESubscriptionManager subscriptionManager) {
+                      ProjectManager projectManager, BuildManager buildManager, 
+					  ObjectMapper objectMapper, UrlManager urlManager, 
+					  EESubscriptionManager subscriptionManager) {
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.packBlobManager = packBlobManager;
 		this.packManager = packManager;
-		this.packBlobReferenceManager = packBlobReferenceManager;
 		this.projectManager = projectManager;
-		this.listenerRegistry = listenerRegistry;
 		this.buildManager = buildManager;
 		this.objectMapper = objectMapper;
 		this.urlManager = urlManager;
@@ -302,7 +297,7 @@ public class NpmService implements PackService {
 					var project = checkProject(projectId, false);
 					sessionManager.run(() -> {
 						var packs = packManager.queryByName(project, TYPE, packageName);
-						var npmUrl = urlManager.urlFor(project) + "/~" + TYPE + "/" + encodePath(packageName);
+						var npmUrl = urlManager.urlFor(project) + "/~" + getServiceId() + "/" + encodePath(packageName);
 						var distTagsNode = objectMapper.createObjectNode();
 						var versionsNode = objectMapper.createObjectNode();
 						NpmData latestPackData = null;
@@ -428,6 +423,7 @@ public class NpmService implements PackService {
 											var fileContent = attachments.get(fileName);
 											if (fileContent != null) {
 												var integrity = distNode.get("integrity").asText();
+												System.out.println(integrity);
 												var algorithm = substringBefore(integrity, "-");
 												var hash = Base64.decodeBase64(substringAfter(integrity, "-"));
 												if (algorithm.equals("sha512")) {
