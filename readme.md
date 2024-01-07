@@ -131,9 +131,9 @@ on other servers will become active immediately without data loss and service in
 
 ![replication](doc/images/replication.png)
 
-## Built-in Docker and Maven Registry (Enterprise Edition)
+## Built-in Docker/NPM/Maven Registry (Enterprise Edition)
 
-The out-of-box integration of packages (current support docker and maven, more to come), CI/CD,
+The out-of-box integration of packages (supports docker/npm/maven currently, more to come), CI/CD,
 code and issues makes information cross-reference a lot easier. For instance, different package
 versions can be compared to show code changes or fixed issues, published packages will be linked
 with CI/CD builds automatically etc
