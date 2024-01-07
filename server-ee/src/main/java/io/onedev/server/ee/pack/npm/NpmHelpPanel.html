@@ -5,7 +5,10 @@
 		<div wicket:id="registryAuth" class="text-break font-size-sm mt-2"></div>
 		<span class="text-muted font-size-sm">Make sure the access token has package write permission over the project</span>
 	</div>
+
+	<div class="font-size-lg font-weight-bolder mb-3">Then publish package from project directory like below</div>
+	<div class="code mb-5">npm publish</div>
 	
-	<div class="font-size-lg font-weight-bolder mb-3">For CI/CD job, configure the registry like below via command step</div>
+	<div class="font-size-lg font-weight-bolder mb-3">For CI/CD job, run below to publish package via command step</div>
 	<div wicket:id="jobCommands"></div>
 </wicket:panel>
