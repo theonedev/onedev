@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.pack;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Pack;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -30,7 +31,12 @@ public class FuzzyCriteria extends Criteria<Pack> {
 	}
 	
 	private Criteria<Pack> parse(String value) {
-		return new TagCriteria("*" + value + "*", PackQueryLexer.Is);
+		return new OrCriteria<Pack>(
+				new TagCriteria("*" + value + "*", PackQueryLexer.Is),
+				new GroupIdCriteria("*" + value + "*", PackQueryLexer.Is),
+				new ArtiractIdCriteria("*" + value + "*", PackQueryLexer.Is),
+				new VersionCriteria("*" + value + "*", PackQueryLexer.Is),
+				new NameCriteria("*" + value + "*", PackQueryLexer.Is));
 	}
 
 	@Override

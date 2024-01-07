@@ -141,6 +141,11 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestPackProps(project, PROP_VERSION, matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(NAME_NAME)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestPackProps(project, PROP_NAME, matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(NAME_LABEL)) {
 										return SuggestionUtils.suggestLabels(matchWith);
 									} else {
@@ -169,7 +174,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query tag";
+						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " for fuzzy query";
 					}
 
 				}.suggest(terminalExpect);
@@ -211,7 +216,9 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Pack.NAME_PROJECT)) {
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
-					} else if (fieldName.equals(NAME_TAG)) {
+					} else if (fieldName.equals(NAME_TAG) || fieldName.equals(NAME_GROUP_ID) 
+							|| fieldName.equals(NAME_ARTIFACT_ID) || fieldName.equals(NAME_VERSION) 
+							|| fieldName.equals(NAME_NAME)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}
