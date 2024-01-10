@@ -106,7 +106,7 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 			String userName = authenticated.getUserName();
 			String emailAddressValue = authenticated.getEmail();
 			emailAddress = emailAddressManager.findByValue(emailAddressValue);
-			if (emailAddress == null) {
+			if (emailAddress == null || !emailAddress.isVerified()) {
 				if (userManager.findByName(userName) != null)
 					throw new AuthenticationException("Login name '" + userName + "' already used by another user");
 				else
