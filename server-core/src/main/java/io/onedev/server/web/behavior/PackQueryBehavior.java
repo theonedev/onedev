@@ -141,7 +141,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestPackProps(project, PROP_VERSION, matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(NAME_NAME)) {
+									} else if (fieldName.equals(NAME_NAME) || fieldName.equals(NAME_ID)) {
 										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestPackProps(project, PROP_NAME, matchWith);
 										else
@@ -218,7 +218,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					} else if (fieldName.equals(NAME_TAG) || fieldName.equals(NAME_GROUP_ID) 
 							|| fieldName.equals(NAME_ARTIFACT_ID) || fieldName.equals(NAME_VERSION) 
-							|| fieldName.equals(NAME_NAME)) {
+							|| fieldName.equals(NAME_NAME) || fieldName.equals(NAME_ID)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

@@ -6,6 +6,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.*;
+import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
@@ -36,12 +37,11 @@ import static io.onedev.server.ee.pack.container.ContainerManifest.isImageIndex;
 import static io.onedev.server.ee.pack.container.ContainerManifest.isImageManifest;
 import static io.onedev.server.ee.pack.container.ContainerPackSupport.TYPE;
 import static io.onedev.server.util.Digest.SHA256;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.copyWithMaxSize;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
 import static javax.servlet.http.HttpServletResponse.*;
-import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @Singleton
@@ -273,8 +273,9 @@ public class ContainerServlet extends HttpServlet {
 						var projectId = sessionManager.call(() -> getProject(projectPath, true).getId());
 						var baos = new ByteArrayOutputStream();
 						try (var is = request.getInputStream()) {
-							if (copyLarge(is, baos, 0, MAX_MANIFEST_SIZE, new byte[BUFFER_SIZE]) >= MAX_MANIFEST_SIZE)
-								throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");
+							copyWithMaxSize(is, baos, MAX_MANIFEST_SIZE);
+						} catch (DataTooLargeException e) {
+							throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");
 						}
 
 						var bytes = baos.toByteArray();
@@ -352,7 +353,7 @@ public class ContainerServlet extends HttpServlet {
 										pack.setData(hash);
 										pack.setPublishDate(new Date());
 
-										packManager.createOrUpdate(pack, packBlobs.values());
+										packManager.createOrUpdate(pack, packBlobs.values(), true);
 									}
 								});
 							});

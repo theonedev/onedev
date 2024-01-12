@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
 import io.onedev.server.entitymanager.PackBlobReferenceManager;
@@ -37,7 +38,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Pack.*;
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -259,8 +259,8 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(PROP_TYPE, type));
-		criteria.add(Restrictions.eq(PROP_NAME, name));
-		criteria.add(Restrictions.eq(PROP_VERSION, version));
+		criteria.add(Restrictions.ilike(PROP_NAME, name.toLowerCase()));
+		criteria.add(Restrictions.ilike(PROP_VERSION, version.toLowerCase()));
 		return find(criteria);
 	}
 	
@@ -311,13 +311,18 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 
 	@Sessional
 	@Override
-	public List<Pack> queryByName(Project project, String type, String name) {
+	public List<Pack> queryByName(Project project, String type, String name, 
+								  Comparator<Pack> sortComparator) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(PROP_TYPE, type));
-		criteria.add(Restrictions.eq(PROP_NAME, name));
-		criteria.addOrder(org.hibernate.criterion.Order.asc(PROP_ID));
-		return query(criteria);
+		criteria.add(Restrictions.ilike(PROP_NAME, name.toLowerCase()));
+		if (sortComparator == null)
+			criteria.addOrder(org.hibernate.criterion.Order.asc(PROP_ID));
+		var packs = query(criteria);
+		if (sortComparator != null)
+			packs.sort(sortComparator);
+		return packs;
 	}
 
 	@Sessional
@@ -336,6 +341,84 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		return query.list();
 	}
 
+	@Sessional
+	@Override
+	public int countNames(Project project, String type, String nameQuery, String excludeVersionQuery) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Pack> root = criteriaQuery.from(Pack.class);
+		criteriaQuery.select(builder.countDistinct(root.get(PROP_NAME)));
+
+		var predicates = new ArrayList<Predicate>();
+		if (nameQuery != null)
+			predicates.add(builder.like(builder.lower(root.get(PROP_NAME)), "%" + nameQuery.toLowerCase() + "%"));
+		if (excludeVersionQuery != null)
+			predicates.add(builder.notLike(builder.lower(root.get(PROP_VERSION)), "%" + excludeVersionQuery + "%"));
+		
+		if (!predicates.isEmpty())
+			criteriaQuery.where(predicates.toArray(new Predicate[0]));
+
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Sessional
+	@Override
+	public List<String> queryNames(Project project, String type, String nameQuery, String excludeVersionQuery, 
+								   int firstResult, int maxResults) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<String> criteriaQuery = builder.createQuery(String.class);
+		Root<Pack> root = criteriaQuery.from(Pack.class);
+		criteriaQuery.select(root.get(PROP_NAME)).distinct(true);
+
+		var predicates = new ArrayList<Predicate>();
+		if (nameQuery != null)
+			predicates.add(builder.like(builder.lower(root.get(PROP_NAME)), "%" + nameQuery.toLowerCase() + "%"));
+		if (excludeVersionQuery != null)
+			predicates.add(builder.notLike(builder.lower(root.get(PROP_VERSION)), "%" + excludeVersionQuery + "%"));
+
+		if (!predicates.isEmpty())
+			criteriaQuery.where(predicates.toArray(new Predicate[0]));
+
+		var query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		return query.list();
+	}
+	
+	@Sessional
+	@Override
+	public Map<String, List<Pack>> loadPacks(List<String> names, String exludeVersionQuery, 
+											 Comparator<Pack> sortComparator) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Pack> criteriaQuery = builder.createQuery(Pack.class);
+		Root<Pack> root = criteriaQuery.from(Pack.class);
+		criteriaQuery.select(root);
+
+		var predicates = Lists.newArrayList(root.get(PROP_NAME).in(names));
+		if (exludeVersionQuery != null)
+			predicates.add(builder.notLike(builder.lower(root.get(PROP_VERSION)), "%" + exludeVersionQuery + "%"));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		if (sortComparator == null)
+			criteriaQuery.orderBy(builder.asc(root.get(PROP_ID)));
+
+		var packs = new LinkedHashMap<String, List<Pack>>();
+		for (var name: names)
+			packs.put(name, new ArrayList<>());
+		
+		var query = getSession().createQuery(criteriaQuery);
+		var result = query.list();
+		if (sortComparator != null)
+			result.sort(sortComparator);
+		
+		for (var pack: result) {
+			var packsOfName = packs.get(pack.getName());
+			if (packsOfName != null)
+				packsOfName.add(pack);
+		}
+		
+		return packs;
+	}
+
 	@Transactional
 	@Override
 	public void deleteByTag(Project project, String type, String tag) {
@@ -343,33 +426,31 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		if (pack != null)
 			delete(pack);
 	}
-	
+
 	@Transactional
-	@Override
-	public void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs) {
+	public void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs, boolean postPublishEvent) {
 		dao.persist(pack);
-		for (var packBlob: packBlobs) {
-			blobAuthorizationManager.authorize(pack.getProject(), packBlob);
-			if (pack.getBlobReferences().stream().noneMatch(it -> it.getPackBlob().equals(packBlob))) {
-				var blobReference = new PackBlobReference();
-				blobReference.setPack(pack);
-				blobReference.setPackBlob(packBlob);
-				blobReferenceManager.create(blobReference);
+		if (packBlobs != null) {
+			packBlobs = new HashSet<>(packBlobs);
+			for (var packBlob: packBlobs) {
+				blobAuthorizationManager.authorize(pack.getProject(), packBlob);
+				if (pack.getBlobReferences().stream().noneMatch(it -> it.getPackBlob().equals(packBlob))) {
+					var blobReference = new PackBlobReference();
+					blobReference.setPack(pack);
+					blobReference.setPackBlob(packBlob);
+					blobReferenceManager.create(blobReference);
+				}
+			}
+			for (var blobReference: pack.getBlobReferences()) {
+				if (packBlobs.stream().noneMatch(it -> it.equals(blobReference.getPackBlob())))
+					blobReferenceManager.delete(blobReference);
 			}
 		}
-		for (var blobReference: pack.getBlobReferences()) {
-			if (packBlobs.stream().noneMatch(it -> it.equals(blobReference.getPackBlob())))
-				blobReferenceManager.delete(blobReference);
-		}
-		listenerRegistry.post(new PackPublished(pack));
+		
+		if (postPublishEvent)
+			listenerRegistry.post(new PackPublished(pack));
 	}
-
-	@Transactional
-	@Override
-	public void createOrUpdate(Pack pack) {
-		dao.persist(pack);
-	}
-
+	
 	@Transactional
 	@Override
 	public void delete(Collection<Pack> packs) {

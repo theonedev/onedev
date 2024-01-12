@@ -6,7 +6,7 @@ import io.onedev.server.ee.subscription.EESubscriptionManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
-import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.exception.HttpResponseAwareException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
@@ -33,20 +33,23 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static io.onedev.server.ee.pack.maven.MavenPackSupport.TYPE;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.copyWithMaxSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.*;
 import static javax.ws.rs.core.HttpHeaders.LAST_MODIFIED;
-import static org.apache.commons.io.IOUtils.copyLarge;
 
 @Singleton
-public class MavenService implements PackService {
+public class MavenPackService implements PackService {
 
+	public static final String SERVICE_ID = "maven";
+	
 	private static final int MAX_CHECKSUM_LEN = 1000;
 	
 	static final String FILE_METADATA = "maven-metadata.xml";
@@ -89,11 +92,11 @@ public class MavenService implements PackService {
 	private final EESubscriptionManager subscriptionManager;
 	
 	@Inject
-	public MavenService(SessionManager sessionManager, TransactionManager transactionManager, 
-						PackBlobManager packBlobManager, PackManager packManager, 
-						PackBlobReferenceManager packBlobReferenceManager, 
-						ProjectManager projectManager, ListenerRegistry listenerRegistry, 
-						BuildManager buildManager, EESubscriptionManager subscriptionManager) {
+	public MavenPackService(SessionManager sessionManager, TransactionManager transactionManager,
+							PackBlobManager packBlobManager, PackManager packManager,
+							PackBlobReferenceManager packBlobReferenceManager,
+							ProjectManager projectManager, ListenerRegistry listenerRegistry,
+							BuildManager buildManager, EESubscriptionManager subscriptionManager) {
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.packBlobManager = packBlobManager;
@@ -107,7 +110,7 @@ public class MavenService implements PackService {
 	
 	@Override
 	public String getServiceId() {
-		return "maven";
+		return SERVICE_ID;
 	}
 
 	@Override
@@ -231,7 +234,12 @@ public class MavenService implements PackService {
 				uploadBlob(request, response, projectId, buildId, pair.getLeft(), pair.getRight(), prevSegment, fileName);
 		}
 	}
-	
+
+	@Override
+	public String getApiKey(HttpServletRequest request) {
+		return null;
+	}
+
 	private String getBlobName(String fileName) {
 		if (fileName.endsWith(EXT_MD5) || fileName.endsWith(EXT_SHA1) 
 				|| fileName.endsWith(EXT_SHA256) || fileName.endsWith(EXT_SHA512)) {
@@ -329,7 +337,9 @@ public class MavenService implements PackService {
 			var blobName = getBlobName(fileName);
 			if (!blobName.equals(fileName)) { // checksum verification
 				var baos = new ByteArrayOutputStream();
-				if (copyLarge(is, baos, 0, MAX_CHECKSUM_LEN, new byte[BUFFER_SIZE]) >= MAX_CHECKSUM_LEN) {
+				try {
+					copyWithMaxSize(is, baos, MAX_CHECKSUM_LEN);
+				} catch (DataTooLargeException e) {
 					throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE, "Checksum is too large");
 				}
 				var checksum = new String(baos.toByteArray(), UTF_8);
@@ -387,7 +397,7 @@ public class MavenService implements PackService {
 					pack.setPublishDate(new Date());
 					MavenData data = (MavenData) pack.getData();
 					var prevSha256BlobHash = data.getSha256BlobHashes().put(blobName, sha256BlobHash);
-					packManager.createOrUpdate(pack);
+					packManager.createOrUpdate(pack, null, false);
 					if (prevSha256BlobHash != null) {
 						for (var blobReference: pack.getBlobReferences()) {
 							if (blobReference.getPackBlob().getSha256Hash().equals(prevSha256BlobHash)) {

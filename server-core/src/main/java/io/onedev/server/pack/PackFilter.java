@@ -72,11 +72,34 @@ public class PackFilter extends ExceptionHandleFilter {
 					else
 						throw new EntityNotFoundException("No project found with path '" + projectPath + "'");
 				});
-				
-				var authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+
 				Long buildId = null;
-				if (authzHeader != null) {
-					if (authzHeader.toLowerCase().startsWith("basic ")) {
+				var apiKey = packService.getApiKey(httpRequest);
+				if (apiKey != null) {
+					var colonIndex = apiKey.indexOf(':');
+					String jobToken;
+					String accessToken;
+					if (colonIndex != -1) {
+						jobToken = apiKey.substring(0, colonIndex);
+						accessToken = apiKey.substring(colonIndex +1);
+					} else {
+						jobToken = null;
+						accessToken = apiKey;
+					}
+					if (jobToken != null) {
+						var jobContext = jobManager.getJobContext(jobToken, false);
+						if (jobContext != null)
+							buildId = jobContext.getBuildId();
+					}
+					var user = userManager.findByAccessToken(accessToken);
+					var subject = SecurityUtils.getSubject();
+					if (user != null)
+						subject.login(new BearerAuthenticationToken(user));
+					else
+						throw new UnauthorizedException();
+				} else {
+					var authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+					if (authzHeader != null && authzHeader.toLowerCase().startsWith("basic ")) {
 						String authValue = StringUtils.substringAfter(authzHeader, " ");
 						String decoded = Base64.decodeToString(authValue);
 						String userName = StringUtils.substringBefore(decoded, ":").trim();
@@ -94,31 +117,8 @@ public class PackFilter extends ExceptionHandleFilter {
 									subject.login(new UsernamePasswordToken(userName, password));
 							}
 						}
-					} else if (authzHeader.toLowerCase().startsWith("bearer ")) {
-						String authValue = StringUtils.substringAfter(authzHeader, " ");
-						var colonIndex = authValue.indexOf(':');
-						String jobToken;
-						String accessToken;
-						if (colonIndex != -1) {
-							jobToken = authValue.substring(0, colonIndex);
-							accessToken = authValue.substring(colonIndex +1);
-						} else {
-							jobToken = null;
-							accessToken = authValue;
-						}
-						if (jobToken != null) {
-							var jobContext = jobManager.getJobContext(jobToken, false);
-							if (jobContext != null)
-								buildId = jobContext.getBuildId();
-						}
-						User user = userManager.findByAccessToken(accessToken);
-						Subject subject = SecurityUtils.getSubject();
-						if (user != null)
-							subject.login(new BearerAuthenticationToken(user));
-						else
-							throw new UnauthorizedException();
 					}
-				} 
+				}
 				
 				packService.service(httpRequest, httpResponse, projectId, buildId,
 						pathSegments.subList(serviceMarkIndex + 1, pathSegments.size()));

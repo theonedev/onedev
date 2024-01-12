@@ -10,7 +10,9 @@ import io.onedev.server.util.criteria.Criteria;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public interface PackManager extends EntityManager<Pack> {
 
@@ -36,18 +38,26 @@ public interface PackManager extends EntityManager<Pack> {
 
 	List<Pack> queryByGAWithV(Project project, String type, String groupId, String artifactId);
 	
-	List<Pack> queryByName(Project project, String type, String name);
+	List<Pack> queryByName(Project project, String type, String name, 
+						   @Nullable Comparator<Pack> sortComparator);
 	
 	List<Pack> queryLatests(Project project, String type, String nameQuery, int firstResult, int maxResults);
+
+	int countNames(Project project, String type, @Nullable String nameQuery, 
+				   @Nullable String excludeVersionQuery);
+
+	List<String> queryNames(Project project, String type, @Nullable String nameQuery, 
+							@Nullable String excludeVersionQuery, int firstResult, int maxResults);
+	
+	Map<String, List<Pack>> loadPacks(List<String> names, @Nullable String exludeVersionQuery, 
+									  @Nullable Comparator<Pack> sortComparator);
 	
 	@Nullable
 	Pack findByGAV(Project project, String type, String groupId, String artifactId, String version);
 	
 	void deleteByTag(Project project, String type, String tag);
-	
-    void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs);
 
-	void createOrUpdate(Pack pack);
+	void createOrUpdate(Pack pack, @Nullable Collection<PackBlob> packBlobs, boolean postPublishEvent);
 	
 	void delete(Collection<Pack> packs);
 

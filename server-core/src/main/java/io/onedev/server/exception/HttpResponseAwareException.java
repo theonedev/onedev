@@ -15,12 +15,12 @@ public class HttpResponseAwareException extends ExplicitException {
 		this.httpResponse = httpResponse;
 	}
 
-	public HttpResponseAwareException(int status, @Nullable String responseBodyText) {
+	public HttpResponseAwareException(int status, String responseBodyText) {
 		this(new HttpResponse(status, responseBodyText));
 	}
 	
 	public HttpResponseAwareException(int status) {
-		this(status, (String)null);
+		this(new HttpResponse(status, (HttpResponseBody)null));
 	}
 	
 	public HttpResponseAwareException(int status, Map<String, Object> responseBodyJsonValue) {

@@ -29,7 +29,7 @@ public class MavenHelpPanel extends Panel {
 
 		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		var bindings = new HashMap<String, Object>();
-		bindings.put("url", serverUrl + "/" + projectPath + "/~maven");
+		bindings.put("url", serverUrl + "/" + projectPath + "/~" + MavenPackService.SERVICE_ID);
 		bindings.put("permission", "write");
 
 		try {

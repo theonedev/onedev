@@ -45,6 +45,8 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 
 	public static final String PROP_ARTIFACT_ID = "artifactId";
 
+	public static final String NAME_ID = "Id";
+	
 	public static final String NAME_NAME = "Name";
 
 	public static final String PROP_NAME = "name";
@@ -63,7 +65,7 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_TYPE, NAME_TAG, NAME_GROUP_ID, NAME_ARTIFACT_ID, 
-			NAME_NAME, NAME_VERSION, NAME_LABEL, NAME_PUBLISH_DATE);
+			NAME_NAME, NAME_ID, NAME_VERSION, NAME_LABEL, NAME_PUBLISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_TYPE, PROP_TYPE,
@@ -71,6 +73,7 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 			NAME_GROUP_ID, PROP_GROUP_ID, 
 			NAME_ARTIFACT_ID, PROP_ARTIFACT_ID, 
 			NAME_NAME, PROP_NAME,
+			NAME_ID, PROP_NAME,
 			NAME_VERSION, PROP_VERSION,
 			NAME_PUBLISH_DATE, PROP_PUBLISH_DATE,
 			NAME_PROJECT, PROP_PROJECT);

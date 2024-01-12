@@ -1,5 +1,7 @@
 package io.onedev.server.util;
 
+import io.onedev.server.exception.DataTooLargeException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,4 +39,16 @@ public class IOUtils extends org.apache.commons.io.IOUtils {
 		}
 	}
 
+	public static long copyWithMaxSize(InputStream is, OutputStream os, long maxSize) {
+		try {
+			long copied = copyLarge(is, os, 0, maxSize + 1, new byte[BUFFER_SIZE]);
+			if (copied >=  maxSize + 1)
+				throw new DataTooLargeException(maxSize);
+			else 
+				return copied;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }

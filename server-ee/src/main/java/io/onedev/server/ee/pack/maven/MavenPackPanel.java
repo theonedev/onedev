@@ -41,7 +41,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static io.onedev.server.ee.pack.maven.MavenService.FILE_METADATA;
+import static io.onedev.server.ee.pack.maven.MavenPackService.FILE_METADATA;
 import static io.onedev.server.util.GroovyUtils.evalTemplate;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -109,7 +109,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				bindings.put("artifactId", getPack().getArtifactId());
 				bindings.put("version", getPack().getVersion());
 				var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~maven");
+				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~" + MavenPackService.SERVICE_ID);
 				bindings.put("permission", "read");
 
 				if (packaging.equals("jar") || packaging.equals("maven-plugin") || packaging.equals("pom")) {

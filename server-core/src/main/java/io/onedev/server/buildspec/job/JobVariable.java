@@ -121,8 +121,14 @@ public enum JobVariable {
 			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 			return UrlUtils.getServer(serverUrl);
 		}
-	}; 
-	
+	},
+	SERVER_URL {
+		@Override
+		public String getValue(Build build) {
+			return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		}
+	};
+
 	public abstract String getValue(Build build);
 	
 }

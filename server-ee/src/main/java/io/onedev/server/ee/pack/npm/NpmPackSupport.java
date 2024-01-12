@@ -6,7 +6,6 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 public class NpmPackSupport implements PackSupport {
@@ -54,5 +53,5 @@ public class NpmPackSupport implements PackSupport {
 	public Component renderHelp(String componentId, Project project) {
 		return new NpmHelpPanel(componentId, project.getPath());
 	}
-	
+
 }

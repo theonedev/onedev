@@ -121,6 +121,8 @@ public class PackQuery extends EntityQuery<Pack> {
 										return new ArtiractIdCriteria(value, operator);
 									case NAME_NAME:
 										return new NameCriteria(value, operator);
+									case NAME_ID:
+										return new IdCriteria(value, operator);
 									case NAME_VERSION:
 										return new VersionCriteria(value, operator);
 									case NAME_TYPE:
@@ -201,7 +203,8 @@ public class PackQuery extends EntityQuery<Pack> {
 				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_TYPE)
 						&& !fieldName.equals(NAME_TAG) && !fieldName.equals(NAME_GROUP_ID)
 						&& !fieldName.equals(NAME_ARTIFACT_ID) && !fieldName.equals(NAME_VERSION)
-						&& !fieldName.equals(NAME_NAME) && !fieldName.equals(NAME_LABEL)) {
+						&& !fieldName.equals(NAME_NAME) && !fieldName.equals(NAME_ID) 
+						&& !fieldName.equals(NAME_LABEL)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;

@@ -22,9 +22,9 @@ public class NpmHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~npm/";
-		add(new Label("scopeRegistry", "npm config set @myscope:registry " + registryUrl));
-		add(new Label("registryAuth", "npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\""));
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + NpmPackService.SERVICE_ID + "/";
+		add(new Label("scopeRegistry", "$ npm config set @myscope:registry " + registryUrl));
+		add(new Label("registryAuth", "$ npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\""));
 
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<>() {
 

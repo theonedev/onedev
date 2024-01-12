@@ -27,15 +27,15 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~npm/";
+		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NpmPackService.SERVICE_ID + "/";
 		if (getPack().getName().contains("/")) {
 			var scope = substringBefore(getPack().getName(), "/");
-			add(new Label("registryConfig", "npm config set " + scope + ":registry " + registryUrl));
+			add(new Label("registryConfig", "$ npm config set " + scope + ":registry " + registryUrl));
 		} else {
-			add(new Label("registryConfig", "npm config set registry " + registryUrl));
+			add(new Label("registryConfig", "$ npm config set registry " + registryUrl));
 		}
-		add(new Label("registryAuth", "npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\""));
-		add(new Label("installPack", "npm install " + getPack().getSupport().getReference(getPack())));
+		add(new Label("registryAuth", "$ npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\""));
+		add(new Label("installPack", "$ npm install " + getPack().getSupport().getReference(getPack())));
 
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<>() {
 
@@ -52,10 +52,10 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 					registryConfig = "npm config set registry " + registryUrl + "\n\n";
 				}
 				return registryConfig +
-						"# Use job token to tell OneDev the build publishing the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package write permission\n" +
+						"# Use job token to tell OneDev the build using the package\n" +
+						"# Job secret 'access-token' should be defined in project build setting as an access token with package read permission\n" +
 						"npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"@job_token@:@secret:access-token@\"\n\n" +
-						"npm install " + getPack().getSupport().getReference(getPack());
+						"npm install";
 			}
 
 		}));

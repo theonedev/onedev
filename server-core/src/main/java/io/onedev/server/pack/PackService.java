@@ -11,5 +11,8 @@ public interface PackService {
 	
 	void service(HttpServletRequest request, HttpServletResponse response,
 				 Long projectId, @Nullable Long buildId, List<String> pathSegments);
+
+	@Nullable
+	String getApiKey(HttpServletRequest request);
 	
 }

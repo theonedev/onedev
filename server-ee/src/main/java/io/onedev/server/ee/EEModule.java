@@ -17,9 +17,11 @@ import io.onedev.server.ee.pack.container.ContainerAuthenticationFilter;
 import io.onedev.server.ee.pack.container.ContainerPackSupport;
 import io.onedev.server.ee.pack.container.ContainerServlet;
 import io.onedev.server.ee.pack.maven.MavenPackSupport;
-import io.onedev.server.ee.pack.maven.MavenService;
+import io.onedev.server.ee.pack.maven.MavenPackService;
 import io.onedev.server.ee.pack.npm.NpmPackSupport;
-import io.onedev.server.ee.pack.npm.NpmService;
+import io.onedev.server.ee.pack.npm.NpmPackService;
+import io.onedev.server.ee.pack.nuget.NugetPackSupport;
+import io.onedev.server.ee.pack.nuget.NugetPackService;
 import io.onedev.server.ee.sendgrid.DefaultMessageManager;
 import io.onedev.server.ee.sendgrid.MessageManager;
 import io.onedev.server.ee.sendgrid.SendgridMailService;
@@ -159,13 +161,17 @@ public class EEModule extends AbstractPluginModule {
 					"noSessionCreation, containerAuthc");
 		});
 
-		bind(MavenService.class);
-		contribute(PackService.class, MavenService.class);
+		bind(MavenPackService.class);
+		contribute(PackService.class, MavenPackService.class);
 		contribute(PackSupport.class, new MavenPackSupport());
 
-		bind(NpmService.class);
-		contribute(PackService.class, NpmService.class);
+		bind(NpmPackService.class);
+		contribute(PackService.class, NpmPackService.class);
 		contribute(PackSupport.class, new NpmPackSupport());
+
+		bind(NugetPackService.class);
+		contribute(PackService.class, NugetPackService.class);
+		contribute(PackSupport.class, new NugetPackSupport());
 	}
 
 	@Override

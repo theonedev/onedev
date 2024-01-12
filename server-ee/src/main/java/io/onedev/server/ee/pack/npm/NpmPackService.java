@@ -3,7 +3,6 @@ package io.onedev.server.ee.pack.npm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Lists;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ee.subscription.EESubscriptionManager;
@@ -11,6 +10,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.PackBlobManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -30,29 +30,34 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.*;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.ee.pack.npm.NpmPackSupport.TYPE;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.copyWithMaxSize;
 import static io.onedev.server.util.UrlUtils.decodePath;
 import static io.onedev.server.util.UrlUtils.encodePath;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static javax.servlet.http.HttpServletResponse.*;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Singleton
-public class NpmService implements PackService {
+public class NpmPackService implements PackService {
+	
+	public static final String SERVICE_ID = "npm";
 	
 	private static final int MAX_UPLOAD_METADATA_LEN = 10000000;
 	
 	private static final int MAX_TAG_BODY_LEN = 1000;
+	
+	private static final int MAX_QUERY_COUNT = 1000;
 
 	private final SessionManager sessionManager;
 	
@@ -73,11 +78,11 @@ public class NpmService implements PackService {
 	private final UrlManager urlManager;
 
 	@Inject
-	public NpmService(SessionManager sessionManager, TransactionManager transactionManager,
-                      PackBlobManager packBlobManager, PackManager packManager,
-                      ProjectManager projectManager, BuildManager buildManager, 
-					  ObjectMapper objectMapper, UrlManager urlManager, 
-					  EESubscriptionManager subscriptionManager) {
+	public NpmPackService(SessionManager sessionManager, TransactionManager transactionManager,
+						  PackBlobManager packBlobManager, PackManager packManager,
+						  ProjectManager projectManager, BuildManager buildManager,
+						  ObjectMapper objectMapper, UrlManager urlManager,
+						  EESubscriptionManager subscriptionManager) {
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.packBlobManager = packBlobManager;
@@ -91,7 +96,7 @@ public class NpmService implements PackService {
 	
 	@Override
 	public String getServiceId() {
-		return "npm";
+		return SERVICE_ID;
 	}
 
 	private String getLockName(Long projectId, String name) {
@@ -155,7 +160,7 @@ public class NpmService implements PackService {
 							if (isGet) {
 								var project = checkProject(projectId, false);
 								sessionManager.run(() -> {
-									var packs = packManager.queryByName(project, TYPE, packageName);
+									var packs = packManager.queryByName(project, TYPE, packageName, null);
 									var distTags = new HashMap<String, String>();
 									for (var pack : packs) {
 										var packData = (NpmData) pack.getData();
@@ -182,9 +187,9 @@ public class NpmService implements PackService {
 								if (isPut) {
 									var baos = new ByteArrayOutputStream();
 									try (var is = request.getInputStream()) {
-										if (copyLarge(is, baos, 0, MAX_TAG_BODY_LEN, new byte[BUFFER_SIZE]) >= MAX_TAG_BODY_LEN) {
-											throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Tag body is too large");
-										}
+										copyWithMaxSize(is, baos, MAX_TAG_BODY_LEN);
+									} catch (DataTooLargeException e) {
+										throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Tag body is too large");
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -203,7 +208,7 @@ public class NpmService implements PackService {
 								} else if (isDelete) {
 									transactionManager.run(() -> {
 										var project = projectManager.load(projectId);
-										for (var pack: packManager.queryByName(project, TYPE, packageName)) {
+										for (var pack: packManager.queryByName(project, TYPE, packageName, null)) {
 											var packData = (NpmData) pack.getData();
 											packData.getDistTags().remove(tag);
 										}
@@ -224,7 +229,7 @@ public class NpmService implements PackService {
 				if (pathSegments.size() == 1 && pathSegments.get(0).equals("search")) {
 					var query = request.getParameter("text");
 					var offset = Integer.parseInt(request.getParameter("from"));
-					var count = Integer.parseInt(request.getParameter("size"));
+					var count = Math.min(Integer.parseInt(request.getParameter("size")), MAX_QUERY_COUNT);
 					sessionManager.run(() -> {
 						var project = checkProject(projectId, false);
 						var objectsNode = objectMapper.createArrayNode();
@@ -296,7 +301,7 @@ public class NpmService implements PackService {
 				if (isGet) {
 					var project = checkProject(projectId, false);
 					sessionManager.run(() -> {
-						var packs = packManager.queryByName(project, TYPE, packageName);
+						var packs = packManager.queryByName(project, TYPE, packageName, null);
 						var npmUrl = urlManager.urlFor(project) + "/~" + getServiceId() + "/" + encodePath(packageName);
 						var distTagsNode = objectMapper.createObjectNode();
 						var versionsNode = objectMapper.createObjectNode();
@@ -337,16 +342,14 @@ public class NpmService implements PackService {
 					});
 					try (var is = request.getInputStream()) {
 						var baos = new ByteArrayOutputStream();
-						if (copyLarge(is, baos, 0, MAX_UPLOAD_METADATA_LEN, new byte[BUFFER_SIZE]) >= MAX_UPLOAD_METADATA_LEN) {
-							throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Package metadata is too large");
-						}
+						copyWithMaxSize(is, baos, MAX_UPLOAD_METADATA_LEN);
 
 						var packageMetadata = readJson(baos.toByteArray());
-						
+
 						var distTags = new HashMap<String, String>();
 						var distTagsNode = packageMetadata.get("dist-tags");
 						if (distTagsNode != null) {
-							for (var it = distTagsNode.fields(); it.hasNext();) {
+							for (var it = distTagsNode.fields(); it.hasNext(); ) {
 								var field = it.next();
 								distTags.put(field.getKey(), field.getValue().asText());
 							}
@@ -355,7 +358,7 @@ public class NpmService implements PackService {
 						var attachments = new HashMap<String, byte[]>();
 						var attachmentsNode = packageMetadata.get("_attachments");
 						if (attachmentsNode != null) {
-							for (var it = attachmentsNode.fields(); it.hasNext();) {
+							for (var it = attachmentsNode.fields(); it.hasNext(); ) {
 								var field = it.next();
 								var fileName = field.getKey();
 								var fileContent = Base64.decodeBase64(field.getValue().get("data").asText());
@@ -365,7 +368,7 @@ public class NpmService implements PackService {
 								attachments.put(fileName, fileContent);
 							}
 						}
-						
+
 						var versionsNode = packageMetadata.get("versions");
 
 						packageMetadata.remove("dist-tags");
@@ -374,9 +377,9 @@ public class NpmService implements PackService {
 						packageMetadata.remove("access");
 
 						byte[] packageMetadataBytes = writeJson(packageMetadata);
-						
+
 						if (versionsNode != null) {
-							for (var it = versionsNode.fields(); it.hasNext();) {
+							for (var it = versionsNode.fields(); it.hasNext(); ) {
 								var field = it.next();
 								var version = field.getKey();
 								var versionMetadata = (ObjectNode) field.getValue();
@@ -408,7 +411,7 @@ public class NpmService implements PackService {
 										pack.setPublishDate(new Date());
 
 										var distTagsOfVersion = new LinkedHashSet<String>();
-										for (var entry: distTags.entrySet()) {
+										for (var entry : distTags.entrySet()) {
 											if (entry.getValue().equals(version))
 												distTagsOfVersion.add(entry.getKey());
 										}
@@ -423,7 +426,6 @@ public class NpmService implements PackService {
 											var fileContent = attachments.get(fileName);
 											if (fileContent != null) {
 												var integrity = distNode.get("integrity").asText();
-												System.out.println(integrity);
 												var algorithm = substringBefore(integrity, "-");
 												var hash = Base64.decodeBase64(substringAfter(integrity, "-"));
 												if (algorithm.equals("sha512")) {
@@ -441,9 +443,9 @@ public class NpmService implements PackService {
 												}
 												var sha256Hash = Digest.sha256Of(fileContent).getHash();
 												var packBlobId = packBlobManager.uploadBlob(projectId, fileContent, sha256Hash);
-												
+
 												pack.setData(new NpmData(packageMetadataBytes, versionMetadataBytes, distTagsOfVersion, fileName, sha256Hash));
-												packManager.createOrUpdate(pack, Lists.newArrayList(packBlobManager.load(packBlobId)));
+												packManager.createOrUpdate(pack, newArrayList(packBlobManager.load(packBlobId)), true);
 												response.setStatus(SC_CREATED);
 											}
 										}
@@ -451,6 +453,8 @@ public class NpmService implements PackService {
 								});
 							}
 						}
+					} catch (DataTooLargeException e) {
+						throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Package metadata is too large");
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -464,7 +468,7 @@ public class NpmService implements PackService {
 						LockUtils.run(getLockName(projectId, packageName), () -> {
 							transactionManager.run(() -> {
 								var project = checkProject(projectId, true);
-								var packs = packManager.queryByName(project, TYPE, packageName);
+								var packs = packManager.queryByName(project, TYPE, packageName, null);
 								if (!packs.isEmpty()) {
 									for (var pack: packs)
 										packManager.delete(pack);
@@ -558,6 +562,15 @@ public class NpmService implements PackService {
 				}
 			}
 		}
+	}
+
+	@Override
+	public String getApiKey(HttpServletRequest request) {
+		var authzHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (authzHeader != null&& authzHeader.toLowerCase().startsWith("bearer ")) 
+			return StringUtils.substringAfter(authzHeader, " ");
+		else
+			return null;
 	}
 
 	private Project checkProject(Long projectId, boolean needsToWrite) {
