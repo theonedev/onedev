@@ -18,13 +18,17 @@
  */
 package io.onedev.server.git;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.ssh.SshAuthenticator;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.UrlManager;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.channel.ChannelSession;
@@ -34,19 +38,12 @@ import org.apache.sshd.server.session.ServerSessionAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.ssh.SshAuthenticator;
-import io.onedev.server.util.CollectionUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 
@@ -98,9 +95,13 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 				String accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(userId, 300);
 				String projectPath = StringUtils.strip(StringUtils.substringBefore(
 						commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
-				if (projectPath.endsWith(".git"))
+				
+				var projectManager = OneDev.getInstance(ProjectManager.class);
+				var project = projectManager.findByPath(projectPath);
+				if (project == null && projectPath.endsWith(".git")) {
 					projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-				Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+					project = projectManager.findByPath(projectPath);
+				}
 				if (project == null)
 					throw new ExplicitException("Project not found: " + projectPath);
 				String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);

@@ -88,16 +88,12 @@ public class GitFilter implements Filter {
 	}
 	
 	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) {
-		String projectPath = StringUtils.strip(projectInfo, "/");
-		if (projectPath.endsWith(".git"))
+		var projectPath = StringUtils.strip(projectInfo, "/");
+		var facade = projectManager.findFacadeByPath(projectPath);
+		if (facade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-
-		ProjectFacade facade = projectManager.findFacadeByPath(projectPath);
-		if (facade == null && projectPath.startsWith("projects/")) {
-			projectPath = projectPath.substring("projects/".length());
 			facade = projectManager.findFacadeByPath(projectPath);
 		}
-		
 		if (facade == null) {
 			if (clusterAccess || upload) { 
 				throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));

@@ -19,7 +19,6 @@ import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.sshd.common.channel.ChannelOutputStream;
@@ -80,14 +79,12 @@ class SshCommand implements Command, ServerSessionAware {
 		
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 
-		String tempStr = StringUtils.substringAfter(commandString, "'/");   
-		String projectPath = StringUtils.substringBefore(tempStr, "'");
-		if (projectPath.endsWith(".git"))
+		var tempStr = StringUtils.substringAfter(commandString, "'/");   
+		var projectPath = StringUtils.substringBefore(tempStr, "'");
+		var projectFacade = projectManager.findFacadeByPath(projectPath);
+		if (projectFacade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-        ProjectFacade projectFacade = projectManager.findFacadeByPath(projectPath);
-		if (projectFacade == null && projectPath.startsWith("projects/")) {
-			projectPath = projectPath.substring("projects/".length());
-			projectFacade = projectManager.findFacadeByPath(projectPath);
+			projectFacade = projectManager.findFacadeByPath(projectPath);				
 		}
         if (projectFacade == null) {
         	if (clusterAccess || upload) {

@@ -34,14 +34,6 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.endsWith(".git")) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = this.message;
-			if (message.length() == 0) {
-				message = "Should not end with .git";
-			}
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;				
 		} else if (OneDev.getInstance(ProjectManager.class).getReservedNames().contains(value)) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
