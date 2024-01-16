@@ -95,7 +95,6 @@
 	<modules>
 		<module>server-core</module>
 		<module>server-plugin</module>
-		<module>server-ee</module>
 		<module>server-product</module>
 	</modules>
 	<dependencyManagement>
