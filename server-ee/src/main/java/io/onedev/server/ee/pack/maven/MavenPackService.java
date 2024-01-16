@@ -374,7 +374,7 @@ public class MavenPackService implements PackService {
 					}
 				}));			
 			} else {
-				var packBlobId = packBlobManager.uploadBlob(projectId, is);
+				var packBlobId = packBlobManager.uploadBlob(projectId, is, null);
 				var sha256BlobHash = sessionManager.call(() -> packBlobManager.load(packBlobId).getSha256Hash());
 				LockUtils.run(lockName, () -> transactionManager.run(() -> {
 					var project = projectManager.load(projectId);

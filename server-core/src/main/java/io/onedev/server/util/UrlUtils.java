@@ -2,8 +2,6 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
@@ -75,10 +73,6 @@ public class UrlUtils {
 		return StringUtils.stripEnd(url.toString(StringMode.FULL), "/");
 	}
 	
-	public static String getRootUrl(String url) {
-		return url.substring(0, url.indexOf('/', url.indexOf("//") + 2));
-	}
-	
 	public static String getServer(String url) {
 		try {
 			var parsedUrl = new URL(url);
@@ -90,5 +84,5 @@ public class UrlUtils {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 }

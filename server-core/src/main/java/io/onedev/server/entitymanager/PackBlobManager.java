@@ -32,15 +32,17 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	long getUploadFileSize(Long projectId, String uuid);
 	
 	long uploadBlob(Long projectId, String uuid, InputStream is);
+
+	@Nullable
+	Long uploadBlob(Long projectId, byte[] blobBytes, @Nullable String sha256Hash);
 	
-	Long uploadBlob(Long projectId, byte[] blobBytes, String sha256Hash);
-	
-	Long uploadBlob(Long projectId, InputStream is);
+	@Nullable
+	Long uploadBlob(Long projectId, InputStream is, @Nullable String sha256Hash);
 
 	void cancelUpload(Long projectId, String uuid);
 	
 	@Nullable
-	Long finishUpload(Long projectId, String uuid, String sha256Hash);
+	Long finishUpload(Long projectId, String uuid, @Nullable String sha256Hash);
 	
 	void downloadBlob(Long projectId, String sha256Hash, OutputStream os);
 	

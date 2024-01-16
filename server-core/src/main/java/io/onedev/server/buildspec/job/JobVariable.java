@@ -1,13 +1,13 @@
 package io.onedev.server.buildspec.job;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.UrlUtils;
 
-import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
@@ -120,6 +120,17 @@ public enum JobVariable {
 		public String getValue(Build build) {
 			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 			return UrlUtils.getServer(serverUrl);
+		}
+	},
+	SERVER_HOST {
+		@Override
+		public String getValue(Build build) {
+			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			try {
+				return new URL(serverUrl).getHost();
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	},
 	SERVER_URL {

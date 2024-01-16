@@ -22,6 +22,8 @@ import io.onedev.server.ee.pack.npm.NpmPackSupport;
 import io.onedev.server.ee.pack.npm.NpmPackService;
 import io.onedev.server.ee.pack.nuget.NugetPackSupport;
 import io.onedev.server.ee.pack.nuget.NugetPackService;
+import io.onedev.server.ee.pack.pypi.PypiPackService;
+import io.onedev.server.ee.pack.pypi.PypiPackSupport;
 import io.onedev.server.ee.sendgrid.DefaultMessageManager;
 import io.onedev.server.ee.sendgrid.MessageManager;
 import io.onedev.server.ee.sendgrid.SendgridMailService;
@@ -172,6 +174,10 @@ public class EEModule extends AbstractPluginModule {
 		bind(NugetPackService.class);
 		contribute(PackService.class, NugetPackService.class);
 		contribute(PackSupport.class, new NugetPackSupport());
+
+		bind(PypiPackService.class);
+		contribute(PackService.class, PypiPackService.class);
+		contribute(PackSupport.class, new PypiPackSupport());
 	}
 
 	@Override

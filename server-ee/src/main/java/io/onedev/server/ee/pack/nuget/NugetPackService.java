@@ -118,14 +118,6 @@ public class NugetPackService implements PackService {
 	private String getLockName(Long projectId, String name) {
 		return "update-pack:" + projectId + ":" + TYPE + ":" + name;
 	}
-	
-	private ObjectNode readJson(byte[] jsonBytes) {
-		try {
-			return (ObjectNode) objectMapper.readTree(jsonBytes);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	private byte[] writeJson(Object value) {
 		try {
@@ -207,7 +199,6 @@ public class NugetPackService implements PackService {
 					var items = upload.getItemIterator(request);
 					if (items.hasNext()) {
 						var item = items.next();
-
 						var tempFile = FileUtils.createTempFile("upload", "nuget");
 						try {
 							try (
@@ -277,7 +268,7 @@ public class NugetPackService implements PackService {
 
 									PackBlob packBlob;
 									try (var is = new FileInputStream(tempFile)) {
-										packBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is));
+										packBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is, null));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -295,7 +286,7 @@ public class NugetPackService implements PackService {
 
 									PackBlob snupkgBlob;
 									try (var is = new FileInputStream(tempFile)) {
-										snupkgBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is));
+										snupkgBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is, null));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}

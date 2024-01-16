@@ -441,9 +441,8 @@ public class NpmPackService implements PackService {
 															fileName, algorithm);
 													throw new ClientException(SC_BAD_REQUEST, errorMessage);
 												}
-												var sha256Hash = Digest.sha256Of(fileContent).getHash();
-												var packBlobId = packBlobManager.uploadBlob(projectId, fileContent, sha256Hash);
-
+												var packBlobId = packBlobManager.uploadBlob(projectId, fileContent, null);
+												var sha256Hash = packBlobManager.load(packBlobId).getSha256Hash();
 												pack.setData(new NpmData(packageMetadataBytes, versionMetadataBytes, distTagsOfVersion, fileName, sha256Hash));
 												packManager.createOrUpdate(pack, newArrayList(packBlobManager.load(packBlobId)), true);
 												response.setStatus(SC_CREATED);
