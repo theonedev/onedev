@@ -174,3 +174,8 @@ live environment of the job to help diagnostics, and resume the job afterwards.
 OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium-sized projects. 
 It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
 normally few to no known bugs in the wild.
+
+## One-Click Deployment Options (Third-Party)
+* [![Deploy](https://pub-da36157c854648669813f3f76c526c2b.r2.dev/deploy-on-elestio-black.png)](https://elest.io/open-source/onedev)
+* [![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploy.png)](https://repocloud.io/details/?app_id=46)
+* [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?searchTerms=OneDev)
