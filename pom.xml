@@ -606,7 +606,7 @@
 	<repositories>
 		<repository>
 			<id>onedev</id>
-			<url>https://code.onedev.io/onedev/~maven</url>
+			<url>https://code.onedev.io/onedev/server/~maven</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
