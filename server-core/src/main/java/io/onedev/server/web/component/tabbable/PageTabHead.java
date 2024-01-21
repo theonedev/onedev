@@ -1,11 +1,12 @@
 package io.onedev.server.web.component.tabbable;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Page;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
-
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 
 public class PageTabHead extends Panel {
 
@@ -22,9 +23,13 @@ public class PageTabHead extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Link<?> pageLink = newLink("link", tab.getMainPageClass());
-		add(pageLink);
-		pageLink.add(new Label("label", tab.getTitleModel()));
+		Link<?> link = newLink("link", tab.getMainPageClass());
+		add(link);
+		if (tab.getIconModel() != null)
+			link.add(new SpriteImage("icon", tab.getIconModel()));
+		else
+			link.add(new WebMarkupContainer("icon").setVisible(false));
+		link.add(new Label("label", tab.getTitleModel()));
 	}
 
 	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

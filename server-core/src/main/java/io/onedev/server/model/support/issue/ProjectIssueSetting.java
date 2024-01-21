@@ -1,28 +1,18 @@
 package io.onedev.server.model.support.issue;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.annotation.Editable;
+import io.onedev.server.web.component.issue.workflowreconcile.*;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
 @Editable
 public class ProjectIssueSetting implements Serializable {
@@ -36,6 +26,8 @@ public class ProjectIssueSetting implements Serializable {
 	private List<BoardSpec> boardSpecs;
 
 	private List<NamedIssueQuery> namedQueries;
+	
+	private Map<String, TimesheetSetting> timesheetSettings = new LinkedHashMap<>();
 	
 	private transient GlobalIssueSetting setting;
 	
@@ -79,6 +71,14 @@ public class ProjectIssueSetting implements Serializable {
 
 	public void setNamedQueries(@Nullable List<NamedIssueQuery> namedQueries) {
 		this.namedQueries = namedQueries;
+	}
+
+	public Map<String, TimesheetSetting> getTimesheetSettings() {
+		return timesheetSettings;
+	}
+
+	public void setTimesheetSettings(Map<String, TimesheetSetting> timesheetSettings) {
+		this.timesheetSettings = timesheetSettings;
 	}
 
 	public void onRenameUser(String oldName, String newName) {
@@ -149,8 +149,11 @@ public class ProjectIssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (!fieldName.equals(Issue.NAME_STATE) && getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (!fieldName.equals(Issue.NAME_STATE) 
+						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
+						&& getGlobalSetting().getFieldSpec(fieldName) == null) {
 					undefinedFields.add(fieldName);
+				}
 			}
 		}
 		for (IssueQueryUpdater updater: getNamedQueryUpdaters())
@@ -195,12 +198,8 @@ public class ProjectIssueSetting implements Serializable {
 		for (IssueQueryUpdater updater: getNamedQueryUpdaters())
 			updater.fixUndefinedFields(resolutions);
 		
-		if (boardSpecs != null) {
-			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (!it.next().fixUndefinedFields(resolutions))
-					it.remove();
-			}		
-		}
+		if (boardSpecs != null) 
+			boardSpecs.removeIf(boardSpec -> !boardSpec.fixUndefinedFields(resolutions));		
 	}	
 	
 	public void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {

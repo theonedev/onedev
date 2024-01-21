@@ -6,6 +6,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import com.hazelcast.internal.monitor.impl.GlobalPerIndexStats;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -15,27 +16,33 @@ public class StatusCriteria extends Criteria<Build> {
 	
 	private final Build.Status status;
 	
-	public StatusCriteria(Build.Status status) {
+	private final int operator;
+	
+	public StatusCriteria(Build.Status status, int operator) {
 		this.status = status;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		Path<?> attribute = from.get(Build.PROP_STATUS);
-		return builder.equal(attribute, status);
+		var predicate = builder.equal(from.get(Build.PROP_STATUS), status);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return build.getStatus() == status;
+		var matches = build.getStatus() == status;
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.NAME_STATUS) 
-				+ " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) 
-				+ " " 
+		return quote(Build.NAME_STATUS) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(status.toString());
 	}
 

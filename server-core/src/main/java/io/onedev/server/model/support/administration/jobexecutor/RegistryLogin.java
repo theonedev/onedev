@@ -19,7 +19,7 @@ public class RegistryLogin implements Serializable {
 	
 	private String password;
 
-	@Editable(order=100, placeholder="Default registry", 
+	@Editable(order=100, placeholder="Docker hub", 
 			description="Specify registry url. Leave empty for official registry")
 	public String getRegistryUrl() {
 		return registryUrl;
@@ -56,4 +56,5 @@ public class RegistryLogin implements Serializable {
 			registryUrl = "https://index.docker.io/v1/";
 		return new RegistryLoginFacade(registryUrl, getUserName(), getPassword());
 	}
+	
 }

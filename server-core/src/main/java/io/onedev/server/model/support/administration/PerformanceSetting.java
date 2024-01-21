@@ -27,10 +27,12 @@ public class PerformanceSetting implements Serializable {
 	public PerformanceSetting() {
 		try {
 			HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
+			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount() / 2;
+			if (cpuIntensiveTaskConcurrency == 0)
+				cpuIntensiveTaskConcurrency = 1;
 		} catch (Exception e) {
 			logger.debug("Error calling oshi", e);
-			cpuIntensiveTaskConcurrency = 4;
+			cpuIntensiveTaskConcurrency = 2;
 		}
 	}
 
@@ -54,9 +56,9 @@ public class PerformanceSetting implements Serializable {
 		this.maxGitLFSFileSize = maxGitLFSFileSize;
 	}
 
-	@Editable(order=700, name="Max Upload File Size (MB)", description="Specify max size of uploaded file in mega bytes. "
-			+ "This applies to file uploaded to repository via web interface, as well as file uploaded to markdown content "
-			+ "(issue comment etc)")
+	@Editable(order=700, name="Max Upload File Size (MB)", description="Specify max size of uploaded file in mega bytes " +
+			"via web interface. This applies to file uploaded to repository, markdown content (issue comment etc), and " +
+			"build artifacts")
 	public int getMaxUploadFileSize() {
 		return maxUploadFileSize;
 	}

@@ -2,6 +2,7 @@ package io.onedev.server.security.realm;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -10,6 +11,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.validation.validator.UserNameValidator;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.PasswordMatcher;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -57,10 +59,15 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		return token instanceof UsernamePasswordToken;
 	}
 
-	private User newUser(String userName, Authenticated authenticated, @Nullable String defaultGroup) {
+	private User newUser(String userNameOrEmailAddress, Authenticated authenticated, 
+						 boolean createAsGuest, @Nullable String defaultGroup) {
 		User user = new User();
-		user.setName(userName);
+		var userName = userNameOrEmailAddress;
+		if (userName.contains("@"))
+			userName = StringUtils.substringBefore(userName, "@");
+		user.setName(UserNameValidator.suggestUserName(userName));
 		user.setPassword(User.EXTERNAL_MANAGED);
+		user.setGuest(createAsGuest);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);
@@ -168,10 +175,12 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 								throw new AuthenticationException("Email address '" + emailAddressValue
 										+ "' has already been used by another user");
 							} else {
-								return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+								return newUser(userNameOrEmailAddressValue, authenticated, 
+										authenticator.isCreateUserAsGuest(), authenticator.getDefaultGroup());
 							}
 						} else {
-							return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+							return newUser(userNameOrEmailAddressValue, authenticated, 
+									authenticator.isCreateUserAsGuest(), authenticator.getDefaultGroup());
 						}
 					} else {
 						throw new UnknownAccountException("Invalid credentials");

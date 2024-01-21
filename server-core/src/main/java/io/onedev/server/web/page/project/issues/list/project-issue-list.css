@@ -10,6 +10,11 @@
 }
 .pinned-issue .primary .number, .pinned-issue .primary .title {
 	font-size: 1.2rem;
+	font-weight: 500;
+}
+.pinned-issue .primary .issue-progress .completion-rate {
+	width: 18px !important;
+	height: 18px !important;
 }
 .pinned-issue.card {
 	margin-bottom: 0.5rem;
@@ -23,10 +28,17 @@
 	border-bottom: 2px dotted transparent;
 	cursor: pointer;
 }
+.pinned-issue .field .issue-state {
+	margin-bottom: 0.5rem;
+	margin-right: 0.5rem;
+	padding: 0.25rem 0.4rem;
+}
 .pinned-issue .state:hover {
 	border-color: var(--gray);
 }
-
+.pinned-issue .issue-link {
+	font-weight: 500;
+}
 .pinned-issue .linked-issues {
 	border-left: 2px dashed var(--secondary);
 }

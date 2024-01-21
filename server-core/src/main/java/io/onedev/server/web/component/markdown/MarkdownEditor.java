@@ -3,7 +3,6 @@ package io.onedev.server.web.component.markdown;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;

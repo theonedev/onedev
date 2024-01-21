@@ -1,0 +1,55 @@
+<wicket:panel>
+	<div wicket:id="content" class="p-4"></div>
+	<wicket:fragment wicket:id="aggregationFrag">
+		<div class="mb-4 bg-light p-4 rounded">
+			<h6>
+				Estimated Time
+			</h6>
+			<div class="mb-2">
+				<span>Total: </span>
+				<span wicket:id="estimatedTime"></span>
+			</div>
+			<div class="mb-2">
+				<span>Own: </span> 
+				<span wicket:id="ownEstimatedTime"></span> 
+				<a wicket:id="editOwnEstimatedTime" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+			</div>
+			<div>
+				<span>Aggregated from '<span wicket:id="estimatedTimeAggregationLink"></span>':</span>
+				<span wicket:id="aggregatedEstimatedTime"></span>
+			</div>
+		</div>
+		<div class="bg-light rounded p-4">
+			<h6>
+				Spent Time
+			</h6>
+			<div class="mb-2">
+				<span>Total: </span>
+				<span wicket:id="spentTime"></span>
+			</div>
+			<div class="mb-2">
+				<span>Own: </span>
+				<span wicket:id="ownSpentTime"></span>
+				<a wicket:id="logWork" title="Log work"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+				<a wicket:id="startWork" title="Start work"><wicket:svg href="play" class="icon"></wicket:svg></a>
+			</div>
+			<div>
+				<span>Aggregated from '<span wicket:id="spentTimeAggregationLink"></span>':</span>
+				<span wicket:id="aggregatedSpentTime"></span>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noAggregationFrag">
+		<div class="mb-4">
+			<span>Estimated Time:</span>
+			<span wicket:id="estimatedTime"></span>
+			<a wicket:id="editEstimatedTime" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		</div>
+		<div class="mb-0">
+			<span>Spent Time:</span>
+			<span wicket:id="spentTime"></span>
+			<a wicket:id="logWork" title="Log work"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<a wicket:id="startWork" title="Start work"><wicket:svg href="play" class="icon"></wicket:svg></a>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

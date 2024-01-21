@@ -31,6 +31,9 @@
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
+				<a wicket:id="showProgress" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="clock" class="icon"></wicket:svg> Timing
+				</a>
 			</div>
 			<div wicket:id="body" class="body">
 				<div wicket:id="feedback"></div>
@@ -45,17 +48,16 @@
 	</div>
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="primary d-flex mb-3">
-			<div class="mr-4 flex-grow-1">
-				<wicket:container wicket:id="numberAndTitle"></wicket:container> 
-				<span class="mr-3">
-					<a wicket:id="copy" title="Copy issue number and title" class="copy ml-1 btn btn-icon btn-xs btn-light btn-hover-primary">
-						<wicket:svg href="copy" class="icon"/>
-					</a>
-					<a wicket:id="pin" title="Pin this issue" class="pin ml-1 btn btn-icon btn-xs btn-light btn-hover-primary">
-						<wicket:svg href="pin" class="icon"/>
-					</a>
-				</span>
-				<span wicket:id="links" class="links"></span>
+			<div class="mr-4 flex-grow-1 d-flex flex-wrap row-gap-2">
+				<span wicket:id="numberAndTitle" class="mr-2"></span>
+				<a wicket:id="copy" title="Copy issue number and title" class="copy mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
+					<wicket:svg href="copy" class="icon"/>
+				</a>
+				<a wicket:id="pin" title="Pin this issue" class="pin mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
+					<wicket:svg href="pin" class="icon"/>
+				</a>
+				<span wicket:id="progress" class="d-flex align-items-center mr-2"></span>
+				<span wicket:id="links" class="d-flex align-items-center links"></span>
 			</div>
 			<div class="flex-shrink-0 d-none d-lg-block text-muted">
 				<span class="votes mr-2" title="Votes">

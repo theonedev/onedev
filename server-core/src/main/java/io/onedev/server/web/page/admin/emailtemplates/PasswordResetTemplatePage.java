@@ -35,8 +35,7 @@ public class PasswordResetTemplatePage extends AbstractTemplatePage {
 	protected Map<String, String> getVariableHelp() {
 		return CollectionUtils.newLinkedHashMap(
 				"user", "<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for",
-				"serverUrl", "root url of OneDev server",
-				"newPassword", "new password");
+				"passwordResetUrl", "url to reset password");
 	}
 
 	@Override

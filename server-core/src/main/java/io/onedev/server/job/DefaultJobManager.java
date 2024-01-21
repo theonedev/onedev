@@ -59,15 +59,14 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import nl.altindag.ssl.SSLFactory;
@@ -92,6 +91,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,6 +101,7 @@ import java.util.function.Consumer;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
@@ -155,7 +156,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final ClusterManager clusterManager;
 
 	private final CodeIndexManager codeIndexManager;
-
+	
 	private final GitService gitService;
 	
 	private final SSLFactory sslFactory;
@@ -267,6 +268,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setProject(project);
 		build.setCommitHash(commitId.name());
 		build.setJobName(jobName);
+		build.setJobToken(UUID.randomUUID().toString());
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
 		build.setSubmitReason(reason);
@@ -276,7 +278,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setIssue(issue);
 		build.setPipeline(pipeline);
 
-		ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
+		Project.push(project);
+		try {
+			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
+		} finally {
+			Project.pop();
+		}
 
 		Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
 		for (ParamSpec paramSpec : build.getJob().getParamSpecs()) {
@@ -312,24 +319,20 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 			for (JobDependency dependency : build.getJob().getJobDependencies()) {
 				JobDependency interpolated = interpolator.interpolateProperties(dependency);
-				new MatrixRunner<>(ParamUtils.getParamMatrix(build, build.getParamCombination(),
-						interpolated.getJobParams())) {
-
-					@Override
-					public void run(Map<String, List<String>> paramMap) {
-						Build dependencyBuild = doSubmit(project, commitId,
-								interpolated.getJobName(), paramMap, pipeline,
-								refName, submitter, request, issue, reason);
-						BuildDependence dependence = new BuildDependence();
-						dependence.setDependency(dependencyBuild);
-						dependence.setDependent(build);
-						dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
-						dependence.setArtifacts(interpolated.getArtifacts());
-						dependence.setDestinationPath(interpolated.getDestinationPath());
-						build.getDependencies().add(dependence);
-					}
-
-				}.run();
+				var dependencyParamMaps = resolveParams(build, build.getParamCombination(), 
+						interpolated.getParamMatrix(), interpolated.getExcludeParamMaps());
+				for (var dependencyParamMap: dependencyParamMaps) {
+					Build dependencyBuild = doSubmit(project, commitId,
+							interpolated.getJobName(), dependencyParamMap, pipeline,
+							refName, submitter, request, issue, reason);
+					BuildDependence dependence = new BuildDependence();
+					dependence.setDependency(dependencyBuild);
+					dependence.setDependent(build);
+					dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
+					dependence.setArtifacts(interpolated.getArtifacts());
+					dependence.setDestinationPath(interpolated.getDestinationPath());
+					build.getDependencies().add(dependence);
+				}
 			}
 
 			for (ProjectDependency dependency : build.getJob().getProjectDependencies()) {
@@ -363,6 +366,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						&& !subject.isPermitted(new ProjectPermission(dependencyProject, jobPermission))) {
 					throw new ExplicitException("Unable to access dependency build '"
 							+ dependencyBuild.getFQN() + "': permission denied");
+				}
+				
+				if (build.getDependencies().stream()
+						.anyMatch(it -> it.getDependency().equals(dependencyBuild))) {
+					throw new ExplicitException("Duplicate dependency build '"
+							+ dependencyBuild.getFQN() + "'");
 				}
 
 				BuildDependence dependence = new BuildDependence();
@@ -412,7 +421,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
 		projectManager.runOnActiveServer(projectId, () -> {
-			FileUtils.cleanDir(buildManager.getStorageDir(projectId, buildNumber));
+			FileUtils.cleanDir(buildManager.getBuildDir(projectId, buildNumber));
 			return null;
 		});
 		listenerRegistry.post(new BuildSubmitted(build));
@@ -485,7 +494,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private JobExecution execute(Build build) {
-		String jobToken = UUID.randomUUID().toString();
+		String jobToken = build.getJobToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
 		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
@@ -505,12 +514,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		AtomicInteger maxRetries = new AtomicInteger(0);
 		AtomicInteger retryDelay = new AtomicInteger(0);
 		List<CacheSpec> caches = new ArrayList<>();
-		List<Service> services = new ArrayList<>();
+		List<ServiceFacade> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
 		long timeout;
 
 		Job job;
-
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
@@ -526,7 +534,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			for (String serviceName : job.getRequiredServices()) {
 				Service service = buildSpec.getServiceMap().get(serviceName);
-				services.add(interpolator.interpolateProperties(service));
+				services.add(interpolator.interpolateProperties(service).getFacade(build, jobToken));
 			}
 
 			maxRetries.set(job.getMaxRetries());
@@ -629,10 +637,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		var jobServer = jobServers.get(jobToken);
 		if (mustExist && jobServer == null)
 			throw new ExplicitException("No job context found for specified job token");
-		var jobContext = clusterManager.runOnServer(jobServer, () -> jobContexts.get(jobToken));
-		if (mustExist && jobContext == null)
-			throw new ExplicitException("No job context found for specified job token");
-		return jobContext;
+		if (jobServer != null) {
+			var jobContext = clusterManager.runOnServer(jobServer, () -> jobContexts.get(jobToken));
+			if (mustExist && jobContext == null)
+				throw new ExplicitException("No job context found for specified job token");
+			return jobContext;
+		} else {
+			return null;
+		}
 	}
 
 	private void markBuildError(Build build, String errorMessage) {
@@ -677,8 +689,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						for (Job job : buildSpec.getJobMap().values()) {
 							TriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
-								Map<String, List<List<String>>> paramMatrix =
-										ParamUtils.getParamMatrix(null, null, match.getParams());
+								var paramMaps = resolveParams(null, null, 
+										match.getParamMatrix(), match.getExcludeParamMaps());
 								Long projectId = event.getProject().getId();
 
 								// run asynchrously as session may get closed due to exception
@@ -689,16 +701,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										SecurityUtils.bindAsSystem();
 										Project project = projectManager.load(projectId);
 										try {
-											new MatrixRunner<>(paramMatrix) {
-
-												@Override
-												public void run(Map<String, List<String>> paramMap) {
-													submit(project, commitId, job.getName(), paramMap,
-															pipeline, match.getRefName(), SecurityUtils.getUser(),
-															match.getRequest(), match.getIssue(), match.getReason());
-												}
-
-											}.run();
+											for (var paramMap: paramMaps) {
+												submit(project, commitId, job.getName(), paramMap,
+														pipeline, match.getRefName(), SecurityUtils.getUser(),
+														match.getRequest(), match.getIssue(), match.getReason());
+											}
 										} catch (Throwable e) {
 											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)",
 													project.getPath(), commitId.name(), job.getName());
@@ -744,6 +751,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 
 				build.setStatus(Build.Status.WAITING);
+				build.setJobToken(UUID.randomUUID().toString());
 				build.setFinishDate(null);
 				build.setPendingDate(null);
 				build.setRetryDate(null);
@@ -753,6 +761,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setSubmitReason(reason);
 				build.setCanceller(null);
 				build.setAgent(null);
+				build.getCheckoutPaths().clear();
 
 				buildParamManager.deleteParams(build);
 				for (Map.Entry<String, List<String>> entry : build.getParamMap().entrySet()) {
@@ -801,9 +810,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long buildId = build.getId();
 		JobContext jobContext = getJobContext(buildId);
 		if (jobContext != null) {
-			String jobServerUUID = jobServers.get(jobContext.getJobToken());
-			if (jobServerUUID != null) {
-				clusterManager.runOnServer(jobServerUUID, new ClusterTask<Void>() {
+			String jobServer = jobServers.get(jobContext.getJobToken());
+			if (jobServer != null) {
+				clusterManager.runOnServer(jobServer, new ClusterTask<Void>() {
 
 					private static final long serialVersionUID = 1L;
 
@@ -901,7 +910,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		} else {
 			throw new ExplicitException("Job shell not ready");
 		}
-
 	}
 
 	@Override
@@ -934,13 +942,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				execution.cancel(userId);
 			} else {
 				transactionManager.run(() -> {
-					Build build1 = buildManager.load(buildId);
-					if (!build1.isFinished()) {
-						build1.setStatus(Status.CANCELLED);
-						build1.setFinishDate(new Date());
-						build1.setCanceller(userManager.load(userId));
-						buildManager.update(build1);
-						listenerRegistry.post(new BuildFinished(build1));
+					Build innerBuild = buildManager.load(buildId);
+					if (!innerBuild.isFinished()) {
+						innerBuild.setStatus(Status.CANCELLED);
+						innerBuild.setFinishDate(new Date());
+						innerBuild.setCanceller(userManager.load(userId));
+						buildManager.update(innerBuild);
+						listenerRegistry.post(new BuildFinished(innerBuild));
 					}
 				});
 			}
@@ -960,8 +968,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(SystemStarted event) {
 		var localServer = clusterManager.getLocalServerAddress();
 		for (var projectId: projectManager.getIds()) {
-			if (localServer.equals(projectManager.getActiveServer(projectId, false))) 
+			if (localServer.equals(projectManager.getActiveServer(projectId, false))) {
 				schedule(projectManager.load(projectId), false);
+			}
 		}
 		thread = new Thread(this);
 		thread.start();
@@ -1061,15 +1070,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						SecurityUtils.bindAsSystem();
 						Project aProject = projectManager.load(projectId);
 						String pipeline = UUID.randomUUID().toString();
-						new MatrixRunner<>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
-
-							@Override
-							public void run(Map<String, List<String>> paramMap) {
-								submit(aProject, commitId, job.getName(), paramMap, pipeline, 
-										refName, SecurityUtils.getUser(), null, null, reason);
-							}
-
-						}.run();
+						var paramMaps = resolveParams(null, null, 
+								trigger.getParamMatrix(), trigger.getExcludeParamMaps());
+						for (var paramMap: paramMaps) {
+							submit(aProject, commitId, job.getName(), paramMap, pipeline,
+									refName, SecurityUtils.getUser(), null, null, reason);
+						}
 					});
 				}
 			}
@@ -1102,8 +1108,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Override
 	public void run() {
 		while (!jobExecutions.isEmpty() || thread != null) {
-			if (thread == null)
-				logger.info("Waiting for unfinished jobs...");
+			if (thread == null) {
+				if (!jobExecutions.isEmpty())
+					logger.info("Waiting for jobs to finish...");
+				for (var execution: jobExecutions.values()) {
+					if (!execution.isDone() && !execution.isCancelled())
+						execution.cancel(User.SYSTEM_ID);
+				}
+			}
 			try {
 				if (clusterManager.isLeaderServer()) {
 					Map<String, Collection<Long>> buildIds = new HashMap<>();
@@ -1111,7 +1123,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						var buildId = entry.getKey();
 						var projectId = entry.getValue();
 						String activeServer = projectManager.getActiveServer(projectId, false);
-						if (activeServer != null && clusterManager.getRunningServers().contains(activeServer)) {
+						if (activeServer != null && clusterManager.getOnlineServers().contains(activeServer)) {
 							var buildIdsOfServer = buildIds.computeIfAbsent(activeServer, k -> new ArrayList<>());
 							buildIdsOfServer.add(buildId);
 						}
@@ -1125,14 +1137,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							transactionManager.run(() -> {
 								for (Long buildId : buildIdsOfServer) {
 									Build build = buildManager.load(buildId);
-									if (build.getStatus() == Status.RUNNING
-											|| build.getStatus() == Status.PENDING) {
+									if (build.getStatus() == Status.PENDING) {
 										JobExecution execution = jobExecutions.get(build.getId());
 										if (execution != null) {
-											if (execution.isTimedout())
-												execution.cancel(null);
+											execution.updateBeginTime();
 										} else if (thread != null) {
-											build.setStatus(Status.PENDING);
 											try {
 												jobExecutions.put(build.getId(), execute(build));
 											} catch (Throwable t) {
@@ -1142,6 +1151,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												else
 													markBuildError(build, Throwables.getStackTraceAsString(t));
 											}
+										}
+									} else if (build.getStatus() == Status.RUNNING) {
+										JobExecution execution = jobExecutions.get(build.getId());
+										if (execution != null) {
+											if (execution.isTimedout())
+												execution.cancel(null);
+										} else {
+											build.setStatus(Status.PENDING);
 										}
 									} else if (build.getStatus() == Status.WAITING) {
 										if (build.getRetryDate() != null) {
@@ -1382,11 +1399,26 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void reportJobWorkspace(JobContext jobContext, String jobWorkspace) {
 		transactionManager.run(() -> {
 			Build build = buildManager.load(jobContext.getBuildId());
-			build.setJobWorkspace(jobWorkspace);
+			
+			CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
+			entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
+				if (executable instanceof CheckoutFacade) {
+					CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
+					var checkoutPath = jobWorkspace;
+					if (checkoutFacade.getCheckoutPath() != null)
+						checkoutPath += "/" + checkoutFacade.getCheckoutPath();
+					checkoutPath = checkoutPath.replace('\\', '/');
+					checkoutPath = Paths.get(checkoutPath).normalize().toString();
+					checkoutPath = checkoutPath.replace('\\', '/');
+					build.getCheckoutPaths().add(checkoutPath);
+				}
+				return null;
+			}, new ArrayList<>());
+			
 			buildManager.update(build);
 		});
 	}
-
+	
 	@Sessional
 	@Override
 	public void copyDependencies(JobContext jobContext, File tempDir) {
@@ -1453,44 +1485,42 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											 boolean callByAgent, TaskLogger logger) {
 		String activeServer = projectManager.getActiveServer(jobContext.getProjectId(), true);
 		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			// Some steps need the commit to be indexed, for instance various 
-			// report publishing steps need to query the full blob path based 
-			// on a partial path (java package/class etc)
-			codeIndexManager.indexAsync(jobContext.getProjectId(), jobContext.getCommitId());
-			while (!codeIndexManager.isIndexed(jobContext.getProjectId(), jobContext.getCommitId())) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+			Thread thread = Thread.currentThread();
+			Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
+			if (callByAgent && threads != null) synchronized (threads) {
+				threads.add(thread);
+			}
+			try {
+				List<Action> actions = jobActions.get(jobContext.getJobToken());
+				if (actions != null) {
+					ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
+					var serverSideStep = (ServerSideStep) serverSideFacade.getStep();
+					var transformedServerSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
+
+					if (transformedServerSideStep.requireCommitIndex()) {
+						logger.log("Waiting for commit to be indexed...");
+						codeIndexManager.indexAsync(jobContext.getProjectId(), jobContext.getCommitId());
+						while (!codeIndexManager.isIndexed(jobContext.getProjectId(), jobContext.getCommitId())) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+					
+					return sessionManager.call(() -> {
+						Build build = buildManager.load(jobContext.getBuildId());
+						return transformedServerSideStep.run(build, inputDir, logger);
+					});
+				} else {
+					throw new IllegalStateException("Job actions not found");
+				}
+			} finally {
+				if (callByAgent && threads != null) synchronized (threads) {
+					threads.remove(thread);
 				}
 			}
-
-			return sessionManager.call(() -> {
-				Thread thread = Thread.currentThread();
-				Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
-				if (callByAgent && threads != null) synchronized (threads) {
-					threads.add(thread);
-				}
-				try {
-					List<Action> actions = jobActions.get(jobContext.getJobToken());
-					if (actions != null) {
-						ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
-						ServerSideStep serverSideStep = (ServerSideStep) serverSideFacade.getStep();
-
-						serverSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
-
-						Build build = buildManager.load(jobContext.getBuildId());
-						return serverSideStep.run(build, inputDir, logger);
-					} else {
-						throw new IllegalStateException("Job actions not found");
-					}
-				} finally {
-					if (callByAgent && threads != null) synchronized (threads) {
-						threads.remove(thread);
-					}
-				}
-
-			});
 		} else {
 			String serverUrl = clusterManager.getServerUrl(activeServer);
 			return KubernetesHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 

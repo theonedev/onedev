@@ -1,19 +1,13 @@
 package io.onedev.server.web.editable.choice;
 
-import java.lang.reflect.AnnotatedElement;
-import java.util.List;
-
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.annotation.ChoiceProvider;
+import java.lang.reflect.AnnotatedElement;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class ChoiceEditSupport implements EditSupport {

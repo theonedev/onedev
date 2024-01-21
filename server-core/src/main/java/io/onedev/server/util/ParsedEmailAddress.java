@@ -1,8 +1,8 @@
 package io.onedev.server.util;
 
-import java.io.Serializable;
-
 import io.onedev.commons.utils.StringUtils;
+
+import java.io.Serializable;
 
 public class ParsedEmailAddress implements Serializable {
 	
@@ -36,8 +36,16 @@ public class ParsedEmailAddress implements Serializable {
 		return name + "@" + domain;
 	}
 	
-	public String getSubAddressed(String subAddress) {
-		return name + "+" + subAddress + "@" + domain;
+	public String getSubaddress(String subaddressSuffix) {
+		return name + "+" + subaddressSuffix + "@" + domain;
+	}
+	
+	public String getOriginalAddress() {
+		return StringUtils.substringBefore(name, "+") + "@" + domain;
+	}
+	
+	public boolean isSubaddress() {
+		return name.contains("+");
 	}
 	
 }

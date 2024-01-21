@@ -91,7 +91,6 @@ public class AgentOverviewPage extends AgentDetailPage {
 		add(new Label("ipAddress", getAgent().getIpAddress()));
 		add(new Label("osVersion", getAgent().getOsVersion()));
 		add(new Label("osArch", getAgent().getOsArch()));
-		add(new Label("temporal", getAgent().isTemporal()));
 		add(new AgentStatusBadge("status", agentModel));
 
 		add(new Label("accessToken", new AbstractReadOnlyModel<>() {

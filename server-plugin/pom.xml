@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>8.6.13</version>
+		<version>10.0.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -20,13 +20,18 @@
 		<module>server-plugin-executor-kubernetes</module>
 		<module>server-plugin-executor-serverdocker</module>
 		<module>server-plugin-buildspec-maven</module>
+		<module>server-plugin-buildspec-dotnet</module>
 		<module>server-plugin-buildspec-gradle</module>
 		<module>server-plugin-buildspec-node</module>
 		<module>server-plugin-authenticator-ldap</module>
+		<module>server-plugin-mailservice-smtpimap</module>
+		<module>server-plugin-mailservice-office365</module>
+		<module>server-plugin-mailservice-gmail</module>
 		<module>server-plugin-sso-openid</module>
 		<module>server-plugin-report-markdown</module>
 		<module>server-plugin-report-jest</module>
 		<module>server-plugin-report-clover</module>
+		<module>server-plugin-report-cobertura</module>
 		<module>server-plugin-report-checkstyle</module>
 		<module>server-plugin-import-github</module>
 		<module>server-plugin-import-gitlab</module>
@@ -40,14 +45,24 @@
 		<module>server-plugin-executor-remoteshell</module>
 		<module>server-plugin-report-unittest</module>
 		<module>server-plugin-report-junit</module>
+		<module>server-plugin-report-trx</module>
 		<module>server-plugin-report-coverage</module>
 		<module>server-plugin-report-jacoco</module>
 		<module>server-plugin-report-problem</module>
 		<module>server-plugin-report-spotbugs</module>
 		<module>server-plugin-report-pmd</module>
+		<module>server-plugin-report-html</module>
+		<module>server-plugin-report-roslynator</module>
 		<module>server-plugin-report-cpd</module>
 		<module>server-plugin-sso-discord</module>
 		<module>server-plugin-notification-slack</module>
     	<module>server-plugin-notification-discord</module>
+		<module>server-plugin-notification-ntfy</module>
+		<module>server-plugin-pack-container</module>
+		<module>server-plugin-pack-maven</module>
+		<module>server-plugin-pack-npm</module>
+		<module>server-plugin-pack-nuget</module>
+		<module>server-plugin-pack-pypi</module>
+		<module>server-plugin-pack-gem</module>
     </modules>
 </project>

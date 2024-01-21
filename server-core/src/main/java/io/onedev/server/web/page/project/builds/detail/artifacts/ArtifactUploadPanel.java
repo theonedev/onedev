@@ -4,15 +4,17 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.util.FileUpload;
+import io.onedev.server.web.upload.FileUpload;
+import io.onedev.server.web.upload.UploadManager;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -30,18 +32,19 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 @SuppressWarnings("serial")
 public abstract class ArtifactUploadPanel extends Panel {
 
 	private String directory;
 	
-	private final Collection<FileUpload> uploads = new ArrayList<>();
+	private String uploadId;
 	
 	public ArtifactUploadPanel(String id) {
 		super(id);
@@ -74,15 +77,15 @@ public abstract class ArtifactUploadPanel extends Panel {
 		
 		DropzoneField dropzone = new DropzoneField(
 				"files", 
-				new PropertyModel<Collection<FileUpload>>(this, "uploads"), 
+				new PropertyModel<String>(this, "uploadId"), 
 				null, 0, maxUploadFileSize);
 		dropzone.setRequired(true).setLabel(Model.of("File"));
 		form.add(dropzone);
 		
 		form.add(new AjaxButton("upload") {
 
-			private String getArtifactPath(FileUpload upload) {
-				String artifactPath = FilenameUtils.sanitizeFilename(upload.getFileName());
+			private String getArtifactPath(FileItem file) {
+				String artifactPath = FilenameUtils.sanitizeFilename(FileUpload.getFileName(file));
 				if (directory != null)
 					artifactPath = directory + "/" + artifactPath;
 				return artifactPath;
@@ -101,61 +104,58 @@ public abstract class ArtifactUploadPanel extends Panel {
 					
 					Long projectId = getBuild().getProject().getId();
 					String activeServer = projectManager.getActiveServer(projectId, true);
-					
-					if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-						LockUtils.write(getBuild().getArtifactsLockName(), () -> {
-							StorageManager storageManager = OneDev.getInstance(StorageManager.class);
-							var artifactsDir = storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
-							for (FileUpload upload: uploads) {
-								String filePath = getArtifactPath(upload);
-								File file = new File(artifactsDir, filePath);
-								FileUtils.createDir(file.getParentFile());
-								try (	InputStream is = upload.getInputStream();
-										OutputStream os = new FileOutputStream(file)) {
-									IOUtils.copy(is, os, BUFFER_SIZE);
-								} finally {
-									upload.release();
+					var upload = getUploadManager().getUpload(uploadId);
+					try {
+						if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+							LockUtils.write(getBuild().getArtifactsLockName(), () -> {
+								StorageManager storageManager = OneDev.getInstance(StorageManager.class);
+								var artifactsDir = storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
+								for (var item : upload.getItems()) {
+									String filePath = getArtifactPath(item);
+									File file = new File(artifactsDir, filePath);
+									FileUtils.createDir(file.getParentFile());
+									try (InputStream is = item.getInputStream();
+										 OutputStream os = new FileOutputStream(file)) {
+										IOUtils.copy(is, os, BUFFER_SIZE);
+									}
 								}
-							}
-							projectManager.directoryModified(projectId, artifactsDir);
-							return null;
-						});
-					} else {
-						Client client = ClientBuilder.newClient();
-						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
-						try {
-							String serverUrl = clusterManager.getServerUrl(activeServer);
-							for (FileUpload upload: uploads) {
-								String filePath = getArtifactPath(upload);
-								WebTarget jerseyTarget = client.target(serverUrl)
-										.path("~api/cluster/artifact")
-										.queryParam("projectId", projectId)
-										.queryParam("buildNumber", getBuild().getNumber())
-										.queryParam("artifactPath", filePath);
-								Invocation.Builder builder = jerseyTarget.request();
-								builder.header(HttpHeaders.AUTHORIZATION, 
-										KubernetesHelper.BEARER + " " + clusterManager.getCredential());
-								
-								StreamingOutput os = new StreamingOutput() {
+								projectManager.directoryModified(projectId, artifactsDir);
+								return null;
+							});
+						} else {
+							Client client = ClientBuilder.newClient();
+							client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
+							try {
+								String serverUrl = clusterManager.getServerUrl(activeServer);
+								for (var item : upload.getItems()) {
+									String filePath = getArtifactPath(item);
+									WebTarget jerseyTarget = client.target(serverUrl)
+											.path("~api/cluster/artifact")
+											.queryParam("projectId", projectId)
+											.queryParam("buildNumber", getBuild().getNumber())
+											.queryParam("artifactPath", filePath);
+									Invocation.Builder builder = jerseyTarget.request();
+									builder.header(HttpHeaders.AUTHORIZATION,
+											KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 
-									@Override
-									public void write(OutputStream output) throws IOException {
-										try (InputStream is = upload.getInputStream()) {
+									StreamingOutput os = output -> {
+										try (InputStream is = item.getInputStream()) {
 											IOUtils.copy(is, output, BUFFER_SIZE);
 										} finally {
 											output.close();
 										}
-									}				   
-								   
-								};
-								
-								try (Response response = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
-									KubernetesHelper.checkStatus(response);
+									};
+
+									try (Response response = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
+										KubernetesHelper.checkStatus(response);
+									}
 								}
+							} finally {
+								client.close();
 							}
-						} finally {
-							client.close();
 						}
+					} finally {
+						upload.clear();
 					}
 					
 					onUploaded(target);
@@ -180,6 +180,10 @@ public abstract class ArtifactUploadPanel extends Panel {
 			}
 			
 		});
+	}
+	
+	private UploadManager getUploadManager() {
+		return OneDev.getInstance(UploadManager.class);
 	}
 
 	public abstract void onUploaded(AjaxRequestTarget target);

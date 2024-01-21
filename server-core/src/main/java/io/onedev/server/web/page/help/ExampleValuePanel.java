@@ -125,7 +125,7 @@ public class ExampleValuePanel extends Panel {
 				&& (getField().getAnnotation(ManyToOne.class) != null 
 					|| getField().getAnnotation(JoinColumn.class) != null)) { 
 			builder.append(toJson(((AbstractEntity)getValue()).getId()));
-		} else if (getValue() instanceof Collection) {
+		} else if (getValue() instanceof Collection || getValue() instanceof Serializable[]) {
 			List<String> elements = new ArrayList<>();
 			visitChildren(ExampleValuePanel.class, (IVisitor<ExampleValuePanel, Void>) (object, visit) -> {
 				elements.add(object.getValueAsJson());
@@ -140,17 +140,12 @@ public class ExampleValuePanel extends Panel {
 
 			AtomicReference<String> nameJsonRef = new AtomicReference<>(null);
 			
-			visitChildren(ExampleValuePanel.class, new IVisitor<ExampleValuePanel, Void>() {
-
-				@Override
-				public void component(ExampleValuePanel object, IVisit<Void> visit) {
-					if (object.getId().equals("name"))
-						nameJsonRef.set(object.getValueAsJson());
-					else
-						properties.put(nameJsonRef.get(), object.getValueAsJson());
-					visit.dontGoDeeper();
-				}
-				
+			visitChildren(ExampleValuePanel.class, (IVisitor<ExampleValuePanel, Void>) (object, visit) -> {
+				if (object.getId().equals("name"))
+					nameJsonRef.set(object.getValueAsJson());
+				else
+					properties.put(nameJsonRef.get(), object.getValueAsJson());
+				visit.dontGoDeeper();
 			});
 			if (properties.isEmpty()) {
 				builder.append("{ }");
@@ -194,7 +189,7 @@ public class ExampleValuePanel extends Panel {
 				&& (getField().getAnnotation(ManyToOne.class) != null 
 					|| getField().getAnnotation(JoinColumn.class) != null)) { 
 			addOrReplace(newScalarFragment(((AbstractEntity)getValue()).getId()));
-		} else if (getValue() instanceof Collection) { 
+		} else if (getValue() instanceof Collection || getValue() instanceof Serializable[]) { 
 			addOrReplace(newArrayFragment());
 		} else if (getValue() instanceof Map) { 
 			addOrReplace(newMapFragment());
@@ -316,7 +311,10 @@ public class ExampleValuePanel extends Panel {
 			@SuppressWarnings("unchecked")
 			@Override
 			public List<Serializable> getObject() {
-				return new ArrayList<>((Collection<? extends Serializable>) getValue());
+				if (getValue() instanceof Collection) 
+					return new ArrayList<>((Collection<? extends Serializable>) getValue());
+				else 
+					return Arrays.asList((Serializable[]) getValue());
 			}
 
 		}) {
@@ -450,6 +448,8 @@ public class ExampleValuePanel extends Panel {
 		
 		if (getDeclaredClass() != null 
 				&& Modifier.isAbstract(getDeclaredClass().getModifiers())
+				&& !getDeclaredClass().getName().startsWith("java.")
+				&& !getDeclaredClass().getName().startsWith("javax.")
 				&& !Collection.class.isAssignableFrom(getDeclaredClass())
 				&& !Map.class.isAssignableFrom(getDeclaredClass())) {
 			Fragment typeInfoFragment = new Fragment("typeInfo", "typeInfoFrag", this);
@@ -518,25 +518,25 @@ public class ExampleValuePanel extends Panel {
 			fragment.add(new WebMarkupContainer("typeInfo").setVisible(false));
 		}
 		
-		fragment.add(new ListView<Field>("properties", fieldsModel) {
+		fragment.add(new ListView<>("properties", fieldsModel) {
 
 			@Override
 			protected void populateItem(ListItem<Field> item) {
 				Field field = item.getModelObject();
-				
+
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
 					@Override
 					protected ValueInfo load() {
 						return new ValueInfo(getValueOrigin(), String.class);
 					}
-					
+
 				};
 				if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null)
 					item.add(new ExampleValuePanel("name", Model.of(field.getName() + "Id"), valueInfoModel, requestBodyClass));
 				else
 					item.add(new ExampleValuePanel("name", Model.of(field.getName()), valueInfoModel, requestBodyClass));
-				
+
 				field.setAccessible(true);
 				valueInfoModel = new LoadableDetachableModel<>() {
 
@@ -547,7 +547,7 @@ public class ExampleValuePanel extends Panel {
 					}
 
 				};
-				
+
 				item.add(new ExampleValuePanel("value", new IModel<>() {
 
 					@Override
@@ -577,11 +577,11 @@ public class ExampleValuePanel extends Panel {
 					}
 
 				}, valueInfoModel, requestBodyClass));
-				
+
 				item.add(new WebMarkupContainer("comma")
-						.setVisible(item.getIndex() < getModelObject().size()-1));
+						.setVisible(item.getIndex() < getModelObject().size() - 1));
 			}
-			
+
 		});
 		return fragment;
 	}

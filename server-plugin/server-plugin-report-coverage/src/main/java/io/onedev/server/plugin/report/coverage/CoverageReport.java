@@ -11,9 +11,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 
-import org.apache.commons.lang.SerializationUtils;
-
 import io.onedev.server.model.Build;
+import org.apache.commons.lang3.SerializationUtils;
 
 public class CoverageReport implements Serializable {
 
@@ -25,27 +24,27 @@ public class CoverageReport implements Serializable {
 	
 	private static final String REPORT = "report.ser";
 	
-	private final CoverageInfo coverages;
+	private final CoverageInfo overallCoverages;
 	
-	private final List<PackageCoverageInfo> packageCoverages;
+	private final List<GroupCoverageInfo> groupCoverages;
 	
-	public CoverageReport(CoverageInfo coverages, List<PackageCoverageInfo> packageCoverages) {
-		this.coverages = coverages;
-		this.packageCoverages = packageCoverages;
+	public CoverageReport(CoverageInfo overallCoverages, List<GroupCoverageInfo> groupCoverages) {
+		this.overallCoverages = overallCoverages;
+		this.groupCoverages = groupCoverages;
 	}
 
 	public CoverageInfo getOverallCoverages() {
-		return coverages;
+		return overallCoverages;
 	}
 
-	public List<PackageCoverageInfo> getPackageCoverages() {
-		return packageCoverages;
+	public List<GroupCoverageInfo> getGroupCoverages() {
+		return groupCoverages;
 	}
 	
 	public static CoverageReport readFrom(File reportDir) {
 		File reportFile = new File(reportDir, REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(reportFile))) {
-			return (CoverageReport) SerializationUtils.deserialize(is);
+			return SerializationUtils.deserialize(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

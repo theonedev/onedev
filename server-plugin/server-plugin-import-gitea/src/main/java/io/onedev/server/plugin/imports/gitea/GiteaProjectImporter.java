@@ -3,6 +3,7 @@ package io.onedev.server.plugin.imports.gitea;
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
 import java.io.Serializable;
@@ -70,7 +71,7 @@ public class GiteaProjectImporter implements ProjectImporter {
 	}
 
 	@Override
-	public String doImport(boolean dryRun, TaskLogger logger) {
+	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		ImportRepositories repositories = repositoriesStep.getSetting();
 		ProjectImportOption option = optionStep.getSetting();
 		return serverStep.getSetting().importProjects(repositories, option, dryRun, logger);

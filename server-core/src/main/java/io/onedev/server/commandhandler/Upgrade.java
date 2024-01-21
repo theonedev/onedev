@@ -1,6 +1,7 @@
 package io.onedev.server.commandhandler;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.ExplicitException;
@@ -13,7 +14,7 @@ import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -48,13 +50,15 @@ public class Upgrade extends AbstractPlugin {
 	
 	public static final String DB_BACKUP_DIR = "db-backup";
 	
+	private static final String INCOMPATIBILITIES_DIR = "incompatibilities";
+	
 	private static final String RELEASE_PROPS_FILE = "release.properties";
 	
-	public static final String INCOMPATIBILITIES = "incompatibilities/incompatibilities.md";
+	public static final String INCOMPATIBILITIES_FILE = INCOMPATIBILITIES_DIR + "/incompatibilities.md";
 	
-	public static final String INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/since-upgraded-version.md"; 
+	public static final String INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE = INCOMPATIBILITIES_DIR + "/since-upgraded-version.md"; 
 	
-	public static final String CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/checked-since-upgraded-version.md"; 
+	public static final String CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE = INCOMPATIBILITIES_DIR + "/checked-since-upgraded-version.md"; 
 	
 	private File upgradeDir;
 	
@@ -124,6 +128,7 @@ public class Upgrade extends AbstractPlugin {
 				"--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED",
 				"--add-opens=java.management/sun.management=ALL-UNNAMED",
 				"--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+				"--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
 				"-classpath", "*", bootstrapClass, 
 				command);
 		cmdline.addArgs(commandArgs);
@@ -231,6 +236,7 @@ public class Upgrade extends AbstractPlugin {
 			Properties oldReleaseProps = loadReleaseProps(new File(upgradeDir, RELEASE_PROPS_FILE));
 
 			if (!releaseProps.equals(oldReleaseProps)) {
+				var inDocker = new File(upgradeDir, "IN_DOCKER").exists();				
 				logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
 
 				if (OneDev.isServerRunning(upgradeDir)) {
@@ -371,7 +377,7 @@ public class Upgrade extends AbstractPlugin {
 										updateProgramFiles(upgradeDir, oldAppDataVersion);
 
 										logger.info("Restoring database with new program...");
-										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath(), "false").execute(new LineConsumer() {
+										ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 											@Override
 											public void consume(String line) {
@@ -433,16 +439,9 @@ public class Upgrade extends AbstractPlugin {
 								boolean programRestored = false;
 								logger.info("Restoring old program files...");
 								try {
-									for (File child : programBackup.listFiles()) {
-										if (!child.getName().equals("site")) {
-											File target = new File(upgradeDir, child.getName());
-											if (target.isDirectory()) {
-												FileUtils.cleanDir(target);
-												FileUtils.copyDirectory(child, target);
-											} else {
-												FileUtils.copyFile(child, target);
-											}
-										}
+									for (File file : programBackup.listFiles()) {
+										if (!file.getName().equals("site")) 
+											restoreProgramFiles(file, new File(upgradeDir, file.getName()));
 									}
 
 									if (oldAppDataVersion <= 102)
@@ -461,7 +460,7 @@ public class Upgrade extends AbstractPlugin {
 								if (programRestored && dbChanged && dbCleaned) {
 									logger.info("Restoring old database...");
 									try {
-										buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath(), "false").execute(new LineConsumer() {
+										buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 											@Override
 											public void consume(String line) {
@@ -483,15 +482,17 @@ public class Upgrade extends AbstractPlugin {
 										logger.error("Error restoring old database", e);
 									}
 								}
-
+								
 								StringBuilder errorMessage = new StringBuilder(String.format("!! Failed to upgrade %s", upgradeDir.getAbsolutePath()));
 								if (dbChanged) {
-									errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");
-									if (SystemUtils.IS_OS_WINDOWS) {
+									if (inDocker)
+										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then exec into the container to run below command:");
+									else
+										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");										
+									if (SystemUtils.IS_OS_WINDOWS) 
 										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
-									} else {
+									else 
 										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
-									}
 								}
 								throw new ExplicitException(errorMessage.toString());
 							} else {
@@ -503,7 +504,7 @@ public class Upgrade extends AbstractPlugin {
 					};
 					
 					var maintenanceFile = OneDev.getMaintenanceFile(upgradeDir);
-					maintenanceFile.createNewFile();
+					FileUtils.touchFile(maintenanceFile);
 					try {
 						var hibernateConfig = new HibernateConfig(upgradeDir);
 						if (!hibernateConfig.isHSQLDialect()) {
@@ -515,14 +516,28 @@ public class Upgrade extends AbstractPlugin {
 							callable.call();
 						}
 					} finally {
-						maintenanceFile.delete();
+						FileUtils.deleteFile(maintenanceFile);
 					}
 					System.exit(0);
-				} catch (ExplicitException e) {
-					logger.error(e.getMessage());
-					System.exit(1);
 				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
+					var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null)
+						logger.error(e.getMessage());
+					else 
+						logger.error("Error upgrading '" + upgradeDir.getAbsolutePath() + "'", e);
+					if (inDocker) {
+						logger.info("*** After solving the problem, please restart container with correct image ***");
+						// loop here to make container active so that user can exec into the container to 
+						// solve problem
+						while (true) {
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException ex) {
+								break;
+							}
+						}
+					}
+					System.exit(1);
 				}
 			} else {
 				logger.info("Successfully checked {}", upgradeDir.getAbsolutePath());
@@ -547,6 +562,41 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.cleanDir(upgradeDir);
 				System.exit(1);
 			}
+		}
+	}
+	
+	private void restoreProgramFiles(File srcFile, File destFile) {
+		if (srcFile.isDirectory()) {
+			if (destFile.isDirectory()) {
+				for (var destChildFile: destFile.listFiles()) {
+					var srcChildFile = new File(srcFile, destChildFile.getName());
+					if (!srcChildFile.exists()) {
+						if (destChildFile.isFile())
+							FileUtils.deleteFile(destChildFile);
+						else 
+							FileUtils.deleteDir(destChildFile);
+					}
+				}
+			} else {
+				if (destFile.isFile())
+					FileUtils.deleteFile(destFile);
+				FileUtils.createDir(destFile);
+			}
+			for (var srcChildFile: srcFile.listFiles())
+				restoreProgramFiles(srcChildFile, new File(destFile, srcChildFile.getName()));
+		} else try {
+			if (destFile.isDirectory())
+				FileUtils.deleteDir(destFile);
+			if (destFile.exists()) {
+				if (destFile.canWrite())
+					FileUtils.copyFile(srcFile, destFile);
+				else if (!Arrays.equals(FileUtils.readFileToByteArray(srcFile), FileUtils.readFileToByteArray(destFile)))
+					throw new ExplicitException("Readonly file has been changed during upgrade: " + destFile.getAbsolutePath());
+			} else {
+				FileUtils.copyFile(srcFile, destFile);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -836,6 +886,16 @@ public class Upgrade extends AbstractPlugin {
 				}
 			}
 		}
+		
+		if (oldAppDataVersion < 142) {
+			try {
+				FileUtils.copyFile(
+						new File(Bootstrap.getSiteDir(), "assets/robots.txt"), 
+						new File(upgradeDir, "site/assets/robots.txt"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
@@ -869,7 +929,24 @@ public class Upgrade extends AbstractPlugin {
 
 			wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
-			writeStringToFile(wrapperConfFile, wrapperConf, UTF_8);
+			var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
+			if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {
+				lines = new ArrayList<>(lines);
+				lines.removeIf(line -> line.contains("Maximum Java Heap Size (in MB)") || line.contains("wrapper.java.maxmemory"));
+
+				int appendIndex = lines.size();
+				for (int i=0; i<lines.size(); i++) {
+					if (lines.get(i).contains("wrapper.java.additional.50")) {
+						appendIndex = i+1;
+						break;
+					}
+				}
+				lines.add(appendIndex, "set.default.max_memory_percent=50");
+				lines.add(appendIndex, "");
+				lines.add(appendIndex, "wrapper.java.additional.100=-XX:MaxRAMPercentage=%max_memory_percent%");
+			}
+			
+			FileUtils.writeLines(wrapperConfFile, UTF_8.name(), lines);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
@@ -970,16 +1047,16 @@ public class Upgrade extends AbstractPlugin {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, RELEASE_PROPS_FILE), new File(upgradeDir, RELEASE_PROPS_FILE));
 
-			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES).getParentFile());
-			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
-				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
-			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
-				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
+			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE).getParentFile());
+			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
+				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
+			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
+				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
 			List<String> incompatibilities = FileUtils.readLines(
-					new File(Bootstrap.installDir, INCOMPATIBILITIES), UTF_8);
-			if (new File(upgradeDir, INCOMPATIBILITIES).exists()) {
+					new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE), UTF_8);
+			if (new File(upgradeDir, INCOMPATIBILITIES_FILE).exists()) {
 				String lastIncompatibilityVersion = null;
-				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES), UTF_8)) {
+				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES_FILE), UTF_8)) {
 					if (line.trim().startsWith("# ")) {
 						lastIncompatibilityVersion = line.trim().substring(1).trim();
 						break;
@@ -998,13 +1075,15 @@ public class Upgrade extends AbstractPlugin {
 					}
 					if (!incompatibilitiesSinceUpgradedVersion.isEmpty()) {
 						FileUtils.writeFile(
-								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
+								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE), 
 								Joiner.on("\n").join(incompatibilitiesSinceUpgradedVersion));
 					}
 				}
 			}
-			FileUtils.copyFile(new File(Bootstrap.installDir, INCOMPATIBILITIES), 
-					new File(upgradeDir, INCOMPATIBILITIES));
+			
+			FileUtils.copyDirectory(
+					new File(Bootstrap.installDir, INCOMPATIBILITIES_DIR), 
+					new File(upgradeDir, INCOMPATIBILITIES_DIR));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

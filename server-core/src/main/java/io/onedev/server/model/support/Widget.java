@@ -31,6 +31,8 @@ public abstract class Widget implements Serializable {
 	
 	private int bottom;
 	
+	private boolean autoHeight = true;
+	
 	@Editable(order=10)
 	@NotEmpty
 	public String getTitle() {
@@ -39,6 +41,17 @@ public abstract class Widget implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	@Editable(order=100000, description = "Adjust widget height automatically to show its content " +
+			"in dashboard view mode. It also extend to fill the gap between current widget and " +
+			"the widget beneath it, or extend to page bottom if no widgets beneath it")
+	public boolean isAutoHeight() {
+		return autoHeight;
+	}
+
+	public void setAutoHeight(boolean autoHeight) {
+		this.autoHeight = autoHeight;
 	}
 
 	public int getLeft() {
@@ -74,11 +87,11 @@ public abstract class Widget implements Serializable {
 	}
 	
 	public int getDefaultWidth() {
-		return 12;
+		return 16;
 	}
 	
 	public int getDefaultHeight() {
-		return 12;
+		return 8;
 	}
 
 	public Component render(String componentId, boolean failsafe) {

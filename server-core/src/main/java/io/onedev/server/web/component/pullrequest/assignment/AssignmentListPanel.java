@@ -40,16 +40,11 @@ public abstract class AssignmentListPanel extends Panel {
 				PullRequest request = getPullRequest();
 				List<PullRequestAssignment> assignments = new ArrayList<>(request.getAssignments());
 				
-				Collections.sort(assignments, new Comparator<PullRequestAssignment>() {
-
-					@Override
-					public int compare(PullRequestAssignment o1, PullRequestAssignment o2) {
-						if (o1.getId() != null && o2.getId() != null)
-							return o1.getId().compareTo(o1.getId());
-						else
-							return 0;
-					}
-					
+				Collections.sort(assignments, (o1, o2) -> {
+					if (o1.getId() != null && o2.getId() != null)
+						return o1.getId().compareTo(o1.getId());
+					else
+						return 0;
 				});
 				
 				return assignments;
@@ -71,22 +66,22 @@ public abstract class AssignmentListPanel extends Panel {
 		super.onConfigure();
 		
 		PullRequest request = getPullRequest();
-		setVisible(!assignmentsModel.getObject().isEmpty() || SecurityUtils.canModify(request) && !request.isMerged());
+		setVisible(!assignmentsModel.getObject().isEmpty() || SecurityUtils.canModifyPullRequest(request) && !request.isMerged());
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PullRequestAssignment>("assignments", assignmentsModel) {
+		add(new ListView<>("assignments", assignmentsModel) {
 
 			@Override
 			protected void populateItem(ListItem<PullRequestAssignment> item) {
 				PullRequestAssignment assignment = item.getModelObject();
 				item.add(new UserIdentPanel("user", assignment.getUser(), Mode.AVATAR_AND_NAME));
-				
+
 				PullRequest request = getPullRequest();
-				
+
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -97,32 +92,32 @@ public abstract class AssignmentListPanel extends Panel {
 									+ "remove assignee '" + item.getModelObject().getUser().getDisplayName() + "'?"));
 						}
 					}
-					
+
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						PullRequestAssignment assignment = item.getModelObject();
 						request.getAssignments().remove(assignment);
-						if (request.isNew()) { 
+						if (request.isNew()) {
 							target.add(AssignmentListPanel.this);
 						} else {
 							OneDev.getInstance(PullRequestAssignmentManager.class).delete(assignment);
-							((BasePage)getPage()).notifyObservableChange(target,
+							((BasePage) getPage()).notifyObservableChange(target,
 									PullRequest.getChangeObservable(getPullRequest().getId()));
 						}
 						assignmentsModel.detach();
 					}
-					
+
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						
-						setVisible(SecurityUtils.canModify(getPullRequest()) && !request.isMerged());
+
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && !request.isMerged());
 					}
-					
+
 				});
 			}
-			
+
 		});
 		
 		add(new AssigneeChoice("addAssignee") {
@@ -131,7 +126,7 @@ public abstract class AssignmentListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 			}
 
 			@Override

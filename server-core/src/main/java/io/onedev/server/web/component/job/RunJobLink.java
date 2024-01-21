@@ -9,7 +9,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -62,9 +62,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 				.getDescendants(getProject().getId(), Sets.newHashSet(commitId));
 		descendants.add(commitId);
 	
-		List<RefFacade> refs = new ArrayList<>();
-		refs.addAll(getProject().getBranchRefs());
-		refs.addAll(getProject().getTagRefs());
+		List<RefFacade> branchRefs = getProject().getBranchRefs();
 		
 		List<String> refNames;
 		
@@ -73,10 +71,14 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 		} else if (getPullRequest() != null) {
 			refNames = Lists.newArrayList(getPullRequest().getMergeRef());
 		} else {
-			refNames = refs.stream()
+			refNames = branchRefs.stream()
 					.filter(it->descendants.contains(it.getPeeledObj()))
-					.map(it->it.getName())
+					.map(RefFacade::getName)
 					.collect(Collectors.toList());
+			for (var tagRef: getProject().getTagRefs()) {
+				if (tagRef.getPeeledObj().equals(commitId))
+					refNames.add(tagRef.getName());
+			}
 		}
 
 		if (!refNames.isEmpty()) {

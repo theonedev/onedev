@@ -1,12 +1,9 @@
 package io.onedev.server.terminal;
 
+import io.onedev.server.model.Build;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 
-import io.onedev.server.model.Build;
-
 public interface TerminalManager {
-		
-	boolean isTerminalSupported();
 	
 	String getTerminalUrl(Build build);
 	

@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getArtifactsLockName;
 
@@ -52,10 +52,7 @@ public class ArtifactResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 
 		Long projectId = params.get(PARAM_PROJECT).toLong();
-		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
-		
-		if (buildNumber == null)
-			throw new IllegalArgumentException("Build number has to be specified");
+		Long buildNumber = params.get(PARAM_BUILD).toLong();
 		
 		List<String> pathSegments = new ArrayList<>();
 
@@ -82,7 +79,7 @@ public class ArtifactResource extends AbstractResource {
 				throw new EntityNotFoundException(message);
 			}
 			
-			if (!SecurityUtils.canAccess(build))
+			if (!SecurityUtils.canAccessBuild(build))
 				throw new UnauthorizedException();
 			
 			fileInfo = (FileInfo) getBuildManager().getArtifactInfo(build, artifactPath);
@@ -117,7 +114,7 @@ public class ArtifactResource extends AbstractResource {
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
 				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 					read(getArtifactsLockName(projectId, buildNumber), () -> {
-						File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
+						File artifactFile = new File(getBuildManager().getArtifactsDir(projectId, buildNumber), artifactPath);
 						try (
 								InputStream is = new FileInputStream(artifactFile);
 								OutputStream os = attributes.getResponse().getOutputStream()) {

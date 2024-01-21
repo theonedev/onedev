@@ -11,11 +11,11 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class ReviewerChoice extends SelectToAddChoice<User> {
+public abstract class ReviewerChoice extends SelectToActChoice<User> {
 
 	public ReviewerChoice(String id) {
 		super(id);

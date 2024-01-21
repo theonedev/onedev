@@ -22,6 +22,7 @@
 				<input wicket:id="text" class="form-control text"></input>
 			</div>	
 			<div class="actions clearfix">
+				<a wicket:id="cancel" class="btn btn-secondary float-right ml-2">Cancel</a>
 				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary float-right">Insert</button>	
 			</div>
 		</form>
@@ -50,6 +51,7 @@
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="file"></div>
 			<div class="text-right mt-4">
+				<a wicket:id="cancel" class="btn btn-secondary float-right ml-2">Cancel</a>
 				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary">Insert</button>
 			</div>
 		</form>
@@ -75,7 +77,8 @@
 				<textarea wicket:id="commitMessage" placeholder="Add files via upload" class="form-control" rows="6"></textarea>
 			</div>			
 			<div class="text-right">
-				<button wicket:id="insert" class="btn btn-primary">Commit &amp; Insert</button>		    
+				<a wicket:id="cancel" class="btn btn-secondary float-right ml-2">Cancel</a>
+				<button wicket:id="insert" class="btn btn-primary dirty-aware">Commit &amp; Insert</button>		    
 			</div>
 		</form>
 	</wicket:fragment>

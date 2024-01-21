@@ -1,5 +1,6 @@
 <wicket:extend>
-	<div class="test-cases">
+	<div wicket:id="report" class="test-cases"></div>
+	<wicket:fragment wicket:id="validFrag">
 		<div class="d-flex flex-wrap flex-md-nowrap no-autofocus">
 			<form wicket:id="nameForm" class="w-100 pr-md-2">
 				<div class="clearable-wrapper">
@@ -39,12 +40,12 @@
 			<tbody>
 				<tr wicket:id="testCases">
 					<td>
-						<div class="d-flex">
+						<div class="d-flex align-items-start">
 							<span wicket:id="status" class="mr-3"></span> 
 							<span wicket:id="name" class="mr-4 text-break"></span>
 							<span wicket:id="duration" class="ml-auto"></span>
 						</div>
-						<pre wicket:id="message" class="text-gray mt-3"></pre>
+						<pre wicket:id="detail" class="text-gray font-size-sm text-break mt-3"></pre>
 					</td>
 				</tr>
 			</tbody>
@@ -63,5 +64,10 @@
 			</tfoot>
 			</wicket:enclosure>
 		</table>
-	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="invalidFrag">
+		<div class="alert alert-notice alert-light-warning">
+			Report format changed. You may re-run this build to generate the report in new format
+		</div>
+	</wicket:fragment>
 </wicket:extend>

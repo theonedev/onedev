@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.watch.WatchStatus;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -14,6 +15,10 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch> 
@@ -54,5 +59,31 @@ public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch>
 		Preconditions.checkState(!watch.isNew());
 		dao.persist(watch);
 	}
-	
+
+	@Transactional
+    @Override
+    public void setWatchStatus(User user, Collection<Issue> issues, WatchStatus watchStatus) {
+		Map<Long, IssueWatch> watchMap = new HashMap<>();
+		for (var watch: user.getIssueWatches()) 
+			watchMap.put(watch.getIssue().getId(), watch);
+		
+        for (var issue: issues) {
+			var watch = watchMap.get(issue.getId());
+			if (watch != null) {
+				if (watchStatus == WatchStatus.WATCH) 
+					watch.setWatching(true);
+				else if (watchStatus == WatchStatus.DO_NOT_WATCH) 
+					watch.setWatching(false);
+				else 
+					delete(watch);
+			} else if (watchStatus != WatchStatus.DEFAULT) {
+				watch = new IssueWatch();
+				watch.setIssue(issue);
+				watch.setUser(user);
+				watch.setWatching(watchStatus == WatchStatus.WATCH);
+				create(watch);
+			}
+		}
+    }
+
 }

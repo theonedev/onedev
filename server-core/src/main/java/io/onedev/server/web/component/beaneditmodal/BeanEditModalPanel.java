@@ -1,16 +1,15 @@
 package io.onedev.server.web.component.beaneditmodal;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
-import io.onedev.server.web.component.modal.ModalPanel;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 
 @SuppressWarnings("serial")
 public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPanel {
@@ -26,7 +25,11 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 	public BeanEditModalPanel(IPartialPageRequestHandler handler, T bean) {
 		this(handler, bean, new HashSet<>(), true, null);
 	}
-			
+
+	public BeanEditModalPanel(IPartialPageRequestHandler handler, T bean, @Nullable String title) {
+		this(handler, bean, new HashSet<>(), true, title);
+	}
+	
 	public BeanEditModalPanel(IPartialPageRequestHandler handler, T bean, 
 			Collection<String> propertyNames, boolean exclude, @Nullable String title) {
 		super(handler);
@@ -75,7 +78,7 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 			protected String getTitle() {
 				return title;
 			}
-			
+
 		};
 	}
 	

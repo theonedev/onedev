@@ -37,6 +37,12 @@
 	word-break: break-all;
 	max-width: 150px;
 }
+.issue-side>.fields>.body>table>tbody>tr>td.values .field-values>div {
+	margin-top: -0.1rem;
+}
+.issue-side>.fields>.body>table>tbody>tr>td.values .field-values>.icon {
+	margin-top: 0.2rem;
+}
 .issue-side>.fields>.body>table>tbody>tr:last-child>td {
 	padding-bottom: 0;
 }

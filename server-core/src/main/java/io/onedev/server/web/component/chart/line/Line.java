@@ -31,7 +31,7 @@ public class Line implements Serializable {
 		return name;
 	}
 
-	public Map<String, Integer> getyAxisValues() {
+	public Map<String, Integer> getYAxisValues() {
 		return yAxisValues;
 	}
 

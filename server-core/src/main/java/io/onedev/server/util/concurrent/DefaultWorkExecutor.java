@@ -1,26 +1,17 @@
 package io.onedev.server.util.concurrent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.security.SecurityUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.*;
+import java.util.concurrent.*;
 
-import io.onedev.server.ServerConfig;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.security.SecurityUtils;
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
 
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {
@@ -32,11 +23,16 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	private final Map<String, Collection<PrioritizedCallable<?>>> runnings = new HashMap<>();
 	
 	private final Map<String, Collection<WorkFuture<?>>> waitings = new HashMap<>();
-
+	
 	@Inject
 	public DefaultWorkExecutor(ExecutorService executorService, SettingManager settingManager) {
 		this.executorService = executorService;
 		this.settingManager = settingManager;
+	}
+	
+	@Listen
+	public void on(SystemSetting event) {
+			
 	}
 	
 	private int getConcurrency() {
@@ -53,7 +49,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 				averagePriorities.put(entry.getKey(), totalPriorities/entry.getValue().size());
 			}
 			List<String> groupIds = new ArrayList<>(waitings.keySet());
-			Collections.sort(groupIds, Comparator.comparingInt(averagePriorities::get));
+			sort(groupIds, comparingInt(averagePriorities::get));
 			for (String groupId: groupIds) {
 				Collection<PrioritizedCallable<?>> runningsOfGroup = new ArrayList<>();
 				for (WorkFuture<?> future: waitings.remove(groupId)) {

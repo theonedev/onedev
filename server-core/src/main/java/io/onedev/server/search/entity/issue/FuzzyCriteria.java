@@ -1,9 +1,7 @@
 package io.onedev.server.search.entity.issue;
 
-import com.google.common.base.Splitter;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Issue;
-import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
@@ -11,9 +9,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 public class FuzzyCriteria extends Criteria<Issue> {
 
@@ -36,15 +31,7 @@ public class FuzzyCriteria extends Criteria<Issue> {
 	}
 	
 	private Criteria<Issue> parse(String value) {
-		var criterias = new ArrayList<Criteria<Issue>>();
-		for (var part: Splitter.on(' ').omitEmptyStrings().trimResults().split(value)) {
-			criterias.add(new OrCriteria<>(
-					new TitleCriteria(part),
-					new DescriptionCriteria(part),
-					new CommentCriteria(part)
-			));
-		}
-		return new AndCriteria<>(criterias);
+		return new OrCriteria<>(new TitleCriteria(value), new DescriptionCriteria(value), new CommentCriteria(value));
 	}
 
 	@Override

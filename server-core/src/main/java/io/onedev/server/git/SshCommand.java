@@ -19,7 +19,6 @@ import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.sshd.common.channel.ChannelOutputStream;
@@ -80,12 +79,12 @@ class SshCommand implements Command, ServerSessionAware {
 		
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 
-		String tempStr = StringUtils.substringAfter(commandString, "'/");   
-		String projectPath = StringUtils.substringBefore(tempStr, "'");
-        ProjectFacade projectFacade = projectManager.findFacadeByPath(projectPath);
-		if (projectFacade == null && projectPath.startsWith("projects/")) {
-			projectPath = projectPath.substring("projects/".length());
-			projectFacade = projectManager.findFacadeByPath(projectPath);
+		var tempStr = StringUtils.substringAfter(commandString, "'/");   
+		var projectPath = StringUtils.substringBefore(tempStr, "'");
+		var projectFacade = projectManager.findFacadeByPath(projectPath);
+		if (projectFacade == null && projectPath.endsWith(".git")) {
+			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
+			projectFacade = projectManager.findFacadeByPath(projectPath);				
 		}
         if (projectFacade == null) {
         	if (clusterAccess || upload) {
@@ -163,31 +162,26 @@ class SshCommand implements Command, ServerSessionAware {
 			});
 		} else {
 			ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
-			future = executorService.submit(new Runnable() {
-
-				@Override
-				public void run() {
-					SshManager sshManager = OneDev.getInstance(SshManager.class);
-					try (	var clientSession = sshManager.ssh(activeServerAddress); 
-							var clientChannel = clientSession.createExecChannel(commandString)) {
-						clientChannel.setIn(in);
-						clientChannel.setOut(out);
-						clientChannel.setErr(err);
-						clientChannel.open().await(CHANNEL_OPEN_TIMEOUT);
-						
-						// Do not use clientChannel.waitFor here as it can not be interrupted
-						while (!clientChannel.isClosed())
-							Thread.sleep(1000);
-						if (clientChannel.getExitStatus() != null)
-							onExit(clientChannel.getExitStatus(), null);
-						else
-							onExit(-1, null);
-					} catch (Exception e) {
-						logger.error("Error ssh to storage server", e);
-						onExit(-1, e.getMessage());
-					}
+			future = executorService.submit(() -> {
+				SshManager sshManager = OneDev.getInstance(SshManager.class);
+				try (	var clientSession = sshManager.ssh(activeServerAddress); 
+						var clientChannel = clientSession.createExecChannel(commandString)) {
+					clientChannel.setIn(in);
+					clientChannel.setOut(out);
+					clientChannel.setErr(err);
+					clientChannel.open().await(CHANNEL_OPEN_TIMEOUT);
+					
+					// Do not use clientChannel.waitFor here as it can not be interrupted
+					while (!clientChannel.isClosed())
+						Thread.sleep(1000);
+					if (clientChannel.getExitStatus() != null)
+						onExit(clientChannel.getExitStatus(), null);
+					else
+						onExit(-1, null);
+				} catch (Exception e) {
+					logger.error("Error ssh to storage server", e);
+					onExit(-1, e.getMessage());
 				}
-				
 			});
 		}
 	}
@@ -209,7 +203,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.in = new InputStreamWrapper(in) {
 
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};
@@ -220,7 +214,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.out = new OutputStreamWrapper(out) {
 			
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};
@@ -232,7 +226,7 @@ class SshCommand implements Command, ServerSessionAware {
 		this.err = new OutputStreamWrapper(err) {
 			
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};

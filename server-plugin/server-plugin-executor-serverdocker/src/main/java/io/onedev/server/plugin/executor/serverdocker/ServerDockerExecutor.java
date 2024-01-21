@@ -2,10 +2,12 @@ package io.onedev.server.plugin.executor.serverdocker;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import io.onedev.agent.BuiltInRegistryLogin;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.agent.job.ImageMappingFacade;
+import io.onedev.agent.job.RegistryLoginFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.*;
@@ -15,18 +17,18 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
-import io.onedev.server.buildspec.Service;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
@@ -52,7 +54,7 @@ import static java.util.stream.Collectors.toList;
 		description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
 @Horizontal
-public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
+public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAware, Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -61,7 +63,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	private static final Object cacheHomeCreationLock = new Object();
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
-	
+
 	private String runOptions;
 	
 	private String dockerExecutable;
@@ -99,7 +101,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		this.registryLogins = registryLogins;
 	}
-
+	
 	@Editable(order=450, placeholder = "Number of CPU Cores", description = "" +
 			"Specify max number of jobs/services this executor can run concurrently. " +
 			"Leave empty to set as CPU cores")
@@ -123,7 +125,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	}
 
 	@Editable(order=520, group="More Settings", description="Whether or not to mount docker sock into job container to "
-			+ "support docker operations in job commands, for instance to build docker image.<br>"
+			+ "support docker operations in job commands<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
 			+ "by operating the mounted docker sock. You should configure job requirement above to make sure the " +
 			"executor can only be used by trusted jobs if this option is enabled")
@@ -260,7 +262,9 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								+ "Please use kubernetes executor instead");
 					}
 
-					hostBuildHome = FileUtils.createTempDir("onedev-build");
+					hostBuildHome = new File(Bootstrap.getTempDir(),
+							"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+					FileUtils.createDir(hostBuildHome);					
 					try {
 						String network = getName() + "-" + jobContext.getProjectId() + "-"
 								+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
@@ -286,16 +290,21 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 						};
 						cache.init(false);
-
-						login(jobLogger);
-
+						
 						createNetwork(newDocker(), network, getNetworkOptions(), jobLogger);
 						try {
 							OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 
-							for (Service jobService : jobContext.getServices()) {
-								startService(newDocker(), network, jobService.toMap(), osInfo, getImageMappingFacades(),
-										getCpuLimit(), getMemoryLimit(), jobLogger);
+							var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+							for (var jobService : jobContext.getServices()) {
+								var docker = newDocker();
+								var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
+										jobContext.getJobToken(), jobService.getBuiltInRegistryAccessToken());
+								callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+									startService(docker, network, jobService, osInfo, getImageMappingFacades(),
+											getCpuLimit(), getMemoryLimit(), jobLogger);
+										return null;
+								});
 							}
 
 							File hostWorkspace = new File(hostBuildHome, "workspace");
@@ -325,8 +334,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 								boolean successful = entryFacade.execute(new LeafHandler() {
 
-									private int runStepContainer(String image, @Nullable String entrypoint, List<String> options,
-																 List<String> arguments, Map<String, String> environments,
+									private int runStepContainer(Commandline docker, String image, @Nullable String entrypoint, 
+																 List<String> options, List<String> arguments, Map<String, String> environments,
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
 																 List<Integer> position, boolean useTTY) {
 										image = mapImage(image);
@@ -334,7 +343,9 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										cache.uninstallSymbolinks(hostWorkspace);
 										containerName = network + "-step-" + stringifyStepPosition(position);
 										try {
-											Commandline docker = newDocker();
+											var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
+											docker.clearArgs();
+								
 											docker.addArgs("run", "--name=" + containerName, "--network=" + network);
 											if (getCpuLimit() != null)
 												docker.addArgs("--cpus", getCpuLimit());
@@ -344,7 +355,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 												docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 
 											docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-											
+
 											for (Map.Entry<String, String> entry : volumeMounts.entrySet()) {
 												if (entry.getKey().contains(".."))
 													throw new ExplicitException("Volume mount source path should not contain '..'");
@@ -352,13 +363,10 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 												docker.addArgs("-v", hostPath + ":" + entry.getValue());
 											}
 
-											if (entrypoint != null) {
+											if (entrypoint != null) 
 												docker.addArgs("-w", containerWorkspace);
-											} else if (workingDir != null) {
-												if (workingDir.contains(".."))
-													throw new ExplicitException("Container working dir should not contain '..'");
+											else if (workingDir != null) 
 												docker.addArgs("-w", workingDir);
-											}
 
 											for (Map.Entry<CacheInstance, String> entry : cache.getAllocations().entrySet()) {
 												String hostCachePath = new File(hostCacheHome, entry.getKey().toString()).getAbsolutePath();
@@ -401,17 +409,17 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 											if (entrypoint != null)
 												docker.addArgs("--entrypoint=" + entrypoint);
 
-											if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
+											if (useProcessIsolation)
 												docker.addArgs("--isolation=process");
 
-											docker.addArgs(options.toArray(new String[options.size()]));
-											
+											docker.addArgs(options.toArray(new String[0]));
+
 											docker.addArgs(image);
-											docker.addArgs(arguments.toArray(new String[arguments.size()]));
+											docker.addArgs(arguments.toArray(new String[0]));
 											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
 											ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
 													ExecutorUtils.newWarningLogger(jobLogger), null);
-											return result.getReturnCode();
+											return result.getReturnCode();													
 										} finally {
 											containerName = null;
 											cache.installSymbolinks(hostWorkspace);
@@ -437,10 +445,16 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 												Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
 														hostBuildHome, commandFacade, osInfo, hostAuthInfoDir.get() != null);
-
-												int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(),
-														new ArrayList<>(), entrypoint.arguments(), new HashMap<>(), null, 
-														new HashMap<>(), position, commandFacade.isUseTTY());
+												
+												var docker = newDocker();
+												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl,
+														jobContext.getJobToken(), commandFacade.getBuiltInRegistryAccessToken());
+												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+													return runStepContainer(docker, execution.getImage(), entrypoint.executable(),
+															new ArrayList<>(), entrypoint.arguments(), new HashMap<>(), null,
+															new HashMap<>(), position, commandFacade.isUseTTY());
+												});
 
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
@@ -448,8 +462,25 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 													return false;
 												}
 											} else if (facade instanceof BuildImageFacade) {
-												DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade,
-														hostBuildHome, jobLogger);
+												var buildImageFacade = (BuildImageFacade) facade;
+												var docker = newDocker();
+												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
+														jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
+												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+													buildImage(docker, buildImageFacade, hostBuildHome, jobLogger);
+													return null;
+												});
+											} else if (facade instanceof RunImagetoolsFacade) {
+												var runImagetoolsFacade = (RunImagetoolsFacade) facade;
+												var docker = newDocker();
+												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl,
+														jobContext.getJobToken(), runImagetoolsFacade.getBuiltInRegistryAccessToken());
+												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+													runImagetools(docker, runImagetoolsFacade, hostBuildHome, jobLogger);
+													return null;
+												});
 											} else if (facade instanceof RunContainerFacade) {
 												RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
 												OsContainer container = runContainerFacade.getContainer(osInfo);
@@ -461,8 +492,15 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 												List<String> arguments = new ArrayList<>();
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
-												int exitCode = runStepContainer(container.getImage(), null, options, arguments, container.getEnvMap(),
-														container.getWorkingDir(), container.getVolumeMounts(), position, runContainerFacade.isUseTTY());
+												var docker = newDocker();
+												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+												var builtInRegistryLogin =new BuiltInRegistryLogin(builtInRegistryUrl, 
+														jobContext.getJobToken(), runContainerFacade.getBuiltInRegistryAccessToken());
+												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+													return runStepContainer(docker, container.getImage(), null, options, arguments,
+															container.getEnvMap(), container.getWorkingDir(), container.getVolumeMounts(),
+															position, runContainerFacade.isUseTTY());
+												});
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
 													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Container exited with code " + exitCode);
@@ -480,6 +518,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 													git.environments().put("HOME", hostAuthInfoDir.get().getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
+
 													if (!Bootstrap.isInDocker()) {
 														checkoutFacade.setupSafeDirectory(git, containerWorkspace,
 																newInfoLogger(jobLogger), newErrorLogger(jobLogger));
@@ -607,11 +646,6 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(),
 				jobContext.getServices().size() + 1, runnable);
 	}
-
-	private void login(TaskLogger jobLogger) {
-		for (RegistryLogin login: getRegistryLogins()) 
-			DockerExecutorUtils.login(newDocker(),login.getFacade(), jobLogger);
-	}
 	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
@@ -653,6 +687,13 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 			imageMappingFacades = getImageMappings().stream().map(it->it.getFacade()).collect(toList());
 		return imageMappingFacades;
 	}
+	
+	protected Collection<RegistryLoginFacade> getRegistryLoginFacades() {
+		var facades = new ArrayList<RegistryLoginFacade>();
+		for (var login: getRegistryLogins())
+			facades.add(login.getFacade());
+		return facades;
+	}
 
 	private String mapImage(String image) {
 		return ImageMappingFacade.map(getImageMappingFacades(), image);
@@ -660,91 +701,93 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		login(jobLogger);
-		
-		File workspaceDir = null;
-		File cacheDir = null;
+		var docker = newDocker();
+		var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		callWithDockerAuth(docker, getRegistryLoginFacades(), null, () -> {
+			File workspaceDir = null;
+			File cacheDir = null;
+			try {
+				workspaceDir = FileUtils.createTempDir("workspace");
+				cacheDir = new File(getCacheHome(ServerDockerExecutor.this), UUID.randomUUID().toString());
+				FileUtils.createDir(cacheDir);
 
-		Commandline docker = newDocker();
-		try {
-			workspaceDir = FileUtils.createTempDir("workspace");
-			cacheDir = new File(getCacheHome(ServerDockerExecutor.this), UUID.randomUUID().toString());
-			FileUtils.createDir(cacheDir);
-			
-			jobLogger.log("Testing specified docker image...");
-			docker.clearArgs();
-			docker.addArgs("run", "--rm");
-			if (getCpuLimit() != null)
-				docker.addArgs("--cpus", getCpuLimit());
-			if (getMemoryLimit() != null)
-				docker.addArgs("--memory", getMemoryLimit());
-			if (getRunOptions() != null)
-				docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-			String containerWorkspacePath;
-			String containerCachePath;
-			if (SystemUtils.IS_OS_WINDOWS) {
-				containerWorkspacePath = "C:\\onedev-build\\workspace";
-				containerCachePath = "C:\\onedev-build\\cache";
-			} else {
-				containerWorkspacePath = "/onedev-build/workspace";
-				containerCachePath = "/onedev-build/cache";
+				jobLogger.log("Testing specified docker image...");
+				docker.clearArgs();
+				docker.addArgs("run", "--rm");
+				if (getCpuLimit() != null)
+					docker.addArgs("--cpus", getCpuLimit());
+				if (getMemoryLimit() != null)
+					docker.addArgs("--memory", getMemoryLimit());
+				if (getRunOptions() != null)
+					docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+				String containerWorkspacePath;
+				String containerCachePath;
+				if (SystemUtils.IS_OS_WINDOWS) {
+					containerWorkspacePath = "C:\\onedev-build\\workspace";
+					containerCachePath = "C:\\onedev-build\\cache";
+				} else {
+					containerWorkspacePath = "/onedev-build/workspace";
+					containerCachePath = "/onedev-build/cache";
+				}
+				docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
+				docker.addArgs("-v", getHostPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
+
+				docker.addArgs("-w", containerWorkspacePath);
+				docker.addArgs(testData.getDockerImage());
+
+				if (SystemUtils.IS_OS_WINDOWS)
+					docker.addArgs("cmd", "/c", "echo hello from container");
+				else
+					docker.addArgs("sh", "-c", "echo hello from container");
+
+				docker.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						jobLogger.log(line);
+					}
+
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						jobLogger.log(line);
+					}
+
+				}).checkReturnCode();
+			} finally {
+				if (workspaceDir != null)
+					FileUtils.deleteDir(workspaceDir);
+				if (cacheDir != null)
+					FileUtils.deleteDir(cacheDir);
 			}
-			docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
-			docker.addArgs("-v", getHostPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
-			
-			docker.addArgs("-w", containerWorkspacePath);
-			docker.addArgs(testData.getDockerImage());
-			
-			if (SystemUtils.IS_OS_WINDOWS) 
-				docker.addArgs("cmd", "/c", "echo hello from container");
-			else 
-				docker.addArgs("sh", "-c", "echo hello from container");
-			
-			docker.execute(new LineConsumer() {
 
-				@Override
-				public void consume(String line) {
-					jobLogger.log(line);
-				}
-				
-			}, new LineConsumer() {
+			if (!SystemUtils.IS_OS_WINDOWS) {
+				jobLogger.log("Checking busybox availability...");
+				docker.clearArgs();
+				docker.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");
+				docker.execute(new LineConsumer() {
 
-				@Override
-				public void consume(String line) {
-					jobLogger.log(line);
-				}
-				
-			}).checkReturnCode();
-		} finally {
-			if (workspaceDir != null)
-				FileUtils.deleteDir(workspaceDir);
-			if (cacheDir != null)
-				FileUtils.deleteDir(cacheDir);
-		}
-		
-		if (!SystemUtils.IS_OS_WINDOWS) {
-			jobLogger.log("Checking busybox availability...");
-			docker = newDocker();
-			docker.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
-			docker.execute(new LineConsumer() {
+					@Override
+					public void consume(String line) {
+						jobLogger.log(line);
+					}
 
-				@Override
-				public void consume(String line) {
-					jobLogger.log(line);
-				}
-				
-			}, new LineConsumer() {
+				}, new LineConsumer() {
 
-				@Override
-				public void consume(String line) {
-					jobLogger.log(line);
-				}
-				
-			}).checkReturnCode();
-		}
-		
-		Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
-		KubernetesHelper.testGitLfsAvailability(git, jobLogger);
+					@Override
+					public void consume(String line) {
+						jobLogger.log(line);
+					}
+
+				}).checkReturnCode();
+			}
+
+			Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
+			KubernetesHelper.testGitLfsAvailability(git, jobLogger);
+
+			return null;			
+		});
 	}
 	
 	@Editable(name="Specify a Docker Image to Test Against")

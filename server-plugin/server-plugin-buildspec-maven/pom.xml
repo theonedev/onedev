@@ -5,8 +5,15 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>8.6.13</version>
+		<version>10.0.0</version>
 	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-junit</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.maven.MavenModule</moduleClass>
 	</properties>

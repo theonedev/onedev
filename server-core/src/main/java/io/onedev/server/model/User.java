@@ -19,6 +19,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
@@ -58,9 +59,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String SYSTEM_NAME = "OneDev";
 	
-	public static final String SYSTEM_EMAIL_ADDRESS = "noreply@onedev.io";
+	public static final String SYSTEM_EMAIL_ADDRESS = "system@onedev";
 	
-	public static final String UNKNOWN_NAME = "Unknown";
+	public static final String UNKNOWN_NAME = "unknown";
 	
 	public static final String EXTERNAL_MANAGED = "external_managed";
 	
@@ -71,6 +72,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final String PROP_FULL_NAME = "fullName";
 	
 	public static final String PROP_SSO_CONNECTOR = "ssoConnector";
+	
+	public static final String PROP_GUEST = "guest";
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
@@ -83,6 +86,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
     private String name;
+	
+	private String passwordResetCode;
 
     @Column(length=1024, nullable=false)
     @JsonIgnore
@@ -92,6 +97,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@JsonIgnore
 	private String ssoConnector;
+	
+	private boolean guest;
 
 	@JsonIgnore
 	@Lob
@@ -141,13 +148,23 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueVote> issueVotes = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<IssueWork> issueWorks = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Stopwatch> stopwatches = new ArrayList<>();
+	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
+	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations = new ArrayList<>();
     
@@ -204,6 +221,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedBuildQuery> buildQueries = new ArrayList<>();
 
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedPackQuery> packQueries = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -218,6 +240,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
+
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> packQuerySubscriptions = new LinkedHashSet<>();
 	
     private transient Collection<Group> groups;
     
@@ -411,6 +438,54 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			
 		};
 	}
+
+	public QueryPersonalization<NamedPackQuery> getPackQueryPersonalization() {
+		return new QueryPersonalization<>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedPackQuery> getQueries() {
+				return packQueries;
+			}
+
+			@Override
+			public void setQueries(ArrayList<NamedPackQuery> userQueries) {
+				packQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedPackQuery> getQueryWatchSupport() {
+				return null;
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedPackQuery> getQuerySubscriptionSupport() {
+				return new QuerySubscriptionSupport<>() {
+
+					@Override
+					public LinkedHashSet<String> getQuerySubscriptions() {
+						return packQuerySubscriptions;
+					}
+
+				};
+			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).update(User.this, null);
+			}
+
+		};
+	}
 	
 	@Override
     public PrincipalCollection getPrincipals() {
@@ -454,7 +529,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	this.password = password;
     }
 
-    public boolean isExternalManaged() {
+	public String getPasswordResetCode() {
+		return passwordResetCode;
+	}
+
+	public void setPasswordResetCode(String passwordResetCode) {
+		this.passwordResetCode = passwordResetCode;
+	}
+
+	public boolean isExternalManaged() {
     	return getPassword().equals(EXTERNAL_MANAGED);
     }
     
@@ -476,6 +559,19 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.ssoConnector = ssoConnector;
 	}
 
+	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
+	public boolean isGuest() {
+		return guest;
+	}
+
+	public void setGuest(boolean guest) {
+		this.guest = guest;
+	}
+
+	public boolean isEffectiveGuest() {
+		return guest && !isRoot() && !isSystem();
+	}
+	
 	public ArrayList<AccessToken> getAccessTokens() {
 		return accessTokens;
 	}
@@ -720,6 +816,22 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.issueVotes = issueVotes;
 	}
 
+	public Collection<IssueWork> getIssueWorks() {
+		return issueWorks;
+	}
+
+	public void setIssueWorks(Collection<IssueWork> issueWorks) {
+		this.issueWorks = issueWorks;
+	}
+
+	public Collection<Stopwatch> getStopwatches() {
+		return stopwatches;
+	}
+
+	public void setStopwatches(Collection<Stopwatch> stopwatches) {
+		this.stopwatches = stopwatches;
+	}
+
 	public Collection<IssueQueryPersonalization> getIssueQueryPersonalizations() {
 		return issueQueryPersonalizations;
 	}
@@ -734,6 +846,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setBuildQueryPersonalizations(Collection<BuildQueryPersonalization> buildQueryPersonalizations) {
 		this.buildQueryPersonalizations = buildQueryPersonalizations;
+	}
+
+	public Collection<PackQueryPersonalization> getPackQueryPersonalizations() {
+		return packQueryPersonalizations;
+	}
+
+	public void setPackQueryPersonalizations(Collection<PackQueryPersonalization> packQueryPersonalizations) {
+		this.packQueryPersonalizations = packQueryPersonalizations;
 	}
 
 	public Collection<PullRequestQueryPersonalization> getPullRequestQueryPersonalizations() {
@@ -815,7 +935,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setBuildQuerySubscriptions(LinkedHashSet<String> buildQuerySubscriptions) {
 		this.buildQuerySubscriptions = buildQuerySubscriptions;
 	}
-	
+
+	public LinkedHashSet<String> getPackQuerySubscriptions() {
+		return packQuerySubscriptions;
+	}
+
+	public void setPackQuerySubscriptions(LinkedHashSet<String> packQuerySubscriptions) {
+		this.packQuerySubscriptions = packQuerySubscriptions;
+	}
+
 	public boolean isEnforce2FA() {
 		return OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnforce2FA() 
 				|| getGroups().stream().anyMatch(it->it.isEnforce2FA());
@@ -849,7 +977,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), getAccessTokens());
+		return new UserFacade(getId(), getName(), getFullName(), isGuest(), getAccessTokens());
 	}
 	
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
@@ -14,6 +16,7 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.search.code.CodeSearchManager;
+import org.jetbrains.annotations.Nullable;
 
 public class JUnitReportParser {
 
@@ -49,29 +52,37 @@ public class JUnitReportParser {
 
 			Status status;
 			if (failures != 0 || errors != 0)
-				status = Status.FAILED;
+				status = Status.NOT_PASSED;
 			else if (skipped == tests)
-				status = Status.SKIPPED;
+				status = Status.NOT_RUN;
 			else
 				status = Status.PASSED;
+			
+			var symbolHit = OneDev.getInstance(CodeSearchManager.class).findPrimarySymbol(
+					build.getProject(), build.getCommitId(), name, ".");
+			
+			var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
+			var position = symbolHit != null? symbolHit.getHitPos(): null;
+			TestSuite testSuite = new TestSuite(name, status, duration, blobPath, position) {
 
-			String fileName;
-			if (name.contains("."))
-				fileName = StringUtils.substringAfterLast(name, ".") + ".java";
-			else
-				fileName = name + ".java";
-
-			String partialBlobPath = name.replace('.', '/') + ".java";
-
-			String blobPath = OneDev.getInstance(CodeSearchManager.class)
-					.findBlobPath(build.getProject(), build.getCommitId(), fileName, partialBlobPath);
-
-			TestSuite testSuite = new TestSuite(name, status, duration, null, blobPath);
+				@Nullable
+				@Override
+				protected Component renderDetail(String componentId, Build build) {
+					return null;
+				}
+			};
 
 			for (Element testCaseElement: testSuiteElement.elements("testcase")) {
 				name = testCaseElement.attributeValue("name");
 				if (testCaseElement.element("skipped") != null) {
-					testCases.add(new TestCase(testSuite, name, Status.SKIPPED, 0, null));
+					testCases.add(new TestCase(testSuite, name, Status.NOT_RUN, "skipped", 0) {
+
+						@Nullable
+						@Override
+						protected Component renderDetail(String componentId, Build build) {
+							return null;
+						}
+					});
 				} else {
 					duration = getDouble(testCaseElement.attributeValue("time"));
 					status = Status.PASSED;
@@ -79,27 +90,39 @@ public class JUnitReportParser {
 					Element failureElement = testCaseElement.element("failure");
 					Element errorElement = testCaseElement.element("error");
 					if (failureElement != null) {
-						status = Status.FAILED;
+						status = Status.NOT_PASSED;
 						message = failureElement.getText();
 					} else if (errorElement != null) {
-						status = Status.FAILED;
+						status = Status.NOT_PASSED;
 						message = errorElement.getText();
 					}
-					testCases.add(new TestCase(testSuite, name, status, duration, message));
+					
+					var finalMessage = message;
+					testCases.add(new TestCase(testSuite, name, status, null, duration) {
+
+						@Nullable
+						@Override
+						protected Component renderDetail(String componentId, Build build) {
+							if (finalMessage != null)
+								return new Label(componentId, finalMessage);
+							else 
+								return null;
+						}
+					});
 				}
 			}
 		}
 		return testCases;
 	}
 	
-	public static int getInt(String input) {
+	private static int getInt(String input) {
 		if (input == null) {
 			return 0;
 		}
 		return Integer.parseInt(input);
 	}
 
-	public static long getDouble(String input) {
+	private static long getDouble(String input) {
 		if (input == null) {
 			return 0;
 		}

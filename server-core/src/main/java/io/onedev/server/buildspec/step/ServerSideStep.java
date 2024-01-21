@@ -38,20 +38,17 @@ public abstract class ServerSideStep extends Step {
 		return new PatternSet(new HashSet<>(), new HashSet<>());
 	}
 	
+	public boolean requireCommitIndex() {
+		return false;
+	}
+	
 	@Nullable
 	public abstract Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger);
 	
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();
 		
-		new EditableStringVisitor(new Consumer<String>() {
-
-			@Override
-			public void accept(String t) {
-				placeholders.addAll(KubernetesHelper.parsePlaceholders(t));
-			}
-			
-		}).visitProperties(this, Interpolative.class);
+		new EditableStringVisitor(t -> placeholders.addAll(KubernetesHelper.parsePlaceholders(t))).visitProperties(this, Interpolative.class);
 		
 		return placeholders;
 	}

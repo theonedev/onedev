@@ -16,27 +16,36 @@ public class VersionCriteria extends Criteria<Build> {
 
 	private final String value;
 	
-	public VersionCriteria(String value) {
+	private final int operator;
+	
+	public VersionCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		String version = build.getVersion();
-		return version != null && WildcardUtils.matchString(value.toLowerCase(), version.toLowerCase());
+		var matches = version != null && WildcardUtils.matchString(value.toLowerCase(), version.toLowerCase());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_VERSION) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

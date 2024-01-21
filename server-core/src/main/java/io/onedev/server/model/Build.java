@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -16,8 +15,6 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -25,7 +22,6 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
@@ -41,9 +37,11 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -52,8 +50,8 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.*;
@@ -63,15 +61,16 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="o_request_id"),  
-				@Index(columnList=PROP_COMMIT), @Index(columnList=PROP_PIPELINE),
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
+				@Index(columnList= PROP_COMMIT_HASH), @Index(columnList=PROP_PIPELINE),
+				@Index(columnList=PROP_NUMBER), @Index(columnList= PROP_JOB_NAME), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
 				@Index(columnList=PROP_FINISH_DAY), @Index(columnList=PROP_VERSION), 
-				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
+				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT_HASH)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
+@DynamicUpdate
 public class Build extends ProjectBelonging 
 		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
@@ -97,7 +96,7 @@ public class Build extends ProjectBelonging
 	
 	public static final String NAME_LABEL = "Label";
 	
-	public static final String PROP_JOB = "jobName";
+	public static final String PROP_JOB_NAME = "jobName";
 	
 	public static final String NAME_STATUS = "Status";
 	
@@ -139,7 +138,7 @@ public class Build extends ProjectBelonging
 	
 	public static final String PROP_REF_NAME = "refName";
 	
-	public static final String PROP_COMMIT = "commitHash";
+	public static final String PROP_COMMIT_HASH = "commitHash";
 	
 	public static final String PROP_PARAMS = "params";
 	
@@ -154,8 +153,6 @@ public class Build extends ProjectBelonging
 	public static final String PROP_ISSUE = "issue";
 	
 	public static final String NAME_LOG = "Log";
-	
-	public static final String PROP_TRIGGER_ID = "triggerId";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_LABEL, NAME_STATUS, NAME_SUBMITTER, 
@@ -172,7 +169,7 @@ public class Build extends ProjectBelonging
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
 	
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_JOB, PROP_JOB,
+			NAME_JOB, PROP_JOB_NAME,
 			NAME_STATUS, PROP_STATUS,
 			NAME_NUMBER, PROP_NUMBER,
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
@@ -180,20 +177,20 @@ public class Build extends ProjectBelonging
 			NAME_RUNNING_DATE, PROP_RUNNING_DATE,
 			NAME_FINISH_DATE, PROP_FINISH_DATE,
 			NAME_PROJECT, PROP_PROJECT,
-			NAME_COMMIT, PROP_COMMIT);	
+			NAME_COMMIT, PROP_COMMIT_HASH);	
 	
 	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
 
 	public static File getLogFile(Long projectId, Long buildNumber) {
-		File buildDir = OneDev.getInstance(BuildManager.class).getStorageDir(projectId, buildNumber);
+		File buildDir = OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber);
 		return new File(buildDir, LOG_FILE);
 	}
 	
-	public static String getProjectRelativeStoragePath(Long buildNumber) {
-		return BUILDS_DIR + "/" + getStoragePath(buildNumber);		
+	public static String getProjectRelativeDirPath(Long buildNumber) {
+		return BUILDS_DIR + "/" + getRelativeDirPath(buildNumber);		
 	}
 	
-	public static String getStoragePath(Long buildNumber) {
+	public static String getRelativeDirPath(Long buildNumber) {
 		return String.format("s%03d", buildNumber%1000) + "/" + buildNumber;
 	}
 	
@@ -267,7 +264,13 @@ public class Build extends ProjectBelonging
 	@Column(nullable=false)
 	private String jobName;
 	
-	private String jobWorkspace;
+	@JsonIgnore
+	@Column(nullable=false)
+	private String jobToken;
+	
+	@Lob
+	@Column(nullable=false)
+	private ArrayList<String> checkoutPaths = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String refName;
@@ -315,6 +318,9 @@ public class Build extends ProjectBelonging
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
+	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<Pack> packs = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependent", cascade=CascadeType.REMOVE)
 	private Collection<BuildDependence> dependencies = new ArrayList<>();
@@ -411,13 +417,16 @@ public class Build extends ProjectBelonging
 		this.jobName = jobName;
 	}
 
-	@Nullable
-	public String getJobWorkspace() {
-		return jobWorkspace;
+	public String getJobToken() {
+		return jobToken;
 	}
 
-	public void setJobWorkspace(@Nullable String jobWorkspace) {
-		this.jobWorkspace = jobWorkspace;
+	public void setJobToken(String jobToken) {
+		this.jobToken = jobToken;
+	}
+
+	public Collection<String> getCheckoutPaths() {
+		return checkoutPaths;
 	}
 
 	@Nullable
@@ -587,7 +596,15 @@ public class Build extends ProjectBelonging
 	public void setParams(Collection<BuildParam> params) {
 		this.params = params;
 	}
-	
+
+	public Collection<Pack> getPacks() {
+		return packs;
+	}
+
+	public void setPacks(Collection<Pack> packs) {
+		this.packs = packs;
+	}
+
 	public Collection<BuildLabel> getLabels() {
 		return labels;
 	}
@@ -618,6 +635,10 @@ public class Build extends ProjectBelonging
 
 	public void setRefName(String refName) {
 		this.refName = refName;
+	}
+
+	public String getReference(@Nullable Project currentProject) {
+		return Referenceable.asReference(this, currentProject);
 	}
 	
 	@Nullable
@@ -752,11 +773,8 @@ public class Build extends ProjectBelonging
 					secretValuesToMask.add(param.getValue().substring(SecretInput.LITERAL_VALUE_PREFIX.length()));
 			}
 		}
-		
-		for (Iterator<String> it = secretValuesToMask.iterator(); it.hasNext();) {
-			if (it.next().length() < SecretInput.MASK.length())
-				it.remove();
-		}
+
+		secretValuesToMask.removeIf(s -> s.length() < SecretInput.MASK.length());
 		return secretValuesToMask;
 	}
 	
@@ -798,20 +816,12 @@ public class Build extends ProjectBelonging
 		return paramBean;
 	}
 	
-	public File getStorageDir() {
-		return getStorageDir(getProject().getId(), getNumber());
+	public File getDir() {
+		return getBuildManager().getBuildDir(getProject().getId(), getNumber());
 	}
 	
 	public File getArtifactsDir() {
-		return getArtifactsDir(getProject().getId(), getNumber());
-	}
-	
-	public static File getStorageDir(Long projectId, Long buildNumber) {
-		return OneDev.getInstance(BuildManager.class).getStorageDir(projectId, buildNumber);
-	}
-	
-	public static File getArtifactsDir(Long projectId, Long buildNumber) {
-		return new File(getStorageDir(projectId, buildNumber), ARTIFACTS_DIR);
+		return getBuildManager().getArtifactsDir(getProject().getId(), getNumber());
 	}
 	
 	@Nullable
@@ -938,43 +948,6 @@ public class Build extends ProjectBelonging
 		}
 	}
 	
-	public boolean matchParams(List<ParamSupply> paramSupplies) {
-		AtomicBoolean matches = new AtomicBoolean(false);
-		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, paramSupplies)) {
-			
-			@Override
-			public void run(Map<String, List<String>> params) {
-				if (!matches.get()) {
-					boolean matching = true;
-					for (Map.Entry<String, List<String>> entry: params.entrySet()) {
-						if (!(getJob().getParamSpecMap().get(entry.getKey()) instanceof SecretParam)) {
-							List<String> paramValues = getParamMap().get(entry.getKey());
-							if (paramValues != null) {
-								if (!entry.getValue().isEmpty()) {
-									if (!Objects.equal(new HashSet<>(entry.getValue()), new HashSet<>(paramValues))) {
-										matching = false;
-										break;
-									}
-								} else if (paramValues.size() != 1 || paramValues.iterator().next() != null) {
-									matching = false;
-									break;
-								}
-							} else {
-								matching = false;
-								break;
-							}
-						}
-					}
-					if (matching)
-						matches.set(true);
-				}
-			}
-			
-		}.run();
-		
-		return matches.get();
-	}
-	
 	@Override
 	public Project getAttachmentProject() {
 		return getProject();
@@ -999,6 +972,26 @@ public class Build extends ProjectBelonging
 				rootArtifacts = new ArrayList<>();
 		}
 		return rootArtifacts;
+	}
+
+	@Nullable
+	public String getBlobPath(String filePath) {
+		if (checkoutPaths.isEmpty())
+			throw new ExplicitException("No checkout path detected");
+		
+		filePath = filePath.replace('\\', '/');
+		filePath = Paths.get(filePath).normalize().toString();
+		filePath = filePath.replace('\\', '/');
+		for (var checkoutPath: checkoutPaths) {
+			if (filePath.startsWith(checkoutPath + "/")) {
+				var blobPath = filePath.substring(checkoutPath.length() + 1);
+				if (getProject().findBlobIdent(getCommitId(), blobPath) != null)
+					return blobPath;
+			} else if (filePath.equals(checkoutPath)) {
+				return "";
+			}
+		}
+		return null;
 	}
 	
 }

@@ -27,8 +27,8 @@ public class ProductModule extends AbstractPluginModule {
 		
 		contribute(ProjectNameReservation.class, () -> {
 			Set<String> reserved = new HashSet<>();
-			for (var file1 : getAssetsDir().listFiles())
-				reserved.add(file1.getName());
+			for (var file : getAssetsDir().listFiles())
+				reserved.add(file.getName());
 			return reserved;
 		});
 	}

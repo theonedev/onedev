@@ -1,6 +1,8 @@
 package io.onedev.server.git.exception;
 
-public class NotFileException extends GitException {
+import io.onedev.commons.utils.ExplicitException;
+
+public class NotFileException extends ExplicitException {
 
 	private static final long serialVersionUID = 1L;
 

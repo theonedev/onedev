@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,6 +29,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+
+import static io.onedev.server.model.Build.getDetailChangeObservable;
 
 @SuppressWarnings("serial")
 public class BuildLogPanel extends GenericPanel<Build> {
@@ -83,7 +86,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			
 			@Override
 			public Collection<String> findObservables() {
-				return Sets.newHashSet(Build.getDetailChangeObservable(getBuild().getId()));
+				return Sets.newHashSet(getDetailChangeObservable(getBuild().getId()));
 			}
 			
 		});
@@ -94,6 +97,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 				@Override
 				protected void respond(AjaxRequestTarget target) {
 					OneDev.getInstance(JobManager.class).resume(getBuild());
+					BasePage page = (BasePage) getPage();
+					page.notifyObservableChange(target, getDetailChangeObservable(getBuild().getId()));
 				}
 				
 			};

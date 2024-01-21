@@ -32,7 +32,6 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.match.WildcardUtils;
 import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;

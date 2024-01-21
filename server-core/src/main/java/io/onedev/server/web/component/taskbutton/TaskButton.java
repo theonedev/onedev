@@ -1,35 +1,5 @@
 package io.onedev.server.web.component.taskbutton;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.IAjaxCallListener;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.joda.time.DateTime;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
-import org.unbescape.html.HtmlEscape;
-
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -42,9 +12,27 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.job.log.StyleBuilder;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.joda.time.DateTime;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
+import java.util.concurrent.*;
 
 @SuppressWarnings("serial")
 public abstract class TaskButton extends AjaxButton {
@@ -169,10 +157,7 @@ public abstract class TaskButton extends AjaxButton {
 					
 				};				
 				try {
-					String feedback = String.format(
-							"<div class='task-result alert-notice text-break alert alert-light-info'>%s</div>",
-							runTask(logger));
-					return new TaskResult(true, feedback);
+					return runTask(logger);
 				} catch (Exception e) {	
 					if (ExceptionUtils.find(e, FailedException.class) == null) {
 						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
@@ -186,14 +171,7 @@ public abstract class TaskButton extends AjaxButton {
 								logger.error(null, e);
 						}
 					}
-					String suggestedSolution = ExceptionUtils.suggestSolution(e);
-					if (suggestedSolution != null)
-						logger.error("!!! " + suggestedSolution);
-					String feedback = String.format(
-							"<div class='task-result text-break alert-notice alert alert-light-danger'>%s</div>", 
-							HtmlEscape.escapeHtml5("Error " + title));					
-					feedback = StringUtils.replace(feedback, "\n", "<br>");
-					return new TaskResult(false, feedback);
+					return new TaskResult(false, new PlainMessage("Error " + title));
 				} 
 			}
 			
@@ -271,7 +249,7 @@ public abstract class TaskButton extends AjaxButton {
 	 * @param logger
 	 * @return html display to user showing task execution result
 	 */
-	protected abstract String runTask(TaskLogger logger) throws InterruptedException;
+	protected abstract TaskResult runTask(TaskLogger logger) throws InterruptedException;
 
 	@Singleton
 	public static class TaskFutureManager implements SchedulableTask {

@@ -121,8 +121,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, placeholder="Use Any Applicable Executor", description="Optionally specify authorized executor "
-			+ "for this job. Leave empty to use first authorized executor")
+	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", description="Optionally specify authorized " +
+			"executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if " +
+			"no executors are defined)")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -132,6 +133,13 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.jobExecutor = jobExecutor;
 	}
 
+	private static String getJobExecutorPlaceholder() {
+		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
+			return "Auto-discovered executor";
+		else 
+			return "First applicable executor";
+	}
+	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobExecutors(String matchWith) {
 		List<String> applicableJobExecutors = new ArrayList<>();
@@ -342,15 +350,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 			} 
 		}
 		
-		Set<String> dependencyProjectPaths = new HashSet<>();
-		for (ProjectDependency dependency: projectDependencies) {
-			if (!dependencyProjectPaths.add(dependency.getProjectPath())) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate dependency (" + dependency.getProjectPath() + ")")
-						.addPropertyNode("projectDependencies").addConstraintViolation();
-			}
-		}
-		
 		Set<String> paramSpecNames = new HashSet<>();
 		for (ParamSpec paramSpec: paramSpecs) {
 			if (!paramSpecNames.add(paramSpec.getName())) {
@@ -378,7 +377,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 			for (int triggerIndex=0; triggerIndex<getTriggers().size(); triggerIndex++) {
 				JobTrigger trigger = getTriggers().get(triggerIndex);
 				try {
-					ParamUtils.validateParams(getParamSpecs(), trigger.getParams());
+					ParamUtils.validateParamMatrix(getParamSpecs(), trigger.getParamMatrix());
+					for (var paramMap: trigger.getExcludeParamMaps())
+						ParamUtils.validateParamMap(getParamSpecs(), paramMap.getParams());
 				} catch (Exception e) {
 					String errorMessage = String.format("Error validating job parameters (item: #%s, error message: %s)", 
 							(triggerIndex+1), e.getMessage());

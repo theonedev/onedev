@@ -1,0 +1,39 @@
+apiVersion: {{ include "ods.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ include "ods.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{ include "ods.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.onedev.replicas }}
+  selector:
+    matchLabels:
+  {{- include "ods.template-labels" . | nindent 6 }}
+  serviceName: {{ template "ods.fullname" . }}
+  {{- if .Values.onedev.updateStrategy}}
+  updateStrategy:
+    {{- toYaml .Values.onedev.updateStrategy | nindent 4 }}
+  {{- end}}
+  template:
+    metadata:
+      labels: {{ include "ods.template-labels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+      {{- if .Values.podAnnotations }}
+      annotations: {{ toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec: {{ include "ods.pod" . | nindent 6 }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - {{ default "ReadWriteOnce" .Values.persistence.accessModes }}
+      storageClassName: {{ .Values.persistence.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}
+      {{- if .Values.persistence.selector }}
+      selector: {{ toYaml .Values.persistence.selector | nindent 8 }}
+      {{- end }}

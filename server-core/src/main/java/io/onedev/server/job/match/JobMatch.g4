@@ -6,7 +6,7 @@ jobMatch
 
 criteria
 	: operator=(OnBranch|SubmittedByUser|SubmittedByGroup) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=Is WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -28,6 +28,10 @@ SubmittedByGroup
 Is
 	: 'is'
 	;
+
+IsNot
+    : 'is' WS+ 'not'
+    ;
 
 And
 	: 'and'

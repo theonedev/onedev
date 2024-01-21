@@ -67,7 +67,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 
 	private static final int UI_INDEXING_PRIORITY = 10;
 	
-	private static final int BACKEND_INDEXING_PRIORITY = 50;
+	private static final int BACKEND_INDEXING_PRIORITY = 90;
 	
 	private static final int DATA_VERSION = 7;
 	
@@ -388,7 +388,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (File file: projectManager.getStorageDir().listFiles()) {
+		for (File file: projectManager.getProjectsDir().listFiles()) {
 			Long projectId = Long.valueOf(file.getName());
 			File indexDir = projectManager.getIndexDir(projectId);
 			if (indexDir.exists()) {

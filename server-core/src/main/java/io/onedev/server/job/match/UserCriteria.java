@@ -1,8 +1,5 @@
 package io.onedev.server.job.match;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.criteria.Criteria;
 

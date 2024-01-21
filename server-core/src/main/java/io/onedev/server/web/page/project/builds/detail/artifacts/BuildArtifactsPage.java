@@ -9,6 +9,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -16,10 +17,10 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.resource.ArtifactResource;
 import io.onedev.server.web.resource.ArtifactResourceReference;
-import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -87,7 +88,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getBuild()));
+				setVisible(SecurityUtils.canManageBuild(getBuild()));
 			}
 
 		});
@@ -119,13 +120,23 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 		});
-		if (SecurityUtils.canManage(getBuild())) {
+		if (SecurityUtils.canManageBuild(getBuild())) {
 			columns.add(new AbstractColumn<>(Model.of("")) {
 
 				@Override
 				public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
 					Fragment fragment = new Fragment(componentId, "deleteFrag", BuildArtifactsPage.this);
 					AjaxLink<?> link = new AjaxLink<Void>("link") {
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							String confirmMessage;
+							if (rowModel.getObject() instanceof DirectoryInfo)
+								confirmMessage = "Do you really want to delete this directory?";
+							else
+								confirmMessage = "Do you really want to delete this file?";
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
+						}
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -134,10 +145,6 @@ public class BuildArtifactsPage extends BuildDetailPage {
 						}
 
 					};
-					if (rowModel.getObject() instanceof DirectoryInfo)
-						link.add(new ConfirmClickModifier("Do you really want to delete this directory?"));
-					else
-						link.add(new ConfirmClickModifier("Do you really want to delete this file?"));
 					fragment.add(link);
 					cellItem.add(fragment);
 				}
@@ -145,7 +152,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			});
 		}
 		
-		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<ArtifactInfo>() {
+		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<>() {
 
 			@Override
 			public void detach() {
@@ -153,12 +160,12 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 			@Override
 			public Iterator<? extends ArtifactInfo> getChildren(ArtifactInfo node) {
-				String artifactPath = node != null? node.getPath(): null;
-				DirectoryInfo directory = ((DirectoryInfo)getBuildManager()
+				String artifactPath = node != null ? node.getPath() : null;
+				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
 						.getArtifactInfo(getBuild(), artifactPath));
 				return directory.getChildren().iterator();
 			}
-			
+
 			@Override
 			public Iterator<? extends ArtifactInfo> getRoots() {
 				return getBuild().getRootArtifacts().iterator();
@@ -173,19 +180,19 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			public IModel<ArtifactInfo> model(ArtifactInfo object) {
 				return Model.of(object);
 			}
-			
+
 		};
 		
-		add(new TableTree<ArtifactInfo, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new TableTree<>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-			    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
-			    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));	
+				getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
+				getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));
 				getTable().add(new NoRecordsBehavior());
-			    getTable().add(AttributeAppender.append("class", "table"));
-			    add(new HumanTheme());
+				getTable().add(AttributeAppender.append("class", "table"));
+				add(new HumanTheme());
 				expand(null);
 				setOutputMarkupPlaceholderTag(true);
 			}
@@ -198,18 +205,18 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 			@Override
 			protected Item<ArtifactInfo> newRowItem(String id, int index, IModel<ArtifactInfo> model) {
-				return new OddEvenItem<ArtifactInfo>(id, index, model);
+				return new OddEvenItem<>(id, index, model);
 			}
 
 			@Override
 			public void expand(ArtifactInfo artifact) {
 				super.expand(artifact);
-				
-				String artifactPath = artifact != null? artifact.getPath(): null;
+
+				String artifactPath = artifact != null ? artifact.getPath() : null;
 				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
 						.getArtifactInfo(getBuild(), artifactPath));
-				if (directory != null 
-						&& directory.getChildren().size() == 1 
+				if (directory != null
+						&& directory.getChildren().size() == 1
 						&& directory.getChildren().get(0) instanceof DirectoryInfo) {
 					expand(directory.getChildren().get(0));
 				}
@@ -230,13 +237,13 @@ public class BuildArtifactsPage extends BuildDetailPage {
 							else
 								expand(artifact);
 						}
-						
+
 					};
 					link.add(new SpriteImage("icon", "folder"));
 					link.add(AttributeAppender.append("class", "folder"));
 				} else {
 					PageParameters params = ArtifactResource.paramsOf(
-							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath()); 
+							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath());
 					link = new ResourceLink<Void>("link", new ArtifactResourceReference(), params);
 					link.add(new SpriteImage("icon", "file"));
 					link.add(AttributeAppender.append("class", "file"));
@@ -246,10 +253,10 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					fileName = StringUtils.substringAfterLast(fileName, "/");
 				link.add(new Label("label", fileName));
 				fragment.add(link);
-				
+
 				return fragment;
-			}				
-			
+			}
+
 		});
 		add(new WebMarkupContainer("noArtifacts") {
 

@@ -12,7 +12,6 @@ import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;

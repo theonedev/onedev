@@ -1,7 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;

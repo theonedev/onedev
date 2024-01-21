@@ -451,7 +451,11 @@ onedev.server.stats = {
 				},
 				tooltip: {
 					trigger: 'axis',
-					background: "#7E8299"
+					textStyle: {
+						color: darkMode? 'white': '#535370'
+					},
+					borderColor: darkMode? '#36364F': 'white',
+					backgroundColor: darkMode? '#36364F': 'white'
 				},
 				legend: {
 					top: 40,

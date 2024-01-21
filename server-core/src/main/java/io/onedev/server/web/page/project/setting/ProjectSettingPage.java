@@ -20,12 +20,12 @@ public abstract class ProjectSettingPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getProject());
+		return SecurityUtils.canManageProject(getProject());
 	}
 	
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (SecurityUtils.canManage(project))
+		if (SecurityUtils.canManageProject(project))
 			return new ViewStateAwarePageLink<Void>(componentId, getPageClass(), paramsOf(project.getId()));
 		else
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));

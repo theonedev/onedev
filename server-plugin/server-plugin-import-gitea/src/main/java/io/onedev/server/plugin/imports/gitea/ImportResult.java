@@ -19,7 +19,7 @@ public class ImportResult {
 	
 	Set<String> nonExistentMilestones = new HashSet<>();
 
-	Set<Issue> importedIssues = new HashSet<>();
+	boolean issuesImported;
 	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {
@@ -36,7 +36,7 @@ public class ImportResult {
 		boolean hasNotice = false;
 		
 		if (!nonExistentMilestones.isEmpty() || !unmappedIssueLabels.isEmpty() 
-				|| !nonExistentLogins.isEmpty() || !importedIssues.isEmpty()) { 
+				|| !nonExistentLogins.isEmpty() || issuesImported) { 
 			hasNotice = true;
 		}
 		
@@ -52,7 +52,7 @@ public class ImportResult {
 					nonExistentLogins));
 		}
 		
-		if (!importedIssues.isEmpty()) {
+		if (issuesImported) {
 			feedback.append("<li> Attachments in issue description and comments are not imported as Gitea does not "
 					+ "provide attachment api currently");
 			feedback.append("<li> Issue dependencies are not imported as Gitea does not "

@@ -1,12 +1,12 @@
 package io.onedev.server.security.permission;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 
-public class EditIssueField implements Permission {
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+public class EditIssueField implements BasePermission {
 
 	private final Collection<String> fields;
 	
@@ -29,4 +29,8 @@ public class EditIssueField implements Permission {
 		}
 	}
 
+	@Override
+	public boolean isApplicable(@Nullable UserFacade user) {
+		return user != null;
+	}
 }

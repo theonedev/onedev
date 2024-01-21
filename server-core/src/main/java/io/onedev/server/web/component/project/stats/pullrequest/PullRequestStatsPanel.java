@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -36,7 +37,7 @@ public class PullRequestStatsPanel extends Panel {
 	}
 	
 	private long getTotalCount() {
-		return getStats().values().stream().collect(Collectors.summingLong(Long::longValue));
+		return getStats().values().stream().mapToLong(Long::longValue).sum();
 	}
 	
 	@Override
@@ -69,7 +70,7 @@ public class PullRequestStatsPanel extends Panel {
 			protected void populateItem(ListItem<Map.Entry<Status, Long>> item) {
 				Map.Entry<Status, Long> entry = item.getModelObject();
 				PullRequestQuery query = new PullRequestQuery(
-						new io.onedev.server.search.entity.pullrequest.StatusCriteria(entry.getKey()));
+						new io.onedev.server.search.entity.pullrequest.StatusCriteria(entry.getKey(), PullRequestQueryLexer.Is));
 				PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> statusLink = new BookmarkablePageLink<Void>("link", ProjectPullRequestsPage.class, params);
 				String statusName = entry.getKey().toString();
@@ -84,7 +85,7 @@ public class PullRequestStatsPanel extends Panel {
 					cssClass = "link-success";
 					break;
 				default:
-					cssClass = "link-secondary";
+					cssClass = "link-gray";
 					break;
 				}
 				statusLink.add(AttributeAppender.append("class", cssClass));

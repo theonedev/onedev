@@ -1,22 +1,21 @@
 package io.onedev.server.web.page.project.builds.detail.dashboard;
 
-import java.io.File;
-
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.core.request.handler.PageProvider;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.core.request.handler.PageProvider;
+import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.io.File;
 
 @SuppressWarnings("serial")
 public class BuildDashboardPage extends BuildDetailPage {
@@ -37,7 +36,7 @@ public class BuildDashboardPage extends BuildDetailPage {
 
 				@Override
 				public Boolean call() throws Exception {
-					File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+					File artifactsDir = OneDev.getInstance(BuildManager.class).getArtifactsDir(projectId, buildNumber);
 					return artifactsDir.exists() && artifactsDir.listFiles().length != 0;
 				}
 				

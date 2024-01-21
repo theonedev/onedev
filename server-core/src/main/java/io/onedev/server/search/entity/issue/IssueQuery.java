@@ -30,7 +30,9 @@ import org.antlr.v4.runtime.*;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static io.onedev.server.model.Issue.*;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
+import static io.onedev.server.util.DateUtils.parseWorkingPeriod;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
@@ -116,6 +118,10 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
+							case IssueQueryLexer.WatchedByMe:
+								if (!option.withCurrentUserCriteria())
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new WatchedByMeCriteria();
 							case IssueQueryLexer.CommentedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -150,7 +156,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						if (fieldName.equals(Issue.NAME_PROJECT)) {
 							return new ProjectIsCurrentCriteria();
 						} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-							return new MilestoneIsEmptyCriteria();
+							return new MilestoneEmptyCriteria(operator);
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 							if (fieldSpec != null)
@@ -174,6 +180,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							return new MentionedCriteria(getUser(value));
 						else if (ctx.SubmittedBy() != null)
 							return new SubmittedByCriteria(getUser(value));
+						else if (ctx.WatchedBy() != null)
+							return new WatchedByCriteria(getUser(value));
 						else if (ctx.CommentedBy() != null)
 							return new CommentedByCriteria(getUser(value));
 						else if (ctx.FixedInBuild() != null)
@@ -234,10 +242,11 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new StringFieldCriteria(fieldName, value, operator);
 								}
 							case IssueQueryLexer.Is:
+							case IssueQueryLexer.IsNot:
 								if (fieldName.equals(Issue.NAME_PROJECT)) {
-									return new ProjectCriteria(value);
+									return new ProjectCriteria(value, operator);
 								} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-									return new MilestoneCriteria(value);
+									return new MilestoneCriteria(value, operator);
 								} else if (fieldName.equals(Issue.NAME_STATE)) {
 									return new StateCriteria(value, operator);
 								} else if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
@@ -246,18 +255,24 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
+								} else if (fieldName.equals(Issue.NAME_ESTIMATED_TIME)) {
+									int intValue = parseWorkingPeriod(value);
+									return new EstimatedTimeCriteria(intValue, operator);
+								} else if (fieldName.equals(Issue.NAME_SPENT_TIME)) {
+									int intValue = parseWorkingPeriod(value);
+									return new SpentTimeCriteria(intValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IssueChoiceField) {
-										return new IssueFieldCriteria(fieldName, project, value);
+										return new IssueFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof BuildChoiceField) {
-										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple());
+										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple(), operator);
 									} else if (field instanceof PullRequestChoiceField) {
-										return new PullRequestFieldCriteria(fieldName, project, value);
+										return new PullRequestFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof CommitField) {
-										return new CommitFieldCriteria(fieldName, project, value);
+										return new CommitFieldCriteria(fieldName, project, value, operator);
 									} else if (field instanceof BooleanField) {
-										return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
+										return new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator);
 									} else if (field instanceof IntegerField) {
 										return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 									} else if (field instanceof ChoiceField) {
@@ -278,6 +293,15 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
+								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
+									int intValue = value.equals(NAME_SPENT_TIME)? -1: parseWorkingPeriod(value);
+									return new EstimatedTimeCriteria(intValue, operator);
+								} else if (fieldName.equals(NAME_SPENT_TIME)) {
+									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: parseWorkingPeriod(value);
+									return new SpentTimeCriteria(intValue, operator);
+								} else if (fieldName.equals(Issue.NAME_PROGRESS)) {
+									var floatValue = getFloatValue(value);
+									return new ProgressCriteria(floatValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 									if (field instanceof IntegerField) {
@@ -369,12 +393,14 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 			case IssueQueryLexer.IsEmpty:
+			case IssueQueryLexer.IsNotEmpty:
 				if (Issue.QUERY_FIELDS.contains(fieldName)
 						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
 			case IssueQueryLexer.IsMe:
+			case IssueQueryLexer.IsNotMe:
 				if (!(fieldSpec instanceof UserChoiceField && option.withCurrentUserCriteria()))
 					throw newOperatorException(fieldName, operator);
 				break;
@@ -407,7 +433,10 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				}
 				break;
 			case IssueQueryLexer.Is:
+			case IssueQueryLexer.IsNot:
 				if (!fieldName.equals(Issue.NAME_PROJECT)
+						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
+						&& !fieldName.equals(NAME_SPENT_TIME)
 						&& !fieldName.equals(Issue.NAME_STATE)
 						&& !fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
@@ -434,6 +463,9 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			case IssueQueryLexer.IsLessThan:
 			case IssueQueryLexer.IsGreaterThan:
 				if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
+						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
+						&& !fieldName.equals(NAME_SPENT_TIME)
+						&& !fieldName.equals(NAME_PROGRESS)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)

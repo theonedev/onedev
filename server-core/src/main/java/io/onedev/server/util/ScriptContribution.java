@@ -1,15 +1,15 @@
 package io.onedev.server.util;
 
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.revwalk.RevCommit;
-
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.annotation.Nullable;
 
 /**
  * Use abstract class instead of interface here as otherwise groovy can not invoke static methods defined here
@@ -42,6 +42,15 @@ public abstract class ScriptContribution {
 		Build build = Build.get();
 		if (build != null)
 			return build.getNumber();
+		else
+			return null;
+	}
+
+	@Nullable
+	public static String getCurrentUser() {
+		User user = User.get();
+		if (user != null)
+			return user.getName();
 		else
 			return null;
 	}

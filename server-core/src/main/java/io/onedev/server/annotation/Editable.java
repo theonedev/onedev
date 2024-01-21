@@ -29,4 +29,5 @@ public @interface Editable {
 	
 	String descriptionProvider() default "";
 	
+	boolean hidden() default false;
 }

@@ -12,7 +12,7 @@ class TestStatusBadge extends Label {
 	private final Status status;
 	
 	public TestStatusBadge(String id, Status status) {
-		super(id, status.name().toLowerCase());
+		super(id, status.name().toLowerCase().replace("_", " "));
 		this.status = status;
 	}
 
@@ -25,16 +25,16 @@ class TestStatusBadge extends Label {
 			@Override
 			public String getObject() {
 				switch (status) {
-				case PASSED:
-					return "unit-test-status badge badge-success flex-shrink-0";
-				case FAILED:
-					return "unit-test-status badge badge-danger flex-shrink-0";
-				case TODO: 
-					return "unit-test-status badge badge-primary flex-shrink-0";
-				case SKIPPED:
-					return "unit-test-status badge badge-info flex-shrink-0";
-				default: 
-					throw new RuntimeException("Unexpected unit test status: " + status);
+					case PASSED:
+						return "unit-test-status badge badge-success flex-shrink-0";
+					case NOT_PASSED:
+						return "unit-test-status badge badge-danger flex-shrink-0";
+					case OTHER:
+						return "unit-test-status badge badge-warning flex-shrink-0";
+					case NOT_RUN:
+						return "unit-test-status badge badge-info flex-shrink-0";
+					default:
+						throw new RuntimeException("Unexpected unit test status: " + status);
 				}
 			}
 			

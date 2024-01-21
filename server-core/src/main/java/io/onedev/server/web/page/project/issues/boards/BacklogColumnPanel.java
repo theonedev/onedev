@@ -8,17 +8,22 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -54,7 +59,7 @@ abstract class BacklogColumnPanel extends Panel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new NotCriteria<Issue>(new MilestoneCriteria(getMilestone().getName())));
+				criterias.add(new NotCriteria<Issue>(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is)));
 				return new IssueQuery(Criteria.andCriterias(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
@@ -130,6 +135,27 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 			
 		});
+
+		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+			add(new DropdownLink("showProgress") {
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new QueriedIssuesProgressPanel(id) {
+						@Override
+						protected ProjectScope getProjectScope() {
+							return BacklogColumnPanel.this.getProjectScope();
+						}
+
+						@Override
+						protected IssueQuery getQuery() {
+							return BacklogColumnPanel.this.getQuery();
+						}
+					};
+				}
+			});
+		} else {
+			add(new WebMarkupContainer("showProgress").setVisible(false));
+		}
 		
 		if (getQuery() != null) {
 			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);

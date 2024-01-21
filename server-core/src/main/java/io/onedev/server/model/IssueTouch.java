@@ -7,13 +7,12 @@ import javax.persistence.*;
 import static io.onedev.server.model.IssueTouch.*;
 
 @Entity
-@Table(
-		indexes={
-				@Index(columnList="o_project_id"), 
-				@Index(columnList= PROP_ISSUE_ID)})
+@Table(indexes={@Index(columnList="o_project_id"), @Index(columnList= PROP_ISSUE_ID)})
 public class IssueTouch extends EntityTouch {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_PROJECT = "project";
 	
 	public static final String PROP_ISSUE_ID = "issueId";
 

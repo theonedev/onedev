@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.SubPath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
@@ -23,7 +23,7 @@ public class VolumeMount implements Serializable {
 	@Editable(order = 100, placeholder = "Job workspace", description = "Specify a path relative to job workspace " +
 			"to be used as mount source. Leave empty to mount job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getSourcePath() {
 		return source;
 	}

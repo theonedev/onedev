@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import javax.validation.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
@@ -31,6 +33,8 @@ public class PropertyDescriptor implements Serializable {
 	private final String propertyName;
 	
 	private boolean propertyExcluded;
+	
+	private boolean propertyHidden;
 	
 	private Set<String> dependencyPropertyNames = new HashSet<>();
 	
@@ -80,6 +84,14 @@ public class PropertyDescriptor implements Serializable {
 
 	public void setPropertyExcluded(boolean propertyExcluded) {
 		this.propertyExcluded = propertyExcluded;
+	}
+
+	public boolean isPropertyHidden() {
+		return propertyHidden;
+	}
+
+	public void setPropertyHidden(boolean propertyHidden) {
+		this.propertyHidden = propertyHidden;
 	}
 
 	public void copyProperty(Object fromBean, Object toBean) {
@@ -135,12 +147,18 @@ public class PropertyDescriptor implements Serializable {
 		return isPropertyVisible(componentContexts, beanDescriptor, Sets.newHashSet());
 	}
 	
+	public boolean isSubscriptionRequired() {
+		return getPropertyGetter().getAnnotation(SubscriptionRequired.class) != null;
+	}
+	
 	private boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (!checkedPropertyNames.add(getPropertyName()))
 			return false;
 		
 		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
-		ComponentContext.push(Preconditions.checkNotNull(componentContexts.get(getPropertyName())));
+		var componentContext = componentContexts.get(getPropertyName());
+		if (componentContext != null)
+			ComponentContext.push(componentContext);
 		try {
 			/* 
 			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
@@ -151,6 +169,7 @@ public class PropertyDescriptor implements Serializable {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
 				return false;
+			getDependencyPropertyNames().remove(getPropertyName());
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {
 				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);
 				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(componentContexts, beanDescriptor, copyOfCheckedPropertyNames))
@@ -159,7 +178,8 @@ public class PropertyDescriptor implements Serializable {
 			return true;
 		} finally {
 			getDependencyPropertyNames().addAll(prevDependencyPropertyNames);
-			ComponentContext.pop();
+			if (componentContext != null)
+				ComponentContext.pop();
 		}
 	}
 	

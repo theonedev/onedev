@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>8.6.13</version>
+		<version>10.0.0</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.notification.slack.SlackModule</moduleClass>

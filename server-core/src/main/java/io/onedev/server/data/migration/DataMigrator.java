@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -42,6 +41,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.naturalOrder;
 
 
@@ -51,80 +51,11 @@ public class DataMigrator {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataMigrator.class);
 
-	private void migrate1(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("CodeComments.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element branchRefElement = element.element("branchRef");
-					if (branchRefElement != null)
-						branchRefElement.detach();
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate2(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Depots.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element gateKeeperElement = element.element("gateKeeper");
-					gateKeeperElement.detach();
-					element.addElement("gateKeepers");
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate4(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Accounts.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					Element avatarUploadDateElement = element.element("avatarUploadDate");
-					if (avatarUploadDateElement != null)
-						avatarUploadDateElement.detach();
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
-
-	private void migrate3(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-			for (Element element: dom.getRootElement().elements()) {
-				String name = element.getName();
-				name = StringUtils.replace(name, "com.pmease.commons", "com.gitplex.commons");
-				name = StringUtils.replace(name, "com.pmease.gitplex", "com.gitplex.server");
-				element.setName(name);
-			}
-			if (file.getName().startsWith("Configs.xml")) {
-				for (Element element: dom.getRootElement().elements()) {
-					Element settingElement = element.element("setting");
-					if (settingElement != null) {
-						String clazz = settingElement.attributeValue("class");
-						settingElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
-						Element gitConfigElement = settingElement.element("gitConfig");
-						if (gitConfigElement != null) {
-							clazz = gitConfigElement.attributeValue("class");
-							gitConfigElement.addAttribute("class", StringUtils.replace(clazz, "com.pmease.gitplex", "com.gitplex.server"));
-						}
-					}
-				}
-			}
-			dom.writeToFile(file, false);
-		}
-	}
-
 	private void migrate5(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Configs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element settingElement = element.element("setting");
 						if (settingElement != null)
@@ -140,9 +71,9 @@ public class DataMigrator {
 	}
 
 	private void migrate7(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content,
 						"com.gitplex.commons.hibernate.migration.VersionTable",
 						"com.gitplex.server.model.ModelVersion");
@@ -162,7 +93,7 @@ public class DataMigrator {
 						"com.gitplex.server.core.setting.", "com.gitplex.server.model.support.setting.");
 				content = StringUtils.replace(content,
 						"com.gitplex.server.core.gatekeeper.", "com.gitplex.server.gatekeeper.");
-				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, UTF_8);
 
 				if (file.getName().equals("VersionTables.xml")) {
 					FileUtils.moveFile(file, new File(file.getParentFile(), "ModelVersions.xml"));
@@ -194,10 +125,10 @@ public class DataMigrator {
 	}
 
 	private void migrate8(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Configs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("SYSTEM")) {
 						Element settingElement = element.element("setting");
 						settingElement.addElement("curlConfig")
@@ -207,13 +138,13 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Accounts.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("reviewEffort").detach();
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Depots.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("gateKeepers").detach();
 					element.element("integrationPolicies").detach();
 					element.addElement("branchProtections");
@@ -222,7 +153,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element assigneeElement = element.element("assignee");
 					if (assigneeElement != null)
 						assigneeElement.detach();
@@ -255,7 +186,7 @@ public class DataMigrator {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element mergeCommitHashElement = element.element("mergeCommitHash");
 					mergeCommitHashElement.setName("mergeBaseCommitHash");
 				}
@@ -268,15 +199,15 @@ public class DataMigrator {
 		try {
 			Map<String, String> accountIdToName = new HashMap<>();
 			Set<String> userIds = new HashSet<>();
-			for (File file: dataDir.listFiles()) {
+			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("Accounts.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
 					FileUtils.moveFile(file, renamedFile);
-					String content = FileUtils.readFileToString(renamedFile, StandardCharsets.UTF_8);
+					String content = FileUtils.readFileToString(renamedFile, UTF_8);
 					content = StringUtils.replace(content, "com.gitplex.server.model.Account",
 							"com.gitplex.server.model.User");
 					VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						accountIdToName.put(element.elementText("id"), element.elementText("name"));
 						if (element.elementTextTrim("organization").equals("true")) {
 							element.detach();
@@ -297,20 +228,20 @@ public class DataMigrator {
 			VersionedXmlDoc userAuthorizationsDom = new VersionedXmlDoc();
 			Element userAuthorizationListElement = userAuthorizationsDom.addElement("list");
 
-			for (File file: dataDir.listFiles()) {
+			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("Depots.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
 					FileUtils.moveFile(file, renamedFile);
-					String content = FileUtils.readFileToString(renamedFile, StandardCharsets.UTF_8);
+					String content = FileUtils.readFileToString(renamedFile, UTF_8);
 					content = StringUtils.replace(content, "com.gitplex.server.model.Depot",
 							"com.gitplex.server.model.Project");
 					VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						String accountId = element.elementText("account");
 						element.element("account").detach();
 						String depotName = element.elementText("name");
 						element.element("name").setText(accountIdToName.get(accountId) + "." + depotName);
-						if (element.element("defaultPrivilege") != null	)
+						if (element.element("defaultPrivilege") != null)
 							element.element("defaultPrivilege").detach();
 
 						String adminId;
@@ -331,7 +262,7 @@ public class DataMigrator {
 					dom.writeToFile(renamedFile, false);
 				} else if (file.getName().startsWith("BranchWatchs.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						if (!userIds.contains(element.elementText("user"))) {
 							element.detach();
 						} else {
@@ -350,7 +281,7 @@ public class DataMigrator {
 					FileUtils.deleteFile(file);
 				} else if (file.getName().startsWith("Configs.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						if (element.elementText("key").equals("SYSTEM")) {
 							String storagePath = element.element("setting").elementText("storagePath");
 							File storageDir = new File(storagePath);
@@ -358,7 +289,7 @@ public class DataMigrator {
 							if (repositoriesDir.exists()) {
 								File projectsDir = new File(storageDir, "projects");
 								FileUtils.moveDirectory(repositoriesDir, projectsDir);
-								for (File projectDir: projectsDir.listFiles()) {
+								for (File projectDir : projectsDir.listFiles()) {
 									File infoDir = new File(projectDir, "info");
 									if (infoDir.exists())
 										FileUtils.deleteDir(infoDir);
@@ -378,18 +309,18 @@ public class DataMigrator {
 	}
 
 	private void migrate10(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml") || file.getName().startsWith("CodeCommentReplys.xml")
 					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						Element exprElement = branchProtectionElement.element("reviewAppointmentExpr");
 						if (exprElement != null)
 							exprElement.setName("reviewRequirementSpec");
-						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
 							exprElement = fileProtectionElement.element("reviewAppointmentExpr");
 							if (exprElement != null)
 								exprElement.setName("reviewRequirementSpec");
@@ -400,13 +331,13 @@ public class DataMigrator {
 			}
 		}
 		VersionedXmlDoc dom = VersionedXmlDoc.fromFile(new File(dataDir, "Configs.xml"));
-		for (Element element: dom.getRootElement().elements()) {
+		for (Element element : dom.getRootElement().elements()) {
 			if (element.elementText("key").equals("SYSTEM")) {
 				String storagePath = element.element("setting").elementText("storagePath");
 				File codeCommentsFromWeiFeng = new File(storagePath, "CodeComments.xml");
 				if (codeCommentsFromWeiFeng.exists()) {
 					dom = VersionedXmlDoc.fromFile(codeCommentsFromWeiFeng);
-					for (Element commentElement: dom.getRootElement().elements()) {
+					for (Element commentElement : dom.getRootElement().elements()) {
 						commentElement.setName("com.gitplex.server.model.CodeComment");
 						commentElement.element("depot").setName("project");
 						commentElement.element("resolved").detach();
@@ -419,17 +350,17 @@ public class DataMigrator {
 	}
 
 	private void migrate11(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Configs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				long maxId = 0;
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long id = Long.parseLong(element.elementTextTrim("id"));
 					if (maxId < id)
 						maxId = id;
 				}
 				Element licenseConfigElement = dom.getRootElement().addElement("com.gitplex.server.model.Config");
-				licenseConfigElement.addElement("id").setText(String.valueOf(maxId+1));
+				licenseConfigElement.addElement("id").setText(String.valueOf(maxId + 1));
 				licenseConfigElement.addElement("key").setText("LICENSE");
 				dom.writeToFile(file, false);
 			}
@@ -437,14 +368,14 @@ public class DataMigrator {
 	}
 
 	private void migrate12(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element projectElement: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: projectElement.element("branchProtections").elements()) {
+				for (Element projectElement : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : projectElement.element("branchProtections").elements()) {
 						branchProtectionElement.addElement("enabled").setText("true");
 					}
-					for (Element tagProtectionElement: projectElement.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : projectElement.element("tagProtections").elements()) {
 						tagProtectionElement.addElement("enabled").setText("true");
 					}
 				}
@@ -454,12 +385,12 @@ public class DataMigrator {
 	}
 
 	private void migrate13(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content, "gitplex", "turbodev");
 				content = StringUtils.replace(content, "GitPlex", "TurboDev");
-				FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+				FileUtils.writeFile(file, content, UTF_8.name());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -467,16 +398,16 @@ public class DataMigrator {
 	}
 
 	private void migrate14(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element projectElement: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: projectElement.element("branchProtections").elements()) {
+				for (Element projectElement : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : projectElement.element("branchProtections").elements()) {
 						Element submitterElement = branchProtectionElement.addElement("submitter");
 						submitterElement.addAttribute("class", "com.turbodev.server.model.support.submitter.Anyone");
 						branchProtectionElement.addElement("noCreation").setText("true");
 					}
-					for (Element tagProtectionElement: projectElement.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : projectElement.element("tagProtections").elements()) {
 						tagProtectionElement.detach();
 					}
 				}
@@ -486,15 +417,15 @@ public class DataMigrator {
 	}
 
 	private void migrate15(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content, "com.turbodev", "io.onedev");
 				content = StringUtils.replace(content, "com/turbodev", "io/onedev");
 				content = StringUtils.replace(content, "turbodev.com", "onedev.io");
 				content = StringUtils.replace(content, "turbodev", "onedev");
 				content = StringUtils.replace(content, "TurboDev", "OneDev");
-				FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+				FileUtils.writeFile(file, content, UTF_8.name());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -532,10 +463,10 @@ public class DataMigrator {
 		Set<String> openRequests = new HashSet<>();
 		Map<String, String> reviewRequirements = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element fullNameElement = element.element("fullName");
 					if (fullNameElement != null)
 						userNames.put(element.elementTextTrim("id"), fullNameElement.getText());
@@ -544,7 +475,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String commentId = element.elementTextTrim("comment");
 					Integer replyCount = codeCommentReplyCounts.get(commentId);
 					if (replyCount == null)
@@ -554,7 +485,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("CodeCommentRelations.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String commentId = element.elementTextTrim("comment");
 					String requestId = element.elementTextTrim("request");
 					Set<String> codeComments = requestCodeComments.get(requestId);
@@ -566,7 +497,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String commentId = element.elementTextTrim("request");
 					Integer commentCount = requestCommentCounts.get(commentId);
 					if (commentCount == null)
@@ -576,22 +507,22 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("closeInfo") == null) {
 						openRequests.add(element.elementTextTrim("id"));
 					}
 				}
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String projectId = element.elementTextTrim("id");
 					StringBuilder builder = new StringBuilder();
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						Element reviewRequirementSpecElement = branchProtectionElement.element("reviewRequirementSpec");
 						if (reviewRequirementSpecElement != null)
 							builder.append(reviewRequirementSpecElement.getText()).append(";");
 
-						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
 							reviewRequirementSpecElement = fileProtectionElement.element("reviewRequirementSpec");
 							builder.append(reviewRequirementSpecElement.getText()).append(";");
 						}
@@ -601,11 +532,11 @@ public class DataMigrator {
 			}
 		}
 
-		for (Map.Entry<String, Set<String>> entry: requestCodeComments.entrySet()) {
+		for (Map.Entry<String, Set<String>> entry : requestCodeComments.entrySet()) {
 			Integer commentCount = requestCommentCounts.get(entry.getKey());
 			if (commentCount == null)
 				commentCount = 0;
-			for (String commentId: entry.getValue()) {
+			for (String commentId : entry.getValue()) {
 				commentCount++;
 				Integer replyCount = codeCommentReplyCounts.get(commentId);
 				if (replyCount != null)
@@ -628,7 +559,7 @@ public class DataMigrator {
 		Element requestBuildListElement = requestBuildsDOM.addElement("list");
 		int requestBuildCount = 0;
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("BranchWatches.xml")
 					|| file.getName().startsWith("PullRequestReferences.xml")
 					|| file.getName().startsWith("PullRequestStatusChanges.xml")
@@ -638,17 +569,17 @@ public class DataMigrator {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("UserAuthorizations.xml") || file.getName().startsWith("GroupAuthorizations.xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8.name());
 					content = StringUtils.replace(content, "ADMIN", "ADMINISTRATION");
 					content = StringUtils.replace(content, "WRITE", "CODE_WRITE");
 					content = StringUtils.replace(content, "READ", "CODE_READ");
-					FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer replyCount = codeCommentReplyCounts.get(element.elementTextTrim("id"));
 					if (replyCount == null)
 						replyCount = 0;
@@ -669,7 +600,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrateMergeStrategy16(element.element("mergeStrategy"));
 					Element lastMergePreviewElement = element.element("lastMergePreview");
 					if (lastMergePreviewElement != null) {
@@ -711,14 +642,14 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Configs.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					content = FileUtils.readFileToString(file, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 				content = StringUtils.replace(content, "io.onedev.server.security.authenticator.",
 						"io.onedev.server.model.support.authenticator.");
 				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.Setting");
 					Element settingElement = element.element("setting");
 					if (settingElement != null) {
@@ -726,7 +657,7 @@ public class DataMigrator {
 						if (element.elementTextTrim("key").equals("AUTHENTICATOR")) {
 							Element authenticatorElement = settingElement.elementIterator().next();
 							settingElement.addAttribute("class", authenticatorElement.getName());
-							for (Element fieldElement: authenticatorElement.elements()) {
+							for (Element fieldElement : authenticatorElement.elements()) {
 								if (!fieldElement.getName().equals("defaultGroupNames")) {
 									fieldElement.detach();
 									settingElement.add(fieldElement);
@@ -741,7 +672,7 @@ public class DataMigrator {
 				dom.writeToFile(new File(file.getParentFile(), file.getName().replace("Config", "Setting")), false);
 			} else if (file.getName().startsWith("PullRequestWatchs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element reasonElement = element.element("reason");
 					if (reasonElement != null)
 						reasonElement.detach();
@@ -752,24 +683,24 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("uuid").detach();
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String project = element.elementTextTrim("id");
 					Element publicReadElement = element.element("publicRead");
 					if (publicReadElement.getTextTrim().equals("true"))
 						element.addElement("defaultPrivilege").setText("CODE_READ");
 					publicReadElement.detach();
 
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.element("verifyMerges").setName("buildMerges");
 						Element verificationsElement = branchProtectionElement.element("verifications");
 						verificationsElement.setName("configurations");
-						for (Element verificationElement: verificationsElement.elements()) {
+						for (Element verificationElement : verificationsElement.elements()) {
 							String verification = verificationElement.getText();
 							Map<String, Long> configurations = projectConfigurations.get(project);
 							if (configurations == null) {
@@ -787,7 +718,7 @@ public class DataMigrator {
 								configurationElement.addElement("name").setText(verification);
 								configurationElement.addElement("buildCleanupRule").addAttribute("class", "io.onedev.server.model.support.configuration.DoNotCleanup");
 							}
-							for (String request: openRequests) {
+							for (String request : openRequests) {
 								Element requestBuildElement = requestBuildListElement.addElement("io.onedev.server.model.PullRequestBuild");
 								requestBuildElement.addAttribute("revision", "0.0");
 								requestBuildElement.addElement("id").setText(String.valueOf(++requestBuildCount));
@@ -806,12 +737,12 @@ public class DataMigrator {
 							reviewRequirementSpecElement.setName("reviewRequirement");
 						}
 
-						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
 							reviewRequirementSpecElement = fileProtectionElement.element("reviewRequirementSpec");
 							reviewRequirementSpecElement.setName("reviewRequirement");
 						}
 					}
-					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : element.element("tagProtections").elements()) {
 						Element submitterElement = tagProtectionElement.element("submitter");
 						String submitterClass = submitterElement.attributeValue("class");
 						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.",
@@ -829,12 +760,12 @@ public class DataMigrator {
 	}
 
 	private void migrate17(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issue")) {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element issueWorkflowElement = element.element("issueWorkflow");
 					if (issueWorkflowElement != null)
 						issueWorkflowElement.detach();
@@ -854,10 +785,10 @@ public class DataMigrator {
 	}
 
 	private void migrate18(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("LICENSE"))
 						element.detach();
 				}
@@ -865,12 +796,12 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
 	private void migrate19(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element commitMessageTransformsElement = element.addElement("commitMessageTransforms");
 					Element commitMessageTransformSettingElement = element.element("commitMessageTransformSetting");
 					if (commitMessageTransformSettingElement != null) {
@@ -885,14 +816,14 @@ public class DataMigrator {
 	}
 
 	private void migrate20(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldElement: valueElement.element("fieldSpecs").elements()) {
+							for (Element fieldElement : valueElement.element("fieldSpecs").elements()) {
 								fieldElement.addElement("canBeChangedBy").addAttribute("class", "io.onedev.server.model.support.usermatcher.Anyone");
 							}
 						}
@@ -904,24 +835,24 @@ public class DataMigrator {
 	}
 
 	private void migrate21(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.element("branch").setName("branches");
-						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
 							fileProtectionElement.element("path").setName("paths");
 						}
 					}
-					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : element.element("tagProtections").elements()) {
 						tagProtectionElement.element("tag").setName("tags");
 					}
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("LICENSE")) {
 						element.element("value").addAttribute("class", "io.onedev.commons.utils.license.LicenseDetail");
 					}
@@ -932,7 +863,7 @@ public class DataMigrator {
 	}
 
 	private void migrate22(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("IssueFieldUnarys.xml")) {
 				File renamedFile = new File(dataDir, file.getName().replace("IssueFieldUnarys", "IssueFieldEntitys"));
 				try {
@@ -941,7 +872,7 @@ public class DataMigrator {
 					throw new RuntimeException(e);
 				}
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(renamedFile);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.IssueFieldEntity");
 				}
 				dom.writeToFile(renamedFile, false);
@@ -950,10 +881,10 @@ public class DataMigrator {
 	}
 
 	private void migrate23(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Build2s.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element runInstanceIdElement = element.element("runInstanceId");
 					if (runInstanceIdElement != null)
 						runInstanceIdElement.detach();
@@ -964,7 +895,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("uuid").detach();
 					if (element.element("issueSetting") == null)
 						element.addElement("issueSetting");
@@ -982,7 +913,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("uuid").detach();
 				}
 				dom.writeToFile(file, false);
@@ -992,7 +923,7 @@ public class DataMigrator {
 
 	private String escapeValue24(String value) {
 		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<value.length(); i++) {
+		for (int i = 0; i < value.length(); i++) {
 			char ch = value.charAt(i);
 			if ("\\()".indexOf(ch) != -1)
 				builder.append("\\");
@@ -1025,7 +956,7 @@ public class DataMigrator {
 	}
 
 	private void migrateTransitionSpecsElement24(Element transitionSpecsElement) {
-		for (Element transitionElement: transitionSpecsElement.elements()) {
+		for (Element transitionElement : transitionSpecsElement.elements()) {
 			Element triggerElement = transitionElement.element("trigger");
 			if (triggerElement.attributeValue("class").contains("PressButtonTrigger"))
 				migrateUserMatcher24(triggerElement.element("authorized"));
@@ -1033,15 +964,15 @@ public class DataMigrator {
 	}
 
 	private void migrate24(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							migrateTransitionSpecsElement24(valueElement.element("defaultTransitionSpecs"));
-							for (Element fieldElement: valueElement.element("fieldSpecs").elements())
+							for (Element fieldElement : valueElement.element("fieldSpecs").elements())
 								migrateUserMatcher24(fieldElement.element("canBeChangedBy"));
 						}
 					}
@@ -1049,14 +980,14 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element issueSettingElement = element.element("issueSetting");
 					Element transitionsElement = issueSettingElement.element("transitionSpecs");
 					if (transitionsElement != null)
 						migrateTransitionSpecsElement24(transitionsElement);
-					for (Element branchProtectionElement: element.element("branchProtections").elements())
+					for (Element branchProtectionElement : element.element("branchProtections").elements())
 						migrateUserMatcher24(branchProtectionElement.element("submitter"));
-					for (Element tagProtectionElement: element.element("tagProtections").elements())
+					for (Element tagProtectionElement : element.element("tagProtections").elements())
 						migrateUserMatcher24(tagProtectionElement.element("submitter"));
 				}
 				dom.writeToFile(file, false);
@@ -1066,11 +997,11 @@ public class DataMigrator {
 
 	// from 2.0 to 3.0
 	private void migrate25(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1078,7 +1009,7 @@ public class DataMigrator {
 				content = content.replace(".support.authenticator.", ".support.administration.authenticator.");
 
 				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("ISSUE") || key.equals("JOB_EXECUTORS")) {
 						element.detach();
@@ -1124,12 +1055,12 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Groups.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("canCreateProjects").setName("createProjects");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("userProjectQueries");
 
 					element.addElement("userIssueQueries");
@@ -1148,7 +1079,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("GroupAuthorizations.xml")
 					|| file.getName().startsWith("UserAuthorizations.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element privilegeElement = element.element("privilege");
 					String privilege = privilegeElement.getTextTrim();
 					privilegeElement.detach();
@@ -1172,12 +1103,12 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("numberStr").detach();
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element rangeElement = element.element("markPos").element("range");
 					rangeElement.element("beginLine").setName("fromRow");
 					rangeElement.element("endLine").setName("toRow");
@@ -1188,37 +1119,37 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 				content = content.replace("DO_NOT_MERGE", "CREATE_MERGE_COMMIT");
 
 				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("numberStr").detach();
 
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element defaultPrivilegeElement = element.element("defaultPrivilege");
 					if (defaultPrivilegeElement != null)
 						defaultPrivilegeElement.detach();
 					element.addElement("owner").setText("1");
 
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						Element submitterElement = branchProtectionElement.element("submitter");
 						submitterElement.setName("user");
 						submitterElement.setText("anyone");
 						branchProtectionElement.element("configurations").detach();
 						branchProtectionElement.element("buildMerges").detach();
 						branchProtectionElement.addElement("jobNames");
-						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements())
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements())
 							fileProtectionElement.addElement("jobNames");
 					}
 
-					for (Element tagProtectionElement: element.element("tagProtections").elements())
+					for (Element tagProtectionElement : element.element("tagProtections").elements())
 						tagProtectionElement.element("submitter").setName("user");
 					element.addElement("secrets");
 					element.element("commitMessageTransforms").detach();
@@ -1257,7 +1188,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("IssueFieldEntitys.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1268,14 +1199,14 @@ public class DataMigrator {
 
 				File renamedFile = new File(dataDir, file.getName().replace(
 						"IssueFieldEntitys.xml", "IssueFields.xml"));
-				FileUtils.writeFile(renamedFile, content, StandardCharsets.UTF_8.name());
+				FileUtils.writeFile(renamedFile, content, UTF_8.name());
 			}
 		}
 		try (InputStream is = getClass().getResourceAsStream("migrate25_roles.xml")) {
 			Preconditions.checkNotNull(is);
 			FileUtils.writeFile(
 					new File(dataDir, "Roles.xml"),
-					StringUtils.join(IOUtils.readLines(is, StandardCharsets.UTF_8.name()), "\n"));
+					StringUtils.join(IOUtils.readLines(is, UTF_8.name()), "\n"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -1283,10 +1214,10 @@ public class DataMigrator {
 	}
 
 	private void migrate26(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element createdAtElement = element.element("createdAt");
 					createdAtElement.setName("createDate");
 					element.addElement("updateDate").setText(createdAtElement.getText());
@@ -1297,10 +1228,10 @@ public class DataMigrator {
 	}
 
 	private void migrate27(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
 					buildSettingElement.element("buildsToPreserve").detach();
 					buildSettingElement.addElement("preservations");
@@ -1313,10 +1244,10 @@ public class DataMigrator {
 	}
 
 	private void migrate28(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.addElement("buildSetting");
 					buildSettingElement.addElement("secrets");
 					buildSettingElement.addElement("buildPreservations");
@@ -1324,7 +1255,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("secrets").detach();
 					element.element("buildSetting").detach();
 					Element buildSettingElement = element.addElement("buildSetting");
@@ -1337,18 +1268,18 @@ public class DataMigrator {
 	}
 
 	private void migrate29(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("webHooks");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: element.element("branchProtections").elements())
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements())
 						branchProtectionElement.element("user").setName("userMatch");
-					for (Element tagProtectionElement: element.element("tagProtections").elements())
+					for (Element tagProtectionElement : element.element("tagProtections").elements())
 						tagProtectionElement.element("user").setName("userMatch");
 				}
 				dom.writeToFile(file, false);
@@ -1357,10 +1288,10 @@ public class DataMigrator {
 	}
 
 	private void migrate30(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS"))
 						element.detach();
@@ -1371,10 +1302,10 @@ public class DataMigrator {
 	}
 
 	private void migrate31(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element editableIssueFieldsElement = element.element("editableIssueFields");
 					editableIssueFieldsElement.detach();
 					element.addElement("editableIssueFields").addAttribute(
@@ -1386,10 +1317,10 @@ public class DataMigrator {
 	}
 
 	private void migrate32(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("ISSUE"))
 						element.detach();
@@ -1402,16 +1333,16 @@ public class DataMigrator {
 	}
 
 	private void migrate33(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.element("noCreation").setName("preventCreation");
 						branchProtectionElement.element("noDeletion").setName("preventDeletion");
 						branchProtectionElement.element("noForcedPush").setName("preventForcedPush");
 					}
-					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : element.element("tagProtections").elements()) {
 						tagProtectionElement.element("noCreation").setName("preventCreation");
 						tagProtectionElement.element("noDeletion").setName("preventDeletion");
 						tagProtectionElement.element("noUpdate").setName("preventUpdate");
@@ -1423,14 +1354,14 @@ public class DataMigrator {
 	}
 
 	private void migrate34(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
+							for (Element stateElement : valueElement.element("stateSpecs").elements()) {
 								Element categoryElement = stateElement.element("category");
 								stateElement.addElement("done").setText(String.valueOf(categoryElement.getTextTrim().equals("CLOSED")));
 								categoryElement.detach();
@@ -1441,7 +1372,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Milestones.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("numOfOpenIssues").setName("numOfIssuesTodo");
 					element.element("numOfClosedIssues").setName("numOfIssuesDone");
 				}
@@ -1451,10 +1382,10 @@ public class DataMigrator {
 	}
 
 	private void migrate35(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("updateDate").detach();
 					Element createDateElement = element.element("createDate");
 					Element lastUpdateElement = element.addElement("lastUpdate");
@@ -1472,7 +1403,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("updateDate").detach();
 					Element submitDateElement = element.element("submitDate");
 					Element lastUpdateElement = element.addElement("lastUpdate");
@@ -1490,7 +1421,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("updateDate").detach();
 					Element submitDateElement = element.element("submitDate");
 					Element lastUpdateElement = element.addElement("lastUpdate");
@@ -1508,22 +1439,22 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
 					Element namedQueriesElement = buildSettingElement.element("namedQueries");
 					if (namedQueriesElement != null) {
-						for (Element queryElement: namedQueriesElement.elements())
+						for (Element queryElement : namedQueriesElement.elements())
 							queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
 					}
 					Element secretsElement = buildSettingElement.element("secrets");
 					secretsElement.setName("jobSecrets");
-					for (Element secretElement: secretsElement.elements())
+					for (Element secretElement : secretsElement.elements())
 						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
-					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+					for (Element buildPreservationElement : buildSettingElement.element("buildPreservations").elements())
 						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
 					buildSettingElement.addElement("actionAuthorizations");
 
-					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+					for (Element tagProtectionElement : element.element("tagProtections").elements()) {
 						Element buildBranchesElement = tagProtectionElement.element("buildBranches");
 						if (buildBranchesElement != null)
 							buildBranchesElement.detach();
@@ -1532,15 +1463,15 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element queryElement: element.element("userBuildQueries").elements())
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element queryElement : element.element("userBuildQueries").elements())
 						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
 					Element buildSettingElement = element.element("buildSetting");
 					Element secretsElement = buildSettingElement.element("secrets");
 					secretsElement.setName("jobSecrets");
-					for (Element secretElement: secretsElement.elements())
+					for (Element secretElement : secretsElement.elements())
 						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
-					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+					for (Element buildPreservationElement : buildSettingElement.element("buildPreservations").elements())
 						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
 					buildSettingElement.addElement("actionAuthorizations");
 					Element passwordElement = element.element("password");
@@ -1552,25 +1483,25 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element queryElement: element.element("userQueries").elements())
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element queryElement : element.element("userQueries").elements())
 						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
+							for (Element stateElement : valueElement.element("stateSpecs").elements()) {
 								stateElement.element("done").detach();
 							}
 						}
 					} else if (element.elementTextTrim("key").equals("BUILD")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element queryElement: valueElement.element("namedQueries").elements())
+							for (Element queryElement : valueElement.element("namedQueries").elements())
 								queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
 						}
 					}
@@ -1578,7 +1509,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Milestones.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("numOfIssuesTodo").detach();
 					element.element("numOfIssuesDone").detach();
 				}
@@ -1592,10 +1523,10 @@ public class DataMigrator {
 	}
 
 	private void migrate37(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("LICENSE"))
 						element.detach();
 				}
@@ -1616,45 +1547,45 @@ public class DataMigrator {
 	private void migrate38(File dataDir, Stack<Integer> versions) {
 		Map<Long, Long> forkedFroms = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.pullrequest.NamedPullRequestQuery")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.pullrequest.NamedPullRequestQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
 							element.element("query").detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.issue.NamedIssueQuery")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.issue.NamedIssueQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
 							element.element("query").detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.build.NamedBuildQuery")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.build.NamedBuildQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
 							element.element("query").detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.NamedProjectQuery")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.NamedProjectQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
 							element.element("query").detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//issueQuery")) {
+				for (Node node : dom.selectNodes("//issueQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.getTextTrim().equals("all"))
 							element.detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.build.BuildPreservation")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.build.BuildPreservation")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						Element conditionElement = element.element("condition");
@@ -1662,7 +1593,7 @@ public class DataMigrator {
 							conditionElement.detach();
 					}
 				}
-				for (Node node: dom.selectNodes("//listFields")) {
+				for (Node node : dom.selectNodes("//listFields")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						Element stateElement = element.addElement("string");
@@ -1675,7 +1606,7 @@ public class DataMigrator {
 			}
 			if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element dataElement = element.element("data");
 					String className = dataElement.attributeValue("class");
 					if (className.contains("IssueCommittedData") || className.contains("IssuePullRequest"))
@@ -1684,7 +1615,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long projectId = Long.valueOf(element.elementTextTrim("id"));
 					Element forkedFromElement = element.element("forkedFrom");
 					if (forkedFromElement != null)
@@ -1694,7 +1625,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -1708,7 +1639,7 @@ public class DataMigrator {
 		}
 
 		Map<Long, Long> forkedRoots = new HashMap<>();
-		for (Long projectId: forkedFroms.keySet()) {
+		for (Long projectId : forkedFroms.keySet()) {
 			forkedRoots.put(projectId, getForkedRoot38(forkedFroms, projectId));
 		}
 
@@ -1716,16 +1647,16 @@ public class DataMigrator {
 		Map<Long, Set<Long>> buildNumbers = new HashMap<>();
 		Map<Long, Set<Long>> pullRequestNumbers = new HashMap<>();
 
-		for (Long forkedRoot: forkedRoots.values()) {
+		for (Long forkedRoot : forkedRoots.values()) {
 			issueNumbers.put(forkedRoot, new HashSet<>());
 			buildNumbers.put(forkedRoot, new HashSet<>());
 			pullRequestNumbers.put(forkedRoot, new HashSet<>());
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long issueNumber = Long.valueOf(element.elementTextTrim("number"));
 					Long projectId = Long.valueOf(element.elementTextTrim("project"));
 					if (projectId.equals(forkedRoots.get(projectId)))
@@ -1733,7 +1664,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long buildNumber = Long.valueOf(element.elementTextTrim("number"));
 					Long projectId = Long.valueOf(element.elementTextTrim("project"));
 					if (projectId.equals(forkedRoots.get(projectId)))
@@ -1741,7 +1672,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long requestNumber = Long.valueOf(element.elementTextTrim("number"));
 					Long projectId = Long.valueOf(element.elementTextTrim("targetProject"));
 					if (projectId.equals(forkedRoots.get(projectId)))
@@ -1750,10 +1681,10 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element numberElement = element.element("number");
 					Long issueNumber = Long.valueOf(numberElement.getTextTrim());
 					Long projectId = Long.valueOf(element.elementTextTrim("project"));
@@ -1771,7 +1702,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element numberElement = element.element("number");
 					Long buildNumber = Long.valueOf(numberElement.getTextTrim());
 					Long projectId = Long.valueOf(element.elementTextTrim("project"));
@@ -1789,7 +1720,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element numberElement = element.element("number");
 					Long requestNumber = Long.valueOf(numberElement.getTextTrim());
 					Long projectId = Long.valueOf(element.elementTextTrim("targetProject"));
@@ -1815,15 +1746,15 @@ public class DataMigrator {
 
 	// from 3.0.x to 3.1.x
 	private void migrate40(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8.name());
 					content = StringUtils.replace(content, "io.onedev.server.issue.",
 							"io.onedev.server.model.support.issue.");
 					content = StringUtils.replace(content, "io.onedev.server.util.inputspec.",
 							"io.onedev.server.model.support.inputspec.");
-					FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1831,10 +1762,10 @@ public class DataMigrator {
 		}
 
 		long maxRoleId = 0;
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					long roleId = Long.parseLong(element.elementTextTrim("id"));
 					if (roleId > maxRoleId)
 						maxRoleId = roleId;
@@ -1844,17 +1775,17 @@ public class DataMigrator {
 
 		boolean hasOwnerRole = false;
 		String idOfRolePreviouslyUsingOwnerId = null;
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element idElement = element.element("id");
 					if (idElement.getText().trim().equals("1")) {
 						if (element.elementText("manageProject").equals("true")) {
 							element.element("name").setText("Owner");
 							hasOwnerRole = true;
 						} else {
-							idOfRolePreviouslyUsingOwnerId = String.valueOf(maxRoleId+1);
+							idOfRolePreviouslyUsingOwnerId = String.valueOf(maxRoleId + 1);
 							idElement.setText(idOfRolePreviouslyUsingOwnerId);
 						}
 					}
@@ -1890,11 +1821,11 @@ public class DataMigrator {
 		}
 
 		if (idOfRolePreviouslyUsingOwnerId != null) {
-			for (File file: dataDir.listFiles()) {
+			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("UserAuthorizations.xml")
 						|| file.getName().startsWith("GroupAuthorizations.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						Element roleElement = element.element("role");
 						if (roleElement.getText().trim().equals("1"))
 							roleElement.setText(idOfRolePreviouslyUsingOwnerId);
@@ -1907,17 +1838,17 @@ public class DataMigrator {
 		Map<String, Element> userBuildSettingElements = new HashMap<>();
 		Map<String, Element> userWebHooksElements = new HashMap<>();
 		Map<String, String> projectOwners = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							valueElement.element("defaultTransitionSpecs").setName("transitionSpecs");
 							valueElement.element("defaultPromptFieldsUponIssueOpen").setName("promptFieldsUponIssueOpen");
 							valueElement.element("defaultBoardSpecs").setName("boardSpecs");
-							for (Node node: valueElement.selectNodes("//uuid"))
+							for (Node node : valueElement.selectNodes("//uuid"))
 								node.detach();
 						}
 					}
@@ -1925,7 +1856,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					projectOwners.put(element.elementText("id").trim(), element.elementText("owner").trim());
 
 					Element transitionSpecsElement = element.element("transitionSpecs");
@@ -1938,7 +1869,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String id = element.elementText("id").trim();
 					Element buildSettingElement = element.element("buildSetting");
 					buildSettingElement.detach();
@@ -1952,33 +1883,33 @@ public class DataMigrator {
 		}
 
 		long maxUserAuthorizationId = 0;
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element ownerElement = element.element("owner");
 					ownerElement.detach();
 
 					String ownerId = ownerElement.getText().trim();
 
-					for (Element webHookElement: userWebHooksElements.get(ownerId).elements())
+					for (Element webHookElement : userWebHooksElements.get(ownerId).elements())
 						element.element("webHooks").add(webHookElement.createCopy());
 
 					Element buildSettingElement = element.element("buildSetting");
 					Element userBuildSettingElement = userBuildSettingElements.get(ownerId);
 
-					for (Element buildPreservationElement: userBuildSettingElement.element("buildPreservations").elements())
+					for (Element buildPreservationElement : userBuildSettingElement.element("buildPreservations").elements())
 						buildSettingElement.element("buildPreservations").add(buildPreservationElement.createCopy());
 
-					for (Element actionAuthorizationElement: userBuildSettingElement.element("actionAuthorizations").elements())
+					for (Element actionAuthorizationElement : userBuildSettingElement.element("actionAuthorizations").elements())
 						buildSettingElement.element("actionAuthorizations").add(actionAuthorizationElement.createCopy());
 
 					Element jobSecretsElement = buildSettingElement.element("jobSecrets");
 					Set<String> existingJobSecretNames = new HashSet<>();
-					for (Element jobSecretElement: jobSecretsElement.elements())
+					for (Element jobSecretElement : jobSecretsElement.elements())
 						existingJobSecretNames.add(jobSecretElement.elementText("name").trim());
 
-					for (Element jobSecretElement: userBuildSettingElement.element("jobSecrets").elements()) {
+					for (Element jobSecretElement : userBuildSettingElement.element("jobSecrets").elements()) {
 						if (!existingJobSecretNames.contains(jobSecretElement.elementText("name").trim()))
 							jobSecretsElement.add(jobSecretElement.createCopy());
 					}
@@ -1986,7 +1917,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("UserAuthorizations.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					long userAuthorizationId = Long.parseLong(element.elementText("id").trim());
 					if (userAuthorizationId > maxUserAuthorizationId)
 						maxUserAuthorizationId = userAuthorizationId;
@@ -2010,7 +1941,7 @@ public class DataMigrator {
 			dom = new VersionedXmlDoc();
 			dom.addElement("list");
 		}
-		for (Map.Entry<String, String> entry: projectOwners.entrySet()) {
+		for (Map.Entry<String, String> entry : projectOwners.entrySet()) {
 			Element userAuthorizationElement = dom.getRootElement().addElement("io.onedev.server.model.UserAuthorization");
 			userAuthorizationElement.addAttribute("revision", "0.0");
 			userAuthorizationElement.addElement("id").setText(String.valueOf(++maxUserAuthorizationId));
@@ -2022,10 +1953,10 @@ public class DataMigrator {
 	}
 
 	private void migrate41(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null)
@@ -2043,14 +1974,14 @@ public class DataMigrator {
 		Map<String, String> requestTargetHeads = new HashMap<>();
 		Map<String, String> requestBaseCommits = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeCommentRelations.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					commentRequests.put(element.elementTextTrim("comment"), element.elementTextTrim("request"));
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String id = element.elementTextTrim("id");
 					requestBaseCommits.put(id, element.elementTextTrim("baseCommitHash"));
 					Element lastMergePreviewElement = element.element("lastMergePreview");
@@ -2069,10 +2000,10 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8.name());
 					content = StringUtils.replace(content,
 							"io.onedev.server.model.support.administration.authenticator.ldap.",
 							"io.onedev.server.plugin.authenticator.ldap.");
@@ -2085,13 +2016,13 @@ public class DataMigrator {
 					content = StringUtils.replace(content,
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest",
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger");
-					FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element keyElement = element.element("key");
 					if (keyElement.getTextTrim().equals("SSH")) {
 						Element valueElement = element.element("value");
@@ -2104,7 +2035,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
 					Element actionAuthorizationsElement = buildSettingElement.element("actionAuthorizations");
 					if (actionAuthorizationsElement.elements().isEmpty()) {
@@ -2116,7 +2047,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element compareContextElement = element.element("compareContext");
 					compareContextElement.element("compareCommit").setName("compareCommitHash");
 					Element markPosElement = element.element("markPos");
@@ -2129,24 +2060,24 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("submitReason").setText("Unknown");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentRelations.xml")) {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("PullRequestBuilds.xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8.name());
 					content = StringUtils.replace(content, "PullRequestBuild", "PullRequestVerification");
 					FileUtils.deleteFile(file);
 					String newFileName = StringUtils.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
-					FileUtils.writeFile(new File(dataDir, newFileName), content, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(new File(dataDir, newFileName), content, UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else if (file.getName().startsWith("PullRequestReviews.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element excludeDateElement = element.element("excludeDate");
 					if (excludeDateElement != null)
 						excludeDateElement.detach();
@@ -2154,14 +2085,14 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("accessToken").setText(CryptoUtils.generateSecret());
 					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("mergeBaseCommitHash").detach();
 					String requestId = element.elementTextTrim("request");
 					String targetHead = requestTargetHeads.get(requestId);
@@ -2178,10 +2109,10 @@ public class DataMigrator {
 
 	// Migrate to 3.2.2
 	private void migrate43(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null)
@@ -2203,19 +2134,19 @@ public class DataMigrator {
 	// Migrate to 4.0.5
 	private void migrate44(File dataDir, Stack<Integer> versions) {
 		Map<String, String> verifications = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequestVerifications.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					verifications.put(element.elementTextTrim("build"), element.elementTextTrim("request"));
 				}
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("triggerId").setText(UUID.randomUUID().toString());
 					String requestId = verifications.get(element.elementTextTrim("id"));
 					if (requestId != null)
@@ -2228,43 +2159,43 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("description"), 14000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("content"), 14000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("content"), 14000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("content"), 15000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("description"), 15000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("description"), 12000);
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					migrate44_abbreviate(element.element("content"), 14000);
 				}
 				dom.writeToFile(file, false);
@@ -2274,10 +2205,10 @@ public class DataMigrator {
 
 	// Migrate to 4.0.6
 	private void migrate45(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("triggerId").detach();
 				dom.writeToFile(file, false);
 			}
@@ -2286,13 +2217,13 @@ public class DataMigrator {
 
 	// migrate to 4.0.7
 	private void migrate46(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
-						for (Element executorElement: valueElement.elements()) {
+						for (Element executorElement : valueElement.elements()) {
 							if (executorElement.getName().contains("KubernetesExecutor")) {
 								Element serviceAccountElement = executorElement.element("serviceAccount");
 								if (serviceAccountElement != null)
@@ -2308,10 +2239,10 @@ public class DataMigrator {
 
 	// migrate to 4.0.8
 	private void migrate47(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element refNameElement = element.element("refName");
 					if (refNameElement == null)
 						element.addElement("refName").setText("unknown");
@@ -2323,14 +2254,14 @@ public class DataMigrator {
 
 	// migrate to 4.1.0
 	private void migrate48(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content,
 						"\" is before \"", "\" is until \"");
 				content = StringUtils.replace(content,
 						"\" is after \"", "\" is since \"");
-				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -2338,10 +2269,10 @@ public class DataMigrator {
 	}
 
 	private void migrate49(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
 					buildSettingElement.addElement("defaultFixedIssueFilters");
 				}
@@ -2355,10 +2286,10 @@ public class DataMigrator {
 	}
 
 	private void migrate51(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element rangeElement = element.element("mark").element("range");
 					Element tabWidthElement = rangeElement.element("tabWidth");
 					if (tabWidthElement == null)
@@ -2372,10 +2303,10 @@ public class DataMigrator {
 
 	// Migrate to 4.2.1
 	private void migrate52(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("revision").setText("0");
 				dom.writeToFile(file, false);
 			}
@@ -2388,9 +2319,9 @@ public class DataMigrator {
 		Map<String, String> groupIds = new HashMap<>();
 		List<Triple<String, String, String>> authorizations = new ArrayList<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content,
 						"io.onedev.server.model.support.issue.fieldspec.",
 						"io.onedev.server.model.support.issue.field.spec.");
@@ -2404,11 +2335,11 @@ public class DataMigrator {
 						"org.server.plugin.report.clover.",
 						"io.onedev.server.plugin.report.clover.");
 
-				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, UTF_8);
 
 				if (file.getName().startsWith("Settings.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						if (element.elementTextTrim("key").equals("SECURITY")) {
 							Element valueElement = element.element("value");
 							if (valueElement != null) {
@@ -2424,11 +2355,11 @@ public class DataMigrator {
 					dom.writeToFile(file, false);
 				} else if (file.getName().startsWith("Groups.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements())
+					for (Element element : dom.getRootElement().elements())
 						groupIds.put(element.elementText("name").trim(), element.elementText("id").trim());
 				} else if (file.getName().startsWith("GroupAuthorizations.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						String groupId = element.elementText("group").trim();
 						String projectId = element.elementText("project").trim();
 						String roleId = element.elementText("role").trim();
@@ -2444,16 +2375,16 @@ public class DataMigrator {
 
 		if (anonymousGroupName != null) {
 			String anonymousGroupId = groupIds.get(anonymousGroupName);
-			for (Triple<String, String, String> authorization: authorizations) {
+			for (Triple<String, String, String> authorization : authorizations) {
 				if (authorization.getLeft().equals(anonymousGroupId))
 					defaultRoles.put(authorization.getMiddle(), authorization.getRight());
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String defaultRoleId = defaultRoles.get(element.elementText("id").trim());
 					if (defaultRoleId != null)
 						element.addElement("defaultRole").setText(defaultRoleId);
@@ -2465,10 +2396,10 @@ public class DataMigrator {
 	}
 
 	private void migrate54(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Groups.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("createProjects").detach();
 				dom.writeToFile(file, false);
 			}
@@ -2476,10 +2407,10 @@ public class DataMigrator {
 	}
 
 	private void migrate55(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element ownerElement = element.element("owner");
 					if (ownerElement != null)
 						ownerElement.detach();
@@ -2490,10 +2421,10 @@ public class DataMigrator {
 	}
 
 	private void migrate56(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("alternateEmails");
 				}
 				dom.writeToFile(file, false);
@@ -2502,20 +2433,20 @@ public class DataMigrator {
 	}
 
 	private void migrate57(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content,
 						"io.onedev.server.model.support.inputspec.numberinput.",
 						"io.onedev.server.model.support.inputspec.integerinput.");
-				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 
 			if (file.getName().startsWith("BuildParams.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String type = element.elementText("type").trim();
 					if (type.equals("Number"))
 						element.setText("Integer");
@@ -2525,7 +2456,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueFields.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String type = element.elementText("type").trim();
 					if (type.equals("Number"))
 						element.setText("Integer");
@@ -2535,11 +2466,11 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
 								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.NumberField"))
 									fieldSpecElement.setName("io.onedev.server.model.support.issue.field.spec.IntegerField");
 								else if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.TextField"))
@@ -2554,10 +2485,10 @@ public class DataMigrator {
 	}
 
 	private void migrate58(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("contributedSettings");
 				}
 				dom.writeToFile(file, false);
@@ -2566,10 +2497,10 @@ public class DataMigrator {
 	}
 
 	private void migrate59(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -2595,14 +2526,14 @@ public class DataMigrator {
 	}
 
 	private void migrate60(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().equals("io.onedev.server.plugin.docker.DockerExecutor"))
 									executorElement.setName("io.onedev.server.plugin.executor.docker.DockerExecutor");
 							}
@@ -2624,43 +2555,43 @@ public class DataMigrator {
 	}
 
 	private void migrate61(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					useUnknownUser(element.element("lastUpdate"), "user");
 					useUnknownUser(element, "submitter");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					useUnknownUser(element, "submitter");
 					useUnknownUser(element, "canceller");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					useUnknownUser(element.element("lastUpdate"), "user");
 					useUnknownUser(element, "user");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					useUnknownUser(element, "user");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					useUnknownUser(element.element("lastUpdate"), "user");
 					useUnknownUser(element, "submitter");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("data").attributeValue("class").contains("IssueDescriptionChangeData"))
 						element.detach();
 					else
@@ -2669,7 +2600,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("data").attributeValue("class").contains("PullRequestDescriptionChangeData"))
 						element.detach();
 					else
@@ -2678,17 +2609,17 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					useUnknownUser(element, "user");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					useUnknownUser(element, "user");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("id").equals("-1"))
 						element.element("email").setText("system email");
 				}
@@ -2721,7 +2652,7 @@ public class DataMigrator {
 
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				long maxId = 1L;
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -2741,14 +2672,14 @@ public class DataMigrator {
 				if (oldSenderAuthorizationElements != null && !oldSenderAuthorizationElements.isEmpty()) {
 					Element serviceDeskSettingElement = dom.getRootElement().addElement("io.onedev.server.model.Setting");
 					serviceDeskSettingElement.addAttribute("revision", "0.0");
-					serviceDeskSettingElement.addElement("id").setText(String.valueOf(maxId+1));
+					serviceDeskSettingElement.addElement("id").setText(String.valueOf(maxId + 1));
 					serviceDeskSettingElement.addElement("key").setText("SERVICE_DESK_SETTING");
 					Element valueElement = serviceDeskSettingElement.addElement("value");
 					valueElement.addAttribute("class", "io.onedev.server.model.support.administration.ServiceDeskSetting");
 					Element senderAuthorizationsElement = valueElement.addElement("senderAuthorizations");
 					Element projectDesignationsElement = valueElement.addElement("projectDesignations");
 					Element issueCreationSettingsElement = valueElement.addElement("issueCreationSettings");
-					for (Element oldSenderAuthorizationElement: oldSenderAuthorizationElements) {
+					for (Element oldSenderAuthorizationElement : oldSenderAuthorizationElements) {
 						Element senderAuthorizationElement = senderAuthorizationsElement
 								.addElement("io.onedev.server.model.support.administration.SenderAuthorization");
 						Element projectDesignationElement = projectDesignationsElement
@@ -2784,19 +2715,19 @@ public class DataMigrator {
 	}
 
 	private void migrate62(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							try {
 								HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-								int cpu = hardware.getProcessor().getLogicalProcessorCount()*1000;
+								int cpu = hardware.getProcessor().getLogicalProcessorCount() * 1000;
 								valueElement.addElement("cpu").setText(String.valueOf(cpu));
-								int memory = (int) (hardware.getMemory().getTotal()/1024/1024);
+								int memory = (int) (hardware.getMemory().getTotal() / 1024 / 1024);
 								valueElement.addElement("memory").setText(String.valueOf(memory));
 							} catch (Exception e) {
 								valueElement.addElement("cpu").setText("4000");
@@ -2806,7 +2737,7 @@ public class DataMigrator {
 					} else if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("DockerExecutor")) {
 									executorElement.setName("io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor");
 									executorElement.element("capacity").detach();
@@ -2818,7 +2749,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element userProjectQueriesElement = element.element("userProjectQueries");
 					if (userProjectQueriesElement != null)
 						userProjectQueriesElement.setName("projectQueries");
@@ -2833,12 +2764,12 @@ public class DataMigrator {
 						userPullRequestQueriesElement.setName("pullRequestQueries");
 
 					Element issueQueryWatchesElement = element.element("issueQueryWatches");
-					for (Element issueQueryWatchElement: issueQueryWatchesElement.elements()) {
+					for (Element issueQueryWatchElement : issueQueryWatchesElement.elements()) {
 						Element queryNameElement = issueQueryWatchElement.element("string");
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					}
 					Element userIssueQueryWatchesElement = element.element("userIssueQueryWatches");
-					for (Element userIssueQueryWatchElement: userIssueQueryWatchesElement.elements()) {
+					for (Element userIssueQueryWatchElement : userIssueQueryWatchesElement.elements()) {
 						Element queryNameElement = userIssueQueryWatchElement.element("string");
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						userIssueQueryWatchElement.detach();
@@ -2847,12 +2778,12 @@ public class DataMigrator {
 					userIssueQueryWatchesElement.detach();
 
 					Element pullRequestQueryWatchesElement = element.element("pullRequestQueryWatches");
-					for (Element pullRequestQueryWatchElement: pullRequestQueryWatchesElement.elements()) {
+					for (Element pullRequestQueryWatchElement : pullRequestQueryWatchesElement.elements()) {
 						Element queryNameElement = pullRequestQueryWatchElement.element("string");
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					}
 					Element userPullRequestQueryWatchesElement = element.element("userPullRequestQueryWatches");
-					for (Element userPullRequestQueryWatchElement: userPullRequestQueryWatchesElement.elements()) {
+					for (Element userPullRequestQueryWatchElement : userPullRequestQueryWatchesElement.elements()) {
 						Element queryNameElement = userPullRequestQueryWatchElement.element("string");
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						userPullRequestQueryWatchElement.detach();
@@ -2861,10 +2792,10 @@ public class DataMigrator {
 					userPullRequestQueryWatchesElement.detach();
 
 					Element buildQuerySubscriptionsElement = element.element("buildQuerySubscriptions");
-					for (Element queryNameElement: buildQuerySubscriptionsElement.elements())
+					for (Element queryNameElement : buildQuerySubscriptionsElement.elements())
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					Element userBuildQuerySubscriptionsElement = element.element("userBuildQuerySubscriptions");
-					for (Element queryNameElement: userBuildQuerySubscriptionsElement.elements()) {
+					for (Element queryNameElement : userBuildQuerySubscriptionsElement.elements()) {
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						queryNameElement.detach();
 						buildQuerySubscriptionsElement.add(queryNameElement);
@@ -2874,16 +2805,16 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.IssueQueryPersonalization");
 					element.element("userQueries").setName("queries");
 					Element queryWatchesElement = element.element("queryWatches");
-					for (Element queryWatchElement: queryWatchesElement.elements()) {
+					for (Element queryWatchElement : queryWatchesElement.elements()) {
 						Element queryNameElement = queryWatchElement.element("string");
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					}
 					Element userQueryWatchesElement = element.element("userQueryWatches");
-					for (Element userQueryWatchElement: userQueryWatchesElement.elements()) {
+					for (Element userQueryWatchElement : userQueryWatchesElement.elements()) {
 						Element queryNameElement = userQueryWatchElement.element("string");
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						userQueryWatchElement.detach();
@@ -2895,16 +2826,16 @@ public class DataMigrator {
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("PullRequestQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.PullRequestQueryPersonalization");
 					element.element("userQueries").setName("queries");
 					Element queryWatchesElement = element.element("queryWatches");
-					for (Element queryWatchElement: queryWatchesElement.elements()) {
+					for (Element queryWatchElement : queryWatchesElement.elements()) {
 						Element queryNameElement = queryWatchElement.element("string");
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					}
 					Element userQueryWatchesElement = element.element("userQueryWatches");
-					for (Element userQueryWatchElement: userQueryWatchesElement.elements()) {
+					for (Element userQueryWatchElement : userQueryWatchesElement.elements()) {
 						Element queryNameElement = userQueryWatchElement.element("string");
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						userQueryWatchElement.detach();
@@ -2916,14 +2847,14 @@ public class DataMigrator {
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.BuildQueryPersonalization");
 					element.element("userQueries").setName("queries");
 					Element querySubscriptionsElement = element.element("querySubscriptions");
-					for (Element queryNameElement: querySubscriptionsElement.elements())
+					for (Element queryNameElement : querySubscriptionsElement.elements())
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					Element userQuerySubscriptionsElement = element.element("userQuerySubscriptions");
-					for (Element queryNameElement: userQuerySubscriptionsElement.elements()) {
+					for (Element queryNameElement : userQuerySubscriptionsElement.elements()) {
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						queryNameElement.detach();
 						querySubscriptionsElement.add(queryNameElement);
@@ -2934,7 +2865,7 @@ public class DataMigrator {
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("CodeCommentQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.CodeCommentQueryPersonalization");
 					element.element("userQueries").setName("queries");
 				}
@@ -2942,15 +2873,15 @@ public class DataMigrator {
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("CommitQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.CommitQueryPersonalization");
 					element.element("userQueries").setName("queries");
 					Element querySubscriptionsElement = element.element("projectQuerySubscriptions");
 					querySubscriptionsElement.setName("querySubscriptions");
-					for (Element queryNameElement: querySubscriptionsElement.elements())
+					for (Element queryNameElement : querySubscriptionsElement.elements())
 						queryNameElement.setText("g:" + queryNameElement.getText());
 					Element userQuerySubscriptionsElement = element.element("userQuerySubscriptions");
-					for (Element queryNameElement: userQuerySubscriptionsElement.elements()) {
+					for (Element queryNameElement : userQuerySubscriptionsElement.elements()) {
 						queryNameElement.setText("p:" + queryNameElement.getText());
 						queryNameElement.detach();
 						querySubscriptionsElement.add(queryNameElement);
@@ -2964,15 +2895,15 @@ public class DataMigrator {
 	}
 
 	private void migrate63(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("AutoDiscoveredJobExecutor"))
 									executorElement.detach();
 							}
@@ -2982,7 +2913,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element errorMessageElement = element.element("errorMessage");
 					if (errorMessageElement != null)
 						errorMessageElement.detach();
@@ -2993,10 +2924,10 @@ public class DataMigrator {
 	}
 
 	private void migrate64(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -3016,10 +2947,10 @@ public class DataMigrator {
 	}
 
 	private void migrate65(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						valueElement.element("cpu").detach();
@@ -3034,10 +2965,10 @@ public class DataMigrator {
 
 	private void migrate66(File dataDir, Stack<Integer> versions) {
 		Map<String, Element> compareContexts = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element compareContextElement = element.element("compareContext");
 					Element leftSideElement = compareContextElement.element("leftSide");
 					Element compareCommitHashElement = compareContextElement.element("compareCommitHash");
@@ -3062,7 +2993,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element lastCodeCommentActivityDateElement = element.element("lastCodeCommentActivityDate");
 					if (lastCodeCommentActivityDateElement != null)
 						lastCodeCommentActivityDateElement.detach();
@@ -3070,7 +3001,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -3084,10 +3015,10 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String elementId = element.elementTextTrim("comment");
 					element.add(compareContexts.get(elementId).createCopy());
 				}
@@ -3098,10 +3029,10 @@ public class DataMigrator {
 
 	private void migrate67(File dataDir, Stack<Integer> versions) {
 		Map<String, Element> compareContexts = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("JestTestMetric.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.setName("io.onedev.server.model.UnitTestMetric");
 
 				String newFileName = file.getName().replace("Jest", "Unit");
@@ -3109,7 +3040,7 @@ public class DataMigrator {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("CloverMetric.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.setName("io.onedev.server.model.CoverageMetric");
 
 				String newFileName = file.getName().replace("Clover", "Coverage");
@@ -3117,7 +3048,7 @@ public class DataMigrator {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("CheckstyleMetric.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.setName("io.onedev.server.model.ProblemMetric");
 
 				String newFileName = file.getName().replace("Checkstyle", "Problem");
@@ -3150,76 +3081,76 @@ public class DataMigrator {
 
 	private void migrate68(File dataDir, Stack<Integer> versions) {
 		Map<String, String> projectIds = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					projectIds.put(element.elementTextTrim("name"), element.elementTextTrim("id"));
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("codeManagementEnabled").setText("true");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("description"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("content"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("description"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("content"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("content"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("content"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("data").element("comment"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("data").element("comment"), projectIds);
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Groups.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("createRootProjects").setText("false");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("createChildren").setText("false");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
-						for (Element executorElement: valueElement.elements()) {
+						for (Element executorElement : valueElement.elements()) {
 							Element jobMatchElement = executorElement.element("jobMatch");
 							if (jobMatchElement.getTextTrim().equals("all"))
 								jobMatchElement.detach();
@@ -3244,10 +3175,10 @@ public class DataMigrator {
 
 		Set<String> promptFieldsUponIssueOpen = new HashSet<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("id");
 					String issueSubmitDate = element.elementTextTrim("submitDate");
 					Element milestoneElement = element.element("milestone");
@@ -3264,7 +3195,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element dataElement = element.element("data");
 					String dataClass = dataElement.attributeValue("class");
 					if (dataClass.contains("IssueMilestoneChangeData") || dataClass.contains("IssueBatchUpdateData")) {
@@ -3285,11 +3216,11 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldNameElement: valueElement.element("promptFieldsUponIssueOpen").elements())
+							for (Element fieldNameElement : valueElement.element("promptFieldsUponIssueOpen").elements())
 								promptFieldsUponIssueOpen.add(fieldNameElement.getText().trim());
 						}
 					}
@@ -3299,20 +3230,20 @@ public class DataMigrator {
 
 		issueSchedulesDoc.writeToFile(new File(dataDir, "IssueSchedules.xml"), false);
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
-						for (Element executorElement: valueElement.elements()) {
+						for (Element executorElement : valueElement.elements()) {
 							if (executorElement.getName().contains("KubernetesExecutor"))
 								executorElement.element("createCacheLabels").detach();
 						}
 					} else if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
 								if (promptFieldsUponIssueOpen.contains(fieldSpecElement.elementText("name").trim()))
 									fieldSpecElement.addElement("promptUponIssueOpen").setText("true");
 								else
@@ -3335,10 +3266,10 @@ public class DataMigrator {
 		Map<Pair<String, String>, String> buildIds = new HashMap<>();
 		Map<Pair<String, String>, String> pullRequestIds = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("id");
 					String numberScope = element.elementTextTrim("numberScope");
 					issueScopes.put(issueId, numberScope);
@@ -3346,7 +3277,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String buildId = element.elementTextTrim("id");
 					String numberScope = element.elementTextTrim("numberScope");
 					String number = element.elementTextTrim("number");
@@ -3354,7 +3285,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String pullRequestId = element.elementTextTrim("id");
 					String numberScope = element.elementTextTrim("numberScope");
 					String number = element.elementTextTrim("number");
@@ -3363,10 +3294,10 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("IssueFields.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("issue");
 					String type = element.elementText("type").trim();
 					String value = element.elementTextTrim("value");
@@ -3397,17 +3328,17 @@ public class DataMigrator {
 
 	private void migrate72(File dataDir, Stack<Integer> versions) {
 		Map<String, Integer> stateOrdinals = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							int index = 0;
-							for (Element stateSpecElement: valueElement.element("stateSpecs").elements())
+							for (Element stateSpecElement : valueElement.element("stateSpecs").elements())
 								stateOrdinals.put(stateSpecElement.elementText("name").trim(), index++);
-							for (Element boardSpecElement: valueElement.element("boardSpecs").elements())
+							for (Element boardSpecElement : valueElement.element("boardSpecs").elements())
 								boardSpecElement.addElement("displayLinks");
 							valueElement.addElement("listLinks");
 						}
@@ -3417,23 +3348,23 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					int ordinal = stateOrdinals.get(element.elementText("state").trim());
 					element.addElement("stateOrdinal").setText(String.valueOf(ordinal));
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element issueSettingElement = element.element("issueSetting");
 					if (issueSettingElement.element("listFields") != null)
 						issueSettingElement.addElement("listLinks");
 					Element boardSpecsElement = issueSettingElement.element("boardSpecs");
 					if (boardSpecsElement != null) {
-						for (Element boardSpecElement: boardSpecsElement.elements())
+						for (Element boardSpecElement : boardSpecsElement.elements())
 							boardSpecElement.addElement("displayLinks");
 					}
 				}
@@ -3443,10 +3374,10 @@ public class DataMigrator {
 	}
 
 	private void migrate73(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element closeInfoElement = element.element("closeInfo");
 					if (closeInfoElement != null) {
 						Element statusElement = closeInfoElement.element("status");
@@ -3459,7 +3390,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Agents.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element osElement = element.element("os");
 					String osName;
 
@@ -3488,10 +3419,10 @@ public class DataMigrator {
 	}
 
 	private void migrate74(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("triggerChain").setText(UUID.randomUUID().toString());
 				dom.writeToFile(file, false);
 			}
@@ -3499,10 +3430,10 @@ public class DataMigrator {
 	}
 
 	private void migrate75(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("AgentTokens.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element noteElement = element.element("note");
 					if (noteElement != null)
 						noteElement.detach();
@@ -3510,7 +3441,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element commentElement = element.element("data").element("comment");
 					if (commentElement != null) {
 						element.addElement("comment").setText(commentElement.getText());
@@ -3520,7 +3451,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element commentElement = element.element("data").element("comment");
 					if (commentElement != null) {
 						element.addElement("comment").setText(commentElement.getText());
@@ -3533,10 +3464,10 @@ public class DataMigrator {
 	}
 
 	private void migrate76(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("PERFORMANCE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -3556,10 +3487,10 @@ public class DataMigrator {
 		Long maxIssueCommentId = 0L;
 		File issueCommentsFile = null;
 		File pullRequestCommentsFile = null;
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String id = element.elementText("id").trim();
 					String name = element.elementText("name").trim();
 					Element fullNameElement = element.element("fullName");
@@ -3571,7 +3502,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long commentId = Long.parseLong(element.elementText("id").trim());
 					if (commentId > maxIssueCommentId)
 						maxIssueCommentId = commentId;
@@ -3579,7 +3510,7 @@ public class DataMigrator {
 				issueCommentsFile = file;
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Long commentId = Long.parseLong(element.elementText("id").trim());
 					if (commentId > maxPullRequestCommentId)
 						maxPullRequestCommentId = commentId;
@@ -3606,17 +3537,17 @@ public class DataMigrator {
 			pullRequestCommentsDom = VersionedXmlDoc.fromFile(pullRequestCommentsFile);
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("issueManagementEnabled").setName("issueManagement");
 					element.element("codeManagementEnabled").setName("codeManagement");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("user") == null)
 						element.addElement("user").setText("-1");
 					Element dataElement = element.element("data");
@@ -3659,7 +3590,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("user") == null)
 						element.addElement("user").setText("-1");
 					Element commentElement = element.element("comment");
@@ -3690,10 +3621,10 @@ public class DataMigrator {
 		Map<String, Integer> issueCommentCounts = new HashMap<>();
 		Map<String, Integer> pullRequestCommentCounts = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("issue");
 					Integer commentCount = issueCommentCounts.get(issueId);
 					if (commentCount == null)
@@ -3703,7 +3634,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String pullRequestId = element.elementTextTrim("request");
 					Integer commentCount = pullRequestCommentCounts.get(pullRequestId);
 					if (commentCount == null)
@@ -3713,10 +3644,10 @@ public class DataMigrator {
 				}
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer commentCount = issueCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -3725,7 +3656,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer commentCount = pullRequestCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -3743,10 +3674,10 @@ public class DataMigrator {
 		Map<String, Integer> issueCommentCounts = new HashMap<>();
 		Map<String, Integer> pullRequestCommentCounts = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("issue");
 					Integer commentCount = issueCommentCounts.get(issueId);
 					if (commentCount == null)
@@ -3756,7 +3687,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String pullRequestId = element.elementTextTrim("request");
 					Integer commentCount = pullRequestCommentCounts.get(pullRequestId);
 					if (commentCount == null)
@@ -3766,10 +3697,10 @@ public class DataMigrator {
 				}
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer commentCount = issueCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -3778,7 +3709,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer commentCount = pullRequestCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -3787,7 +3718,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Agents.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("temporal").setText(("false"));
 				dom.writeToFile(file, false);
 			}
@@ -3795,10 +3726,10 @@ public class DataMigrator {
 	}
 
 	private void migrate81(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("serviceDeskName") == null)
 						element.addElement("serviceDeskName").setText(Project.NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString());
 				}
@@ -3816,19 +3747,19 @@ public class DataMigrator {
 
 		String sshServerUrl = null;
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					for (Element branchProtectionElement: element.element("branchProtections").elements())
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements())
 						branchProtectionElement.addElement("signatureRequired").setText("false");
-					for (Element tagProtectionElement: element.element("tagProtections").elements())
+					for (Element tagProtectionElement : element.element("tagProtections").elements())
 						tagProtectionElement.addElement("signatureRequired").setText("false");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String userId = element.elementText("id").trim();
 					Element nameElement = element.element("name");
 					String name = nameElement.getText().trim();
@@ -3859,7 +3790,7 @@ public class DataMigrator {
 						}
 
 						Element alternateEmailsElement = element.element("alternateEmails");
-						for (Element alternateEmailElement: alternateEmailsElement.elements()) {
+						for (Element alternateEmailElement : alternateEmailsElement.elements()) {
 							String alternateEmail = alternateEmailElement.getText().trim();
 							alternateEmails.put(alternateEmail.toLowerCase(), userId);
 						}
@@ -3875,12 +3806,12 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.element("triggerChain").setName("pipeline");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SECURITY")) {
 						Element valueElement = element.element("value");
@@ -3898,17 +3829,17 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Groups.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("enforce2FA").setText("false");
 				dom.writeToFile(file, false);
 			}
 		}
 
 		if (sshServerUrl != null) {
-			for (File file: dataDir.listFiles()) {
+			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("Settings.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					for (Element element: dom.getRootElement().elements()) {
+					for (Element element : dom.getRootElement().elements()) {
 						if (element.elementTextTrim("key").equals("SYSTEM")) {
 							Element valueElement = element.element("value");
 							if (valueElement != null)
@@ -3927,7 +3858,7 @@ public class DataMigrator {
 
 		long id = 1;
 		Map<String, Element> primaryEmailElements = new HashMap<>();
-		for (Map.Entry<String, String> entry: primaryEmails.entrySet()) {
+		for (Map.Entry<String, String> entry : primaryEmails.entrySet()) {
 			Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
 			emailAddressElement.addAttribute("revision", "0.0");
 			emailAddressElement.addElement("id").setText(String.valueOf(id++));
@@ -3938,7 +3869,7 @@ public class DataMigrator {
 			primaryEmailElements.put(entry.getValue(), emailAddressElement);
 		}
 
-		for (Map.Entry<String, String> entry: gitEmails.entrySet()) {
+		for (Map.Entry<String, String> entry : gitEmails.entrySet()) {
 			if (!primaryEmails.containsKey(entry.getKey())) {
 				Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
 				emailAddressElement.addAttribute("revision", "0.0");
@@ -3951,7 +3882,7 @@ public class DataMigrator {
 			}
 		}
 
-		for (Map.Entry<String, String> entry: alternateEmails.entrySet()) {
+		for (Map.Entry<String, String> entry : alternateEmails.entrySet()) {
 			if (!primaryEmails.containsKey(entry.getKey()) && !gitEmails.containsKey(entry.getKey())) {
 				Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
 				emailAddressElement.addAttribute("revision", "0.0");
@@ -3969,10 +3900,10 @@ public class DataMigrator {
 	private void migrate83(File dataDir, Stack<Integer> versions) {
 		Map<String, String> issueInfos = new HashMap<>();
 		Map<String, String> pullRequestInfos = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueInfo = MessageFormat.format(
 							"project id: {0}, issue number: {1}",
 							element.elementText("project"), element.elementText("number"));
@@ -3980,7 +3911,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String pullRequestInfo = MessageFormat.format(
 							"project id: {0}, pull request number: {1}",
 							element.elementText("targetProject"), element.elementText("number"));
@@ -3989,10 +3920,10 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null) {
 						String description = descriptionElement.getText().trim();
@@ -4006,7 +3937,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null) {
 						String description = descriptionElement.getText().trim();
@@ -4020,7 +3951,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
 						String content = contentElement.getText().trim();
@@ -4034,7 +3965,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
 						String content = contentElement.getText().trim();
@@ -4048,7 +3979,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -4067,10 +3998,10 @@ public class DataMigrator {
 	}
 
 	private void migrate85(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("uuid").setText(UUID.randomUUID().toString());
 				dom.writeToFile(file, false);
 			}
@@ -4081,15 +4012,15 @@ public class DataMigrator {
 	}
 
 	private void migrate87(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("DockerExecutor"))
 									executorElement.addElement("mountDockerSock").setText("false");
 								else if (executorElement.getName().contains("KubernetesExecutor"))
@@ -4108,10 +4039,10 @@ public class DataMigrator {
 	}
 
 	private void migrate88(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("resolved").setText("false");
 				dom.writeToFile(file, false);
 			}
@@ -4121,10 +4052,10 @@ public class DataMigrator {
 	private void migrate89(File dataDir, Stack<Integer> versions) {
 		Map<String, Integer> pullRequestCommentCounts = new HashMap<>();
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String pullRequestId = element.elementTextTrim("request");
 					Integer commentCount = pullRequestCommentCounts.get(pullRequestId);
 					if (commentCount == null)
@@ -4134,7 +4065,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element dataElement = element.element("data");
 					String className = dataElement.attributeValue("class");
 					if (className.contains("PullRequestAssigneeAddData")
@@ -4148,7 +4079,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestReviews.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element resultElement = element.element("result");
 					if (resultElement != null) {
 						Element approvedElement = resultElement.element("approved");
@@ -4171,10 +4102,10 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Integer commentCount = pullRequestCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -4186,10 +4117,10 @@ public class DataMigrator {
 	}
 
 	private void migrate90(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element closeInfoElement = element.element("closeInfo");
 					if (closeInfoElement != null)
 						closeInfoElement.detach();
@@ -4203,15 +4134,15 @@ public class DataMigrator {
 	}
 
 	private void migrate92(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("confidential").setText("false");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("codePrivilege").equals("WRITE"))
 						element.addElement("accessConfidentialIssues").setText("true");
 					else
@@ -4220,7 +4151,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element dataElement = element.element("data");
 					if (dataElement.attributeValue("class").contains("IssueBatchUpdateData")) {
 						dataElement.addElement("oldConfidential").setText("false");
@@ -4230,12 +4161,12 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SERVICE_DESK_SETTING")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element issueCreationSettingElement: valueElement.element("issueCreationSettings").elements())
+							for (Element issueCreationSettingElement : valueElement.element("issueCreationSettings").elements())
 								issueCreationSettingElement.addElement("confidential").setText("false");
 						}
 					}
@@ -4249,10 +4180,10 @@ public class DataMigrator {
 	}
 
 	private void migrate94(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("MAIL")) {
 						Element valueElement = element.element("value");
@@ -4270,12 +4201,12 @@ public class DataMigrator {
 	}
 
 	private void migrate95(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("GpgKeys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
-					byte[] bytes = contentElement.getText().getBytes(StandardCharsets.UTF_8);
+					byte[] bytes = contentElement.getText().getBytes(UTF_8);
 					contentElement.setText(JVM.getBase64Codec().encode(bytes));
 				}
 				dom.writeToFile(file, false);
@@ -4284,10 +4215,10 @@ public class DataMigrator {
 	}
 
 	private void migrate96(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SERVICE_DESK_SETTING")) {
 						Element valueElement = element.element("value");
@@ -4305,18 +4236,18 @@ public class DataMigrator {
 
 	private void migrate97(File dataDir, Stack<Integer> versions) {
 		Map<String, String> emailOwners = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("EmailAddresss.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					emailOwners.put(element.elementTextTrim("id"), element.elementTextTrim("owner"));
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("GpgKeys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element emailAddressElement = element.element("emailAddress");
 					element.addElement("owner").setText(emailOwners.get(emailAddressElement.getTextTrim()));
 					emailAddressElement.detach();
@@ -4332,10 +4263,10 @@ public class DataMigrator {
 	private void migrate99(File dataDir, Stack<Integer> versions) {
 		Map<String, String> names = new HashMap<>();
 		Map<String, String> parentIds = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String id = element.elementText("id").trim();
 					String name = element.elementText("name").trim();
 					String parentId;
@@ -4350,10 +4281,10 @@ public class DataMigrator {
 			}
 		}
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String id = element.elementText("id").trim();
 					List<String> pathSegments = new ArrayList<>();
 
@@ -4371,10 +4302,10 @@ public class DataMigrator {
 	}
 
 	private void migrate100(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("paused").setText("false");
 				dom.writeToFile(file, false);
 			}
@@ -4382,15 +4313,15 @@ public class DataMigrator {
 	}
 
 	private void migrate101(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements())
+							for (Element executorElement : valueElement.elements())
 								executorElement.addElement("shellAccessEnabled").setText("false");
 						}
 					}
@@ -4409,10 +4340,10 @@ public class DataMigrator {
 		projectUpdatesDom = new VersionedXmlDoc();
 		Element listElement = projectUpdatesDom.addElement("list");
 
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String projectId = element.elementTextTrim("id");
 					Element updateDateElement = element.element("updateDate");
 					element.addElement("update").setText(projectId);
@@ -4428,7 +4359,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("PERFORMANCE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -4439,7 +4370,7 @@ public class DataMigrator {
 					} else if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								Element mountDockerSockElement = executorElement.element("mountDockerSock");
 								if (mountDockerSockElement != null && mountDockerSockElement.attribute("defined-in") != null)
 									mountDockerSockElement.detach();
@@ -4468,10 +4399,10 @@ public class DataMigrator {
 	}
 
 	private void migrate104(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null)
 						descriptionElement.setText(migrate104_markdown(descriptionElement.getText()));
@@ -4479,14 +4410,14 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					contentElement.setText(migrate104_markdown(contentElement.getText()));
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null)
 						descriptionElement.setText(migrate104_markdown(descriptionElement.getText()));
@@ -4494,21 +4425,21 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					contentElement.setText(migrate104_markdown(contentElement.getText()));
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					contentElement.setText(migrate104_markdown(contentElement.getText()));
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element contentElement = element.element("content");
 					contentElement.setText(migrate104_markdown(contentElement.getText()));
 				}
@@ -4518,15 +4449,15 @@ public class DataMigrator {
 	}
 
 	private void migrate105(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements())
+							for (Element executorElement : valueElement.elements())
 								executorElement.addElement("sitePublishEnabled").setText("false");
 						}
 					}
@@ -4537,10 +4468,10 @@ public class DataMigrator {
 	}
 
 	private void migrate106(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("AUTHENTICATOR")) {
 						Element valueElement = element.element("value");
@@ -4554,10 +4485,10 @@ public class DataMigrator {
 	}
 
 	private void migrate107(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SYSTEM")) {
 						Element valueElement = element.element("value");
@@ -4579,7 +4510,7 @@ public class DataMigrator {
 					} else if (key.equals("SSO_CONNECTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element connectorElement: valueElement.elements()) {
+							for (Element connectorElement : valueElement.elements()) {
 								if (connectorElement.getName().contains("OpenIdConnector")) {
 									Element issuerUrlElement = connectorElement.element("issuerUrl");
 									issuerUrlElement.setName("configurationDiscoveryUrl");
@@ -4590,7 +4521,7 @@ public class DataMigrator {
 					} else if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("KubernetesExecutor")) {
 									executorElement.addElement("cpuRequest").setText("250m");
 									executorElement.addElement("memoryRequest").setText("256Mi");
@@ -4615,15 +4546,15 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("gitPackConfig");
 
-					for (var branchProtectionElement: element.element("branchProtections").elements()) {
+					for (var branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.setName("io.onedev.server.model.support.code.BranchProtection");
-						for (var fileProtectionElement: branchProtectionElement.element("fileProtections").elements())
+						for (var fileProtectionElement : branchProtectionElement.element("fileProtections").elements())
 							fileProtectionElement.setName("io.onedev.server.model.support.code.FileProtection");
 					}
-					for (var tagProtectionElement: element.element("tagProtections").elements()) {
+					for (var tagProtectionElement : element.element("tagProtections").elements()) {
 						tagProtectionElement.setName("io.onedev.server.model.support.code.TagProtection");
 					}
 				}
@@ -4634,7 +4565,7 @@ public class DataMigrator {
 					element.element("memory").detach();
 					Element cpuElement = element.element("cpu");
 					cpuElement.setName("cpus");
-					cpuElement.setText(String.valueOf(Integer.parseInt(cpuElement.getTextTrim())/1000));
+					cpuElement.setText(String.valueOf(Integer.parseInt(cpuElement.getTextTrim()) / 1000));
 				}
 				dom.writeToFile(file, false);
 			}
@@ -4644,7 +4575,7 @@ public class DataMigrator {
 	private Set<String> getMentioned108(Map<String, String> userIds, String content) {
 		Set<String> mentioned = new HashSet<>();
 		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
-		for (String userName: new MentionParser().parseMentions(markdownManager.render(content))) {
+		for (String userName : new MentionParser().parseMentions(markdownManager.render(content))) {
 			String userId = userIds.get(userName);
 			if (userId != null)
 				mentioned.add(userId);
@@ -4658,19 +4589,19 @@ public class DataMigrator {
 		Set<Pair<String, String>> codeCommentMentions = new HashSet<>();
 
 		Map<String, String> userIds = new HashMap<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					userIds.put(element.elementText("name").trim(),
 							element.elementTextTrim("id"));
 				}
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("id");
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null) {
@@ -4681,7 +4612,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("IssueComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String issueId = element.elementTextTrim("issue");
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
@@ -4692,7 +4623,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String requestId = element.elementTextTrim("id");
 					Element descriptionElement = element.element("description");
 					if (descriptionElement != null) {
@@ -4703,7 +4634,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequestComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String requestId = element.elementTextTrim("request");
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
@@ -4714,7 +4645,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String commentId = element.elementTextTrim("id");
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
@@ -4725,7 +4656,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String commentId = element.elementTextTrim("comment");
 					Element contentElement = element.element("content");
 					if (contentElement != null) {
@@ -4783,10 +4714,10 @@ public class DataMigrator {
 
 	private void migrate109(File dataDir, Stack<Integer> versions) {
 		var updateIds = new HashSet<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element updateElement = element.element("update");
 					updateIds.add(updateElement.getTextTrim());
 					updateElement.setName("dynamics");
@@ -4794,10 +4725,10 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ProjectUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (!updateIds.contains(element.elementTextTrim("id"))) {
 						element.detach();
 					} else {
@@ -4812,7 +4743,7 @@ public class DataMigrator {
 					|| file.getName().startsWith("CodeComments.xml")
 					|| file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element lastUpdateElement = element.element("lastUpdate");
 					lastUpdateElement.setName("lastActivity");
 					lastUpdateElement.element("activity").setName("description");
@@ -4820,7 +4751,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				List<Node> selectedNodes = new ArrayList<>();
@@ -4843,10 +4774,10 @@ public class DataMigrator {
 
 	private void migrate110(File dataDir, Stack<Integer> versions) {
 		var updateIds = new HashSet<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					element.element("accessToken").setText(CryptoUtils.generateSecret());
 				}
 				dom.writeToFile(file, false);
@@ -4855,7 +4786,7 @@ public class DataMigrator {
 	}
 
 	private void migrate111(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -4868,7 +4799,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element lastMergePreviewElement = element.element("lastMergePreview");
 					if (lastMergePreviewElement != null) {
 						lastMergePreviewElement.setName("mergePreview");
@@ -4880,11 +4811,11 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
 								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.ChoiceField")) {
 									Element defaultValueProviderElement = fieldSpecElement.element("defaultValueProvider");
 									if (defaultValueProviderElement != null
@@ -4914,7 +4845,7 @@ public class DataMigrator {
 
 	private void migrate112(File dataDir, Stack<Integer> versions) {
 		var updateIds = new HashSet<>();
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("IssueChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -4969,13 +4900,13 @@ public class DataMigrator {
 						}
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValue")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValue")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						element.setName("io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue");
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						element.setName("io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.DefaultMultiValue");
@@ -4996,13 +4927,13 @@ public class DataMigrator {
 	}
 
 	private void migrate114(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content,
 						"io.onedev.server.model.support.inputspec.",
 						"io.onedev.server.buildspecmodel.inputspec.");
-				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -5020,7 +4951,7 @@ public class DataMigrator {
 							migrate114_reviewRequirement(fileProtectionElement.element("reviewRequirement"));
 						}
 					}
-					for (var secretElement: buildSettingElement.element("jobSecrets").elements()) {
+					for (var secretElement : buildSettingElement.element("jobSecrets").elements()) {
 						var authorizedBranchesElement = secretElement.element("authorizedBranches");
 						if (authorizedBranchesElement != null) {
 							PatternSet patterns = PatternSet.parse(authorizedBranchesElement.getText());
@@ -5043,12 +4974,12 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (var jobExecutorElement: valueElement.elements()) {
+							for (var jobExecutorElement : valueElement.elements()) {
 								var jobAuthorizationElement = jobExecutorElement.element("jobAuthorization");
 								if (jobAuthorizationElement != null)
 									jobAuthorizationElement.setName("jobRequirement");
@@ -5057,7 +4988,7 @@ public class DataMigrator {
 					} else if (key.equals("GROOVY_SCRIPTS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (var groovyScriptElement: valueElement.elements()) {
+							for (var groovyScriptElement : valueElement.elements()) {
 								var criterias = new ArrayList<>();
 								Element allowedProjectsElement = groovyScriptElement.element("allowedProjects");
 								if (allowedProjectsElement != null) {
@@ -5102,14 +5033,14 @@ public class DataMigrator {
 	}
 
 	private void migrate115(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
 								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.UserChoiceField")) {
 									Element defaultValueProviderElement = fieldSpecElement.element("defaultValueProvider");
 									if (defaultValueProviderElement != null
@@ -5171,13 +5102,13 @@ public class DataMigrator {
 						}
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValue")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValue")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						element.setName("io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultvalueprovider.DefaultValue");
 					}
 				}
-				for (Node node: dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
+				for (Node node : dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						element.setName("io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.DefaultMultiValue");
@@ -5296,10 +5227,10 @@ public class DataMigrator {
 	}
 
 	private void migrate121(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.element("signatureRequired").setName("commitSignatureRequired");
 						branchProtectionElement.addElement("enforceConventionalCommits").setText("false");
@@ -5313,7 +5244,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -5334,10 +5265,10 @@ public class DataMigrator {
 	}
 
 	private void migrate122(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("SECURITY")) {
 						Element valueElement = element.element("value");
@@ -5357,14 +5288,14 @@ public class DataMigrator {
 		var pullRequestTouchesElement = pullRequestTouchesDoc.addElement("list");
 		var codeCommentTouchesDoc = new VersionedXmlDoc();
 		var codeCommentTouchesElement = codeCommentTouchesDoc.addElement("list");
-		
+
 		var issueTouchId = 1L;
 		var pullRequestTouchId = 1L;
 		var codeCommentTouchId = 1L;
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					var issueTouchElement = issueTouchesElement.addElement("io.onedev.server.model.IssueTouch");
 					issueTouchElement.addAttribute("revision", "0.0.0");
 					issueTouchElement.addElement("id").setText(String.valueOf(issueTouchId++));
@@ -5373,7 +5304,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					var pullRequestTouchElement = pullRequestTouchesElement.addElement("io.onedev.server.model.PullRequestTouch");
 					pullRequestTouchElement.addAttribute("revision", "0.0.0");
 					pullRequestTouchElement.addElement("id").setText(String.valueOf(pullRequestTouchId++));
@@ -5382,7 +5313,7 @@ public class DataMigrator {
 				}
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					var codeCommentTouchElement = codeCommentTouchesElement.addElement("io.onedev.server.model.CodeCommentTouch");
 					codeCommentTouchElement.addAttribute("revision", "0.0.0");
 					codeCommentTouchElement.addElement("id").setText(String.valueOf(codeCommentTouchId++));
@@ -5400,12 +5331,12 @@ public class DataMigrator {
 		pullRequestTouchesDoc.writeToFile(new File(dataDir, "PullRequestTouchs.xml"), true);
 		codeCommentTouchesDoc.writeToFile(new File(dataDir, "CodeCommentTouchs.xml"), true);
 	}
-	
+
 	private void migrate124(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					var accessTokenElement = element.element("accessToken");
 					var accessTokensElement = element.addElement("accessTokens");
 					var newAccessTokenElement = accessTokensElement.addElement("io.onedev.server.model.support.AccessToken");
@@ -5419,15 +5350,15 @@ public class DataMigrator {
 	}
 
 	private void migrate125(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("KubernetesExecutor"))
 									executorElement.element("mountContainerSock").detach();
 							}
@@ -5440,15 +5371,15 @@ public class DataMigrator {
 	}
 
 	private void migrate126(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("KubernetesExecutor")
 										|| executorElement.getName().contains("DockerExecutor")) {
 									executorElement.addElement("imageMappings");
@@ -5463,10 +5394,10 @@ public class DataMigrator {
 	}
 
 	private void migrate127(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("SshKeys.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					PublicKey publicKey = null;
 					try {
 						publicKey = SshKeyUtils.decodeSshPublicKey(element.elementText("content"));
@@ -5482,21 +5413,21 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
 	private void migrate128(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (Element executorElement: valueElement.elements()) {
+							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().contains("KubernetesExecutor")
 										|| executorElement.getName().contains("DockerExecutor")) {
-									for (var registryLoginElement: executorElement.element("registryLogins").elements()) {
-										registryLoginElement.setName("io.onedev.server.model.support.administration.jobexecutor.RegistryLogin");										
+									for (var registryLoginElement : executorElement.element("registryLogins").elements()) {
+										registryLoginElement.setName("io.onedev.server.model.support.administration.jobexecutor.RegistryLogin");
 									}
 								}
 							}
@@ -5509,14 +5440,14 @@ public class DataMigrator {
 	}
 
 	private void migrate129(File dataDir, Stack<Integer> versions) {
-		
+
 	}
 
 	private void migrate130(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
 						branchProtectionElement.addElement("checkCommitMessageFooter").setText("false");
 						branchProtectionElement.addElement("commitTypesForFooterCheck");
@@ -5528,7 +5459,7 @@ public class DataMigrator {
 	}
 
 	private void migrate131(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeCommentTouchs.xml") || file.getName().startsWith("PullRequestTouchs.xml")) {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("Alerts.xml")) {
@@ -5542,10 +5473,10 @@ public class DataMigrator {
 					if (keyElement.getTextTrim().equals("NOTIFICATION_TEMPLATE_SETTING")) {
 						keyElement.setText("EMAIL_TEMPLATES");
 						Element valueElement = element.element("value");
-						
+
 						List<String> lines = new ArrayList<>();
-						for (var lineElement: valueElement.element("issueNotificationTemplate").elements()) 
-							lines.add(lineElement.getText());							
+						for (var lineElement : valueElement.element("issueNotificationTemplate").elements())
+							lines.add(lineElement.getText());
 						var issueNotificationTemplate = StringUtils.join(lines, "\n");
 
 						String pullRequestNotificationTemplate;
@@ -5554,17 +5485,17 @@ public class DataMigrator {
 							pullRequestNotificationTemplate = issueNotificationTemplate;
 						} else {
 							lines.clear();
-							for (var lineElement: valueElement.element("pullRequestNotificationTemplate").elements())
+							for (var lineElement : valueElement.element("pullRequestNotificationTemplate").elements())
 								lines.add(lineElement.getText());
 							pullRequestNotificationTemplate = StringUtils.join(lines, "\n");
 						}
 
 						valueElement.detach();
-						
+
 						Element emailTemplatesElement;
 						try (InputStream is = getClass().getResourceAsStream("migrate131_email_templates.xml")) {
 							Preconditions.checkNotNull(is);
-							var xml = IOUtils.toString(is, StandardCharsets.UTF_8.name());
+							var xml = IOUtils.toString(is, UTF_8.name());
 							emailTemplatesElement = VersionedXmlDoc.fromXML(xml).getRootElement();
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -5583,7 +5514,7 @@ public class DataMigrator {
 	}
 
 	private void migrate132(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
+		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -5632,7 +5563,7 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			}
-			
+
 		}
 	}
 
@@ -5658,7 +5589,7 @@ public class DataMigrator {
 								portElement.detach();
 								portElement.setName("port");
 								sslSettingElement.add(portElement);
-								
+
 								var pollSettingElement = valueElement.element("otherInboxPollSetting");
 								if (pollSettingElement != null) {
 									var enableSSLElement = pollSettingElement.element("enableSSL");
@@ -5683,4 +5614,509 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate135(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("ALERT")) {
+						var valueElement = element.element("value");
+						valueElement.element("trialEnterpriseLicenseExpireInOneWeekAlerted").setName("trialSubscriptionExpireInOneWeekAlerted");
+						valueElement.element("trialEnterpriseLicenseExpiredAlerted").setName("trialSubscriptionExpiredAlerted");
+						valueElement.element("enterpriseLicenseExpireInOneMonthAlerted").setName("subscriptionExpireInOneMonthAlerted");
+						valueElement.element("enterpriseLicenseExpireInOneWeekAlerted").setName("subscriptionExpireInOneWeekAlerted");
+						valueElement.element("enterpriseLicenseExpiredAlerted").setName("subscriptionExpiredAlerted");
+					} else if (keyElement.getTextTrim().equals("LICENSE_DATA")) {
+						keyElement.setText("SUBSCRIPTION_DATA");
+					} else if (keyElement.getTextTrim().equals("PERFORMANCE")) {
+						var valueElement = element.element("value");
+						var cpuIntensiveTaskConcurrencyElement = valueElement.element("cpuIntensiveTaskConcurrency");
+						var cpuIntensiveTaskConcurrency = Integer.parseInt(cpuIntensiveTaskConcurrencyElement.getTextTrim()) / 2;
+						if (cpuIntensiveTaskConcurrency == 0)
+							cpuIntensiveTaskConcurrency = 1;
+						cpuIntensiveTaskConcurrencyElement.setText(String.valueOf(cpuIntensiveTaskConcurrency));
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate136(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("checkoutPaths");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CoverageMetrics.xml")
+					|| file.getName().startsWith("UnitTestMetrics.xml")
+					|| file.getName().startsWith("ProblemMetrics.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				var buildAndReports = new HashSet<String>();
+				for (Element element : dom.getRootElement().elements()) {
+					if (file.getName().startsWith("CoverageMetrics.xml")) {
+						element.element("totalMethods").detach();
+						element.element("totalStatements").detach();
+						element.element("totalBranches").detach();
+						element.element("totalLines").detach();
+					}
+					var buildId = element.elementText("build").trim();
+					var reportName = element.elementText("reportName").trim();
+					if (!buildAndReports.add(buildId + ":" + reportName))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate137(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("CoverageMetrics.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("methodCoverage").detach();
+					element.element("statementCoverage").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate138(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var jobWorkspaceElement = element.element("jobWorkspace");
+					if (jobWorkspaceElement != null)
+						jobWorkspaceElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate139(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Agents.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.element("temporal").detach();
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate140(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements())
+								executorElement.addElement("htmlReportPublishEnabled").setText("false");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate141(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM"))
+						element.element("value").addElement("disableAutoUpdateCheck").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate142(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.util.channelnotification.",
+							"io.onedev.server.model.support.channelnotification.");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("timeTracking").setText("false");
+					element.element("issueSetting").addElement("timesheetSettings").addAttribute("class", "linked-hash-map");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("totalEstimatedTime").setText("0");
+					element.addElement("totalSpentTime").setText("0");
+					element.addElement("ownEstimatedTime").setText("0");
+					element.addElement("ownSpentTime").setText("0");
+					element.addElement("progress").setText("-1");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var dataElement = element.element("data");
+					if (dataElement.attributeValue("class").startsWith("io.onedev.server.model.support.issue.changedata.IssueLink"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.Office365Setting",
+							"io.onedev.server.plugin.mailservice.office365.Office365MailService");
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.GmailSetting",
+							"io.onedev.server.plugin.mailservice.gmail.GmailMailService");
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.OtherMailSetting",
+							"io.onedev.server.plugin.mailservice.smtpimap.SmtpImapMailService");
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.administration.mailsetting.",
+							"io.onedev.server.model.support.administration.mailservice.");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
+				for (Element element : dom.getRootElement().elements()) {
+					var key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("timeTrackingSetting");
+					} else if (key.equals("MAIL")) {
+						element.element("key").setText("MAIL_SERVICE");
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var emailAddressElement = valueElement.element("emailAddress");
+							if (emailAddressElement != null)
+								emailAddressElement.setName("systemAddress");
+							var otherInboxPollSettingElement = valueElement.element("otherInboxPollSetting");
+							if (otherInboxPollSettingElement != null)
+								otherInboxPollSettingElement.setName("inboxPollSetting");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate143(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("guest").setText("false");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("UserInvitations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("inviteAsGuest").setText("false");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("selfRegisterAsGuest").setText("false");
+					} else if (key.equals("AUTHENTICATOR")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("createUserAsGuest").setText("false");
+					} else if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element connectorElement : valueElement.elements())
+								connectorElement.addElement("createUserAsGuest").setText("false");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate144(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("EMAIL_TEMPLATES")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.element("passwordReset").detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate145(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL_SERVICE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var inboxPollSettingElement = valueElement.element("inboxPollSetting");
+							if (inboxPollSettingElement != null)
+								inboxPollSettingElement.addElement("monitorSystemAddressOnly").setText("true");
+							var webhookSettingElement = valueElement.element("webhookSetting");
+							if (webhookSettingElement != null)
+								webhookSettingElement.addElement("monitorSystemAddressOnly").setText("true");
+							if (valueElement.attributeValue("class").contains("GmailMailService"))
+								valueElement.addElement("systemAddress").setText(valueElement.elementText("accountName").trim());
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate146(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("packManagement").setText("false");
+					element.addElement("pendingDelete").setText("false");
+					element.addElement("packSetting");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var codePrivilege = element.elementTextTrim("codePrivilege");
+					element.addElement("packPrivilege").setText(codePrivilege);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("packQueries");
+					element.addElement("packQuerySubscriptions");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	// Migrate data to 9.4.0
+	private void migrate147(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("jobToken").setText(UUID.randomUUID().toString());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("version").setName("tag");
+					var blobHashElement = element.element("blobHash");
+					blobHashElement.setName("data");
+					blobHashElement.addAttribute("class", "string");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("version").setName("tag");
+					var blobHashElement = element.element("blobHash");
+					blobHashElement.setName("data");
+					blobHashElement.addAttribute("class", "string");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PackBlobs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("hash").setName("sha256Hash");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate148(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Dashboards.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var widgetElement : element.element("widgets").elements())
+						widgetElement.addElement("autoHeight").setText("true");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate149(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL_SERVICE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var inboxPollSettingElement = valueElement.element("inboxPollSetting");
+							if (inboxPollSettingElement != null) {
+								inboxPollSettingElement.element("monitorSystemAddressOnly").detach();
+								inboxPollSettingElement.addElement("additionalTargetAddresses");
+							}
+							var webhookSettingElement = valueElement.element("webhookSetting");
+							if (webhookSettingElement != null) {
+								webhookSettingElement.element("monitorSystemAddressOnly").detach();
+								webhookSettingElement.addElement("additionalTargetAddresses");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate150(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			try {
+				var content = FileUtils.readFileToString(file, UTF_8);
+				content = StringUtils.replace(content,
+						"io.onedev.server.model.support.issue.field.supply.FieldSupply",
+						"io.onedev.server.model.support.issue.field.instance.FieldInstance");
+				content = StringUtils.replace(content,
+						"io.onedev.server.model.support.issue.field.supply.Ignore",
+						"io.onedev.server.model.support.issue.field.instance.IgnoreValue");
+				content = StringUtils.replace(content,
+						"io.onedev.server.model.support.issue.field.supply.ScriptingValue",
+						"io.onedev.server.model.support.issue.field.instance.ScriptingValue");
+				content = StringUtils.replace(content,
+						"io.onedev.server.model.support.issue.field.supply.SpecifiedValue",
+						"io.onedev.server.model.support.issue.field.instance.SpecifiedValue");
+				FileUtils.writeStringToFile(file, content, UTF_8.name());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var threadingReferenceElement = element.element("threadingReference");
+					if (threadingReferenceElement != null)
+						threadingReferenceElement.setName("messageId");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate151(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var dataElement = element.element("data");
+					if (dataElement != null) {
+						if (dataElement.attributeValue("class").contains("MavenData")) {
+							dataElement.element("sha256BlobHashes").attributeValue("class", "linked-hash-map");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate152(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var prerelease = element.elementTextTrim("type").equals("NuGet") 
+							&& element.elementText("version").contains("-");
+					element.addElement("prerelease").setText(String.valueOf(prerelease));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate153(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Packs.xml")) {
+				try {
+					var content = FileUtils.readFileToString(file, UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.ee.pack.",
+							"io.onedev.server.plugin.pack.");
+					FileUtils.writeStringToFile(file, content, UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}			
+		}
+		
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Packs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var groupIdElement = element.element("groupId");
+					if (groupIdElement != null) {
+						var groupId = groupIdElement.getTextTrim();
+						var artifactIdElement = element.element("artifactId");
+						if (artifactIdElement != null) {
+							var artifactId = artifactIdElement.getTextTrim();
+							element.addElement("name").setText(groupId + ":" + artifactId);
+							groupIdElement.detach();
+							artifactIdElement.detach();
+						} else {
+							element.addElement("name").setText(groupId + ":<$NONE$>");							
+							element.addElement("version").setText("<$NONE$>");
+							groupIdElement.detach();
+						}
+					}
+					var tagElement = element.element("tag");
+					if (tagElement != null) {
+						element.addElement("name").setText("default");
+						element.addElement("version").setText(tagElement.getTextTrim());
+						tagElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

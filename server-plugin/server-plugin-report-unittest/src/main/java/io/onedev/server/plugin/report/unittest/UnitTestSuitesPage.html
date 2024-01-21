@@ -1,9 +1,10 @@
 <wicket:extend>
-	<div class="test-suites">
+	<div wicket:id="report" class="test-suites"></div>
+	<wicket:fragment wicket:id="validFrag">
 		<form wicket:id="form" class="form no-autofocus">
 			<div class="clearable-wrapper">
 				<div class="input-group">
-                    <input wicket:id="name" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by name">
+					<input wicket:id="name" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by name">
 					<span class="input-group-append">
 						<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 					</span>
@@ -22,32 +23,39 @@
 		</div>
 		<table wicket:id="detail" class="detail table">
 			<tbody>
-				<tr wicket:id="testSuites">
-					<td>
-						<div class="d-flex">
-							<span wicket:id="status" class="mr-3"></span> 
-							<a wicket:id="testCases" class="mr-4 text-break" title="Show test cases of this test suite"><span wicket:id="label"></span></a>
-							<a wicket:id="viewSource" class="ml-n3 mr-4" title="View source file"><wicket:svg href="file" class="icon"/></a>
-							<span wicket:id="duration" class="ml-auto"></span>
-						</div>
-						<pre wicket:id="message" class="text-gray mt-3"></pre>
-					</td>
-				</tr>
+			<tr wicket:id="testSuites">
+				<td>
+					<div class="d-flex align-items-start">
+						<span wicket:id="status" class="mr-3"></span>
+						<span class="mr-4">
+							<a wicket:id="testCases" class="text-break" title="Show test cases of this test suite"><span wicket:id="label"></span></a>
+							<a wicket:id="viewSource" title="View source file" target="_blank"><wicket:svg href="file" class="icon"/></a>
+						</span>
+						<span wicket:id="duration" class="ml-auto"></span>
+					</div>
+					<pre wicket:id="detail" class="text-gray font-size-sm text-break mt-3"></pre>
+				</td>
+			</tr>
 			</tbody>
 			<wicket:enclosure>
-			<tfoot>
+				<tfoot>
 				<tr>
-					<td wicket:id="pagingNavigator" class="pt-5"></td>						
+					<td wicket:id="pagingNavigator" class="pt-5"></td>
 				</tr>
-			</tfoot>
+				</tfoot>
 			</wicket:enclosure>
 			<wicket:enclosure>
-			<tfoot>
+				<tfoot>
 				<tr>
-					<td wicket:id="noRecords"></td>						
+					<td wicket:id="noRecords"></td>
 				</tr>
-			</tfoot>
+				</tfoot>
 			</wicket:enclosure>
 		</table>
-	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="invalidFrag">
+		<div class="alert alert-notice alert-light-warning">
+			Report format changed. You may re-run this build to generate the report in new format
+		</div>			
+	</wicket:fragment>
 </wicket:extend>

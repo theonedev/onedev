@@ -53,7 +53,7 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (SecurityUtils.canManage(project)) 
+		if (SecurityUtils.canManageProject(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, PullRequestSettingPage.class, paramsOf(project.getId()));
 		else 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));

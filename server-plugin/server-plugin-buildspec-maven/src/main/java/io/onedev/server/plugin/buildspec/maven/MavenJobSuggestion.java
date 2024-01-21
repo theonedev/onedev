@@ -1,11 +1,22 @@
 package io.onedev.server.plugin.buildspec.maven;
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.k8shelper.ExecuteCondition;
+import io.onedev.server.buildspec.job.CacheSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobSuggestion;
+import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
+import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
+import io.onedev.server.buildspec.step.CheckoutStep;
+import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -15,21 +26,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.server.buildspec.job.CacheSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.buildspec.step.CheckoutStep;
-import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.SetBuildVersionStep;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import javax.annotation.Nullable;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MavenJobSuggestion implements JobSuggestion {
 
@@ -65,21 +65,22 @@ public class MavenJobSuggestion implements JobSuggestion {
 			setBuildVersion.setBuildVersion("@file:buildVersion@");
 			job.getSteps().add(setBuildVersion);
 			
-			CommandStep runMaven = new CommandStep();
-			runMaven.setName("run unit tests");
-			runMaven.setImage(imageName);
-			runMaven.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
+			CommandStep runTests = new CommandStep();
+			runTests.setName("run tests");
+			runTests.setImage(imageName);
+			runTests.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
+			job.getSteps().add(runTests);
 
-			job.getSteps().add(runMaven);
+			var publishUnitTestReportStep = new PublishJUnitReportStep();
+			publishUnitTestReportStep.setName("publish unit test report");
+			publishUnitTestReportStep.setReportName("Unit Test");
+			publishUnitTestReportStep.setFilePatterns("**/TEST-*.xml");
+			publishUnitTestReportStep.setCondition(ExecuteCondition.ALWAYS);
+			job.getSteps().add(publishUnitTestReportStep);
 			
-			// Trigger the job automatically when there is a push to the branch			
-			BranchUpdateTrigger trigger = new BranchUpdateTrigger();
-			job.getTriggers().add(trigger);
+			job.getTriggers().add(new BranchUpdateTrigger());
+			job.getTriggers().add(new PullRequestUpdateTrigger());
 			
-			/*
-			 * Cache Maven local repository in order not to download Maven dependencies all over again for 
-			 * subsequent builds
-			 */
 			CacheSpec cache = new CacheSpec();
 			cache.setKey("maven-cache");
 			cache.setPath("/root/.m2/repository");

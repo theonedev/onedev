@@ -1,0 +1,11 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3">Edit <code>$HOME/.pypirc</code> to add a package repository like below</div>
+	<div wicket:id="addRepository"></div>
+	<div class="text-muted font-size-sm mt-2 mb-5">Make sure the user has package write permission over the project</div>
+	
+	<div class="font-size-lg font-weight-bolder mb-3">Then upload package to the repository with twine</div>
+	<div class="code mb-5">$ python3 -m twine upload --repository onedev /path/to/files_to_upload</div>
+
+	<div class="font-size-lg font-weight-bolder mb-3">For CI/CD job, run below to add package repository via command step</div>
+	<div wicket:id="jobCommands"></div>
+</wicket:panel>

@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URLEncoder;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -71,12 +71,12 @@ public class AttachmentResource extends AbstractResource {
 					if (!SecurityUtils.canReadCode(project))
 						throw new UnauthorizedException();
 				} else if ((issue = OneDev.getInstance(IssueManager.class).findByUUID(attachmentGroup)) != null) {
-					if (!SecurityUtils.canAccess(issue))
+					if (!SecurityUtils.canAccessIssue(issue))
 						throw new UnauthorizedException();
 				} else if ((build = OneDev.getInstance(BuildManager.class).findByUUID(attachmentGroup)) != null) {
-					if (!SecurityUtils.canAccess(build))
+					if (!SecurityUtils.canAccessBuild(build))
 						throw new UnauthorizedException();
-				} else if (!SecurityUtils.canAccess(project)) {
+				} else if (!SecurityUtils.canAccessProject(project)) {
 					throw new UnauthorizedException();
 				}
 			}

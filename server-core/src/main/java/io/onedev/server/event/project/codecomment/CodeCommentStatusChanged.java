@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;

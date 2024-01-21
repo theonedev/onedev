@@ -1,13 +1,12 @@
 package io.onedev.server.imports;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.List;
 
 public interface IssueImporter extends Serializable {
 
@@ -15,7 +14,6 @@ public interface IssueImporter extends Serializable {
 
 	List<ImportStep<? extends Serializable>> getSteps();
 	
-	@Nullable
-	public abstract String doImport(Project project, boolean dryRun, TaskLogger logger);
+	public abstract TaskResult doImport(Long projectId, boolean dryRun, TaskLogger logger);
 	
 }

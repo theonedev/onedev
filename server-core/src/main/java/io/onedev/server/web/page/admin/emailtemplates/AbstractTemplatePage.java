@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")

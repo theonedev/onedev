@@ -24,6 +24,8 @@ import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.util.PagingHistorySupport;
 
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
+
 @SuppressWarnings("serial")
 public class MilestoneIssuesPage extends MilestoneDetailPage {
 
@@ -56,7 +58,7 @@ public class MilestoneIssuesPage extends MilestoneDetailPage {
 
 			@Override
 			protected Link<Void> newStateLink(String componentId, String state) {
-				String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
+				String query = new IssueQuery(new StateCriteria(state, Is)).toString();
 				PageParameters params = paramsOf(getProject(), getMilestone(), query);
 				return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 			}
@@ -88,7 +90,7 @@ public class MilestoneIssuesPage extends MilestoneDetailPage {
 			
 			@Override
 			protected IssueQuery getBaseQuery() {
-				return new IssueQuery(new MilestoneCriteria(getMilestone().getName()), new ArrayList<>());
+				return new IssueQuery(new MilestoneCriteria(getMilestone().getName(), Is), new ArrayList<>());
 			}
 	
 			@Override

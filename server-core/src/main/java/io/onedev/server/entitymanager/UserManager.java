@@ -1,17 +1,16 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.shiro.authz.Permission;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
+import java.util.Collection;
+import java.util.List;
 
 public interface UserManager extends EntityManager<User> {
 	
@@ -39,6 +38,8 @@ public interface UserManager extends EntityManager<User> {
 	void useInternalAuthentication(Collection<User> users);
 	
 	void useExternalAuthentication(Collection<User> users);
+
+	void setAsGuest(Collection<User> users, boolean guest);
 	
 	/**
 	 * Find root user in the system. 
@@ -83,6 +84,9 @@ public interface UserManager extends EntityManager<User> {
 
 	@Nullable
 	User findByAccessToken(String accessTokenValue);
+	
+	@Nullable
+	User findByPasswordResetCode(String passwordResetCode);
 
 	String createTemporalAccessToken(Long userId, long secondsToExpire);
 	
@@ -97,7 +101,7 @@ public interface UserManager extends EntityManager<User> {
 	 
 	void onDeleteSsoConnector(String name);
 
-	Collection<User> getAuthorizedUsers(Project project, Permission permission);
+	Collection<User> getAuthorizedUsers(Project project, BasePermission permission);
 	
 	UserCache cloneCache();
 	

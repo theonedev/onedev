@@ -21,13 +21,13 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.Permission;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.onedev.server.model.User.*;
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
@@ -91,7 +92,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		getSession().replicate(user, ReplicationMode.OVERWRITE);
 		idManager.useId(User.class, user.getId());
 		var facade = user.getFacade();
-		transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+		if (facade.getId() > 0)
+			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 	}
 	
     @Transactional
@@ -116,9 +118,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 					throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
 				}
     		}
-    		
     		settingManager.onRenameUser(oldName, user.getName());
-    		
     		issueFieldManager.onRenameUser(oldName, user.getName());
     	}
     }
@@ -177,7 +177,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("submitter", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
-    	
+
+		query = getSession().createQuery("update Pack set user=:unknown where user=:user");
+		query.setParameter("user", user);
+		query.setParameter("unknown", getUnknown());
+		query.executeUpdate();
+		
     	query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("unknown", getUnknown());
@@ -270,7 +275,44 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			user.setSsoConnector(null);
 		}
 	}
-	
+
+	@Transactional
+	@Override
+	public void setAsGuest(Collection<User> users, boolean guest) {
+		for (var user: users) {
+			user.setGuest(guest);
+			if (guest) {
+				var query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
+				query.setParameter("submitter", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+
+				query = getSession().createQuery("update Build set canceller=:unknown where canceller=:canceller");
+				query.setParameter("canceller", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+
+				query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
+				query.setParameter("submitter", user);
+				query.setParameter("unknown", getUnknown());
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from PullRequestAssignment where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from IssueWork where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+				
+				query = getSession().createQuery("delete from Stopwatch where user=:user");
+				query.setParameter("user", user);
+				query.executeUpdate();
+			}
+			dao.persist(user);
+		}
+	}
+
 	@Sessional
     @Override
     public User findByName(String userName) {
@@ -295,6 +337,14 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		else
 			return null;
     }
+
+	@Sessional
+	@Override
+	public User findByPasswordResetCode(String passwordResetCode) {
+		var criteria = newCriteria();
+		criteria.add(Restrictions.eq("passwordResetCode", passwordResetCode));
+		return find(criteria);
+	}
 	
 	@Sessional
     @Override
@@ -340,13 +390,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 		temporalAccessTokens = hazelcastInstance.getMap("temporalAccessTokens");
-        cache = new UserCache(hazelcastInstance.getMap("userCache"));
-        var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheInited");
-		clusterManager.init(cacheInited, () -> {
-			for (User user: query())
-				cache.put(user.getId(), user.getFacade());
-			return 1L;			
-		});
+		
+		// Use replicated map, otherwise it will be slow to display many user avatars
+		// (in issue list for instance) which will call findFacadeById many times
+        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
+		for (User user: query())
+			cache.put(user.getId(), user.getFacade());
     }
     
 	@Transactional
@@ -407,6 +456,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return query.getResultList();
 	}
 
+	@Sessional
 	@Override
 	public int count(String term) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
@@ -434,25 +484,27 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return cache.clone();
 	}
 
+	private Collection<User> filterApplicable(Collection<User> users, BasePermission permission) {
+		return users.stream().filter(it -> permission.isApplicable(it.getFacade())).collect(toList());
+	}
+	
 	@Override
-	public Collection<User> getAuthorizedUsers(Project project, Permission permission) {
+	public Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
 		UserCache cacheClone = cache.clone();
 
 		Collection<User> authorizedUsers = Sets.newHashSet(getRoot());
 
-       	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+		Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
    		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
-   			return cacheClone.getUsers();
+   			return filterApplicable(cacheClone.getUsers(), permission);
    		
-		for (Group group: groupManager.queryAdminstrator()) {
-			for (User user: group.getMembers())
-				authorizedUsers.add(user);
-		}
+		for (Group group: groupManager.queryAdminstrator()) 
+			authorizedUsers.addAll(group.getMembers());
 		
 		Project current = project;
 		do {
 			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission)) 
-	   			return cacheClone.getUsers();
+	   			return filterApplicable(cacheClone.getUsers(), permission);
 			
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {  
 				if (authorization.getRole().implies(permission))
@@ -462,8 +514,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {  
 				if (authorization.getRole().implies(permission)) {
 					if (authorization.getGroup().equals(defaultLoginGroup))
-			   			return cacheClone.getUsers();
-					
+						return filterApplicable(cacheClone.getUsers(), permission);
 					for (User user: authorization.getGroup().getMembers())
 						authorizedUsers.add(user);
 				}
@@ -477,7 +528,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 				authorizedUsers.add(authorization.getUser());
 		}
 
-        return authorizedUsers;	
+        return filterApplicable(authorizedUsers, permission);	
 	}
 
 	@Transactional
@@ -486,7 +537,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		// Cache will be null when we run reset-admin-password command
 		if (cache != null && event.getEntity() instanceof User) {
 			var facade = (UserFacade) event.getEntity().getFacade();
-			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+			if (facade.getId() > 0)
+				transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}
 

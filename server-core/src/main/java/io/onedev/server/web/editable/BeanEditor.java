@@ -2,11 +2,13 @@ package io.onedev.server.web.editable;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -188,13 +190,15 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!property.getDescriptor().isPropertyExcluded() 
-						&& property.getDescriptor().isPropertyVisible(componentContexts, descriptor));
+				setVisible(!property.isPropertyExcluded() 
+						&& property.isPropertyVisible(componentContexts, descriptor));
 			}
 
 		};
 		
 		propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
+		if (property.isPropertyHidden())
+			propertyContainer.add(AttributeAppender.append("class", "d-none"));
 
 		return propertyContainer;
 	}
@@ -257,6 +261,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		
 		add(AttributeAppender.append("class", "bean-editor editable"));
 		
+		if (descriptor.getBeanClass().getAnnotation(SubscriptionRequired.class) != null 
+				&& !WicketUtils.isSubscriptionActive()) {
+			add(AttributeAppender.append("class", "disabled"));
+		}
 		setOutputMarkupId(true);
 	}
 	
@@ -286,7 +294,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
-		final Serializable bean = (Serializable) getDescriptor().newBeanInstance();
+		Serializable bean = (Serializable) getDescriptor().newBeanInstance();
 		
 		visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>) (object, visit) -> {
 			if (!object.getDescriptor().isPropertyExcluded()) 

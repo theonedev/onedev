@@ -212,14 +212,17 @@ onedev.server.sourceView = {
 		});
 	},
 	syncOutline: function(symbolId) {
-		var $symbol = $("#" + symbolId);
 		var $body = $(".source-view>.outline>.content>.body");
-		$symbol[0].scrollIntoViewIfNeeded(true);
-		$body.find(".tree-content").removeClass("active");
-		$symbol.addClass("active");
+		var $symbol = $("#" + symbolId);
+		if ($symbol.length != 0) {
+			$symbol[0].scrollIntoViewIfNeeded(true);
+			$body.find(".tree-content").removeClass("active");
+			$symbol.addClass("active");
+		} else {
+			$body.find(".tree-content").removeClass("active");
+		}
 	},
 	addCoverageGutter: function(line, coverageStatus) {
-		console.log(coverageStatus);
 		let tooltip;
 		if (coverageStatus == 'COVERED')
 			tooltip = `Covered by tests`;

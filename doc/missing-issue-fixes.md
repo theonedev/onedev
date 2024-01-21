@@ -29,3 +29,8 @@ issue #1326
 issue #1327 
 issue #1338 
 issue #1471
+issue #1533 
+issue #1547 
+issue #1580
+issue #7
+issue #1693

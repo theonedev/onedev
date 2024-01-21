@@ -28,8 +28,8 @@ import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
-import io.onedev.server.model.support.issue.field.supply.SpecifiedValue;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
@@ -40,12 +40,12 @@ public class FieldUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FieldUtils.class);
 	
-	private static final MetaDataKey<Class<? extends Serializable>> FIELD_BEAN_CLASS_KEY = 
-			new MetaDataKey<Class<? extends Serializable>>() {
+	private static final MetaDataKey<Class<? extends Serializable>> FIELD_BEAN_CLASS_KEY =
+			new MetaDataKey<>() {
 
-		private static final long serialVersionUID = 1L;
-		
-	};
+				private static final long serialVersionUID = 1L;
+
+			};
 	
 	public static final String FIELD_BEAN_CLASS_NAME = "IssueFieldBean";
 	
@@ -158,9 +158,9 @@ public class FieldUtils {
 		}
 	}
 	
-	public static void validateFields(Map<String, FieldSpec> fieldSpecs, List<FieldSupply> fields) {
+	public static void validateFields(Map<String, FieldSpec> fieldSpecs, List<FieldInstance> fields) {
 		Map<String, List<String>> fieldMap = new HashMap<>();
-		for (FieldSupply field: fields) {
+		for (FieldInstance field: fields) {
 			List<String> values;
 			if (field.getValueProvider() instanceof SpecifiedValue)
 				values = field.getValueProvider().getValue();

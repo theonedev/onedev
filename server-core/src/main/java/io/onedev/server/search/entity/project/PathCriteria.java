@@ -14,25 +14,33 @@ public class PathCriteria extends Criteria<Project> {
 
 	private final String value;
 	
-	public PathCriteria(String value) {
+	private final int operator;
+	
+	public PathCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		Path<String> attribute = from.get(Project.PROP_PATH);
-		return builder.like(builder.lower(attribute), value.toLowerCase().replace("*", "%"));
+		var predicate = OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, from, value);
+		if (operator == ProjectQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return WildcardUtils.matchPath(value.toLowerCase(), project.getPath().toLowerCase());
+		var matches = WildcardUtils.matchPath(value.toLowerCase(), project.getPath().toLowerCase());
+		if (operator == ProjectQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return Criteria.quote(Project.NAME_PATH) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
+				+ ProjectQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(value);
 	}
 

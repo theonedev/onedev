@@ -53,7 +53,7 @@ public class FileQuery extends BlobQuery {
 		private final String term;
 		
 		private boolean caseSensitive;
-
+		
 		private String excludeFileName;
 
 		private String directory;

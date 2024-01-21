@@ -70,7 +70,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		
 		String markdownPath = Joiner.on("/").join(pathSegments);
 		
-		File buildDir = build.getStorageDir();
+		File buildDir = build.getDir();
 		File reportDir = new File(buildDir, PublishMarkdownReportStep.CATEGORY + "/" + reportName);
 		
 		File markdownFile = new File(reportDir, markdownPath);

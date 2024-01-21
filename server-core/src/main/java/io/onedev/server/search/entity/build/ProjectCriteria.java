@@ -17,26 +17,35 @@ public class ProjectCriteria extends Criteria<Build> {
 	private static final long serialVersionUID = 1L;
 	
 	private final String projectPath;
+	
+	private final int operator;
 
-	public ProjectCriteria(String projectPath) {
+	public ProjectCriteria(String projectPath, int operator) {
 		this.projectPath = projectPath;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
+		var predicate = OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
 				builder, from.join(Build.PROP_PROJECT, JoinType.INNER), projectPath);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return WildcardUtils.matchPath(projectPath, build.getProject().getPath());
+		var matches = WildcardUtils.matchPath(projectPath, build.getProject().getPath());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_PROJECT) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(projectPath);
 	}
 

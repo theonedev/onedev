@@ -17,6 +17,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -35,7 +36,6 @@ import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -50,12 +50,10 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.BuildAware;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -152,7 +150,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getBuild());
+		return SecurityUtils.canAccessBuild(getBuild());
 	}
 	
 	@Override
@@ -311,7 +309,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getBuild()));
+						setVisible(SecurityUtils.canManageBuild(getBuild()));
 					}
 
 				});
@@ -331,12 +329,12 @@ public abstract class BuildDetailPage extends ProjectPage
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (getTerminalManager().isTerminalSupported()) {
+						if (WicketUtils.isSubscriptionActive()) {
 							JobManager jobManager = OneDev.getInstance(JobManager.class);
 							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
 							if (jobContext!= null) {
 								setVisible(SecurityUtils.isAdministrator()
-										|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());
+										|| SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()) && jobContext.getJobExecutor().isShellAccessEnabled());
 							} else {
 								setVisible(false);
 							}
@@ -427,21 +425,14 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
-		add(new MarkdownViewer("description", new AbstractReadOnlyModel<String>() {
+		add(new MarkdownViewer("description", new AbstractReadOnlyModel<>() {
 
 			@Override
 			public String getObject() {
 				return getBuild().getDescription();
 			}
-			
-		}, new ContentVersionSupport() {
 
-			@Override
-			public long getVersion() {
-				return 0;
-			}
-			
-		}) {
+		}, null) {
 
 			@Override
 			protected void onConfigure() {
@@ -451,7 +442,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}.setOutputMarkupPlaceholderTag(true).add(newBuildObserver(getBuild().getId())));
 		
-		add(new Tabbable("buildTabs", new LoadableDetachableModel<List<? extends Tab>>() {
+		add(new Tabbable("buildTabs", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<Tab> load() {
@@ -459,21 +450,57 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
 					tabs.add(new BuildTab("Log", BuildLogPage.class) {
-	
+
 						@Override
 						protected Component renderOptions(String componentId) {
 							BuildLogPage page = (BuildLogPage) getPage();
 							return page.renderOptions(componentId);
 						}
-						
+
 					});
 				}
-				
-				if (SecurityUtils.canReadCode(getProject())) 
+
+				if (SecurityUtils.canReadCode(getProject()))
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
-				
-				if (SecurityUtils.canManage(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
+
+				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
 					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+				}
+
+				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+				for (var packSupport: packSupports) {
+					var packType = packSupport.getPackType();
+					if (getBuild().getPacks().stream().anyMatch(it -> it.getType().equals(packType) && SecurityUtils.canReadPack(it.getProject()))) {
+						tabs.add(new BuildTab(packSupport.getPackType(), packSupport.getPackIcon(), BuildPacksPage.class) {
+							@Override
+							public boolean isActive(Page currentPage) {
+								if (super.isActive(currentPage)) {
+									if (currentPage instanceof BuildPacksPage) {
+										var buildPacksPage = (BuildPacksPage) currentPage;
+										return buildPacksPage.getPackType().equals(packSupport.getPackType());
+									} else {
+										return true;
+									}
+								} else {
+									return false;
+								}
+							}
+
+							@Override
+							public Component render(String componentId) {
+								return new PageTabHead(componentId, this) {
+
+									@Override
+									protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+										return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
+												BuildPacksPage.paramsOf(getBuild(), packType));
+									}
+
+								};
+							}
+						});
+					}
 				}
 				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
@@ -485,27 +512,27 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 								return new ViewStateAwarePageLink<Void>(
-										linkId, pageClass, FixedIssuesPage.paramsOf(getBuild(), 
+										linkId, pageClass, FixedIssuesPage.paramsOf(getBuild(),
 										getProject().getHierarchyDefaultFixedIssueQuery(getBuild().getJobName())));
 							}
-							
+
 						};
 					}
-					
+
 				});
-				
+
 				if (SecurityUtils.canReadCode(getProject()))
 					tabs.add(new BuildTab("Changes", BuildChangesPage.class));
-				
+
 				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
 				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
-				
-				for (BuildTabContribution contribution: contributions)
+
+				for (BuildTabContribution contribution : contributions)
 					tabs.addAll(contribution.getTabs(getBuild()));
-				
+
 				return tabs;
 			}
-			
+
 		}) {
 
 			@Override

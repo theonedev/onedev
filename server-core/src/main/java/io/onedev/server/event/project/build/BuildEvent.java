@@ -6,7 +6,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;

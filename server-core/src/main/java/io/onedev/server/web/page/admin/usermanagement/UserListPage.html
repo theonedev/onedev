@@ -3,7 +3,7 @@
 		<div class="card-body">
 			<div class="d-flex align-items-center mb-4">
 				<div class="clearable-wrapper flex-grow-1 mr-3">
-					<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name">
+					<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name or email address">
 				</div>
 				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
@@ -16,7 +16,11 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
-		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
+		<a wicket:id="link">
+			<img wicket:id="avatar">
+			<span wicket:id="name" class="name"></span>
+			<span wicket:id="guest" class="badge badge-sm badge-info ml-1">guest</span>
+		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
 		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Impersonate this user"><wicket:svg href="user-tick" class="icon align-middle"/></a>

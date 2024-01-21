@@ -13,15 +13,15 @@ public class AlertSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean trialEnterpriseLicenseExpireInOneWeekAlerted;
+	private boolean trialSubscriptionExpireInOneWeekAlerted;
 
-	private boolean trialEnterpriseLicenseExpiredAlerted;
+	private boolean trialSubscriptionExpiredAlerted;
 
-	private boolean enterpriseLicenseExpireInOneMonthAlerted;
+	private boolean subscriptionExpireInOneMonthAlerted;
 
-	private boolean enterpriseLicenseExpireInOneWeekAlerted;
+	private boolean subscriptionExpireInOneWeekAlerted;
 
-	private boolean enterpriseLicenseExpiredAlerted;
+	private boolean subscriptionExpiredAlerted;
 	
 	private List<String> notifyUsers = new ArrayList<>();
 	
@@ -36,52 +36,52 @@ public class AlertSetting implements Serializable {
 		this.notifyUsers = notifyUsers;
 	}
 	
-	public boolean isTrialEnterpriseLicenseExpireInOneWeekAlerted() {
-		return trialEnterpriseLicenseExpireInOneWeekAlerted;
+	public boolean isTrialSubscriptionExpireInOneWeekAlerted() {
+		return trialSubscriptionExpireInOneWeekAlerted;
 	}
 
-	public void setTrialEnterpriseLicenseExpireInOneWeekAlerted(boolean trialEnterpriseLicenseExpireInOneWeekAlerted) {
-		this.trialEnterpriseLicenseExpireInOneWeekAlerted = trialEnterpriseLicenseExpireInOneWeekAlerted;
+	public void setTrialSubscriptionExpireInOneWeekAlerted(boolean trialSubscriptionExpireInOneWeekAlerted) {
+		this.trialSubscriptionExpireInOneWeekAlerted = trialSubscriptionExpireInOneWeekAlerted;
 	}
 
-	public boolean isTrialEnterpriseLicenseExpiredAlerted() {
-		return trialEnterpriseLicenseExpiredAlerted;
+	public boolean isTrialSubscriptionExpiredAlerted() {
+		return trialSubscriptionExpiredAlerted;
 	}
 
-	public void setTrialEnterpriseLicenseExpiredAlerted(boolean trialEnterpriseLicenseExpiredAlerted) {
-		this.trialEnterpriseLicenseExpiredAlerted = trialEnterpriseLicenseExpiredAlerted;
+	public void setTrialSubscriptionExpiredAlerted(boolean trialSubscriptionExpiredAlerted) {
+		this.trialSubscriptionExpiredAlerted = trialSubscriptionExpiredAlerted;
 	}
 
-	public boolean isEnterpriseLicenseExpireInOneMonthAlerted() {
-		return enterpriseLicenseExpireInOneMonthAlerted;
+	public boolean isSubscriptionExpireInOneMonthAlerted() {
+		return subscriptionExpireInOneMonthAlerted;
 	}
 
-	public void setEnterpriseLicenseExpireInOneMonthAlerted(boolean enterpriseLicenseExpireInOneMonthAlerted) {
-		this.enterpriseLicenseExpireInOneMonthAlerted = enterpriseLicenseExpireInOneMonthAlerted;
+	public void setSubscriptionExpireInOneMonthAlerted(boolean subscriptionExpireInOneMonthAlerted) {
+		this.subscriptionExpireInOneMonthAlerted = subscriptionExpireInOneMonthAlerted;
 	}
 
-	public boolean isEnterpriseLicenseExpireInOneWeekAlerted() {
-		return enterpriseLicenseExpireInOneWeekAlerted;
+	public boolean isSubscriptionExpireInOneWeekAlerted() {
+		return subscriptionExpireInOneWeekAlerted;
 	}
 
-	public void setEnterpriseLicenseExpireInOneWeekAlerted(boolean enterpriseLicenseExpireInOneWeekAlerted) {
-		this.enterpriseLicenseExpireInOneWeekAlerted = enterpriseLicenseExpireInOneWeekAlerted;
+	public void setSubscriptionExpireInOneWeekAlerted(boolean subscriptionExpireInOneWeekAlerted) {
+		this.subscriptionExpireInOneWeekAlerted = subscriptionExpireInOneWeekAlerted;
 	}
 
-	public boolean isEnterpriseLicenseExpiredAlerted() {
-		return enterpriseLicenseExpiredAlerted;
+	public boolean isSubscriptionExpiredAlerted() {
+		return subscriptionExpiredAlerted;
 	}
 
-	public void setEnterpriseLicenseExpiredAlerted(boolean enterpriseLicenseExpiredAlerted) {
-		this.enterpriseLicenseExpiredAlerted = enterpriseLicenseExpiredAlerted;
+	public void setSubscriptionExpiredAlerted(boolean subscriptionExpiredAlerted) {
+		this.subscriptionExpiredAlerted = subscriptionExpiredAlerted;
 	}
 	
 	public void setAlerted(boolean alerted) {
-		trialEnterpriseLicenseExpireInOneWeekAlerted = alerted;
-		trialEnterpriseLicenseExpiredAlerted = alerted;
-		enterpriseLicenseExpireInOneMonthAlerted = alerted;
-		enterpriseLicenseExpireInOneWeekAlerted = alerted;
-		enterpriseLicenseExpiredAlerted = alerted;
+		trialSubscriptionExpireInOneWeekAlerted = alerted;
+		trialSubscriptionExpiredAlerted = alerted;
+		subscriptionExpireInOneMonthAlerted = alerted;
+		subscriptionExpireInOneWeekAlerted = alerted;
+		subscriptionExpiredAlerted = alerted;
 	}
 
 	public Usage onDeleteUser(String userName) {

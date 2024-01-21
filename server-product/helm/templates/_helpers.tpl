@@ -74,17 +74,6 @@ Return the target Kubernetes version
 {{- end -}}
 
 {{/*
-Return the appropriate apiVersion for deployment.
-*/}}
-{{- define "ods.deployment.apiVersion" -}}
-{{- if semverCompare "<1.14-0" (include "ods.kubeVersion" .) -}}
-{{- print "extensions/v1beta1" -}}
-{{- else -}}
-{{- print "apps/v1" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return the appropriate apiVersion for statefulset.
 */}}
 {{- define "ods.statefulset.apiVersion" -}}
@@ -95,20 +84,19 @@ Return the appropriate apiVersion for statefulset.
 {{- end -}}
 {{- end -}}
 
-
-{{/* 
+{{/*
 Generate URL string based on the database type
  */}}
 {{- define "getConnectionURL" -}}
 {{- $connectionURL := "" -}}
-{{- if eq $.Values.database.dbType "mysql" }}
-{{- $connectionURL = printf "jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
-{{- else if eq $.Values.database.dbType "postgresql" }}
-{{- $connectionURL = printf "jdbc:postgresql://%s:%s/%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
-{{- else if eq $.Values.database.dbType "mariadb" }}
-{{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
-{{- else if eq $.Values.database.dbType "mssql" }}
-{{- $connectionURL = printf "sqlserver://%s:%s;databaseName=%s" $.Values.database.dbHost $.Values.database.dbPort $.Values.database.dbName -}}
+{{- if eq $.Values.database.type "mysql" }}
+{{- $connectionURL = printf "jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- else if eq $.Values.database.type "postgresql" }}
+{{- $connectionURL = printf "jdbc:postgresql://%s:%s/%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- else if eq $.Values.database.type "mariadb" }}
+{{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- else if eq $.Values.database.type "mssql" }}
+{{- $connectionURL = printf "sqlserver://%s:%s;databaseName=%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
 {{- else -}}
 Invalid database type
 {{- end -}}
@@ -119,7 +107,7 @@ Invalid database type
 Set dilect and driver env variables based database type
  */}}
 {{- define "setDatabaseEnvVars" -}}
-{{- $dbType := .Values.database.dbType -}}
+{{- $dbType := .Values.database.type -}}
 {{- $dbTypeMap := dict "mysql" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "com.mysql.cj.jdbc.Driver")
                      "postgresql" (dict "dialect" "io.onedev.server.persistence.PostgreSQLDialect" "driver" "org.postgresql.Driver")
                      "mariadb" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "org.mariadb.jdbc.Driver")

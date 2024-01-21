@@ -39,5 +39,5 @@ public class LabelBadge extends WebComponent {
 		add(AttributeAppender.append("style", style));
 		add(AttributeAppender.append("class", "badge badge-sm"));
 	}
-
+	
 }

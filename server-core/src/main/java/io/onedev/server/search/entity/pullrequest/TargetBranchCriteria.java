@@ -16,26 +16,35 @@ public class TargetBranchCriteria extends Criteria<PullRequest> {
 
 	private final String branch;
 	
-	public TargetBranchCriteria(String value) {
+	private final int operator;
+	
+	public TargetBranchCriteria(String value, int operator) {
 		this.branch = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(PullRequest.PROP_TARGET_BRANCH);
 		String normalized = branch.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == PullRequestQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return WildcardUtils.matchString(branch.toLowerCase(), request.getTargetBranch().toLowerCase());
+		var matches = WildcardUtils.matchString(branch.toLowerCase(), request.getTargetBranch().toLowerCase());
+		if (operator == PullRequestQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(PullRequest.NAME_TARGET_BRANCH) + " " 
-				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(branch);
 	}
 

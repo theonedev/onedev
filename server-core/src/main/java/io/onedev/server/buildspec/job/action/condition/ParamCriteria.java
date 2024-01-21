@@ -14,13 +14,16 @@ public class ParamCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	private String value;
+	private final String value;
 	
-	public ParamCriteria(String name, String value) {
+	private final int operator;
+	
+	public ParamCriteria(String name, String value, int operator) {
 		this.name = name;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -31,13 +34,16 @@ public class ParamCriteria extends Criteria<Build> {
 	@Override
 	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		return paramValues != null && paramValues.contains(value);
+		var matches = paramValues != null && paramValues.contains(value);
+		if (operator == ActionConditionLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(name) + " " 
-				+ ActionCondition.getRuleName(ActionConditionLexer.Is) + " "
+				+ ActionCondition.getRuleName(operator) + " "
 				+ quote(value);
 	}
 	

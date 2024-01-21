@@ -10,9 +10,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Markdown;
-import io.onedev.server.annotation.ProjectName;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.*;
@@ -22,7 +20,6 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signatureverification.SignatureVerificationManager;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.build.*;
@@ -32,6 +29,9 @@ import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.issue.TimesheetSetting;
+import io.onedev.server.model.support.pack.NamedPackQuery;
+import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
@@ -39,6 +39,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -47,9 +48,11 @@ import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.SerializationUtils;
@@ -69,6 +72,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.Validator;
 import javax.validation.constraints.NotEmpty;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -93,14 +97,14 @@ import static io.onedev.server.util.match.WildcardUtils.matchPath;
 public class Project extends AbstractEntity implements LabelSupport<ProjectLabel> {
 
 	private static final long serialVersionUID = 1L;
-
-	public static String BUILDS_DIR = "builds";
-
-	public static String ATTACHMENT_DIR = "attachment";
-
-	public static String SITE_DIR = "site";
 	
-	public static String SHARE_TEST_DIR = ".onedev-share-test";
+	public static final String BUILDS_DIR = "builds";
+
+	public static final String ATTACHMENT_DIR = "attachment";
+
+	public static final String SITE_DIR = "site";
+	
+	public static final String SHARE_TEST_DIR = ".onedev-share-test";
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
@@ -133,12 +137,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
 	
 	public static final String PROP_CODE_MANAGEMENT = "codeManagement";
+
+	public static final String PROP_PACK_MANAGEMENT = "packManagement";
 	
 	public static final String PROP_ISSUE_MANAGEMENT = "issueManagement";
+
+	public static final String PROP_TIME_TRACKING = "timeTracking";
 	
 	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
 	
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
+	
+	public static final String PROP_PENDING_DELETE = "pendingDelete";
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
@@ -181,7 +191,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private Project forkedFrom;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=true)
+	@JoinColumn
 	@Api(description="Represents the parent project. Remove this property if the project does not " +
 			"have a parent project. May be null")
 	private Project parent;
@@ -204,7 +214,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy= "project")
+	private Collection<PackBlob> packBlobs = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<Pack> packs = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PackBlobAuthorization> packBlobAuthorizations = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -279,15 +298,24 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	private boolean codeManagement = true;
-
+	
+	private boolean packManagement;
+	
 	private boolean issueManagement = true;
 
+	private boolean timeTracking = false;
+	
+	private boolean pendingDelete;
+	
 	@Lob
 	@Column(length=65535)
 	private GitPackConfig gitPackConfig = new GitPackConfig();
@@ -316,6 +344,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
+
+	@JsonIgnore
+	@Lob
+	@Column(length=65535, nullable=false)
+	private ProjectPackSetting packSetting = new ProjectPackSetting();
 	
 	@JsonIgnore
 	@Lob
@@ -351,7 +384,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     private transient Optional<CodeCommentQueryPersonalization> codeCommentQueryPersonalizationOfCurrentUserHolder;
     
     private transient Optional<BuildQueryPersonalization> buildQueryPersonalizationOfCurrentUserHolder;
-    
+
+	private transient Optional<PackQueryPersonalization> packQueryPersonalizationOfCurrentUserHolder;
+	
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
 	private transient List<Milestone> sortedMilestones;
@@ -638,7 +673,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
-				lastEventDate.getId(), idOf(getDefaultRole()), idOf(getParent()));
+				lastEventDate.getId(), idOf(getDefaultRole()), isPendingDelete(), idOf(getParent()));
 	}
 	
 	/**
@@ -675,6 +710,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			throw new ObjectNotFoundException("Unable to find blob ident: " + blobIdent);
 		else 
 			return blobOptional.orNull();
+	}
+	
+	public BlobIdent findBlobIdent(ObjectId revId, String path) {
+		return getGitService().getBlobIdent(this, revId, path);
 	}
 	
 	/**
@@ -896,7 +935,53 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public void setIssueManagement(boolean issueManagement) {
 		this.issueManagement = issueManagement;
 	}
+
+	@Editable(order=350, descriptionProvider = "getTimeTrackingDescription")
+	@ShowCondition("isIssueManagementEnabled")
+	@SubscriptionRequired
+	public boolean isTimeTracking() {
+		return timeTracking;
+	}
+
+	public void setTimeTracking(boolean timeTracking) {
+		this.timeTracking = timeTracking;
+	}
 	
+	private static String getTimeTrackingDescription() {
+		if (!WicketUtils.isSubscriptionActive()) {
+			return "<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. " +
+					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
+		} else {
+			return "Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this " +
+					"project to track progress and generate timesheets";
+		}
+	}
+
+	private static boolean isIssueManagementEnabled() {
+		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
+	}
+
+	@Editable(order=400, name="Package Management", descriptionProvider = "getPackManagementDescription")
+	public boolean isPackManagement() {
+		return packManagement;
+	}
+
+	public void setPackManagement(boolean packManagement) {
+		this.packManagement = packManagement;
+	}
+
+	private static String getPackManagementDescription() {
+		return "Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project";
+	}
+
+	public boolean isPendingDelete() {
+		return pendingDelete;
+	}
+
+	public void setPendingDelete(boolean pendingDelete) {
+		this.pendingDelete = pendingDelete;
+	}
+
 	@Nullable
 	public String getServiceDeskName() {
 		if (serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
@@ -944,15 +1029,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.buildSetting = buildSetting;
 	}
 
+	public ProjectPackSetting getPackSetting() {
+		return packSetting;
+	}
+
+	public void setPackSetting(ProjectPackSetting packSetting) {
+		this.packSetting = packSetting;
+	}
+
 	public List<JobSecret> getHierarchyJobSecrets() {
 		List<JobSecret> jobSecrets = new ArrayList<>(getBuildSetting().getJobSecrets());
-		if (getParent() != null) {
-			Set<String> names = jobSecrets.stream().map(it->it.getName()).collect(Collectors.toSet());
-			for (JobSecret secret: getParent().getHierarchyJobSecrets()) {
-				if (!names.contains(secret.getName()))
-					jobSecrets.add(secret);
-			}
-		}
+		if (getParent() != null) 
+			jobSecrets.addAll(getParent().getHierarchyJobSecrets());
 		return jobSecrets;
 	}
 
@@ -1074,12 +1162,44 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.buildQueryPersonalizations = buildQueryPersonalizations;
 	}
 
+	public Collection<PackQueryPersonalization> getPackQueryPersonalizations() {
+		return packQueryPersonalizations;
+	}
+
+	public void setPackQueryPersonalizations(Collection<PackQueryPersonalization> packQueryPersonalizations) {
+		this.packQueryPersonalizations = packQueryPersonalizations;
+	}
+
 	public Collection<Build> getBuilds() {
 		return builds;
 	}
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
+	}
+
+	public Collection<PackBlob> getPackBlobs() {
+		return packBlobs;
+	}
+
+	public void setPackBlobs(Collection<PackBlob> packBlobs) {
+		this.packBlobs = packBlobs;
+	}
+
+	public Collection<Pack> getPacks() {
+		return packs;
+	}
+
+	public void setPacks(Collection<Pack> packs) {
+		this.packs = packs;
+	}
+
+	public Collection<PackBlobAuthorization> getPackBlobAuthorizations() {
+		return packBlobAuthorizations;
+	}
+
+	public void setPackBlobAuthorizations(Collection<PackBlobAuthorization> packBlobAuthorizations) {
+		this.packBlobAuthorizations = packBlobAuthorizations;
 	}
 
 	public List<BlobIdent> getBlobChildren(BlobIdent blobIdent, BlobIdentFilter filter) {
@@ -1287,6 +1407,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 		}
 		return buildQueryPersonalizationOfCurrentUserHolder.orNull();
+	}
+
+	@Nullable
+	public PackQueryPersonalization getPackQueryPersonalizationOfCurrentUser() {
+		if (packQueryPersonalizationOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				PackQueryPersonalization personalization =
+						OneDev.getInstance(PackQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new PackQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
+				}
+				packQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
+			} else {
+				packQueryPersonalizationOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return packQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable
@@ -1538,6 +1678,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 		return null;
 	}
+
+	@Nullable
+	public NamedPackQuery getNamedPackQuery(String name) {
+		for (NamedPackQuery namedQuery: getNamedPackQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
 	
 	@Nullable
 	public NamedPullRequestQuery getNamedPullRequestQuery(String name) {
@@ -1553,11 +1702,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedIssueQuery> namedQueries = current.getIssueSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedIssueQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedIssueQuery>) getSettingManager().getIssueSetting().getNamedQueries();
+		return getSettingManager().getIssueSetting().getNamedQueries();
 	}
 	
 	public List<NamedBuildQuery> getNamedBuildQueries() {
@@ -1565,11 +1714,23 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedBuildQuery> namedQueries = current.getBuildSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedBuildQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedBuildQuery>) getSettingManager().getBuildSetting().getNamedQueries();
+		return getSettingManager().getBuildSetting().getNamedQueries();
+	}
+
+	public List<NamedPackQuery> getNamedPackQueries() {
+		Project current = this;
+		do {
+			List<NamedPackQuery> namedQueries = current.getPackSetting().getNamedQueries();
+			if (namedQueries != null)
+				return namedQueries;
+			current = current.getParent();
+		} while (current != null);
+
+		return getSettingManager().getPackSetting().getNamedQueries();
 	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
@@ -1577,15 +1738,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			List<NamedPullRequestQuery> namedQueries = current.getPullRequestSetting().getNamedQueries();
 			if (namedQueries != null)
-				return (ArrayList<NamedPullRequestQuery>) namedQueries;
+				return namedQueries;
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedPullRequestQuery>) getSettingManager().getPullRequestSetting().getNamedQueries();
+		return getSettingManager().getPullRequestSetting().getNamedQueries();
 	}
-
+	
+	public Map<String, TimesheetSetting> getHierarchyTimesheetSettings() {
+		Map<String, TimesheetSetting> timesheetSettings = new LinkedHashMap<>();
+		Project current = this;
+		do {
+			for (var entry: current.getIssueSetting().getTimesheetSettings().entrySet()) 
+				timesheetSettings.putIfAbsent(entry.getKey(), entry.getValue());
+			current = current.getParent();
+		} while (current != null);
+		return timesheetSettings;
+	}
+	
 	public List<BoardSpec> getHierarchyBoards() {
-		List<BoardSpec> boards = null;
+		List<BoardSpec> boards;
 		
 		Project current = this;
 		do {
@@ -1677,4 +1849,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return builds;
 	}
 
+	public static String getDeleteChangeObservable(Long projectId) {
+		return Project.class.getName() + ":delete:" + projectId;
+	}
+
+	public String getDeleteChangeObservable() {
+		return getDeleteChangeObservable(getId());
+	}
+	
+	public File getDir() {
+		return OneDev.getInstance(ProjectManager.class).getProjectDir(getId());
+	}
+	
 }

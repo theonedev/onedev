@@ -100,8 +100,6 @@ public class Agent extends AbstractEntity {
 	
 	private int cpus;
 	
-	private boolean temporal;
-	
 	private boolean paused;
 	
 	@JsonIgnore
@@ -175,14 +173,6 @@ public class Agent extends AbstractEntity {
 		this.cpus = cpus;
 	}
 
-	public boolean isTemporal() {
-		return temporal;
-	}
-
-	public void setTemporal(boolean temporal) {
-		this.temporal = temporal;
-	}
-
 	public Collection<AgentAttribute> getAttributes() {
 		return attributes;
 	}
@@ -212,14 +202,14 @@ public class Agent extends AbstractEntity {
 			var clusterManager = OneDev.getInstance(ClusterManager.class);
 			var server = agentManager.getAgentServer(getId());
 			online = server != null && clusterManager.getServer(server, false) != null
-					&& clusterManager.getRunningServers().contains(server);
+					&& clusterManager.getOnlineServers().contains(server);
 		}
 		return online;
 	}
 	
 	public AgentData getAgentData() {
 		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
-				name, ipAddress, cpus, temporal, getAttributeMap());
+				name, ipAddress, cpus, getAttributeMap());
 	}
 	
 }

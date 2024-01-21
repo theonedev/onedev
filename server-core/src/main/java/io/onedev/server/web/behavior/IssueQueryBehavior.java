@@ -2,7 +2,6 @@ package io.onedev.server.web.behavior;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -31,16 +30,16 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.model.Issue.*;
 import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.issue.IssueQuery.*;
@@ -93,27 +92,57 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
+					private Map<String, String> getFieldCandidates(Collection<String> fields) {
+						Map<String, String> candidates = new LinkedHashMap<>();
+						for (var field: fields) {
+							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME) || field.equals(NAME_PROGRESS))
+									&& issueSetting.getTimeTrackingSetting().getAggregationLink() != null) {
+								if (field.equals(NAME_ESTIMATED_TIME))
+									candidates.put(field, "Total estimated time");
+								else if (field.equals(NAME_SPENT_TIME))
+									candidates.put(field, "Total spent time");
+								else
+									candidates.put(field, "Total spent time / total estimated time");
+							} else if (field.equals(NAME_PROGRESS)) {
+								candidates.put(field, "Spent time / estimated time");
+							} else {
+								candidates.put(field, null);
+							}
+						}
+						return candidates;
+					}
+					
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.QUERY_FIELDS);
+							Map<String, String> candidates = getFieldCandidates(QUERY_FIELDS);
 							if (!option.withProjectCriteria())
 								candidates.remove(NAME_PROJECT);
 							if (!option.withStateCriteria())
 								candidates.remove(NAME_STATE);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
-								candidates.add(field.getName());
+								candidates.put(field.getName(), null);
+							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
+								candidates.remove(NAME_ESTIMATED_TIME);
+								candidates.remove(NAME_SPENT_TIME);
+								candidates.remove(NAME_PROGRESS);
+							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
+							Map<String, String> candidates = getFieldCandidates(ORDER_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
+							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
+								candidates.remove(NAME_ESTIMATED_TIME);
+								candidates.remove(NAME_SPENT_TIME);
+								candidates.remove(NAME_PROGRESS);
+							}
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
 										|| field instanceof DateField || field instanceof DateTimeField 
 										|| field instanceof MilestoneChoiceField) { 
-									candidates.add(field.getName());
+									candidates.put(field.getName(), null);
 								}
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
@@ -137,7 +166,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy)
+								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy || operator == WatchedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == FixedInBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -172,7 +201,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} else if (fieldSpec instanceof PullRequestChoiceField) {
 											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 										} else if (fieldSpec instanceof BooleanField) {
-											return SuggestionUtils.suggest(Lists.newArrayList("true", "false"), matchWith);
+											return SuggestionUtils.suggest(newArrayList("true", "false"), matchWith);
 										} else if (fieldSpec instanceof GroupChoiceField) {
 											List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 											return SuggestionUtils.suggest(candidates, matchWith);
@@ -203,6 +232,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 												return SuggestionUtils.suggestMilestones(project, matchWith);
 											else
 												return null;
+										} else if (fieldName.equals(NAME_ESTIMATED_TIME) || fieldName.equals(NAME_SPENT_TIME)) {
+											var suggestions = new ArrayList<InputSuggestion>();
+											if ("1w 1d 1h 1m".contains(matchWith.toLowerCase()))
+												suggestions.add(new InputSuggestion("1w 1d 1h 1m", "specify working period, modify as necessary", null));
+											return !suggestions.isEmpty()? suggestions: null;
+										} else if (fieldName.equals(NAME_PROGRESS)) {
+											var suggestions = new ArrayList<InputSuggestion>();
+											if ("0.5".contains(matchWith.toLowerCase()))
+												suggestions.add(new InputSuggestion("0.5", "specify decimal number, modify as necessary", null));
+											return !suggestions.isEmpty() ? suggestions : null;
 										} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
 												|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
 												|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 
@@ -248,14 +287,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))
+				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)))
 				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		} else if (suggestedLiteral.equals("#")) {
-			return Optional.of("Find issue by number");
+			return Optional.of("find issue by number");
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

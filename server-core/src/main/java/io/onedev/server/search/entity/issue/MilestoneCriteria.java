@@ -20,9 +20,12 @@ public class MilestoneCriteria extends Criteria<Issue> {
 	private static final long serialVersionUID = 1L;
 	
 	private final String milestoneName;
+	
+	private final int operator;
 
-	public MilestoneCriteria(String milestoneName) {
+	public MilestoneCriteria(String milestoneName, int operator) {
 		this.milestoneName = milestoneName;
+		this.operator = operator;
 	}
 
 	@Override
@@ -34,30 +37,38 @@ public class MilestoneCriteria extends Criteria<Issue> {
 		scheduleQuery.where(builder.and(
 				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), from), 
 				builder.like(milestoneJoin.get(Milestone.PROP_NAME), milestoneName.replace("*", "%"))));
-		return builder.exists(scheduleQuery);
+		var predicate =  builder.exists(scheduleQuery);
+		if (operator == IssueQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getSchedules().stream()
+		var matches = issue.getSchedules().stream()
 				.anyMatch(it->WildcardUtils.matchString(milestoneName, it.getMilestone().getName()));
+		if (operator == IssueQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(IssueSchedule.NAME_MILESTONE) + " " 
-				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(milestoneName);
 	}
 
 	@Override
 	public void fill(Issue issue) {
-		Milestone milestone = issue.getProject().getHierarchyMilestone(milestoneName);
-		if (milestone != null) {
-			IssueSchedule schedule = new IssueSchedule();
-			schedule.setIssue(issue);
-			schedule.setMilestone(milestone);
-			issue.getSchedules().add(schedule);
+		if (operator == IssueQueryLexer.Is) {
+			Milestone milestone = issue.getProject().getHierarchyMilestone(milestoneName);
+			if (milestone != null) {
+				IssueSchedule schedule = new IssueSchedule();
+				schedule.setIssue(issue);
+				schedule.setMilestone(milestone);
+				issue.getSchedules().add(schedule);
+			}
 		}
 	}
 

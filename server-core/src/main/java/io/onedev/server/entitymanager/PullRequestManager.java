@@ -68,7 +68,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	int count(@Nullable Project targetProject, Criteria<PullRequest> requestCriteria);
 	
-	List<PullRequest> query(Project targetProject, String term, int count);
+	List<PullRequest> query(Project targetProject, String fuzzyQuery, int count);
 
 	void delete(Collection<PullRequest> requests, Project project);
 	

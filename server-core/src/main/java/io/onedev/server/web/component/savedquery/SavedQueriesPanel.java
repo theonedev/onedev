@@ -114,7 +114,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	}
 	
 	private boolean canEditCommonQueries() {
-		return SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get());
+		return SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManageProject(Project.get());
 	}
 	
 	@Override

@@ -60,7 +60,7 @@ public interface BuildManager extends EntityManager<Build> {
 									  @Nullable Optional<PullRequest> request, @Nullable Optional<Issue> issue, 
 									  @Nullable Map<String, List<String>> params);
 	
-	List<Build> query(Project project, String term, int count);
+	List<Build> query(Project project, String fuzzyQuery, int count);
 
 	List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 
@@ -95,6 +95,8 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	void syncBuilds(Long projectId, String activeServer);
 	
-	File getStorageDir(Long projectId, Long buildNumber);
+	File getBuildDir(Long projectId, Long buildNumber);
+
+	File getArtifactsDir(Long projectId, Long buildNumber);
 	
 }

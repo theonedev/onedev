@@ -1,6 +1,8 @@
 package io.onedev.server.web;
 
-import java.io.IOException;
+import io.onedev.server.persistence.SessionManager;
+import org.apache.wicket.protocol.http.WicketFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -8,16 +10,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.wicket.protocol.http.WicketFilter;
-import org.apache.wicket.protocol.http.WicketServlet;
-
-import io.onedev.server.persistence.annotation.Sessional;
+import java.io.IOException;
 
 @Singleton
 public class DefaultWicketServlet extends WicketServlet {
 
 	private static final long serialVersionUID = 1L;
+	
+	private final SessionManager sessionManager;
 	
 	private final WicketFilter wicketFilter;
 	
@@ -27,7 +27,8 @@ public class DefaultWicketServlet extends WicketServlet {
 	}
 
 	@Inject
-	public DefaultWicketServlet(WicketFilter wicketFilter) {
+	public DefaultWicketServlet(SessionManager sessionManager, WicketFilter wicketFilter) {
+		this.sessionManager = sessionManager;
 		this.wicketFilter = wicketFilter;
 	}
 	
@@ -36,11 +37,16 @@ public class DefaultWicketServlet extends WicketServlet {
 		return wicketFilter;
 	}
 
-	@Sessional
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-		((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
-		super.service(req, res);
+		sessionManager.run(() -> {
+			((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+			try {
+				super.service(req, res);
+			} catch (ServletException | IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 }

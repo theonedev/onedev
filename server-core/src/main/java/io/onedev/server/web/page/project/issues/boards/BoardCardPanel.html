@@ -1,18 +1,16 @@
 <wicket:panel>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="contentFrag">
-		<div class="primary font-weight-bold mb-3">
-			<wicket:container wicket:id="numberAndTitle"></wicket:container>
-			<span wicket:id="links" class="links ml-3"></span>
+		<div class="primary d-flex align-items-center flex-wrap row-gap-2 mb-3">
+			<span wicket:id="numberAndTitle" class="font-weight-bold mr-2"></span>
+			<span wicket:id="links" class="links mr-2"></span>
 			<a wicket:id="showDetail" title="Click to show issue details" class="show-detail"><wicket:svg href="ellipsis" class="icon"/></a>
 		</div>
-		<div class="secondary d-flex flex-wrap mb-n2">
-			<div wicket:id="transit" class="state">
-				<span wicket:id="state" class="mb-2 mr-2"></span>
-			</div>
+		<div class="secondary d-flex align-items-center flex-wrap mb-n2">
 			<div wicket:id="fields" class="field"></div>
-			<div class="avatars ml-auto d-flex flex-wrap mr-n2">
+			<div class="avatars-and-progress ml-auto d-flex align-items-center flex-wrap">
 				<div wicket:id="avatars" class="avatar"></div>
+				<div wicket:id="progress" class="d-flex align-items-center mr-2 mb-2"></div>
 			</div>
 		</div>
 		<wicket:enclosure child="linkedIssues">
@@ -20,5 +18,8 @@
 			<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
 		</div>
 		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="stateFrag">
+		<div wicket:id="transit" class="state"><span wicket:id="state" class="mb-2 mr-2"></span></div>
 	</wicket:fragment>
 </wicket:panel>

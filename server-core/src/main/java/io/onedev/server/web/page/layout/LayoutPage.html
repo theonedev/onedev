@@ -3,7 +3,7 @@
 		<div class="sidebar-header">
 			<a wicket:id="brandLink" class="sidebar-brand">
 				<span wicket:id="brandLogo"></span>
-				<span wicket:id="brandName"></span>			
+				<span wicket:id="brandName"></span>
 			</a>
 			<a href="javascript:void(0);" class="sidebar-mini-toggle d-none d-lg-inline"><wicket:svg href="expand3" class="icon"></wicket:svg></a>
 			<a href="javascript:void(0);" class="sidebar-close d-lg-none"><wicket:svg href="times" class="icon"></wicket:svg></a>
@@ -16,7 +16,7 @@
 		</div>
 		<div class="sidebar-footer">
 			<a wicket:id="productVersion" href="https://onedev.io" target="_blank" class="sidebar-version"></a>
-			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm">Try EE</a>
+			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm" title="Try Enterprise Edition">Try EE</a>
 			<div class="dropdown sidebar-help">
 				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
 					<wicket:svg href="question-o" class="icon"></wicket:svg>
@@ -27,9 +27,10 @@
 					<a wicket:id="bugReport" href="https://code.onedev.io/onedev/server/~issues?query=%22State%22+is+%22Open%22" class="dropdown-item" target="_blank">Support & Bug Report</a>
 					<a href="/~help/api" class="dropdown-item" target="_blank">RESTful API</a>
 					<a wicket:id="incompatibilities" class="dropdown-item">Incompatibilities</a>
-					<a wicket:id="license" class="dropdown-item" target="_blank"></a>
+					<a class="dropdown-item" href="https://onedev.io/license-agreement" target="_blank">License Agreement</a>
+					<a wicket:id="checkUpdate" class="dropdown-item">Check Update</a>
 					<a wicket:id="tryEEMenuItem" href="https://onedev.io/pricing" class="try-ee dropdown-item d-none">Try Enterprise Edition</a>
-	          	</div>  					
+				</div>
 			</div>
 		</div>
 	</div>
@@ -45,24 +46,25 @@
 		</div>
 		<div class="topbar-right text-nowrap">
 			<a wicket:id="alerts" class="text-warning topbar-link" title="Alerts"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
-			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
+			<a wicket:id="newVersionStatus" class="new-version-status topbar-link" title="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting"><img wicket:id="icon"/></a>
 			<a wicket:id="darkMode" class="topbar-link" title="Toggle dark mode"><svg wicket:id="icon" class="icon"/></a>
-	  		<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline">Sign In</span></a>
+			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
+			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline">Sign In</span></a>
 			<div wicket:id="userInfo" class="dropdown user-info">
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
-					<img wicket:id="avatar"> 
-					<span wicket:id="name" class="ml-2 d-none d-lg-inline"></span>
+					<img wicket:id="avatar">
+					<span wicket:id="name" class="ml-1 d-none d-lg-inline"></span>
 				</a>
 				<div class="dropdown-menu">
 					<wicket:enclosure child="hasUnverifiedLink">
-					<div class="mx-3 my-2 alert alert-light-warning">
-						You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a>
-					</div>
+						<div class="mx-3 my-2 alert alert-light-warning">
+							You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a>
+						</div>
 					</wicket:enclosure>
 					<wicket:enclosure child="noPrimaryAddressLink">
-					<div class="mx-3 my-2 alert alert-light-warning">
-						Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified
-					</div>
+						<div class="mx-3 my-2 alert alert-light-warning">
+							Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified
+						</div>
 					</wicket:enclosure>
 					<a wicket:id="myProfile" class="dropdown-item">
 						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
@@ -100,14 +102,14 @@
 						<wicket:svg href="logout" class="icon mr-2"></wicket:svg>
 						<span wicket:id="label"></span>
 					</a>
-	          	</div>        				
+				</div>
 			</div>
 		</div>
 	</div>
 	<div class="main autofit d-flex flex-column resize-aware">
 		<wicket:child></wicket:child>
 	</div>
-	
+
 	<wicket:fragment wicket:id="menuHeaderFrag">
 		<img wicket:id="icon" class="menu-header-icon avatar"></img>
 		<span wicket:id="label" class="menu-header-text"></span>

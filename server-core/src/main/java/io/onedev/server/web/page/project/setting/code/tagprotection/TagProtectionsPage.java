@@ -1,7 +1,12 @@
 package io.onedev.server.web.page.project.setting.code.tagprotection;
 
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.support.code.TagProtection;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,12 +18,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.code.TagProtection;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class TagProtectionsPage extends ProjectSettingPage {
@@ -36,7 +36,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 		container = new WebMarkupContainer("tagProtectionSetting");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<TagProtection>("protections", new AbstractReadOnlyModel<List<TagProtection>>() {
+		container.add(new ListView<>("protections", new AbstractReadOnlyModel<List<TagProtection>>() {
 
 			@Override
 			public List<TagProtection> getObject() {
@@ -59,11 +59,17 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						getProject().getTagProtections().set(item.getIndex(), protection);
 						OneDev.getInstance(ProjectManager.class).update(getProject());
+						target.add(container);
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						target.add(container);
 					}
 					
 				});
 			}
-			
+
 		});
 		
 		container.add(new SortBehavior() {
@@ -71,8 +77,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				List<TagProtection> protections = getProject().getTagProtections();
-				TagProtection protection = protections.get(from.getItemIndex());
-				protections.set(from.getItemIndex(), protections.set(to.getItemIndex(), protection));
+				CollectionUtils.move(protections, from.getItemIndex(), to.getItemIndex());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				
 				target.add(container);

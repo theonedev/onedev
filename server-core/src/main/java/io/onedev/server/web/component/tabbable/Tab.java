@@ -19,4 +19,5 @@ public abstract class Tab implements Serializable {
 	public abstract boolean isSelected();
 	
 	public abstract String getTitle();
+	
 }

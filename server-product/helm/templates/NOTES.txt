@@ -1,13 +1,12 @@
-
-
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
+{{- if and (not .Values.command) (not .Values.args) (eq .Values.image.name "1dev/server") }}
 ###################################################################
 #
-# CAUTION: if you are upgrading from version <= 8.4.2, please make
-# sure to follow https://docs.onedev.io/upgrade-guide#upgrade-from-chart-v--842
+# CAUTION: If you are upgrading from version <= 9.0.0, please make
+# sure to follow https://docs.onedev.io/upgrade-guide/deploy-to-k8s
 # to migrate your data
 #
 ###################################################################
@@ -47,5 +46,6 @@ Get the OneDev URL by running:
   echo "URL: http://$SERVICE_IP"
 {{- end }}
 
+{{- end }}
 {{- end }}
 {{- end }}

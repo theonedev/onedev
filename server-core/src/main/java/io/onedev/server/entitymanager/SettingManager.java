@@ -4,9 +4,9 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.usage.Usage;
@@ -23,7 +23,7 @@ import java.util.Map;
 public interface SettingManager extends EntityManager<Setting> {
 	
 	@Nullable
-	Setting getSetting(Key key);
+	Setting findSetting(Key key);
 	
 	/**
 	 * Get system setting.
@@ -39,8 +39,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	AlertSetting getAlertSetting();
 	
+	String getSystemUUID();
+	
 	@Nullable
-	String getLicenseData();
+	String getSubscriptionData();
 	
 	/**
 	 * Save specified system setting.
@@ -52,28 +54,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveAlertSetting(AlertSetting alertSetting);
 	
-	void saveLicenseData(@Nullable String licenseData);
-	
-	/**
-	 * Get mail setting.
-	 * <p>
-	 * @return
-	 * 			mail setting, or <tt>null</tt> if mail setting record exists but value is 
-	 * 			null.
-	 * @throws 
-	 * 			RuntimeException if mail setting record is not found
-	 */
-	@Nullable
-	MailSetting getMailSetting();
-
-	/**
-	 * Save specified mail setting.
-	 * <p>
-	 * @param mailSetting
-	 * 			mail setting to be saved. Use <tt>null</tt> to clear the setting (but 
-	 * 			setting record will still be remained in database)
-	 */
-	void saveMailSetting(@Nullable MailSetting mailSetting);
+	void saveSubscriptionData(@Nullable String subscriptionData);
 	
 	/**
 	 * Get backup setting.
@@ -116,6 +97,11 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveAuthenticator(@Nullable Authenticator authenticator);
 
+	@Nullable
+	MailService getMailService();
+	
+	void saveMailService(@Nullable MailService mailService);
+
 	List<JobExecutor> getJobExecutors();
 	
 	void saveJobExecutors(List<JobExecutor> jobExecutors);
@@ -141,6 +127,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveBuildSetting(GlobalBuildSetting buildSetting);
 	
+	GlobalPackSetting getPackSetting();
+
+	void savePackSetting(GlobalPackSetting packSetting);
+	
 	GlobalProjectSetting getProjectSetting();
 	
 	void saveProjectSetting(GlobalProjectSetting projectSetting);
@@ -148,6 +138,8 @@ public interface SettingManager extends EntityManager<Setting> {
 	AgentSetting getAgentSetting();
 	
 	void saveAgentSetting(AgentSetting agentSetting);
+	
+	void saveSystemUUID(String systemUUID);
 	
     SshSetting getSshSetting();
     

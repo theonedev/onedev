@@ -6,12 +6,12 @@ import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
-import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
@@ -72,8 +72,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	List<ProjectFacade> getChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
-
-	void delete(Collection<Project> projects);
+	
+	void requestToDelete(Collection<Project> projects);
 	
 	Collection<Long> getIds();
 	
@@ -81,7 +81,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getPathMatchingIds(PatternSet patternSet);
 	
-	Collection<Project> getPermittedProjects(Permission permission);
+	Collection<Project> getPermittedProjects(BasePermission permission);
 	
 	ProjectCache cloneCache();
 	
@@ -115,7 +115,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	void redistributeReplicas();
 	
 	void directoryModified(Long projectId, File directory);
-
+	
 	boolean hasLfsObjects(Long projectId);
 	
 	Map<String, ProjectReplica> getReplicas(Long projectId);
@@ -144,9 +144,9 @@ public interface ProjectManager extends EntityManager<Project> {
 
 	void syncFile(Long projectId, String path, String readLock, String activeServer);
 
-	File getStorageDir();
+	File getProjectsDir();
 
-	File getStorageDir(Long projectId);
+	File getProjectDir(Long projectId);
 
 	/**
 	 * Get directory to store git repository of specified project
@@ -168,7 +168,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	 * Get directory to store static content of specified project
 	 *
 	 * @return
-	 * 			directory to store static content. The directory will be exist after calling this method
+	 * 			directory to store static content. The directory will exist after calling this method
 	 */
 	File getSiteDir(Long projectId);
 
@@ -176,10 +176,10 @@ public interface ProjectManager extends EntityManager<Project> {
 	 * Get directory to store additional info of specified project
 	 *
 	 * @return
-	 * 			directory to store additional info. The directory will be exist after calling this method
+	 * 			directory to store additional info. The directory will exist after calling this method
 	 */
 	File getInfoDir(Long projectId);
-
+	
 	/**
 	 * Get directory to store attachments of specified project
 	 *
@@ -189,5 +189,11 @@ public interface ProjectManager extends EntityManager<Project> {
 	File getAttachmentDir(Long projectId);
 
 	File getSubDir(Long projectId, String subdirPath);
+
+	File getSubDir(Long projectId, String subdirPath, boolean createIfNotExist);
+	
+	void updateActiveServers();
+
+	boolean isSharedDir(File dir, String remoteServer, Long projectId, String subPath);
 	
 }

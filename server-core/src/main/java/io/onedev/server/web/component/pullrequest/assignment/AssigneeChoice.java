@@ -10,11 +10,11 @@ import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class AssigneeChoice extends SelectToAddChoice<User> {
+public abstract class AssigneeChoice extends SelectToActChoice<User> {
 
 	public AssigneeChoice(String id) {
 		super(id);

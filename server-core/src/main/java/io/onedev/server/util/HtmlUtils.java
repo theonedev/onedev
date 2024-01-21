@@ -38,7 +38,7 @@ public class HtmlUtils {
 		whiteList = new Safelist() {
 
 			@Override
-			protected boolean isSafeAttribute(String tagName, Element el, Attribute attr) {
+			public boolean isSafeAttribute(String tagName, Element el, Attribute attr) {
 				if (attr.getKey().startsWith("data-"))
 					return true;
 				else

@@ -46,7 +46,7 @@ public class NoCommitsPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (SecurityUtils.canModify(context.getProject(), "main", null)) {
+		if (SecurityUtils.canModifyFile(context.getProject(), "main", null)) {
 			add(new MenuLink("addFiles") {
 
 				@Override
@@ -119,7 +119,7 @@ public class NoCommitsPanel extends Panel {
 				
 			});		
 
-			if (SecurityUtils.canModify(context.getProject(), "main", BuildSpec.BLOB_PATH)) {
+			if (SecurityUtils.canModifyFile(context.getProject(), "main", BuildSpec.BLOB_PATH)) {
 				add(new AjaxLink<Void>("setupBuildSpec") {
 
 					@Override

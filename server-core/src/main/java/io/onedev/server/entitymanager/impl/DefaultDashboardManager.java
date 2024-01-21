@@ -1,48 +1,42 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import com.google.common.base.Preconditions;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.DashboardGroupShareManager;
 import io.onedev.server.entitymanager.DashboardManager;
 import io.onedev.server.entitymanager.DashboardUserShareManager;
-import io.onedev.server.model.Dashboard;
-import io.onedev.server.model.DashboardGroupShare;
-import io.onedev.server.model.DashboardUserShare;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Singleton
 public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implements DashboardManager {
 
+	private final SubscriptionManager subscriptionManager;
+	
 	private final DashboardGroupShareManager groupShareManager;
 	
 	private final DashboardUserShareManager userShareManager;
 	
 	@Inject
 	public DefaultDashboardManager(Dao dao, DashboardGroupShareManager groupShareManager, 
-			DashboardUserShareManager userShareManager) {
+			DashboardUserShareManager userShareManager, SubscriptionManager subscriptionManager) {
 		super(dao);
 		this.groupShareManager = groupShareManager;
 		this.userShareManager = userShareManager;
+		this.subscriptionManager = subscriptionManager;
 	}
 
 	@Override
@@ -83,6 +77,7 @@ public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implem
 						builder.equal(groupShareRoot.get(DashboardGroupShare.PROP_DASHBOARD), root),
 						builder.equal(groupShareRoot.get(DashboardGroupShare.PROP_GROUP), group))));
 			}
+			predicates.add(builder.equal(root.get(Dashboard.PROP_FOR_EVERYONE), true));
 			criteriaQuery.where(builder.or(predicates.toArray(new Predicate[0])));
 		} else {
 			criteriaQuery.where(builder.equal(root.get(Dashboard.PROP_FOR_EVERYONE), true));
@@ -94,13 +89,13 @@ public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implem
 
 	@Override
 	public void create(Dashboard dashboard) {
-		Preconditions.checkState(dashboard.isNew());
+		Preconditions.checkState(dashboard.isNew() && subscriptionManager.isSubscriptionActive());
 		dao.persist(dashboard);
 	}
 
 	@Override
 	public void update(Dashboard dashboard) {
-		Preconditions.checkState(!dashboard.isNew());
+		Preconditions.checkState(!dashboard.isNew() && subscriptionManager.isSubscriptionActive());
 	}
 
 	@Override

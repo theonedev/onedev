@@ -1,34 +1,38 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import io.onedev.server.model.Group;
+import io.onedev.server.model.User;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import io.onedev.server.model.Group;
-import io.onedev.server.model.User;
-import io.onedev.server.notification.ActivityDetail;
-
-public class IssueLinkChangeData extends IssueChangeData {
+public abstract class IssueLinkChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String linkName;
 	
-	private final String oldIssueSummary;
+	private final boolean opposite;
 	
-	private final String newIssueSummary;
+	private final String linkedIssueNumber;
 	
-	public IssueLinkChangeData(String linkName, @Nullable String oldIssueSummary, @Nullable String newIssueSummary) {
+	public IssueLinkChangeData(String linkName, boolean opposite, String linkedIssueNumber) {
 		this.linkName = linkName;
-		this.oldIssueSummary = oldIssueSummary;
-		this.newIssueSummary = newIssueSummary;
+		this.opposite = opposite;
+		this.linkedIssueNumber = linkedIssueNumber;
 	}
-	
-	@Override
-	public String getActivity() {
-		return "changed \"" + linkName + "\"";
+
+	public String getLinkName() {
+		return linkName;
+	}
+
+	public boolean isOpposite() {
+		return opposite;
+	}
+
+	public String getLinkedIssueNumber() {
+		return linkedIssueNumber;
 	}
 
 	@Override
@@ -44,15 +48,6 @@ public class IssueLinkChangeData extends IssueChangeData {
 	@Override
 	public boolean affectsListing() {
 		return true;
-	}
-
-	@Override
-	public ActivityDetail getActivityDetail() {
-		Map<String, String> oldFieldValues = new HashMap<>();
-		oldFieldValues.put(linkName, oldIssueSummary);
-		Map<String, String> newFieldValues = new HashMap<>();
-		newFieldValues.put(linkName, newIssueSummary);
-		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	
 }

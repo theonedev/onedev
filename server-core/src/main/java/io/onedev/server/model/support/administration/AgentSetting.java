@@ -8,8 +8,11 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.support.NamedAgentQuery;
 import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.search.entity.agent.AgentQueryLexer;
 import io.onedev.server.search.entity.agent.NotUsedSinceCriteria;
 import io.onedev.server.search.entity.agent.OsCriteria;
+
+import static io.onedev.server.search.entity.agent.AgentQueryLexer.Is;
 
 public class AgentSetting implements Serializable {
 	
@@ -21,10 +24,10 @@ public class AgentSetting implements Serializable {
 		namedQueries.add(new NamedAgentQuery("All agents", null));
 		namedQueries.add(new NamedAgentQuery("Online agents", "online"));
 		namedQueries.add(new NamedAgentQuery("Offline agents", "offline"));
-		namedQueries.add(new NamedAgentQuery("Linux agents", new AgentQuery(new OsCriteria("Linux")).toString()));
-		namedQueries.add(new NamedAgentQuery("Windows agents", new AgentQuery(new OsCriteria("Windows")).toString()));
-		namedQueries.add(new NamedAgentQuery("Mac OS X agents", new AgentQuery(new OsCriteria("Mac OS X")).toString()));
-		namedQueries.add(new NamedAgentQuery("FreeBSD agents", new AgentQuery(new OsCriteria("FreeBSD")).toString()));
+		namedQueries.add(new NamedAgentQuery("Linux agents", new AgentQuery(new OsCriteria("Linux", Is)).toString()));
+		namedQueries.add(new NamedAgentQuery("Windows agents", new AgentQuery(new OsCriteria("Windows", Is)).toString()));
+		namedQueries.add(new NamedAgentQuery("Mac OS X agents", new AgentQuery(new OsCriteria("Mac OS X", Is)).toString()));
+		namedQueries.add(new NamedAgentQuery("FreeBSD agents", new AgentQuery(new OsCriteria("FreeBSD", Is)).toString()));
 		namedQueries.add(new NamedAgentQuery("Paused agents", "paused"));
 		namedQueries.add(new NamedAgentQuery("Not used for 1 month", new AgentQuery(new NotUsedSinceCriteria("1 month ago")).toString()));
 	}

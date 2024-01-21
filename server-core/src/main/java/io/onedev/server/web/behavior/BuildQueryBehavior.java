@@ -214,7 +214,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 			}
 		}
 		if (suggestedLiteral.equals("#")) 
-			return Optional.of("Find build by number");
+			return Optional.of("find build by number");
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

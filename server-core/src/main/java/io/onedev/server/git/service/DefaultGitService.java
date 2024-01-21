@@ -321,8 +321,8 @@ public class DefaultGitService implements GitService, Serializable {
 
 					@Override
 					public void run() {
-						Project project1 = projectManager.load(projectId);
-						listenerRegistry.post(new RefUpdated(project1, refName, commitId, ObjectId.zeroId()));
+						Project innerProject = projectManager.load(projectId);
+						listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 					}
 					
 				});
@@ -333,6 +333,7 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			return null;
 		});
+		project.cacheObjectId(GitUtils.branch2ref(branchName), null);
 	}
 	
 	@Override
@@ -347,8 +348,8 @@ public class DefaultGitService implements GitService, Serializable {
 				
 				String refName = GitUtils.tag2ref(tagName);
 				sessionManager.runAsync(() -> {
-					Project project1 = projectManager.load(projectId);
-					listenerRegistry.post(new RefUpdated(project1, refName, commitId, ObjectId.zeroId()));
+					Project innerProject = projectManager.load(projectId);
+					listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 				});
 				
 			} catch (Exception e) {
@@ -357,6 +358,7 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			return null;
 		});
+		project.cacheObjectId(GitUtils.tag2ref(tagName), null);
 	}
 
 	@Sessional
@@ -889,6 +891,35 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
+	public BlobIdent getBlobIdent(Project project, ObjectId revId, String path) {
+		Long projectId = project.getId();
+
+		return runOnProjectServer(projectId, new ClusterTask<>() {
+
+			@Override
+			public BlobIdent call() {
+				if (path.length() == 0) {
+					return new BlobIdent(revId.name(), null, FileMode.TREE.getBits());
+				} else {
+					Repository repository = getRepository(projectId);
+					try (RevWalk revWalk = new RevWalk(repository)) {
+						RevCommit commit = GitUtils.parseCommit(revWalk, revId);
+						if (commit != null) {
+							TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree());
+							if (treeWalk != null)
+								return new BlobIdent(revId.name(), path, treeWalk.getRawMode(0));
+						}
+						return null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+
+		});
+	}
+	
+	@Override
 	public void deleteRefs(Project project, Collection<String> refs) {
 		Long projectId = project.getId();
 		runOnProjectServer(projectId, () -> {
@@ -1049,6 +1080,21 @@ public class DefaultGitService implements GitService, Serializable {
 		});
 	}
 
+	@Override
+	public Collection<ObjectId> filterNonExistants(Project project, Collection<ObjectId> objIds) {
+		Long projectId = project.getId();
+
+		return runOnProjectServer(projectId, () -> {
+			var nonExistants = new ArrayList<ObjectId>();
+			ObjectDatabase database = getRepository(projectId).getObjectDatabase();
+			for (var objId: objIds) {
+				if (!database.has(objId))
+					nonExistants.add(objId);
+			}
+			return nonExistants;
+		});
+	}
+	
 	@Override
 	public List<BlobIdent> getChildren(Project project, ObjectId revId, String path, 
 			BlobIdentFilter filter, boolean expandSingle) {

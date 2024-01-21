@@ -1,13 +1,11 @@
 package io.onedev.server.model.support.administration.sso;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
-import org.apache.shiro.authc.AuthenticationToken;
-
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
+import org.apache.shiro.authc.AuthenticationToken;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 public class SsoAuthenticated extends Authenticated implements AuthenticationToken {
 	
@@ -17,9 +15,9 @@ public class SsoAuthenticated extends Authenticated implements AuthenticationTok
 	
 	private final SsoConnector connector;
 	
-	public SsoAuthenticated(String userName, String email, @Nullable String fullName,
-			@Nullable Collection<String> groupNames, @Nullable Collection<String> sshKeys, 
-			SsoConnector connector) {
+	public SsoAuthenticated(String userName, String email, @Nullable String fullName, 
+							@Nullable Collection<String> groupNames, 
+							@Nullable Collection<String> sshKeys, SsoConnector connector) {
 		super(email, fullName, groupNames, sshKeys);
 		this.userName = userName;
 		this.connector = connector;

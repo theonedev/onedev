@@ -137,23 +137,33 @@ public class InvitationListPage extends AdministrationPage {
 		
 		List<IColumn<UserInvitation, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<UserInvitation, Void>(Model.of("Email Address")) {
+		columns.add(new AbstractColumn<>(Model.of("Email Address")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem, 
-					String componentId, IModel<UserInvitation> rowModel) {
+			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
+									 String componentId, IModel<UserInvitation> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getEmailAddress()));
 			}
-			
+
 		});
-		
-		columns.add(new AbstractColumn<UserInvitation, Void>(Model.of("")) {
+
+		columns.add(new AbstractColumn<>(Model.of("Invite as Guest")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem, 
-					String componentId, IModel<UserInvitation> rowModel) {
+			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
+									 String componentId, IModel<UserInvitation> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().isInviteAsGuest()));
+			}
+
+		});
+		
+		columns.add(new AbstractColumn<>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
+									 String componentId, IModel<UserInvitation> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", InvitationListPage.this);
-				
+
 				fragment.add(new AjaxLink<Void>("resend") {
 
 					@Override
@@ -164,23 +174,23 @@ public class InvitationListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						if (OneDev.getInstance(SettingManager.class).getMailSetting() != null) {
+						if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
 							UserInvitation invitation = rowModel.getObject();
 							getInvitationManager().sendInvitationEmail(invitation);
 							Session.get().success("Invitation sent to '" + invitation.getEmailAddress() + "'");
 						} else {
-							Session.get().error("Mail settings not specified");
+							Session.get().error("Mail service not configured");
 						}
 					}
-					
+
 				});
-				
+
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to cancel invitation to '" 
+						String message = "Do you really want to cancel invitation to '"
 								+ rowModel.getObject().getEmailAddress() + "'?";
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
@@ -198,9 +208,9 @@ public class InvitationListPage extends AdministrationPage {
 						super.onConfigure();
 						setVisible(SecurityUtils.isAdministrator());
 					}
-					
+
 				});
-				
+
 				cellItem.add(fragment);
 			}
 

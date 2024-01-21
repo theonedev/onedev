@@ -8,10 +8,10 @@ query
 
 criteria
 	: operator=(Successful|Failed|Cancelled|Running|Finished|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
-    | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|InPipelineOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | Hash? number=Number #NumberCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | PoundSign? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -92,17 +92,25 @@ FixedIssue
 	;
 	
 OrderBy
-    : 'order by'
+    : 'order' WS+ 'by'
     ;
 
 Is
 	: 'is'
 	;
+
+IsNot
+    : 'is' WS+ 'not'
+    ;
 	
 IsEmpty
 	: 'is' WS+ 'empty'
 	;	
-	
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
+    ;
+
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'
 	;
@@ -112,11 +120,11 @@ IsLessThan
 	;
 	
 IsSince
-	: 'is since'
+	: 'is' WS+ 'since'
 	;
 
 IsUntil
-	: 'is until'
+	: 'is' WS+ 'until'
 	;
 	
 And
@@ -147,7 +155,7 @@ RParens
 	: ')'
 	;
 
-Hash
+PoundSign
     : '#'
     ;
 

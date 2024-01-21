@@ -43,6 +43,8 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private CurlLocation curlLocation = new SystemCurl();
 	
+	private boolean disableAutoUpdateCheck;
+	
 	private boolean gravatarEnabled;
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
@@ -113,7 +115,21 @@ public class SystemSetting implements Serializable, Validatable {
 	public void setCurlLocation(CurlLocation curlLocation) {
 		this.curlLocation = curlLocation;
 	}
-	
+
+	@Editable(order=400, description = "Auto update check is performed by requesting an image in " +
+			"your browser from onedev.io indicating new version availability, with color " +
+			"indicating severity of the update. It works the same way as how gravatar requests " +
+			"avatar images. If disabled, you are highly recommended to check update manually " +
+			"from time to time (can be done via help menu on left bottom of the screen) to see " +
+			"if there are any security/critical fixes")
+	public boolean isDisableAutoUpdateCheck() {
+		return disableAutoUpdateCheck;
+	}
+
+	public void setDisableAutoUpdateCheck(boolean disableAutoUpdateCheck) {
+		this.disableAutoUpdateCheck = disableAutoUpdateCheck;
+	}
+
 	@Editable(order=500, description="Whether or not to enable user gravatar (https://gravatar.com)")
 	public boolean isGravatarEnabled() {
 		return gravatarEnabled;

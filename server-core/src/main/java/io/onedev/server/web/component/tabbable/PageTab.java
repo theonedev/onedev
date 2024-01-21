@@ -1,13 +1,13 @@
 package io.onedev.server.web.component.tabbable;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.util.WicketUtils;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PageTab extends Tab {
 	
@@ -15,56 +15,67 @@ public class PageTab extends Tab {
 
 	private final IModel<String> titleModel;
 	
+	private final IModel<String> iconModel;
+	
 	private final Class<? extends Page> mainPageClass;
 	
 	private final List<Class<? extends Page>> additionalPageClasses;
 	
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+	public PageTab(IModel<String> titleModel, IModel<String> iconModel, Class<? extends Page> mainPageClass, 
 			List<Class<? extends Page>> additionalPageClasses) {
 		this.titleModel = titleModel;
+		this.iconModel = iconModel;
 		this.mainPageClass = mainPageClass;
 		this.additionalPageClasses = additionalPageClasses;
 	}
-	
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass) {
-		this(titleModel, mainPageClass, new ArrayList<Class<? extends Page>>());
+
+	public PageTab(IModel<String> titleModel, IModel<String> iconModel, Class<? extends Page> mainPageClass) {
+		this(titleModel, iconModel, mainPageClass, new ArrayList<>());
 	}
 
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+	public PageTab(IModel<String> titleModel, IModel<String> iconModel, Class<? extends Page> mainPageClass, 
 			Class<? extends Page> additionalPageClass) {
-		this(titleModel, mainPageClass, asList(additionalPageClass));
+		this(titleModel, iconModel, mainPageClass, asList(additionalPageClass));
 	}
 
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+	public PageTab(IModel<String> titleModel, IModel<String> iconModel, Class<? extends Page> mainPageClass, 
 			Class<? extends Page> additionalPageClass1, Class<? extends Page> additionalPageClass2) {
-		this(titleModel, mainPageClass, asList(additionalPageClass1, additionalPageClass2));
+		this(titleModel, iconModel, mainPageClass, asList(additionalPageClass1, additionalPageClass2));
 	}
 
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
+	public PageTab(IModel<String> titleModel, IModel<String> iconModel, Class<? extends Page> mainPageClass, 
 			Class<? extends Page> additionalPageClass1, 
 			Class<? extends Page> additionalPageClass2,
 			Class<? extends Page> additionalPageClass3) {
-		this(titleModel, mainPageClass, asList(additionalPageClass1, 
+		this(titleModel, iconModel, mainPageClass, asList(additionalPageClass1, 
 				additionalPageClass2, additionalPageClass3));
 	}
 
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
-			Class<? extends Page> additionalPageClass1, 
-			Class<? extends Page> additionalPageClass2,
-			Class<? extends Page> additionalPageClass3, 
-			Class<? extends Page> additionalPageClass4) {
-		this(titleModel, mainPageClass, asList(additionalPageClass1, 
-				additionalPageClass2, additionalPageClass3, additionalPageClass4));
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass,
+				   List<Class<? extends Page>> additionalPageClasses) {
+		this(titleModel, null, mainPageClass, additionalPageClasses);
 	}
-	
-	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass, 
-			Class<? extends Page> additionalPageClass1, 
-			Class<? extends Page> additionalPageClass2,
-			Class<? extends Page> additionalPageClass3, 
-			Class<? extends Page> additionalPageClass4, 
-			Class<? extends Page> additionalPageClass5) {
-		this(titleModel, mainPageClass, asList(additionalPageClass1, 
-				additionalPageClass2, additionalPageClass3, additionalPageClass4, additionalPageClass5));
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass) {
+		this(titleModel, null, mainPageClass, new ArrayList<Class<? extends Page>>());
+	}
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass,
+				   Class<? extends Page> additionalPageClass) {
+		this(titleModel, null, mainPageClass, asList(additionalPageClass));
+	}
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass,
+				   Class<? extends Page> additionalPageClass1, Class<? extends Page> additionalPageClass2) {
+		this(titleModel, null, mainPageClass, asList(additionalPageClass1, additionalPageClass2));
+	}
+
+	public PageTab(IModel<String> titleModel, Class<? extends Page> mainPageClass,
+				   Class<? extends Page> additionalPageClass1,
+				   Class<? extends Page> additionalPageClass2,
+				   Class<? extends Page> additionalPageClass3) {
+		this(titleModel, null, mainPageClass, asList(additionalPageClass1,
+				additionalPageClass2, additionalPageClass3));
 	}
 	
 	private static List<Class<? extends Page>> asList(Class<? extends Page> pageClass) {
@@ -117,7 +128,12 @@ public class PageTab extends Tab {
 	public final IModel<String> getTitleModel() {
 		return titleModel;
 	}
-	
+
+	@Nullable
+	public final IModel<String> getIconModel() {
+		return iconModel;
+	}
+
 	public final List<Class<? extends Page>> getAdditionalPageClasses() {
 		return additionalPageClasses;
 	}

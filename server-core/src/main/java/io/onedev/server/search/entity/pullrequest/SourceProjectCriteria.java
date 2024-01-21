@@ -19,29 +19,40 @@ public class SourceProjectCriteria extends Criteria<PullRequest> {
 
 	private final String projectPath;
 	
-	public SourceProjectCriteria(String projectPath) {
+	private final int operator;
+	
+	public SourceProjectCriteria(String projectPath, int operator) {
 		this.projectPath = projectPath;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, 
+		var predicate = OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, 
 				from.join(PullRequest.PROP_SOURCE_PROJECT, JoinType.INNER), projectPath);
+		if (operator == PullRequestQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
 		Project project = request.getSourceProject();
+		boolean matches;
 		if (project != null) 
-			return WildcardUtils.matchPath(projectPath, project.getPath());
+			matches = WildcardUtils.matchPath(projectPath, project.getPath());
 		else 
-			return false;
+			matches = false;
+		
+		if (operator == PullRequestQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(PullRequest.NAME_SOURCE_PROJECT) + " " 
-				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(projectPath);
 	}
 

@@ -5,10 +5,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
@@ -16,6 +16,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.project.DeleteStatusLabel;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
@@ -44,6 +45,8 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -65,7 +68,7 @@ import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSet
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
-import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
+import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -102,8 +105,6 @@ import java.util.*;
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected final IModel<Project> projectModel;
-	
-	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
@@ -174,7 +175,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getProject());
+		return SecurityUtils.canAccessProject(getProject());
 	}
 	
 	@Override
@@ -200,16 +201,18 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Tags", 
 					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Pull Requests", 
-					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0), 
-					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Comments", 
 					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Compare", 
 					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
 			
 			menuItems.add(new SidebarMenuItem.SubMenu("git", "Code", codeMenuItems));
-		}		
+		}
+		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests",
+					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0),
+					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
+		}
 		if (getProject().isIssueManagement()) {
 			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
 			
@@ -221,14 +224,21 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "Milestones", 
 					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
 					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
-			
+			if (getProject().isTimeTracking() && isSubscriptionActive()) 
+				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
-		
+
 		if (getProject().isCodeManagement()) {
-			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
-					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
+			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds",
+					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
+		}
+		
+		if (getProject().isPackManagement() && SecurityUtils.canReadPack(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("package", "Packages",
+					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
+					Lists.newArrayList(PackDetailPage.class)));
 		}
 		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
@@ -252,7 +262,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canManageProject(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Settings", 
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
@@ -294,10 +304,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build", buildSettingMenuItems));
-
+			
 			if (getSettingManager().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk", 
-						ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject())));
+						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));
 			}
 			
 			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();
@@ -449,9 +459,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			@Override
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
-				if (SecurityUtils.canAccess(project)) {
+				if (SecurityUtils.canAccessProject(project)) {
 					WebMarkupContainer link = navToProject("link", project);
 					link.add(new Label("label", project.getName()));
+					if (project.equals(getProject()))
+						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
+					else
+						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					
 					List<ProjectFacade> children = getProjectManager().getChildren(project.getId());
@@ -488,6 +502,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						
 					};
 					link.add(new Label("label", project.getName()));
+					if (project.equals(getProject()))
+						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
+					else
+						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					item.add(new WebMarkupContainer("children").setVisible(false));
 					item.add(new Label("dot").add(AttributeAppender.append("class", "dot")));

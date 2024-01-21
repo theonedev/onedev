@@ -34,7 +34,7 @@ import io.onedev.server.annotation.IssueQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Editable(order=100, name="Manually", description = "Press button (or drag&drop in boards)")
+@Editable(order=100, name="Press Button or Drag & Drop in Boards")
 public class PressButtonTrigger extends TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;

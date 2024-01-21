@@ -27,6 +27,8 @@ public class VoteCountCriteria extends Criteria<Issue> {
 		Path<Integer> attribute = from.get(Issue.PROP_VOTE_COUNT);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return builder.not(builder.equal(attribute, value));
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return builder.greaterThan(attribute, value);
 		else
@@ -37,6 +39,8 @@ public class VoteCountCriteria extends Criteria<Issue> {
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
 			return issue.getVoteCount() == value;
+		else if (operator == IssueQueryLexer.IsNot)
+			return issue.getVoteCount() != value;
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return issue.getVoteCount() > value;
 		else

@@ -15,9 +15,10 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.FileQuery;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.search.code.query.SymbolQuery;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.BinaryDocValues;
@@ -318,39 +319,51 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 		}
 	}
 
+	@Nullable
 	@Override
-	public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
-		Long projectId = project.getId();
-		return projectManager.runOnActiveServer(projectId, new ClusterTask<String>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String call() {
-				var query = new FileQuery.Builder(fileName)
-						.caseSensitive(true)
-						.count(MAX_BLOB_PATH_QUERY_COUNT)
-						.build();
-				String blobPath = null;
-				try {
-					for (QueryHit hit: search(projectId, commit, query)) {
-						if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 
-							if (blobPath == null) {
-								blobPath = hit.getBlobPath();
-							} else {
-								blobPath = null;
-								break;
-							}
-						}
-					}
-				} catch (TooGeneralQueryException ignored) {
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+	public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
+		var fileName = blobPathSuffix;
+		var lastIndex = fileName.lastIndexOf('/');
+		if (lastIndex != -1)
+			fileName = fileName.substring(lastIndex + 1);
+		
+		var query = new FileQuery.Builder(fileName).caseSensitive(true).count(MAX_BLOB_PATH_QUERY_COUNT).build();
+		String blobPath = null;
+		for (QueryHit hit: search(project, commit, query)) {
+			if (hit.getBlobPath().endsWith(blobPathSuffix)) {
+				if (blobPath == null) {
+					blobPath = hit.getBlobPath();
+				} else {
+					blobPath = null;
+					break;
 				}
-				return blobPath;
 			}
-			
-		});
+		}
+		return blobPath;
+	}
+	
+	@Nullable
+	@Override
+	public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
+		var symbolName = symbolFQN;
+		var lastIndex = symbolName.lastIndexOf(fqnSeparator);
+		if (lastIndex != -1)
+			symbolName = symbolName.substring(lastIndex + 1);
+
+		var query = new SymbolQuery.Builder(symbolName).caseSensitive(true).primary(true).count(MAX_BLOB_PATH_QUERY_COUNT).build();
+		SymbolHit found = null;
+		for (var hit : search(project, commitId, query)) {
+			var symbolHit = (SymbolHit) hit;
+			if (symbolFQN.equals(symbolHit.getSymbol().getFQN())) {
+				if (found == null) {
+					found = symbolHit;
+				} else {
+					logger.warn("Multiple primary symbols matching: " + symbolFQN);
+					found = null;
+				}
+			}
+		}
+		return found;
 	}
 
 }

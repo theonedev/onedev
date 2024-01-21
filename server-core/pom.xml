@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>8.6.13</version>
+		<version>10.0.0</version>
 	</parent>
 	<build>
 		<plugins>
@@ -319,6 +319,10 @@
 		<dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>javase</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.dhatim</groupId>
+			<artifactId>fastexcel</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>

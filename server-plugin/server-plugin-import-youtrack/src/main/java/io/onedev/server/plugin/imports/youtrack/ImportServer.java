@@ -1,7 +1,6 @@
 package io.onedev.server.plugin.imports.youtrack;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -22,6 +21,7 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -29,6 +29,9 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.http.client.utils.URIBuilder;
@@ -71,7 +74,7 @@ public class ImportServer implements Serializable, Validatable {
 	private String userName;
 
 	private String password;
-
+	
 	@Editable(order = 10, name = "YouTrack API URL", description = "Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>")
 	@NotEmpty
 	public String getApiUrl() {
@@ -160,13 +163,13 @@ public class ImportServer implements Serializable, Validatable {
 					projectNodes.add(projectNode);
 			}
 
-			return buildImportOption(projectNodes);
+			return buildImportOption(projectNodes, projects.isPopulateTagMappings());
 		} finally {
 			client.close();
 		}
 	}
 
-	ImportOption buildImportOption(String project) {
+	ImportOption buildImportOption(String project, boolean populateTagMappings) {
 		Client client = newClient();
 		try {
 			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name,customFields(field(name),bundle(values(name)))");
@@ -181,7 +184,7 @@ public class ImportServer implements Serializable, Validatable {
 				if (project.equals(projectNode.get("name").asText())) {
 					List<JsonNode> projectNodes = new ArrayList<>();
 					projectNodes.add(projectNode);
-					return buildImportOption(projectNodes);
+					return buildImportOption(projectNodes, populateTagMappings);
 				}
 			}
 			throw new ExplicitException("Unable to find YouTrack project: " + project);
@@ -190,7 +193,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	ImportOption buildImportOption(Collection<JsonNode> projectNodes) {
+	ImportOption buildImportOption(Collection<JsonNode> projectNodes, boolean populateTagMappings) {
 		ImportOption option = new ImportOption();
 		Client client = newClient();
 		try {
@@ -238,14 +241,17 @@ public class ImportServer implements Serializable, Validatable {
 				}
 
 			};
-			String apiEndpoint = getApiEndpoint("/issueTags?fields=name");
-			for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
-				IssueTagMapping mapping = new IssueTagMapping();
-				mapping.setYouTrackIssueTag(tagNode.get("name").asText());
-				option.getIssueTagMappings().add(mapping);
+			
+			if (populateTagMappings) {
+				String apiEndpoint = getApiEndpoint("/issueTags?fields=name");
+				for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
+					IssueTagMapping mapping = new IssueTagMapping();
+					mapping.setYouTrackIssueTag(tagNode.get("name").asText());
+					option.getIssueTagMappings().add(mapping);
+				}
 			}
 
-			apiEndpoint = getApiEndpoint("/issueLinkTypes?fields=name");
+			String apiEndpoint = getApiEndpoint("/issueLinkTypes?fields=name");
 			for (JsonNode tagNode : list(client, apiEndpoint, taskLogger)) {
 				IssueLinkMapping mapping = new IssueLinkMapping();
 				mapping.setYouTrackIssueLink(tagNode.get("name").asText());
@@ -272,7 +278,7 @@ public class ImportServer implements Serializable, Validatable {
 			Map<String, LinkSpec> linkMappings = new HashMap<>();
 
 			Map<Long, Long> issueNumberMappings = new HashMap<>();
-			Map<Long, Issue> issueMappings = new HashMap<>();
+			Map<String, Issue> issueMapping = new HashMap<>();
 
 			for (IssueStateMapping mapping : option.getIssueStateMappings())
 				stateMappings.put(mapping.getYouTrackIssueState(), mapping.getOneDevIssueState());
@@ -318,8 +324,7 @@ public class ImportServer implements Serializable, Validatable {
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 
 			List<Issue> issues = new ArrayList<>();
-			Map<Long, Pair<LinkSpec, List<Long>>> issueLinkInfo = new HashMap<>();
-			Map<Long, Set<Set<Long>>> processedSymmetricLinks = new HashMap<>();
+			Map<String, Pair<LinkSpec, List<String>>> linkedIssuesMapping = new HashMap<>();
 
 			String fields = ""
 					+ "idReadable,"
@@ -332,7 +337,7 @@ public class ImportServer implements Serializable, Validatable {
 					+ "reporter(login,name,email),"
 					+ "tags(name),"
 					+ "customFields(name,value(name,login,email,presentation,text),projectCustomField(field(fieldType(id)))),"
-					+ "links(direction,linkType(name,sourceToTarget,targetToSource),issues(numberInProject))";
+					+ "links(direction,linkType(name,sourceToTarget,targetToSource),issues(idReadable))";
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
 				@Nullable
@@ -431,7 +436,7 @@ public class ImportServer implements Serializable, Validatable {
 
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
-						issueMappings.put(oldNumber, issue);
+						issueMapping.put(readableId, issue);
 						issue.setTitle(issueNode.get("summary").asText());
 						issue.setDescription(issueNode.get("description").asText(null));
 						issue.setSubmitDate(new Date(issueNode.get("created").asLong(System.currentTimeMillis())));
@@ -821,51 +826,33 @@ public class ImportServer implements Serializable, Validatable {
 							issue.setState(initialState.getName());
 
 						for (JsonNode linkNode : issueNode.get("links")) {
-							List<Long> linkedIssueNumbers = new ArrayList<>();
-							for (JsonNode linkedIssueNode : linkNode.get("issues"))
-								linkedIssueNumbers.add(linkedIssueNode.get("numberInProject").asLong());
+							List<String> linkedIssueIds = new ArrayList<>();
+							for (JsonNode linkedIssueNode : linkNode.get("issues")) 
+								linkedIssueIds.add(linkedIssueNode.get("idReadable").asText());								
 
-							if (!linkedIssueNumbers.isEmpty() && linkNode.hasNonNull("linkType")) {
+							if (!linkedIssueIds.isEmpty() && linkNode.hasNonNull("linkType")) {
 								JsonNode linkTypeNode = linkNode.get("linkType");
 								String direction = linkNode.get("direction").asText();
 								String linkName = linkTypeNode.get("name").asText(null);
 								if (linkName != null) {
 									LinkSpec linkSpec = linkMappings.get(linkName);
 									if (linkSpec == null) {
-										List<String> linkedIssueLinks = new ArrayList<>();
-										for (Long issueNumber : linkedIssueNumbers)
-											linkedIssueLinks.add(youTrackProjectShortName + "-" + issueNumber);
-
 										unmappedIssueLinks.add(linkName);
 										switch (direction) {
 											case "BOTH":
 											case "OUTWARD":
 												linkName = linkTypeNode.get("sourceToTarget").asText(null);
 												if (linkName != null)
-													extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
+													extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueIds));
 												break;
 											case "INWARD":
 												linkName = linkTypeNode.get("targetToSource").asText(null);
 												if (linkName != null)
-													extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
+													extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueIds));
 												break;
 										}
-									} else if ("OUTWARD".equals(direction)) {
-										issueLinkInfo.put(oldNumber, new Pair<>(linkSpec, linkedIssueNumbers));
-									} else if ("BOTH".equals(direction)) {
-										Set<Set<Long>> value = processedSymmetricLinks.get(linkSpec.getId());
-										if (value == null) {
-											value = new HashSet<>();
-											processedSymmetricLinks.put(linkSpec.getId(), value);
-										}
-										List<Long> filteredIssueNumbers = new ArrayList<>();
-										for (Long issueNumber : linkedIssueNumbers) {
-											Set<Long> linkSides = Sets.newHashSet(oldNumber, issueNumber);
-											if (value.add(linkSides))
-												filteredIssueNumbers.add(issueNumber);
-										}
-										if (!filteredIssueNumbers.isEmpty())
-											issueLinkInfo.put(oldNumber, new Pair<>(linkSpec, filteredIssueNumbers));
+									} else if ("OUTWARD".equals(direction) || "BOTH".equals(direction)) {
+										linkedIssuesMapping.put(readableId, new Pair<>(linkSpec, linkedIssueIds));
 									}
 								}
 							}
@@ -990,27 +977,6 @@ public class ImportServer implements Serializable, Validatable {
 						dao.persist(comment);
 					}
 				}
-
-				Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
-				for (Map.Entry<Long, Pair<LinkSpec, List<Long>>> entry : issueLinkInfo.entrySet()) {
-					Issue source = issueMappings.get(entry.getKey());
-					if (source != null) {
-						for (Long targetNumber : entry.getValue().getRight()) {
-							Issue target = issueMappings.get(targetNumber);
-							if (target != null) {
-								var triple = new ImmutableTriple<>(source.getId(), target.getId(),
-										entry.getValue().getLeft().getId());
-								if (linkTriples.add(triple)) {
-									IssueLink link = new IssueLink();
-									link.setSource(source);
-									link.setTarget(target);
-									link.setSpec(entry.getValue().getLeft());
-									OneDev.getInstance(IssueLinkManager.class).create(link);
-								}
-							}
-						}
-					}
-				}
 			}
 
 			ImportResult result = new ImportResult();
@@ -1021,10 +987,16 @@ public class ImportServer implements Serializable, Validatable {
 			result.unmappedIssueStates.addAll(unmappedIssueStates);
 			result.unmappedIssueLinks.addAll(unmappedIssueLinks);
 			result.unmappedIssueTags.addAll(unmappedIssueTags);
+			for (var entry: issueMapping.entrySet())
+				result.issueMapping.put(entry.getKey(), entry.getValue().getId());
+			for (var entry: linkedIssuesMapping.entrySet()) {
+				result.linkedIssuesMapping.put(entry.getKey(), 
+						new Pair<>(entry.getValue().getLeft().getId(), entry.getValue().getRight()));
+			}
 
 			if (!dryRun && !issues.isEmpty())
 				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
-
+			
 			return result;
 		} finally {
 			if (!dryRun)
@@ -1049,8 +1021,8 @@ public class ImportServer implements Serializable, Validatable {
 		}, logger);
 		return result;
 	}
-
-	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
+	
+	TaskResult importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, String> youTrackProjectIds = new HashMap<>();
 		Map<String, String> youTrackProjectDescriptions = new HashMap<>();
 		Client client = newClient();
@@ -1065,49 +1037,88 @@ public class ImportServer implements Serializable, Validatable {
 			ImportResult result = new ImportResult();
 
 			for (var youTrackProject : projects.getImportProjects()) {
-				String oneDevProjectPath;
-				if (projects.getParentOneDevProject() != null)
-					oneDevProjectPath = projects.getParentOneDevProject() + "/" + youTrackProject;
-				else
-					oneDevProjectPath = youTrackProject;
+				OneDev.getInstance(TransactionManager.class).run(() -> {
+					String oneDevProjectPath;
+					if (projects.getParentOneDevProject() != null)
+						oneDevProjectPath = projects.getParentOneDevProject() + "/" + youTrackProject;
+					else
+						oneDevProjectPath = youTrackProject;
 
-				logger.log("Importing from '" + youTrackProject + "' to '" + oneDevProjectPath + "'...");
+					logger.log("Importing from '" + youTrackProject + "' to '" + oneDevProjectPath + "'...");
 
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				Project project = projectManager.setup(oneDevProjectPath);
+					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+					Project project = projectManager.setup(oneDevProjectPath);
 
-				if (!project.isNew() && !SecurityUtils.canManage(project)) {
-					throw new UnauthorizedException("Import target already exists. " +
-							"You need to have project management privilege over it");
-				}
+					if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
+						throw new UnauthorizedException("Import target already exists. " +
+								"You need to have project management privilege over it");
+					}
 
-				String youTrackProjectId = youTrackProjectIds.get(youTrackProject);
-				if (youTrackProjectId == null)
-					throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
+					String youTrackProjectId = youTrackProjectIds.get(youTrackProject);
+					if (youTrackProjectId == null)
+						throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
 
-				project.setDescription(youTrackProjectDescriptions.get(youTrackProject));
-				project.setIssueManagement(true);
+					project.setDescription(youTrackProjectDescriptions.get(youTrackProject));
+					project.setIssueManagement(true);
 
-				boolean newlyCreated = project.isNew();
-				if (!dryRun && newlyCreated)
-					projectManager.create(project);
+					boolean newlyCreated = project.isNew();
+					if (!dryRun && newlyCreated)
+						projectManager.create(project);
 
-				logger.log("Importing issues...");
-				ImportResult currentResult = doImportIssues(youTrackProjectId, project,
-						option, dryRun, logger);
-				result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
-				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-				result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
-				result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
-				result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
-				result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
-				result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
+					logger.log("Importing issues...");
+					ImportResult currentResult = doImportIssues(youTrackProjectId, project,
+							option, dryRun, logger);
+
+					result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
+					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
+					result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
+					result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
+					result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
+					result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
+					result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
+					result.issueMapping.putAll(currentResult.issueMapping);
+					result.linkedIssuesMapping.putAll(currentResult.linkedIssuesMapping);
+				});
 			}
-
-			return result.toHtml("Projects imported successfully");
+			
+			if (!dryRun)
+				setupIssueLinks(result);
+			
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} finally {
 			client.close();
 		}
+	}
+	
+	private void setupIssueLinks(ImportResult result) {
+		OneDev.getInstance(TransactionManager.class).run(() -> {
+			Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
+			var issueManager = OneDev.getInstance(IssueManager.class);
+			var linkSpecManager = OneDev.getInstance(LinkSpecManager.class);
+			for (var entry : result.linkedIssuesMapping.entrySet()) {
+				Long sourceIssueId = result.issueMapping.get(entry.getKey());
+				if (sourceIssueId != null) {
+					for (String targetYouTrackIssueId : entry.getValue().getRight()) {
+						Long targetIssueId = result.issueMapping.get(targetYouTrackIssueId);
+						if (targetIssueId != null) {
+							var triple = new ImmutableTriple<>(sourceIssueId, targetIssueId, entry.getValue().getLeft());
+							if (linkTriples.add(triple)) {
+								var linkSpec = linkSpecManager.load(entry.getValue().getLeft());
+								if (linkSpec.getOpposite() == null) {
+									linkTriples.add(new ImmutableTriple<>(targetIssueId, sourceIssueId, 
+											entry.getValue().getLeft()));
+								}
+								IssueLink link = new IssueLink();
+								link.setSource(issueManager.load(sourceIssueId));
+								link.setTarget(issueManager.load(targetIssueId));
+								link.setSpec(linkSpec);
+								OneDev.getInstance(IssueLinkManager.class).create(link);
+							}
+						}
+					}
+				}
+			}
+		});
 	}
 
 	private void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, TaskLogger logger) {
@@ -1137,22 +1148,31 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	String importIssues(Project project, String youTrackProject, ImportOption option,
+	TaskResult importIssues(Long projectId, String youTrackProject, ImportOption option,
 						boolean dryRun, TaskLogger logger) {
-		logger.log("Importing issues from '" + youTrackProject + "'...");
-		Client client = newClient();
-		try {
-			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name");
-			for (JsonNode projectNode : list(client, apiEndpoint, logger)) {
-				if (youTrackProject.equals(projectNode.get("name").asText())) {
-					ImportResult result = doImportIssues(projectNode.get("id").asText(),
-							project, option, dryRun, logger);
-					return result.toHtml("Issues imported successfully");
+		var result = OneDev.getInstance(TransactionManager.class).call(() -> {
+			var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			logger.log("Importing issues from '" + youTrackProject + "'...");
+			Client client = newClient();
+			try {
+				String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name");
+				for (JsonNode projectNode : list(client, apiEndpoint, logger)) {
+					if (youTrackProject.equals(projectNode.get("name").asText())) {
+						return doImportIssues(projectNode.get("id").asText(),
+								project, option, dryRun, logger);
+					}
 				}
+				return null;
+			} finally {
+				client.close();
 			}
-			throw new ExplicitException("Unable to find YouTrack project: " + youTrackProject);
-		} finally {
-			client.close();
+		});
+		if (result != null) {
+			if (!dryRun)
+				setupIssueLinks(result);
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
+		} else {
+			return new TaskResult(false, new PlainMessage("Unable to find YouTrack project: " + youTrackProject));
 		}
 	}
 

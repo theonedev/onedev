@@ -27,10 +27,11 @@ public abstract class Interpreter implements Serializable {
 		this.commands = commands;
 	}
 
-	public abstract CommandFacade getExecutable(JobExecutor jobExecutor, @Nullable String image, boolean useTTY);
+	public abstract CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, @Nullable String image,
+												@Nullable String builtInRegistryAccessToken, boolean useTTY);
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false, true);
+		return BuildSpec.suggestVariables(matchWith, true, false, true);
 	}
 	
 }

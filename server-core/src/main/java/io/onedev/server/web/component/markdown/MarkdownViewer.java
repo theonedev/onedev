@@ -186,7 +186,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "issue":
 					Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(referenceId);
 					// check permission here as issue project may not be the same as current project
-					if (issue != null && SecurityUtils.canAccess(issue)) {
+					if (issue != null && SecurityUtils.canAccessIssue(issue)) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s');", 
 								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())), 
@@ -225,7 +225,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "build":
 					Build build = OneDev.getInstance(BuildManager.class).find(referenceId);
 					// check permission here as build project may not be the same as current project
-					if (build != null && SecurityUtils.canAccess(build)) {
+					if (build != null && SecurityUtils.canAccessBuild(build)) {
 						String iconHref = SpriteImage.getVersionedHref(BuildStatusIcon.getIconHref(build.getStatus()));
 						String iconCss = BuildStatusIcon.getIconClass(build.getStatus());
 						

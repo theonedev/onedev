@@ -46,8 +46,9 @@ public class ShellInterpreter extends Interpreter {
 	}
 
 	@Override
-	public CommandFacade getExecutable(JobExecutor jobExecutor, String image, boolean useTTY) {
-		return new ShellFacade(image, shell, getCommands(), useTTY);
+	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
+									   String builtInRegistryAccessToken, boolean useTTY) {
+		return new ShellFacade(image, builtInRegistryAccessToken, shell, getCommands(), useTTY);
 	}
 
 }

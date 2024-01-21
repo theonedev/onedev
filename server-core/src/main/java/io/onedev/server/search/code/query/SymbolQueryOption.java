@@ -22,6 +22,8 @@ import java.util.List;
 import static io.onedev.server.search.code.FieldConstants.*;
 import static io.onedev.server.util.match.WildcardUtils.matchString;
 import static io.onedev.server.util.match.WildcardUtils.rangeOfMatch;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
+import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 public class SymbolQueryOption implements QueryOption {
 
@@ -108,10 +110,10 @@ public class SymbolQueryOption implements QueryOption {
 		if (fileNames != null) {
 			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
-				subQueryBuilder.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), BooleanClause.Occur.SHOULD);
+				subQueryBuilder.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), SHOULD);
 			BooleanQuery subQuery = subQueryBuilder.build();
 			if (subQuery.clauses().size() != 0)
-				builder.add(subQuery, BooleanClause.Occur.MUST);
+				builder.add(subQuery, MUST);
 		}
 
 		boolean tooGeneral = true;
@@ -131,7 +133,12 @@ public class SymbolQueryOption implements QueryOption {
 			else
 				fieldName = BLOB_SECONDARY_SYMBOLS.name();
 
-			builder.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), BooleanClause.Occur.MUST);
+			builder.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), MUST);
+		} else {
+			BooleanQuery.Builder termQueryBuilder = new BooleanQuery.Builder();
+			termQueryBuilder.add(new WildcardQuery(new Term(BLOB_PRIMARY_SYMBOLS.name(), term.toLowerCase())), SHOULD);
+			termQueryBuilder.add(new WildcardQuery(new Term(BLOB_SECONDARY_SYMBOLS.name(), term.toLowerCase())), SHOULD);
+			builder.add(termQueryBuilder.build(), MUST);
 		}
 	}
 

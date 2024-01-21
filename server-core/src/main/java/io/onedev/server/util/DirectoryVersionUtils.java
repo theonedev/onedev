@@ -25,17 +25,22 @@ public class DirectoryVersionUtils {
 		}
 	}
 	
-	public static int readVersion(File directory) {
+	public static long readVersion(File directory) {
 		return callWithVersionLock(directory.toPath(), () -> {
 			var versionFile = new File(directory, FILE_VERSION);
-			if (versionFile.exists())
-				return Integer.parseInt(FileUtils.readFileToString(versionFile, UTF_8).trim());
-			else
-				return 0;
+			if (versionFile.exists()) {
+				try {
+					return Long.parseLong(FileUtils.readFileToString(versionFile, UTF_8).trim());
+				} catch (Exception e) {
+					throw new RuntimeException("Error reading directory version from file: " + versionFile, e);
+				}
+			} else {
+				return 0L;
+			}
 		});
 	}
 
-	public static void writeVersion(File directory, int version) {
+	public static void writeVersion(File directory, long version) {
 		callWithVersionLock(directory.toPath(), () -> {
 			var versionFile = new File(directory, FILE_VERSION);
 			FileUtils.writeStringToFile(versionFile, String.valueOf(version), UTF_8);

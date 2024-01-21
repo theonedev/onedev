@@ -1,19 +1,17 @@
 package io.onedev.server.web.editable.buildspec.job.jobdependency;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.util.TextUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -23,12 +21,9 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.buildspec.job.JobDependency;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
-import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.util.TextUtils;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class JobDependencyListViewPanel extends Panel {
@@ -61,7 +56,7 @@ class JobDependencyListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getParamMatrix().size()));
 			}
 			
 		});		

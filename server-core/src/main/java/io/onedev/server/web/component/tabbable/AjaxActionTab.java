@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.tabbable;
 
+import com.google.common.base.Preconditions;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -8,15 +9,19 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
 public abstract class AjaxActionTab extends ActionTab {
 
-	public AjaxActionTab(IModel<String> titleModel) {
-		super(titleModel);
+	public AjaxActionTab(IModel<String> titleModel, @Nullable IModel<String> iconModel) {
+		super(titleModel, iconModel);
 	}
 
+	public AjaxActionTab(IModel<String> titleModel) {
+		this(titleModel, null);
+	}
+	
 	@Override
 	public Component render(String componentId) {
 		return new ActionTabHead(componentId, this) {

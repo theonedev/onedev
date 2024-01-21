@@ -101,9 +101,9 @@ public class DefaultAlertManager extends BaseEntityManager<Alert> implements Ale
 				var alertSetting = settingManager.getAlertSetting();
 				if (!alertSetting.getNotifyUsers().isEmpty()) {
 					transactionManager.runAfterCommit(() -> sessionManager.runAsync(() -> {
-						var mailSetting = settingManager.getMailSetting();
-						if (mailSetting == null) {
-							alert("Unable to send alert email: Mail setting not defined yet", null, true);
+						var mailService = settingManager.getMailService();
+						if (mailService == null) {
+							alert("Unable to send alert email: Mail service not specified yet", null, true);
 						} else {
 							var emailAddresses = new ArrayList<String>();
 							for (var userName: alertSetting.getNotifyUsers()) {
@@ -133,8 +133,9 @@ public class DefaultAlertManager extends BaseEntityManager<Alert> implements Ale
 								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 								
-								mailManager.sendMail(mailSetting.getSendSetting(), emailAddresses, new ArrayList<>(), new ArrayList<>(), 
-										"[Alert] " + alert.getSubject(), htmlBody, textBody, null, null, null);
+								mailManager.sendMail(emailAddresses, new ArrayList<>(), new ArrayList<>(), 
+										"[Alert] " + alert.getSubject(), htmlBody, textBody, 
+										null, null, null);
 							}
 						}
 					}));

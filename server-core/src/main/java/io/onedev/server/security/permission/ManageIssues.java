@@ -1,8 +1,10 @@
 package io.onedev.server.security.permission;
 
+import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
+import org.jetbrains.annotations.Nullable;
 
-public class ManageIssues implements Permission {
+public class ManageIssues implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
@@ -13,4 +15,8 @@ public class ManageIssues implements Permission {
 				|| new ScheduleIssues().implies(p);
 	}
 
+	@Override
+	public boolean isApplicable(@Nullable UserFacade user) {
+		return user != null && !user.isEffectiveGuest();
+	}
 }

@@ -22,9 +22,8 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.buildspec.step.UseTemplateStep;
-import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.data.migration.VersionedYamlDoc;
-import io.onedev.server.data.migration.XmlBuildSpecMigrator;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -34,7 +33,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.*;
 
@@ -60,8 +58,6 @@ public class BuildSpec implements Serializable, Validatable {
 		@Override
         public byte[] load(String key) {
 			String buildSpecString = key;
-			if (buildSpecString.trim().startsWith("<?xml")) 
-				buildSpecString = XmlBuildSpecMigrator.migrate(buildSpecString);
 			try {
 				return SerializationUtils.serialize(VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class));
 			} catch (Exception e) {
@@ -153,28 +149,28 @@ public class BuildSpec implements Serializable, Validatable {
 		importedBuildSpecs = null;
 	}
 	
-	private List<BuildSpec> getImportedBuildSpecs(Collection<String> projectChain) {
+	private List<BuildSpec> getImportedBuildSpecs(Collection<String> commitChain) {
 		if (importedBuildSpecs == null) {
 			importedBuildSpecs = new ArrayList<>();
-			for (Import aImport: getImports()) { 
-				if (!projectChain.contains(aImport.getProjectPath())) {
-					Collection<String> newProjectChain = new HashSet<>(projectChain);
-					newProjectChain.add(aImport.getProjectPath());
-					try {
+			for (Import aImport: getImports()) {
+				try {
+					var importCommit = aImport.getCommit();
+					if (!commitChain.contains(importCommit.name())) {
+						Collection<String> newCommitChain = new HashSet<>(commitChain);
+						newCommitChain.add(importCommit.name());
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
-						RevCommit commit = aImport.getProject().getRevCommit(aImport.getRevision(), true);
 						JobAuthorizationContext.push(new JobAuthorizationContext(
-								aImport.getProject(), commit, SecurityUtils.getUser(), null));
+								aImport.getProject(), importCommit, SecurityUtils.getUser(), null));
 						try {
-							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newProjectChain));
+							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newCommitChain));
 						} finally {
 							JobAuthorizationContext.pop();
 						}
 						importedBuildSpecs.add(importedBuildSpec);
-					} catch (Exception e) {
-						// Ignore here as we rely on this method to show viewer/editor 
-						// Errors relating to this will be shown when validated
 					}
+				} catch (Exception e) {
+					// Ignore here as we rely on this method to show viewer/editor 
+					// Errors relating to this will be shown when validated
 				}
 			}
 		}
@@ -380,10 +376,10 @@ public class BuildSpec implements Serializable, Validatable {
 			index++;
 		}
 		
-		Set<String> importProjectNames = new HashSet<>();
+		Set<String> importProjectAndRevisions = new HashSet<>();
 		for (Import aImport: imports) {
-			if (!importProjectNames.add(aImport.getProjectPath())) {
-				context.buildConstraintViolationWithTemplate("Duplicate import (" + aImport.getProjectPath() + ")")
+			if (!importProjectAndRevisions.add(aImport.getProjectPath() + ":" + aImport.getRevision())) {
+				context.buildConstraintViolationWithTemplate(String.format("Duplicate import (project: %s, revision: %s)", aImport.getProjectPath(), aImport.getRevision()))
 						.addPropertyNode(PROP_IMPORTS).addConstraintViolation();
 				isValid = false;
 			}
@@ -545,7 +541,9 @@ public class BuildSpec implements Serializable, Validatable {
 			if (template != null) {
 				if (templateChain.isEmpty()) {
 					try {
-						ParamUtils.validateParams(template.getParamSpecs(), step.getParams());
+						ParamUtils.validateParamMatrix(template.getParamSpecs(), step.getParamMatrix());
+						for (var paramMap: step.getExcludeParamMaps())
+							ParamUtils.validateParamMap(template.getParamSpecs(), paramMap.getParams());
 					} catch (Exception e) {
 						throw new ValidationException(String.format("Error validating step template parameters (%s)", e.getMessage()));
 					}
@@ -571,7 +569,9 @@ public class BuildSpec implements Serializable, Validatable {
 				if (dependencyJob != null) {
 					if (dependencyChain.isEmpty()) {
 						try {
-							ParamUtils.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
+							ParamUtils.validateParamMatrix(dependencyJob.getParamSpecs(), dependency.getParamMatrix());
+							for (var paramMap: dependency.getExcludeParamMaps())
+								ParamUtils.validateParamMap(dependencyJob.getParamSpecs(), paramMap.getParams());
 						} catch (ValidationException e) {
 							String message = String.format("Error validating dependency job parameters (dependency job: %s, error message: %s)", 
 									dependencyJob.getName(), e.getMessage());
@@ -1720,6 +1720,79 @@ public class BuildSpec implements Serializable, Validatable {
 						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
 						if (stepTemplateTupleKey.equals("steps"))
 							migrate25_steps((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
+
+	private void migrate26_steps(SequenceNode stepsNode) {
+		for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+			MappingNode stepNode = (MappingNode) itStepNode.next();
+			for (NodeTuple stepTuple: stepNode.getValue()) {
+				var stepTupleKeyNode = (ScalarNode)stepTuple.getKeyNode();
+				if (stepTupleKeyNode.getValue().equals("params")) {
+					stepTupleKeyNode.setValue("paramMatrix");
+					for (Node paramNode: ((SequenceNode)stepTuple.getValueNode()).getValue()) {
+						MappingNode paramMappingNode = (MappingNode) paramNode;
+						for (NodeTuple paramTuple: paramMappingNode.getValue()) {
+							if (((ScalarNode)paramTuple.getKeyNode()).getValue().equals("valuesProvider")) {
+								MappingNode valuesProviderNode = (MappingNode) paramTuple.getValueNode();
+								if (valuesProviderNode.getTag().getValue().equals("!Ignore"))
+									valuesProviderNode.setTag(new Tag("!IgnoreValues"));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void migrate26(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps")) {
+							migrate26_steps((SequenceNode) jobTuple.getValueNode());
+						} else if (jobTupleKey.equals("triggers") || jobTupleKey.equals("jobDependencies")
+								|| jobTupleKey.equals("postBuildActions")) {
+							SequenceNode propsNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node propNodeItem: propsNode.getValue()) {
+								MappingNode propNode = (MappingNode) propNodeItem;
+								for (NodeTuple propTuple: propNode.getValue()) {
+									var propTupleKeyNode = (ScalarNode)propTuple.getKeyNode();
+									if (propTupleKeyNode.getValue().equals("params")
+											|| propTupleKeyNode.getValue().equals("jobParams")) {
+										propTupleKeyNode.setValue("paramMatrix");
+										for (Node paramNode: ((SequenceNode)propTuple.getValueNode()).getValue()) {
+											MappingNode paramMappingNode = (MappingNode) paramNode;
+											for (NodeTuple paramTuple: paramMappingNode.getValue()) {
+												if (((ScalarNode)paramTuple.getKeyNode()).getValue().equals("valuesProvider")) {
+													MappingNode valuesProviderNode = (MappingNode) paramTuple.getValueNode();
+													if (valuesProviderNode.getTag().getValue().equals("!Ignore")) 
+														valuesProviderNode.setTag(new Tag("!IgnoreValues"));
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps"))
+							migrate26_steps((SequenceNode)stepTemplateTuple.getValueNode());
 					}
 				}
 			}

@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -38,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.onedev.agent.ExecutorUtils.newInfoLogger;
+import static io.onedev.agent.ExecutorUtils.newWarningLogger;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 
@@ -118,7 +119,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								+ "directly on bare metal/virtual machine");
 					}
 
-					buildHome = FileUtils.createTempDir("onedev-build");
+					buildHome = new File(Bootstrap.getTempDir(),
+							"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+					FileUtils.createDir(buildHome);
 					File workspaceDir = new File(buildHome, "workspace");
 					try {
 						String serverAddress = getClusterManager().getLocalServerAddress();
@@ -201,16 +204,14 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										interpreter.workingDir(workspaceDir).environments(environments);
 										interpreter.addArgs(jobScriptFile.getAbsolutePath());
 
-										ExecutionResult result = interpreter.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+										ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 										if (result.getReturnCode() != 0) {
 											long duration = System.currentTimeMillis() - time;
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Command exited with code " + result.getReturnCode());
 											return false;
 										}
-									} else if (facade instanceof RunContainerFacade) {
-										throw new ExplicitException("This step can only be executed by server docker executor, "
-												+ "remote docker executor, or kubernetes executor");
-									} else if (facade instanceof BuildImageFacade) {
+									} else if (facade instanceof BuildImageFacade || facade instanceof RunContainerFacade
+											|| facade instanceof RunImagetoolsFacade) {
 										throw new ExplicitException("This step can only be executed by server docker executor or "
 												+ "remote docker executor");
 									} else if (facade instanceof CheckoutFacade) {
@@ -225,23 +226,23 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											git.environments(environments);
 
 											checkoutFacade.setupWorkingDir(git, workspaceDir);
-
+											
 											File trustCertsFile = new File(buildHome, "trust-certs.pem");
 											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
 													trustCertsFile.getAbsolutePath(), 
-													ExecutorUtils.newInfoLogger(jobLogger), 
-													ExecutorUtils.newWarningLogger(jobLogger));
+													newInfoLogger(jobLogger), 
+													newWarningLogger(jobLogger));
 
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
 											cloneInfo.writeAuthData(userHome, git, false, 
-													ExecutorUtils.newInfoLogger(jobLogger), 
-													ExecutorUtils.newWarningLogger(jobLogger));
+													newInfoLogger(jobLogger), 
+													newWarningLogger(jobLogger));
 
 											int cloneDepth = checkoutFacade.getCloneDepth();
 
 											cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(), jobContext.getRefName(),
 													jobContext.getCommitId().name(), checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-													cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+													cloneDepth, newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 										} catch (Exception e) {
 											long duration = System.currentTimeMillis() - time;
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));

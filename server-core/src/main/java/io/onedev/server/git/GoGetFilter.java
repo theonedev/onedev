@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Splitter;
 
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 

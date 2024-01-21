@@ -1,22 +1,22 @@
 package io.onedev.server;
 
 import com.google.common.base.Splitter;
-import io.onedev.agent.Agent;
 import io.onedev.server.persistence.HibernateConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static io.onedev.commons.utils.FileUtils.loadProperties;
+import static java.lang.Integer.parseInt;
 
 public class ServerConfig {
 	
@@ -50,7 +50,7 @@ public class ServerConfig {
 		if (StringUtils.isBlank(httpPortStr))
 			httpPortStr = props.getProperty(PROP_HTTP_PORT);
 		if (StringUtils.isNotBlank(httpPortStr)) {
-			httpPort = Integer.parseInt(httpPortStr.trim());
+			httpPort = parseInt(httpPortStr.trim());
 		} else {
 			logger.warn(PROP_HTTP_PORT + " not specified, default to 6610");
 			httpPort = 6610;
@@ -60,7 +60,7 @@ public class ServerConfig {
 		if (StringUtils.isBlank(sshPortStr))
 			sshPortStr = props.getProperty(PROP_SSH_PORT);
 		if (StringUtils.isNotBlank(sshPortStr)) {
-			sshPort = Integer.parseInt(sshPortStr.trim());
+			sshPort = parseInt(sshPortStr.trim());
 		} else {
 			logger.warn(PROP_SSH_PORT + " not specified, default to 6611");
 			sshPort = 6611;
@@ -90,25 +90,51 @@ public class ServerConfig {
 			if (dbUrl.startsWith("hsqldb")) {
 				clusterIp = "127.0.0.1";
 			} else {
+				Map<String, Integer> dbPorts = new HashMap<>();
 				String tempStr = StringUtils.substringAfter(dbUrl, "//");
-				String dbHost = StringUtils.substringBefore(tempStr, ":");
-				tempStr = StringUtils.substringAfter(tempStr, ":");
-				int dbPort;
-				if (dbUrl.startsWith("sqlserver")) {
-					dbPort = Integer.parseInt(StringUtils.substringBefore(tempStr, ";"));
+				if (dbUrl.startsWith("mysql") || dbUrl.startsWith("mariadb")) {
+					if (tempStr.contains(":")) {
+						String dbHost = StringUtils.substringBefore(tempStr, ":");
+						tempStr = StringUtils.substringAfter(tempStr, ":");
+						tempStr = StringUtils.substringBefore(tempStr, "/");
+						dbPorts.put(dbHost, parseInt(tempStr));
+					} else {
+						String dbHost = StringUtils.substringBefore(tempStr, "/");
+						dbPorts.put(dbHost, 3306);
+					}
+				} else if (dbUrl.startsWith("sqlserver")) {
+					if (tempStr.contains(":")) {
+						String dbHost = StringUtils.substringBefore(tempStr, ":");
+						tempStr = StringUtils.substringAfter(tempStr, ":");
+						tempStr = StringUtils.substringBefore(tempStr, ";");
+						dbPorts.put(dbHost, parseInt(tempStr));
+					} else {
+						String dbHost = StringUtils.substringBefore(tempStr, ";");
+						dbPorts.put(dbHost, 1433);
+					}
 				} else {
 					tempStr = StringUtils.substringBefore(tempStr, "/");
-					// Fix issue https://code.onedev.io/onedev/server/~issues/1086
-					tempStr = StringUtils.substringBefore(tempStr, ",");
-					dbPort = Integer.parseInt(tempStr);
+					for (var part: Splitter.on(",").omitEmptyStrings().trimResults().split(tempStr)) {
+						if (part.contains(":")) {
+							dbPorts.put(StringUtils.substringBefore(part, ":"), 
+									parseInt(StringUtils.substringAfter(part, ":")));
+						} else {
+							dbPorts.put(part, 5432);
+						}
+					}
 				}
 
-				try (Socket socket = new Socket()) {
-					socket.connect(new InetSocketAddress(dbHost, dbPort));
-					clusterIp = socket.getLocalAddress().getHostAddress();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				for (var entry: dbPorts.entrySet()) {
+					try (Socket socket = new Socket()) {
+						socket.connect(new InetSocketAddress(entry.getKey(), entry.getValue()));
+						clusterIp = socket.getLocalAddress().getHostAddress();
+						break;
+					} catch (Exception e) {
+						logger.warn(String.format("Connection failed (host: %s, port: %d)", entry.getKey(), entry.getValue()), e);
+					}
 				}
+				if (StringUtils.isBlank(clusterIp)) 
+					throw new RuntimeException("Unable to discover cluster ip from database connection url: " + dbUrl);
 			}
 		}
 		this.clusterIp = clusterIp;
@@ -119,7 +145,7 @@ public class ServerConfig {
 		if (StringUtils.isBlank(clusterPortStr))
 			clusterPort = 5710;
 		else
-			clusterPort = Integer.parseInt(clusterPortStr.trim());
+			clusterPort = parseInt(clusterPortStr.trim());
 	}
 
 	public int getHttpPort() {

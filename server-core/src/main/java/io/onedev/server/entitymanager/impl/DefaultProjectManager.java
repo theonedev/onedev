@@ -14,7 +14,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
@@ -37,8 +37,6 @@ import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -59,7 +57,9 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.ProjectNameReservation;
 import io.onedev.server.util.artifact.ArtifactInfo;
@@ -71,11 +71,12 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.api.Git;
@@ -109,7 +110,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.FileUtils.cleanDir;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
@@ -136,7 +137,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	private static final String LFS_SINCE_COMMITS = "lfs/.lfs-since-commits";
 	
-	private static final int SYNC_PRIORITY = 10000;
+	private static final int SYNC_PRIORITY = 20;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
@@ -182,6 +183,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final StorageManager storageManager;
 	
+	private final PackBlobManager packBlobManager;
+	
 	private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml", "sitemap.txt",
 			"favicon.ico", "favicon.png", "logo.png", "wicket", "projects");
 
@@ -205,8 +208,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 ClusterManager clusterManager, GitService gitService, TaskScheduler taskScheduler,
 								 ProjectLastEventDateManager lastEventDateManager, PullRequestManager pullRequestManager,
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
-								 VisitInfoManager visitInfoManager, StorageManager storageManager, 
-								 Set<ProjectNameReservation> nameReservations) {
+								 VisitInfoManager visitInfoManager, StorageManager storageManager,
+								 PackBlobManager packBlobManager, Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -230,13 +233,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.batchWorkManager = batchWorkManager;
 		this.visitInfoManager = visitInfoManager;
 		this.storageManager = storageManager;
+		this.packBlobManager = packBlobManager;
 
 		for (ProjectNameReservation reservation : nameReservations)
 			reservedNames.addAll(reservation.getReserved());
-	}
-
-	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(ProjectManager.class);
 	}
 
 	@Override
@@ -332,7 +332,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		for (var entry: replicasOfProject.entrySet()) {
 			var replica = entry.getValue();
 			clusterManager.runOnServer(entry.getKey(), () -> {
-				var projectDir = getStorageDir(projectId);
+				var projectDir = getProjectDir(projectId);
 				cleanDir(projectDir);
 				replica.saveType(projectDir);
 				initGit(projectId, gitPackConfig);
@@ -378,74 +378,78 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public void delete(Project project) {
 		for (Project child : project.getChildren())
 			delete(child);
 
-		Usage usage = new Usage();
-		usage.add(settingManager.onDeleteProject(project.getPath()));
-
-		for (LinkSpec link : linkSpecManager.query()) {
-			for (IssueQueryUpdater updater : link.getQueryUpdaters())
-				usage.add(updater.onDeleteProject(project.getPath()).prefix("issue setting").prefix("administration"));
-		}
-
-		usage.checkInUse("Project '" + project.getPath() + "'");
-
-		for (Project fork : project.getForks()) {
-			Collection<Project> forkChildren = fork.getForkChildren();
-			forkChildren.add(fork);
-			for (Project forkChild : forkChildren) {
-				Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
-						Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
-				query.setParameter("fork", fork);
-				query.setParameter("descendant", forkChild);
-				query.executeUpdate();
-
-				query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
-						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
-				query.setParameter("fork", fork);
-				query.setParameter("descendant", forkChild);
-				query.executeUpdate();
-
-				query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
-						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
-				query.setParameter("fork", fork);
-				query.setParameter("descendant", forkChild);
-				query.executeUpdate();
+		transactionManager.run(() -> {
+			Usage usage = new Usage();
+			usage.add(settingManager.onDeleteProject(project.getPath()));
+	
+			for (LinkSpec link : linkSpecManager.query()) {
+				for (IssueQueryUpdater updater : link.getQueryUpdaters())
+					usage.add(updater.onDeleteProject(project.getPath()).prefix("issue setting").prefix("administration"));
 			}
-		}
+	
+			usage.checkInUse("Project '" + project.getPath() + "'");
+			
+			for (Project fork : project.getForks()) {
+				Collection<Project> forkChildren = fork.getForkChildren();
+				forkChildren.add(fork);
+				for (Project forkChild : forkChildren) {
+					Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
+							Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
+					query.setParameter("fork", fork);
+					query.setParameter("descendant", forkChild);
+					query.executeUpdate();
 
-		Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom",
-				Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
-		query.setParameter("forkedFrom", project);
-		query.executeUpdate();
+					query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
+							Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
+					query.setParameter("fork", fork);
+					query.setParameter("descendant", forkChild);
+					query.executeUpdate();
 
-		for (PullRequest request: project.getOutgoingRequests()) {
-			if (!request.getTargetProject().equals(project) && request.isOpen())
-				pullRequestManager.discard(request, "Source project is deleted.");
-		}
-		
-		query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
-				PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
-		query.setParameter("sourceProject", project);
-		query.executeUpdate();
+					query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
+							PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
+					query.setParameter("fork", fork);
+					query.setParameter("descendant", forkChild);
+					query.executeUpdate();
+				}
+			}
 
-		for (Build build : project.getBuilds())
-			buildManager.delete(build);
+			Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom",
+					Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
+			query.setParameter("forkedFrom", project);
+			query.executeUpdate();
 
-		dao.remove(project);
-		lastEventDateManager.delete(project.getLastEventDate());
+			for (PullRequest request: project.getOutgoingRequests()) {
+				if (!request.getTargetProject().equals(project) && request.isOpen())
+					pullRequestManager.discard(request, "Source project is deleted.");
+			}
 
-		synchronized (repositoryCache) {
-			Repository repository = repositoryCache.remove(project.getId());
-			if (repository != null)
-				repository.close();
-		}
-		
-		listenerRegistry.post(new ProjectDeleted(project));
+			query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
+					PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
+			query.setParameter("sourceProject", project);
+			query.executeUpdate();
+
+			packBlobManager.onDeleteProject(project);
+
+			for (Build build : project.getBuilds())
+				buildManager.delete(build);
+
+			dao.remove(project);
+			lastEventDateManager.delete(project.getLastEventDate());
+
+			synchronized (repositoryCache) {
+				Repository repository = repositoryCache.remove(project.getId());
+				if (repository != null)
+					repository.close();
+			}
+
+			listenerRegistry.post(new ProjectDeleted(project));
+		});
 	}
 
 	@Override
@@ -516,7 +520,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		project.setPath(path);
 		return project;
 	}
-
+	
 	@Sessional
 	@Override
 	public Project find(Project parent, String name) {
@@ -744,7 +748,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		
 		var projects = cache.clone();
 		String localServer = clusterManager.getLocalServerAddress();
-		for (var projectDir: getStorageDir().listFiles()) {
+		for (var projectDir: getProjectsDir().listFiles()) {
 			if (new File(projectDir, DELETE_MARK).exists()) {
 				logger.info("Deleting directory marked for deletion: " + projectDir);
 				FileUtils.deleteDir(projectDir);
@@ -800,15 +804,35 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(ConnectionEvent event) {
 		if (clusterManager.isLeaderServer()) {
-			var newActiveServers = new HashMap<Long, String>();
-			for (var entry: replicas) {
-				var projectId = entry.getKey();
-				newActiveServers.put(projectId, updateActiveServer(projectId, entry.getValue(), true));
-			}
-			notifyActiveServerChanged(newActiveServers);
+			logger.info("Updating active servers upon cluster member change...");
+			updateActiveServers();
+		}
+	}
+	
+	@Override
+	public boolean isSharedDir(File dir, String remoteServer, Long projectId, String subPath) {
+		var testFile = new File(dir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
+		FileUtils.touchFile(testFile);
+		try {
+			return clusterManager.runOnServer(remoteServer, () -> {
+				var remoteDir = getSubDir(projectId, subPath, false);
+				return new File(remoteDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
+			});
+		} finally {
+			FileUtils.deleteFile(testFile);
 		}
 	}
 
+	@Override
+	public void updateActiveServers() {
+		var newActiveServers = new HashMap<Long, String>();
+		for (var entry: replicas) {
+			var projectId = entry.getKey();
+			newActiveServers.put(projectId, updateActiveServer(projectId, entry.getValue(), true));
+		}
+		notifyActiveServerChanged(newActiveServers);
+	}
+	
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
@@ -933,47 +957,50 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
-	public Collection<Project> getPermittedProjects(Permission permission) {
-		ProjectCache cacheClone = cache.clone();
-
-		Collection<Long> permittedProjectIds;
+	public Collection<Project> getPermittedProjects(BasePermission permission) {
 		User user = SecurityUtils.getUser();
-		if (user != null) {
-			if (user.isRoot() || user.isSystem()) {
-				return cacheClone.getProjects();
+		if (permission.isApplicable(UserFacade.of(user))) {
+			ProjectCache cacheClone = cache.clone();
+			Collection<Long> permittedProjectIds;
+			if (user != null) {
+				if (user.isRoot() || user.isSystem()) {
+					return cacheClone.getProjects();
+				} else {
+					permittedProjectIds = new HashSet<>();
+					for (Group group : user.getGroups()) {
+						if (group.isAdministrator())
+							return cacheClone.getProjects();
+						for (GroupAuthorization authorization : group.getAuthorizations()) {
+							if (authorization.getRole().implies(permission))
+								addSubTreeIds(permittedProjectIds, authorization.getProject());
+						}
+					}
+					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+					if (defaultLoginGroup != null) {
+						if (defaultLoginGroup.isAdministrator())
+							return cacheClone.getProjects();
+						for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
+							if (authorization.getRole().implies(permission))
+								addSubTreeIds(permittedProjectIds, authorization.getProject());
+						}
+					}
+
+					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
+						if (authorization.getRole().implies(permission))
+							addSubTreeIds(permittedProjectIds, authorization.getProject());
+					}
+					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+				}
 			} else {
 				permittedProjectIds = new HashSet<>();
-				for (Group group : user.getGroups()) {
-					if (group.isAdministrator())
-						return cacheClone.getProjects();
-					for (GroupAuthorization authorization : group.getAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							addSubTreeIds(permittedProjectIds, authorization.getProject());
-					}
-				}
-				Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-				if (defaultLoginGroup != null) {
-					if (defaultLoginGroup.isAdministrator())
-						return cacheClone.getProjects();
-					for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							addSubTreeIds(permittedProjectIds, authorization.getProject());
-					}
-				}
-
-				for (UserAuthorization authorization : user.getProjectAuthorizations()) {
-					if (authorization.getRole().implies(permission))
-						addSubTreeIds(permittedProjectIds, authorization.getProject());
-				}
-				addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+				if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
+					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
 			}
-		} else {
-			permittedProjectIds = new HashSet<>();
-			if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
-				addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
-		}
 
-		return permittedProjectIds.stream().map(it -> load(it)).collect(toSet());
+			return permittedProjectIds.stream().map(it -> load(it)).collect(toSet());
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	private void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,
@@ -1082,19 +1109,45 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Transactional
 	@Override
-	public void delete(Collection<Project> projects) {
-		Collection<Project> independents = new HashSet<>(projects);
-		for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
-			Project independent = it.next();
-			for (Project each : independents) {
-				if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
-					it.remove();
-					break;
-				}
-			}
+	public void requestToDelete(Collection<Project> projects) {
+		var pendingDeleteProjects = new HashSet<>(projects);
+		for (Project project: projects) {
+			pendingDeleteProjects.add(project);
+			pendingDeleteProjects.addAll(project.getDescendants());
 		}
-		for (Project independent : independents)
-			delete(independent);
+		for (var project: pendingDeleteProjects) {
+			project.setPendingDelete(true);
+			dao.persist(project);
+		}
+		transactionManager.runAfterCommit(() -> clusterManager.submitToServer(clusterManager.getLeaderServerAddress(), () -> {
+			processPendingDeletes();
+			return null;
+		}));
+		listenerRegistry.post(new ProjectsPendingDelete(pendingDeleteProjects));
+	}
+	
+	private synchronized void processPendingDeletes() {
+		try {
+			sessionManager.run(() -> {
+				var criteria = newCriteria();
+				criteria.add(Restrictions.eq(PROP_PENDING_DELETE, true));
+
+				Collection<Project> independents = new HashSet<>(query(criteria, 0, Integer.MAX_VALUE));
+				for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
+					Project independent = it.next();
+					for (Project each : independents) {
+						if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
+							it.remove();
+							break;
+						}
+					}
+				}
+				for (Project independent : independents)
+					delete(independent);
+			});
+		} catch(Exception e) {
+			logger.error("Error processing pending deletes", e);
+		}
 	}
 
 	@Override
@@ -1161,8 +1214,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		
 		String oldActiveServer, newActiveServer = null;
 		if (!effectiveReplicasOfProject.isEmpty()) {
-			int maxVersion = effectiveReplicasOfProject.values().stream()
-					.mapToInt(ProjectReplica::getVersion).max().getAsInt();
+			long maxVersion = effectiveReplicasOfProject.values().stream()
+					.mapToLong(ProjectReplica::getVersion).max().getAsLong();
 			var candidates = effectiveReplicasOfProject.entrySet().stream()
 					.filter(it -> it.getValue().getVersion() == maxVersion)
 					.collect(toList());
@@ -1304,7 +1357,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						var replica = replicasOfProject.get(server);
 						if (replica == null || replica.getType() != newReplica.getType()) {
 							newReplica.setVersion(clusterManager.runOnServer(server, () -> {
-								var projectDir = getStorageDir(projectId);
+								var projectDir = getProjectDir(projectId);
 								if (!projectDir.exists()) {
 									FileUtils.createDir(projectDir);
 									initGit(projectId, project.getGitPackConfig());
@@ -1359,7 +1412,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Override
 	public void directoryModified(Long projectId, File directory) {
-		var projectDir = getStorageDir(projectId);
+		var projectDir = getProjectDir(projectId);
 		var projectPath = projectDir.toPath();	
 		var currentPath = directory.toPath();
 		while (currentPath.startsWith(projectPath)) {
@@ -1451,7 +1504,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	private void updateReplicaVersion(Long projectId) {
-		var projectDir = getStorageDir(projectId);
+		var projectDir = getProjectDir(projectId);
 		while (true) {
 			var replicasOfProject = replicas.get(projectId);
 			if (replicasOfProject != null) {
@@ -1542,17 +1595,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer) {
-		var directory = new File(getStorageDir(projectId), path);
+		var directory = new File(getProjectDir(projectId), path);
 		
-		int remoteVersion = clusterManager.runOnServer(activeServer, () -> {
-			return readVersion(new File(getStorageDir(projectId), path));
-		});
-		int version = readVersion(directory);
+		long remoteVersion = clusterManager.runOnServer(activeServer, () -> readVersion(new File(getProjectDir(projectId), path)));
+		long version = readVersion(directory);
 		
 		if (version < remoteVersion) {
 			Collection<String> remoteChildren = clusterManager.runOnServer(activeServer, () -> {
 				var children = new HashSet<String>();
-				for (var file: new File(getStorageDir(projectId), path).listFiles()) {
+				for (var file: new File(getProjectDir(projectId), path).listFiles()) {
 					if (!isVersionFile(file))
 						children.add(file.getName());
 				}
@@ -1579,11 +1630,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public void syncDirectory(Long projectId, String path, String readLock, String activeServer) {
-		var directory = new File(getStorageDir(projectId), path);
-		int version = readVersion(directory);
+		var directory = new File(getProjectDir(projectId), path);
+		long version = readVersion(directory);
 
-		int remoteVersion = clusterManager.runOnServer(activeServer, () -> {
-			return readVersion(new File(getStorageDir(projectId), path));
+		long remoteVersion = clusterManager.runOnServer(activeServer, () -> {
+			return readVersion(new File(getProjectDir(projectId), path));
 		});
 
 		if (version < remoteVersion) {
@@ -1617,7 +1668,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public void syncFile(Long projectId, String path, String readLock, String activeServer) {
-		var file = new File(getStorageDir(projectId), path);
+		var file = new File(getProjectDir(projectId), path);
 		Client client = ClientBuilder.newClient();
 		try {
 			String fromServerUrl = clusterManager.getServerUrl(activeServer);
@@ -1630,7 +1681,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					BEARER + " " + clusterManager.getCredential());
 			try (Response response = builder.get()) {
 				if (response.getStatus() == NO_CONTENT.getStatusCode()) {
-					FileUtils.deleteFile(file);
+					if (file.exists())
+						FileUtils.deleteFile(file);
 				} else {
 					FileUtils.createDir(file.getParentFile());
 					KubernetesHelper.checkStatus(response);
@@ -1659,10 +1711,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				var project = cache.get(projectId);
 				if (project != null) {
 					try {
-						var projectDir = getStorageDir(projectId);
-						var remoteVersion = clusterManager.runOnServer(syncWithServer, () -> {
-							return readVersion(getStorageDir(projectId));
-						});
+						var projectDir = getProjectDir(projectId);
+						var remoteVersion = clusterManager.runOnServer(syncWithServer, () -> readVersion(getProjectDir(projectId)));
 						var version = readVersion(projectDir);
 
 						if (version < remoteVersion) {
@@ -1671,6 +1721,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 							attachmentManager.syncAttachments(projectId, syncWithServer);
 							buildManager.syncBuilds(projectId, syncWithServer);
 							visitInfoManager.syncVisitInfo(projectId, syncWithServer);
+							packBlobManager.syncPacks(projectId, syncWithServer);
 							
 							syncDirectory(projectId, SITE_DIR, getSiteLockName(projectId), syncWithServer);
 							
@@ -1724,17 +1775,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 								if (withLfs) {
 									var lfsDir = storageManager.initLfsDir(projectId);
-									boolean lfsDirShared;
-									var testFile = new File(lfsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
-									FileUtils.touchFile(testFile);
-									try {
-										lfsDirShared = clusterManager.runOnServer(activeServer, 
-												new SharedLfsDirTester(projectId, testFile.getName()));
-									} finally {
-										FileUtils.deleteFile(testFile);
-									}
-									
-									if (lfsDirShared) {
+									if (isSharedDir(lfsDir, activeServer, projectId, "git/lfs")) {
 										fetch(git, fetchUrl);
 									} else {
 										var sinceCommitIds = readLfsSinceCommits(projectId);
@@ -1779,29 +1820,35 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
-	public File getStorageDir() {
+	public File getProjectsDir() {
 		File projectsDir = new File(Bootstrap.getSiteDir(), "projects");
 		FileUtils.createDir(projectsDir);
 		return projectsDir;
 	}
 
 	@Override
-	public File getStorageDir(Long projectId) {
-		return new File(getStorageDir(), String.valueOf(projectId));
+	public File getProjectDir(Long projectId) {
+		return new File(getProjectsDir(), String.valueOf(projectId));
 	}
 
 	@Override
 	public File getSubDir(Long projectId, String subdirPath) {
-		File projectDir = getStorageDir(projectId);
+		return getSubDir(projectId, subdirPath, true);
+	}
+
+	@Override
+	public File getSubDir(Long projectId, String subdirPath, boolean createIfNotExist) {
+		File projectDir = getProjectDir(projectId);
 		if (projectDir.exists()) {
 			File subDir = new File(projectDir, subdirPath);
-			FileUtils.createDir(subDir);
+			if (createIfNotExist)
+				FileUtils.createDir(subDir);
 			return subDir;
 		} else {
 			throw new ExplicitException("Storage directory not found for project id " + projectId);
 		}
 	}
-
+	
 	@Override
 	public File getGitDir(Long projectId) {
 		return getSubDir(projectId, "git");
@@ -1816,7 +1863,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public File getIndexDir(Long projectId) {
 		return getSubDir(projectId, "index");
 	}
-
+	
 	@Override
 	public File getSiteDir(Long projectId) {
 		return getSubDir(projectId, SITE_DIR);
@@ -1889,7 +1936,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private void markStorageForDelete(Long projectId) {
 		try {
-			var projectDir = getStorageDir(projectId);
+			var projectDir = getProjectDir(projectId);
 			if (projectDir.exists())
 				new File(projectDir, DELETE_MARK).createNewFile();
 		} catch (Exception e) {
@@ -1912,25 +1959,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 
 	}
-
-	private static class SharedLfsDirTester implements ClusterTask<Boolean> {
-
-		Long projectId;
-
-		String fileName;
-
-		SharedLfsDirTester(Long projectId, String fileName) {
-			this.projectId = projectId;
-			this.fileName = fileName;
-		}
-		
-		@Override
-		public Boolean call() throws IOException {
-			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-			var remoteLfsDir = new File(projectManager.getGitDir(projectId), "lfs");
-			return new File(remoteLfsDir, SHARE_TEST_DIR + "/" + fileName).exists();
-		}
-		
-	};
+	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(ProjectManager.class);
+	}
 	
 }

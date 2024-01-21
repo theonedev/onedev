@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.search.entity.build.BuildQueryLexer;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -69,7 +70,7 @@ public class BuildStatsPanel extends Panel {
 			protected void populateItem(ListItem<Map.Entry<Status, Long>> item) {
 				Map.Entry<Status, Long> entry = item.getModelObject();
 				BuildQuery query = new BuildQuery(
-						new io.onedev.server.search.entity.build.StatusCriteria(entry.getKey()));
+						new io.onedev.server.search.entity.build.StatusCriteria(entry.getKey(), BuildQueryLexer.Is));
 				PageParameters params = ProjectBuildsPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> statusLink = new BookmarkablePageLink<Void>("link", ProjectBuildsPage.class, params);
 				String statusName = entry.getKey().toString();

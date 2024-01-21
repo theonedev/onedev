@@ -1,18 +1,18 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.usage.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.GroupChoice;
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 @Editable
 public class SecuritySetting implements Serializable {
@@ -24,6 +24,8 @@ public class SecuritySetting implements Serializable {
 	private boolean enableAnonymousAccess = false;
 	
 	private boolean enableSelfRegister = true;
+	
+	private boolean selfRegisterAsGuest = false;
 	
 	private boolean enableSelfDeregister;
 	
@@ -49,8 +51,21 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfRegister = enableSelfRegister;
 	}
 
-	@Editable(order=300, name="Default Login Group", description="Optionally specify a default group "
-			+ "for all users logged in")
+	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
+	@ShowCondition("isEnableSelfRegisterEnabled")
+	public boolean isSelfRegisterAsGuest() {
+		return selfRegisterAsGuest;
+	}
+
+	public void setSelfRegisterAsGuest(boolean selfRegisterAsGuest) {
+		this.selfRegisterAsGuest = selfRegisterAsGuest;
+	}
+	
+	private static boolean isEnableSelfRegisterEnabled() {
+		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
+	}
+
+	@Editable(order=300, name="Default Login Group", description="Optionally specify a default group for all users logged in")
 	@GroupChoice
 	public String getDefaultLoginGroupName() {
 		return defaultLoginGroupName;
@@ -70,9 +85,8 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfDeregister = enableSelfDeregister;
 	}
 
-	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce "
-			+ "all users to set up two-factor authentication upon next login. Users will not be able "
-			+ "to disable two-factor authentication themselves if this option is set")
+	@Editable(order=400, name="Enable Two-factor Authentication", description="Check this to enable "
+			+ "two-factor authentication for all users in the system")
 	public boolean isEnforce2FA() {
 		return enforce2FA;
 	}

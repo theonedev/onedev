@@ -61,13 +61,12 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     @Sessional
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new EmailAddressCache(hazelcastInstance.getMap("emailAddressCache"));
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("emailAddressCacheInited");        
-		clusterManager.init(cacheInited, () -> {
-			for (EmailAddress address: query())
-				cache.put(address.getId(), address.getFacade());
-			return 1L;			
-		});
+		
+		// Use replicated map, otherwise it will be slow to display many user avatars
+		// (in issue list for instance) which will call findPrimaryFacade many times
+        cache = new EmailAddressCache(hazelcastInstance.getReplicatedMap("emailAddressCache"));
+		for (EmailAddress address: query())
+			cache.put(address.getId(), address.getFacade());
     }
     
     @Sessional
@@ -152,16 +151,9 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		
 		user.getEmailAddresses().add(emailAddress);
 		
-		if (!emailAddress.isVerified() && settingManager.getMailSetting() != null) {
+		if (!emailAddress.isVerified() && settingManager.getMailService() != null) {
 			Long addressId = emailAddress.getId();
-			sessionManager.runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					sendVerificationEmail(load(addressId));
-				}
-				
-			});
+			sessionManager.runAsyncAfterCommit(() -> sendVerificationEmail(load(addressId)));
 		}
 	}
 
@@ -203,7 +195,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     
 	@Override
 	public void sendVerificationEmail(EmailAddress emailAddress) {
-		Preconditions.checkState(settingManager.getMailSetting() != null 
+		Preconditions.checkState(settingManager.getMailService() != null 
 				&& !emailAddress.isVerified());
 
 		User user = emailAddress.getOwner();
@@ -222,9 +214,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 		var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 		
-		mailManager.sendMail(
-				settingManager.getMailSetting().getSendSetting(), 
-				Arrays.asList(emailAddress.getValue()),
+		mailManager.sendMail(Arrays.asList(emailAddress.getValue()),
 				Lists.newArrayList(), Lists.newArrayList(), 
 				"[Email Verification] Please Verify Your Email Address", 
 				htmlBody, textBody, null, null, null);

@@ -1,12 +1,14 @@
 package io.onedev.server.util;
 
+import io.onedev.server.exception.DataTooLargeException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import io.onedev.commons.bootstrap.Bootstrap;
-
 public class IOUtils extends org.apache.commons.io.IOUtils {
+
+	public static final int BUFFER_SIZE = 64*1024;
 
 	public static void copyRange(InputStream in, OutputStream out, LongRange range) throws IOException {
 		int totalSkipped = 0;
@@ -22,7 +24,7 @@ public class IOUtils extends org.apache.commons.io.IOUtils {
 
 		long bytesToCopy = range.getEnd() - range.getStart() + 1;
 
-		byte buffer[] = new byte[Bootstrap.BUFFER_SIZE];
+		byte buffer[] = new byte[BUFFER_SIZE];
 		while (bytesToCopy > 0) {
 			int bytesRead = in.read(buffer);
 			if (bytesRead <= 0) {
@@ -37,4 +39,16 @@ public class IOUtils extends org.apache.commons.io.IOUtils {
 		}
 	}
 
+	public static long copyWithMaxSize(InputStream is, OutputStream os, long maxSize) {
+		try {
+			long copied = copyLarge(is, os, 0, maxSize + 1, new byte[BUFFER_SIZE]);
+			if (copied >=  maxSize + 1)
+				throw new DataTooLargeException(maxSize);
+			else 
+				return copied;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }

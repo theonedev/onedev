@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.editabletitle;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
@@ -7,6 +8,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -14,6 +16,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -144,13 +148,22 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(SecurityUtils.canModify(getIssue()));
+				setVisible(SecurityUtils.canModifyIssue(getIssue()));
 			}
 			
 		});
 		titleViewer.add(new CopyToClipboardLink("copy", 
 				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
 		
+		titleViewer.add(new IssueProgressPanel("progress") {
+
+			@Override
+			protected Issue getIssue() {
+				return IssueEditableTitlePanel.this.getIssue();
+			}
+			
+		});
+
 		titleViewer.setOutputMarkupId(true);
 		
 		return titleViewer;
@@ -162,7 +175,13 @@ public abstract class IssueEditableTitlePanel extends Panel {
 		
 		add(newTitleViewer());
 	}
-	
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new IssueEditableTitleCssResourceReference()));
+	}
+
 	protected abstract Issue getIssue();
 	
 	protected abstract Project getProject();

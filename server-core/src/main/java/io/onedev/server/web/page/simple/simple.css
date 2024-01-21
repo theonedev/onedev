@@ -100,18 +100,13 @@
 	top: 1rem;
 	background: var(--light);
 }
+.SimplePage.dark-mode .main .error-detail+.copy {
+	background: #323248;
+}
 
 .PageNotFoundErrorPage h3 {
 	font-size: 3rem;
 }
 .PageNotFoundErrorPage .sub-title {
 	font-size: 1.5rem !important;
-}
-
-.LoginPage .setup-2fa .modal-header {
-	display: none;
-}
-.LoginPage .setup-2fa .modal-footer {
-	border-top: none;
-	justify-content: center;
 }

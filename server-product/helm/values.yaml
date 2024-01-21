@@ -9,18 +9,22 @@ global:
     # dept_name: platform
 
 onedev:
-  # onedev.useStatefulSet -- Set to true to use a StatefulSet instead of a Deployment
-  useStatefulSet: false
-  # onedev.updateStrategy -- valid options for statefulset `RollingUpdate`, `OnDelete` / Deployment: `RollingUpdate`, `Recreate`
+  # onedev.replicas -- Number of OneDev servers to run. With an enterprise license, you will be able to distribute
+  # different projects to different servers for horizontal scaling, as well as replicate project repositories and
+  # artifacts for high availability. Note that setting this param to 2 or more is only meaningful if you are
+  # connecting to external database; otherwise they simply run as independent OneDev instances
+  replicas: 1
+  # onedev.updateStrategy -- Valid options: `RollingUpdate`, `OnDelete`
   updateStrategy:
-    type: Recreate
+    type: RollingUpdate
   trustCerts:
     # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
     # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
     # where /path/to/trust-certs is a local directory contains all certificates to be trusted. Certificate should be 
     # of base64 encoded PEM format beginning with "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
-
+  jvm:
+    maxMemoryPercent: "50"
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
     # onedev.initSettings.user -- Administrator username. Leave empty to prompt
@@ -30,7 +34,7 @@ onedev:
     # onedev.initSettings.email -- Administrator Email address. Leave empty to prompt
     email: ""
     # onedev.initSettings.serverUrl -- Server url. Leave empty to prompt. Will be ignored if ingress.host is specified
-    serverUrl: "http://localhost:6610"
+    serverUrl: ""
     # onedev.initSettings.sshRootUrl -- Root url to clone repository via SSH. Leave empty to derive from server url
     sshRootUrl: ""
 
@@ -38,21 +42,21 @@ onedev:
 database:
   # database.external -- Set to **true** when using external database
   external: false
-  # database.dbType -- Required: Set type of external database. Possible values `mysql`, `mariadb`, `postgresql`, `mssql`
+  # database.type-- Required: Set type of external database. Possible values `mysql`, `mariadb`, `postgresql`, `mssql`
   # [external databases](https://docs.onedev.io/installation-guide/run-as-docker-container#use-external-database)
-  dbType: "mysql"
-  # database.dbHost -- IP address or hostname of database
-  dbHost: ""
-  # database.dbPort --  Port Number
-  dbPort: "3306"
-  # database.dbName --  Name of the database
-  dbName: "onedev"
-  # database.dbUser --  User with access to database
-  dbUser: "onedev"
-  # database.dbPassword -- Database password 
-  dbPassword: "changeit"
-  # database.dbMaximumPoolSize -- Database maximum pool size
-  dbMaximumPoolSize: "25"
+  type: "mysql"
+  # database.host -- IP address or hostname of database
+  host: "onedev-mysql.onedev.svc.cluster.local"
+  # database.port --  Port Number
+  port: "3306"
+  # database.name --  Name of the database
+  name: "onedev"
+  # database.user --  User with access to database
+  user: "root"
+  # database.password -- Database password 
+  password: "changeit"
+  # database.maximumPoolSize -- Database maximum pool size
+  maximumPoolSize: "25"
 
 image:
   # image.name -- Specify the image name to use (relative to `image.repository`).
@@ -96,6 +100,10 @@ podSecurityContext: {}
 
 # securityContext -- Specify securityContext for Containers.
 securityContext: {}
+# command -- Override default image command.
+command: []
+# args -- Override default image arguments.
+args: []
 
 # env -- Define additional environment variables.
 env: []
@@ -151,8 +159,6 @@ affinity: {}
 topologySpreadConstraints: []
 
 service:
-  # service.enabled -- If **true**, create a Service resource.
-  enabled: true
   # service.type -- Specify the type for the Service. ClusterIP, LoadBalancer
   type: "ClusterIP"
   # service.annotations -- Specify annotations for the Service.
@@ -208,9 +214,13 @@ ingress:
   # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
   # ingress.annotations -- Specify annotations for the Ingress.
-  annotations: {}
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
+  annotations: 
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/session-cookie-name: "session-sticky"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
   # ingress.host -- Set the host name
   host: onedev.example.com
 
@@ -243,10 +253,6 @@ initContainers: []
 extraContainers: []
 
 persistence:
-  # persistence.enabled -- If **true**, create and use PersistentVolumeClaims.
-  enabled: true
-  # persistence.existingClaim -- Name of an existing PersistentVolumeClaim to use.
-  existingClaim: ""
   # persistence.storageClassName -- (string) Specify the storageClassName for PersistentVolumeClaims.
   storageClassName: ""
   # persistence.accessModes -- Specify the accessModes for PersistentVolumeClaims.

@@ -113,7 +113,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 					public List<Issue> findIssues(@Nullable Project project, String query, int count) {
 						if (project == null) 
 							project = context.getProject();
-						if (SecurityUtils.canAccess(project))
+						if (SecurityUtils.canAccessProject(project))
 							return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
 						else
 							return new ArrayList<>();

@@ -16,31 +16,41 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	private final boolean value;
 	
-	public BooleanFieldCriteria(String name, boolean value) {
+	private final int operator;
+	
+	public BooleanFieldCriteria(String name, boolean value, int operator) {
 		super(name);
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
-		return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), String.valueOf(value));
+		var predicate = builder.equal(fieldFrom.get(IssueField.PROP_VALUE), String.valueOf(value));
+		if (operator == IssueQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return Objects.equals(value, issue.getFieldValue(getFieldName()));
+		var matches = Objects.equals(value, issue.getFieldValue(getFieldName()));
+		if (operator == IssueQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(getFieldName()) + " " 
-				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setFieldValue(getFieldName(), value);
+		if (operator == IssueQueryLexer.Is)
+			issue.setFieldValue(getFieldName(), value);
 	}
 
 }

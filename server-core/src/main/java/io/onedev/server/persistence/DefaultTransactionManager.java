@@ -16,27 +16,24 @@
 
 package io.onedev.server.persistence;
 
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import io.onedev.commons.utils.ExceptionUtils;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Singleton;
+import javax.persistence.FlushModeType;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-
-import javax.inject.Singleton;
-import javax.persistence.FlushModeType;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-
-import io.onedev.commons.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultTransactionManager implements TransactionManager {
@@ -106,11 +103,6 @@ public class DefaultTransactionManager implements TransactionManager {
 				logger.error("Error executing in transaction", e);
 			}
 		});
-	}
-	
-	@Override
-	public void runAsyncAfterCommit(Runnable runnable) {
-		runAfterCommit(() -> runAsync(runnable));
 	}
 	
 	@Override

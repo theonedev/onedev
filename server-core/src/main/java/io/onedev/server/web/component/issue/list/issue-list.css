@@ -2,7 +2,7 @@
 	padding: 1.2rem 0.8rem 0.7rem 0.8rem;
 }
 .issue-list>div>.body table>tbody>tr>td.row-selector {
-	padding-top: 1.3rem;
+	padding-top: 1.5rem;
 }
 .issue-list .field.undefined {
 	display: none;
@@ -10,8 +10,12 @@
 .issue-list .field .issue-state {
 	margin-bottom: 0.5rem;
 	margin-right: 0.5rem;
+	padding: 0.25rem 0.4rem;
 }
-
+.issue-list .issue-progress .completion-rate {
+	width: 18px !important;
+	height: 18px !important;
+}
 .issue-list>div>.body .new-indicator {
 	width: 4px;
 	padding: 0;
@@ -38,7 +42,6 @@
 .issue-list .state:hover {
 	border-color: var(--gray);
 }
-
 .issue-list .issue-link {
 	font-weight: 500;
 }

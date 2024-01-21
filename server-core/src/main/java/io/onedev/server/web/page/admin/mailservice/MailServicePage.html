@@ -1,0 +1,26 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<form wicket:id="mailService" class="mail-service leave-confirm">
+				<div wicket:id="editor" class="mb-5"></div>
+				<button wicket:id="save" class="btn btn-primary dirty-aware mr-3">Save Settings</button>
+				<input wicket:id="test" type="submit" class="btn btn-light-primary" value="Test Settings">
+			</form>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="testFrag">
+		<form wicket:id="form" class="mail-service-test">
+			<div class="modal-header">
+				<h5 id="modal-title" class="modal-title">Mail Service Test</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="editor"></div>
+			</div>
+			<div class="modal-footer">
+				<button wicket:id="ok" class="btn btn-primary">Ok</button>
+				<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:extend>

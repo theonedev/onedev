@@ -6,9 +6,9 @@ query
 
 criteria
 	: operator=(BuildIsSuccessful|BuildIsFailed) #OperatorCriteria
-    | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
     | operator=(Since|Until) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=Is WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -26,11 +26,19 @@ BuildIsFailed
 Is
 	: 'is'
 	;
-	
+
+IsNot
+    : 'is' WS+ 'not'
+    ;
+
 IsEmpty
 	: 'is' WS+ 'empty'
 	;	
-	
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
+    ;
+
 Since
 	: 'since'
 	;

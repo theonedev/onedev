@@ -27,9 +27,10 @@ import io.onedev.server.web.page.admin.issuesetting.integritycheck.CheckIssueInt
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
-import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.mailservice.MailServicePage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -38,7 +39,6 @@ import io.onedev.server.web.page.admin.rolemanagement.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
-import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
@@ -55,7 +55,6 @@ import io.onedev.server.web.page.admin.usermanagement.membership.UserMemberships
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
-import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
@@ -70,6 +69,7 @@ import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.packs.PackListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.NoProjectStoragePage;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -82,6 +82,7 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
@@ -97,13 +98,14 @@ import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.*;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
-import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
@@ -116,13 +118,12 @@ import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSet
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
-import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
+import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
-import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.simple.security.*;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
@@ -149,6 +150,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~issues", IssueListPage.class));
 		add(new BasePageMapper("~pulls", PullRequestListPage.class));
 		add(new BasePageMapper("~builds", BuildListPage.class));
+		add(new BasePageMapper("~packages", PackListPage.class));
 		addAdministrationPages();
 		addMyPages();
 		addSecurityPages();
@@ -201,14 +203,13 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	
 	private void addErrorPages() {
 		add(new BasePageMapper("/~errors/404", PageNotFoundErrorPage.class));
-		add(new BasePageMapper("/~errors/405", MethodNotAllowedErrorPage.class));
 	}
 	
 	private void addSecurityPages() {
 		add(new BasePageMapper("~login", LoginPage.class));
 		add(new BasePageMapper("~logout", LogoutPage.class));
 		add(new BasePageMapper("~signup", SignUpPage.class));
-		add(new BasePageMapper("~reset-password", PasswordResetPage.class));
+		add(new BasePageMapper("~reset-password/#{passwordResetCode}", PasswordResetPage.class));
 		add(new BasePageMapper("~verify-email-address/${emailAddress}/${verificationCode}", 
 				EmailAddressVerificationPage.class));
 		add(new BasePageMapper("~create-user-from-invitation/${emailAddress}/${invitationCode}", 
@@ -225,14 +226,13 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}", UserProfilePage.class));
 		add(new BasePageMapper("~administration/users/${user}/email-setting", UserEmailAddressesPage.class));
 		add(new BasePageMapper("~administration/users/${user}/groups", UserMembershipsPage.class));
-		add(new BasePageMapper("~administration/users/${user}/authorizations", UserAuthorizationsPage.class));
+		add(new BasePageMapper("~administration/users/${user}/authorizations", 
+				io.onedev.server.web.page.admin.usermanagement.authorization.UserAuthorizationsPage.class));
 		add(new BasePageMapper("~administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new BasePageMapper("~administration/users/${user}/password", UserPasswordPage.class));
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/access-tokens", UserAccessTokensPage.class));
-		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", 
-				UserTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));
 		add(new BasePageMapper("~administration/invitations/new", NewInvitationPage.class));
 		
@@ -246,9 +246,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/groups/${group}/members", GroupMembershipsPage.class));
 		add(new BasePageMapper("~administration/groups/${group}/authorizations", GroupAuthorizationsPage.class));
 		
-		add(new BasePageMapper("~administration/settings/mail", MailSettingPage.class));
+		add(new BasePageMapper("~administration/settings/mail-service", MailServicePage.class));
 		add(new BasePageMapper("~administration/settings/service-desk-setting", 
-				ServiceDeskSettingPage.class));
+				io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/issue-notification", 
 				IssueNotificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification", 
@@ -267,6 +267,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				EmailVerificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/password-reset",
 				PasswordResetTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/stopwatch-overdue",
+				StopwatchOverdueTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/alert",
 				AlertTemplatePage.class));
 		
@@ -292,6 +294,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-links", LinkSpecListPage.class));
+		add(new BasePageMapper("~administration/settings/time-tracking", TimeTrackingSettingPage.class));
 		add(new BasePageMapper("~administration/settings/issue-templates", IssueTemplateListPage.class));
 		add(new BasePageMapper("~administration/settings/commit-message-fix-patterns", CommitMessageFixPatternsPage.class));
 		add(new BasePageMapper("~administration/settings/check-issue-integrity", CheckIssueIntegrityPage.class));
@@ -357,7 +360,11 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~builds/${build}/changes", BuildChangesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/fixed-issues", FixedIssuesPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/artifacts", BuildArtifactsPage.class));
+		add(new ProjectPageMapper("${project}/~builds/${build}/packages/${type}", BuildPacksPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/invalid", InvalidBuildPage.class));
+
+		add(new ProjectPageMapper("${project}/~packages", ProjectPacksPage.class));
+		add(new ProjectPageMapper("${project}/~packages/${pack}", PackDetailPage.class));
 		
 		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		
@@ -374,7 +381,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/build/job-properties", JobPropertiesPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
-		add(new ProjectPageMapper("${project}/~settings/service-desk", ProjectServiceDeskSettingPage.class));
+		add(new ProjectPageMapper("${project}/~settings/service-desk", ServiceDeskSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/web-hooks", WebHooksPage.class));
 		add(new ProjectPageMapper("${project}/~settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 
 				ContributedProjectSettingPage.class));

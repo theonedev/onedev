@@ -1,8 +1,7 @@
 package io.onedev.server.model.support.administration.authenticator;
 
-import java.util.Collection;
-
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 public class Authenticated {
 	
@@ -15,7 +14,8 @@ public class Authenticated {
 	private final Collection<String> sshKeys;
 	
 	public Authenticated(@Nullable String email, @Nullable String fullName, 
-			@Nullable Collection<String> groupNames, @Nullable Collection<String> sshKeys) {
+						 @Nullable Collection<String> groupNames, 
+						 @Nullable Collection<String> sshKeys) {
 		this.email = email;
 		this.fullName = fullName;
 		this.groupNames = groupNames;

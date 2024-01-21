@@ -7,9 +7,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 @SuppressWarnings("serial")
-public class CoverageBar extends GenericPanel<Coverage> {
+public class CoverageBar extends GenericPanel<Integer> {
 
-	public CoverageBar(String id, IModel<Coverage> model) {
+	public CoverageBar(String id, IModel<Integer> model) {
 		super(id, model);
 	}
 
@@ -21,9 +21,9 @@ public class CoverageBar extends GenericPanel<Coverage> {
 
 			@Override
 			protected String load() {
-				if (getCoverage().getPercent() < 50)
+				if (getCoverage() < 50)
 					return "bg-danger";
-				else if (getCoverage().getPercent() < 75)
+				else if (getCoverage() < 75)
 					return "bg-warning";
 				else
 					return "bg-success";
@@ -33,13 +33,13 @@ public class CoverageBar extends GenericPanel<Coverage> {
 
 			@Override
 			protected String load() {
-				return "width: " + getCoverage().getPercent() + "%";
+				return "width: " + getCoverage() + "%";
 			}
 			
 		})));
 	}
 	
-	private Coverage getCoverage() {
+	private int getCoverage() {
 		return getModelObject();
 	}
 

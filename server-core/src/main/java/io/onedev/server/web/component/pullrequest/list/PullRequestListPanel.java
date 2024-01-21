@@ -6,6 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestLabel;
@@ -17,12 +18,14 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
+import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -41,12 +44,14 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -83,6 +88,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
@@ -230,280 +238,395 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
-				
+
 				menuItems.add(new MenuItem() {
 
 					@Override
 					public String getLabel() {
-						return "Discard Selected Pull Requests";
+						return "Watch/Unwatch Selected Pull Requests";
 					}
-					
+
 					@Override
 					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
+						return new DropdownLink(id) {
 
 							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								String errorMessage = null;
-								for (IModel<PullRequest> each: selectionColumn.getSelections()) {
-									PullRequest request = each.getObject();
-									if (!request.isOpen()) {
-										errorMessage = "Pull request #" + request.getNumber() + " already closed";
-										break;
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new WatchStatusPanel(id) {
+
+									@Override
+									protected WatchStatus getWatchStatus() {
+										return null;
+									}
+
+									@Override
+									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+										dropdown.close();
+										dropdown2.close();
+
+										var requests = selectionColumn.getSelections().stream()
+												.map(it->it.getObject()).collect(toList());
+										getWatchManager().setWatchStatus(SecurityUtils.getUser(), requests, watchStatus);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+										Session.get().success("Watch status changed");
+									}
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select pull requests to watch/unwatch");
+								}
+							}
+
+						};
+					}
+
+				});
+				
+				if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Discard Selected Pull Requests";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+
+									String errorMessage = null;
+									for (IModel<PullRequest> each : selectionColumn.getSelections()) {
+										PullRequest request = each.getObject();
+										if (!request.isOpen()) {
+											errorMessage = "Pull request #" + request.getNumber() + " already closed";
+											break;
+										}
+									}
+
+									if (errorMessage != null) {
+										getSession().error(errorMessage);
+									} else {
+										new ConfirmModalPanel(target) {
+
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												for (IModel<PullRequest> each : selectionColumn.getSelections())
+													OneDev.getInstance(PullRequestManager.class).discard(each.getObject(), null);
+												target.add(body);
+												selectionColumn.getSelections().clear();
+											}
+
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to discard selected pull requests";
+											}
+
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+
+										};
+									}
+
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select pull requests to discard");
 									}
 								}
-								
-								if (errorMessage != null) {
-									getSession().error(errorMessage);
-								} else {
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Delete Selected Pull Requests";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+
 									new ConfirmModalPanel(target) {
-										
+
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											for (IModel<PullRequest> each: selectionColumn.getSelections())
-												OneDev.getInstance(PullRequestManager.class).discard(each.getObject(), null);
+											Collection<PullRequest> requests = new ArrayList<>();
+											for (IModel<PullRequest> each : selectionColumn.getSelections())
+												requests.add(each.getObject());
+											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
-										
+
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to discard selected pull requests";
+											return "Type <code>yes</code> below to delete selected pull requests";
 										}
-										
+
 										@Override
 										protected String getConfirmInput() {
 											return "yes";
 										}
-										
+
 									};
+
 								}
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select pull requests to discard");
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
 								}
-							}
-							
-						};
-					}
-					
-				});
-				
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select pull requests to delete");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
+
 				menuItems.add(new MenuItem() {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Pull Requests";
+						return "Watch/Unwatch All Queried Pull Requests";
 					}
-					
+
 					@Override
 					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
+						return new DropdownLink(id) {
 
 							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
-									
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new WatchStatusPanel(id) {
+
 									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
+									protected WatchStatus getWatchStatus() {
+										return null;
+									}
+
+									@Override
+									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+										dropdown.close();
+										dropdown2.close();
+
 										Collection<PullRequest> requests = new ArrayList<>();
-										for (IModel<PullRequest> each: selectionColumn.getSelections())
-											requests.add(each.getObject());
-										OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
-										target.add(body);
-										selectionColumn.getSelections().clear();
+										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+											requests.add(it.next());
+										getWatchManager().setWatchStatus(SecurityUtils.getUser(), requests, watchStatus);
+										Session.get().success("Watch status changed");
 									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected pull requests";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
+
 								};
-								
 							}
-							
+
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
+								setEnabled(requestsTable.getItemCount() != 0);
 							}
-							
+
 							@Override
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select pull requests to delete");
+									tag.put("title", "No pull requests to watch/unwatch");
 								}
 							}
-							
 						};
 					}
-					
+
 				});
 				
-				menuItems.add(new MenuItem() {
+				if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Discard All Queried Pull Requests";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
+						@Override
+						public String getLabel() {
+							return "Discard All Queried Pull Requests";
+						}
 
-							@SuppressWarnings("unchecked")
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
 
-								String errorMessage = null;
-								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
-									PullRequest request = it.next();
-									if (!request.isOpen()) {
-										errorMessage = "Pull request #" + request.getNumber() + " already closed";
-										break;
+								@SuppressWarnings("unchecked")
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+
+									String errorMessage = null;
+									for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); ) {
+										PullRequest request = it.next();
+										if (!request.isOpen()) {
+											errorMessage = "Pull request #" + request.getNumber() + " already closed";
+											break;
+										}
+									}
+
+									if (errorMessage != null) {
+										getSession().error(errorMessage);
+									} else {
+										new ConfirmModalPanel(target) {
+
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+													OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
+												dataProvider.detach();
+												target.add(body);
+												selectionColumn.getSelections().clear();
+											}
+
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to discard all queried pull requests";
+											}
+
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+
+										};
+									}
+
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(requestsTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No pull requests to discard");
 									}
 								}
-								
-								if (errorMessage != null) {
-									getSession().error(errorMessage);
-								} else {
+
+							};
+						}
+
+					});
+
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Delete All Queried Pull Requests";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@SuppressWarnings("unchecked")
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+
 									new ConfirmModalPanel(target) {
-										
+
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
-												OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
+											Collection<PullRequest> requests = new ArrayList<>();
+											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+												requests.add(it.next());
+											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
 											dataProvider.detach();
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
-										
+
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to discard all queried pull requests";
+											return "Type <code>yes</code> below to delete all queried pull requests";
 										}
-										
+
 										@Override
 										protected String getConfirmInput() {
 											return "yes";
 										}
-										
+
 									};
-								}
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(requestsTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No pull requests to discard");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Delete All Queried Pull Requests";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@SuppressWarnings("unchecked")
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
-									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<PullRequest> requests = new ArrayList<>();
-										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
-											requests.add(it.next());
-										OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
-										dataProvider.detach();
-										target.add(body);
-										selectionColumn.getSelections().clear();
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried pull requests";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(requestsTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No pull requests to delete");
 								}
-							}
-							
-						};
-					}
-					
-				});
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(requestsTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No pull requests to delete");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
 				
 				return menuItems;
 			}
@@ -511,7 +634,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getProject() != null && SecurityUtils.canManagePullRequests(getProject()));
+				setVisible(SecurityUtils.getUser() != null);
 			}
 			
 		});
@@ -600,9 +723,10 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		add(queryForm);
-		
+
+		Component newPullRequestLink;
 		if (getProject() == null) {
-			add(new DropdownLink("newPullRequest") {
+			add(newPullRequestLink = new DropdownLink("newPullRequest") {
 	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
@@ -632,9 +756,11 @@ public abstract class PullRequestListPanel extends Panel {
 				
 			});
 		} else {
-			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+			add(newPullRequestLink = new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
 					NewPullRequestPage.paramsOf(getProject())));		
 		}
+		var user = SecurityUtils.getUser();
+		newPullRequestLink.setVisible(user == null || !user.isEffectiveGuest());
 		
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -657,7 +783,7 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) 
+		if (SecurityUtils.getUser() != null)
 			columns.add(selectionColumn = new SelectionColumn<PullRequest, Void>());
 		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("")) {
@@ -754,6 +880,20 @@ public abstract class PullRequestListPanel extends Panel {
 				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				fragment.add(new RequestStatusBadge("status", rowModel));
+				fragment.add(new BranchLink("targetBranch", request.getTarget()));
+				if (request.getSourceProject() != null) {
+					fragment.add(new BranchLink("sourceBranch", request.getSource()));
+				} else {
+					fragment.add(new Label("sourceBranch", "unknown") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("em");
+						}
+
+					});
+				}
 				
 				LastActivity lastActivity = request.getLastActivity();
 				if (lastActivity.getUser() != null) 
@@ -858,6 +998,10 @@ public abstract class PullRequestListPanel extends Panel {
 		requestsTable.add(new NoRecordsBehavior());
 		
 		setOutputMarkupId(true);
+	}
+	
+	private PullRequestWatchManager getWatchManager() {
+		return OneDev.getInstance(PullRequestWatchManager.class);
 	}
 
 	@Override

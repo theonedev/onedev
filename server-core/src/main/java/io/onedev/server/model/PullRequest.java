@@ -12,7 +12,6 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.LastActivity;
@@ -29,6 +28,7 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -83,6 +83,8 @@ public class PullRequest extends ProjectBelonging
 	public static final String NAME_SOURCE_BRANCH = "Source Branch";
 	
 	public static final String PROP_SOURCE_BRANCH = "sourceBranch";
+	
+	public static final String PROP_BUILD_COMMIT_HASH = "buildCommitHash";
 	
 	public static final String NAME_TITLE = "Title";
 	
@@ -285,7 +287,7 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Boolean mergedIntoTarget;
 
-	private transient Boolean valid;
+	private transient Collection<ObjectId> missingCommits;
 	
 	private transient Collection<Long> fixedIssueIds;
 	
@@ -822,16 +824,20 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	public boolean isValid() {
-		if (valid == null) {
-			List<ObjectId> objIds = new ArrayList<>();
+		return getMissingCommits().isEmpty();
+	}
+
+	public Collection<ObjectId> getMissingCommits() {
+		if (missingCommits == null) {
+			Set<ObjectId> objIds = new LinkedHashSet<>();
 			objIds.add(ObjectId.fromString(baseCommitHash));
 			for (PullRequestUpdate update: updates) {
 				objIds.add(ObjectId.fromString(update.getTargetHeadCommitHash()));
 				objIds.add(ObjectId.fromString(update.getHeadCommitHash()));
 			}
-			valid = getGitService().hasObjects(targetProject, objIds.toArray(new ObjectId[0]));
-		} 
-		return valid;
+			missingCommits = getGitService().filterNonExistants(targetProject, objIds);
+		}
+		return missingCommits;
 	}
 	
 	private GitService getGitService() {
@@ -1069,6 +1075,10 @@ public class PullRequest extends ProjectBelonging
 
 	public static String getSerialLockName(Long requestId) {
 		return "pull-request-" + requestId + "-serial";
+	}
+
+	public String getReference(@Nullable Project currentProject) {
+		return Referenceable.asReference(this, currentProject);
 	}
 	
 }

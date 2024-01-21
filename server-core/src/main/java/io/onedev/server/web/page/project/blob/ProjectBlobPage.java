@@ -64,8 +64,8 @@ import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
+import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.FileUpload;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -204,7 +204,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			var revision = state.blobIdent.revision;
 			if (revision == null)
 				revision = "main";
-			if (!SecurityUtils.canModify(getProject(), revision, path))
+			if (!SecurityUtils.canModifyFile(getProject(), revision, path))
 				unauthorized();
 		}
 		
@@ -1500,7 +1500,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	@Override
-	public ObjectId uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
+	public ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
 		String parentPath = getDirectory();
@@ -1516,8 +1516,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		BlobIdent blobIdent = getBlobIdent();
 		
 		boolean signRequired = false;
-		for (FileUpload upload: uploads) {
-			String blobPath = FilenameUtils.sanitizeFilename(upload.getFileName());
+		for (var item: upload.getItems()) {
+			String blobPath = FilenameUtils.sanitizeFilename(FileUpload.getFileName(item));
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			
@@ -1528,7 +1528,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			else if (getProject().isCommitSignatureRequiredButNoSigningKey(user, blobIdent.revision)) 
 				signRequired = true;
 			
-			BlobContent blobContent = new BlobContent(upload.getBytes(), FileMode.REGULAR_FILE.getBits());
+			BlobContent blobContent = new BlobContent(item.get(), FileMode.REGULAR_FILE.getBits());
 			newBlobs.put(blobPath, blobContent);
 		}
 

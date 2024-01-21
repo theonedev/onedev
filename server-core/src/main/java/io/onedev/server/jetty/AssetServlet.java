@@ -82,7 +82,7 @@ public abstract class AssetServlet extends DefaultServlet {
 			    return "false";
 			if (name.equals("cacheControl")) {
 		        if (!Bootstrap.sandboxMode || Bootstrap.prodMode)
-			        return "max-age=31536000,public";
+			        return "max-age=86400,public";
 		        else
 		        	return "must-revalidate,no-cache,no-store";
 			}
@@ -99,7 +99,9 @@ public abstract class AssetServlet extends DefaultServlet {
 			if (mapping.getServletName().equals(getServletName())) {
 				for (String pathSpec: mapping.getPathSpecs()) {
 					String relativePath = null;
-					if (pathSpec.endsWith("/*")) {
+					if (pathSpec.startsWith("/~help/")) {
+						relativePath = pathInContext.substring("/~help/".length());
+					} else if (pathSpec.endsWith("/*")) {
 						pathSpec = StringUtils.substringBeforeLast(pathSpec, "/*");
 						if (pathInContext.startsWith(pathSpec + "/")) 
 							relativePath = pathInContext.substring(pathSpec.length());

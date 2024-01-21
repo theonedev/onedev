@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.dashboard;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.core.request.handler.PageProvider;
@@ -27,6 +28,8 @@ public class ProjectDashboardPage extends ProjectPage {
 			pageProvider = new PageProvider(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
 		else if (getProject().isIssueManagement()) 
 			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0));
+		else if (getProject().isPackManagement())
+			pageProvider = new PageProvider(ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0));
 		else
 			pageProvider = new PageProvider(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject()));
 		throw new RestartResponseException(pageProvider, RedirectPolicy.NEVER_REDIRECT);
@@ -39,7 +42,7 @@ public class ProjectDashboardPage extends ProjectPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+		return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

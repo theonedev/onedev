@@ -1,15 +1,15 @@
 package io.onedev.server.security.realm;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-
+import com.google.common.collect.Lists;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.*;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.security.permission.*;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -17,22 +17,10 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.google.common.collect.Lists;
+import javax.inject.Inject;
+import java.util.*;
 
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueAuthorization;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.security.permission.ConfidentialIssuePermission;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.SystemAdministration;
-import io.onedev.server.security.permission.UserAdministration;
+import static com.google.common.collect.Lists.newArrayList;
 
 public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 
@@ -47,8 +35,7 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     protected final SettingManager settingManager;
     
     @SuppressWarnings("serial")
-	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = 
-			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
+	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
     
 	@Inject
     public AbstractAuthorizingRealm(UserManager userManager, GroupManager groupManager, 
@@ -61,39 +48,39 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     }
 
 	private AuthorizationInfo newAuthorizationInfo(Long userId) {
-		Collection<Permission> permissions = sessionManager.call(() -> {
-			Collection<Permission> innerPermissions = new ArrayList<>();
-			
-			if (userId != 0L) { 
+		var result = sessionManager.call(() -> {
+			Collection<Permission> permissions = new ArrayList<>();
+			User user = null;
+			if (userId != 0L) {
 				Permission systemAdministration = new SystemAdministration();
 				
-				User user = userManager.load(userId);
+				user = userManager.load(userId);
 				if (user.isRoot() || user.isSystem()) 
-					return Lists.newArrayList(systemAdministration);
+					return new Pair<>(user.getFacade(), newArrayList(systemAdministration));
 				
 				List<Group> groups = new ArrayList<>(user.getGroups());
-				   Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-				   if (defaultLoginGroup != null) 
-					   groups.add(defaultLoginGroup);
-				
-				   for (Group group: groups) {
-					   if (group.implies(systemAdministration))
-						   return Lists.newArrayList(systemAdministration);
-					   innerPermissions.add(group);
-				   }
+				Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+				if (defaultLoginGroup != null) 
+					groups.add(defaultLoginGroup);
+
+				for (Group group : groups) {
+					if (group.implies(systemAdministration))
+						return new Pair<>(user.getFacade(), newArrayList(systemAdministration));
+					permissions.add(group);
+				}
 				   
-				innerPermissions.add(new UserAdministration(user));
+				permissions.add(new UserAdministration(user));
 				
 				for (UserAuthorization authorization: user.getProjectAuthorizations()) 
-					innerPermissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 				for (IssueAuthorization authorization: user.getIssueAuthorizations()) {
-					innerPermissions.add(new ProjectPermission(
+					permissions.add(new ProjectPermission(
 							authorization.getIssue().getProject(), 
 							new ConfidentialIssuePermission(authorization.getIssue())));
 				}
-			} 
-			if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
-				innerPermissions.add(p -> {
+			}
+			if (user != null || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
+				permissions.add(p -> {
 					if (p instanceof ProjectPermission) {
 						ProjectPermission projectPermission = (ProjectPermission) p;
 						Project project = projectPermission.getProject();
@@ -107,7 +94,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 					return false;
 				});
 			}
-			return innerPermissions;
+			
+			return new Pair<>(UserFacade.of(user), permissions);
 		});
 		
 		return new AuthorizationInfo() {
@@ -126,7 +114,14 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return permissions;
+				return Lists.newArrayList(permission -> {
+					if (permission instanceof BasePermission) {
+						BasePermission basePermission = (BasePermission) permission;	
+						if (!basePermission.isApplicable(result.getLeft()))							
+							return false;
+					} 
+					return result.getRight().stream().anyMatch(it -> it.implies(permission));
+				});
 			}
 			
 		};		

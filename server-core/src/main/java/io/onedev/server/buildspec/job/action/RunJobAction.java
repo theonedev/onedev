@@ -6,13 +6,14 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.ParamMap;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 
@@ -21,7 +22,8 @@ import javax.validation.ValidationException;
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 @Editable(name="Run job", order=100)
 public class RunJobAction extends PostBuildAction {
@@ -30,7 +32,9 @@ public class RunJobAction extends PostBuildAction {
 
 	private String jobName;
 	
-	private List<ParamSupply> jobParams = new ArrayList<>();
+	private List<ParamInstances> paramMatrix = new ArrayList<>();
+	
+	private List<ParamMap> excludeParamMaps = new ArrayList<>();
 	
 	@Editable(order=900, name="Job")
 	@ChoiceProvider("getJobChoices")
@@ -47,22 +51,41 @@ public class RunJobAction extends PostBuildAction {
 	private static List<String> getJobChoices() {
 		return Job.getChoices();
 	}
-	
-	@Editable(name="Job Parameters", order=1000)
+
+	@Editable(order=1000)
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=true, withDynamicVariables=false)
+	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
 	@Valid
-	public List<ParamSupply> getJobParams() {
-		return jobParams;
+	public List<ParamInstances> getParamMatrix() {
+		return paramMatrix;
 	}
 
-	public void setJobParams(List<ParamSupply> jobParams) {
-		this.jobParams = jobParams;
+	public void setParamMatrix(List<ParamInstances> paramMatrix) {
+		this.paramMatrix = paramMatrix;
+	}
+
+	@Editable(order=1100, name="Exclude Param Combos")
+	@ShowCondition("isExcludeParamMapsVisible")
+	public List<ParamMap> getExcludeParamMaps() {
+		return excludeParamMaps;
+	}
+
+	public void setExcludeParamMaps(List<ParamMap> excludeParamMaps) {
+		this.excludeParamMaps = excludeParamMaps;
 	}
 	
-	@SuppressWarnings("unused")
-	private static List<ParamSpec> getParamSpecs() {
+	private static boolean isExcludeParamMapsVisible() {
+		var componentContext = ComponentContext.get();
+		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+			return !getParamSpecs().isEmpty();
+		} else {
+			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");
+			return !excludeParamMaps.isEmpty();
+		}
+	}
+
+	public static List<ParamSpec> getParamSpecs() {
 		String jobName = (String) EditContext.get().getInputValue("jobName");
 		if (jobName != null) {
 			Component component = ComponentContext.get().getComponent();
@@ -75,25 +98,19 @@ public class RunJobAction extends PostBuildAction {
 						return job.getParamSpecs();
 				}
 			}
-		} 
+		}
 		return new ArrayList<>();
 	}
 	
 	@Override
 	public void execute(Build build) {
-		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, 
-				build.getParamCombination(), getJobParams())) {
-			
-			@Override
-			public void run(Map<String, List<String>> paramMap) {
-				JobManager jobManager = OneDev.getInstance(JobManager.class);
-				jobManager.submit(build.getProject(), build.getCommitId(), getJobName(), 
-						paramMap, build.getPipeline(), build.getRefName(), 
-						build.getSubmitter(), build.getRequest(), build.getIssue(), 
-						"Post build action of job '" + build.getJobName() + "'"); 
-			}
-			
-		}.run();
+		for (var paramMap: resolveParams(build, build.getParamCombination(), getParamMatrix(), getExcludeParamMaps())) {
+			JobManager jobManager = OneDev.getInstance(JobManager.class);
+			jobManager.submit(build.getProject(), build.getCommitId(), getJobName(),
+					paramMap, build.getPipeline(), build.getRefName(),
+					build.getSubmitter(), build.getRequest(), build.getIssue(),
+					"Post build action of job '" + build.getJobName() + "'");
+		}
 	}
 
 	@Override
@@ -108,7 +125,9 @@ public class RunJobAction extends PostBuildAction {
 		Job jobToRun = buildSpec.getJobMap().get(jobName);
 		if (jobToRun != null) {
 			try {
-				ParamUtils.validateParams(jobToRun.getParamSpecs(), jobParams);
+				ParamUtils.validateParamMatrix(jobToRun.getParamSpecs(), paramMatrix);
+				for (var exludeParamMap: excludeParamMaps)
+					ParamUtils.validateParamMap(jobToRun.getParamSpecs(), exludeParamMap.getParams());
 			} catch (ValidationException e) {
 				String errorMessage = String.format("Error validating job parameters (job: %s, error message: %s)", 
 						jobToRun.getName(), e.getMessage());

@@ -6,12 +6,10 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
-import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.*;
-import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
@@ -47,6 +45,8 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<BoardSpec> boardSpecs = new ArrayList<>();
 	
+	private TimeTrackingSetting timeTrackingSetting = new TimeTrackingSetting();
+	
 	private List<String> listFields = new ArrayList<>();
 	
 	private List<String> listLinks = new ArrayList<>();
@@ -79,16 +79,16 @@ public class GlobalIssueSetting implements Serializable {
 		bug.setValue("Bug");
 		bug.setColor("#F64E60");
 		choices.add(bug);
-
+		
 		Choice task = new Choice();
 		task.setValue("Task");
 		task.setColor("#8950FC");
 		choices.add(task);
 
-		Choice buildFailure = new Choice();
-		buildFailure.setValue("Build Failure");
-		buildFailure.setColor("#F64E60");
-		choices.add(buildFailure);
+		Choice supportRequest = new Choice();
+		supportRequest.setValue("Support Request");
+		supportRequest.setColor("#8950FC");
+		choices.add(supportRequest);
 		
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
@@ -147,20 +147,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		fieldSpecs.add(assignees);
 		
-		BuildChoiceField failedBuild = new BuildChoiceField();
-		failedBuild.setName("Failed Build");
-		failedBuild.setAllowEmpty(true);
-		failedBuild.setNameOfEmptyValue("Not specified");
-		
-		fieldSpecs.add(failedBuild);
-		
-		ShowCondition showCondition = new ShowCondition();
-		showCondition.setInputName("Type");
-		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
-		showCondition.setValueMatcher(valueIsOneOf);
-		failedBuild.setShowCondition(showCondition);
-		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setColor("#FFA800");
@@ -190,16 +176,6 @@ public class GlobalIssueSetting implements Serializable {
 		BranchUpdateTrigger branchUpdate = new BranchUpdateTrigger();
 		branchUpdate.setBranches("main");
 		transition.setTrigger(branchUpdate);
-		
-		transitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
-		BuildSuccessfulTrigger buildSuccessful = new BuildSuccessfulTrigger();
-		buildSuccessful.setBranches("main");
-		buildSuccessful.setIssueQuery("\"Type\" is \"Build Failure\" and (\"Failed Build\" is current or \"Failed Build\" is previous)");
-		transition.setTrigger(buildSuccessful);
 		
 		transitionSpecs.add(transition);
 		
@@ -237,7 +213,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees"));
+		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_MILESTONE));
 		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
 		
@@ -245,6 +221,7 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add("Type");
 		listFields.add("Priority");
 		listFields.add("Assignees");
+		listFields.add(IssueSchedule.NAME_MILESTONE);
 		
 		listLinks.add("Child Issue");
 		listLinks.add("Blocked By");
@@ -253,13 +230,14 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
-		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
+		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Milestone\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 		
@@ -272,6 +250,8 @@ public class GlobalIssueSetting implements Serializable {
 		entry.setPrefix("\\(\\s*");
 		entry.setSuffix("\\s*\\)\\s*$");
 		commitMessageFixPatterns.getEntries().add(entry);
+		
+		timeTrackingSetting.setAggregationLink("Child Issue");
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
@@ -362,7 +342,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
-			
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				undefinedStates.addAll(query.getUndefinedStates());
@@ -375,8 +354,11 @@ public class GlobalIssueSetting implements Serializable {
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
 		for (String fieldName: getListFields()) {
-			if (!fieldName.equals(Issue.NAME_STATE) && getFieldSpec(fieldName) == null)
+			if (!fieldName.equals(Issue.NAME_STATE) 
+					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE) 
+					&& getFieldSpec(fieldName) == null) {
 				undefinedFields.add(fieldName);
+			}
 		}
 		
 		for (TransitionSpec transition: getTransitionSpecs())
@@ -636,6 +618,8 @@ public class GlobalIssueSetting implements Serializable {
 			template.getQueryUpdater().onRenameLink(oldName, newName);
 		
 		ReconcileUtils.renameItem(listLinks, oldName, newName);
+		
+		timeTrackingSetting.onRenameLink(oldName, newName);
 	}
 
 	public Usage onDeleteLink(String linkName) {
@@ -650,7 +634,7 @@ public class GlobalIssueSetting implements Serializable {
 			usage.add(board.getBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
 			usage.add(board.getBacklogBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
 			if (board.getDisplayLinks().contains(linkName))
-				usage.add("display links").prefix("default board #" + index);
+				usage.add(new Usage().add("display links").prefix("default board #" + index));
 			index++;
 		}
 		
@@ -660,6 +644,8 @@ public class GlobalIssueSetting implements Serializable {
 		
 		if (listLinks.contains(linkName))
 			usage.add(new Usage().add("fields & links").prefix("-> issues"));
+		
+		usage.add(timeTrackingSetting.onDeleteLink(linkName).prefix("time tracking"));
 		
 		return usage.prefix("issue settings");
 	}
@@ -677,6 +663,14 @@ public class GlobalIssueSetting implements Serializable {
 
 	public void setBoardSpecs(List<BoardSpec> boardSpecs) {
 		this.boardSpecs = boardSpecs;
+	}
+
+	public TimeTrackingSetting getTimeTrackingSetting() {
+		return timeTrackingSetting;
+	}
+
+	public void setTimeTrackingSetting(TimeTrackingSetting timeTrackingSetting) {
+		this.timeTrackingSetting = timeTrackingSetting;
 	}
 
 	public List<String> getListFields() {

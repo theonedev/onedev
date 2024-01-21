@@ -23,7 +23,7 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.SubPath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
@@ -56,7 +56,7 @@ public class PublishSiteStep extends ServerSideStep {
 			+ "relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish "
 			+ "artifacts from. Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	@Override
 	public String getSourcePath() {
 		return sourcePath;

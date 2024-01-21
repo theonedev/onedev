@@ -11,7 +11,7 @@ public abstract class StringTransformer {
 		this.pattern = pattern;
 	}
 	
-	public String transform(String string) {
+	public final String transform(String string) {
 		StringBuffer buffer = new StringBuffer();
 		int lastPos = 0;
 		Matcher matcher = pattern.matcher(string);

@@ -4,22 +4,26 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 
 import javax.annotation.Nullable;
+import javax.mail.Message;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public interface MailManager {
 	
-	public static final String TEST_SUB_ADDRESS = "test~subaddressing";
+	String TEST_SUB_ADDRESS = "test~subaddressing";
 	
-	public static final String COMMENT_MARKER = "no-color";
+	String COMMENT_MARKER = "no-color";
 	
 	void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 				  String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 				  @Nullable String senderName, @Nullable String references);
 	
-	void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
-				  Collection<String> bccList, String subject, String htmlBody, String textBody, 
-				  @Nullable String replyAddress, @Nullable String senderName, @Nullable String references);
+	void sendMail(SmtpSetting smtpSetting, Collection<String> toList, Collection<String> ccList,
+				  Collection<String> bccList, String subject, String htmlBody, String textBody,
+				  @Nullable String replyAddress, @Nullable String senderName, String systemAddress, 
+				  @Nullable String references);
 	
 	void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 					   String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
@@ -41,7 +45,10 @@ public interface MailManager {
 	
 	String toPlainText(String mailContent);
 	
-	Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, 
-						   MailPosition lastPosition);
+	Future<?> monitorInbox(ImapSetting imapSetting, String systemAddress,
+						   Consumer<Message> messageConsumer, 
+						   MailPosition lastPosition, boolean testMode);
 
+	void handleMessage(Message message, String systemAddress, List<String> additionalTargetAddresses);
+	
 }

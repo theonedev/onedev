@@ -4,24 +4,24 @@ import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DnsName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildRunning;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.terminal.TerminalManager;
-import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.DnsName;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.web.util.WicketUtils;
+import org.eclipse.jetty.http.HttpStatus;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -38,6 +38,8 @@ public abstract class JobExecutor implements Serializable {
 	private String jobRequirement;
 	
 	private boolean shellAccessEnabled;
+	
+	private boolean htmlReportPublishEnabled;
 	
 	private boolean sitePublishEnabled;
 	
@@ -62,11 +64,11 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=20, description="Enable this to allow project managers to open web terminal to running builds. "
+	@Editable(order=20, description="Enable this to allow to open interactive shell to diagnose running builds. "
 			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
 			+ "the executor. You should configure job requirement below to make sure the executor can only be "
 			+ "used by trusted jobs if this option is enabled")
-	@ShowCondition("isTerminalSupported")
+	@ShowCondition("isSubscriptionActive")
 	public boolean isShellAccessEnabled() {
 		return shellAccessEnabled;
 	}
@@ -85,9 +87,19 @@ public abstract class JobExecutor implements Serializable {
 		this.sitePublishEnabled = sitePublishEnabled;
 	}
 
+	@Editable(order=40, description = "Enable this to allow to run html report publish step. To avoid XSS attach, " +
+			"make sure this executor can only be used by trusted jobs")
+	public boolean isHtmlReportPublishEnabled() {
+		return htmlReportPublishEnabled;
+	}
+
+	public void setHtmlReportPublishEnabled(boolean htmlReportPublishEnabled) {
+		this.htmlReportPublishEnabled = htmlReportPublishEnabled;
+	}
+
 	@SuppressWarnings("unused")
-	private static boolean isTerminalSupported() {
-		return OneDev.getInstance(TerminalManager.class).isTerminalSupported();
+	private static boolean isSubscriptionActive() {
+		return WicketUtils.isSubscriptionActive();
 	}
 
 	@Editable(order=10000, placeholder="Any job", description="Optionally specify job requirement of this executor")
@@ -197,9 +209,9 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	protected String getErrorMessage(Exception exception) {
-		Response response = ExceptionUtils.buildResponse(exception);
+		var response = ExceptionUtils.buildResponse(exception);
 		if (response != null) 
-			return response.getEntity().toString();
+			return response.getBody() != null? response.getBody().getText() : HttpStatus.getMessage(response.getStatus());
 		else
 			return Throwables.getStackTraceAsString(exception);
 	}

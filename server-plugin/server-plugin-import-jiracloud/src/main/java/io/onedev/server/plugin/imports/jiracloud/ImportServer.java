@@ -23,6 +23,7 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -30,6 +31,8 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -150,20 +153,20 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	@Nullable
-	private User getUser(Map<String, Optional<User>> users, JsonNode userNode, TaskLogger logger) {
+	private Long getUserId(Map<String, Optional<Long>> userIds, JsonNode userNode, TaskLogger logger) {
 		String accountId = userNode.get("accountId").asText();
-		Optional<User> userOpt = users.get(accountId);
-		if (userOpt == null) {
+		Optional<Long> userIdOpt = userIds.get(accountId);
+		if (userIdOpt == null) {
 			String displayName = null;
 			if (userNode.hasNonNull("displayName"))
 				displayName = userNode.get("displayName").asText(null);
 			if (displayName != null)
-				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByFullName(displayName));
+				userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserManager.class).findByFullName(displayName)));
 			else
-				userOpt = Optional.empty();
-			users.put(accountId, userOpt);
+				userIdOpt = Optional.empty();
+			userIds.put(accountId, userIdOpt);
 		}
-		return userOpt.orElse(null);
+		return userIdOpt.orElse(null);
 	}
 	
 	private String getMarkdown(JsonNode contentNode, boolean escape) {
@@ -315,78 +318,81 @@ public class ImportServer implements Serializable, Validatable {
 		return markdown.toString();
 	}
 	
-	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
-		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
-		
+	TaskResult importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
-			Map<String, Optional<User>> users = new HashMap<>();
+			Map<String, Optional<Long>> userIds = new HashMap<>();
+			Map<String, JsonNode> projectNodes = getProjectNodes(logger);
 			ImportResult result = new ImportResult();
 			for (var jiraProject: projects.getImportProjects()) {
-				String oneDevProjectPath;
-				if (projects.getParentOneDevProject() != null)
-					oneDevProjectPath = projects.getParentOneDevProject() + "/" + jiraProject;
-				else
-					oneDevProjectPath = jiraProject;
+				OneDev.getInstance(TransactionManager.class).run(() -> {
+					String oneDevProjectPath;
+					if (projects.getParentOneDevProject() != null)
+						oneDevProjectPath = projects.getParentOneDevProject() + "/" + jiraProject;
+					else
+						oneDevProjectPath = jiraProject;
 
-				logger.log("Importing from '" + jiraProject + "' to '" + oneDevProjectPath + "'...");
-				
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.setup(oneDevProjectPath);
+					logger.log("Importing from '" + jiraProject + "' to '" + oneDevProjectPath + "'...");
 
-				if (!project.isNew() && !SecurityUtils.canManage(project)) {
-					throw new UnauthorizedException("Import target already exists. " +
-							"You need to have project management privilege over it");
-				}
+					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+					Project project = projectManager.setup(oneDevProjectPath);
 
-				JsonNode projectNode = projectNodes.get(jiraProject);
-				if (projectNode == null)
-					throw new ExplicitException("Unable to find project: " + jiraProject);
+					if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
+						throw new UnauthorizedException("Import target already exists. " +
+								"You need to have project management privilege over it");
+					}
 
-				String apiEndpoint = getApiEndpoint("/project/" + projectNode.get("id").asText());
+					JsonNode projectNode = projectNodes.get(jiraProject);
+					if (projectNode == null)
+						throw new ExplicitException("Unable to find project: " + jiraProject);
 
-				// Get more detail project information
-				projectNode = JerseyUtils.get(client, apiEndpoint, logger);
+					String apiEndpoint = getApiEndpoint("/project/" + projectNode.get("id").asText());
 
-				project.setDescription(projectNode.get("description").asText(null));
-				
-				if (!dryRun && project.isNew()) 
-					projectManager.create(project);
-				
-				logger.log("Importing issues...");
-				ImportResult currentResult = importIssues(projectNode, project, option, users, dryRun, logger);
-				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-				result.errorAttachments.addAll(currentResult.errorAttachments);
-				result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
-				result.unmappedIssuePriorities.addAll(currentResult.unmappedIssuePriorities);
-				result.unmappedIssueStatuses.addAll(currentResult.unmappedIssueStatuses);
-				result.unmappedIssueTypes.addAll(currentResult.unmappedIssueTypes);
+					// Get more detail project information
+					projectNode = JerseyUtils.get(client, apiEndpoint, logger);
+
+					project.setDescription(projectNode.get("description").asText(null));
+
+					if (!dryRun && project.isNew())
+						projectManager.create(project);
+
+					logger.log("Importing issues...");
+					ImportResult currentResult = importIssues(projectNode, project, option, userIds, dryRun, logger);
+					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
+					result.errorAttachments.addAll(currentResult.errorAttachments);
+					result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
+					result.unmappedIssuePriorities.addAll(currentResult.unmappedIssuePriorities);
+					result.unmappedIssueStatuses.addAll(currentResult.unmappedIssueStatuses);
+					result.unmappedIssueTypes.addAll(currentResult.unmappedIssueTypes);
+				});
 			}
 			
-			return result.toHtml("Projects imported successfully");
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Projects imported successfully")));
 		} finally {
 			client.close();
 		}	
 	}
 	
-	String importIssues(Project project, String jiraProject, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importIssues(Long projectId, String jiraProject, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
-		
 		Client client = newClient();
 		try {
-			Map<String, Optional<User>> users = new HashMap<>();
 			JsonNode projectNode = projectNodes.get(jiraProject);
 			if (projectNode == null)
 				throw new ExplicitException("Unable to find project: " + jiraProject);
-			ImportResult result = importIssues(projectNode, project, option, users, dryRun, logger);
-			return result.toHtml("Issues imported successfully");
+			return OneDev.getInstance(TransactionManager.class).call(() -> {
+				var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				Map<String, Optional<Long>> userIds = new HashMap<>();
+				ImportResult result = importIssues(projectNode, project, option, userIds, dryRun, logger);
+				return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
+			});
 		} finally {
 			client.close();
 		}
 	}
 	
 	private ImportResult importIssues(JsonNode jiraProject, Project oneDevProject, ImportOption option, 
-			Map<String, Optional<User>> users, boolean dryRun, TaskLogger logger) {
+			Map<String, Optional<Long>> userIds, boolean dryRun, TaskLogger logger) {
 		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
@@ -580,13 +586,14 @@ public class ImportServer implements Serializable, Validatable {
 								extraIssueInfo.put("Labels", joinAsMultilineHtml(labels));
 						}
 						
+						var userManager = OneDev.getInstance(UserManager.class);
 						JsonNode authorNode = fieldsNode.get("reporter");
 						if (authorNode == null)
 							authorNode = fieldsNode.get("creator");
 						if (authorNode != null) {
-							User user = getUser(users, authorNode, logger);
-							if (user != null) {
-								issue.setSubmitter(user);
+							Long userId = getUserId(userIds, authorNode, logger);
+							if (userId != null) {
+								issue.setSubmitter(userManager.load(userId));
 							} else {
 								issue.setSubmitter(OneDev.getInstance(UserManager.class).getUnknown());
 								nonExistentLogins.add(authorNode.get("displayName").asText());
@@ -602,9 +609,9 @@ public class ImportServer implements Serializable, Validatable {
 							assigneeField.setName(option.getAssigneeIssueField());
 							assigneeField.setType(InputSpec.USER);
 							
-							User user = getUser(users, assigneeNode, logger);
-							if (user != null) { 
-								assigneeField.setValue(user.getName());
+							Long userId = getUserId(userIds, assigneeNode, logger);
+							if (userId != null) { 
+								assigneeField.setValue(userManager.load(userId).getName());
 								issue.getFields().add(assigneeField);
 							} else {
 								nonExistentLogins.add(assigneeNode.get("displayName").asText());
@@ -706,9 +713,9 @@ public class ImportServer implements Serializable, Validatable {
 									
 									authorNode = commentNode.get("author");
 									if (authorNode != null) {
-										User user = getUser(users, authorNode, logger);
-										if (user != null) {
-											comment.setUser(user);
+										Long userId = getUserId(userIds, authorNode, logger);
+										if (userId != null) {
+											comment.setUser(userManager.load(userId));
 										} else {
 											comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
 											nonExistentLogins.add(authorNode.get("displayName").asText());

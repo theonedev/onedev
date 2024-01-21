@@ -157,6 +157,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
 		codeWriter.setCodePrivilege(CodePrivilege.WRITE);
+		codeWriter.setPackPrivilege(PackPrivilege.READ);
 		codeWriter.setScheduleIssues(true);
 		codeWriter.setAccessConfidentialIssues(true);
 		codeWriter.setEditableIssueFields(new AllIssueFields());
@@ -171,18 +172,50 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
 		codeReader.setCodePrivilege(CodePrivilege.READ);
+		codeReader.setPackPrivilege(PackPrivilege.READ);
 		
 		if (hasAssigneesField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
 			allfieldsExcept.getExcludeFields().add("Assignees");
 			codeReader.setEditableIssueFields(allfieldsExcept);
 		}
-		
+
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
 		codeReader.getJobPrivileges().add(jobPrivilege);
-		
+
 		create(codeReader, new ArrayList<>());
+		
+		Role packWriter = new Role();
+		packWriter.setName("Package Writer");
+		packWriter.setCodePrivilege(CodePrivilege.READ);
+		packWriter.setPackPrivilege(PackPrivilege.WRITE);
+		packWriter.setScheduleIssues(true);
+		packWriter.setAccessConfidentialIssues(true);
+		packWriter.setEditableIssueFields(new AllIssueFields());
+
+		jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		jobPrivilege.setRunJob(true);
+		packWriter.getJobPrivileges().add(jobPrivilege);
+
+		create(packWriter, new ArrayList<>());
+
+		Role packReader = new Role();
+		packReader.setName("Package Reader");
+		packReader.setPackPrivilege(PackPrivilege.READ);
+		
+		if (hasAssigneesField) {
+			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+			allfieldsExcept.getExcludeFields().add("Assignees");
+			packReader.setEditableIssueFields(allfieldsExcept);
+		}
+		
+		jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		packReader.getJobPrivileges().add(jobPrivilege);
+		
+		create(packReader, new ArrayList<>());
 		
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");

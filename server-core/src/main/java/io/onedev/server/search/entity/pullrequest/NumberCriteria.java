@@ -36,6 +36,8 @@ public class NumberCriteria extends Criteria<PullRequest> {
 		
 		if (operator == PullRequestQueryLexer.Is)
 			numberPredicate = builder.equal(attribute, number.getNumber());
+		else if (operator == PullRequestQueryLexer.IsNot)
+			numberPredicate = builder.not(builder.equal(attribute, number.getNumber()));
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
 			numberPredicate = builder.greaterThan(attribute, number.getNumber());
 		else
@@ -51,6 +53,8 @@ public class NumberCriteria extends Criteria<PullRequest> {
 		if (request.getTargetProject().equals(number.getProject())) {
 			if (operator == PullRequestQueryLexer.Is)
 				return request.getNumber() == number.getNumber();
+			else if (operator == PullRequestQueryLexer.IsNot)
+				return request.getNumber() != number.getNumber();
 			else if (operator == PullRequestQueryLexer.IsGreaterThan)
 				return request.getNumber() > number.getNumber();
 			else

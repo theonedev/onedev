@@ -3,11 +3,14 @@ package io.onedev.server.search.entitytext;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.issue.IssuesTouched;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.EntityTouch;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessConfidentialIssues;
@@ -103,6 +106,12 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 				entityDoc.add(new TextField(FIELD_COMMENT, comment.getContent(), NO));
 		}
 	}
+
+	@Transactional
+	@Listen
+	public void on(IssuesTouched event) {
+		requestToIndex(event.getProject().getId());
+	}
 	
 	@Nullable
 	private EntityTextQuery buildQuery(@Nullable ProjectScope projectScope, String queryString) {
@@ -117,7 +126,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 					applicableProjectIds.addAll(projectManager.getSubtreeIds(project.getId()));
 				if (projectScope.isInherited()) {
 					for (var ancestor: project.getAncestors()) {
-						if (SecurityUtils.canAccess(ancestor))
+						if (SecurityUtils.canAccessProject(ancestor))
 							applicableProjectIds.add(ancestor.getId());
 					}
 				}

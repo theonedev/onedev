@@ -14,7 +14,7 @@ public class DiscardedCriteria extends Criteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	private Criteria<PullRequest> getCriteria() {
-		return new StatusCriteria(Status.DISCARDED);
+		return new StatusCriteria(Status.DISCARDED, PullRequestQueryLexer.Is);
 	}
 	
 	@Override

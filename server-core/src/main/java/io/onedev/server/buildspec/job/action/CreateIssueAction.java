@@ -20,7 +20,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.annotation.Editable;
@@ -40,7 +40,7 @@ public class CreateIssueAction extends PostBuildAction {
 	
 	private boolean issueConfidential;
 	
-	private List<FieldSupply> issueFields = new ArrayList<>();
+	private List<FieldInstance> issueFields = new ArrayList<>();
 	
 	@Editable(order=1000, name="Title", group="Issue Detail", description="Specify title of the issue")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -82,11 +82,11 @@ public class CreateIssueAction extends PostBuildAction {
 	@FieldNamesProvider("getFieldNames")
 	@OmitName
 	@Valid
-	public List<FieldSupply> getIssueFields() {
+	public List<FieldInstance> getIssueFields() {
 		return issueFields;
 	}
 
-	public void setIssueFields(List<FieldSupply> issueFields) {
+	public void setIssueFields(List<FieldInstance> issueFields) {
 		this.issueFields = issueFields;
 	}
 	
@@ -111,10 +111,10 @@ public class CreateIssueAction extends PostBuildAction {
 				
 				issue.setDescription(getIssueDescription());
 				issue.setConfidential(isIssueConfidential());
-				for (FieldSupply supply: getIssueFields()) {
-					Object fieldValue = issueSetting.getFieldSpec(supply.getName())
-							.convertToObject(supply.getValueProvider().getValue());
-					issue.setFieldValue(supply.getName(), fieldValue);
+				for (FieldInstance instance: getIssueFields()) {
+					Object fieldValue = issueSetting.getFieldSpec(instance.getName())
+							.convertToObject(instance.getValueProvider().getValue());
+					issue.setFieldValue(instance.getName(), fieldValue);
 				}
 				OneDev.getInstance(IssueManager.class).open(issue);
 			}

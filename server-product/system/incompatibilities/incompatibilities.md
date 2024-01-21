@@ -1,19 +1,87 @@
+# 9.4.7
+
+### Mail Service
+
+The option `Monitor System Email Only` is removed from various mail services. Instead, you will 
+need to specify additional email addresses to be monitored explicitly via option 
+`Additional Email Addresses to Monitor`
+
+# 9.3.2
+
+### Agent
+
+OneDev now relies on buildx to build docker image. Make sure to update agent image by running 
+`docker pull 1dev/agent` if you are running agent inside container
+
+# 9.1.6
+
+Well this is a notice rather than an incompatibility. You are highly recommended to check update
+like below to list changes and incompatibilities since your current version before each upgrade 
+as some incompatibility change may affect the upgrade procedure:
+
+![check-update](check-update.png)
+
+# 9.1.5
+
+### Agent
+
+Temporal agent support is removed as this feature is flawed (using same token). 
+This feature will be replaced by on demand agent launch in future versions
+
+# 9.1.0
+
+### Pull Request
+
+1. The query criteria *has failed builds* has been changed to *has unsuccessful builds*
+2. The query criteria *to be verified by builds* has been changed to *has unfinished builds*
+
+# 9.0.0
+ 
+### License Terms
+
+Since 9.0, OneDev introduces [enterprise edition](https://onedev.io/pricing) which requires a paid subscription to use, 
+and now it is distributed under [new license](https://onedev.io/license-agreement). In short, the _server-ee_ folder is 
+licensed separately with a source available license, while other parts remain MIT licensed. 
+
+It is promised that all existing features prior to 9.0 will never be moved into enterprise edition, and new features 
+will be added to MIT licensed part continuously.
+
+### Helm Chart 
+
+1. OneDev only supports to run as statefulsets now. Refer to the [upgrade guide](https://docs.onedev.io/upgrade-guide/deploy-to-k8s) to migrate the persistent volume
+2. Various database settings are changed to remove the _db_ prefix. For instance, _.Values.database.dbType_ was changed to _.Values.database.type_. Refer to [values.yaml](https://code.onedev.io/onedev/server/~files/main/server-product/helm/values.yaml) for details
+
+### RESTful api 
+
+The operation to [get issue fields](/~help/api/io.onedev.server.rest.IssueResource/getFields) now return a map of field name to value  
+
 # 8.6.0
 
-**[Database]** Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide]((https://docs.onedev.io/administration-guide/backup-restore)) 
+### Database 
+
+Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide]((https://docs.onedev.io/administration-guide/backup-restore)) 
 
 # 8.5.0
 
-**[Helm Chart]** Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [this guide](https://docs.onedev.io/upgrade-guide#upgrade-from-chart-v--842) to upgrade your chart from version <= 8.4.2  
+### Helm Chart
+
+Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [upgrade guide](https://docs.onedev.io/upgrade-guide/deploy-to-k8s) to upgrade your chart from version <= 8.4.2
 
 # 8.4.0
 
-1. **[Executor]** Kubernetes executor no longer supports to execute step of type `Run Docker Container` to avoid mounting container sock into sidecar container. Put your step logic in a command step instead
+### Executor
+
+Kubernetes executor no longer supports to execute step of type `Run Docker Container` to avoid mounting container sock into sidecar container. Put your step logic in a command step instead
 
 # 8.3.4
 
-1. **[Executor]** Kubernetes executor no longer supports to execute build image step even with docker runtime. A kaniko step is added to build image in Kubernetes cluster
-2. **[Build Spec]** The `publish` option of `build docker image` step is removed, and now the step always tries to publish the built image
+### Executor 
+
+Kubernetes executor no longer supports to execute build image step even with docker runtime. A kaniko step is added to build image in Kubernetes cluster
+
+### Build Spec 
+
+The `publish` option of `build docker image` step is removed, and now the step always tries to publish the built image
 
 # 8.2.0
 
@@ -21,9 +89,14 @@ Branch/tag protection rules are changed to apply first matching instead of apply
 
 # 8.1.0
 
-1. **[Agent]** A particular agent token can only be used by one agent now. If you have multiple agents using same token, only the first one can connect to server, and others will be rejected. To fix this, open detail page of each rejected agent and copy the newly generated token to agent side
-2. **[RESTful api]** The endpoint path to list agents in agent token resource has been changed from `/agents` to `/agent`
-3. **[RESTful api]** The endpoint to create agent token now do not require any request body. It will generate new token value at OneDev side
+**[Agent]** 
+
+A particular agent token can only be used by one agent now. If you have multiple agents using same token, only the first one can connect to server, and others will be rejected. To fix this, open detail page of each rejected agent and copy the newly generated token to agent side
+
+**[RESTful api]** 
+
+1. The endpoint path to list agents in agent token resource has been changed from `/agents` to `/agent`
+1. The endpoint to create agent token now do not require any request body. It will generate new token value at OneDev side
 
 # 8.0.7
 

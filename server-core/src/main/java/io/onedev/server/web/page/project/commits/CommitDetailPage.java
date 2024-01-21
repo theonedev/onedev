@@ -18,7 +18,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
@@ -300,7 +300,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
 					if (buildSpec != null) {
 						for (Job job : buildSpec.getJobMap().values()) {
-							if (SecurityUtils.canAccess(getProject(), job.getName()))
+							if (SecurityUtils.canAccessJob(getProject(), job.getName()))
 								jobs.add(job);
 						}
 					}

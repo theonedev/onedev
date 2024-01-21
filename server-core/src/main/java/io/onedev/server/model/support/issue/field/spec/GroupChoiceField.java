@@ -6,6 +6,9 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.AllGroups;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
@@ -22,6 +25,8 @@ public class GroupChoiceField extends FieldSpec {
 	private ChoiceProvider choiceProvider = new AllGroups();
 
 	private DefaultValueProvider defaultValueProvider;
+	
+	private boolean editEstimatedTime = true;
 	
 	@Editable(order=1000, name="Available Choices")
 	@NotNull(message="may not be empty")
@@ -49,6 +54,21 @@ public class GroupChoiceField extends FieldSpec {
 		return GroupChoiceInput.getPossibleValues(choiceProvider);
 	}
 
+	@Editable(order=1200, name="Can Edit Estimated Time", description = "If ticked, group indicated by this " +
+			"field will be able to edit estimated time of corresponding issues if time tracking is enabled")
+	@ShowCondition("isSubscriptionActive")
+	public boolean isEditEstimatedTime() {
+		return editEstimatedTime;
+	}
+
+	public void setEditEstimatedTime(boolean editEstimatedTime) {
+		this.editEstimatedTime = editEstimatedTime;
+	}
+
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+	}
+	
 	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
 		return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider);

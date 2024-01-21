@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
+import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -60,7 +61,7 @@ public class ServiceLocator implements Serializable {
 		this.nodeSelector = nodeSelector;
 	}
 	
-	public final boolean isApplicable(Service service) {
+	public final boolean isApplicable(ServiceFacade service) {
 		Matcher matcher = new PathMatcher();
 		return (getServiceNames() == null || PatternSet.parse(getServiceNames()).matches(matcher, service.getName()))
 				&& (getServiceImages() == null || PatternSet.parse(getServiceImages()).matches(matcher, service.getImage()));

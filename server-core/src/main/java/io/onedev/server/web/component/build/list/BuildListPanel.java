@@ -1040,7 +1040,7 @@ public abstract class BuildListPanel extends Panel {
 				}));
 				fragment.add(link);
 
-				fragment.add(new EntityLabelsPanel<BuildLabel>("labels", rowModel));
+				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);
@@ -1213,16 +1213,6 @@ public abstract class BuildListPanel extends Panel {
 		
 		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
-		
-		body.add(new WebMarkupContainer("tips") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null && getProject() != null && SecurityUtils.canReadCode(getProject()));
-			}
-			
-		});
 		
 		setOutputMarkupId(true);
 	}

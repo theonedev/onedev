@@ -3,7 +3,6 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.map.IMap;
 import io.onedev.agent.AgentData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
@@ -12,16 +11,16 @@ import io.onedev.agent.job.LogRequest;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentLastUsedDateManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentLastUsedDateManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.model.AgentLastUsedDate;
@@ -189,7 +188,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			agent.setOsArch(data.getOsInfo().getOsArch());
 			agent.setName(data.getName());
 			agent.setCpus(data.getCpus());
-			agent.setTemporal(data.isTemporal());
 			agent.setIpAddress(data.getIpAddress());
 
 			AgentLastUsedDate lastUsedDate = new AgentLastUsedDate();
@@ -215,7 +213,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			agent.setOsArch(data.getOsInfo().getOsArch());
 			agent.setIpAddress(data.getIpAddress());
 			agent.setCpus(data.getCpus());
-			agent.setTemporal(data.isTemporal());
 			dao.persist(agent);
 			attributeManager.syncAttributes(agent, data.getAttributes());
 		}
@@ -240,13 +237,8 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		agentServers.remove(agentId);
 		agentSessions.remove(agentId);
 		Agent agent = get(agentId);
-		if (agent != null) {
-			if (agent.isTemporal()) {
-				removeReferences(agent);
-				dao.remove(agent);
-			}
+		if (agent != null) 
 			listenerRegistry.post(new AgentDisconnected(agent));
-		}
 	}
 
 	private void removeReferences(Agent agent) {

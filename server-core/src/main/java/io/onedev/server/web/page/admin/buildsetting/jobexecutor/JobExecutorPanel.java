@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
-import java.util.List;
-
-import org.apache.wicket.Component;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.editable.BeanContext;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -14,10 +14,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class JobExecutorPanel extends Panel {
@@ -37,16 +34,7 @@ abstract class JobExecutorPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Label nameLabel = new Label("name", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return EditableUtils.getDisplayName(getExecutor().getClass());
-			}
-			
-		});
-		nameLabel.setOutputMarkupPlaceholderTag(true);
-		add(nameLabel);
+		add(new Label("name", getExecutor().getName()));
 		
 		add(new AjaxLink<Void>("edit") {
 
@@ -57,27 +45,16 @@ abstract class JobExecutorPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						JobExecutorPanel.this.onSave(target);
-						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
-						JobExecutorPanel.this.replace(viewer);
-						target.add(viewer);
-						nameLabel.setVisible(true);
-						target.add(nameLabel);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
-						JobExecutorPanel.this.replace(viewer);
-						target.add(viewer);
-						nameLabel.setVisible(true);
-						target.add(nameLabel);
+						JobExecutorPanel.this.onCancel(target);
 					}
 					
 				};
 				JobExecutorPanel.this.replace(editor);
 				target.add(editor);
-				nameLabel.setVisible(false);
-				target.add(nameLabel);
 			}
 			
 		});
@@ -118,7 +95,9 @@ abstract class JobExecutorPanel extends Panel {
 			
 		});
 		
-		add(BeanContext.view("executor", getExecutor()).setOutputMarkupId(true));
+		var bean = new JobExecutorBean();
+		bean.setExecutor(getExecutor());
+		add(BeanContext.view("executor", bean).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
@@ -140,4 +119,5 @@ abstract class JobExecutorPanel extends Panel {
 
 	protected abstract void onSave(AjaxRequestTarget target);
 	
+	protected abstract void onCancel(AjaxRequestTarget target);
 }

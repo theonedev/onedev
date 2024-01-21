@@ -1,0 +1,34 @@
+.pack-side>* {
+	margin-bottom: 1.5rem;
+	border-top: 1px dashed var(--secondary);
+	padding-top: 1.5rem;
+}
+.dark-mode .pack-side>* {
+	border-top-color: var(--dark-mode-dark-gray);
+}
+
+.pack-side>div:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+.pack-side>.properties {
+    width: 100%;
+    display: table;
+}
+.pack-side>.properties>div {
+    display: table-row;
+}
+.pack-side>.properties>div>div.name {
+    display: table-cell;
+	padding: 0 1rem 1.5rem 0;
+	width: 40%;
+	font-weight: 500;
+}
+.pack-side>.properties>div>div.value {
+    display: table-cell;
+	padding: 0 0 1.5rem 1rem;
+}
+.pack-side>div>.head {
+	font-weight: 600;
+	margin-bottom: 1rem;
+}

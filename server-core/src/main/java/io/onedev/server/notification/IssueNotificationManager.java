@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.event.Listen;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
@@ -117,7 +117,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
 				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
@@ -145,7 +145,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
 				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
@@ -248,7 +248,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					&& (visitDate == null || visitDate.before(event.getDate()))
 					&& !notifiedUsers.contains(watch.getUser())
 					&& !isNotified(notifiedEmailAddresses, watch.getUser())
-					&& SecurityUtils.canAccess(watch.getUser().asSubject(), issue)) {
+					&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
 				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 				if (emailAddress != null && emailAddress.isVerified())
 					bccEmailAddresses.add(emailAddress.getValue());
@@ -263,7 +263,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
 			String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
 
-			String threadingReferences = issue.getEffectiveThreadingReference();
+			String threadingReferences = issue.getThreadingReferences();
 			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
 					replyAddress, senderName, threadingReferences);

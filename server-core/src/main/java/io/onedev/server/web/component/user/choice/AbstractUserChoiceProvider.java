@@ -22,7 +22,7 @@ public abstract class AbstractUserChoiceProvider extends ChoiceProvider<User> {
 	
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getDisplayName()));
+		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getDisplayName().trim()));
 		String avatarUrl = OneDev.getInstance(AvatarManager.class).getUserAvatarUrl(choice.getId());
 		writer.key("avatar").value(avatarUrl);
 	}

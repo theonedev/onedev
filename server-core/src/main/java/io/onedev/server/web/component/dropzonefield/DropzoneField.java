@@ -1,14 +1,9 @@
 package io.onedev.server.web.component.dropzonefield;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.fileupload.FileItem;
+import io.onedev.server.OneDev;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.upload.FileUpload;
+import io.onedev.server.web.upload.UploadManager;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -24,25 +19,24 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.web.UploadItemManager;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.util.FileUpload;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.UUID;
 
 @SuppressWarnings("serial")
-public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
+public class DropzoneField extends FormComponentPanel<String> {
 
 	private final int maxFiles;
 	
 	private final int maxFilesize;
 	
 	private final String acceptedFiles;
+
+	private final String uploadId = UUID.randomUUID().toString();
 	
 	private AbstractPostAjaxBehavior uploadBehavior;
 	
 	private AbstractPostAjaxBehavior deleteBehavior;
-	
-	private String uploadId = UUID.randomUUID().toString();
 	
 	/**
 	 * @param id
@@ -56,7 +50,7 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 	 * @param maxFilesize
 	 * 			max file size in MB
 	 */
-	public DropzoneField(String id, IModel<Collection<FileUpload>> model, @Nullable String acceptedFiles, 
+	public DropzoneField(String id, IModel<String> model, @Nullable String acceptedFiles, 
 			int maxFiles, int maxFilesize) {
 		super(id, model);
 		this.acceptedFiles = acceptedFiles;
@@ -64,14 +58,14 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 		this.maxFilesize = maxFilesize;
 	}
 
-	private UploadItemManager getUploadItemManager() {
-		return OneDev.getInstance(UploadItemManager.class);
+	private UploadManager getUploadManager() {
+		return OneDev.getInstance(UploadManager.class);
 	}
 	
 	@Override
 	protected void onBeforeRender() {
 		// In order to be consistent with browser side
-		getUploadItemManager().setUploadItems(uploadId, new ArrayList<>());
+		getUploadManager().clearUpload(uploadId);
 		super.onBeforeRender();
 	}
 
@@ -88,8 +82,12 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 	                MultipartServletWebRequest multiPartRequest = webRequest.newMultipartWebRequest(
 	                    Bytes.megabytes(maxFilesize), "ignored");
 	                multiPartRequest.parseFileParts();
-	                List<FileItem> items = getUploadItemManager().getUploadItems(uploadId);
-	                items.addAll(multiPartRequest.getFiles().get("file"));
+					var upload = getUploadManager().getUpload(uploadId);
+					if (upload == null) {
+						upload = new FileUpload(uploadId, new ArrayList<>());
+						getUploadManager().cacheUpload(upload);
+					}
+					upload.getItems().addAll(multiPartRequest.getFiles().get("file"));
 	            } catch (FileUploadException e) {
 	            	throw new RuntimeException(e);
 	            }
@@ -109,12 +107,14 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				String fileName = params.getParameterValue("name").toString();
-				List<FileItem> items = getUploadItemManager().getUploadItems(uploadId);
-				for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
-					FileItem fileItem = it.next();
-					if (fileItem.getName().equals(fileName)) {
-						fileItem.delete();
-						it.remove();
+				var upload = getUploadManager().getUpload(uploadId);
+				if (upload != null) {
+					for (var it = upload.getItems().iterator(); it.hasNext();) {
+						var item = it.next();
+						if (item.getName().equals(fileName)) {
+							item.delete();
+							it.remove();
+						}
 					}
 				}
 			}
@@ -125,15 +125,11 @@ public class DropzoneField extends FormComponentPanel<Collection<FileUpload>> {
 
 	@Override
 	public void convertInput() {
-		List<FileItem> items = getUploadItemManager().getUploadItems(uploadId);
-		if (items.isEmpty()) {
+		var upload = getUploadManager().getUpload(uploadId);
+		if (upload != null && !upload.getItems().isEmpty())
+			setConvertedInput(uploadId);
+		else
 			setConvertedInput(null);
-		} else {
-			Collection<FileUpload> uploads = new ArrayList<>();
-			for (int i=0; i<items.size(); i++)
-				uploads.add(new FileUpload(uploadId, i));
-			setConvertedInput(uploads);
-		}
 	}
 	
 	@Override

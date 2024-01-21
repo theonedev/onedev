@@ -232,7 +232,7 @@ public class BlobTextDiffPanel extends Panel {
 			if (getPullRequest() != null 
 					&& getPullRequest().getSource() != null 
 					&& getPullRequest().getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) { 
+					&& SecurityUtils.canModifyFile(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
@@ -252,7 +252,7 @@ public class BlobTextDiffPanel extends Panel {
 				};
 				editLink.add(AttributeAppender.replace("title", "Edit on source branch"));
 				actions.add(editLink);
-			} else if (SecurityUtils.canModify(getProject(), change.getBlobIdent().revision, change.getPath()) 
+			} else if (SecurityUtils.canModifyFile(getProject(), change.getBlobIdent().revision, change.getPath()) 
 					&& getProject().getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch 
 				Link<Void> editLink = new Link<Void>("editFile") {

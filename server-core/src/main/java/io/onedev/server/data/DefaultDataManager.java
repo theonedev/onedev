@@ -14,18 +14,17 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.data.migration.DataMigrator;
+import io.onedev.server.data.migration.MigrationHelper;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.data.migration.DataMigrator;
-import io.onedev.server.data.migration.MigrationHelper;
-import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.*;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.persistence.HibernateConfig;
@@ -36,10 +35,10 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.util.editablebean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
@@ -81,9 +80,9 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Throwables.*;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
-import static org.unbescape.html.HtmlEscape.*;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -211,7 +210,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (dbDataVersion == null) {
 			File tempFile = null;
         	try {
-            	tempFile = File.createTempFile("schema", ".sql");
+            	tempFile = FileUtils.createTempFile("schema", ".sql");
 	        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
 	        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
 	        	List<String> sqls = new ArrayList<String>();
@@ -220,7 +219,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	        			sqls.add(sql);
 	        	}
 	        	execute(conn, sqls, true);
-	        	
+				
 	        	try (var stmt = conn.createStatement()) {
 	        		stmt.execute(String.format("insert into %s values(1, '%s')", 
 	        				getTableName(ModelVersion.class), MigrationHelper.getVersion(DataMigrator.class)));
@@ -440,15 +439,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void importData(File dataDir) {
 		var entityTypes = getEntityTypes();
 		Collections.reverse(entityTypes);
+		entityTypes.remove(ModelVersion.class);
+		entityTypes.add(0, ModelVersion.class);
 		for (Class<?> entityType: entityTypes) {
-			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
-
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.startsWith(entityType.getSimpleName() + "s.xml");
-				}
-				
-			});
+			File[] dataFiles = dataDir.listFiles((dir, name) -> name.startsWith(entityType.getSimpleName() + "s.xml"));
 			for (File file: dataFiles) {
 				Session session = dao.getSession();
 				Transaction transaction = session.beginTransaction();
@@ -472,39 +466,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 	}
 	
-	@Override
-	public void validateData(File dataDir) {
-		var entityTypes = getEntityTypes();
-		Collections.reverse(entityTypes);
-		for (Class<?> entityType: entityTypes) {
-			File[] dataFiles = dataDir.listFiles(new FilenameFilter() {
-
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.startsWith(entityType.getSimpleName() + "s.xml");
-				}
-				
-			});
-			for (File file: dataFiles) {
-				try {
-					logger.info("Validating data file '" + file.getName() + "'...");
-					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					
-					for (Element element: dom.getRootElement().elements()) {
-						element.detach();
-						AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
-						if (entity.getId() > 0) {
-							for (ConstraintViolation<?> violation: validator.validate(entity)) 
-								reportError(entity, violation);
-						}
-					}
-				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
-				}
-			}
-		}	
-	}
-	
 	private void reportError(AbstractEntity entity, ConstraintViolation<?> violation) {
 		String errorInfo = String.format("Error validating entity (entity class: %s, entity id: %d, entity property: %s, error message: %s)", 
 				entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
@@ -515,7 +476,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void applyConstraints(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -537,7 +498,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void createTables(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -558,7 +519,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void dropConstraints(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -579,7 +540,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	public void cleanDatabase(Connection conn) {
 		File tempFile = null;
     	try {
-        	tempFile = File.createTempFile("schema", ".sql");
+        	tempFile = FileUtils.createTempFile("schema", ".sql");
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
         	List<String> sqls = new ArrayList<>();
@@ -685,7 +646,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean) {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(User.PROP_GUEST)) {
 	
 					@Override
 					public void complete() {
@@ -696,8 +657,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			}
 		}
 		
-		Setting setting = settingManager.getSetting(Key.SYSTEM);
-		SystemSetting systemSetting = null;
+		Setting setting = settingManager.findSetting(Key.SYSTEM);
+		SystemSetting systemSetting;
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
 		
@@ -727,7 +688,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "gravatarEnabled");
+			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "disableAutoUpdateCheck", "gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add(SystemSetting.PROP_GIT_LOCATION);
 				excludedProps.add(SystemSetting.PROP_CURL_LOCATION);
@@ -745,8 +706,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
+		
+		setting = settingManager.findSetting(Key.SYSTEM_UUID);
+		if (setting == null || setting.getValue() == null) 
+			settingManager.saveSystemUUID(UUID.randomUUID().toString());
 
-		setting = settingManager.getSetting(Key.SSH);
+		setting = settingManager.findSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
 			SshSetting sshSetting = new SshSetting();
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
@@ -754,17 +719,17 @@ public class DefaultDataManager implements DataManager, Serializable {
             settingManager.saveSshSetting(sshSetting);
         }
 		
-		setting = settingManager.getSetting(Key.GPG);
+		setting = settingManager.findSetting(Key.GPG);
 		if (setting == null || setting.getValue() == null) {
 			GpgSetting gpgSetting = new GpgSetting();
             settingManager.saveGpgSetting(gpgSetting);
         }
 		
-		setting = settingManager.getSetting(Key.SECURITY);
+		setting = settingManager.findSetting(Key.SECURITY);
 		if (setting == null) {
 			settingManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		setting = settingManager.getSetting(Key.ISSUE);
+		setting = settingManager.findSetting(Key.ISSUE);
 		if (setting == null) {
 			LinkSpec link = new LinkSpec();
 			link.setName("Child Issue");
@@ -785,50 +750,54 @@ public class DefaultDataManager implements DataManager, Serializable {
 			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 
-		setting = settingManager.getSetting(Key.PERFORMANCE);
+		setting = settingManager.findSetting(Key.PERFORMANCE);
 		if (setting == null) {
 			settingManager.savePerformanceSetting(new PerformanceSetting());
 		} 
-		setting = settingManager.getSetting(Key.AUTHENTICATOR);
+		setting = settingManager.findSetting(Key.AUTHENTICATOR);
 		if (setting == null) {
 			settingManager.saveAuthenticator(null);
 		}
-		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
+		setting = settingManager.findSetting(Key.JOB_EXECUTORS);
 		if (setting == null) 
 			settingManager.saveJobExecutors(new ArrayList<>());
-		setting = settingManager.getSetting(Key.SSO_CONNECTORS);
+		setting = settingManager.findSetting(Key.SSO_CONNECTORS);
 		if (setting == null) {
 			settingManager.saveSsoConnectors(Lists.newArrayList());
 		}
-		setting = settingManager.getSetting(Key.GROOVY_SCRIPTS);
+		setting = settingManager.findSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());
 		}
-		setting = settingManager.getSetting(Key.PULL_REQUEST);
+		setting = settingManager.findSetting(Key.PULL_REQUEST);
 		if (setting == null) {
 			settingManager.savePullRequestSetting(new GlobalPullRequestSetting());
 		}
-		setting = settingManager.getSetting(Key.BUILD);
+		setting = settingManager.findSetting(Key.BUILD);
 		if (setting == null) {
 			settingManager.saveBuildSetting(new GlobalBuildSetting());
 		}
-		setting = settingManager.getSetting(Key.PROJECT);
+		setting = settingManager.findSetting(Key.PACK);
+		if (setting == null) {
+			settingManager.savePackSetting(new GlobalPackSetting());
+		}
+		setting = settingManager.findSetting(Key.PROJECT);
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
-		setting = settingManager.getSetting(Key.LICENSE_DATA);
+		setting = settingManager.findSetting(Key.SUBSCRIPTION_DATA);
 		if (setting == null) {
-			settingManager.saveLicenseData(null);
+			settingManager.saveSubscriptionData(null);
 		}
-		setting = settingManager.getSetting(Key.ALERT);
+		setting = settingManager.findSetting(Key.ALERT);
 		if (setting == null) {
 			settingManager.saveAlertSetting(new AlertSetting());
 		}
-		setting = settingManager.getSetting(Key.AGENT);
+		setting = settingManager.findSetting(Key.AGENT);
 		if (setting == null) {
 			settingManager.saveAgentSetting(new AgentSetting());
 		}
-		setting = settingManager.getSetting(Key.SERVICE_DESK_SETTING);
+		setting = settingManager.findSetting(Key.SERVICE_DESK_SETTING);
 		if (setting == null) { 
 			settingManager.saveServiceDeskSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -842,30 +811,27 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		setting = settingManager.getSetting(Key.EMAIL_TEMPLATES);
+		setting = settingManager.findSetting(Key.EMAIL_TEMPLATES);
 		if (setting == null) {
 			settingManager.saveEmailTemplates(new EmailTemplates());
+		} else {
+			var emailTemplates = (EmailTemplates) setting.getValue();
+			if (emailTemplates.getStopwatchOverdue() == null)
+				emailTemplates.setStopwatchOverdue(EmailTemplates.DEFAULT_STOPWATCH_OVERDUE);
+			if (emailTemplates.getPasswordReset() == null)
+				emailTemplates.setPasswordReset(EmailTemplates.DEFAULT_PASSWORD_RESET);
+			settingManager.saveEmailTemplates(emailTemplates);
 		}
 		
-		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);
+		setting = settingManager.findSetting(Key.CONTRIBUTED_SETTINGS);
 		if (setting == null) 
 			settingManager.saveContributedSettings(new LinkedHashMap<>());
 		
-		setting = settingManager.getSetting(Key.MAIL);
-		if (setting == null) {
-			settingManager.saveMailSetting(null);
-		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Settings", null, setting.getValue()) {
-
-				@Override
-				public void complete() {
-					settingManager.saveMailSetting((MailSetting) getSetting());
-				}
-				
-			});
-		}
+		setting = settingManager.findSetting(Key.MAIL_SERVICE);
+		if (setting == null) 
+			settingManager.saveMailService(null);
 		
-		setting = settingManager.getSetting(Key.BACKUP);
+		setting = settingManager.findSetting(Key.BACKUP);
 		if (setting == null) {
 			settingManager.saveBackupSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -880,11 +846,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		setting = settingManager.getSetting(Key.BRANDING);
+		setting = settingManager.findSetting(Key.BRANDING);
 		if (setting == null) 
 			settingManager.saveBrandingSetting(new BrandingSetting());
 
-		setting = settingManager.getSetting(Key.CLUSTER_SETTING);
+		setting = settingManager.findSetting(Key.CLUSTER_SETTING);
 		if (setting == null) {
 			ClusterSetting clusterSetting = new ClusterSetting();
 			clusterSetting.setReplicaCount(1);

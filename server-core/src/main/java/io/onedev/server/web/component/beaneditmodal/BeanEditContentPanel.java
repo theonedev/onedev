@@ -1,10 +1,10 @@
 package io.onedev.server.web.component.beaneditmodal;
 
-import java.io.Serializable;
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.EditableUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -17,11 +17,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditableUtils;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Collection;
 
 @SuppressWarnings("serial")
 abstract class BeanEditContentPanel extends Panel {

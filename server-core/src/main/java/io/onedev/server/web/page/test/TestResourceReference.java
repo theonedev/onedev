@@ -1,12 +1,11 @@
 package io.onedev.server.web.page.test;
 
-import java.util.List;
-
+import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
+import io.onedev.server.web.page.base.BaseDependentResourceReference;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 
-import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
-import io.onedev.server.web.page.base.BaseDependentResourceReference;
+import java.util.List;
 
 public class TestResourceReference extends BaseDependentResourceReference {
 

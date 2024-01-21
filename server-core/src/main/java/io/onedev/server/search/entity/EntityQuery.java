@@ -1,40 +1,26 @@
 package io.onedev.server.search.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.Path;
-
 import com.google.common.base.Splitter;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.LabelSpec;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.model.*;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ProjectScopedRevision;
 import io.onedev.server.util.criteria.Criteria;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.Path;
+import javax.validation.ValidationException;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
@@ -57,6 +43,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new ExplicitException("Invalid number: " + value);
 		}
 	}
+
+	public static float getFloatValue(String value) {
+		try {
+			return Float.parseFloat(value);
+		} catch (NumberFormatException e) {
+			throw new ExplicitException("Invalid decimal: " + value);
+		}
+	}
 	
 	public static LabelSpec getLabelSpec(String labelName) {
 		var labelSpec = OneDev.getInstance(LabelSpecManager.class).find(labelName);
@@ -64,6 +58,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			return labelSpec;
 		else
 			throw new ExplicitException("Undefined label: " + labelName);
+	}
+	
+	public static int getWorkingPeriodValue(String value) {
+		try {
+			return DateUtils.parseWorkingPeriod(value);
+		} catch (ValidationException e) {
+			throw new ExplicitException("Invalid working period: " + value);
+		}
 	}
 	
 	public static long getLongValue(String value) {

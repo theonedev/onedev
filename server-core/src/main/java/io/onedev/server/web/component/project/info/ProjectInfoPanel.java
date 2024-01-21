@@ -38,7 +38,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,17 +135,17 @@ public abstract class ProjectInfoPanel extends Panel {
         
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         if (settingManager.getServiceDeskSetting() != null
-        		&& settingManager.getMailSetting() != null 
-        		&& settingManager.getMailSetting().getCheckSetting() != null
+        		&& settingManager.getMailService() != null 
+        		&& settingManager.getMailService().getInboxMonitor() != null
         		&& getProject().isIssueManagement()) {
         	
         	String subAddressed;
         	
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailSetting().getCheckSetting().getCheckAddress());
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
 			if (getProject().getServiceDeskName() != null)
-				subAddressed = checkAddress.getSubAddressed(getProject().getServiceDeskName());
+				subAddressed = checkAddress.getSubaddress(getProject().getServiceDeskName());
 			else
-				subAddressed = checkAddress.getSubAddressed(getProject().getPath());
+				subAddressed = checkAddress.getSubaddress(getProject().getPath());
         	
         	add(new WebMarkupContainer("serviceDesk") {
 
@@ -186,7 +185,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(new WebMarkupContainer("forkedFrom").setVisible(false));
 		}
 		
-		int latestVersion;
+		long latestVersion;
 		if (activeServer != null) {
 			var replica = replicasModel.getObject().get(activeServer);
 			if (replica != null)
@@ -244,7 +243,7 @@ public abstract class ProjectInfoPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()) 
+						setVisible(SecurityUtils.canManageProject(getProject()) 
 								&& item.getModelObject().getValue().getVersion() < latestVersion);
 					}
 				});

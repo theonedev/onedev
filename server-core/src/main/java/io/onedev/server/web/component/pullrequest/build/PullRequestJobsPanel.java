@@ -58,7 +58,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 				}
 				for (Map.Entry<String, List<Build>> entry : map.entrySet()) {
 					String jobName = entry.getKey();
-					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), jobName)) {
+					if (SecurityUtils.canAccessJob(getPullRequest().getTargetProject(), jobName)) {
 						List<Build> builds = new ArrayList<>(entry.getValue());
 						Collections.sort(builds);
 						boolean required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);

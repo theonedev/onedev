@@ -102,6 +102,20 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new MergedCriteria();
 							case PullRequestQueryLexer.Discarded:
 								return new DiscardedCriteria();
+							case PullRequestQueryLexer.ReadyToMerge:
+								return new ReadyToMergeCriteria();
+							case PullRequestQueryLexer.NeedMyAction:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new NeedMyActionCriteria();
+							case PullRequestQueryLexer.ToBeMergedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new ToBeMergedByMeCriteria();
+							case PullRequestQueryLexer.ToBeChangedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new ToBeChangedByMeCriteria();
 							case PullRequestQueryLexer.MentionedMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -110,6 +124,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
+							case PullRequestQueryLexer.WatchedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new WatchedByMeCriteria();
 							case PullRequestQueryLexer.CommentedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -132,12 +150,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new AssignedToMeCriteria();
 							case PullRequestQueryLexer.SomeoneRequestedForChanges:
 								return new SomeoneRequestedForChangesCriteria();
-							case PullRequestQueryLexer.HasFailedBuilds:
-								return new HasFailedBuildsCriteria();
+							case PullRequestQueryLexer.HasUnsuccessfulBuilds:
+								return new HasUnsuccessfulBuilds();
 							case PullRequestQueryLexer.HasMergeConflicts:
 								return new HasMergeConflictsCriteria();
-							case PullRequestQueryLexer.ToBeVerifiedByBuilds:
-								return new ToBeVerifiedByBuildsCriteria();
+							case PullRequestQueryLexer.HasUnfinishedBuilds:
+								return new HasUnfinishedBuildsCriteria();
 							case PullRequestQueryLexer.HasPendingReviews:
 								return new HasPendingReviewsCriteria();
 							default:
@@ -151,6 +169,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						switch (ctx.operator.getType()) {
 							case PullRequestQueryLexer.ToBeReviewedBy:
 								return new ToBeReviewedByCriteria(getUser(value));
+							case PullRequestQueryLexer.ToBeChangedBy:
+								return new ToBeChangedByCriteria(getUser(value));
+							case PullRequestQueryLexer.ToBeMergedBy:
+								return new ToBeMergedByCriteria(getUser(value));
 							case PullRequestQueryLexer.ApprovedBy:
 								return new ApprovedByCriteria(getUser(value));
 							case PullRequestQueryLexer.AssignedTo:
@@ -161,6 +183,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new MentionedCriteria(getUser(value));
 							case PullRequestQueryLexer.SubmittedBy:
 								return new SubmittedByCriteria(getUser(value));
+							case PullRequestQueryLexer.WatchedBy:
+								return new WatchedByCriteria(getUser(value));
+							case PullRequestQueryLexer.NeedActionOf:
+								return new NeedActionOfCriteria(getUser(value));
 							case PullRequestQueryLexer.CommentedBy:
 								return new CommentedByCriteria(getUser(value));
 							case PullRequestQueryLexer.IncludesCommit:
@@ -207,27 +233,28 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										throw new IllegalStateException();
 								}
 							case PullRequestQueryLexer.Is:
+							case PullRequestQueryLexer.IsNot:
 								switch (fieldName) {
 									case PullRequest.NAME_NUMBER:
 										return new NumberCriteria(project, value, operator);
 									case PullRequest.NAME_STATUS:
 										try {
-											return new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()));
+											return new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()), operator);
 										} catch (IllegalArgumentException e) {
 											throw new ExplicitException("Invalid status: " + value);
 										}
 									case PullRequest.NAME_MERGE_STRATEGY:
-										return new MergeStrategyCriteria(MergeStrategy.fromString(value));
+										return new MergeStrategyCriteria(MergeStrategy.fromString(value), operator);
 									case PullRequest.NAME_SOURCE_BRANCH:
-										return new SourceBranchCriteria(value);
+										return new SourceBranchCriteria(value, operator);
 									case PullRequest.NAME_SOURCE_PROJECT:
-										return new SourceProjectCriteria(value);
+										return new SourceProjectCriteria(value, operator);
 									case PullRequest.NAME_TARGET_BRANCH:
-										return new TargetBranchCriteria(value);
+										return new TargetBranchCriteria(value, operator);
 									case PullRequest.NAME_TARGET_PROJECT:
-										return new TargetProjectCriteria(value);
+										return new TargetProjectCriteria(value, operator);
 									case PullRequest.NAME_LABEL:
-										return new LabelCriteria(getLabelSpec(value));
+										return new LabelCriteria(getLabelSpec(value), operator);
 									case PullRequest.NAME_COMMENT_COUNT:
 										return new CommentCountCriteria(getIntValue(value), operator);
 									default:
@@ -315,6 +342,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				}
 				break;
 			case PullRequestQueryLexer.Is:
+			case PullRequestQueryLexer.IsNot:
 				if (!fieldName.equals(PullRequest.NAME_NUMBER)
 						&& !fieldName.equals(PullRequest.NAME_STATUS)
 						&& !fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)

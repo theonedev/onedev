@@ -20,18 +20,20 @@ public abstract class Authenticator implements Serializable {
 	
 	private String defaultGroup;
 	
+	private boolean createUserAsGuest;
+	
 	private int timeout = 300;
 
-	@Editable(order=10000, description="Specify network timeout in seconds when authenticate through this system")
-	public int getTimeout() {
-		return timeout;
+	@Editable(order=10000, description = "Whether or not to create authenticated user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
+	public boolean isCreateUserAsGuest() {
+		return createUserAsGuest;
 	}
 
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
+	public void setCreateUserAsGuest(boolean createUserAsGuest) {
+		this.createUserAsGuest = createUserAsGuest;
 	}
-
-	@Editable(order=20000, placeholder="No default group", description="Optionally add newly authenticated user to "
+	
+	@Editable(order=15000, placeholder="No default group", description="Optionally add newly authenticated user to "
 			+ "specified group if membership information is not retrieved")
 	@GroupChoice
 	public String getDefaultGroup() {
@@ -42,6 +44,15 @@ public abstract class Authenticator implements Serializable {
 		this.defaultGroup = defaultGroup;
 	}
 
+	@Editable(order=20000, description="Specify network timeout in seconds when authenticate through this system")
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+	
 	public void onRenameGroup(String oldName, String newName) {
 		if (oldName.equals(defaultGroup))
 			defaultGroup = newName;

@@ -7,12 +7,17 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>8.6.13</version>
+		<version>10.0.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>server-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-ee</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -23,6 +28,16 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-report-junit</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-trx</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-cobertura</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -38,6 +53,11 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-buildspec-maven</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-buildspec-dotnet</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -107,7 +127,17 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-roslynator</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-report-spotbugs</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-html</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -157,7 +187,57 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-notification-ntfy</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-notification-discord</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-smtpimap</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-office365</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-mailservice-gmail</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-container</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-maven</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-npm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-nuget</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-pypi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-pack-gem</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->

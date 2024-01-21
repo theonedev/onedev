@@ -1,10 +1,11 @@
 package io.onedev.server.security.permission;
 
-import org.apache.shiro.authz.Permission;
-
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.facade.UserFacade;
+import org.apache.shiro.authz.Permission;
+import org.jetbrains.annotations.Nullable;
 
-public class ConfidentialIssuePermission implements Permission {
+public class ConfidentialIssuePermission implements BasePermission {
 
 	private final Issue issue;
 	
@@ -26,4 +27,9 @@ public class ConfidentialIssuePermission implements Permission {
 		return issue;
 	}
 
+	@Override
+	public boolean isApplicable(@Nullable UserFacade user) {
+		return user != null;
+	}
+	
 }

@@ -64,14 +64,15 @@ public class JobMatch extends Criteria<JobMatchContext> {
 
 			@Override
 			public Criteria<io.onedev.server.job.match.JobMatchContext> visitFieldOperatorValueCriteria(JobMatchParser.FieldOperatorValueCriteriaContext ctx) {
+				int operator = ctx.operator.getType();
 				String fieldName = getValue(ctx.Quoted(0).getText());
 				String fieldValue = getValue(ctx.Quoted(1).getText());
 				checkField(fieldName, withProjectCriteria, withJobCriteria);
 
 				if (fieldName.equals(Build.NAME_PROJECT)) 
-					return new ProjectCriteria(fieldValue);
+					return new ProjectCriteria(fieldValue, operator);
 				else
-					return new JobCriteria(fieldValue);
+					return new JobCriteria(fieldValue, operator);
 			}
 			
 			@Override
@@ -79,7 +80,7 @@ public class JobMatch extends Criteria<JobMatchContext> {
 				String fieldValue = getValue(ctx.Quoted().getText());
 				switch (ctx.operator.getType()) {
 					case JobMatchParser.OnBranch:
-						return new BranchCriteria(fieldValue);
+						return new OnBranchCriteria(fieldValue);
 					case JobMatchParser.SubmittedByGroup:
 						var group = OneDev.getInstance(GroupManager.class).find(fieldValue);
 						if (group != null)

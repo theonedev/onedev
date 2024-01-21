@@ -14,18 +14,25 @@ public class JobCriteria extends Criteria<JobMatchContext> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String jobName;
+	private final String jobName;
 	
-	public JobCriteria(String jobName) {
+	private final int operator;
+	
+	public JobCriteria(String jobName, int operator) {
 		this.jobName = jobName;
+		this.operator = operator;
 	}
 
 	@Override
 	public boolean matches(JobMatchContext context) {
-		if (context.getJobName() != null)
-			return WildcardUtils.matchString(jobName, context.getJobName());
-		else 
+		if (context.getJobName() != null) {
+			var matches = WildcardUtils.matchString(jobName, context.getJobName());
+			if (operator == JobMatchLexer.IsNot)
+				matches = !matches;
+			return matches;
+		} else {
 			throw new ExplicitException("Job name not available in match context");
+		}
 	}
 
 	@Override
@@ -36,7 +43,9 @@ public class JobCriteria extends Criteria<JobMatchContext> {
 	
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.NAME_JOB) + " " + JobMatch.getRuleName(JobMatchLexer.Is) + " " + quote(jobName);
+		return quote(Build.NAME_JOB) + " " 
+				+ JobMatch.getRuleName(operator) 
+				+ " " + quote(jobName);
 	}
 
 }

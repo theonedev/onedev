@@ -99,9 +99,9 @@ public class BuildMetricQuery implements Serializable {
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						if (fieldName.equals(NAME_PULL_REQUEST))
-							return new PullRequestIsEmptyCriteria();
+							return new PullRequestEmptyCriteria(operator);
 						else
-							return new ParamIsEmptyCriteria(fieldName);
+							return new ParamEmptyCriteria(fieldName, operator);
 					}
 					
 					@Override
@@ -110,22 +110,20 @@ public class BuildMetricQuery implements Serializable {
 						String value = EntityQuery.getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-						
-						switch (operator) {
-						case BuildMetricQueryLexer.Is:
+
+						if (operator == BuildMetricQueryLexer.Is || operator == BuildMetricQueryLexer.IsNot) {
 							switch (fieldName) {
-							case BuildMetric.NAME_REPORT:
-								return new ReportCriteria(value);
-							case NAME_JOB:
-								return new JobCriteria(value);
-							case NAME_BRANCH:
-								return new BranchCriteria(value);
-							default: 
-								return new ParamCriteria(fieldName, value);
+								case BuildMetric.NAME_REPORT:
+									return new ReportCriteria(value, operator);
+								case NAME_JOB:
+									return new JobCriteria(value, operator);
+								case NAME_BRANCH:
+									return new BranchCriteria(value, operator);
+								default:
+									return new ParamCriteria(fieldName, value, operator);
 							}
-						default:
-							throw new IllegalStateException();
 						}
+						throw new IllegalStateException();
 					}
 					
 					@Override
@@ -175,17 +173,19 @@ public class BuildMetricQuery implements Serializable {
 		if (!METRIC_QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName)) 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case BuildMetricQueryLexer.Is:
-			if (!fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_BRANCH) 
-					&& !fieldName.equals(BuildMetric.NAME_REPORT) 
-					&& !paramNames.contains(fieldName)) {
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
-		case BuildMetricQueryLexer.IsEmpty:
-			if (!fieldName.equals(NAME_PULL_REQUEST) && !paramNames.contains(fieldName)) 
-				throw newOperatorException(fieldName, operator);
-			break;
+			case BuildMetricQueryLexer.Is:
+			case BuildMetricQueryLexer.IsNot:
+				if (!fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_BRANCH)
+						&& !fieldName.equals(BuildMetric.NAME_REPORT)
+						&& !paramNames.contains(fieldName)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
+			case BuildMetricQueryLexer.IsEmpty:
+			case BuildMetricQueryLexer.IsNotEmpty:
+				if (!fieldName.equals(NAME_PULL_REQUEST) && !paramNames.contains(fieldName))
+					throw newOperatorException(fieldName, operator);
+				break;
 		}
 	}
 	

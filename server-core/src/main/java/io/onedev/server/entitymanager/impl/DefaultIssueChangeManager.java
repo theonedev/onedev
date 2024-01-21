@@ -38,8 +38,8 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -142,13 +142,77 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
+	public void changeOwnEstimatedTime(Issue issue, int ownEstimatedTime) {
+		int prevOwnEstimatedTime = issue.getOwnEstimatedTime();
+		if (ownEstimatedTime != prevOwnEstimatedTime) {
+			issue.setOwnEstimatedTime(ownEstimatedTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueOwnEstimatedTimeChangeData(prevOwnEstimatedTime, issue.getOwnEstimatedTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void changeOwnSpentTime(Issue issue, int ownSpentTime) {
+		int prevOwnSpentTime = issue.getOwnSpentTime();
+		if (ownSpentTime != prevOwnSpentTime) {
+			issue.setOwnSpentTime(ownSpentTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueOwnSpentTimeChangeData(prevOwnSpentTime, issue.getOwnSpentTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+	
+	@Transactional
+	@Override
+	public void changeTotalEstimatedTime(Issue issue, int totalEstimatedTime) {
+		int prevTotalEstimatedTime = issue.getTotalEstimatedTime();
+		if (totalEstimatedTime != prevTotalEstimatedTime) {
+			issue.setTotalEstimatedTime(totalEstimatedTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueTotalEstimatedTimeChangeData(prevTotalEstimatedTime, issue.getTotalEstimatedTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void changeTotalSpentTime(Issue issue, int totalSpentTime) {
+		int prevTotalSpentTime = issue.getTotalSpentTime();
+		if (totalSpentTime != prevTotalSpentTime) {
+			issue.setTotalSpentTime(totalSpentTime);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueTotalSpentTimeChangeData(prevTotalSpentTime, issue.getTotalSpentTime()));
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+	
+	@Transactional
+	@Override
 	public void changeDescription(Issue issue, @Nullable String description) {
 		String prevDescription = issue.getDescription();
 		if (!Objects.equals(description, prevDescription)) {
 			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
 				throw new ExplicitException("Description too long");
 			issue.setDescription(description);
-			entityReferenceManager.addReferenceChange(issue, description);
+			entityReferenceManager.addReferenceChange(SecurityUtils.getUser(), issue, description);
 
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
@@ -611,77 +675,38 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 		
 	}
-
-	@Transactional
-	@Override
-	public void changeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
-		Issue prevLinkedIssue = issue.findLinkedIssue(spec, opposite);
-		
-		List<Issue> linkedIssues = new ArrayList<>();
-		if (linkedIssue != null)
-			linkedIssues.add(linkedIssue);
-		issueLinkManager.syncLinks(spec, issue, linkedIssues, opposite);
-		
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setUser(SecurityUtils.getUser());
-		
-		IssueLinkChangeData data = new IssueLinkChangeData(spec.getName(opposite), 
-				getLinkedIssueInfo(issue, prevLinkedIssue), 
-				getLinkedIssueInfo(issue, linkedIssue));
-		change.setData(data);
-		create(change, null);
-		
-		logLinkedSideChange(spec, issue, prevLinkedIssue, linkedIssue, opposite);
-	}
 	
 	private void logLinkedSideChange(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, 
 			@Nullable Issue linkedIssue, boolean opposite) {
 		String linkName;
-		boolean multiple;
-		if (spec.getOpposite() != null) {
+		if (spec.getOpposite() != null) 
 			linkName = opposite?spec.getName():spec.getOpposite().getName();
-			multiple = opposite?spec.isMultiple():spec.getOpposite().isMultiple(); 
-		} else {
+		else 
 			linkName = spec.getName();
-			multiple = spec.isMultiple();
-		}
 		if (prevLinkedIssue != null) {
 			IssueChange change = new IssueChange();
 			change.setIssue(prevLinkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String prevIssueSummary = getLinkedIssueInfo(prevLinkedIssue, issue);
-			if (multiple)
-				change.setData(new IssueLinkRemoveData(linkName, prevIssueSummary));
-			else
-				change.setData(new IssueLinkChangeData(linkName, prevIssueSummary, null));
+			change.setData(new IssueLinkRemoveData(linkName, !opposite, getLinkedIssueNumber(prevLinkedIssue, issue)));
 			create(change, null);
 		} 
 		if (linkedIssue != null) {
 			IssueChange change = new IssueChange();
 			change.setIssue(linkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String issueSummary = getLinkedIssueInfo(linkedIssue, issue);
-			if (multiple)
-				change.setData(new IssueLinkAddData(linkName, issueSummary));
-			else
-				change.setData(new IssueLinkChangeData(linkName, null, issueSummary));
+			change.setData(new IssueLinkAddData(linkName, !opposite, getLinkedIssueNumber(linkedIssue, issue)));
 			create(change, null);
 		}
 	}
-	
-	@Nullable
-	private String getLinkedIssueInfo(Issue issue, @Nullable Issue linkedIssue) {
-		if (linkedIssue != null) {
-			if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
-				return "#" + linkedIssue.getNumber();
-			else
-				return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
-		} else {
-			return null;
-		}
-	}
 
+	@Nullable
+	private String getLinkedIssueNumber(Issue issue, Issue linkedIssue) {
+		if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
+			return "#" + linkedIssue.getNumber();
+		else
+			return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
+	}
+	
 	@Transactional
 	@Override
 	public void addLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
@@ -694,7 +719,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 	
 		String linkName = spec.getName(opposite);
-		IssueLinkAddData data = new IssueLinkAddData(linkName, getLinkedIssueInfo(issue, linkedIssue));
+		IssueLinkAddData data = new IssueLinkAddData(linkName, opposite, getLinkedIssueNumber(issue, linkedIssue));
 		change.setData(data);
 		create(change, null);
 		
@@ -713,11 +738,19 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		
 		String linkName = spec.getName(opposite);
-		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getLinkedIssueInfo(issue, linkedIssue));
+		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, opposite, getLinkedIssueNumber(issue, linkedIssue));
 		change.setData(data);
 		create(change, null);
 		
 		logLinkedSideChange(spec, issue, linkedIssue, null, opposite);
 	}
-	
+
+	@Transactional
+	@Override
+	public void changeLink(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, @Nullable Issue linkedIssue, boolean opposite) {
+		if (prevLinkedIssue != null)
+			removeLink(spec, issue, prevLinkedIssue, opposite);
+		if (linkedIssue != null)
+			addLink(spec, issue, linkedIssue, opposite);
+	}
 }

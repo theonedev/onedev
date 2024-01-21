@@ -15,7 +15,7 @@ import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;

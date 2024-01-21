@@ -1,26 +1,26 @@
 package io.onedev.server.buildspec.step;
 
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.ReservedOptions;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.annotation.SafePath;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.UrlUtils;
 
-@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker daemon. " +
-		"This step can only be executed by server docker executor or remote docker executor, and " +
-		"<code>mount docker sock</code> option needs to be enabled on the executor. To build image with " +
-		"Kubernetes executor, please use kaniko step. <b class='text-danger'>NOTE: </b> registry logins " +
-		"should be configured in the job executor if authentication is required for build or publish")
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
+@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker buildx. " +
+		"This step can only be executed by server docker executor or remote docker executor. To build image with " +
+		"Kubernetes executor, please use kaniko step instead")
 public class BuildImageStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -33,6 +33,8 @@ public class BuildImageStep extends Step {
 
 	private boolean publish = true;
 	
+	private String builtInRegistryAccessTokenSecret;
+	
 	private boolean removeDanglingImages = true;
 	
 	private String moreOptions;
@@ -40,7 +42,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getBuildPath() {
 		return buildPath;
 	}
@@ -52,7 +54,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use file <tt>Dockerfile</tt> under build path specified above")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	public String getDockerfile() {
 		return dockerfile;
 	}
@@ -83,6 +85,28 @@ public class BuildImageStep extends Step {
 		this.publish = publish;
 	}
 
+	@Editable(order=335, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return builtInRegistryAccessTokenSecret;
+	}
+
+	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
+		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+
+	private static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).distinct().collect(toList());
+	}
+
+	private static String getBuiltInRegistryAccessTokenSecretDescription() {
+		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		var server = UrlUtils.getServer(serverUrl);
+		return "Optionally specify a secret to be used as access token for built-in registry server " +
+				"<code>" + server + "</code>";
+	}
+	
 	@Editable(order=340, name="Remove Dangling Images After Build")
 	public boolean isRemoveDanglingImages() {
 		return removeDanglingImages;
@@ -93,9 +117,10 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=350, description="Optionally specify additional options to build image, " +
-			"separated by spaces")
+			"separated by spaces. For instance <code>--builder</code> and <code>--platform</code> can be " +
+			"used to build multi-arch images")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"-f", "(--file)=.*", "-t", "(--tag)=.*"})
+	@ReservedOptions({"--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
@@ -103,15 +128,20 @@ public class BuildImageStep extends Step {
 	public void setMoreOptions(String moreOptions) {
 		this.moreOptions = moreOptions;
 	}
-
-
+	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish(), isRemoveDanglingImages(), getMoreOptions());
+		String accessToken;
+		if (getBuiltInRegistryAccessTokenSecret() != null)
+			accessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
+		else
+			accessToken = null;
+		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish(), 
+				isRemoveDanglingImages(), accessToken, getMoreOptions());
 	}
-
+	
 }

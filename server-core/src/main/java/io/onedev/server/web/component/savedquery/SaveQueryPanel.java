@@ -69,7 +69,7 @@ public abstract class SaveQueryPanel extends Panel {
 				super.onConfigure();
 				
 				if (getPage() instanceof ProjectPage) 
-					setVisible(SecurityUtils.canManage(((ProjectPage)getPage()).getProject()));
+					setVisible(SecurityUtils.canManageProject(((ProjectPage)getPage()).getProject()));
 				else
 					setVisible(SecurityUtils.isAdministrator());
 			}

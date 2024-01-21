@@ -32,7 +32,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 			period = DateUtils.formatWorkingPeriod(getModelObject()).toString();
 		else
 			period = null;
-		input = new TextField<String>("input", Model.of(period));
+		input = new TextField<>("input", Model.of(period));
 		add(input);
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		

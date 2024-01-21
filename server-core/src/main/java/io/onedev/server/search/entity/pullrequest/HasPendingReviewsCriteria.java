@@ -1,12 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.*;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
@@ -20,17 +14,24 @@ public class HasPendingReviewsCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Join<?, ?> join = from.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
-		Path<?> statusPath = EntityQuery.getPath(join, PullRequestReview.PROP_STATUS);
-		join.on(builder.equal(statusPath, Status.PENDING));
-		return join.isNotNull();
+		Subquery<PullRequestReview> reviewQuery = query.subquery(PullRequestReview.class);
+		Root<PullRequestReview> review = reviewQuery.from(PullRequestReview.class);
+		reviewQuery.select(review);
+		reviewQuery.where(builder.and(
+				builder.equal(review.get(PullRequestReview.PROP_STATUS), Status.PENDING),
+				builder.equal(review.get(PullRequestReview.PROP_REQUEST), from)));
+		return builder.and(
+				builder.equal(from.get(PullRequest.PROP_STATUS), PullRequest.Status.OPEN),
+				builder.exists(reviewQuery));
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		for (PullRequestReview review: request.getReviews()) {
-			if (review.getStatus() == Status.PENDING)
-				return true;
+		if (request.isOpen()) {
+			for (PullRequestReview review : request.getReviews()) {
+				if (review.getStatus() == Status.PENDING)
+					return true;
+			}
 		}
 		return false;
 	}

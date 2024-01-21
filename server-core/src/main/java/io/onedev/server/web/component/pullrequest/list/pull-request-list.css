@@ -5,6 +5,10 @@
 	width: 4px;
 	padding: 0;
 }
+.pull-request-list>div>.body table>tbody>tr>td.row-selector {
+	padding-top: 1.4rem;
+}
+
 .pull-request-list>div>.body tr.request.new td.new-indicator {
 	background: var(--primary);
 }

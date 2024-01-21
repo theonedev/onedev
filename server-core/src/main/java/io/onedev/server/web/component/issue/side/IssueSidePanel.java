@@ -38,7 +38,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -89,6 +89,8 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private boolean confidential;
 	
+	private Component watchesContainer;
+	
 	public IssueSidePanel(String id) {
 		super(id);
 		confidential = getIssue().isConfidential();
@@ -102,7 +104,7 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newLinksContainer());
 		addOrReplace(newVotesContainer());
 		
-		addOrReplace(new EntityWatchesPanel("watches") {
+		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
@@ -124,7 +126,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected boolean isAuthorized(User user) {
-				return SecurityUtils.canAccess(user.asSubject(), getIssue());
+				return SecurityUtils.canAccessIssue(user.asSubject(), getIssue());
 			}
 			
 		});
@@ -237,7 +239,7 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		});
-		confidentialInput.setVisible(SecurityUtils.canModify(getIssue()));
+		confidentialInput.setVisible(SecurityUtils.canModifyIssue(getIssue()));
 		
 		return confidentialInput;
 	}
@@ -460,8 +462,8 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Not authorized to link issue in project '" + linkedIssue.getProject() + "'");
 							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else {
-							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), 
-									linkedIssue, side.isOpposite());
+							Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());
+							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), prevLinkedIssue, linkedIssue, side.isOpposite());
 							notifyIssueChange(handler, getIssue());
 						}
 					}
@@ -481,7 +483,7 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
 			@Nullable LinkDeleteListener deleteListener) {
-		if (SecurityUtils.canAccess(linkedIssue)) {
+		if (SecurityUtils.canAccessIssue(linkedIssue)) {
 			Long linkedIssueId = linkedIssue.getId();
 			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
 			Link<Void> link = new BookmarkablePageLink<Void>("number", IssueActivitiesPage.class, 
@@ -630,7 +632,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		container.add(new SelectToAddChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
+		container.add(new SelectToActChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
 			
 			@Override
 			public void query(String term, int page, Response<Milestone> response) {
@@ -645,7 +647,7 @@ public abstract class IssueSidePanel extends Panel {
 					}
 					
 				};
-				new ResponseFiller<Milestone>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
 			}
 			
 		}) {
@@ -709,7 +711,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		}));
 
-		container.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+		container.add(new ListView<>("voters", new LoadableDetachableModel<List<IssueVote>>() {
 
 			@Override
 			protected List<IssueVote> load() {
@@ -718,7 +720,7 @@ public abstract class IssueSidePanel extends Panel {
 					votes = votes.subList(0, MAX_DISPLAY_AVATARS);
 				return votes;
 			}
-			
+
 		}) {
 
 			@Override
@@ -732,7 +734,7 @@ public abstract class IssueSidePanel extends Panel {
 				super.onConfigure();
 				setVisible(!getIssue().getVotes().isEmpty());
 			}
-			
+
 		});
 		
 		container.add(new SimpleUserListLink("more") {
@@ -776,6 +778,7 @@ public abstract class IssueSidePanel extends Panel {
 						vote.setDate(new Date());
 						OneDev.getInstance(IssueVoteManager.class).create(vote);
 						getIssue().getVotes().add(vote);
+						target.add(watchesContainer);
 					} else {
 						getIssue().getVotes().remove(vote);
 						OneDev.getInstance(IssueVoteManager.class).delete(vote);

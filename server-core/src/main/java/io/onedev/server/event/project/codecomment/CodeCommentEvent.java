@@ -4,7 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;

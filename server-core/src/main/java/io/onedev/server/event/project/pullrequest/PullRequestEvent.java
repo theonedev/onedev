@@ -4,7 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;

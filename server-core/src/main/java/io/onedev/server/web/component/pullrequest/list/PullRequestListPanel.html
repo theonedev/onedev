@@ -35,11 +35,11 @@
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="primary d-flex mb-2">
 			<div class="flex-grow-1 d-flex flex-wrap row-gap-2">
-				<span class="mr-3">
+				<span class="mr-2">
 					<a wicket:id="number" class="number h6 mr-1 mb-0"></a> 
 					<span wicket:id="title" class="title h6 mb-0"></span> 
 				</span>
-				<span wicket:id="labels" class="mr-3"></span>
+				<span wicket:id="labels" class="mr-2"></span>
 			</div>
 			<div class="flex-shrink-0 comments d-none d-lg-block text-muted" title="Comments">
 				<wicket:svg href="comments" class="icon"></wicket:svg> <span wicket:id="comments"></span>
@@ -47,6 +47,9 @@
 		</div>
 		<div class="secondary d-flex flex-wrap row-gap-3">
 			<div class="status flex-shrink-0 mr-3"><span wicket:id="status"></span></div>
+			<div class="branches flex-shrink-0 text-nowrap mr-3">
+				<a wicket:id="targetBranch"></a> &larr; <a wicket:id="sourceBranch"></a>
+			</div>
 			<div class="reviews mr-3" wicket:id="reviews"></div>
 			<div class="jobs mr-3" wicket:id="jobs"></div>
 			<div class="last-update ml-auto d-none d-lg-block text-muted font-size-sm">

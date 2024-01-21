@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -101,6 +102,19 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 				dao.persist(newAuthorization);
 			}
 		}
+	}
+
+	@Transactional
+	@Override
+	public void authorize(User user, Project project, Role role) {
+		var authorization = user.getProjectAuthorizations().stream().filter(it->it.getProject().equals(project)).findFirst().orElse(null);
+		if (authorization == null) {
+			authorization = new UserAuthorization();
+			authorization.setUser(user);
+			authorization.setProject(project);
+		}
+		authorization.setRole(role);
+		dao.persist(authorization);
 	}
 
 	@Transactional

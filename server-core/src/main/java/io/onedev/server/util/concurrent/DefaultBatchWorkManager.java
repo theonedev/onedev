@@ -53,27 +53,6 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 			thread = null;
 			notify();
 		}
-		while (true) {
-			var hasWorkings = false;
-			synchronized (this) {
-				for (var worksOfWorker : works.values()) {
-					if (!worksOfWorker.working.isEmpty()) {
-						hasWorkings = true;
-						break;
-					}
-				}
-			}
-			if (hasWorkings) {
-				logger.info("Waiting for batch works to complete...");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			} else {
-				break;
-			}
-		}
 	}
 
 	@Override
@@ -87,8 +66,8 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 					works.queued.drainTo(works.working, worker.getMaxBatchSize());
 					if (!works.working.isEmpty()) {
 						double priority = works.working.stream().collect(Collectors.averagingInt(Prioritized::getPriority));
-						workExecutor.submit(new PrioritizedRunnable((int)priority) {
-							
+						workExecutor.submit(new PrioritizedRunnable((int) priority) {
+
 							@Override
 							public void run() {
 								try {
@@ -96,13 +75,13 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 								} catch (Exception e) {
 									logger.error("Error doing works", e);
 								} finally {
-									synchronized(DefaultBatchWorkManager.this) {
+									synchronized (DefaultBatchWorkManager.this) {
 										works.working.clear();
 										DefaultBatchWorkManager.this.notify();
 									}
 								}
 							}
-							
+
 						});
 					} else {
 						it.remove();
@@ -111,7 +90,7 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 			}
 			try {
 				wait();
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}

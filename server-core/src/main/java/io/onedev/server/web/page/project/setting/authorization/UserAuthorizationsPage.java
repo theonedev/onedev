@@ -51,7 +51,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 				super.onSubmit();
 
 				if (getProject().getParent() == null 
-						|| !SecurityUtils.canManage(getProject().getParent())) {
+						|| !SecurityUtils.canManageProject(getProject().getParent())) {
 					boolean canManageProject = false;
 					Project project = getProject();
 					User user = SecurityUtils.getUser();

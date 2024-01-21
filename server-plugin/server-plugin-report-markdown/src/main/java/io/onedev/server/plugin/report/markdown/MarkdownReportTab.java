@@ -1,24 +1,24 @@
 package io.onedev.server.plugin.report.markdown;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Callable;
 
 @SuppressWarnings("serial")
 public class MarkdownReportTab extends BuildTab {
@@ -77,7 +77,7 @@ public class MarkdownReportTab extends BuildTab {
 
 				@Override
 				public String call() throws Exception {
-					File startPageFile = new File(Build.getStorageDir(projectId, buildNumber), 
+					File startPageFile = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), 
 							PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + PublishMarkdownReportStep.START_PAGE);
 					return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
 				}

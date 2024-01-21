@@ -559,6 +559,8 @@ onedev.server = {
 	},
 	util: {
 		formatWorkingPeriod: function(minutes) {
+			var negative = minutes < 0;
+			minutes = Math.abs(minutes);
 			var weeks = Math.floor(minutes/(60*8*5));
 			minutes = minutes%(60*8*5);
 			var days = Math.floor(minutes/(60*8));
@@ -579,6 +581,8 @@ onedev.server = {
 			formatted = formatted.trim();
 			if (formatted.length == 0)
 				return "0m";
+			else if (negative)
+				return "-" + formatted;
 			else
 				return formatted;
 		},
@@ -602,6 +606,10 @@ onedev.server = {
 		},
 		isMac: function() {
 			return navigator.userAgent.indexOf('Mac') != -1;		
+		},
+		isSafari: function() {
+			var ua = navigator.userAgent.toLowerCase();
+			return ua.indexOf("safari") != -1 && ua.indexOf("chrome") == -1;
 		},
 		describeUrl: function(url) {
 			if (url.indexOf("http://") == 0)
@@ -855,6 +863,19 @@ onedev.server = {
 	onDomReady: function(bootTimestamp, icons, popStateCallback) {
 		onedev.server.bootTimestamp = bootTimestamp;
 		onedev.server.icons = icons;
+		
+		// fix issue #1640
+		if (onedev.server.util.isMac() && onedev.server.util.isSafari()) {
+			$(document).on("afterElementReplace", function(event, componentId) {
+				var $component = $("#" + componentId);
+				$component.find("textarea").addBack("textarea").each(function() {
+					var value = $(this).val();
+					if (value !== "") {
+						$(this).val("").val(value).caret(0);
+					}
+				});
+			});
+		}
 		
 		$(window).resize(function() {
 			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");

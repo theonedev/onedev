@@ -1,3 +1,9 @@
 <wicket:panel>
-	<input wicket:id="input" type="hidden" class="form-control">
+	<wicket:container wicket:id="content"></wicket:container>
+	<wicket:fragment wicket:id="choiceFrag">
+		<input wicket:id="input" type="hidden" class="form-control">
+	</wicket:fragment>
+	<wicket:fragment wicket:id="radioFrag">
+		<div wicket:id="input"></div>
+	</wicket:fragment>
 </wicket:panel>

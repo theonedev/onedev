@@ -18,27 +18,36 @@ public class BranchCriteria extends Criteria<Build> {
 
 	private final String value;
 	
-	public BranchCriteria(String value) {
+	private final int operator;
+	
+	public BranchCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_REF_NAME);
 		String normalized = Constants.R_HEADS + value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		String branch = build.getBranch();
-		return branch != null && WildcardUtils.matchString(value.toLowerCase(), branch.toLowerCase());
+		var matches = branch != null && WildcardUtils.matchString(value.toLowerCase(), branch.toLowerCase());
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(Build.NAME_BRANCH) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

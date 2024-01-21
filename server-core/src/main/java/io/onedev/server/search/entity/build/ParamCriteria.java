@@ -17,13 +17,16 @@ public class ParamCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private final String name;
 	
-	private String value;
+	private final String value;
 	
-	public ParamCriteria(String name, String value) {
+	private final int operator;
+	
+	public ParamCriteria(String name, String value, int operator) {
 		this.name = name;
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -32,22 +35,29 @@ public class ParamCriteria extends Criteria<Build> {
 		Root<BuildParam> paramRoot = paramQuery.from(BuildParam.class);
 		paramQuery.select(paramRoot);
 
-		return builder.exists(paramQuery.where(
+		var predicate = builder.exists(paramQuery.where(
 				builder.equal(paramRoot.get(BuildParam.PROP_BUILD), from), 
 				builder.equal(paramRoot.get(BuildParam.PROP_NAME), name), 
 				builder.equal(paramRoot.get(BuildParam.PROP_VALUE), value)));
+		
+		if (operator == BuildQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		return paramValues != null && paramValues.contains(value);
+		var matches = paramValues != null && paramValues.contains(value);
+		if (operator == BuildQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(name) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 	

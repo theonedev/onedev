@@ -1,7 +1,12 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -9,15 +14,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class JobSecretEditPanel extends Panel {
@@ -66,27 +63,13 @@ public abstract class JobSecretEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				boolean hasErrors = false;
 				List<JobSecret> secrets = getProject().getBuildSetting().getJobSecrets();
-				for (int i=0; i<secrets.size(); i++) {
-					JobSecret secret = secrets.get(i);
-					if (i != index && secret.getName().equals(editingSecret.getName())) {
-						editor.error(new Path(new PathNode.Named("name")), 
-								"Name already been used by another secret");
-						hasErrors = true;
-						break;
-					}
-				}
-				if (!hasErrors) {
-					if (index == -1)
-						secrets.add(editingSecret);
-					else
-						secrets.set(index, editingSecret);
-					OneDev.getInstance(ProjectManager.class).update(getProject());
-					onSaved(target);
-				} else {
-					target.add(form);
-				}
+				if (index == -1)
+					secrets.add(editingSecret);
+				else
+					secrets.set(index, editingSecret);
+				OneDev.getInstance(ProjectManager.class).update(getProject());
+				onSaved(target);
 			}
 
 			@Override

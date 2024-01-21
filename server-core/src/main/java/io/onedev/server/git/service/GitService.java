@@ -83,6 +83,9 @@ public interface GitService {
 	@Nullable
 	Blob getBlob(Project project, ObjectId revId, String path);
 	
+	@Nullable
+	BlobIdent getBlobIdent(Project project, ObjectId revId, String path);
+	
 	void deleteRefs(Project project, Collection<String> refs);
 	
 	@Nullable
@@ -113,6 +116,8 @@ public interface GitService {
 	
 	boolean hasObjects(Project project, ObjectId... objIds);
 
+	Collection<ObjectId> filterNonExistants(Project project, Collection<ObjectId> objIds);
+	
 	List<BlobIdent> getChildren(Project project, ObjectId revId, @Nullable String path, 
 			BlobIdentFilter filter, boolean expandSingle);
 	

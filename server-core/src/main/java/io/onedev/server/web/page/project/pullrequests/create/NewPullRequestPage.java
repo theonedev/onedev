@@ -9,13 +9,13 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
@@ -241,7 +241,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					request.getAssignments().add(assignment);
 				} else {
 					for (UserAuthorization authorization: target.getProject().getUserAuthorizations()) {
-						if (authorization.getRole().isOwner()) {
+						if (authorization.getRole().isOwner() && !authorization.getUser().isEffectiveGuest()) {
 							PullRequestAssignment assignment = new PullRequestAssignment();
 							assignment.setRequest(request);
 							assignment.setUser(authorization.getUser());
@@ -1041,7 +1041,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(target.getProject()) && SecurityUtils.canReadCode(source.getProject());
+		return !SecurityUtils.getUser().isEffectiveGuest() 
+				&& SecurityUtils.canReadCode(target.getProject()) 
+				&& SecurityUtils.canReadCode(source.getProject());
 	}
 
 	@Override

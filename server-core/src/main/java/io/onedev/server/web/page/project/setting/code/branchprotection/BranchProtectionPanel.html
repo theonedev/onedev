@@ -2,8 +2,10 @@
 	<div class="branch-protection card">
 		<div class="card-header">
 			<div class="card-title">
-				<span class="drag-indicator"><wicket:svg href="grip" class="icon mr-4"/></span>
-				<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+				<a class="toggle" onclick="$(this).closest('.branch-protection').toggleClass('expanded');"><wicket:svg href="arrow4" class="icon rotate-270"/></a>
+				<span class="drag-indicator"><wicket:svg href="grip" class="icon icon-lg mr-2"/></span>
+				<span wicket:id="branches" class="mr-3"></span>
+				<a wicket:id="edit" onclick="$(this).closest('.branch-protection').addClass('expanded');" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 				<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4" title="Delete this rule"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 				<span wicket:id="disabled" class="badge badge-warning">Disabled</span>
 			</div>

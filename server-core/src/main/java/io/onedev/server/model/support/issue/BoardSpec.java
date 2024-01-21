@@ -16,6 +16,7 @@ import javax.validation.constraints.Size;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.model.IssueSchedule;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
@@ -60,7 +61,7 @@ public class BoardSpec implements Serializable {
 	
 	private List<String> columns = new ArrayList<>();
 	
-	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE);
+	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE, IssueSchedule.NAME_MILESTONE);
 	
 	private List<String> displayLinks = new ArrayList<>();
 	
@@ -199,6 +200,7 @@ public class BoardSpec implements Serializable {
 		for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			choices.add(fieldSpec.getName());
 		}
+		choices.add(IssueSchedule.NAME_MILESTONE);
 		return choices;
 	}
 	
@@ -267,7 +269,7 @@ public class BoardSpec implements Serializable {
 				undefinedFields.add(getIdentifyField());
 		}
 		for (String displayField: getDisplayFields()) {
-			if (!Issue.NAME_STATE.equals(displayField)) { 
+			if (!Issue.NAME_STATE.equals(displayField) && !IssueSchedule.NAME_MILESTONE.equals(displayField)) { 
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(displayField);
 				if (fieldSpec == null)
 					undefinedFields.add(displayField);

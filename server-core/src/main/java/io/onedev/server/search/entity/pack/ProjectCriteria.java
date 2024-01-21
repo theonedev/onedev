@@ -1,0 +1,48 @@
+package io.onedev.server.search.entity.pack;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Pack;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.match.WildcardUtils;
+
+import javax.persistence.criteria.*;
+
+public class ProjectCriteria extends Criteria<Pack> {
+
+	private static final long serialVersionUID = 1L;
+	
+	private final String projectPath;
+	
+	private final int operator;
+
+	public ProjectCriteria(String projectPath, int operator) {
+		this.projectPath = projectPath;
+		this.operator = operator;
+	}
+
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
+		var predicate = OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
+				builder, from.join(Pack.PROP_PROJECT, JoinType.INNER), projectPath);
+		if (operator == PackQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
+	}
+
+	@Override
+	public boolean matches(Pack pack) {
+		var matches = WildcardUtils.matchPath(projectPath, pack.getProject().getPath());
+		if (operator == PackQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
+	}
+
+	@Override
+	public String toStringWithoutParens() {
+		return quote(Pack.NAME_PROJECT) + " " 
+				+ PackQuery.getRuleName(operator) + " " 
+				+ quote(projectPath);
+	}
+
+}

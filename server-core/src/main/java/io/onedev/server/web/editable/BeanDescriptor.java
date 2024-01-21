@@ -52,6 +52,7 @@ public class BeanDescriptor implements Serializable {
 				property.setPropertyExcluded(BeanUtils.findSetter(propertyGetter) == null 
 						|| propertyNames.contains(propertyName) && excluded 
 						|| !propertyNames.contains(propertyName) && !excluded);
+				property.setPropertyHidden(editable.hidden());
 			}
 		}
 	}
@@ -106,6 +107,10 @@ public class BeanDescriptor implements Serializable {
 				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public boolean isPropertyVisible(String propertyNameOrDisplayName) {
+		return getProperty(propertyNameOrDisplayName).isPropertyVisible(new HashMap<>(), this);
 	}
 
 	public String getPropertyName(String propertyNameOrDisplayName) {

@@ -1,13 +1,19 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -19,19 +25,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.taskbutton.TaskButton;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.util.Testable;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class JobExecutorEditPanel extends Panel {
@@ -201,9 +200,9 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			protected String runTask(TaskLogger logger) {
+			protected TaskResult runTask(TaskLogger logger) {
 				((Testable)bean.getExecutor()).test(testData, logger);
-				return "Job executor tested successfully";
+				return new TaskResult(true, new PlainMessage("Job executor tested successfully"));
 			}
 
 		};		

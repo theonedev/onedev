@@ -22,6 +22,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -59,6 +60,10 @@ public abstract class CommandPalettePanel extends Panel {
 			+ "~pulls/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
 			+ "**/${build}/** -**/${build} **/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
 			+ "**/${group}/** -**/${group} projects/**");
+
+	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +
+			"~dashboards/** ~code-search/** ~administration/settings/storage-setting " +
+			"~administration/cluster ~administration/settings/time-tracking ${project}/~timesheets");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())
@@ -187,41 +192,48 @@ public abstract class CommandPalettePanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
+		var matcher = new PathMatcher();
 		if (getPage() instanceof ProjectPage) {
 			for (String[] url: availableUrls) {
-				try {
-					if (url.length > 1 && url[0].equals("${project}")) {
-						String[] relativeUrl = new String[url.length-1];
-						System.arraycopy(url, 1, relativeUrl, 0, relativeUrl.length);
-						parsedUrls.add(newProjectAwareParsedUrl(relativeUrl));
+				if (WicketUtils.isSubscriptionActive() 
+						|| !eeUrlPatterns.matches(matcher, Joiner.on("/").join(url))) {
+					try {
+						if (url.length > 1 && url[0].equals("${project}")) {
+							String[] relativeUrl = new String[url.length-1];
+							System.arraycopy(url, 1, relativeUrl, 0, relativeUrl.length);
+							parsedUrls.add(newProjectAwareParsedUrl(relativeUrl));
+						}
+					} catch (IgnoredUrlParam e) {
 					}
-				} catch (IgnoredUrlParam e) {
 				}
 			}
 		}
 		for (String[] url: availableUrls) {
-			boolean applicable = false;
-			if (SecurityUtils.isAdministrator()) {
-				applicable = true;
-			} else if (SecurityUtils.getUser() != null) {
-				if (!url[0].equals("~administration"))
+			if (WicketUtils.isSubscriptionActive()
+					|| !eeUrlPatterns.matches(matcher, Joiner.on("/").join(url))) {
+				boolean applicable = false;
+				if (SecurityUtils.isAdministrator()) {
 					applicable = true;
-			} else if (!url[0].equals("~administration") && !url[0].equals("~my")) {
-				applicable = true;
-			}
-			if (applicable) {
-				try {
-					parsedUrls.add(new ParsedUrl(url) {
-	
-						@Override
-						protected Project getProject() {
-							return null;
-						}
-					});				
-				} catch (IgnoredUrlParam e) {
+				} else if (SecurityUtils.getUser() != null) {
+					if (!url[0].equals("~administration"))
+						applicable = true;
+				} else if (!url[0].equals("~administration") && !url[0].equals("~my")) {
+					applicable = true;
 				}
-			};				
+				if (applicable) {
+					try {
+						parsedUrls.add(new ParsedUrl(url) {
+
+							@Override
+							protected Project getProject() {
+								return null;
+							}
+						});
+					} catch (IgnoredUrlParam e) {
+					}
+				};
+			}
 		}
 		
 		add(new AjaxLink<Void>("close") {

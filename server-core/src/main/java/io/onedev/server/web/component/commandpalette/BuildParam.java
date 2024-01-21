@@ -9,6 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.JobCriteria;
 import io.onedev.server.search.entity.build.VersionCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -33,8 +34,8 @@ public class BuildParam extends ParamSegment {
 			query = new BuildQuery();
 		} else {		
 			List<Criteria<Build>> criterias = new ArrayList<>();
-			criterias.add(new VersionCriteria("*" + matchWith + "*"));
-			criterias.add(new JobCriteria("*" + matchWith + "*"));
+			criterias.add(new VersionCriteria("*" + matchWith + "*", BuildQueryLexer.Is));
+			criterias.add(new JobCriteria("*" + matchWith + "*", BuildQueryLexer.Is));
 			query = new BuildQuery(new OrCriteria<Build>(criterias));
 		}
 		List<Build> builds = buildManager.query(ParsedUrl.getProject(paramValues), query, 0, count);

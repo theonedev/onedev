@@ -1,13 +1,17 @@
 package io.onedev.server.web.editable.beanlist;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.server.annotation.ExcludedProperties;
+import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.PathNode.Indexed;
+import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -25,23 +29,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.util.HtmlUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.PathNode.Indexed;
-import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.server.annotation.ExcludedProperties;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {

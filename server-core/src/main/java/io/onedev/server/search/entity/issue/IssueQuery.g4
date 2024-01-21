@@ -7,12 +7,12 @@ query
     ;
 
 criteria
-    : operator=(Confidential|SubmittedByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
-    | operator=(SubmittedBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    : operator=(Confidential|SubmittedByMe|WatchedByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    | operator=(SubmittedBy|WatchedBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
-    | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | Hash? number=Number #NumberCriteria
+    | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | PoundSign? number=Number #NumberCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -37,8 +37,16 @@ SubmittedBy
 	: 'submitted' WS+ 'by'
 	;
 
+WatchedBy
+    : 'watched' WS+ 'by'
+    ;
+
 CommentedBy
     : 'commented' WS+ 'by'
+    ;
+
+Mentioned
+    : 'mentioned'
     ;
 
 FixedInCommit
@@ -81,8 +89,16 @@ SubmittedByMe
 	: 'submitted' WS+ 'by' WS+ 'me'
 	;
 
+WatchedByMe
+    : 'watched' WS+ 'by' WS+ 'me'
+    ;
+
 CommentedByMe
     : 'commented' WS+ 'by' WS+ 'me'
+    ;
+
+MentionedMe
+    : 'mentioned' WS+ 'me'
     ;
 
 Confidential
@@ -97,21 +113,21 @@ Is
 	: 'is'
 	;
 
+IsNot
+    : 'is' WS+ 'not'
+    ;
+
 IsMe
 	: 'is' WS+  'me'
+	;
+
+IsNotMe
+	: 'is' WS+ 'not' WS+ 'me'
 	;
 
 Contains
 	: 'contains'
 	;
-
-Mentioned
-    : 'mentioned'
-    ;
-
-MentionedMe
-    : 'mentioned' WS+ 'me'
-    ;
 
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'
@@ -140,6 +156,10 @@ IsUntil
 IsEmpty
 	: 'is' WS+ 'empty'
 	;
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
+    ;
 
 Build
 	: 'build'
@@ -201,7 +221,7 @@ RParens
 	: ')'
 	;
 
-Hash
+PoundSign
     : '#'
     ;
 

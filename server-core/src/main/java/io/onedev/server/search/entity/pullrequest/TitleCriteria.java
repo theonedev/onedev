@@ -29,7 +29,7 @@ public class TitleCriteria extends Criteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		String title = request.getTitle();
-		return title != null && WildcardUtils.matchString("*" + value.toLowerCase() + "*", title);
+		return WildcardUtils.matchString("*" + value.toLowerCase() + "*", title.toLowerCase());
 	}
 
 	@Override

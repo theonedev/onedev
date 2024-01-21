@@ -12,7 +12,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.util.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;

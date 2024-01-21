@@ -9,8 +9,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.util.watch.WatchStatus;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("serial")
-abstract class WatchStatusPanel extends Panel {
+public abstract class WatchStatusPanel extends Panel {
 
 	public WatchStatusPanel(String id) {
 		super(id);
@@ -73,6 +75,7 @@ abstract class WatchStatusPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new WatchStatusResourceReference()));
 	}
 
+	@Nullable
 	protected abstract WatchStatus getWatchStatus();
 	
 	protected abstract void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus);

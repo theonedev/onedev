@@ -1,7 +1,8 @@
 package io.onedev.server.job;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.job.match.BranchCriteria;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.job.match.OnBranchCriteria;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.Project;
@@ -9,7 +10,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -63,7 +63,7 @@ public class JobAuthorizationContext {
 				if (secret.getName().equals(secretName)) {
 					String authorization = secret.getAuthorization();
 					if (authorization == null)
-						authorization = new BranchCriteria("**").toString();
+						authorization = new OnBranchCriteria("**").toString();
 					JobMatch jobMatch = JobMatch.parse(authorization, false, false);
 					if (request != null) {
 						if (project.equals(request.getSourceProject())) {
@@ -81,13 +81,10 @@ public class JobAuthorizationContext {
 						if (jobMatch.matches(matchContext)) 
 							return normalizeSecretValue(secret.getValue());
 					}
-					throw new ExplicitException(String.format(
-							"Job secret not authorized (project: %s, job secret: %s)",
-							project.getPath(), secretName));
 				}
 			}
 			throw new ExplicitException(String.format(
-					"Job secret not found (project: %s, job secret: %s)",
+					"No authorized job secret found (project: %s, job secret: %s)",
 					project.getPath(), secretName));
 		}
 	}

@@ -10,12 +10,14 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.IndexSearcher;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -50,8 +52,14 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				}
 
 				@Override
-				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+				public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
 					return "Test.java";
+				}
+
+				@Nullable
+				@Override
+				public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
+					return null;
 				}
 
 			});
@@ -64,8 +72,8 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 			
 			assertEquals(1, report.getTestSuites().size());
 			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.PASSED)).size());
-			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.FAILED)).size());
-			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.SKIPPED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.NOT_PASSED)).size());
+			assertEquals(1, report.getTestCases(null, null, Sets.newSet(Status.NOT_RUN)).size());
 			
 		} catch (IOException|DocumentException e) {
 			throw new RuntimeException(e);
@@ -94,8 +102,14 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				}
 
 				@Override
-				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+				public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
 					return "Test.java";
+				}
+
+				@Nullable
+				@Override
+				public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {
+					return null;
 				}
 
 			});
@@ -108,8 +122,8 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 
 			assertEquals(2, report.getTestSuites().size());
 			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.PASSED)).size());
-			assertEquals(4, report.getTestCases(null, null, Sets.newSet(Status.FAILED)).size());
-			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.SKIPPED)).size());
+			assertEquals(4, report.getTestCases(null, null, Sets.newSet(Status.NOT_PASSED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.NOT_RUN)).size());
 
 		} catch (IOException|DocumentException e) {
 			throw new RuntimeException(e);

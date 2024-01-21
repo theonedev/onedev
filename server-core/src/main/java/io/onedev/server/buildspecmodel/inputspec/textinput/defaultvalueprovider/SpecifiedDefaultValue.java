@@ -1,10 +1,9 @@
 package io.onedev.server.buildspecmodel.inputspec.textinput.defaultvalueprovider;
 
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.Password;
+
+import javax.validation.constraints.NotEmpty;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {
@@ -14,7 +13,6 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 	private String value;
 
 	@Editable(name="Specified default value")
-	@Password
 	@NotEmpty
 	@OmitName
 	public String getValue() {

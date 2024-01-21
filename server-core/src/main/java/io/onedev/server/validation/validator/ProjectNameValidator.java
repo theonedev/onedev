@@ -28,7 +28,7 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 		if (!PATTERN.matcher(value).matches()) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
-			if (message.length() == 0) { 
+			if (message.length() == 0) {
 				message = "Should start with alphanumeric or underscore, and contains only "
 						+ "alphanumeric, underscore, dash, or dot";
 			}

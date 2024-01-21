@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -22,13 +21,13 @@ public class IssueCommentedActivity implements IssueActivity {
 	
 	@Override
 	public Panel render(String panelId, DeleteCallback deleteCallback) {
-		return new IssueCommentedPanel(panelId, new LoadableDetachableModel<IssueComment>() {
+		return new IssueCommentedPanel(panelId, new LoadableDetachableModel<>() {
 
 			@Override
 			protected IssueComment load() {
 				return getComment();
 			}
-			
+
 		}, target -> {
 			OneDev.getInstance(IssueCommentManager.class).delete(getComment());
 			deleteCallback.onDelete(target);

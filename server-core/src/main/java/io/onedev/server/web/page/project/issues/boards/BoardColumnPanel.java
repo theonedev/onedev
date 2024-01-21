@@ -27,7 +27,10 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -36,6 +39,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -75,9 +79,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (boardQuery.getCriteria() != null)
 					criterias.add(boardQuery.getCriteria());
 				if (getMilestone() != null)
-					criterias.add(new MilestoneCriteria(getMilestone().getName()));
+					criterias.add(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is));
 				else
-					criterias.add(new MilestoneIsEmptyCriteria());
+					criterias.add(new MilestoneEmptyCriteria(IssueQueryLexer.IsEmpty));
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
 					criterias.add(new StateCriteria(getColumn(), IssueQueryLexer.Is));
@@ -268,6 +272,27 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		if (color != null) {
 			head.add(AttributeAppender.append("style", "border-top-color:" + color + ";"));
 			content.add(AttributeAppender.append("style", "border-color:" + color + ";"));
+		}
+
+		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+			head.add(new DropdownLink("showProgress") {
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new QueriedIssuesProgressPanel(id) {
+						@Override
+						protected ProjectScope getProjectScope() {
+							return BoardColumnPanel.this.getProjectScope();
+						}
+
+						@Override
+						protected IssueQuery getQuery() {
+							return BoardColumnPanel.this.getQuery();
+						}
+					};
+				}
+			});
+		} else {
+			head.add(new WebMarkupContainer("showProgress").setVisible(false));
 		}
 		
 		if (getQuery() != null) {

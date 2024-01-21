@@ -11,13 +11,14 @@ import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.pack.PackSupport;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
@@ -27,15 +28,15 @@ import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.shiro.authz.Permission;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toList;
 
 public class SuggestionUtils {
 	
@@ -51,13 +52,19 @@ public class SuggestionUtils {
 		
 		return sortAndTruncate(suggestions, matchWith);
 	}
-	
+
 	public static List<InputSuggestion> suggestLabels(String matchWith) {
 		var labelNames = OneDev.getInstance(LabelSpecManager.class).query().stream()
 				.map(it->it.getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(labelNames, matchWith);
+	}
+
+	public static List<InputSuggestion> suggestPackTypes(String matchWith) {
+		List<PackSupport> packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+		packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+		return suggest(packSupports.stream().map(PackSupport::getPackType).collect(toList()), matchWith);
 	}
 	
 	private static List<InputSuggestion> sortAndTruncate(List<InputSuggestion> suggestions, String matchWith) {
@@ -98,7 +105,7 @@ public class SuggestionUtils {
 							.stream()
 							.map(it-> GitUtils.ref2branch(it.getName()))
 							.sorted()
-							.collect(Collectors.toList());
+							.collect(toList());
 					return SuggestionUtils.suggest(branchNames, matchWith);
 				} else {
 					return new ArrayList<>();
@@ -118,7 +125,7 @@ public class SuggestionUtils {
 							.stream()
 							.sorted()
 							.map(it-> GitUtils.ref2tag(it.getName()))
-							.collect(Collectors.toList());
+							.collect(toList());
 					Collections.reverse(tags);
 					return SuggestionUtils.suggest(tags, matchWith);
 				} else {
@@ -139,7 +146,7 @@ public class SuggestionUtils {
 							.stream()
 							.sorted()
 							.map(it-> GitUtils.ref2branch(it.getName()))
-							.collect(Collectors.toList());
+							.collect(toList());
 					Collections.reverse(branches);
 					if (project.getDefaultBranch() != null) {
 						branches.remove(project.getDefaultBranch());
@@ -150,7 +157,7 @@ public class SuggestionUtils {
 							.stream()
 							.sorted()
 							.map(it-> GitUtils.ref2tag(it.getName()))
-							.collect(Collectors.toList());
+							.collect(toList());
 					Collections.reverse(tags);
 					
 					List<String> revisions = new ArrayList<>();
@@ -188,14 +195,14 @@ public class SuggestionUtils {
 		return suggestProjectPaths(matchWith, new AccessProject());
 	}
 	
-	public static List<InputSuggestion> suggestProjectPaths(String matchWith, Permission permission) {
+	public static List<InputSuggestion> suggestProjectPaths(String matchWith, BasePermission permission) {
 		Collection<Project> projects = getProjectManager().getPermittedProjects(permission);
 		ProjectCache cache = getProjectManager().cloneCache();
 		
 		List<String> projectPaths = projects.stream()
 				.map(it->cache.get(it.getId()).getPath())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(projectPaths, matchWith);
 	}
 	
@@ -206,7 +213,7 @@ public class SuggestionUtils {
 		List<String> projectNames = projects.stream()
 				.map(it->cache.get(it.getId()).getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(projectNames, matchWith);
 	}
 	
@@ -215,7 +222,7 @@ public class SuggestionUtils {
 				.stream()
 				.map(it->it.getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(agentNames, matchWith);
 	}
 	
@@ -344,7 +351,7 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (SecurityUtils.canAccess(project)) {
+				if (SecurityUtils.canAccessProject(project)) {
 					for (Issue issue: OneDev.getInstance(IssueManager.class).query(null, project, matchWith, count)) {
 						String title = Emojis.getInstance().apply(issue.getTitle());
 						suggestions.add(new InputSuggestion("#" + issue.getNumber(), title, null));
@@ -401,7 +408,7 @@ public class SuggestionUtils {
 				.stream()
 				.map(it->it.getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(groupNames, matchWith);
 	}
 
@@ -410,7 +417,7 @@ public class SuggestionUtils {
 				.stream()
 				.map(it->it.getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(roleNames, matchWith);
 	}
 	
@@ -464,7 +471,7 @@ public class SuggestionUtils {
 				ProjectCache cache = getProjectManager().cloneCache();
 				List<String> projectPaths = getProjectManager().getPermittedProjects(new AccessProject()).stream()
 						.map(it->cache.get(it.getId()).getPath())
-						.collect(Collectors.toList());
+						.collect(toList());
 				Collections.sort(projectPaths);
 				
 				for (String projectPath: projectPaths) {
@@ -517,13 +524,25 @@ public class SuggestionUtils {
 		
 		return sortAndTruncate(suggestions, matchWith);
 	}
+
+	public static List<InputSuggestion> suggestPackProps(Project project, String propName, String matchWith) {
+		Collection<String> packProps = OneDev.getInstance(PackManager.class).queryProps(
+				project, propName, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (String packProp: packProps) {
+			LinearRange match = LinearRange.match(packProp, matchWith);
+			suggestions.add(new InputSuggestion(packProp, null, match));
+		}
+
+		return sortAndTruncate(suggestions, matchWith);
+	}
 	
 	public static List<InputSuggestion> suggestMilestones(Project project, String matchWith) {
 		List<String> milestoneNames = project.getHierarchyMilestones()
 				.stream()
 				.map(it->it.getName())
 				.sorted()
-				.collect(Collectors.toList());
+				.collect(toList());
 		return suggest(milestoneNames, matchWith);
 	}
 	

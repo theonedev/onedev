@@ -8,20 +8,17 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.IssueTouch;
 import io.onedev.server.model.support.EntityTouch;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.ReflectionUtils;
@@ -99,7 +96,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	protected static final String FIELD_PROJECT_ID = "projectId";
 	
-	private static final int INDEXING_PRIORITY = 20;
+	private static final int INDEXING_PRIORITY = 100;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -229,24 +226,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			return null;
 		});
 	}
-
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof EntityTouch) {
-			EntityTouch touch = (EntityTouch) event.getEntity();
-			if (touch.getEntityClass() == entityClass) {
-				var projectId = touch.getProjectId();
-				transactionManager.runAfterCommit(() -> {
-					projectManager.submitToActiveServer(projectId, () -> {
-						requestToIndex(projectId);
-						return null;
-					});
-				});
-			}
-		}
-	}
-
+	
 	@Listen
 	public void on(ActiveServerChanged event) {
 		for(var projectId: event.getProjectIds()) 	

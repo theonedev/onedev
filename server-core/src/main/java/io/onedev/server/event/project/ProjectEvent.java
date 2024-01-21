@@ -2,7 +2,7 @@ package io.onedev.server.event.project;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;

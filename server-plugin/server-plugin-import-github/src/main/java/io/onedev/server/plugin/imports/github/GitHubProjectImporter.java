@@ -3,6 +3,7 @@ package io.onedev.server.plugin.imports.github;
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
 import java.io.Serializable;
@@ -70,7 +71,7 @@ public class GitHubProjectImporter implements ProjectImporter {
 	}
 	
 	@Override
-	public String doImport(boolean dryRun, TaskLogger logger) {
+	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		ImportRepositories repositories = repositoriesStep.getSetting();
 		ProjectImportOption option = optionStep.getSetting();

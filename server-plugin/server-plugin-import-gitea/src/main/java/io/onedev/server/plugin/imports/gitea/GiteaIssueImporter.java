@@ -2,9 +2,14 @@ package io.onedev.server.plugin.imports.gitea;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import io.onedev.server.web.util.ImportStep;
 
 import java.io.Serializable;
@@ -74,16 +79,19 @@ public class GiteaIssueImporter implements IssueImporter {
 	}
 
 	@Override
-	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
-		ImportServer server = serverStep.getSetting();
-		String giteaRepo = repositoryStep.getSetting().getRepository();
-		IssueImportOption option = optionStep.getSetting();
-		
-		logger.log("Importing issues from repository " + giteaRepo + "...");
-		Map<String, Optional<User>> users = new HashMap<>();
-		
-		ImportResult result = server.importIssues(giteaRepo, project, option, users, dryRun, logger);
-		return result.toHtml("Issues imported successfully");
+	public TaskResult doImport(Long projectId, boolean dryRun, TaskLogger logger) {
+		return OneDev.getInstance(TransactionManager.class).call(() -> {
+			var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			ImportServer server = serverStep.getSetting();
+			String giteaRepo = repositoryStep.getSetting().getRepository();
+			IssueImportOption option = optionStep.getSetting();
+
+			logger.log("Importing issues from repository " + giteaRepo + "...");
+			Map<String, Optional<Long>> userIds = new HashMap<>();
+
+			ImportResult result = server.importIssues(giteaRepo, project, option, userIds, dryRun, logger);
+			return new TaskResult(true, new HtmlMessgae(result.toHtml("Issues imported successfully")));
+		});
 	}
 
 	@Override

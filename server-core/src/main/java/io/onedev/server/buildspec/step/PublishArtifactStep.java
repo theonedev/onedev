@@ -8,11 +8,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.StorageManager;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.validation.constraints.NotEmpty;
@@ -33,7 +33,7 @@ public class PublishArtifactStep extends ServerSideStep {
 			+ "relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish "
 			+ "artifacts from. Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SafePath
+	@SubPath
 	@Override
 	public String getSourcePath() {
 		return sourcePath;

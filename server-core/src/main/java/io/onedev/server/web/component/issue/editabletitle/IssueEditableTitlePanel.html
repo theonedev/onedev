@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div wicket:id="content" class="issue-title d-flex align-items-center justify-content-start flex-nowrap flex-grow-1"></div>
+	<div wicket:id="content" class="issue-editable-title d-flex align-items-center justify-content-start flex-nowrap flex-grow-1"></div>
 	<wicket:fragment wicket:id="titleEditFrag">
 		<form wicket:id="form" class="flex-grow-1 d-flex align-items-center">
 			<div class="clearable-wrapper flex-grow-1 mr-3">
@@ -12,9 +12,10 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="titleViewFrag">
-		<span wicket:id="title" class="mr-3"></span>
-		<span wicket:id="confidential" title="Confidential" class="text-warning mr-3"><wicket:svg href="incognito" class="icon icon-lg"/></span>
-		<a wicket:id="copy" class="btn btn-xs btn-icon btn-light btn-hover-primary copy flex-shrink-0 mr-3" title="Copy issue number and title"><wicket:svg href="copy" class="icon"></wicket:svg></a>
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary edit flex-shrink-0 mr-3" title="Edit issue title"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<span wicket:id="title" class="mr-2"></span>
+		<span wicket:id="confidential" title="Confidential" class="text-warning mr-2"><wicket:svg href="incognito" class="icon icon-lg"/></span>
+		<a wicket:id="copy" class="btn btn-xs btn-icon btn-light btn-hover-primary copy flex-shrink-0 mr-2" title="Copy issue number and title"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary edit flex-shrink-0 mr-2" title="Edit issue title"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<span wicket:id="progress" class="d-flex align-items-center mr-2"></span>
 	</wicket:fragment>
 </wicket:panel>

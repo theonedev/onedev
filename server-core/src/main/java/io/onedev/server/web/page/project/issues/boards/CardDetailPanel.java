@@ -5,7 +5,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -181,7 +181,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				
 			});
 			
-			if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue())) {
+			if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue())) {
 				tabs.add(new AjaxActionTab(Model.of("Authorizations")) {
 
 					@Override

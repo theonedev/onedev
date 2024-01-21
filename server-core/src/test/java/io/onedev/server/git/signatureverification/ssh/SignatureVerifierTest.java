@@ -12,7 +12,6 @@ import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.git.signatureverification.gpg.GpgSignatureVerifier;
 import io.onedev.server.git.signatureverification.gpg.GpgSigningKey;
 import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.GpgKey;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GpgSetting;
@@ -22,7 +21,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.IOException;

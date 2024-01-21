@@ -1,22 +1,6 @@
 package io.onedev.server.plugin.report.jest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
-import org.unbescape.html.HtmlEscape;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -27,6 +11,19 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class JestReportParser {
 
@@ -36,8 +33,7 @@ public class JestReportParser {
 		List<TestCase> testCases = new ArrayList<>();
 		for (JsonNode testSuiteNode: rootNode.get("testResults")) { 
 			String name = testSuiteNode.get("name").asText();
-			if (build.getJobWorkspace() != null && name.startsWith(build.getJobWorkspace()))
-				name = name.substring(build.getJobWorkspace().length()+1);
+			String blobPath = build.getBlobPath(name);
 			
 			String message = testSuiteNode.get("message").asText(null);
 			if (StringUtils.isBlank(message))
@@ -52,47 +48,45 @@ public class JestReportParser {
 			
 			Status status;
 			switch(testSuiteNode.get("status").asText()) {
-			case "pending":
-				status = Status.SKIPPED;
-				break;
-			case "todo":
-				status = Status.TODO;
-				break;
-			case "failed":
-				status = Status.FAILED;
-				break;
-			default:
-				if (!testCaseDatum.isEmpty()) {
-					if (testCaseDatum.stream().allMatch(it->it.status == Status.TODO))
-						status = Status.TODO;
-					else if (testCaseDatum.stream().allMatch(it->it.status == Status.SKIPPED))
-						status = Status.SKIPPED;
-					else
+				case "pending":
+				case "todo":
+					status = Status.NOT_RUN;
+					break;
+				case "failed":
+					status = Status.NOT_PASSED;
+					break;
+				default:
+					if (!testCaseDatum.isEmpty()) {
+						if (testCaseDatum.stream().allMatch(it -> it.status == Status.NOT_RUN))
+							status = Status.NOT_RUN;
+						else
+							status = Status.PASSED;
+					} else {
 						status = Status.PASSED;
-				} else {
-					status = Status.PASSED;
-				}
+					}
 			}
 			
-			TestSuite testSuite = new TestSuite(name, status, duration, message, name) {
+			var testSuiteMessage = message;
+			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, blobPath, null) {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Component renderMessage(String componentId, Build build) {
-					return JestReportParser.renderMessage(componentId, build, getMessage());
+				protected Component renderDetail(String componentId, Build build) {
+					return JestReportParser.renderMessage(componentId, build, testSuiteMessage);
 				}
 				
 			};
 			
 			for (TestCaseData testCaseData: testCaseDatum) {
-				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, 0, testCaseData.message) {
+				var testCaseMessage = testCaseData.message;
+				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, testCaseData.statusText, 0) {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					protected Component renderMessage(String componentId, Build build) {
-						return JestReportParser.renderMessage(componentId, build, getMessage());
+					protected Component renderDetail(String componentId, Build build) {
+						return JestReportParser.renderMessage(componentId, build, testCaseMessage);
 					}
 					
 				});
@@ -109,7 +103,7 @@ public class JestReportParser {
 		
 					@Override
 					protected String transformUnmatched(String string) {
-						return HtmlEscape.escapeHtml5(string);
+						return escapeHtml5(string);
 					}
 		
 					@Override
@@ -118,19 +112,17 @@ public class JestReportParser {
 						int line = Integer.parseInt(matcher.group(2));
 						int col = Integer.parseInt(matcher.group(3));
 						
-						if (build.getJobWorkspace() != null && file.startsWith(build.getJobWorkspace())) 
-							file = file.substring(build.getJobWorkspace().length()+1);
-						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), file, FileMode.REGULAR_FILE.getBits());
-						if (build.getProject().getBlob(blobIdent, false) != null) {
+						var blobPath = build.getBlobPath(file);
+						if (blobPath != null) {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
-							state.blobIdent = blobIdent;
+							state.blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 							PlanarRange range = new PlanarRange(line-1, col-1, line-1, col); 
 							state.position = BlobRenderer.getSourcePosition(range);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
 							String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
-							return String.format("(<a href='%s'>%s:%d:%d</a>)", url, HtmlEscape.escapeHtml5(file), line, col);
+							return String.format("(<a href='%s'>%s:%d:%d</a>)", url, escapeHtml5(blobPath), line, col);
 						} else {
-							return "(" + HtmlEscape.escapeHtml5(file) + ":" + line + ":" + col + ")";
+							return "(" + escapeHtml5(file) + ":" + line + ":" + col + ")";
 						}
 					}
 					
@@ -161,19 +153,21 @@ public class JestReportParser {
 		
 		if (!messages.isEmpty())
 			testCaseData.message = StringUtils.join(messages, "\n\n");
-		
+
 		switch (rootNode.get("status").asText()) {
-		case "passed":
-			testCaseData.status = Status.PASSED;
-			break;
-		case "pending":
-			testCaseData.status = Status.SKIPPED;
-			break;
-		case "todo":
-			testCaseData.status = Status.TODO;
-			break;
-		default:
-			testCaseData.status = Status.FAILED;
+			case "passed":
+				testCaseData.status = Status.PASSED;
+				break;
+			case "pending":
+				testCaseData.status = Status.NOT_RUN;
+				testCaseData.statusText = "pending";
+				break;
+			case "todo":
+				testCaseData.status = Status.NOT_RUN;
+				testCaseData.statusText = "todo";
+				break;
+			default:
+				testCaseData.status = Status.NOT_PASSED;
 		}
 
 		return testCaseData;
@@ -184,6 +178,8 @@ public class JestReportParser {
 		String name;
 		
 		Status status;
+		
+		String statusText;
 		
 		String message;
 		

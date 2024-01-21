@@ -31,9 +31,19 @@ containers:
 {{- end }}
     image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.command }}
+    command: {{ toYaml .Values.command | nindent 6 }}
+{{- end }}
+{{- if .Values.args }}
+    args: {{ toYaml .Values.args | nindent 6 }}
+{{- end }}
     env:
     - name: k8s_service
       value: {{ include "ods.fullname" . }}
+{{- if .Values.onedev.jvm.maxMemoryPercent }}
+    - name: max_memory_percent
+      value: "{{ .Values.onedev.jvm.maxMemoryPercent }}"
+{{- end }}
 {{- if .Values.onedev.initSettings.user }}
     - name: initial_user
       value: {{ .Values.onedev.initSettings.user }}
@@ -68,14 +78,14 @@ containers:
     - name: hibernate_connection_url
       value: {{ include "getConnectionURL" . | quote }}
     - name: hibernate_connection_username
-      value: {{ .Values.database.dbUser }}
+      value: {{ .Values.database.user }}
     - name: hibernate_connection_password
       valueFrom:
         secretKeyRef:
           name: {{ include "ods.fullname" . }}-secrets
           key: dbPassword
     - name: hibernate_hikari_maximumPoolSize
-      value: {{ .Values.database.dbMaximumPoolSize | quote }}
+      value: {{ .Values.database.maximumPoolSize | quote }}
 {{- end }}
 
 {{- if .Values.env }}
@@ -132,16 +142,6 @@ volumes:
   secret:
     secretName: {{ .Values.onedev.trustCerts.secretName }}
     optional: true
-{{- if .Values.persistence.enabled }}
-{{- if .Values.persistence.existingClaim }}
-- name: data
-  persistentVolumeClaim:
-    claimName: {{ .Values.persistence.existingClaim }}
-{{- end }}
-{{- else }}
-- name: data
-  emptyDir: {}
-{{- end }}
 {{- if .Values.extraVolumes }}
 {{ toYaml .Values.extraVolumes | indent 2 }}
 {{- end }}

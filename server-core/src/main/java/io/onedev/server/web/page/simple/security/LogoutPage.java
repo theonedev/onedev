@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.simple.security;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.RestartResponseException;

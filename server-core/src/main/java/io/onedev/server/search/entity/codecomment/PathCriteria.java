@@ -17,8 +17,11 @@ public class PathCriteria extends Criteria<CodeComment>  {
 
 	private final String value;
 	
-	public PathCriteria(String value) {
+	private final int operator;
+	
+	public PathCriteria(String value, int operator) {
 		this.value = value;
+		this.operator = operator;
 	}
 
 	@Override
@@ -27,18 +30,24 @@ public class PathCriteria extends Criteria<CodeComment>  {
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
 			normalized += "%";
-		return builder.like(builder.lower(attribute), normalized);
+		var predicate = builder.like(builder.lower(attribute), normalized);
+		if (operator == CodeCommentQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
 	}
 	
 	@Override
 	public boolean matches(CodeComment comment) {
-		return WildcardUtils.matchPath(value.toLowerCase(), comment.getMark().getPath().toLowerCase());
+		var matches = WildcardUtils.matchPath(value.toLowerCase(), comment.getMark().getPath().toLowerCase());
+		if (operator == CodeCommentQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(CodeComment.NAME_PATH) + " " 
-				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " 
+				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}
 

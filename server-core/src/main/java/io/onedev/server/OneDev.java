@@ -10,6 +10,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.DataManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -17,6 +18,7 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.SessionManager;
@@ -25,7 +27,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.taskschedule.TaskScheduler;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;
@@ -40,7 +42,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
@@ -72,6 +76,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private final ClusterManager clusterManager;
 	
+	private final SettingManager settingManager;
+	
 	private final IdManager idManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
@@ -90,7 +96,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
                   SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
                   DataManager dataManager, ExecutorService executorService,
                   ListenerRegistry listenerRegistry, ClusterManager clusterManager,
-                  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
+                  IdManager idManager, SessionFactoryManager sessionFactoryManager, 
+				  SettingManager settingManager) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
@@ -101,6 +108,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		this.clusterManager = clusterManager;
 		this.idManager = idManager;
 		this.sessionFactoryManager = sessionFactoryManager;
+		this.settingManager = settingManager;
 		
 		try {
 			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
@@ -131,14 +139,20 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		clusterManager.start();
 		sessionFactoryManager.start();
 		
-		try (var conn = dataManager.openConnection()) {
-			callWithTransaction(conn, () -> {
-				dataManager.populateDatabase(conn);
-				return null;
-			});
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		};
+		var databasePopulated = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong("databasePopulated");
+		// Do not use database lock as schema update will commit transaction immediately 
+		// in MySQL 
+		clusterManager.init(databasePopulated, () -> {
+			try (var conn = dataManager.openConnection()) {
+				callWithTransaction(conn, () -> {
+					dataManager.populateDatabase(conn);
+					return null;
+				});
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			};
+			return 1L;
+		});
 		
 		idManager.init();
 
@@ -152,12 +166,32 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			else
 				logger.warn("Please set up the server at " + guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
+			var localServer = clusterManager.getLocalServerAddress();
 			while (true) {
+				if (maintenanceFile.exists()) {
+					logger.info("Maintenance requested, trying to stop all servers...");
+					clusterManager.submitToAllServers(() -> {
+						if (!localServer.equals(clusterManager.getLocalServerAddress()))
+							restart();
+						return null;
+					});
+					while (thread != null && clusterManager.getServerAddresses().size() != 1) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ignored) {
+						}
+					}
+					restart();
+					return;
+				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
+				if (thread == null)
+					return;
+				
 				manualConfigs = checkData();
 				if (manualConfigs.isEmpty()) {
 					initStage = new InitStage("Please wait...");
@@ -200,12 +234,16 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	@Sessional
 	@Override
 	public void postStart() {
+		if (thread == null) 
+			return;
 		SecurityUtils.bindAsSystem();
 		initStage = null;
 		listenerRegistry.post(new SystemStarted());
 		clusterManager.postStart();
 		thread.start();
-        logger.info("Server is ready at " + guessServerUrl());
+
+		SystemSetting systemSetting = settingManager.getSystemSetting();
+		logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 	}
 
 	@Override
@@ -266,9 +304,20 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	}
 	
 	public String guessServerUrl() {
-		ServerConfig serverConfig = serverConfigProvider.get();
-		var serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
-		return UrlUtils.toString(serverUrl);
+		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
+		if (serviceHost != null) {
+			return "http://" + serviceHost;
+		} else {
+			ServerConfig serverConfig = serverConfigProvider.get();
+			String hostName;
+			try {
+				hostName = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				hostName = "localhost";
+			}
+			var serverUrl = buildServerUrl(hostName, "http", serverConfig.getHttpPort());
+			return UrlUtils.toString(serverUrl);
+		}
 	}
 	
 	private Url buildServerUrl(String host, String protocol, int port) {
@@ -375,13 +424,11 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				}
 				restart();
 				break;
-			} else {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ignored) {
-				}
+			} 
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}
-	
 }

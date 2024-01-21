@@ -1,10 +1,10 @@
 package io.onedev.server.web.component.orderedit;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
@@ -20,10 +20,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<EntitySort>> {
@@ -55,15 +54,7 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				List<EntitySort> selected = new ArrayList<>(getSelected());
-				int fromIndex = from.getItemIndex();
-				int toIndex = to.getItemIndex();
-				if (fromIndex < toIndex) {
-					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(selected, fromIndex+i, fromIndex+i+1);
-				} else {
-					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(selected, fromIndex-i, fromIndex-i-1);
-				}
+				CollectionUtils.move(selected, from.getItemIndex(), to.getItemIndex());
 				OrderEditPanel.this.setModelObject(selected);
 				target.add(selectedContainer);
 			}

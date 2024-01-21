@@ -1,13 +1,23 @@
 package io.onedev.server.web.page.project.setting.general;
 
-import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
-import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
-import static io.onedev.server.model.Project.PROP_NAME;
-
-import java.io.Serializable;
-import java.util.Collection;
-
+import com.google.common.base.Objects;
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectLabelManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.project.ConfirmDeleteModal;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,23 +29,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+import java.util.Collection;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectLabelManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import io.onedev.server.web.util.editablebean.LabelsBean;
+import static io.onedev.server.model.Project.*;
 
 @SuppressWarnings("serial")
 public class GeneralProjectSettingPage extends ProjectSettingPage {
@@ -51,7 +48,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT);
+				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
+				PROP_TIME_TRACKING);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
@@ -62,7 +60,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		if (getProject().getParent() != null)
 			parentBean.setParentPath(getProject().getParent().getPath());
 		
-		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+		editor = BeanContext.editModel("editor", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -77,7 +75,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 			public void setObject(Serializable object) {
 				editor.getDescriptor().copyProperties(object, getProject());
 			}
-			
+
 		}, properties, false);
 		
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);		
@@ -156,15 +154,29 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				new ConfirmDeleteProjectModal(target) {
-					
+				new ConfirmDeleteModal(target) {
+
 					@Override
-					protected void onDeleted(AjaxRequestTarget target) {
+					protected void onConfirm(AjaxRequestTarget target) {
+						Project project = getProject();
+						OneDev.getInstance(ProjectManager.class).requestToDelete(Sets.newHashSet(project));
+						getSession().success("Requested to delete project");
 						String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Project.class);
 						if (redirectUrlAfterDelete != null)
 							throw new RedirectToUrlException(redirectUrlAfterDelete);
 						else
 							setResponsePage(ProjectListPage.class);
+					}
+
+					@Override
+					protected String getConfirmMessage() {
+						return "Everything inside this project and all child projects will be deleted and can not be recovered, "
+								+ "please type project path <code>" + getProject().getPath() + "</code> below to confirm deletion.";
+					}
+
+					@Override
+					protected String getConfirmInput() {
+						return getProject().getPath();
 					}
 					
 					@Override
@@ -182,7 +194,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "General Setting").add(AttributeAppender.replace("class", "text-truncate"));
+		return new Label(componentId, "General Settings").add(AttributeAppender.replace("class", "text-truncate"));
 	}
 
 }

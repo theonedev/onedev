@@ -32,14 +32,12 @@
 			<div wicket:id="body">
 				<div wicket:id="feedback"></div>
 				<table wicket:id="builds" class="table"></table>
-				<div wicket:id="tips" class="form-text text-muted"><wicket:svg href="bulb" class="icon icon-sm"/> Run jobs 
-				from commit view, or select an existing build and run downstream jobs from its pipeline view / promotion menu</div>
 			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="buildFrag">
 		<div class="d-flex flex-wrap row-gap-2">
-			<a wicket:id="link" class="text-nowrap mr-3">
+			<a wicket:id="link" class="text-nowrap mr-2">
 				<svg wicket:id="icon" class="icon mr-1"></svg> 
 				<span wicket:id="text"></span>
 			</a>

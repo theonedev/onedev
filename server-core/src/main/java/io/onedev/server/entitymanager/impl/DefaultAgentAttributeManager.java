@@ -1,11 +1,10 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.persistence.TransactionManager;

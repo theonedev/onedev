@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.watchstatus;
 
+import io.onedev.server.util.watch.WatchStatus;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -8,11 +12,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-
-import io.onedev.server.util.watch.WatchStatus;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public abstract class WatchStatusLink extends DropdownLink {

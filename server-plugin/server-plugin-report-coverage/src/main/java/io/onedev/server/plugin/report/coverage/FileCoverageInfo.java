@@ -4,24 +4,22 @@ public class FileCoverageInfo extends NamedCoverageInfo {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String blobPath;
-	
-	public FileCoverageInfo(String name, 
-			Coverage statementCoverage, Coverage methodCoverage, 
-			Coverage branchCoverage, Coverage lineCoverage, 
-			String blobPath) {
-		super(name, statementCoverage, methodCoverage, branchCoverage, lineCoverage);
-		this.blobPath = blobPath;
+	public FileCoverageInfo(String blobPath, int totalBranches, int coveredBranches,
+							int totalLines, int coveredLines) {
+		super(blobPath, totalBranches, coveredBranches, totalLines, coveredLines);
 	}
 
-	public FileCoverageInfo(String name, CoverageInfo coverageInfo, String blobPath) {
-		super(name, coverageInfo.getStatementCoverage(), coverageInfo.getMethodCoverage(), 
-				coverageInfo.getBranchCoverage(), coverageInfo.getLineCoverage());
-		this.blobPath = blobPath;
+	public FileCoverageInfo(String blobPath, CoverageInfo coverageInfo) {
+		this(blobPath, coverageInfo.getTotalBranches(), coverageInfo.getCoveredBranches(), 
+				coverageInfo.getTotalLines(), coverageInfo.getCoveredLines());
+	}
+	
+	public FileCoverageInfo(String blobPath) {
+		super(blobPath);
 	}
 	
 	public String getBlobPath() {
-		return blobPath;
+		return getName();
 	}
 
 }

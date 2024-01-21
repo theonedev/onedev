@@ -144,7 +144,7 @@ public class BuildQuery extends EntityQuery<Build> {
 					
 					@Override
 					public Criteria<Build> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Build>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
@@ -153,15 +153,15 @@ public class BuildQuery extends EntityQuery<Build> {
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						if (fieldName.equals(NAME_VERSION))
-							return new VersionIsEmptyCriteria();
+							return new VersionEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_PULL_REQUEST))
-							return new PullRequestIsEmptyCriteria();
+							return new PullRequestEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_BRANCH))
-							return new BranchIsEmptyCriteria();
+							return new BranchEmptyCriteria(operator);
 						else if (fieldName.equals(NAME_TAG))
-							return new TagIsEmptyCriteria();
+							return new TagEmptyCriteria(operator);
 						else
-							return new ParamIsEmptyCriteria(fieldName);
+							return new ParamEmptyCriteria(fieldName, operator);
 					}
 					
 					@Override
@@ -172,53 +172,54 @@ public class BuildQuery extends EntityQuery<Build> {
 						checkField(project, fieldName, operator);
 						
 						switch (operator) {
-						case BuildQueryLexer.IsUntil:
-						case BuildQueryLexer.IsSince:
-							if (fieldName.equals(NAME_SUBMIT_DATE))
-								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(NAME_PENDING_DATE))
-								return new PendingDateCriteria(value, operator);
-							else if (fieldName.equals(NAME_RUNNING_DATE))
-								return new RunningDateCriteria(value, operator);
-							else if (fieldName.equals(NAME_FINISH_DATE))
-								return new FinishDateCriteria(value, operator);
-							else
-								throw new IllegalStateException();
-						case BuildQueryLexer.Is:
-							switch (fieldName) {
-							case NAME_PROJECT:
-								return new ProjectCriteria(value);
-							case NAME_STATUS:
-								Build.Status status = Build.Status.of(value);
-								if (status != null)
-									return new StatusCriteria(status);
+							case BuildQueryLexer.IsUntil:
+							case BuildQueryLexer.IsSince:
+								if (fieldName.equals(NAME_SUBMIT_DATE))
+									return new SubmitDateCriteria(value, operator);
+								else if (fieldName.equals(NAME_PENDING_DATE))
+									return new PendingDateCriteria(value, operator);
+								else if (fieldName.equals(NAME_RUNNING_DATE))
+									return new RunningDateCriteria(value, operator);
+								else if (fieldName.equals(NAME_FINISH_DATE))
+									return new FinishDateCriteria(value, operator);
 								else
-									throw new ExplicitException("Invalid status: " + value);
-							case NAME_COMMIT:
-								ProjectScopedCommit commitId = getCommitId(project, value); 
-								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
-							case NAME_JOB:
-								return new JobCriteria(value);
-							case NAME_NUMBER:
+									throw new IllegalStateException();
+							case BuildQueryLexer.Is:
+							case BuildQueryLexer.IsNot:
+								switch (fieldName) {
+									case NAME_PROJECT:
+										return new ProjectCriteria(value, operator);
+									case NAME_STATUS:
+										Build.Status status = Build.Status.of(value);
+										if (status != null)
+											return new StatusCriteria(status, operator);
+										else
+											throw new ExplicitException("Invalid status: " + value);
+									case NAME_COMMIT:
+										ProjectScopedCommit commitId = getCommitId(project, value);
+										return new CommitCriteria(commitId.getProject(), commitId.getCommitId(), operator);
+									case NAME_JOB:
+										return new JobCriteria(value, operator);
+									case NAME_NUMBER:
+										return new NumberCriteria(project, value, operator);
+									case NAME_VERSION:
+										return new VersionCriteria(value, operator);
+									case NAME_BRANCH:
+										return new BranchCriteria(value, operator);
+									case NAME_TAG:
+										return new TagCriteria(value, operator);
+									case NAME_LABEL:
+										return new LabelCriteria(getLabelSpec(value), operator);
+									case NAME_PULL_REQUEST:
+										return new PullRequestCriteria(project, value, operator);
+									default:
+										return new ParamCriteria(fieldName, value, operator);
+								}
+							case BuildQueryLexer.IsLessThan:
+							case BuildQueryLexer.IsGreaterThan:
 								return new NumberCriteria(project, value, operator);
-							case NAME_VERSION:
-								return new VersionCriteria(value);
-							case NAME_BRANCH:
-								return new BranchCriteria(value);
-							case NAME_TAG:
-								return new TagCriteria(value);
-							case NAME_LABEL:
-								return new LabelCriteria(getLabelSpec(value));
-							case NAME_PULL_REQUEST:
-								return new PullRequestCriteria(project, value);
-							default: 
-								return new ParamCriteria(fieldName, value);
-							}
-						case BuildQueryLexer.IsLessThan:
-						case BuildQueryLexer.IsGreaterThan:
-							return new NumberCriteria(project, value, operator);
-						default:
-							throw new IllegalStateException();
+							default:
+								throw new IllegalStateException();
 						}
 					}
 					
@@ -274,36 +275,38 @@ public class BuildQuery extends EntityQuery<Build> {
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case BuildQueryLexer.IsUntil:
-		case BuildQueryLexer.IsSince:
-			if (!fieldName.equals(NAME_SUBMIT_DATE) 
-					&& !fieldName.equals(NAME_PENDING_DATE)
-					&& !fieldName.equals(NAME_RUNNING_DATE)
-					&& !fieldName.equals(NAME_FINISH_DATE)) 
-				throw newOperatorException(fieldName, operator);
-			break;
-		case BuildQueryLexer.Is:
-			if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_COMMIT) 
-					&& !fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_NUMBER) 
-					&& !fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION) 
-					&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
-					&& !fieldName.equals(NAME_LABEL) && !fieldName.equals(NAME_STATUS) 
-					&& !paramNames.contains(fieldName)) {
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
-		case BuildQueryLexer.IsEmpty:
-			if (!fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)  
-					&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
-					&& !paramNames.contains(fieldName)) {
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
-		case BuildQueryLexer.IsLessThan:
-		case BuildQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(NAME_NUMBER))
-				throw newOperatorException(fieldName, operator);
-			break;
+			case BuildQueryLexer.IsUntil:
+			case BuildQueryLexer.IsSince:
+				if (!fieldName.equals(NAME_SUBMIT_DATE)
+						&& !fieldName.equals(NAME_PENDING_DATE)
+						&& !fieldName.equals(NAME_RUNNING_DATE)
+						&& !fieldName.equals(NAME_FINISH_DATE))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case BuildQueryLexer.Is:
+			case BuildQueryLexer.IsNot:
+				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_COMMIT)
+						&& !fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_NUMBER)
+						&& !fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)
+						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
+						&& !fieldName.equals(NAME_LABEL) && !fieldName.equals(NAME_STATUS)
+						&& !paramNames.contains(fieldName)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
+			case BuildQueryLexer.IsEmpty:
+			case BuildQueryLexer.IsNotEmpty:
+				if (!fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)
+						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
+						&& !paramNames.contains(fieldName)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
+			case BuildQueryLexer.IsLessThan:
+			case BuildQueryLexer.IsGreaterThan:
+				if (!fieldName.equals(NAME_NUMBER))
+					throw newOperatorException(fieldName, operator);
+				break;
 		}
 	}
 	

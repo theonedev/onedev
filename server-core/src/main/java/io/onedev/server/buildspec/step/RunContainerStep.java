@@ -3,13 +3,17 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
+import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.annotation.Nullable;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
 		+ "job workspace, either use environment variable <tt>ONEDEV_WORKSPACE</tt>, or specify volume mounts. " +
@@ -35,25 +40,12 @@ public class RunContainerStep extends Step {
 
 	private String workingDir;
 	
-	private List<VolumeMount> volumeMounts = new ArrayList<>(); 
+	private List<VolumeMount> volumeMounts = new ArrayList<>();
+
+	private String builtInRegistryAccessTokenSecret;
 	
 	private boolean useTTY;
 	
-	@Override
-	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		Map<String, String> envMap = new HashMap<>();
-		for (EnvVar var: getEnvVars())
-			envMap.put(var.getName(), var.getValue());
-		Map<String, String> mountMap = new HashMap<>();
-		for (VolumeMount mount: getVolumeMounts()) {
-			var sourcePath = mount.getSourcePath();
-			if (sourcePath == null)
-				sourcePath = ".";
-			mountMap.put(sourcePath, mount.getTargetPath());
-		}
-		return new RunContainerFacade(getImage(), null, getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
-	}
-
 	@Editable(order=100, description="Specify container image to run")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
@@ -79,7 +71,6 @@ public class RunContainerStep extends Step {
 
 	@Editable(order=300, name="Working Directory", description="Optionally specify working directory of the container. "
 			+ "Leave empty to use default working directory of the container")
-	@SafePath
 	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable
 	public String getWorkingDir() {
@@ -109,6 +100,29 @@ public class RunContainerStep extends Step {
 		this.volumeMounts = volumeMounts;
 	}
 
+	@Editable(order=600, name="Built-in Registry Access Token Secret", description="Optionally specify a " +
+			"access token secret to access built-in container registry if necessary. If this step needs to " +
+			"access external container registry, login information should be configured in corresponding " +
+			"executor then")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isSubscriptionActive")
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return builtInRegistryAccessTokenSecret;
+	}
+
+	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
+		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+
+	protected static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+	}
+	
 	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
 			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
 			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
@@ -123,6 +137,28 @@ public class RunContainerStep extends Step {
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
+	}
+
+	@Override
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		Map<String, String> envMap = new HashMap<>();
+		for (EnvVar var: getEnvVars())
+			envMap.put(var.getName(), var.getValue());
+		Map<String, String> mountMap = new HashMap<>();
+		for (VolumeMount mount: getVolumeMounts()) {
+			var sourcePath = mount.getSourcePath();
+			if (sourcePath == null)
+				sourcePath = ".";
+			mountMap.put(sourcePath, mount.getTargetPath());
+		}
+		
+		String builtInRegistryAccessToken;
+		if (getBuiltInRegistryAccessTokenSecret() != null)
+			builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
+		else 
+			builtInRegistryAccessToken = null;
+		return new RunContainerFacade(getImage(), null, getArgs(), envMap, getWorkingDir(), mountMap, 
+				builtInRegistryAccessToken, isUseTTY());
 	}
 	
 }

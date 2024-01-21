@@ -6,7 +6,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.infomanager.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -111,7 +111,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getIssue());
+		return SecurityUtils.canAccessIssue(getIssue());
 	}
 
 	@Override
@@ -143,8 +143,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 		});
 		
-		add(new Tabbable("issueTabs", new LoadableDetachableModel<List<? extends Tab>>() {
-			
+		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
+
 			@Override
 			protected List<? extends Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
@@ -167,13 +167,13 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					// Do not calculate fix builds now as it might be slow
 					tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
 				}
-				
-				if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
+
+				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue()))
 					tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
-				
+
 				return tabs;
 			}
-			
+
 		}) {
 			@Override
 			public void onInitialize() {
@@ -231,7 +231,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+						IssueQueryParseOption option = new IssueQueryParseOption()
+								.withCurrentUserCriteria(true)
+								.withCurrentProjectCriteria(true);
 						return IssueQuery.parse(project, queryString, option, true);
 					}
 

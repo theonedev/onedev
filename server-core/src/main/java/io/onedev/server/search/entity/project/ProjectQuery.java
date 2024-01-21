@@ -128,7 +128,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 					
 					@Override
 					public Criteria<Project> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Project>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
@@ -139,15 +139,18 @@ public class ProjectQuery extends EntityQuery<Project> {
 						checkField(fieldName, operator);
 						
 						switch (operator) {
-						case Is:
-							if (fieldName.equals(Project.NAME_NAME))
-								return new NameCriteria(value);
-							else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME))
-								return new ServiceDeskNameCriteria(value);
-							else if (fieldName.equals(Project.NAME_PATH))
-								return new PathCriteria(value);
-							else
-								return new LabelCriteria(getLabelSpec(value));
+							case Is:
+							case IsNot:
+								switch (fieldName) {
+									case Project.NAME_NAME:
+										return new NameCriteria(value, operator);
+									case Project.NAME_SERVICE_DESK_NAME:
+										return new ServiceDeskNameCriteria(value, operator);
+									case Project.NAME_PATH:
+										return new PathCriteria(value, operator);
+									default:
+										return new LabelCriteria(getLabelSpec(value), operator);
+								}
 						case Contains:
 							return new DescriptionCriteria(value);
 						case IsUntil:
@@ -216,25 +219,26 @@ public class ProjectQuery extends EntityQuery<Project> {
 		if (!Project.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case Contains:
-			if (!fieldName.equals(Project.NAME_DESCRIPTION))
-				throw newOperatorException(fieldName, operator);
-			break;
-		case Is:
-			if (!fieldName.equals(Project.NAME_NAME) 
-					&& !fieldName.equals(Project.NAME_LABEL)
-					&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME) 
-					&& !fieldName.equals(Project.NAME_PATH)) { 
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
-		case IsUntil:
-		case IsSince:
-			if (!fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE) 
-					&& !fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
+			case Contains:
+				if (!fieldName.equals(Project.NAME_DESCRIPTION))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case Is:
+			case IsNot:
+				if (!fieldName.equals(Project.NAME_NAME)
+						&& !fieldName.equals(Project.NAME_LABEL)
+						&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME)
+						&& !fieldName.equals(Project.NAME_PATH)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
+			case IsUntil:
+			case IsSince:
+				if (!fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE)
+						&& !fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
 		}
 	}
 	

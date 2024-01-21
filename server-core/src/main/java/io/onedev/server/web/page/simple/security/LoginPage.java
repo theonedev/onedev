@@ -1,13 +1,18 @@
 package io.onedev.server.web.page.simple.security;
 
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
-
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
+import com.google.common.base.Preconditions;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.realm.PasswordAuthorizingRealm;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
+import io.onedev.server.web.page.simple.SimpleCssResourceReference;
+import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.RestartResponseException;
@@ -29,19 +34,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthorizingRealm;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
-import io.onedev.server.web.page.simple.SimpleCssResourceReference;
-import io.onedev.server.web.page.simple.SimplePage;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 
 @SuppressWarnings("serial")
 public class LoginPage extends SimplePage {
@@ -89,14 +83,16 @@ public class LoginPage extends SimplePage {
 					PrincipalCollection principals = OneDev.getInstance(PasswordAuthorizingRealm.class)
 							.getAuthenticationInfo(token).getPrincipals();
 					User user = Preconditions.checkNotNull(SecurityUtils.toUser(principals));
-					if (user.getTwoFactorAuthentication() != null) {
-						subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
-								+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
-								+ "authenticator is in sync";
-						newPasscodeVerifyFrag(user.getId());
-					} else if (user.isEnforce2FA()) {
-						subTitle = "Set up two-factor authentication";
-						newTwoFactorAuthenticationSetup(user.getId());
+					if (user.isEnforce2FA()) {
+						if (user.getTwoFactorAuthentication() != null) {
+							subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
+									+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
+									+ "authenticator is in sync";
+							newPasscodeVerifyFrag(user.getId());
+						} else {
+							subTitle = "Set up two-factor authentication";
+							newTwoFactorAuthenticationSetup(user.getId());
+						}
 					} else {
 						afterLogin(user);
 					}
@@ -173,7 +169,7 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(OneDev.getInstance(SettingManager.class).getMailSetting() != null);
+				setVisible(OneDev.getInstance(SettingManager.class).getMailService() != null);
 			}
 			
 		});
@@ -221,13 +217,8 @@ public class LoginPage extends SimplePage {
 		replace(new TwoFactorAuthenticationSetupPanel("content") {
 			
 			@Override
-			protected void onEnabled(AjaxRequestTarget target) {
+			protected void onConfigured(AjaxRequestTarget target) {
 				afterLogin(getUser());
-			}
-			
-			@Override
-			protected void onCancelled(AjaxRequestTarget target) {
-				setResponsePage(LoginPage.class);
 			}
 			
 			@Override

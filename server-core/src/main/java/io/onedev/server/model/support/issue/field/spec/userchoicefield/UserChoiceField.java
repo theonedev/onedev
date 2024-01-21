@@ -1,10 +1,12 @@
 package io.onedev.server.model.support.issue.field.spec.userchoicefield;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.SpecifiedDefaultMultiValue;
@@ -72,6 +74,10 @@ public class UserChoiceField extends FieldSpec {
 		return EditContext.get().getInputValue("allowMultiple").equals(true);
 	}
 	
+	private static boolean isSubscriptionActive() {
+		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+	}
+
 	@Override
 	public List<String> getPossibleValues() {
 		return UserChoiceInput.getPossibleValues();

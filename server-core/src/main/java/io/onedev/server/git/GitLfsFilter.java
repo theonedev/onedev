@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import static com.google.common.hash.Hashing.sha256;
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static javax.servlet.http.HttpServletResponse.*;
@@ -111,9 +111,9 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
+		var serverUrl = settingManager.getSystemSetting().getServerUrl();
 		return String.format("%s/%s.git/lfs/objects/%s?lfs-objects=true", 
-				StringUtils.stripEnd(settingManager.getSystemSetting().getServerUrl(), "/\\"), 
-				projectPath, objectId);
+				StringUtils.stripEnd(serverUrl, "/\\"), projectPath, objectId);
 	}
 
 	private String getProjectPath(String pathInfo) {
@@ -432,7 +432,7 @@ public class GitLfsFilter implements Filter {
 									lockManager.delete(lock);
 									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 								} else if (force) {
-									if (SecurityUtils.canManage(project)) {
+									if (SecurityUtils.canManageProject(project)) {
 										lockManager.delete(lock);
 										writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 									} else {

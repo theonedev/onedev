@@ -1,5 +1,8 @@
 package io.onedev.server.plugin.imports.youtrack;
 
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.util.Pair;
 import org.unbescape.html.HtmlEscape;
 
 import java.util.*;
@@ -21,6 +24,10 @@ public class ImportResult {
 	Map<String, String> mismatchedIssueFields = new LinkedHashMap<>();
 	
 	Set<String> tooLargeAttachments = new LinkedHashSet<>();
+	
+	Map<String, Long> issueMapping = new HashMap<>();
+
+	Map<String, Pair<Long, List<String>>> linkedIssuesMapping = new HashMap<>();
 	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {

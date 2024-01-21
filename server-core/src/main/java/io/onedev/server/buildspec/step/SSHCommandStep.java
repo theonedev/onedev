@@ -1,13 +1,10 @@
 package io.onedev.server.buildspec.step;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
@@ -125,7 +122,7 @@ public class SSHCommandStep extends CommandStep {
 				var commands = newArrayList(
 						"mkdir /root/.ssh",
 						"cat <<EOF>> /root/.ssh/id_rsa");
-				var privateKey = Build.get().getJobSecretAuthorizationContext().getSecretValue(getPrivateKeySecret());
+				var privateKey = Build.get().getJobAuthorizationContext().getSecretValue(getPrivateKeySecret());
 				commands.addAll(StringUtils.splitToLines(privateKey));
 				
 				var sshBuilder = new StringBuilder("ssh -o StrictHostKeyChecking=no ");

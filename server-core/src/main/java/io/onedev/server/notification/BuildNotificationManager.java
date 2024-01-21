@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
@@ -51,7 +50,8 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	@Inject
 	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
-			UserManager userManager, SettingManager settingManager, MarkdownManager markdownManager) {
+									UserManager userManager, SettingManager settingManager, 
+									MarkdownManager markdownManager) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
@@ -74,19 +74,21 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	public void notify(BuildEvent event, Collection<String> emails) {
 		emails = emails.stream().filter(it -> !it.equals(User.SYSTEM_EMAIL_ADDRESS)).collect(toList());
 		
-		Build build = event.getBuild();
-		String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
+		if (!emails.isEmpty()) {
+			Build build = event.getBuild();
+			String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
 
-		String summary = build.getStatus().toString();
-		if (build.getVersion() != null)
-			summary = build.getVersion() + " " + summary;
-			
-		String url = urlManager.urlFor(build);
-		String threadingReferences = "<" + build.getProject().getPath() + "-build-" + build.getNumber() + "@onedev>";
-		String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
-		String textBody = getEmailBody(false, event, summary, null, url, false, null);
-		mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody, 
-				textBody, null, null, threadingReferences);
+			String summary = build.getStatus().toString();
+			if (build.getVersion() != null)
+				summary = build.getVersion() + " " + summary;
+
+			String url = urlManager.urlFor(build);
+			String threadingReferences = "<" + build.getProject().getPath() + "-build-" + build.getNumber() + "@onedev>";
+			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
+			String textBody = getEmailBody(false, event, summary, null, url, false, null);
+			mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
+					textBody, null, null, threadingReferences);
+		}
 	}
 	
 	@Sessional

@@ -119,26 +119,24 @@ public class AgentQuery extends EntityQuery<Agent> {
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
 						checkField(fieldName, operator);
-						
-						switch (operator) {
-						case AgentQueryLexer.Is:
+
+						if (operator == AgentQueryLexer.Is || operator == AgentQueryLexer.IsNot) {
 							switch (fieldName) {
-							case NAME_NAME:
-								return new NameCriteria(value);
-							case NAME_OS_NAME:
-								return new OsCriteria(value);
-							case NAME_OS_VERSION:
-								return new OsVersionCriteria(value);
-							case NAME_OS_ARCH:
-								return new OsArchCriteria(value);
-							case NAME_IP_ADDRESS:
-								return new IpAddressCriteria(value);
-							default: 
-								return new AttributeCriteria(fieldName, value);
+								case NAME_NAME:
+									return new NameCriteria(value, operator);
+								case NAME_OS_NAME:
+									return new OsCriteria(value, operator);
+								case NAME_OS_VERSION:
+									return new OsVersionCriteria(value, operator);
+								case NAME_OS_ARCH:
+									return new OsArchCriteria(value, operator);
+								case NAME_IP_ADDRESS:
+									return new IpAddressCriteria(value, operator);
+								default:
+									return new AttributeCriteria(fieldName, value, operator);
 							}
-						default:
-							throw new IllegalStateException();
 						}
+						throw new IllegalStateException();
 					}
 					
 					@Override

@@ -30,6 +30,8 @@ public class NumericFieldCriteria extends FieldCriteria {
 		Path<Integer> attribute = fieldFrom.get(IssueField.PROP_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return builder.not(builder.equal(attribute, value));
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return builder.greaterThan(attribute, value);
 		else
@@ -41,6 +43,8 @@ public class NumericFieldCriteria extends FieldCriteria {
 		Integer fieldValue = (Integer) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.IsNot)
+			return !Objects.equals(fieldValue, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return fieldValue != null && fieldValue > value;
 		else
@@ -56,7 +60,8 @@ public class NumericFieldCriteria extends FieldCriteria {
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setFieldValue(getFieldName(), value);
+		if (operator == IssueQueryLexer.Is)
+			issue.setFieldValue(getFieldName(), value);
 	}
 
 }

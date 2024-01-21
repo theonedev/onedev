@@ -2,9 +2,10 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,22 +33,22 @@ public abstract class CommandHandler extends AbstractPlugin {
 			} else if (!hibernateConfig.isHSQLDialect()) {
 				try (var conn = openConnection(hibernateConfig, Thread.currentThread().getContextClassLoader())) {
 					return callWithLock(conn, () -> {
-						maintenanceFile.createNewFile();
+						FileUtils.touchFile(maintenanceFile);
 						try {
 							waitForServerStop();
 							return callable.call();
 						} finally {
-							maintenanceFile.delete();
+							FileUtils.deleteFile(maintenanceFile);
 						}
 					});
 				}
 			} else {
-				maintenanceFile.createNewFile();
+				FileUtils.touchFile(maintenanceFile);
 				try {
 					waitForServerStop();
 					return callable.call();
 				} finally {
-					maintenanceFile.delete();
+					FileUtils.deleteFile(maintenanceFile);
 				}
 			}
 		} catch (Exception e) {

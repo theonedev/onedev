@@ -210,7 +210,7 @@ public abstract class BuildSidePanel extends Panel {
 		general.add(jobLink);
 		
 		if (branch != null) {
-			if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH) 
+			if (SecurityUtils.canModifyFile(getProject(), branch, BuildSpec.BLOB_PATH) 
 					&& getBuild().getSpec() != null 
 					&& getBuild().getSpec().getJobs().stream().anyMatch(it->it.getName().equals(getBuild().getJobName()))) {
 				state = new ProjectBlobPage.State();
@@ -229,7 +229,7 @@ public abstract class BuildSidePanel extends Panel {
 			if (request != null
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), BuildSpec.BLOB_PATH)
+					&& SecurityUtils.canModifyFile(request.getSourceProject(), request.getSourceBranch(), BuildSpec.BLOB_PATH)
 					&& getBuild().getSpec() != null 
 					&& getBuild().getSpec().getJobs().stream().anyMatch(it->it.getName().equals(getBuild().getJobName()))) { 
 				BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), BuildSpec.BLOB_PATH, 
@@ -335,13 +335,13 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getBuild().getLabels().isEmpty() || SecurityUtils.canManage(getBuild()));
+				setVisible(!getBuild().getLabels().isEmpty() || SecurityUtils.canManageBuild(getBuild()));
 			}
 			
 		};
 		labelsContainer.setOutputMarkupId(true);
 		
-		if (SecurityUtils.canManage(getBuild())) {
+		if (SecurityUtils.canManageBuild(getBuild())) {
 			labelsContainer.add(new InplacePropertyEditLink("head") {
 				
 				@Override
@@ -385,7 +385,7 @@ public abstract class BuildSidePanel extends Panel {
 			
 		}));
 		labelsContainer.add(new WebMarkupContainer("labelsHelp")
-				.setVisible(SecurityUtils.canManage(getBuild())));
+				.setVisible(SecurityUtils.canManageBuild(getBuild())));
 		add(labelsContainer);
 		
 		add(new ListView<Input>("params", new LoadableDetachableModel<List<Input>>() {
@@ -486,7 +486,7 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.canManage(getBuild()))
+		if (SecurityUtils.canManageBuild(getBuild()))
 			add(newDeleteLink("delete"));
 		else
 			add(new WebMarkupContainer("delete").setVisible(false));

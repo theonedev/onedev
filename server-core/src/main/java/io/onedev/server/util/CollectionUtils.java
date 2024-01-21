@@ -1,13 +1,6 @@
 package io.onedev.server.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
@@ -60,4 +53,13 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
         return sorted;
 	}
 	
+	public static <T> void move(List<T> list, int fromIndex, int toIndex) {
+		if (fromIndex < toIndex) {
+			for (int i=0; i<toIndex-fromIndex; i++)
+				Collections.swap(list, fromIndex+i, fromIndex+i+1);
+		} else {
+			for (int i=0; i<fromIndex-toIndex; i++)
+				Collections.swap(list, fromIndex-i, fromIndex-i-1);
+		}
+	}
 }
