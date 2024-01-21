@@ -1,13 +1,13 @@
-version: 25
+version: 26
 jobs:
 - name: CI
   steps:
   - !CheckoutStep
     name: checkout
-    cloneCredential: !DefaultCredential {}
+    cloneCredential: !HttpCredential
+      accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect build version
@@ -187,10 +187,10 @@ jobs:
 - name: Sync Main (GitHub)
   steps:
   - !CheckoutStep
-    name: 'checkout '
+    name: checkout
     cloneCredential: !DefaultCredential {}
     withLfs: false
-    withSubmodules: true
+    withSubmodules: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: sync
