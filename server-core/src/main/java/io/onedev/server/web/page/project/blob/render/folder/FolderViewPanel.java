@@ -59,18 +59,18 @@ public class FolderViewPanel extends Panel {
 	
 	private final BlobRenderContext context;
 	
-	private final IModel<List<BlobIdent>> childrenModel = new LoadableDetachableModel<List<BlobIdent>>() {
+	private final IModel<List<BlobIdent>> childrenModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected List<BlobIdent> load() {
-			List<BlobIdent> children = getGitService().getChildren(context.getProject(), getCommitId(), 
+			List<BlobIdent> children = getGitService().getChildren(context.getProject(), getCommitId(),
 					context.getBlobIdent().path, BlobIdentFilter.ALL, true);
-			for (BlobIdent child: children)
+			for (BlobIdent child : children)
 				child.revision = context.getBlobIdent().revision;
-			
-			BlobIdent oldBuildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+
+			BlobIdent oldBuildSpecIdent = new BlobIdent(context.getBlobIdent().revision,
 					".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
-			BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+			BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision,
 					BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
 			if (children.contains(oldBuildSpecIdent)) {
 				children.remove(oldBuildSpecIdent);
@@ -82,7 +82,7 @@ public class FolderViewPanel extends Panel {
 			}
 			return children;
 		}
-		
+
 	};
 	
 	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {

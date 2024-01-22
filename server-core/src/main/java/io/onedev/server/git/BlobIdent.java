@@ -122,12 +122,12 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 
 	@Override
 	public int compareTo(BlobIdent ident) {
-		if (isTree()) {
-			if (ident.isTree()) 
+		if (isTree() || isGitLink() || isSymbolLink()) {
+			if (ident.isTree() || ident.isGitLink() || ident.isSymbolLink()) 
 				return GitUtils.comparePath(path, ident.path);
 			else
 				return -1;
-		} else if (ident.isTree()) {
+		} else if (ident.isTree() || ident.isGitLink() || ident.isSymbolLink()) {
 			return 1;
 		} else {
 			return GitUtils.comparePath(path, ident.path);
