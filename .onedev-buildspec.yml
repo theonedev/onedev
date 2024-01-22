@@ -30,7 +30,7 @@ jobs:
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
-      - mvn test
+      - mvn test -Pee
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
@@ -83,7 +83,7 @@ jobs:
       - docker login -u robinshen -p @secrets:dockerhub-password@
       - ''
       - '# Skip test as we''ve already tested in CI build'
-      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
+      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
       - ''
       - cd $projectDir/server-product/docker
       - docker run --privileged --rm tonistiigi/binfmt --install all
@@ -198,15 +198,8 @@ jobs:
     image: alpine/git:1.0.7
     interpreter: !DefaultInterpreter
       commands:
-      - git config --global user.name "Robin Shen"
-      - git config --global user.email "robin@@onedev.io"
       - git config --global --unset http.extraHeader
-      - git rm -r server-ee
-      - sed -i '/server-ee/d' pom.xml
-      - ''
-      - git add pom.xml
-      - git commit -m "Remove EE module"
-      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git HEAD:main
+      - git push https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
