@@ -61,13 +61,13 @@ public class Tabbable extends GenericPanel<List<? extends Tab>> {
 				actionTabs.get(0).setSelected(true);
 		}
 		
-		add(new ListView<Tab>("tabs", new LoadableDetachableModel<List<Tab>>() {
+		add(new ListView<>("tabs", new LoadableDetachableModel<List<Tab>>() {
 
 			@Override
 			protected List<Tab> load() {
 				return getTabs().stream().collect(Collectors.toList());
 			}
-			
+
 		}) {
 
 			@Override
@@ -77,12 +77,12 @@ public class Tabbable extends GenericPanel<List<? extends Tab>> {
 					item.add(AttributeModifier.append("class", "active"));
 				if (item.getIndex() == 0)
 					item.add(AttributeModifier.append("class", "first"));
-				if (item.getIndex() == getTabs().size()-1)
+				if (item.getIndex() == getTabs().size() - 1)
 					item.add(AttributeModifier.append("class", "last"));
 
 				item.add(tab.render("tab"));
 			}
-			
+
 		});
 
 		setOutputMarkupId(true);

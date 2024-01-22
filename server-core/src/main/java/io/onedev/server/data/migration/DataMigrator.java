@@ -6118,7 +6118,8 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Dashboards.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					for (var widgetElement : element.element("widgets").elements()) {
+					var widgetsElement = element.element("widgets");
+					for (var widgetElement : widgetsElement.elements()) {
 						if (widgetElement.getName().contains("ProjectOverviewWidget")) {
 							widgetElement.addElement("showCodeStats").setText("true");
 							widgetElement.addElement("showPullRequestStats").setText("true");
@@ -6126,11 +6127,43 @@ public class DataMigrator {
 							widgetElement.addElement("showBuildStatus").setText("true");
 							widgetElement.addElement("showPackStats").setText("true");
 						}
+						widgetElement.detach();
+						if (widgetElement.getName().contains("CompositeWidget"))
+							continue;
+						
+						var newWidgetElement = widgetsElement.addElement("io.onedev.server.model.support.widget.Widget");
+						
+						var leftElement = widgetElement.element("left");
+						leftElement.detach();
+						newWidgetElement.add(leftElement);
+
+						var topElement = widgetElement.element("top");
+						topElement.detach();
+						newWidgetElement.add(topElement);
+
+						var rightElement = widgetElement.element("right");
+						rightElement.detach();
+						newWidgetElement.add(rightElement);
+
+						var bottomElement = widgetElement.element("bottom");
+						bottomElement.detach();
+						newWidgetElement.add(bottomElement);
+
+						var autoHeightElement = widgetElement.element("autoHeight");
+						autoHeightElement.detach();
+						newWidgetElement.add(autoHeightElement);
+						
+						var tabWrappersElement = newWidgetElement.addElement("tabWrappers");
+						var tabWrapperElement = tabWrappersElement.addElement("io.onedev.server.model.support.widget.WidgetTabWrapper");
+						widgetElement.addAttribute("class", widgetElement.getName());
+						widgetElement.setName("tab");
+						tabWrapperElement.add(widgetElement);
 					}
 				}
 				dom.writeToFile(file, false);
 			}
 		}
+		
 	}
 	
 }

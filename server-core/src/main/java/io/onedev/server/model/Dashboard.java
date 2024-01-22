@@ -20,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import io.onedev.server.model.support.Widget;
+import io.onedev.server.model.support.widget.Widget;
 
 @Entity
 @Table(
