@@ -206,7 +206,7 @@ service:
     annotations: {}
     topologyKeys: []
 
- # Configure Ingress resource
+# Configure Ingress resource
 ingress:
   # ingress.enabled -- If **true**, create an Ingress resource.
   enabled: false
@@ -261,6 +261,7 @@ persistence:
   size: 100Gi
   # persistence.selector -- Specify the selectors for PersistentVolumeClaims.
   selector: {}
+
 # dnsPolicy -- Specify the
 # [dnsPolicy](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy).
 dnsPolicy: ClusterFirst
