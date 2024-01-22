@@ -6115,6 +6115,20 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Dashboards.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var widgetElement : element.element("widgets").elements()) {
+						if (widgetElement.getName().contains("ProjectOverviewWidget")) {
+							widgetElement.addElement("showCodeStats").setText("true");
+							widgetElement.addElement("showPullRequestStats").setText("true");
+							widgetElement.addElement("showIssueStatus").setText("true");
+							widgetElement.addElement("showBuildStatus").setText("true");
+							widgetElement.addElement("showPackStats").setText("true");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

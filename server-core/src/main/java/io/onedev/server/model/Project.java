@@ -308,7 +308,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	private boolean codeManagement = true;
 	
-	private boolean packManagement;
+	private boolean packManagement = true;
 	
 	private boolean issueManagement = true;
 
