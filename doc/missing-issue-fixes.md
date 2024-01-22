@@ -34,3 +34,4 @@ issue #1547
 issue #1580
 issue #7
 issue #1693
+issue #1722
