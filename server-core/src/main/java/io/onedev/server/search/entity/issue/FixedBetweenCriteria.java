@@ -90,7 +90,14 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 		
 		ObjectId mergeBaseId = getGitService().getMergeBase(project, firstCommitId, project, secondCommitId);
 		if (mergeBaseId != null) {
-			Collection<ObjectId> startCommitIds = Lists.newArrayList(secondCommitId, firstCommitId);
+			Collection<ObjectId> startCommitIds;
+			// Check this special commit to avoid displaying a lot of resolved issues 
+			// when check update between <=9.7.0 and >=10.0.0 for OneDev. Can safely 
+			// remove this if fewer sites are using <=9.7.0
+			if (mergeBaseId.name().equals("3d1c4d2b6de888ba0f42467f7a36418ade8ca688"))  
+				startCommitIds = Lists.newArrayList(secondCommitId);
+			else				
+				startCommitIds = Lists.newArrayList(secondCommitId, firstCommitId);
 			Collection<ObjectId> uninterestingCommitIds = Lists.newArrayList(mergeBaseId);
 			for (RevCommit commit: getGitService().getReachableCommits(project, startCommitIds, uninterestingCommitIds))
 				fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
