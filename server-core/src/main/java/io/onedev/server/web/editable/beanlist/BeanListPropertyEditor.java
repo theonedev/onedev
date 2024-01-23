@@ -77,7 +77,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				throw new RuntimeException(e);
 			}
 		} else {
-			return new ArrayList<Serializable>();
+			return new ArrayList<>();
 		}
 	}
 	
@@ -113,20 +113,20 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		WebMarkupContainer thead = new WebMarkupContainer("thead");
 		table.add(thead);
 		
-		thead.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		thead.add(new ListView<>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				PropertyContext<Serializable> propertyContext = item.getModelObject();
 				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
-				
+
 				String required;
 				if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
 					required = "*";
 				else
 					required = "&nbsp;";
-				
+
 				item.add(new Label("required", required).setEscapeModelStrings(false));
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
 				if (description != null) {
@@ -137,7 +137,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 					item.add(new WebMarkupContainer("help").setVisible(false));
 				}
 			}
-			
+
 		});
 		thead.setVisible(propertyContexts.size() > 1);
 		

@@ -6153,11 +6153,10 @@ public class DataMigrator {
 						autoHeightElement.detach();
 						newWidgetElement.add(autoHeightElement);
 						
-						var tabWrappersElement = newWidgetElement.addElement("tabWrappers");
-						var tabWrapperElement = tabWrappersElement.addElement("io.onedev.server.model.support.widget.WidgetTabWrapper");
+						var tabsElement = newWidgetElement.addElement("tabs");
 						widgetElement.addAttribute("class", widgetElement.getName());
 						widgetElement.setName("tab");
-						tabWrapperElement.add(widgetElement);
+						tabsElement.add(widgetElement);
 					}
 				}
 				dom.writeToFile(file, false);

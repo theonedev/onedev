@@ -72,7 +72,7 @@ public class BeanListPropertyViewer extends Panel {
 		WebMarkupContainer thead = new WebMarkupContainer("thead");
 		table.add(thead);
 		
-		thead.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		thead.add(new ListView<>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -80,27 +80,27 @@ public class BeanListPropertyViewer extends Panel {
 				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			}
-			
+
 		});
 		thead.setVisible(propertyContexts.size() > 1);
 		
-		table.add(new ListView<Serializable>("rows", elements) {
+		table.add(new ListView<>("rows", elements) {
 
 			@Override
 			protected void populateItem(final ListItem<Serializable> rowItem) {
-				rowItem.add(new ListView<PropertyContext<Serializable>>("columns", propertyContexts) {
+				rowItem.add(new ListView<>("columns", propertyContexts) {
 
 					@Override
 					protected void populateItem(ListItem<PropertyContext<Serializable>> columnItem) {
-						PropertyContext<Serializable> propertyContext = columnItem.getModelObject(); 
+						PropertyContext<Serializable> propertyContext = columnItem.getModelObject();
 						Serializable elementPropertyValue = (Serializable) propertyContext.getPropertyValue(rowItem.getModelObject());
 						columnItem.add(propertyContext.renderForView("cell", Model.of(elementPropertyValue)));
 						columnItem.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 					}
-					
+
 				});
 			}
-			
+
 		});
 		WebMarkupContainer noRecords = new WebMarkupContainer("noRecords");
 		noRecords.add(new WebMarkupContainer("td").add(AttributeModifier.append("colspan", propertyContexts.size())));

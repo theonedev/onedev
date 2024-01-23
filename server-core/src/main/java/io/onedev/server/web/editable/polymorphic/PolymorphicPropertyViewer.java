@@ -1,18 +1,16 @@
 package io.onedev.server.web.editable.polymorphic;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.wicket.Application;
+import io.onedev.server.annotation.ExcludedProperties;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyDescriptor;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.annotation.ExcludedProperties;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyViewer extends Panel {
@@ -38,7 +36,6 @@ public class PolymorphicPropertyViewer extends Panel {
 		super.onInitialize();
 		
 		String displayName = EditableUtils.getDisplayName(propertyValue.getClass());
-		displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
 		
 		add(new Label("type", displayName));
 		add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
@@ -53,7 +50,7 @@ public class PolymorphicPropertyViewer extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(propertyValue != null && EditableUtils.getDescription(propertyValue.getClass()) != null);
+				setVisible(EditableUtils.getDescription(propertyValue.getClass()) != null);
 			}
 			
 		});

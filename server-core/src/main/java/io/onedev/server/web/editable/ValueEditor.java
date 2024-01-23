@@ -27,14 +27,7 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> {
 	}
 	
 	public void clearErrors() {
-		visitComponentsPostOrder(this, new IVisitor<Component, Void>() {
-			
-			@Override
-			public void component(Component formComponent, IVisit<Void> visit) {
-				formComponent.getFeedbackMessages().clear();
-			}
-			
-		});
+		visitComponentsPostOrder(this, (formComponent, visit) -> formComponent.getFeedbackMessages().clear());
 	}
 
 	protected abstract T convertInputToValue() throws ConversionException;
