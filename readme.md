@@ -83,6 +83,15 @@ Build pipeline, matrix jobs, typed parameters, parameter chaining, step template
 
 ![pipeline.gif](doc/images/pipeline.gif)
 
+## Built-in Docker/NPM/Maven/NuGET/PyPi/RubyGems Registry
+
+The out-of-box integration of binary packages, CI/CD,
+code and issues makes information cross-reference a lot easier. For instance, different package
+versions can be compared to show code changes or fixed issues, published packages will be linked
+with CI/CD builds automatically etc
+
+![build-package](doc/images/package-tab.png)
+
 ## Flexible Pull Request Review Policy and Reviewer Suggestion
 
 Specify pull request review policy based on author, branch, and changed files. OneDev can leverage git change history to suggest most appropriate reviewers for pull requests touching certain files.
@@ -130,15 +139,6 @@ servers, as well as the ability to sync projects with its replicas in real time.
 on other servers will become active immediately without data loss and service interruption. 
 
 ![replication](doc/images/replication.png)
-
-## Built-in Docker/NPM/Maven/NuGET/PyPi/RubyGems Registry (Enterprise Edition)
-
-The out-of-box integration of binary packages, CI/CD,
-code and issues makes information cross-reference a lot easier. For instance, different package
-versions can be compared to show code changes or fixed issues, published packages will be linked
-with CI/CD builds automatically etc
-
-![build-package](doc/images/package-tab.png)
 
 ## Customizable Dashboard (Enterprise Edition)
 
