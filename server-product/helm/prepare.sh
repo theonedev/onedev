@@ -10,7 +10,7 @@ rm -rf helm-chart/onedev/*
 rm -rf helm-chart/*.tgz
 mkdir -p helm-chart/onedev
 cp -r ../helm/* helm-chart/onedev
-rm helm-chart/onedev/build.sh
+rm helm-chart/onedev/prepare.sh
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	find helm-chart -name "*.yaml" | xargs sed -i '' "s/\${buildVersion}/${buildVersion}/g"
