@@ -140,6 +140,24 @@ jobs:
     moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: publish helm chart
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands:
+      - set -e
+      - ''
+      - buildVersion=@build_version@
+      - projectDir=`pwd`
+      - ''
+      - cd $projectDir/server-product/helm
+      - ./prepare.sh
+      - ''
+      - cd $projectDir/server-product/target/helm-chart
+      - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
     name: publish GH release
     runInContainer: true
     image: '@property:buildEnvironment@'
@@ -181,24 +199,6 @@ jobs:
     name: close milestone
     milestoneName: '@build_version@'
     accessTokenSecret: onedev-token
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: publish helm chart
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - ''
-      - buildVersion=@build_version@
-      - projectDir=`pwd`
-      - ''
-      - cd $projectDir/server-product/helm
-      - ./prepare.sh
-      - ''
-      - cd $projectDir/server-product/target/helm-chart
-      - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
-    useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   jobDependencies:
   - jobName: CI
