@@ -103,7 +103,7 @@ jobs:
       - sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
       - sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
       - ''
-      - cp server-product/target/docker/*.yaml .
+      - cp server-product/docker/*.yaml .
       - ''
       - '# Prepare for docker image build'
       - cd $projectDir/server-product/docker
