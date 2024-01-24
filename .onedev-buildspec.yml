@@ -47,14 +47,14 @@ jobs:
 - name: Release
   steps:
   - !CheckoutStep
-    name: checkout code
+    name: checkout
     cloneCredential: !HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: detect build version
+    name: detect version
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
@@ -65,11 +65,11 @@ jobs:
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
-    name: set build version
+    name: set version
     buildVersion: '@file:buildVersion@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: build and deploy
+    name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
@@ -169,6 +169,79 @@ jobs:
     removeDanglingImages: true
     moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: deploy
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands:
+      - set -e
+      - set -o pipefail
+      - ''
+      - buildVersion=@build_version@
+      - ''
+      - projectDir=`pwd`
+      - docker login -u robinshen -p @secrets:dockerhub-password@
+      - ''
+      - '# Skip test as we''ve already tested in CI build'
+      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
+      - ''
+      - cd $projectDir/server-product/docker
+      - docker run --privileged --rm tonistiigi/binfmt --install all
+      - ./build.sh release
+      - ''
+      - cd $projectDir/server-product/helm
+      - ./build.sh
+      - ''
+      - cd $projectDir/server-product/target/helm-chart
+      - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
+      - ''
+      - cd $projectDir
+      - cp server-product/target/onedev-${buildVersion}.zip .
+      - ''
+      - mkdir server-plugin-archetype-${buildVersion}
+      - cd server-plugin/server-plugin-archetype
+      - mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
+      - cd $projectDir
+      - sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///' server-plugin-archetype-${buildVersion}/pom.xml
+      - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
+      - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
+      - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
+      - ''
+      - echo "Creating release tag..."
+      - ''
+      - git config --global user.name "Robin Shen"
+      - git config --global user.email "robin@@onedev.io"
+      - git config --global --add safe.directory /onedev-build/workspace
+      - ''
+      - git tag v$buildVersion -m "Release tag"
+      - git push -f origin v$buildVersion:v$buildVersion
+      - git config --global --unset http.extraHeader
+      - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
+      - ''
+      - echo "Creating release in GitHub..."
+      - ''
+      - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion | jq '.id')
+      - ''
+      - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
+      - ''
+      - 'acceptHeader="Accept: application/vnd.github.v3+json"'
+      - if [ "$releaseId" == "null" ]; then
+      - '  curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases'
+      - else
+      - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
+      - fi
+      - ''
+      - unzip onedev-${buildVersion}.zip
+      - tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
+      - sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256
+      - sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
+      - sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
+      - sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
+      - ''
+      - cp server-product/target/docker/*.yaml .
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL    
   - !CloseMilestoneStep
     name: close milestone
     milestoneName: '@build_version@'
