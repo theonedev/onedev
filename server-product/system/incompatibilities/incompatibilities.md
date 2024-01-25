@@ -13,14 +13,6 @@ need to specify additional email addresses to be monitored explicitly via option
 OneDev now relies on buildx to build docker image. Make sure to update agent image by running 
 `docker pull 1dev/agent` if you are running agent inside container
 
-# 9.1.6
-
-Well this is a notice rather than an incompatibility. You are highly recommended to check update
-like below to list changes and incompatibilities since your current version before each upgrade 
-as some incompatibility change may affect the upgrade procedure:
-
-![check-update](check-update.png)
-
 # 9.1.5
 
 ### Agent
