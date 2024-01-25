@@ -225,7 +225,7 @@ jobs:
     interpreter: !DefaultInterpreter
       commands:
       - git config --global --unset http.extraHeader
-      - git push https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
+      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
