@@ -7,7 +7,7 @@
 </div>
 
 <div align="center">
-<h1>Self-hosted Git Server with Kanban and CI/CD</h1>
+<h1>Git Server with CI/CD, Kanban, and Packages</h1>
 
 <h2>
 <a href="https://docs.onedev.io">Quickstart</a> 

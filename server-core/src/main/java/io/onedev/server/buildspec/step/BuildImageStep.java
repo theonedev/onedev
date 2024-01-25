@@ -64,7 +64,7 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=300, description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, "
-			+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>myregistry:5000/myorg/myrepo:1.0.0</tt>. "
+			+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. "
 			+ "Multiple tags should be separated with space.<br>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

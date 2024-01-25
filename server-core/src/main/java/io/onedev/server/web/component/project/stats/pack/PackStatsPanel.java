@@ -5,7 +5,6 @@ import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -83,7 +82,7 @@ public class PackStatsPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(WicketUtils.isSubscriptionActive() && getTotalCount() != 0);
+		setVisible(getTotalCount() != 0);
 	}
 
 	@Override

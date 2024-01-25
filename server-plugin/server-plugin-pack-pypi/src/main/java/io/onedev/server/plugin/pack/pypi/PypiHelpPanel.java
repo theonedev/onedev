@@ -6,6 +6,7 @@ import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 public class PypiHelpPanel extends Panel {
 	
@@ -30,11 +31,13 @@ public class PypiHelpPanel extends Panel {
 						"  onedev\n\n" +
 						"[onedev]\n" + 
 						"repository=" + registryUrl + "\n" + 
-						"username={username}\n" +
-						"password={password_or_access_token}";
+						"username=<onedev_account_name>\n" +
+						"password=<onedev_account_password>";
 			}
 			
 		}));
+		
+		add(new CodeSnippetPanel("uploadCommand", Model.of("$ python3 -m twine upload --repository onedev /path/to/files_to_upload")));
 
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<>() {
 			@Override

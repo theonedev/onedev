@@ -39,7 +39,7 @@ public class MavenPackSupport implements PackSupport {
 			reference = substringBeforeLast(pack.getName(), ":") + ":<Plugins Metadata>";
 		
 		if (withProject)
-			reference = pack.getProject().getPath() + ">" + reference;
+			reference = pack.getProject().getPath() + "/" + reference;
 		return reference;
 	}
 

@@ -1,6 +1,6 @@
 # OneDev Helm Chart
 
-Self-hosted Git Server with CI/CD and Kanban
+Git Server with CI/CD, Kanban, and Packages
 
 ### Homepage
 https://onedev.io
