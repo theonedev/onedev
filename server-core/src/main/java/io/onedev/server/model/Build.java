@@ -911,10 +911,15 @@ public class Build extends ProjectBelonging
 	}
 
 	public boolean canCreateBranch(String accessTokenSecret, String branchName) {
-		return SecurityUtils.canCreateBranch(getUser(accessTokenSecret), getProject(), branchName);
+		var project = getProject();
+		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
+				|| accessTokenSecret != null && SecurityUtils.canCreateBranch(getUser(accessTokenSecret), project, branchName);
 	}
-	public boolean canCreateTag(String accessTokenSecret, String tagName) {
-		return SecurityUtils.canCreateTag(getUser(accessTokenSecret), getProject(), tagName);
+	
+	public boolean canCreateTag(@Nullable String accessTokenSecret, String tagName) {
+		var project = getProject();
+		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
+				|| accessTokenSecret != null && SecurityUtils.canCreateTag(getUser(accessTokenSecret), project, tagName);
 	}
 	
 	private User getUser(String accessTokenSecret) {
@@ -925,8 +930,10 @@ public class Build extends ProjectBelonging
 		return user;
 	}
 	
-	public boolean canCloseMilestone(String accessTokenSecret, String milestoneName) {
-		return SecurityUtils.canManageIssues(getUser(accessTokenSecret), getProject());
+	public boolean canCloseMilestone(@Nullable String accessTokenSecret) {
+		var project = getProject();
+		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
+				|| accessTokenSecret != null && SecurityUtils.canManageIssues(getUser(accessTokenSecret), project);
 	}
 	
 	public boolean isValid() {

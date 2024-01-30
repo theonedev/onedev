@@ -7,6 +7,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -1172,7 +1173,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
-					FileUtils.untar(
+					TarUtils.untar(
 							response.readEntity(InputStream.class),
 							getEnvDir(targetProjectId.toString()), false);
 				}

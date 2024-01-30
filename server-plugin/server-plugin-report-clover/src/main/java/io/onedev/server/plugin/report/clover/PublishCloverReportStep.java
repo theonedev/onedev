@@ -29,7 +29,7 @@ import java.util.Map;
 
 import static java.lang.Integer.parseInt;
 
-@Editable(order=9910, group=StepGroup.PUBLISH_REPORTS, name="Clover Coverage")
+@Editable(order=9910, group=StepGroup.PUBLISH, name="Clover Coverage Report")
 public class PublishCloverReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;

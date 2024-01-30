@@ -83,8 +83,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 	private List<String> requiredServices = new ArrayList<>();
 	
 	private List<JobTrigger> triggers = new ArrayList<>();
-	
-	private List<CacheSpec> caches = new ArrayList<>();
 
 	private long timeout = 3600;
 	
@@ -277,22 +275,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.retryDelay = retryDelay;
 	}
 	
-	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. "
-			+ "For instance for Java Maven projects executed by various docker executors, you may cache folder "
-			+ "<tt>/root/.m2/repository</tt> to avoid downloading dependencies for subsequent executions.<br>"
-			+ "<b class='text-danger'>WARNING</b>: When using cache, malicious jobs running with same job executor "
-			+ "can read or even pollute the cache intentionally using same cache key as yours. To avoid this "
-			+ "issue, make sure job executor executing your job can only be used by trusted jobs via job "
-			+ "authorization setting</b>")
-	@Valid
-	public List<CacheSpec> getCaches() {
-		return caches;
-	}
-
-	public void setCaches(List<CacheSpec> caches) {
-		this.caches = caches;
-	}
-
 	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds")
 	public long getTimeout() {
 		return timeout;
@@ -328,18 +310,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 		
 		Set<String> keys = new HashSet<>();
 		Set<String> paths = new HashSet<>();
-		for (CacheSpec cache: caches) {
-			if (!keys.add(cache.getKey())) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate key (" + cache.getKey() + ")")
-						.addPropertyNode("caches").addConstraintViolation();
-			}
-			if (!paths.add(cache.getPath())) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate path (" + cache.getPath() + ")")
-						.addPropertyNode("caches").addConstraintViolation();
-			} 
-		}
 
 		Set<String> dependencyJobNames = new HashSet<>();
 		for (JobDependency dependency: jobDependencies) {

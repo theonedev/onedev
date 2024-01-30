@@ -57,10 +57,7 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
-import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
-import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
-import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
+import io.onedev.server.web.page.project.setting.build.*;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
@@ -302,6 +299,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					BuildPreservationsPage.class, BuildPreservationsPage.paramsOf(getProject())));
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Fixed Issue Filters", 
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Cache Management",
+					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build", buildSettingMenuItems));
 			

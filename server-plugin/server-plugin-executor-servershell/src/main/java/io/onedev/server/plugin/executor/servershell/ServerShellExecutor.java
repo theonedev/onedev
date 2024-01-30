@@ -15,10 +15,7 @@ import io.onedev.server.annotation.*;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.git.location.GitLocation;
-import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.job.JobRunnable;
-import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.*;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
@@ -56,8 +53,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	private String concurrency;
 	
-	private static final Object cacheHomeCreationLock = new Object();
-	
 	private transient volatile LeafFacade runningStep;
 	
 	private transient volatile File buildHome;
@@ -72,14 +67,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 	public void setConcurrency(String concurrency) {
 		this.concurrency = concurrency;
-	}
-	
-	private File getCacheHome(JobExecutor jobExecutor) {
-		File file = new File(Bootstrap.getSiteDir(), "cache/" + jobExecutor.getName());
-		if (!file.exists()) synchronized (cacheHomeCreationLock) {
-			FileUtils.createDir(file);
-		}
-		return file;
 	}
 
 	private ClusterManager getClusterManager() {
@@ -124,9 +111,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					FileUtils.createDir(buildHome);
 					File workspaceDir = new File(buildHome, "workspace");
 					try {
-						String serverAddress = getClusterManager().getLocalServerAddress();
+						String localServer = getClusterManager().getLocalServerAddress();
 						jobLogger.log(String.format("Executing job (executor: %s, server: %s)...", 
-								getName(), serverAddress));
+								getName(), localServer));
 
 						jobLogger.log(String.format("Executing job with executor '%s'...", getName()));
 
@@ -134,28 +121,10 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 							throw new ExplicitException("This job requires services, which can only be supported "
 									+ "by docker aware executors");
 						}
-
-						File cacheHomeDir = getCacheHome(jobContext.getJobExecutor());
-
-						jobLogger.log("Setting up job cache...") ;
-						JobCache cache = new JobCache(cacheHomeDir) {
-
-							@Override
-							protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
-								return getJobManager().allocateCaches(jobContext, request);
-							}
-
-							@Override
-							protected void delete(File cacheDir) {
-								FileUtils.cleanDir(cacheDir);
-							}
-
-						};
-						cache.init(true);
 						FileUtils.createDir(workspaceDir);
 
-						cache.installSymbolinks(workspaceDir);
-
+						var cacheHelper = new ServerCacheHelper(buildHome, jobContext, jobLogger);
+						
 						jobLogger.log("Copying job dependencies...");
 						getJobManager().copyDependencies(jobContext, workspaceDir);
 
@@ -163,7 +132,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						FileUtils.createDir(userHome);
 
 						getJobManager().reportJobWorkspace(jobContext, workspaceDir.getAbsolutePath());
-
 						CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 
 						OsInfo osInfo = OneDev.getInstance(OsInfo.class);
@@ -218,7 +186,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										try {
 											CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 											jobLogger.log("Checking out code...");
-											
+
 											Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 
 											Map<String, String> environments = new HashMap<>();
@@ -226,16 +194,16 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											git.environments(environments);
 
 											checkoutFacade.setupWorkingDir(git, workspaceDir);
-											
+
 											File trustCertsFile = new File(buildHome, "trust-certs.pem");
-											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
-													trustCertsFile.getAbsolutePath(), 
-													newInfoLogger(jobLogger), 
+											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile,
+													trustCertsFile.getAbsolutePath(),
+													newInfoLogger(jobLogger),
 													newWarningLogger(jobLogger));
 
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-											cloneInfo.writeAuthData(userHome, git, false, 
-													newInfoLogger(jobLogger), 
+											cloneInfo.writeAuthData(userHome, git, false,
+													newInfoLogger(jobLogger),
 													newWarningLogger(jobLogger));
 
 											int cloneDepth = checkoutFacade.getCloneDepth();
@@ -248,7 +216,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));
 											return false;
 										}
-									} else {
+									} else if (facade instanceof SetupCacheFacade) {
+										SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
+										var cachePath = setupCacheFacade.getPath();
+										if (new File(cachePath).isAbsolute()) 
+											throw new ExplicitException("Shell executor does not allow absolute cache path: " + cachePath);
+										cacheHelper.setupCache(setupCacheFacade);
+									} else if (facade instanceof ServerSideFacade) {
 										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
 										try {
 											serverSideFacade.execute(buildHome, new ServerSideFacade.Runner() {
@@ -267,6 +241,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											}
 											return false;
 										}
+									} else {
+										throw new ExplicitException("Unexpected step type: " + facade.getClass());
 									}
 									long duration = System.currentTimeMillis() - time;
 									jobLogger.success("Step \"" + stepNames + "\" is successful (" + DateUtils.formatDuration(duration) + ")");
@@ -283,7 +259,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 						}, new ArrayList<>());
 
-						if (!successful)
+						if (successful)
+							cacheHelper.uploadCaches();
+						else
 							throw new FailedException();
 					} finally {
 						// Fix https://code.onedev.io/onedev/server/~issues/597

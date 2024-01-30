@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<h6 class="mb-4">Cache Preserve Days</h6>
+			<form wicket:id="cacheSetting" class="mb-5">
+				<div wicket:id="editor"></div>
+				<input type="submit" class="btn btn-primary" value="Update">
+			</form>
+			<h6 class="border-top pt-4 mb-2">Caches</h6>
+			<table wicket:id="caches" class="table table-hover mb-0"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="delete"><wicket:svg href="trash" class="icon"/></a>
+	</wicket:fragment>
+</wicket:extend>

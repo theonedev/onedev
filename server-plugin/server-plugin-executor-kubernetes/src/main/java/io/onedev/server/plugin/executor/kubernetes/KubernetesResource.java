@@ -1,18 +1,21 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
-import io.onedev.commons.utils.ExplicitException;
+import com.google.common.base.Splitter;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.K8sJobData;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.entitymanager.JobCacheManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -43,22 +46,30 @@ public class KubernetesResource {
 
 	private final JobManager jobManager;
 	
+	private final JobCacheManager jobCacheManager;
+	
 	private final SessionManager sessionManager;
+	
+	private final ProjectManager projectManager;
 	
     @Context
     private HttpServletRequest request;
     
     @Inject
-    public KubernetesResource(JobManager jobManager, SessionManager sessionManager) {
+    public KubernetesResource(JobManager jobManager, JobCacheManager jobCacheManager, 
+							  SessionManager sessionManager, ProjectManager projectManager) {
     	this.jobManager = jobManager;
+		this.jobCacheManager = jobCacheManager;
     	this.sessionManager = sessionManager;
+		this.projectManager = projectManager;
 	}
     
 	@Path("/job-data")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @POST
-    public byte[] getJobData(@Nullable String jobWorkspace) {
-		JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
+    @GET
+    public byte[] getJobData(@QueryParam("jobToken") String jobToken, 
+							 @QueryParam("jobWorkspace") @Nullable String jobWorkspace) {
+		JobContext jobContext = jobManager.getJobContext(jobToken, true);
 		if (StringUtils.isNotBlank(jobWorkspace))
 			jobManager.reportJobWorkspace(jobContext, jobWorkspace);	
 		K8sJobData k8sJobData = new K8sJobData(
@@ -69,23 +80,14 @@ public class KubernetesResource {
 		return SerializationUtils.serialize(k8sJobData);
     }
 	
-	@Path("/allocate-caches")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @POST
-    public byte[] allocateCaches(String requestString) {
-		CacheAllocationRequest request = CacheAllocationRequest.fromString(requestString);
-		return SerializationUtils.serialize((Serializable) jobManager.allocateCaches(
-				jobManager.getJobContext(getJobToken(), true), request));
-    }
-	
 	@Path("/run-server-step")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
-	public Response runServerStep(InputStream is) {
+	public Response runServerStep(@QueryParam("jobToken") String jobToken, InputStream is) {
+		JobContext jobContext = jobManager.getJobContext(jobToken, true);
 		// Make sure we are not occupying a database connection here as we will occupy 
 		// database connection when running step at project server side
-		sessionManager.closeSession(); 
+		sessionManager.closeSession();
 		try {
 			StreamingOutput os = output -> {
 				File filesDir = FileUtils.createTempDir();
@@ -100,9 +102,8 @@ public class KubernetesResource {
 					for (int i=0; i<length; i++) 
 						placeholderValues.put(readString(is), readString(is));
 					
-					FileUtils.untar(is, filesDir, false);
+					TarUtils.untar(is, filesDir, false);
 					
-					JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
 					Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
 							stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
@@ -139,21 +140,86 @@ public class KubernetesResource {
 	@Path("/download-dependencies")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadDependencies() {
-		StreamingOutput os = output -> {
-			JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
-			File tempDir = FileUtils.createTempDir();
-			try {
-				jobManager.copyDependencies(jobContext, tempDir);
-				FileUtils.tar(tempDir, output, false);
-				output.flush();
-			} finally {
-				FileUtils.deleteDir(tempDir);
-			}
-	   };
-		return Response.ok(os).build();
+	public Response downloadDependencies(@QueryParam("jobToken") String jobToken) {
+		sessionManager.closeSession();
+		try {
+			StreamingOutput output = os -> {
+				JobContext jobContext = jobManager.getJobContext(jobToken, true);
+				File tempDir = FileUtils.createTempDir();
+				try {
+					jobManager.copyDependencies(jobContext, tempDir);
+					TarUtils.tar(tempDir, os, false);
+					os.flush();
+				} finally {
+					FileUtils.deleteDir(tempDir);
+				}
+			};
+			return Response.ok(output).build();
+		} finally {
+			sessionManager.openSession();
+		}
 	}
-	 
+
+	@Path("/download-cache")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadCache(
+			@QueryParam("jobToken") String jobToken,
+			@QueryParam("cacheKey") @Nullable String cacheKey, 
+			@QueryParam("cacheLoadKeys") @Nullable String joinedCacheLoadKeys, 
+			@QueryParam("cachePath") String cachePath) {
+		sessionManager.closeSession();
+		try {
+			StreamingOutput output = os -> {
+				var jobContext = jobManager.getJobContext(jobToken, true);
+				if (cacheKey != null) {
+					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheKey, cachePath, os);
+				} else {
+					var cacheLoadKeys = Splitter.on('\n').splitToList(joinedCacheLoadKeys);
+					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheLoadKeys, cachePath, os);
+				}
+			};
+			return Response.ok(output).build();
+		} finally {
+			sessionManager.openSession();
+		}
+	}
+	
+	@Path("/upload-cache")
+	@GET
+	public Response checkUploadCache(
+			@QueryParam("jobToken") String jobToken,
+			@QueryParam("cacheKey") String cacheKey,
+			@QueryParam("cachePath") String cachePath) {
+		var jobContext = jobManager.getJobContext(jobToken, true);
+		var project = projectManager.load(jobContext.getProjectId());
+		if (project.isCommitOnBranch(jobContext.getCommitId(), project.getDefaultBranch())
+				|| SecurityUtils.canUploadCache(project)) {
+			return Response.ok().build();
+		} else {
+			throw new UnauthorizedException("Not authorized to upload cache");
+		}
+	}
+
+	@Path("/upload-cache")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@POST
+	public Response uploadCache(
+			@QueryParam("jobToken") String jobToken,
+			@QueryParam("cacheKey") String cacheKey, 
+			@QueryParam("cachePath") String cachePath, 
+			InputStream is) {
+		checkUploadCache(jobToken, cacheKey, cachePath);
+		var jobContext = jobManager.getJobContext(jobToken, true);
+		sessionManager.closeSession();
+		try {
+			jobCacheManager.uploadCache(jobContext.getProjectId(), cacheKey, cachePath, is);
+			return Response.ok().build();
+		} finally {
+			sessionManager.openSession();
+		}
+	}	
+	
 	@GET
 	@Path("/test")
 	public Response test() {
@@ -162,14 +228,6 @@ public class KubernetesResource {
 			return Response.ok().build();
 		else 
 			return Response.status(400).entity("Missing job token").build();
-	}
-	
-	private String getJobToken() {
-		String jobToken = SecurityUtils.getBearerToken(request);
-		if (jobToken != null)
-			return jobToken;
-		else
-			throw new ExplicitException("Job token is expected");
 	}
 	
 }

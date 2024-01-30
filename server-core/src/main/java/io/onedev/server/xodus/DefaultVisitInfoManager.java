@@ -3,6 +3,7 @@ package io.onedev.server.xodus;
 import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -249,7 +250,7 @@ public class DefaultVisitInfoManager extends AbstractMultiEnvironmentManager
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
-					FileUtils.untar(
+					TarUtils.untar(
 							response.readEntity(InputStream.class),
 							getEnvDir(projectId.toString()), false);
 				}

@@ -67,6 +67,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	private boolean manageBuilds;
 	
+	private boolean uploadCache;
+	
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
@@ -265,7 +267,18 @@ public class Role extends AbstractEntity implements BasePermission {
 	private static boolean isManageBuildsDisabled() {
 		return !(boolean)EditContext.get().getInputValue("manageBuilds");
 	}
-	
+
+	@Editable(order=675, description = "Enable to allow to upload build cache generated during CI/CD job. " +
+			"Uploaded cache can be used by subsequent builds of the project as long as cache key matches")
+	@ShowCondition("isManageBuildsDisabled")
+	public boolean isUploadCache() {
+		return uploadCache;
+	}
+
+	public void setUploadCache(boolean uploadCache) {
+		this.uploadCache = uploadCache;
+	}
+
 	@Editable(order=700)
 	@ShowCondition("isManageBuildsDisabled")
 	public List<JobPrivilege> getJobPrivileges() {
@@ -348,6 +361,8 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 		if (manageBuilds)
 			permissions.add(new ManageBuilds());
+		if (uploadCache)
+			permissions.add(new UploadCache());
 		for (var jobPrivilege: jobPrivileges) {
 			permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
 			if (jobPrivilege.isManageJob()) 

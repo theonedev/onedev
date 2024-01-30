@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
+import io.onedev.commons.utils.TarUtils;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -51,7 +52,7 @@ public class AgentLibResource extends AbstractResource {
 						}
 						
 						OutputStream os = attributes.getResponse().getOutputStream();
-						FileUtils.tar(tempDir, os, false);
+						TarUtils.tar(tempDir, os, false);
 					} finally {
 						FileUtils.deleteDir(tempDir);
 					}

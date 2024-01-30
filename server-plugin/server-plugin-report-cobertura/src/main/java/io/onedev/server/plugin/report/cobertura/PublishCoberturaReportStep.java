@@ -29,7 +29,7 @@ import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.parseInt;
 import static java.util.Comparator.comparing;
 
-@Editable(order=9950, group=StepGroup.PUBLISH_REPORTS, name="Cobertura Coverage")
+@Editable(order=9950, group=StepGroup.PUBLISH, name="Cobertura Coverage Report")
 public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;

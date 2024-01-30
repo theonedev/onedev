@@ -61,7 +61,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			}
 
 			@Override
-			protected void onTypeChanged(AjaxRequestTarget target) {
+			protected void onTypeChanging(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
 				if (editor.isDefined()) {
 					target.appendJavaScript(String.format("$('#%s').addClass('property-defined');",

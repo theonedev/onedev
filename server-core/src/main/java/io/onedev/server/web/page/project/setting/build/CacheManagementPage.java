@@ -1,0 +1,196 @@
+package io.onedev.server.web.page.project.setting.build;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.JobCacheManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.JobCache;
+import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.util.PagingHistorySupport;
+import org.apache.commons.io.FileUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static io.onedev.server.model.JobCache.PROP_PROJECT;
+
+public class CacheManagementPage extends ProjectBuildSettingPage {
+	
+	private static final String PARAM_PAGE = "page";
+	
+	private DataTable<JobCache, Void> cachesTable;
+	
+	public CacheManagementPage(PageParameters params) {
+		super(params);
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		var bean = new CacheSettingBean();
+		bean.setPreserveDays(getProject().getBuildSetting().getCachePreserveDays());
+		var form = new Form<Void>("cacheSetting") {
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				getProject().getBuildSetting().setCachePreserveDays(bean.getPreserveDays());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
+			}
+			
+		};
+		form.add(BeanContext.edit("editor", bean));
+		add(form);
+
+		List<IColumn<JobCache, Void>> columns = new ArrayList<>();
+
+		columns.add(new AbstractColumn<>(Model.of("Key")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId, IModel<JobCache> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getKey()));
+			}
+		});
+		
+		columns.add(new AbstractColumn<>(Model.of("Size")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
+									 IModel<JobCache> rowModel) {
+				var cache = rowModel.getObject();
+				var cacheSize = getCacheManager().getCacheSize(cache.getProject().getId(), cache.getId());
+				if (cacheSize != null)
+					cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(cacheSize)));
+				else 
+					cellItem.add(new Label(componentId, "<i class='text-danger'>File missing or obsolete</i>").setEscapeModelStrings(false));
+			}
+
+		});
+
+		columns.add(new AbstractColumn<>(Model.of("Last Accessed")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
+									 IModel<JobCache> rowModel) {
+				var cache = rowModel.getObject();
+				cellItem.add(new Label(componentId, DateUtils.formatDate(cache.getAccessDate())));
+			}
+
+		});
+
+		columns.add(new AbstractColumn<>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId, IModel<JobCache> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionFrag", CacheManagementPage.this);
+
+				fragment.add(new AjaxLink<Void>("delete") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						var cache = rowModel.getObject();
+						getCacheManager().delete(cache);
+						Session.get().success("Cache '" + cache.getKey() + "' deleted");
+						target.add(cachesTable);
+					}
+					
+				});
+
+				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "actions";
+			}
+
+		});
+
+		SortableDataProvider<JobCache, Void> dataProvider = new SortableDataProvider<>() {
+
+			private EntityCriteria<JobCache> newCriteria() {
+				var criteria = EntityCriteria.of(JobCache.class);
+				criteria.add(Restrictions.eq(PROP_PROJECT, getProject()));
+				return criteria;
+			}
+			
+			@Override
+			public Iterator<? extends JobCache> iterator(long first, long count) {
+				var criteria = newCriteria();
+				criteria.addOrder(Order.desc(JobCache.PROP_ACCESS_DATE));
+				return getCacheManager().query(criteria, (int) first, (int) count).iterator();
+			}
+
+			@Override
+			public long size() {
+				return getCacheManager().count(newCriteria());
+			}
+
+			@Override
+			public IModel<JobCache> model(JobCache object) {
+				Long id = object.getId();
+				return new LoadableDetachableModel<>() {
+
+					@Override
+					protected JobCache load() {
+						return getCacheManager().load(id);
+					}
+
+				};
+			}
+
+		};
+
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = new PageParameters();
+				params.add(PARAM_PAGE, currentPage+1);
+				return params;
+			}
+
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+			}
+
+		};
+
+		add(cachesTable = new DefaultDataTable<>("caches", columns, dataProvider,
+				WebConstants.PAGE_SIZE, pagingHistorySupport));
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Job Cache Management");
+	}
+	
+	private JobCacheManager getCacheManager() {
+		return OneDev.getInstance(JobCacheManager.class);
+	}
+	
+}

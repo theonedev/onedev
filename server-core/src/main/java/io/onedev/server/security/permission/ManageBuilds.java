@@ -8,7 +8,8 @@ public class ManageBuilds implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof ManageBuilds || new JobPermission("*", new ManageJob()).implies(p);
+		return p instanceof ManageBuilds || new UploadCache().implies(p) 
+				|| new JobPermission("*", new ManageJob()).implies(p);
 	}
 
 	@Override

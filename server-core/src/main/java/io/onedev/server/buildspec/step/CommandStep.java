@@ -68,30 +68,7 @@ public class CommandStep extends Step {
 	public void setImage(String image) {
 		this.image = image;
 	}
-
-	@Editable(order=105, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
-	@ChoiceProvider("getAccessTokenSecretChoices")
-	@ShowCondition("isRunInContainerEnabled")
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return builtInRegistryAccessTokenSecret;
-	}
-
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
-	}
-
-	protected static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
-	}
 	
-	private static String getBuiltInRegistryAccessTokenSecretDescription() {
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		var server = UrlUtils.getServer(serverUrl);
-		return "Optionally specify a secret to be used as access token for built-in registry server " +
-				"<code>" + server + "</code>";
-	}
-
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
@@ -106,7 +83,31 @@ public class CommandStep extends Step {
 		this.interpreter = interpreter;
 	}
 
-	@Editable(order=10000, name="Enable TTY Mode", description=USE_TTY_HELP)
+	@Editable(order=9000, name="Built-in Registry Access Token Secret", group = "More Settings",
+			descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isRunInContainerEnabled")
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return builtInRegistryAccessTokenSecret;
+	}
+
+	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
+		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	}
+
+	protected static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
+	private static String getBuiltInRegistryAccessTokenSecretDescription() {
+		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		var server = UrlUtils.getServer(serverUrl);
+		return "Optionally specify a secret to be used as access token for built-in registry server " +
+				"<code>" + server + "</code>";
+	}
+	
+	@Editable(order=10000, name="Enable TTY Mode", group = "More Settings", description=USE_TTY_HELP)
 	@ShowCondition("isRunInContainerEnabled")
 	public boolean isUseTTY() {
 		return useTTY;

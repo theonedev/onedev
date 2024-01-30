@@ -138,7 +138,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				onTypeChanged(target);
+				onTypeChanging(target);
 				target.add(typeSelectorContainer.get("typeDescription"));
 				Component beanEditor = get("beanEditor");
 				target.add(beanEditor);
@@ -226,7 +226,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 		return new HashSet<>();
 	}
 	
-	protected void onTypeChanged(AjaxRequestTarget target) {
+	protected void onTypeChanging(AjaxRequestTarget target) {
 	}
 	
 }

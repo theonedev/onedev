@@ -24,7 +24,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 
-@Editable(order=7000, group=StepGroup.PUBLISH_REPORTS, name="Jest Test")
+@Editable(order=7000, group=StepGroup.PUBLISH, name="Jest Test Report")
 public class PublishJestReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;

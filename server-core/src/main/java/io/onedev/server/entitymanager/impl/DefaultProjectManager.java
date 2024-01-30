@@ -7,10 +7,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -1654,7 +1651,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
 					try (InputStream is = response.readEntity(InputStream.class)) {
-						FileUtils.untar(is, directory, false);
+						TarUtils.untar(is, directory, false);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -1863,7 +1860,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public File getIndexDir(Long projectId) {
 		return getSubDir(projectId, "index");
 	}
-	
+
+	@Override
+	public File getCacheDir(Long projectId) {
+		return getSubDir(projectId, "cache");
+	}
+
 	@Override
 	public File getSiteDir(Long projectId) {
 		return getSubDir(projectId, SITE_DIR);

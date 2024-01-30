@@ -3,13 +3,10 @@ package io.onedev.server.job;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.ServiceFacade;
-import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import org.eclipse.jgit.lib.ObjectId;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 public class JobContext implements Serializable {
@@ -36,18 +33,17 @@ public class JobContext implements Serializable {
 	
 	private final ObjectId commitId;
 	
-	private final Collection<CacheSpec> cacheSpecs; 
-	
 	private final List<ServiceFacade> services;
 	
 	private final long timeout;
 	
 	private final int retried;
 	
-	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath, 
-			String projectGitDir, Long buildId, Long buildNumber, List<Action> actions, 
-			String refName, ObjectId commitId, Collection<CacheSpec> caches, 
-			List<ServiceFacade> services, long timeout, int retried) {
+	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, 
+					  String projectPath, String projectGitDir, Long buildId, 
+					  Long buildNumber, List<Action> actions, String refName, 
+					  ObjectId commitId, List<ServiceFacade> services, 
+					  long timeout, int retried) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -58,7 +54,6 @@ public class JobContext implements Serializable {
 		this.actions = actions;
 		this.refName = refName;
 		this.commitId = commitId;
-		this.cacheSpecs = caches;
 		this.services = services;
 		this.timeout = timeout;
 		this.retried = retried;
@@ -87,11 +82,7 @@ public class JobContext implements Serializable {
 	public ObjectId getCommitId() {
 		return commitId;
 	}
-
-	public Collection<CacheSpec> getCacheSpecs() {
-		return cacheSpecs;
-	}
-
+	
 	public List<ServiceFacade> getServices() {
 		return services;
 	}

@@ -12,17 +12,16 @@
  */
 package io.onedev.server.web.component.select2;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-
-import org.json.JSONException;
-import org.json.JSONStringer;
-
+import io.onedev.server.annotation.OmitName;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.select2.json.Json;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.annotation.OmitName;
+import org.json.JSONException;
+import org.json.JSONStringer;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
  * Select2 settings. Refer to the Select2 documentation for what these options
@@ -415,17 +414,16 @@ public final class Settings implements Serializable {
 		ComponentContext.push(new ComponentContext(select2));
 		try {
 			Method propertyGetter = propertyDescriptor.getPropertyGetter();
-			if (propertyDescriptor.isPropertyRequired()) {
+			String placeholder = EditableUtils.getPlaceholder(propertyGetter);
+			if (placeholder != null) {
+				setPlaceholder(placeholder);
+			} else if (propertyDescriptor.isPropertyRequired()) {
 				if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
 					setPlaceholder("Choose " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
 				else
 					setPlaceholder("Choose...");
 			} else if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null) {
 				setPlaceholder(EditableUtils.getDisplayName(propertyDescriptor.getPropertyGetter()));
-			} else {
-				String placeholder = EditableUtils.getPlaceholder(propertyGetter);
-				if (placeholder != null)
-					setPlaceholder(placeholder);
 			}
 		} finally {
 			ComponentContext.pop();

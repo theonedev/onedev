@@ -1798,5 +1798,22 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
+
+	private void migrate27(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem : jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (var itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						String jobTupleKey = ((ScalarNode) itJobTuple.next().getKeyNode()).getValue();
+						if (jobTupleKey.equals("caches")) 
+							itJobTuple.remove();
+					}
+				}
+			}
+		}
+	}
 	
 }

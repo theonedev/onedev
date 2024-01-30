@@ -20,7 +20,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-@Editable(order=1050, name="Publish Artifacts")
+import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
+
+@Editable(order=1050, group= PUBLISH, name="Artifacts")
 public class PublishArtifactStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;

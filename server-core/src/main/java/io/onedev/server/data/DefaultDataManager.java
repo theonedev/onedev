@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
@@ -886,7 +883,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 							exportData(tempDir);
 							File backupFile = new File(backupDir, 
 									DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
-							FileUtils.zip(tempDir, backupFile, null);
+							ZipUtils.zip(tempDir, backupFile, null);
 						} catch (Exception e) {
 							notifyBackupError(e);
 							throw ExceptionUtils.unchecked(e);

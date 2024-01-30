@@ -20,6 +20,8 @@ import java.util.*;
 public class ProjectBuildSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final int DEFAULT_CACHE_PRESERVE_DAYS = 7;
 
 	private List<String> listParams;
 	
@@ -32,6 +34,8 @@ public class ProjectBuildSetting implements Serializable {
 	private List<BuildPreservation> buildPreservations = new ArrayList<>();
 	
 	private List<DefaultFixedIssueFilter> defaultFixedIssueFilters = new ArrayList<>();
+	
+	private Integer cachePreserveDays;
 	
 	private transient GlobalBuildSetting globalSetting;
 	
@@ -65,6 +69,14 @@ public class ProjectBuildSetting implements Serializable {
 
 	public void setDefaultFixedIssueFilters(List<DefaultFixedIssueFilter> defaultFixedIssueFilters) {
 		this.defaultFixedIssueFilters = defaultFixedIssueFilters;
+	}
+
+	public Integer getCachePreserveDays() {
+		return cachePreserveDays;
+	}
+
+	public void setCachePreserveDays(Integer cachePreserveDays) {
+		this.cachePreserveDays = cachePreserveDays;
 	}
 
 	private GlobalBuildSetting getGlobalSetting() {

@@ -215,6 +215,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
 
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<JobCache> jobCaches = new ArrayList<>();
+	
 	@OneToMany(mappedBy= "project")
 	private Collection<PackBlob> packBlobs = new ArrayList<>();
 	
@@ -1080,6 +1083,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return null;
 	}
 	
+	public int getHierarchyCachePreserveDays() {
+		var cachePreserveDays = getBuildSetting().getCachePreserveDays();
+		if (cachePreserveDays != null)
+			return cachePreserveDays;
+		else if (getParent() != null)
+			return getParent().getHierarchyCachePreserveDays();
+		else 
+			return ProjectBuildSetting.DEFAULT_CACHE_PRESERVE_DAYS; 
+	}
+	
 	public ProjectPullRequestSetting getPullRequestSetting() {
 		return pullRequestSetting;
 	}
@@ -1176,6 +1189,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
+	}
+
+	public Collection<JobCache> getJobCaches() {
+		return jobCaches;
+	}
+
+	public void setJobCaches(Collection<JobCache> jobCaches) {
+		this.jobCaches = jobCaches;
 	}
 
 	public Collection<PackBlob> getPackBlobs() {

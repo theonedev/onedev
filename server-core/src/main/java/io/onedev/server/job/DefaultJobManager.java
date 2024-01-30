@@ -14,7 +14,10 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.*;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
+import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
@@ -97,7 +100,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import java.util.function.Consumer;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
@@ -513,7 +515,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 		AtomicInteger maxRetries = new AtomicInteger(0);
 		AtomicInteger retryDelay = new AtomicInteger(0);
-		List<CacheSpec> caches = new ArrayList<>();
 		List<ServiceFacade> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
 		long timeout;
@@ -528,9 +529,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				step = interpolator.interpolateProperties(step);
 				actions.add(step.getAction(build, jobExecutor, jobToken, build.getParamCombination()));
 			}
-
-			for (CacheSpec cache : job.getCaches())
-				caches.add(interpolator.interpolateProperties(cache));
 
 			for (String serviceName : job.getRequiredServices()) {
 				Service service = buildSpec.getServiceMap().get(serviceName);
@@ -551,8 +549,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			AtomicInteger retried = new AtomicInteger(0);
 			while (true) {
 				JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
-						projectGitDir, buildId, buildNumber, actions, refName, commitId, caches, 
-						services, timeout, retried.get());
+						projectGitDir, buildId, buildNumber, actions, refName, commitId, services, 
+						timeout, retried.get());
 				// Store original job actions as the copy in job context will be fetched from cluster and 
 				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
 				jobActions.put(jobToken, actions);
@@ -1280,65 +1278,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public Map<CacheInstance, String> allocateCaches(JobContext jobContext, CacheAllocationRequest request) {
-		String jobToken = jobContext.getJobToken();
-		return clusterManager.runOnServer(clusterManager.getLeaderServerAddress(), () -> {
-			synchronized (allocatedCaches) {
-				JobContext innerJobContext = getJobContext(jobToken, true);
-
-				List<CacheInstance> sortedInstances = new ArrayList<>(request.getInstances().keySet());
-				sortedInstances.sort((o1, o2) -> request.getInstances().get(o2).compareTo(request.getInstances().get(o1)));
-
-				Collection<String> allAllocated = new HashSet<>();
-				var activeJobTokens = getActiveJobTokens();
-				Collection<String> removeKeys = new HashSet<>();
-				for (var entry : allocatedCaches.entrySet()) {
-					if (activeJobTokens.contains(entry.getKey()))
-						allAllocated.addAll(entry.getValue());
-					else
-						removeKeys.add(entry.getKey());
-				}
-				for (var key : removeKeys)
-					allocatedCaches.remove(key);
-
-				Map<CacheInstance, String> allocations = new HashMap<>();
-
-				Collection<String> allocatedCachesOfJob = new ArrayList<>();
-				for (CacheSpec cacheSpec : innerJobContext.getCacheSpecs()) {
-					Optional<CacheInstance> result = sortedInstances
-							.stream()
-							.filter(it -> it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
-							.filter(it -> !allAllocated.contains(it.getCacheUUID()))
-							.findFirst();
-					CacheInstance allocation;
-					allocation = result.orElseGet(() -> new CacheInstance(cacheSpec.getNormalizedKey(), UUID.randomUUID().toString()));
-					allocations.put(allocation, cacheSpec.getPath());
-					allocatedCachesOfJob.add(allocation.getCacheUUID());
-					allAllocated.add(allocation.getCacheUUID());
-				}
-
-				Consumer<CacheInstance> deletionMarker = instance -> {
-					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
-					if (ellapsed > innerJobContext.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
-						allocations.put(instance, null);
-						allocatedCachesOfJob.add(instance.getCacheUUID());
-						allAllocated.add(instance.getCacheUUID());
-					}
-				};
-
-				allocatedCaches.put(jobToken, allocatedCachesOfJob);
-
-				request.getInstances().keySet()
-						.stream()
-						.filter(it -> !allAllocated.contains(it.getCacheUUID()))
-						.forEach(deletionMarker);
-
-				return allocations;
-			}
-		});
-	}
-
-	@Override
 	public void runJob(String server, ClusterRunnable runnable) {
 		Future<?> future = null;
 		try {
@@ -1466,7 +1405,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						try (Response response = builder.get()) {
 							KubernetesHelper.checkStatus(response);
 							try (InputStream is = response.readEntity(InputStream.class)) {
-								FileUtils.untar(is, targetDir, false);
+								TarUtils.untar(is, targetDir, false);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}

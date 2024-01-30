@@ -41,125 +41,128 @@ public class TRXReportParser {
 		Element testRunElement = doc.getRootElement();
 
 		Map<String, String> testClasses = new HashMap<>();
-		for (var testDefinitionElement : testRunElement.element("TestDefinitions").elements()) {
-			testClasses.put(
-					testDefinitionElement.attributeValue("id"), 
-					testDefinitionElement.element("TestMethod").attributeValue("className").replace('+', '.'));
-		}
-		
-		Map<String, List<TestCaseData>> testCaseDatum = new LinkedHashMap<>();
-		for (var testResultElement: testRunElement.element("Results").elements()) {
-			var testId = testResultElement.attributeValue("testId");
-			
-			var testCaseData = new TestCaseData();
-			testCaseData.name = testResultElement.attributeValue("testName");
-			testCaseData.duration = parseDuration(testResultElement.attributeValue("duration"));
-			testCaseData.statusText = testResultElement.attributeValue("outcome"); 
-			Status testStatus;
-			switch (testCaseData.statusText) {
-				case "Passed":
-					testStatus = Status.PASSED;
-					break;
-				case "Error":
-				case "Failed":
-				case "Timeout":
-				case "Aborted":
-					testStatus = Status.NOT_PASSED;
-					break;
-				case "NotExecuted":
-				case "NotRunnable":
-				case "Pending":
-					testStatus = Status.NOT_RUN;
-					break;
-				default: 
-					testStatus = Status.OTHER;
+		var testDefinitions = testRunElement.element("TestDefinitions");
+		if (testDefinitions != null) {
+			for (var testDefinitionElement : testDefinitions.elements()) {
+				testClasses.put(
+						testDefinitionElement.attributeValue("id"),
+						testDefinitionElement.element("TestMethod").attributeValue("className").replace('+', '.'));
 			}
-			testCaseData.status = testStatus;
-			
-			var detailInfo = new StringBuilder();
-			var outputElement = testResultElement.element("Output");
-			if (outputElement != null) {
-				var errorInfoElement = outputElement.element("ErrorInfo");
-				if (errorInfoElement != null) {
-					appendMessage(detailInfo, null, errorInfoElement.elementText("Message"));
-					appendMessage(detailInfo, "StackTrace", errorInfoElement.elementText("StackTrace"));
+
+			Map<String, List<TestCaseData>> testCaseDatum = new LinkedHashMap<>();
+			for (var testResultElement: testRunElement.element("Results").elements()) {
+				var testId = testResultElement.attributeValue("testId");
+
+				var testCaseData = new TestCaseData();
+				testCaseData.name = testResultElement.attributeValue("testName");
+				testCaseData.duration = parseDuration(testResultElement.attributeValue("duration"));
+				testCaseData.statusText = testResultElement.attributeValue("outcome");
+				Status testStatus;
+				switch (testCaseData.statusText) {
+					case "Passed":
+						testStatus = Status.PASSED;
+						break;
+					case "Error":
+					case "Failed":
+					case "Timeout":
+					case "Aborted":
+						testStatus = Status.NOT_PASSED;
+						break;
+					case "NotExecuted":
+					case "NotRunnable":
+					case "Pending":
+						testStatus = Status.NOT_RUN;
+						break;
+					default:
+						testStatus = Status.OTHER;
 				}
-				appendMessage(detailInfo, "StdOut", outputElement.elementText("StdOut"));
-				appendMessage(detailInfo, "StdErr", outputElement.elementText("StdErr"));
-				appendMessage(detailInfo, "Exception", outputElement.elementText("Exception"));
+				testCaseData.status = testStatus;
+
+				var detailInfo = new StringBuilder();
+				var outputElement = testResultElement.element("Output");
+				if (outputElement != null) {
+					var errorInfoElement = outputElement.element("ErrorInfo");
+					if (errorInfoElement != null) {
+						appendMessage(detailInfo, null, errorInfoElement.elementText("Message"));
+						appendMessage(detailInfo, "StackTrace", errorInfoElement.elementText("StackTrace"));
+					}
+					appendMessage(detailInfo, "StdOut", outputElement.elementText("StdOut"));
+					appendMessage(detailInfo, "StdErr", outputElement.elementText("StdErr"));
+					appendMessage(detailInfo, "Exception", outputElement.elementText("Exception"));
+				}
+				testCaseData.detailInfo = StringUtils.trimToNull(detailInfo.toString());
+
+				var testClass = testClasses.get(testId);
+				if (testClass != null)
+					testCaseDatum.computeIfAbsent(testClass, it -> new ArrayList<>()).add(testCaseData);
 			}
-			testCaseData.detailInfo = StringUtils.trimToNull(detailInfo.toString());
-			
-			var testClass = testClasses.get(testId);
-			if (testClass != null) 
-				testCaseDatum.computeIfAbsent(testClass, it -> new ArrayList<>()).add(testCaseData);
-		}
 
-		var searchManager = OneDev.getInstance(CodeSearchManager.class);
-		for (var entry: testCaseDatum.entrySet()) {
-			Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
-			var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
-			var symbolHit = searchManager.findPrimarySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
-			var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
-			var position = symbolHit != null? symbolHit.getHitPos(): null;
-			var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath, position) {
+			var searchManager = OneDev.getInstance(CodeSearchManager.class);
+			for (var entry: testCaseDatum.entrySet()) {
+				Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
+				var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
+				var symbolHit = searchManager.findPrimarySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
+				var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
+				var position = symbolHit != null? symbolHit.getHitPos(): null;
+				var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath, position) {
 
-				@Override
-				protected Component renderDetail(String componentId, Build build) {
-					return null;
-				}
-			};
-			for (var testCaseData: entry.getValue()) {
-				var name = testCaseData.name;
-				if (name.startsWith(testSuite.getName() + "."))
-					name = name.substring(testSuite.getName().length() + 1);
-				
-				var detailInfo = testCaseData.detailInfo;
-				testCases.add(new TestCase(testSuite, name, testCaseData.status, testCaseData.statusText, 
-						testCaseData.duration) {
-					
 					@Override
 					protected Component renderDetail(String componentId, Build build) {
-						if (detailInfo != null) {
-							if (SecurityUtils.canReadCode(build.getProject())) {
-								String transformed = new StringTransformer(PATTERN_LOCATION) {
-
-									@Override
-									protected String transformUnmatched(String string) {
-										return escapeHtml5(string);
-									}
-
-									@Override
-									protected String transformMatched(Matcher matcher) {
-										String file = matcher.group(1);
-										int line = Integer.parseInt(matcher.group(2));
-
-										var blobPath = build.getBlobPath(file);
-										if (blobPath != null) {
-											ProjectBlobPage.State state = new ProjectBlobPage.State();
-											state.blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
-											PlanarRange range = new PlanarRange(line-1, -1, line-1, -1);
-											state.position = BlobRenderer.getSourcePosition(range);
-											PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
-											String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
-											return String.format(" in <a href='%s' target='_blank'>%s:line %d</a>)", url, escapeHtml5(blobPath), line);
-										} else {
-											return " in " + escapeHtml5(file) + ":line " + line + " ";
-										}
-									}
-
-								}.transform(detailInfo);
-
-								return new Label(componentId, transformed).setEscapeModelStrings(false);
-							} else {
-								return new Label(componentId, detailInfo);
-							}
-						} else {
-							return null;
-						}
+						return null;
 					}
-				});
-			}
+				};
+				for (var testCaseData: entry.getValue()) {
+					var name = testCaseData.name;
+					if (name.startsWith(testSuite.getName() + "."))
+						name = name.substring(testSuite.getName().length() + 1);
+
+					var detailInfo = testCaseData.detailInfo;
+					testCases.add(new TestCase(testSuite, name, testCaseData.status, testCaseData.statusText,
+							testCaseData.duration) {
+
+						@Override
+						protected Component renderDetail(String componentId, Build build) {
+							if (detailInfo != null) {
+								if (SecurityUtils.canReadCode(build.getProject())) {
+									String transformed = new StringTransformer(PATTERN_LOCATION) {
+
+										@Override
+										protected String transformUnmatched(String string) {
+											return escapeHtml5(string);
+										}
+
+										@Override
+										protected String transformMatched(Matcher matcher) {
+											String file = matcher.group(1);
+											int line = Integer.parseInt(matcher.group(2));
+
+											var blobPath = build.getBlobPath(file);
+											if (blobPath != null) {
+												ProjectBlobPage.State state = new ProjectBlobPage.State();
+												state.blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
+												PlanarRange range = new PlanarRange(line-1, -1, line-1, -1);
+												state.position = BlobRenderer.getSourcePosition(range);
+												PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
+												String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
+												return String.format(" in <a href='%s' target='_blank'>%s:line %d</a>)", url, escapeHtml5(blobPath), line);
+											} else {
+												return " in " + escapeHtml5(file) + ":line " + line + " ";
+											}
+										}
+
+									}.transform(detailInfo);
+
+									return new Label(componentId, transformed).setEscapeModelStrings(false);
+								} else {
+									return new Label(componentId, detailInfo);
+								}
+							} else {
+								return null;
+							}
+						}
+					});
+				}
+			}			
 		}
 		
 		return testCases;

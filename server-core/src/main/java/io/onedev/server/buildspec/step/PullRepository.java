@@ -51,7 +51,7 @@ import static io.onedev.server.git.GitUtils.getReachableCommits;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
-@Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
+@Editable(order=1070, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
 		+ "to run from default branch")
 public class PullRepository extends SyncRepository {

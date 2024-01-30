@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@Editable(order=8020, group=StepGroup.PUBLISH_REPORTS, name="PMD")
+@Editable(order=8020, group=StepGroup.PUBLISH, name="PMD Report")
 public class PublishPMDReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

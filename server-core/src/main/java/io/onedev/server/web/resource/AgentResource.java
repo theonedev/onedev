@@ -3,9 +3,7 @@ package io.onedev.server.web.resource;
 import com.google.common.collect.Sets;
 import io.onedev.agent.Agent;
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
@@ -101,10 +99,10 @@ public class AgentResource extends AbstractResource {
 
 					if (fileName.endsWith("zip")) {
 						File packageFile = new File(tempDir, fileName);
-						FileUtils.zip(agentDir, packageFile, "agent/boot/wrapper-*, agent/bin/*.sh");
+						ZipUtils.zip(agentDir, packageFile, "agent/boot/wrapper-*, agent/bin/*.sh");
 						IOUtils.copy(packageFile, attributes.getResponse().getOutputStream());
 					} else {
-						FileUtils.tar(agentDir, Sets.newHashSet("**"), Sets.newHashSet(), 
+						TarUtils.tar(agentDir, Sets.newHashSet("**"), Sets.newHashSet(), 
 								Sets.newHashSet("agent/boot/wrapper-*", "agent/bin/*.sh"),
 								attributes.getResponse().getOutputStream(), true);
 					}

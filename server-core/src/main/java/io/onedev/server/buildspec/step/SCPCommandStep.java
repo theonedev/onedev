@@ -14,8 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
-@Editable(order=135, name="Copy Files with SCP", description = "" +
+@Editable(order=1100, group = UTILITIES, name="Copy Files with SCP", description = "" +
 		"This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
 public class SCPCommandStep extends CommandStep {
 
@@ -95,6 +96,11 @@ public class SCPCommandStep extends CommandStep {
 		return false;
 	}
 
+	@Override
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return null;
+	}
+	
 	@Override
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {

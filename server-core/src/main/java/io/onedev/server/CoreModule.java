@@ -52,6 +52,8 @@ import io.onedev.server.job.DefaultJobManager;
 import io.onedev.server.job.DefaultResourceAllocator;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.entitymanager.JobCacheManager;
+import io.onedev.server.entitymanager.impl.DefaultJobCacheManager;
 import io.onedev.server.job.log.DefaultLogManager;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.mail.DefaultMailManager;
@@ -216,6 +218,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildManager.class).to(DefaultBuildManager.class);
 		bind(BuildDependenceManager.class).to(DefaultBuildDependenceManager.class);
 		bind(JobManager.class).to(DefaultJobManager.class);
+		bind(JobCacheManager.class).to(DefaultJobCacheManager.class);
 		bind(LogManager.class).to(DefaultLogManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(IssueManager.class).to(DefaultIssueManager.class);

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@Editable(order=7100, group=StepGroup.PUBLISH_REPORTS, name="TRX (.net unit test)")
+@Editable(order=7100, group=StepGroup.PUBLISH, name="TRX Report (.net unit test)")
 public class PublishTRXReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;

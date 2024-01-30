@@ -21,10 +21,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.location.GitLocation;
-import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.job.JobRunnable;
-import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.*;
 import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
@@ -59,8 +56,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	private static final long serialVersionUID = 1L;
 	
 	static final int ORDER = 50;
-
-	private static final Object cacheHomeCreationLock = new Object();
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 
@@ -217,17 +212,13 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 		useDockerSock(docker, getDockerSockPath());
 		return docker;
 	}
-	
-	private File getCacheHome(JobExecutor jobExecutor) {
-		File file = new File(Bootstrap.getSiteDir(), "cache/" + jobExecutor.getName());
-		if (!file.exists()) synchronized (cacheHomeCreationLock) {
-			FileUtils.createDir(file);
-		}
-		return file;
-	}
 
 	private ClusterManager getClusterManager() {
 		return OneDev.getInstance(ClusterManager.class);
+	}
+	
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
 	}
 	
 	private JobManager getJobManager() {
@@ -269,36 +260,18 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 						String network = getName() + "-" + jobContext.getProjectId() + "-"
 								+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 
-						String serverAddress = getClusterManager().getLocalServerAddress();
+						String localServer = getClusterManager().getLocalServerAddress();
 						jobLogger.log(String.format("Executing job (executor: %s, server: %s, network: %s)...", 
-								getName(), serverAddress, network));
+								getName(), localServer, network));
 
-						File hostCacheHome = getCacheHome(jobContext.getJobExecutor());
-
-						jobLogger.log("Setting up job cache...");
-						JobCache cache = new JobCache(hostCacheHome) {
-
-							@Override
-							protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
-								return getJobManager().allocateCaches(jobContext, request);
-							}
-
-							@Override
-							protected void delete(File cacheDir) {
-								deleteDir(cacheDir, newDocker(), Bootstrap.isInDocker());
-							}
-
-						};
-						cache.init(false);
-						
 						createNetwork(newDocker(), network, getNetworkOptions(), jobLogger);
 						try {
 							OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 
-							var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+							var serverUrl = getSettingManager().getSystemSetting().getServerUrl();
 							for (var jobService : jobContext.getServices()) {
 								var docker = newDocker();
-								var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
+								var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl, 
 										jobContext.getJobToken(), jobService.getBuiltInRegistryAccessToken());
 								callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 									startService(docker, network, jobService, osInfo, getImageMappingFacades(),
@@ -310,10 +283,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 							File hostWorkspace = new File(hostBuildHome, "workspace");
 							FileUtils.createDir(hostWorkspace);
 
+							var cacheHelper = new ServerCacheHelper(hostBuildHome, jobContext, jobLogger);
+							
 							AtomicReference<File> hostAuthInfoDir = new AtomicReference<>(null);
 							try {
-								cache.installSymbolinks(hostWorkspace);
-
 								jobLogger.log("Copying job dependencies...");
 								getJobManager().copyDependencies(jobContext, hostWorkspace);
 
@@ -339,8 +312,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
 																 List<Integer> position, boolean useTTY) {
 										image = mapImage(image);
-										// Uninstall symbol links as docker can not process it well
-										cache.uninstallSymbolinks(hostWorkspace);
 										containerName = network + "-step-" + stringifyStepPosition(position);
 										try {
 											var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
@@ -368,11 +339,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											else if (workingDir != null) 
 												docker.addArgs("-w", workingDir);
 
-											for (Map.Entry<CacheInstance, String> entry : cache.getAllocations().entrySet()) {
-												String hostCachePath = new File(hostCacheHome, entry.getKey().toString()).getAbsolutePath();
-												String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
-												docker.addArgs("-v", getHostPath(hostCachePath) + ":" + containerCachePath);
-											}
+											cacheHelper.mountVolumes(docker, ServerDockerExecutor.this::getHostPath);
 
 											if (isMountDockerSock()) {
 												if (getDockerSockPath() != null) {
@@ -422,7 +389,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											return result.getReturnCode();													
 										} finally {
 											containerName = null;
-											cache.installSymbolinks(hostWorkspace);
 										}
 									}
 
@@ -447,8 +413,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 														hostBuildHome, commandFacade, osInfo, hostAuthInfoDir.get() != null);
 												
 												var docker = newDocker();
-												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl,
+												var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 														jobContext.getJobToken(), commandFacade.getBuiltInRegistryAccessToken());
 												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 													return runStepContainer(docker, execution.getImage(), entrypoint.executable(),
@@ -464,8 +429,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											} else if (facade instanceof BuildImageFacade) {
 												var buildImageFacade = (BuildImageFacade) facade;
 												var docker = newDocker();
-												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, 
+												var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 														jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
 												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 													buildImage(docker, buildImageFacade, hostBuildHome, jobLogger);
@@ -474,8 +438,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											} else if (facade instanceof RunImagetoolsFacade) {
 												var runImagetoolsFacade = (RunImagetoolsFacade) facade;
 												var docker = newDocker();
-												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-												var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl,
+												var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 														jobContext.getJobToken(), runImagetoolsFacade.getBuiltInRegistryAccessToken());
 												callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 													runImagetools(docker, runImagetoolsFacade, hostBuildHome, jobLogger);
@@ -493,8 +456,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
 												var docker = newDocker();
-												var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-												var builtInRegistryLogin =new BuiltInRegistryLogin(builtInRegistryUrl, 
+												var builtInRegistryLogin =new BuiltInRegistryLogin(serverUrl, 
 														jobContext.getJobToken(), runContainerFacade.getBuiltInRegistryAccessToken());
 												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 													return runStepContainer(docker, container.getImage(), null, options, arguments,
@@ -510,9 +472,9 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 												try {
 													CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 													jobLogger.log("Checking out code...");
-													
+
 													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
-													
+
 													if (hostAuthInfoDir.get() == null)
 														hostAuthInfoDir.set(FileUtils.createTempDir());
 													git.environments().put("HOME", hostAuthInfoDir.get().getAbsolutePath());
@@ -527,19 +489,19 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 													File trustCertsFile = new File(hostBuildHome, "trust-certs.pem");
 													installGitCert(git, Bootstrap.getTrustCertsDir(),
 															trustCertsFile, containerTrustCerts,
-															ExecutorUtils.newInfoLogger(jobLogger), 
+															ExecutorUtils.newInfoLogger(jobLogger),
 															ExecutorUtils.newWarningLogger(jobLogger));
-													
+
 													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-													cloneInfo.writeAuthData(hostAuthInfoDir.get(), git, true, 
-															ExecutorUtils.newInfoLogger(jobLogger), 
+													cloneInfo.writeAuthData(hostAuthInfoDir.get(), git, true,
+															ExecutorUtils.newInfoLogger(jobLogger),
 															ExecutorUtils.newWarningLogger(jobLogger));
 
 													if (trustCertsFile.exists())
 														git.addArgs("-c", "http.sslCAInfo=" + trustCertsFile.getAbsolutePath());
 
 													int cloneDepth = checkoutFacade.getCloneDepth();
-			
+
 													cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
 															jobContext.getRefName(), jobContext.getCommitId().name(),
 															checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
@@ -549,7 +511,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));
 													return false;
 												}
-											} else {
+											} else if (facade instanceof SetupCacheFacade) {
+												SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
+												cacheHelper.setupCache(setupCacheFacade);
+											} else if (facade instanceof ServerSideFacade) {
 												ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
 												try {
 													serverSideFacade.execute(hostBuildHome, new ServerSideFacade.Runner() {
@@ -563,11 +528,13 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 													});
 												} catch (Exception e) {
 													if (ExceptionUtils.find(e, InterruptedException.class) == null) {
-														long duration = System.currentTimeMillis() - time;														
+														long duration = System.currentTimeMillis() - time;
 														jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ") " + getErrorMessage(e));
 													}
 													return false;
 												}
+											} else {
+												throw new ExplicitException("Unexpected step type: " + facade.getClass());
 											}
 											long duration = System.currentTimeMillis() - time;
 											jobLogger.success("Step \"" + stepNames + "\" is successful (" + DateUtils.formatDuration(duration) + ")");
@@ -584,13 +551,15 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 								}, new ArrayList<>());
 
-								if (!successful)
+								if (successful) 
+									cacheHelper.uploadCaches();
+								else 
 									throw new FailedException();
 							} finally {
-								cache.uninstallSymbolinks(hostWorkspace);
 								// Fix https://code.onedev.io/onedev/server/~issues/597
-								if (SystemUtils.IS_OS_WINDOWS)
+								if (SystemUtils.IS_OS_WINDOWS) {
 									FileUtils.deleteDir(hostWorkspace);
+								}
 								if (hostAuthInfoDir.get() != null)
 									FileUtils.deleteDir(hostAuthInfoDir.get());
 							}
@@ -702,15 +671,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		var docker = newDocker();
-		var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		callWithDockerAuth(docker, getRegistryLoginFacades(), null, () -> {
 			File workspaceDir = null;
-			File cacheDir = null;
 			try {
 				workspaceDir = FileUtils.createTempDir("workspace");
-				cacheDir = new File(getCacheHome(ServerDockerExecutor.this), UUID.randomUUID().toString());
-				FileUtils.createDir(cacheDir);
-
 				jobLogger.log("Testing specified docker image...");
 				docker.clearArgs();
 				docker.addArgs("run", "--rm");
@@ -721,16 +685,11 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 				if (getRunOptions() != null)
 					docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 				String containerWorkspacePath;
-				String containerCachePath;
-				if (SystemUtils.IS_OS_WINDOWS) {
+				if (SystemUtils.IS_OS_WINDOWS) 
 					containerWorkspacePath = "C:\\onedev-build\\workspace";
-					containerCachePath = "C:\\onedev-build\\cache";
-				} else {
+				else 
 					containerWorkspacePath = "/onedev-build/workspace";
-					containerCachePath = "/onedev-build/cache";
-				}
 				docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
-				docker.addArgs("-v", getHostPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
 
 				docker.addArgs("-w", containerWorkspacePath);
 				docker.addArgs(testData.getDockerImage());
@@ -758,8 +717,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 			} finally {
 				if (workspaceDir != null)
 					FileUtils.deleteDir(workspaceDir);
-				if (cacheDir != null)
-					FileUtils.deleteDir(cacheDir);
 			}
 
 			if (!SystemUtils.IS_OS_WINDOWS) {

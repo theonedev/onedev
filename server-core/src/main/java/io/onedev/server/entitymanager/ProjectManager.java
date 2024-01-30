@@ -163,6 +163,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	 * 			directory to store lucene index. The directory will be exist after calling this method
 	 */
 	File getIndexDir(Long projectId);
+	
+	File getCacheDir(Long projectId);
 
 	/**
 	 * Get directory to store static content of specified project

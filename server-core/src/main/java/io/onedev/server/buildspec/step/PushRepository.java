@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Editable(order=70, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
+@Editable(order=1080, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
 		description="This step pushes current commit to same ref on remote")
 public class PushRepository extends SyncRepository {
 

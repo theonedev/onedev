@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.databasebackup;
 
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -77,7 +78,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 						try {
 							DataManager databaseManager = OneDev.getInstance(DataManager.class);
 							databaseManager.exportData(tempDir);
-							FileUtils.zip(tempDir, attributes.getResponse().getOutputStream());
+							ZipUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
 							FileUtils.deleteDir(tempDir);
 						}

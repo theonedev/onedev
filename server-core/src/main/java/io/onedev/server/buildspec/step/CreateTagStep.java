@@ -61,10 +61,9 @@ public class CreateTagStep extends ServerSideStep {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
-	@Editable(order=1060, description="Specify a secret to be used as access token. This access token " +
-			"should have permission to create above tag in the project")
+	@Editable(order=1060, description="For build commit not reachable from default branch, " +
+			"an access token with create tag permission is required")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@NotEmpty
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;
 	}
@@ -87,10 +86,6 @@ public class CreateTagStep extends ServerSideStep {
 		
 		if (!Repository.isValidRefName(GitUtils.tag2ref(tagName)))
 			throw new ExplicitException("Invalid tag name: " + tagName);
-
-		// Access token is left empty if we migrate from old version
-		if (getAccessTokenSecret() == null)
-			throw new ExplicitException("Access token secret not specified");
 		
 		if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
 			RefFacade tagRef = project.getTagRef(tagName);

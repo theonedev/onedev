@@ -29,7 +29,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.ProjectChoice;
 
-@Editable(order=1060, name="Publish Site", description="This step publishes specified files to be served as project web site. "
+import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
+
+@Editable(order=1060, name="Site", group = PUBLISH, description="This step publishes specified files to be served as project web site. "
 		+ "Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>")
 public class PublishSiteStep extends ServerSideStep {
 

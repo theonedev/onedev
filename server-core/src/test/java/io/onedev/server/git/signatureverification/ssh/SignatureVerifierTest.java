@@ -3,6 +3,7 @@ package io.onedev.server.git.signatureverification.ssh;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -38,7 +39,7 @@ public class SignatureVerifierTest {
     public void verify() {
 		var tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(SignatureVerifierTest.class, "git-signature.zip").openStream()) {
-			FileUtils.unzip(is, tempDir);
+			ZipUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				var emailAddressValue = "foo@example.com";
 				var owner = new User();

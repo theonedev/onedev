@@ -101,7 +101,7 @@ public class Service implements NamedElement, Serializable {
 		this.readinessCheckCommand = readinessCheckCommand;
 	}
 
-	@Editable(order=500, name="Built-in Registry Access Token", description = "Specify access token for built-in docker registry if necessary")
+	@Editable(order=500, name="Built-in Registry Access Token", group="More Settings", description = "Specify access token for built-in docker registry if necessary")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;

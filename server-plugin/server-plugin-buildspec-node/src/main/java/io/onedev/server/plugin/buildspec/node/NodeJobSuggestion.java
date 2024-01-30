@@ -1,36 +1,30 @@
 package io.onedev.server.plugin.buildspec.node;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.buildspec.step.CheckoutStep;
-import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.buildspec.step.*;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.interpolative.VariableInterpolator;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class NodeJobSuggestion implements JobSuggestion {
 
@@ -61,8 +55,10 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setName("angular ci");
 
 			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout");
+			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
+			
+			job.getSteps().addAll(newCacheSteps());
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
@@ -116,7 +112,6 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
-			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -125,8 +120,10 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setName("react ci");
 			
 			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout");
+			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
+			
+			job.getSteps().addAll(newCacheSteps());
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
@@ -135,10 +132,9 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			CommandStep runCommands = new CommandStep();
 			runCommands.setName("build & test");
-			runCommands.setImage("node:10.16-alpine");
+			runCommands.setImage("node");
 
 			List<String> commands = Lists.newArrayList( 
-					"npm install typescript", 
 					"npm install", 
 					"export CI=TRUE");
 
@@ -177,7 +173,6 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
-			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -186,8 +181,10 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setName("vue ci");
 			
 			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout");
+			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
+			
+			job.getSteps().addAll(newCacheSteps());
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
@@ -196,7 +193,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			CommandStep runCommands = new CommandStep();
 			runCommands.setName("build & test");
-			runCommands.setImage("node:10.16-alpine");
+			runCommands.setImage("node");
 
 			List<String> commands = Lists.newArrayList("npm install");
 
@@ -231,7 +228,6 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
-			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -240,8 +236,10 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setName("express ci");
 			
 			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout");
+			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
+			
+			job.getSteps().addAll(newCacheSteps());
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
@@ -250,7 +248,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			CommandStep runCommands = new CommandStep();
 			runCommands.setName("build & test");
-			runCommands.setImage("node:10.16-alpine");
+			runCommands.setImage("node");
 
 			List<String> commands = Lists.newArrayList("npm install");
 
@@ -284,17 +282,24 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
-			setupCaches(job);
 			jobs.add(job);
 		} 
 		return jobs;
 	}
 	
-	private void setupCaches(Job job) {
-		CacheSpec cache = new CacheSpec();
-		cache.setKey("npm-cache");
-		cache.setPath("/root/.npm");
-		job.getCaches().add(cache);
+	private List<Step> newCacheSteps() {
+		var generateChecksum = new GenerateChecksumStep();
+		generateChecksum.setName("generate package checksum");
+		generateChecksum.setFiles("package-lock.json");
+		generateChecksum.setTargetFile("checksum");
+		
+		var setupCache = new SetupCacheStep();
+		setupCache.setName("set up package cache");
+		setupCache.setKey("node_modules_@file:checksum@");
+		setupCache.setPath("node_modules");
+		setupCache.getLoadKeys().add("node_modules");
+		
+		return Lists.newArrayList(generateChecksum, setupCache);
 	}
 
 	private void setupTriggers(Job job) {

@@ -226,6 +226,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new ManageJob())));
 	}
+
+	public static boolean canUploadCache(Project project) {
+		return canUploadCache(getSubject(), project);
+	}
+
+	public static boolean canUploadCache(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new UploadCache()));
+	}
 	
 	public static boolean canAccessLog(Build build) {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 

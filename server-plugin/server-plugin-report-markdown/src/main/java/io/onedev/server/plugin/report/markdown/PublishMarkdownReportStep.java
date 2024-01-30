@@ -21,7 +21,7 @@ import io.onedev.server.annotation.Interpolative;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
-@Editable(order=1100, group=StepGroup.PUBLISH_REPORTS, name="Markdown")
+@Editable(order=1100, group=StepGroup.PUBLISH, name="Markdown Report")
 public class PublishMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;

@@ -8,7 +8,6 @@ import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -24,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
-		+ "job workspace, either use environment variable <tt>ONEDEV_WORKSPACE</tt>, or specify volume mounts. " +
+@Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> "
+		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. " +
 		"<b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote " +
 		"docker executor")
 public class RunContainerStep extends Step {
@@ -91,7 +90,7 @@ public class RunContainerStep extends Step {
 		this.envVars = envVars;
 	}
 
-	@Editable(order=500, description="Optionally mount directories or files under job workspace into container")
+	@Editable(order=500, group = "More Settings", description="Optionally mount directories or files under job workspace into container")
 	public List<VolumeMount> getVolumeMounts() {
 		return volumeMounts;
 	}
@@ -100,12 +99,11 @@ public class RunContainerStep extends Step {
 		this.volumeMounts = volumeMounts;
 	}
 
-	@Editable(order=600, name="Built-in Registry Access Token Secret", description="Optionally specify a " +
+	@Editable(order=600, name="Built-in Registry Access Token Secret", group = "More Settings", description="Optionally specify a " +
 			"access token secret to access built-in container registry if necessary. If this step needs to " +
 			"access external container registry, login information should be configured in corresponding " +
 			"executor then")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@ShowCondition("isSubscriptionActive")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
 	}
@@ -123,7 +121,7 @@ public class RunContainerStep extends Step {
 		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 	
-	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
+	@Editable(order=10000, name="Enable TTY Mode", group = "More Settings", description="Many commands print outputs with ANSI colors in "
 			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
 			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
 			+ "to the command")

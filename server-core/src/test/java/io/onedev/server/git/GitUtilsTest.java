@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.onedev.commons.utils.ZipUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -327,7 +328,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-link.zip").openStream()) {
-			FileUtils.unzip(is, tempDir);
+			ZipUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
@@ -362,7 +363,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-file.zip").openStream()) {
-			FileUtils.unzip(is, tempDir);
+			ZipUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
@@ -411,7 +412,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-dir.zip").openStream()) {
-			FileUtils.unzip(is, tempDir);
+			ZipUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 

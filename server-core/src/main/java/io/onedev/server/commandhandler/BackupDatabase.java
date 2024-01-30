@@ -4,6 +4,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.SessionFactoryManager;
@@ -78,7 +79,7 @@ public class BackupDatabase extends CommandHandler {
 				File tempDir = FileUtils.createTempDir("backup");
 				try {
 					dataManager.exportData(tempDir);
-					FileUtils.zip(tempDir, backupFile, null);
+					ZipUtils.zip(tempDir, backupFile, null);
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				} finally {

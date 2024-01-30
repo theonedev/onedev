@@ -8,8 +8,6 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
-import io.onedev.server.util.facade.EmailAddressCache;
-import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -178,12 +176,6 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void onClick() {
 				setResponsePage(NewUserPage.class);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator());
 			}
 			
 		});

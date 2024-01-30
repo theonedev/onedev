@@ -6162,7 +6162,17 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-		
+	}
+
+	private void migrate154(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.addElement("uploadCache").setText("false");
+				dom.writeToFile(file, false);
+			}
+		}
 	}
 	
 }

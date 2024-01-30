@@ -24,7 +24,7 @@ import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
-@Editable(order=1000, group= StepGroup.PUBLISH_REPORTS, name="Html")
+@Editable(order=1070, group= StepGroup.PUBLISH, name="Html Report")
 public class PublishHtmlReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;

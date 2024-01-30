@@ -55,6 +55,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
@@ -901,21 +902,18 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				String containerBuildHome;
 				String containerCommandDir;
-				String containerCacheHome;
 				String containerAuthInfoDir;
 				String containerTrustCertsDir;
 				String containerWorkspace;
 				if (osInfo.isWindows()) {
 					containerBuildHome = "C:\\onedev-build";
 					containerWorkspace = containerBuildHome + "\\workspace";
-					containerCacheHome = containerBuildHome + "\\cache";
 					containerCommandDir = containerBuildHome + "\\command";
 					containerAuthInfoDir = "C:\\Users\\ContainerAdministrator\\auth-info";
 					containerTrustCertsDir = containerBuildHome + "\\trust-certs";
 				} else {
 					containerBuildHome = "/onedev-build";
 					containerWorkspace = containerBuildHome +"/workspace";
-					containerCacheHome = containerBuildHome + "/cache";
 					containerCommandDir = containerBuildHome + "/command";
 					containerAuthInfoDir = "/root/auth-info";
 					containerTrustCertsDir = containerBuildHome + "/trust-certs";
@@ -925,22 +923,20 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"name", "build-home", 
 						"mountPath", containerBuildHome);
 				Map<String, String> authInfoMount = newLinkedHashMap(
-						"name", "auth-info", 
-						"mountPath", containerAuthInfoDir);
+						"name", "build-home", 
+						"mountPath", containerAuthInfoDir, 
+						"subPath", "auth-info");
 				
 				// Windows nanoserver default user is ContainerUser
 				Map<String, String> authInfoMount2 = newLinkedHashMap(
-						"name", "auth-info", 
-						"mountPath", "C:\\Users\\ContainerUser\\auth-info");
-				
-				Map<String, String> cacheHomeMount = newLinkedHashMap(
-						"name", "cache-home", 
-						"mountPath", containerCacheHome);
+						"name", "build-home", 
+						"mountPath", "C:\\Users\\ContainerUser\\auth-info", 
+						"subPath", "auth-info");
 				Map<String, String> trustCertsMount = newLinkedHashMap(
 						"name", "trust-certs", 
 						"mountPath", containerTrustCertsDir);
 				
-				var commonVolumeMounts = Lists.newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
+				var commonVolumeMounts = newArrayList(buildHomeMount, authInfoMount);
 				if (osInfo.isWindows())
 					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
@@ -952,12 +948,12 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				} else {
 					List<Action> actions = new ArrayList<>();
 					CommandFacade facade = new CommandFacade((String) executionContext, null,
-							Lists.newArrayList("this does not matter"), false);
+							newArrayList("this does not matter"), false);
 					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
 					entryFacade = new CompositeFacade(actions);
 				}
 				
-				List<String> containerNames = Lists.newArrayList("init");
+				List<String> containerNames = newArrayList("init");
 				
 				String helperImageSuffix;
 				if (osInfo.isWindows()) {  
@@ -988,6 +984,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"value", containerWorkspace
 						));
 
+				Collection<String> cachePaths = new HashSet<>();
 				entryFacade.traverse((facade, position) -> {
 					String containerName = getContainerName(position);
 					containerNames.add(containerName);
@@ -1005,48 +1002,58 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 								"image", mapImage(execution.getImage()));
 						if (commandFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);
-						stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+						var volumeMounts = buildVolumeMounts(cachePaths);
+						volumeMounts.addAll(commonVolumeMounts);
+						stepContainerSpec.put("volumeMounts", volumeMounts);
 						stepContainerSpec.put("env", commonEnvs);
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
-					} else if (facade instanceof RunContainerFacade) {
+					} else if (facade instanceof RunContainerFacade || facade instanceof RunImagetoolsFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor");
-					} else { 
+					} else {
+						if (facade instanceof SetupCacheFacade) {
+							var cachePath = ((SetupCacheFacade) facade).getPath();
+							if (!cachePaths.add(cachePath))
+								throw new ExplicitException("Duplicate cache path: " + cachePath);
+						}
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);
-						stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+						var volumeMounts = buildVolumeMounts(cachePaths);
+						volumeMounts.addAll(commonVolumeMounts);
+						stepContainerSpec.put("volumeMounts", volumeMounts);
 						stepContainerSpec.put("env", commonEnvs);
 					}
 					
-					String positionStr = stringifyStepPosition(position);
-					if (osInfo.isLinux()) {
-						stepContainerSpec.put("command", Lists.newArrayList("sh"));
-						stepContainerSpec.put("args", Lists.newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
-					} else {
-						stepContainerSpec.put("command", Lists.newArrayList("cmd"));
-						stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
-					}
+					if (stepContainerSpec != null) {
+						String positionStr = stringifyStepPosition(position);
+						if (osInfo.isLinux()) {
+							stepContainerSpec.put("command", newArrayList("sh"));
+							stepContainerSpec.put("args", newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
+						} else {
+							stepContainerSpec.put("command", newArrayList("cmd"));
+							stepContainerSpec.put("args", newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
+						}
 
-					Map<Object, Object> requestsSpec = newLinkedHashMap(
-									"cpu", "0", 
-									"memory", "0");
-					Map<Object, Object> limitsSpec = new LinkedHashMap<>();
-					if (getCpuLimit() != null)
-						limitsSpec.put("cpu", getCpuLimit());
-					if (getMemoryLimit() != null)
-						limitsSpec.put("memory", getMemoryLimit());
-					if (!limitsSpec.isEmpty()) {
-						stepContainerSpec.put(
-								"resources", newLinkedHashMap(
-										"limits", limitsSpec, 
-										"requests", requestsSpec));
+						Map<Object, Object> requestsSpec = newLinkedHashMap(
+								"cpu", "0",
+								"memory", "0");
+						Map<Object, Object> limitsSpec = new LinkedHashMap<>();
+						if (getCpuLimit() != null)
+							limitsSpec.put("cpu", getCpuLimit());
+						if (getMemoryLimit() != null)
+							limitsSpec.put("memory", getMemoryLimit());
+						if (!limitsSpec.isEmpty()) {
+							stepContainerSpec.put(
+									"resources", newLinkedHashMap(
+											"limits", limitsSpec,
+											"requests", requestsSpec));
+						}
+
+						containerSpecs.add(stepContainerSpec);
 					}
-					
-					containerSpecs.add(stepContainerSpec);
-					
 					return null;
 				}, new ArrayList<>());
 				
@@ -1057,32 +1064,35 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					k8sHelperClassPath = "C:\\k8s-helper\\*";
 				}
 				
-				List<String> sidecarArgs = Lists.newArrayList(
+				List<String> sidecarArgs = newArrayList(
 						"-classpath", k8sHelperClassPath,
 						"io.onedev.k8shelper.SideCar");
-				List<String> initArgs = Lists.newArrayList(
+				List<String> initArgs = newArrayList(
 						"-classpath", k8sHelperClassPath, 
 						"io.onedev.k8shelper.Init");
 				if (jobContext == null) {
 					sidecarArgs.add("test");
 					initArgs.add("test");
 				}
+
+				var volumeMounts = buildVolumeMounts(cachePaths);
+				volumeMounts.addAll(commonVolumeMounts);
 				
 				Map<Object, Object> initContainerSpec = newHashMap(
 						"name", "init", 
 						"image", helperImage, 
-						"command", Lists.newArrayList("java"), 
+						"command", newArrayList("java"), 
 						"args", initArgs,
 						"env", commonEnvs,
-						"volumeMounts", commonVolumeMounts);
+						"volumeMounts", volumeMounts);
 				
 				Map<Object, Object> sidecarContainerSpec = newLinkedHashMap(
 						"name", "sidecar", 
 						"image", helperImage, 
-						"command", Lists.newArrayList("java"), 
+						"command", newArrayList("java"), 
 						"args", sidecarArgs, 
 						"env", commonEnvs, 
-						"volumeMounts", commonVolumeMounts);
+						"volumeMounts", volumeMounts);
 				
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
@@ -1104,22 +1114,13 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				Map<Object, Object> buildHomeVolume = newLinkedHashMap(
 						"name", "build-home", 
 						"emptyDir", newLinkedHashMap());
-				Map<Object, Object> userHomeVolume = newLinkedHashMap(
-						"name", "auth-info", 
-						"emptyDir", newLinkedHashMap());
-				Map<Object, Object> cacheHomeVolume = newLinkedHashMap(
-						"name", "cache-home", 
-						"hostPath", newLinkedHashMap(
-								"path", osInfo.getCacheHome(), 
-								"type", "DirectoryOrCreate"));
-				List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
+				List<Object> volumes = newArrayList(buildHomeVolume);
 				if (trustCertsConfigMapName != null) {
 					volumes.add(newLinkedHashMap(
 							"name", "trust-certs", 
 							"configMap", newLinkedHashMap(
 									"name", trustCertsConfigMapName)));
 				}
-				
 				podSpec.put("volumes", volumes);
 
 				Map<Object, Object> podDef = newLinkedHashMap(
@@ -1258,6 +1259,20 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			if (getClusterRole() != null)
 				deleteClusterRoleBinding(namespace, jobLogger);
 		}
+	}
+	
+	private List<Object> buildVolumeMounts(Collection<String> cachePaths) {
+		var volumeMounts = new ArrayList<>();
+		int index = 1;
+		for (var cachePath: cachePaths) {
+			var volumeMount = newLinkedHashMap(
+					"name", "build-home",
+					"mountPath", cachePath,
+					"subPath", "cache/" + index);
+			volumeMounts.add(volumeMount);
+			index++;
+		}
+		return volumeMounts;
 	}
 	
 	private String getContainerName(List<Integer> stepPosition) {

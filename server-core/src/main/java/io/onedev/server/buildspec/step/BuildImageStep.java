@@ -16,9 +16,10 @@ import io.onedev.server.util.UrlUtils;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker buildx. " +
+@Editable(order=160, name="Build Docker Image", group = DOCKER_IMAGE, description="Build and publish docker image with docker buildx. " +
 		"This step can only be executed by server docker executor or remote docker executor. To build image with " +
 		"Kubernetes executor, please use kaniko step instead")
 public class BuildImageStep extends Step {
@@ -85,7 +86,7 @@ public class BuildImageStep extends Step {
 		this.publish = publish;
 	}
 
-	@Editable(order=335, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@Editable(order=1000, name="Built-in Registry Access Token Secret", group = "More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;
@@ -107,7 +108,7 @@ public class BuildImageStep extends Step {
 				"<code>" + server + "</code>";
 	}
 	
-	@Editable(order=340, name="Remove Dangling Images After Build")
+	@Editable(order=1100, name="Remove Dangling Images After Build", group = "More Settings")
 	public boolean isRemoveDanglingImages() {
 		return removeDanglingImages;
 	}
@@ -116,7 +117,7 @@ public class BuildImageStep extends Step {
 		this.removeDanglingImages = removeDanglingImages;
 	}
 
-	@Editable(order=350, description="Optionally specify additional options to build image, " +
+	@Editable(order=1200, group = "More Settings", description="Optionally specify additional options to build image, " +
 			"separated by spaces. For instance <code>--builder</code> and <code>--platform</code> can be " +
 			"used to build multi-arch images")
 	@Interpolative(variableSuggester="suggestVariables")

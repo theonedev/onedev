@@ -24,8 +24,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidator;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -218,7 +216,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			}
 
 			@Override
-			protected void onTypeChanged(AjaxRequestTarget target) {
+			protected void onTypeChanging(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
 			}
 			
@@ -262,12 +260,11 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		int index = ((PathNode.Indexed) propertyNode).getIndex();
-		String messagePrefix = "Item " + (index+1) + ": ";
 		PathNode.Named named = (PathNode.Named) pathInProperty.takeNode();
 		if (named != null) 
 			getElementEditorAtRow(index).error(named, pathInProperty, errorMessage);
 		else 
-			error(messagePrefix + errorMessage);
+			rows.get(index).error(errorMessage);
 	}
 
 	@Override

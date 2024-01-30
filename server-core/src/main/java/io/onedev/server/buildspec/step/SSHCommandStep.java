@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
-@Editable(order=125, name="Execute Commands via SSH", description = "" +
+@Editable(order=1090, group = UTILITIES, name="Execute Commands via SSH", description = "" +
 		"This step can only be executed by a docker aware executor")
 public class SSHCommandStep extends CommandStep {
 
@@ -114,6 +115,11 @@ public class SSHCommandStep extends CommandStep {
 		return false;
 	}
 
+	@Override
+	public String getBuiltInRegistryAccessTokenSecret() {
+		return null;
+	}
+	
 	@Override
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {

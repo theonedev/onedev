@@ -1,21 +1,22 @@
 package io.onedev.server.web.editable.stringlist;
 
-import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
+
+import static io.onedev.server.util.ReflectionUtils.getCollectionElementClass;
 
 @SuppressWarnings("serial")
 public class StringListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
+		var propertyGetter = descriptor.getPropertyGetter();
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass()) 
-				&& ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType()) == String.class) {
+				&& getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
 						
 			return new PropertyContext<List<String>>(descriptor) {
 
@@ -27,14 +28,7 @@ public class StringListEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null && !model.getObject().isEmpty()) {
-								String content = "";
-								for (String each: model.getObject()) {
-									if (content.length() == 0)
-										content += each.toString();
-									else
-										content += ", " + each.toString();
-								}
-								return new Label(id, content);
+								return new StringListPropertyViewer(id, propertyDescriptor, model.getObject());
 							} else { 
 								return new EmptyValueLabel(id) {
 

@@ -1,10 +1,19 @@
 package io.onedev.server.web.page.admin.groupmanagement;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
+import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
+import io.onedev.server.web.util.PagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -29,20 +38,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
-import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class GroupListPage extends AdministrationPage {
@@ -132,23 +131,17 @@ public class GroupListPage extends AdministrationPage {
 				setResponsePage(NewGroupPage.class);
 			}
 			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator());
-			}
-			
 		});
 		
 		List<IColumn<Group, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupListPage.this);
 				Group group = rowModel.getObject();
-				WebMarkupContainer link = new ActionablePageLink("link", 
+				WebMarkupContainer link = new ActionablePageLink("link",
 						GroupProfilePage.class, GroupProfilePage.paramsOf(group)) {
 
 					@Override
@@ -157,7 +150,7 @@ public class GroupListPage extends AdministrationPage {
 								GroupListPage.class, getPageParameters()).toString();
 						WebSession.get().setRedirectUrlAfterDelete(Group.class, redirectUrlAfterDelete);
 					}
-					
+
 				};
 				link.add(new Label("label", group.getName()));
 				fragment.add(link);
@@ -165,14 +158,14 @@ public class GroupListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Is Site Admin")) {
+		columns.add(new AbstractColumn<>(Model.of("Is Site Admin")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
-					IModel<Group> rowModel) {
+									 IModel<Group> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().isAdministrator()));
 			}
-			
+
 		});
 		
 		columns.add(new AbstractColumn<Group, Void>(Model.of("Can Create Root Projects")) {
@@ -186,12 +179,12 @@ public class GroupListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", GroupListPage.this);
-				
+
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -209,14 +202,8 @@ public class GroupListPage extends AdministrationPage {
 						target.add(groupsTable);
 					}
 
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.isAdministrator());
-					}
-					
 				});
-				
+
 				cellItem.add(fragment);
 			}
 
@@ -224,14 +211,14 @@ public class GroupListPage extends AdministrationPage {
 			public String getCssClass() {
 				return "actions";
 			}
-			
+
 		});
 		
-		SortableDataProvider<Group, Void> dataProvider = new SortableDataProvider<Group, Void>() {
+		SortableDataProvider<Group, Void> dataProvider = new SortableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends Group> iterator(long first, long count) {
-				return OneDev.getInstance(GroupManager.class).query(query, (int)first, (int)count).iterator();
+				return OneDev.getInstance(GroupManager.class).query(query, (int) first, (int) count).iterator();
 			}
 
 			@Override
@@ -242,13 +229,13 @@ public class GroupListPage extends AdministrationPage {
 			@Override
 			public IModel<Group> model(Group object) {
 				Long id = object.getId();
-				return new LoadableDetachableModel<Group>() {
+				return new LoadableDetachableModel<>() {
 
 					@Override
 					protected Group load() {
 						return OneDev.getInstance(GroupManager.class).load(id);
 					}
-					
+
 				};
 			}
 		};

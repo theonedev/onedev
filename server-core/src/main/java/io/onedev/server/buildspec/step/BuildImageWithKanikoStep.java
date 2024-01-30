@@ -20,9 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=200, name="Build Docker Image (Kaniko)", description="Build and publish docker image with Kaniko. " +
+@Editable(order=200, name="Build Docker Image (Kaniko)", group = DOCKER_IMAGE, description="Build and publish docker image with Kaniko. " +
 		"This step can be executed by server docker executor, remote docker executor, or Kubernetes executor, " +
 		"without the need to mount docker sock")
 public class BuildImageWithKanikoStep extends CommandStep {
@@ -80,7 +81,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.destinations = destinations;
 	}
 	
-	@Editable(order=325, name="Certificates to Trust", placeholder = "Base64 encoded PEM format, starting with " +
+	@Editable(order=1000, name="Certificates to Trust", group = "More Settings", placeholder = "Base64 encoded PEM format, starting with " +
 			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----",
 			description = "Specify certificates to trust if you are using self-signed certificates for your docker registries")
 	@Multiline(monospace = true)
@@ -93,7 +94,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.trustCertificates = trustCertificates;
 	}
 
-	@Editable(order=340, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@Editable(order=1100, name="Built-in Registry Access Token Secret", group="More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Override
 	public String getBuiltInRegistryAccessTokenSecret() {
@@ -112,7 +113,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 				"<code>" + server + "</code>";
 	}
 	
-	@Editable(order=350, description="Optionally specify additional options to build image, " +
+	@Editable(order=1200, group="More Settings", description="Optionally specify additional options to build image, " +
 			"separated by spaces")
 	@Interpolative(variableSuggester="suggestVariables")
 	@ReservedOptions({"(--context)=.*", "(--destination)=.*"})

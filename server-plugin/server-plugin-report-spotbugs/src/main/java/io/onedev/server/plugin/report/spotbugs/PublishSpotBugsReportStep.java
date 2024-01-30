@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@Editable(order=8010, group=StepGroup.PUBLISH_REPORTS, name="SpotBugs")
+@Editable(order=8010, group=StepGroup.PUBLISH, name="SpotBugs Report")
 public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

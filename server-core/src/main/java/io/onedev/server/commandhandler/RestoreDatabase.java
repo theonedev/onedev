@@ -4,6 +4,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.Command;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.SessionFactoryManager;
@@ -69,7 +70,7 @@ public class RestoreDatabase extends CommandHandler {
 				if (backupFile.isFile()) {
 					File dataDir = FileUtils.createTempDir("restore");
 					try {
-						FileUtils.unzip(backupFile, dataDir);
+						ZipUtils.unzip(backupFile, dataDir);
 						doRestore(dataDir);
 					} finally {
 						FileUtils.deleteDir(dataDir);

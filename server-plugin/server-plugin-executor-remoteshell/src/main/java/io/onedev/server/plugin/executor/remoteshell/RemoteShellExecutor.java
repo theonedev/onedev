@@ -10,7 +10,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Horizontal;
 import io.onedev.server.annotation.Numeric;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.job.*;
@@ -24,7 +23,6 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -98,13 +96,6 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 					if (!jobContext.getServices().isEmpty()) {
 						throw new ExplicitException("This job requires services, which can only be supported "
 								+ "by docker aware executors");
-					}
-
-					for (CacheSpec cacheSpec : jobContext.getCacheSpecs()) {
-						if (new File(cacheSpec.getPath()).isAbsolute()) {
-							throw new ExplicitException("Shell executor does not support "
-									+ "absolute cache path: " + cacheSpec.getPath());
-						}
 					}
 
 					String jobToken = jobContext.getJobToken();

@@ -6,6 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.StorageManager;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.JobCacheManager;
 import io.onedev.server.entitymanager.PackBlobManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.CommandUtils;
@@ -39,12 +40,12 @@ import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static io.onedev.commons.utils.FileUtils.tar;
+import static io.onedev.commons.utils.TarUtils.tar;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.getArtifactsLockName;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
@@ -69,13 +70,16 @@ public class ClusterResource {
 	
 	private final BuildManager buildManager;
 	
+	private final JobCacheManager jobCacheManager;
+	
 	private final WorkExecutor workExecutor;
 	
 	@Inject
 	public ClusterResource(ProjectManager projectManager, CommitInfoManager commitInfoManager, 
 						   AttachmentManager attachmentManager, VisitInfoManager visitInfoManager, 
 						   WorkExecutor workExecutor, StorageManager storageManager, 
-						   PackBlobManager packBlobManager, BuildManager buildManager) {
+						   PackBlobManager packBlobManager, BuildManager buildManager, 
+						   JobCacheManager jobCacheManager) {
 		this.commitInfoManager = commitInfoManager;
 		this.projectManager = projectManager;
 		this.workExecutor = workExecutor;
@@ -84,6 +88,7 @@ public class ClusterResource {
 		this.storageManager = storageManager;
 		this.packBlobManager = packBlobManager;
 		this.buildManager = buildManager;
+		this.jobCacheManager = jobCacheManager;
 	}
 
 	@Path("/project-files")
@@ -214,6 +219,18 @@ public class ClusterResource {
 		return ok(out).build();
 	}
 	
+	@Path("/cache")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadCache(
+			@QueryParam("projectId") Long projectId, @QueryParam("cacheId") Long cacheId, 
+			@QueryParam("cachePath") String cachePath) {
+		if (!SecurityUtils.isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+		StreamingOutput out = os -> jobCacheManager.downloadCacheLocal(projectId, cacheId, cachePath, os, null);
+		return ok(out).build();
+	}
+
 	@Path("/site")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
@@ -425,6 +442,20 @@ public class ClusterResource {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Path("/cache")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@POST
+	public Response uploadCache(
+			@QueryParam("projectId") Long projectId,
+			@QueryParam("cacheId") Long cacheId,
+			@QueryParam("cachePath") String cachePath,
+			InputStream cacheStream) {
+		if (!SecurityUtils.isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+		jobCacheManager.uploadCacheLocal(projectId, cacheId, cachePath, cacheStream);
+		return ok().build();
 	}
 	
 }

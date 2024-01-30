@@ -1,3 +1,12 @@
+# 10.1.0
+
+### CI/CD
+
+OneDev now stores job caches on server instead of local disk for better manageability and 
+sharing. As result of this, the cache settings defined at job level are removed. One should 
+use _Set Up Cache_ step now instead. Check out <a href='https://docs.onedev.io/tutorials/cicd/job-cache'>this tutorial</a> 
+to get familiar with the new cache mechanism
+
 # 9.4.7
 
 ### Mail Service

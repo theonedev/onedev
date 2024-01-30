@@ -337,7 +337,7 @@ kbd {
 }
 code {
     background-color: var(--light);
-    padding: 0.15rem 0.5rem;
+    padding: 0.15rem 0.25rem;
     font-weight: 400;
     border-radius: 0.42rem;
 }

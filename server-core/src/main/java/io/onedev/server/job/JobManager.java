@@ -1,8 +1,6 @@
 package io.onedev.server.job;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.CacheAllocationRequest;
-import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.model.*;
 import io.onedev.server.terminal.Shell;
@@ -47,8 +45,6 @@ public interface JobManager {
 	
 	@Nullable
 	JobContext getJobContext(Long buildId);
-	
-	Map<CacheInstance, String> allocateCaches(JobContext jobContext, CacheAllocationRequest request);
 
 	void copyDependencies(JobContext jobContext, File targetDir);
 	

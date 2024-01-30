@@ -39,6 +39,7 @@ import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.editable.EditableUtils;
+import org.unbescape.html.HtmlEscape;
 
 @SuppressWarnings("serial")
 public abstract class TypeSelectPanel<T extends Serializable> extends Panel {

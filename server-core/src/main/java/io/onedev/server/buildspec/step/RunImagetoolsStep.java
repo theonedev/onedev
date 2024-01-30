@@ -18,9 +18,10 @@ import io.onedev.server.util.UrlUtils;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=230, name="Run Docker Buildx Image Tools", description="Run docker buildx imagetools " +
+@Editable(order=230, name="Run Docker Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
 		"command with specified arguments. This step can only be executed by server docker executor " +
 		"or remote docker executor")
 public class RunImagetoolsStep extends Step {
@@ -43,7 +44,7 @@ public class RunImagetoolsStep extends Step {
 		this.arguments = arguments;
 	}
 	
-	@Editable(order=200, name="Built-in Registry Access Token Secret", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
+	@Editable(order=200, name="Built-in Registry Access Token Secret", group = "More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;

@@ -4,6 +4,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
@@ -285,7 +286,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			try (Response response = builder.get()) {
 				KubernetesHelper.checkStatus(response);
 				try (InputStream is = response.readEntity(InputStream.class)) {
-					FileUtils.untar(is, targetDir, false);
+					TarUtils.untar(is, targetDir, false);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

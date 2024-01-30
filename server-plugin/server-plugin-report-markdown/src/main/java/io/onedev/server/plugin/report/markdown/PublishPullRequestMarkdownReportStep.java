@@ -21,7 +21,7 @@ import io.onedev.server.annotation.Interpolative;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
-@Editable(order=1200, group=StepGroup.PUBLISH_REPORTS, name="Pull Request Markdown", 
+@Editable(order=1200, group=StepGroup.PUBLISH, name="Pull Request Markdown Report", 
 		description="This report will be displayed in pull request overview page if build is triggered by pull request")
 public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 

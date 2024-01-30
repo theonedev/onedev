@@ -7,6 +7,7 @@ import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.DataManager;
@@ -216,7 +217,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
 					try (InputStream is = response.readEntity(InputStream.class)) {							
-						FileUtils.untar(is, getAssetsDir(), false);
+						TarUtils.untar(is, getAssetsDir(), false);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

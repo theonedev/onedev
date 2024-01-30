@@ -1,7 +1,10 @@
 package io.onedev.server.web.editable.string;
 
-import java.lang.reflect.Method;
-
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -12,11 +15,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.Multiline;
+import java.lang.reflect.Method;
 
 @SuppressWarnings("serial")
 public class StringPropertyEditor extends PropertyEditor<String> {
@@ -32,14 +31,14 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		Method getter = getDescriptor().getPropertyGetter();
 		var multiline = getter.getAnnotation(Multiline.class);
 		if (multiline != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);
 			fragment.add(input = new TextArea<>("input", Model.of(getModelObject())) {
 
-				@Override
+			@Override
 				protected boolean shouldTrimInput() {
 					return false;
 				}
@@ -56,7 +55,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			fragment.add(input = new TextField<String>("input", Model.of(getModelObject())));
 			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
-		}
+			}
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
 		
 		if (inputAssist != null) {
