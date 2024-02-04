@@ -19,6 +19,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Horizontal;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -31,6 +32,8 @@ import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
@@ -88,6 +91,12 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
+	private boolean stagingOnPV;
+	
+	private String storageClass;
+	
+	private String storageSize;
+	
 	private List<ServiceLocator> serviceLocators = new ArrayList<>();
 
 	private String configFile;
@@ -110,7 +119,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private transient List<ImageMappingFacade> imageMappingFacades;
 	
-	@Editable(order=20, description="Optionally specify node selector of the job pods")
+	@Editable(order=500, group = "More Settings", description="Optionally specify node selector of the job pods")
 	public List<NodeSelectorEntry> getNodeSelector() {
 		return nodeSelector;
 	}
@@ -119,7 +128,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.nodeSelector = nodeSelector;
 	}
 
-	@Editable(order=40, description="Optionally specify cluster role the job pods service account "
+	@Editable(order=600, group="More Settings", description="Optionally specify cluster role the job pods service account "
 			+ "binding to. This is necessary if you want to do things such as running other "
 			+ "Kubernetes pods in job command")
 	public String getClusterRole() {
@@ -141,7 +150,41 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.registryLogins = registryLogins;
 	}
 
-	@Editable(order=400, description = "Specify cpu request for jobs using this executor. " +
+	@Editable(order=300, name="Staging on Persistent Volume")
+	public boolean isStagingOnPV() {
+		return stagingOnPV;
+	}
+
+	public void setStagingOnPV(boolean stagingOnPV) {
+		this.stagingOnPV = stagingOnPV;
+	}
+
+	private static boolean isStagingOnPVEnabled() {
+		return (boolean) EditContext.get().getInputValue("stagingOnPV");
+	}
+	
+	@Editable(order=400, name="Persistent Volume Storage Class", placeholder = "Use default storage class")
+	@ShowCondition("isStagingOnPVEnabled")
+	public String getStorageClass() {
+		return storageClass;
+	}
+
+	public void setStorageClass(String storageClass) {
+		this.storageClass = storageClass;
+	}
+
+	@Editable(order=500, name="Persistent Volume Storage Size")
+	@ShowCondition("isStagingOnPVEnabled")
+	@NotEmpty
+	public String getStorageSize() {
+		return storageSize;
+	}
+
+	public void setStorageSize(String storageSize) {
+		this.storageSize = storageSize;
+	}
+
+	@Editable(order=400, group = "Resource Settings", description = "Specify cpu request for jobs using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	@NotEmpty
 	public String getCpuRequest() {
@@ -152,7 +195,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.cpuRequest = cpuRequest;
 	}
 
-	@Editable(order=500, description = "Specify memory request for jobs using this executor. " +
+	@Editable(order=500, group="Resource Settings", description = "Specify memory request for jobs using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	@NotEmpty
 	public String getMemoryRequest() {
@@ -163,7 +206,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.memoryRequest = memoryRequest;
 	}
 
-	@Editable(order=24990, group="More Settings", placeholder = "No limit", description = "" +
+	@Editable(order=24990, group="Resource Settings", placeholder = "No limit", description = "" +
 			"Optionally specify cpu limit for jobs using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	public String getCpuLimit() {
@@ -174,7 +217,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.cpuLimit = cpuLimit;
 	}
 
-	@Editable(order=24995, group="More Settings", placeholder = "No limit", description = "" +
+	@Editable(order=24995, group="Resource Settings", placeholder = "No limit", description = "" +
 			"Optionally specify memory limit for jobs using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	public String getMemoryLimit() {
@@ -894,6 +937,24 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				var trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
 				
+				if (isStagingOnPV()) {
+					Map<Object, Object> pvcDef = newLinkedHashMap(
+							"apiVersion", "v1",
+							"kind", "PersistentVolumeClaim",
+							"metadata", newLinkedHashMap(
+									"name", "build-home",
+									"namespace", namespace));
+					Map<Object, Object> pvcSpecDef = newLinkedHashMap(
+							"accessModes", newArrayList("ReadWriteOnce"),
+							"resources", newLinkedHashMap(
+									"requests", newLinkedHashMap(
+												"storage", getStorageSize())));
+					if (getStorageClass() != null)
+						pvcSpecDef.put("storageClassName", getStorageClass());
+					pvcDef.put("spec", pvcSpecDef);
+					createResource(pvcDef, Sets.newHashSet(), jobLogger);
+				}
+				
 				osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
 				
 				Map<String, Object> podSpec = new LinkedHashMap<>();
@@ -1111,9 +1172,17 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				if (!getNodeSelector().isEmpty())
 					podSpec.put("nodeSelector", toMap(getNodeSelector()));
 				
-				Map<Object, Object> buildHomeVolume = newLinkedHashMap(
-						"name", "build-home", 
-						"emptyDir", newLinkedHashMap());
+				Map<Object, Object> buildHomeVolume;
+				if (isStagingOnPV()) {
+					buildHomeVolume = newLinkedHashMap(
+							"name", "build-home", 
+							"persistentVolumeClaim", newLinkedHashMap(
+									"claimName", "build-home"));
+				} else {
+					buildHomeVolume = newLinkedHashMap(
+							"name", "build-home",
+							"emptyDir", newLinkedHashMap());
+				}
 				List<Object> volumes = newArrayList(buildHomeVolume);
 				if (trustCertsConfigMapName != null) {
 					volumes.add(newLinkedHashMap(
@@ -1132,6 +1201,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"spec", podSpec);
 				
 				createResource(podDef, Sets.newHashSet(), jobLogger);
+				
 				String podFQN = namespace + "/" + POD_NAME;
 				
 				AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
@@ -1265,11 +1335,13 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		var volumeMounts = new ArrayList<>();
 		int index = 1;
 		for (var cachePath: cachePaths) {
-			var volumeMount = newLinkedHashMap(
-					"name", "build-home",
-					"mountPath", cachePath,
-					"subPath", "cache/" + index);
-			volumeMounts.add(volumeMount);
+			if (FilenameUtils.getPrefixLength(cachePath) > 0) {
+				var volumeMount = newLinkedHashMap(
+						"name", "build-home",
+						"mountPath", cachePath,
+						"subPath", "cache/" + index);
+				volumeMounts.add(volumeMount);
+			}
 			index++;
 		}
 		return volumeMounts;

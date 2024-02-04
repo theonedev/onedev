@@ -222,8 +222,7 @@ public class KubernetesResource {
 	
 	@GET
 	@Path("/test")
-	public Response test() {
-		String jobToken = SecurityUtils.getBearerToken(request);
+	public Response test(@QueryParam("jobToken") String jobToken) {
 		if (jobToken != null) 
 			return Response.ok().build();
 		else 

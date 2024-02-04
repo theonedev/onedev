@@ -80,6 +80,7 @@ public class GenerateChecksumStep extends CommandStep {
 				commands.add("set -e");
 				commands.add("shopt -s globstar");
 				commands.add("cat `ls -1 " + files + " 2>/dev/null` | md5sum | awk '{ print $1 }' > " + targetFile);
+				commands.add("echo Generated checksum: `cat " + targetFile + "`");
 				return commands;
 			}
 		};

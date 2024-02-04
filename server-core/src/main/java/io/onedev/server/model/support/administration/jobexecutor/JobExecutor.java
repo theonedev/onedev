@@ -43,8 +43,6 @@ public abstract class JobExecutor implements Serializable {
 	
 	private boolean sitePublishEnabled;
 	
-	private int cacheTTL = 7;
-	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -64,7 +62,7 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=20, description="Enable this to allow to open interactive shell to diagnose running builds. "
+	@Editable(order=20, group = "Privilege Settings", description="Enable this to allow to open interactive shell to diagnose running builds. "
 			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
 			+ "the executor. You should configure job requirement below to make sure the executor can only be "
 			+ "used by trusted jobs if this option is enabled")
@@ -77,7 +75,7 @@ public abstract class JobExecutor implements Serializable {
 		this.shellAccessEnabled = shellAccessEnabled;
 	}
 
-	@Editable(order=30, description="Enable this to allow to run site publish step. OneDev will serve project "
+	@Editable(order=30, group = "Privilege Settings", description="Enable this to allow to run site publish step. OneDev will serve project "
 			+ "site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs")
 	public boolean isSitePublishEnabled() {
 		return sitePublishEnabled;
@@ -87,7 +85,7 @@ public abstract class JobExecutor implements Serializable {
 		this.sitePublishEnabled = sitePublishEnabled;
 	}
 
-	@Editable(order=40, description = "Enable this to allow to run html report publish step. To avoid XSS attach, " +
+	@Editable(order=40, group = "Privilege Settings", description = "Enable this to allow to run html report publish step. To avoid XSS attach, " +
 			"make sure this executor can only be used by trusted jobs")
 	public boolean isHtmlReportPublishEnabled() {
 		return htmlReportPublishEnabled;
@@ -111,18 +109,6 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setJobRequirement(String jobRequirement) {
 		this.jobRequirement = jobRequirement;
-	}
-
-	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
-			+ "OneDev may create multiple job caches even for same cache key to avoid cache conflicts when "
-			+ "running jobs concurrently. This setting tells OneDev to remove caches inactive for specified "
-			+ "time period to save disk space")
-	public int getCacheTTL() {
-		return cacheTTL;
-	}
-
-	public void setCacheTTL(int cacheTTL) {
-		this.cacheTTL = cacheTTL;
 	}
 	
 	public abstract void execute(JobContext jobContext, TaskLogger jobLogger);

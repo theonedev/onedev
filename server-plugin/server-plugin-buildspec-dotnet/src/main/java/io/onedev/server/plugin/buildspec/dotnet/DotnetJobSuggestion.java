@@ -44,7 +44,7 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			job.getSteps().add(generateChecksum);
 
 			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up package cache");
+			setupCache.setName("set up nuget cache");
 			setupCache.setKey("nuget_packages_@file:checksum@");
 			setupCache.setPath("/root/.nuget/packages");
 			setupCache.getLoadKeys().add("nuget_packages");
