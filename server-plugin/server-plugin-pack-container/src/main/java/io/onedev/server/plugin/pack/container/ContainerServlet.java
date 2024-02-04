@@ -277,82 +277,88 @@ public class ContainerServlet extends HttpServlet {
 						String hash;
 						if (isTag(reference)) {
 							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, null);
-							hash = LockUtils.call(getLockName(projectId, repository), () -> sessionManager.call(new Callable<>() {
-
-								private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
-									var packBlob = packBlobs.get(hash);
-									if (packBlob == null) {
-										packBlob = packBlobManager.findBySha256Hash(hash);
-										if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-											if (packBlob.getSize() == size)
-												packBlobs.put(hash, packBlob);
-											else
-												throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
-										} else {
-											throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
-										}
-									}
-									return packBlob;
-								}
-
-								private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs, byte[] bytes) {
-									var manifest = new ContainerManifest(bytes);
-									if (manifest.isImageIndex()) {
-										for (var manifestNode : manifest.getJson().get("manifests")) {
-											var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
-											var size = manifestNode.get("size").asLong();
-											var packBlob = loadPackBlob(packBlobs, hash, size);
-											var mediaType = manifestNode.get("mediaType").asText();
-											if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
-												var baos = new ByteArrayOutputStream();
-												packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
-												loadReferencedPackBlobs(packBlobs, baos.toByteArray());
-											}
-										}
-									} else if (manifest.isImageManifest()) {
-										var blobNodes = new ArrayList<JsonNode>();
-										blobNodes.add(manifest.getJson().get("config"));
-										for (var layerNode : manifest.getJson().get("layers"))
-											blobNodes.add(layerNode);
-										for (var blobNode : blobNodes) {
-											var hash = parseDigest(blobNode.get("digest").asText()).getHash();
-											var size = blobNode.get("size").asLong();
-											loadPackBlob(packBlobs, hash, size);
-										}
-									}
-								}
-
+							// DO not use lamda here as it may cause compilation error on terminal
+							hash = LockUtils.call(getLockName(projectId, repository), new Callable<String>() {
 								@Override
 								public String call() {
-									var packBlobs = new HashMap<String, PackBlob>();
-									loadReferencedPackBlobs(packBlobs, bytes);
-									var packBlob = packBlobManager.load(packBlobId);
-									packBlobs.put(packBlob.getSha256Hash(), packBlob);
+									return sessionManager.call(new Callable<>() {
 
-									var project = projectManager.load(projectId);
-									var pack = packManager.findByNameAndVersion(project, TYPE, repository, reference);
-									if (pack == null) {
-										pack = new Pack();
-										pack.setProject(project);
-										pack.setType(TYPE);
-										pack.setName(repository);
-										pack.setVersion(reference);
-									}
+										private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
+											var packBlob = packBlobs.get(hash);
+											if (packBlob == null) {
+												packBlob = packBlobManager.findBySha256Hash(hash);
+												if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+													if (packBlob.getSize() == size)
+														packBlobs.put(hash, packBlob);
+													else
+														throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID);
+												} else {
+													throw new ClientException(SC_BAD_REQUEST, ErrorCode.MANIFEST_BLOB_UNKNOWN);
+												}
+											}
+											return packBlob;
+										}
 
-									Build build = null;
-									Long buildId = (Long) request.getAttribute(ATTR_BUILD_ID);
-									if (buildId != null)
-										build = buildManager.load(buildId);
-									pack.setBuild(build);
-									pack.setUser(SecurityUtils.getUser());
-									pack.setData(packBlob.getSha256Hash());
-									pack.setPublishDate(new Date());
+										private void loadReferencedPackBlobs(Map<String, PackBlob> packBlobs, byte[] bytes) {
+											var manifest = new ContainerManifest(bytes);
+											if (manifest.isImageIndex()) {
+												for (var manifestNode : manifest.getJson().get("manifests")) {
+													var hash = parseDigest(manifestNode.get("digest").asText()).getHash();
+													var size = manifestNode.get("size").asLong();
+													var packBlob = loadPackBlob(packBlobs, hash, size);
+													var mediaType = manifestNode.get("mediaType").asText();
+													if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
+														var baos = new ByteArrayOutputStream();
+														packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+														loadReferencedPackBlobs(packBlobs, baos.toByteArray());
+													}
+												}
+											} else if (manifest.isImageManifest()) {
+												var blobNodes = new ArrayList<JsonNode>();
+												blobNodes.add(manifest.getJson().get("config"));
+												for (var layerNode : manifest.getJson().get("layers"))
+													blobNodes.add(layerNode);
+												for (var blobNode : blobNodes) {
+													var hash = parseDigest(blobNode.get("digest").asText()).getHash();
+													var size = blobNode.get("size").asLong();
+													loadPackBlob(packBlobs, hash, size);
+												}
+											}
+										}
 
-									packManager.createOrUpdate(pack, packBlobs.values(), true);
+										@Override
+										public String call() {
+											var packBlobs = new HashMap<String, PackBlob>();
+											loadReferencedPackBlobs(packBlobs, bytes);
+											var packBlob = packBlobManager.load(packBlobId);
+											packBlobs.put(packBlob.getSha256Hash(), packBlob);
 
-									return packBlob.getSha256Hash();
+											var project = projectManager.load(projectId);
+											var pack = packManager.findByNameAndVersion(project, TYPE, repository, reference);
+											if (pack == null) {
+												pack = new Pack();
+												pack.setProject(project);
+												pack.setType(TYPE);
+												pack.setName(repository);
+												pack.setVersion(reference);
+											}
+
+											Build build = null;
+											Long buildId = (Long) request.getAttribute(ATTR_BUILD_ID);
+											if (buildId != null)
+												build = buildManager.load(buildId);
+											pack.setBuild(build);
+											pack.setUser(SecurityUtils.getUser());
+											pack.setData(packBlob.getSha256Hash());
+											pack.setPublishDate(new Date());
+
+											packManager.createOrUpdate(pack, packBlobs.values(), true);
+
+											return packBlob.getSha256Hash();
+										}
+									});
 								}
-							}));
+							});
 						} else {
 							hash = parseDigest(reference).getHash();
 							if (packBlobManager.uploadBlob(projectId, bytes, hash) == null) {
