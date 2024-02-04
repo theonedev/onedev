@@ -21,7 +21,7 @@ public class GenerateChecksumStep extends CommandStep {
 
 	private String targetFile;
 	
-	@Editable(order=100, description = "Specify files to create sha256 checksum from. Multiple files " +
+	@Editable(order=100, description = "Specify files to create md5 checksum from. Multiple files " +
 			"should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. " +
 			"Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -79,7 +79,7 @@ public class GenerateChecksumStep extends CommandStep {
 				var commands = new ArrayList<String>();
 				commands.add("set -e");
 				commands.add("shopt -s globstar");
-				commands.add("cat `ls -1 " + files + " 2>/dev/null` | sha256sum | awk '{ print $1 }' > " + targetFile);
+				commands.add("cat `ls -1 " + files + " 2>/dev/null` | md5sum | awk '{ print $1 }' > " + targetFile);
 				return commands;
 			}
 		};
