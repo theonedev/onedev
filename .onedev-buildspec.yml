@@ -336,12 +336,16 @@ jobs:
     moreOptions: --builder onedev --platform @param:Platforms@
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   paramSpecs:
-  - !TextParam
+  - !ChoiceParam
     name: Platforms
+    allowMultiple: true
     allowEmpty: false
-    multiline: false
-    defaultValueProvider: !SpecifiedDefaultValue
-      value: linux/amd64
+    choiceProvider: !SpecifiedChoices
+      choices:
+      - value: linux/amd64
+        color: '#0d87e9'
+      - value: linux/arm64
+        color: '#0d87e9'
   jobDependencies:
   - jobName: CI
     requireSuccessful: true
