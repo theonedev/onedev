@@ -324,7 +324,7 @@ jobs:
     tags: 1dev/server:test
     publish: true
     removeDanglingImages: true
-    moreOptions: --builder onedev --platform @param:platform@
+    moreOptions: --builder onedev --platform @param:Platforms@
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build agent docker image
@@ -333,11 +333,11 @@ jobs:
     tags: 1dev/agent:test
     publish: true
     removeDanglingImages: true
-    moreOptions: --builder onedev --platform @param:platform@
+    moreOptions: --builder onedev --platform @param:Platforms@
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   paramSpecs:
   - !TextParam
-    name: platform
+    name: Platforms
     allowEmpty: false
     multiline: false
     defaultValueProvider: !SpecifiedDefaultValue
