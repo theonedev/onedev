@@ -1,49 +1,5 @@
 version: 26
 jobs:
-- name: CI
-  steps:
-  - !CheckoutStep
-    name: checkout
-    cloneCredential: !HttpCredential
-      accessTokenSecret: onedev-token
-    withLfs: false
-    withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: detect build version
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: set build version
-    buildVersion: '@file:buildVersion@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: test
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - mvn test -Pee
-    useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  triggers:
-  - !BranchUpdateTrigger
-    branches: main
-    projects: onedev/server
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
-  timeout: 3600
 - name: Release
   steps:
   - !CheckoutStep
@@ -81,8 +37,7 @@ jobs:
       - ''
       - projectDir=`pwd`
       - ''
-      - '# Skip test as we''ve already tested in CI build'
-      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
+      - mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
       - ''
       - '# Prepare for artifact and site publish'
       - cp server-product/target/onedev-${buildVersion}.zip .
@@ -200,9 +155,6 @@ jobs:
     milestoneName: '@build_version@'
     accessTokenSecret: onedev-token
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -289,7 +241,7 @@ jobs:
       commands:
       - set -e
       - ''
-      - mvn -Dmaven.test.skip=true package -Pee
+      - mvn package -Pee
       - ''
       - cd server-product/target
       - cp -r ../docker docker
@@ -307,7 +259,6 @@ jobs:
     tags: 1dev/server:test
     publish: true
     removeDanglingImages: true
-    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build agent docker image
@@ -316,11 +267,7 @@ jobs:
     tags: 1dev/agent:test
     publish: true
     removeDanglingImages: true
-    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
