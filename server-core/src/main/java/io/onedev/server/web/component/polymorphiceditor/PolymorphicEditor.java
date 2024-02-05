@@ -11,6 +11,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -204,6 +205,16 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 			super.error(propertyNode, pathInProperty, errorMessage);
 	}
 
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof BeanUpdating) {
+			convertInput();
+			clearErrors();
+		}
+	}
+	
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
 		Component beanEditor = get("beanEditor");

@@ -89,7 +89,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 						 * Create new property container instead of simply refreshing it as some dependent 
 						 * properties may only take effect when re-create the property container. For instance
 						 * If default value of an issue field depends on input value of another issue field  
-						 */
+						 */  
 						PropertyContainer newPropertyContainer = 
 								newPropertyContainer(propertyContainer.getId(), propertyContext);
 						propertyContainer.replaceWith(newPropertyContainer);
