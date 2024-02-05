@@ -6188,7 +6188,7 @@ public class DataMigrator {
 							for (Element executorElement : valueElement.elements()) {
 								executorElement.element("cacheTTL").detach();
 								if (executorElement.getName().contains("KubernetesExecutor")) 
-									executorElement.addElement("stagingOnPV").setText("false");
+									executorElement.addElement("buildWithPV").setText("false");
 							}
 						}
 					}

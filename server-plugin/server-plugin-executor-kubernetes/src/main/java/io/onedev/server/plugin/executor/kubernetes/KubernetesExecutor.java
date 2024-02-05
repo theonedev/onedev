@@ -91,7 +91,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
-	private boolean stagingOnPV;
+	private boolean buildWithPV;
 	
 	private String storageClass;
 	
@@ -150,21 +150,25 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.registryLogins = registryLogins;
 	}
 
-	@Editable(order=300, name="Staging on Persistent Volume")
-	public boolean isStagingOnPV() {
-		return stagingOnPV;
+	@Editable(order=300, name="Build with Persistent Volume", description="Enable this to place intermediate " +
+			"files required by job execution on dynamically allocated persistent volume instead of emptyDir")
+	public boolean isBuildWithPV() {
+		return buildWithPV;
 	}
 
-	public void setStagingOnPV(boolean stagingOnPV) {
-		this.stagingOnPV = stagingOnPV;
+	public void setBuildWithPV(boolean buildWithPV) {
+		this.buildWithPV = buildWithPV;
 	}
 
-	private static boolean isStagingOnPVEnabled() {
-		return (boolean) EditContext.get().getInputValue("stagingOnPV");
+	private static boolean isBuildWithPVEnabled() {
+		return (boolean) EditContext.get().getInputValue("buildWithPV");
 	}
 	
-	@Editable(order=400, name="Persistent Volume Storage Class", placeholder = "Use default storage class")
-	@ShowCondition("isStagingOnPVEnabled")
+	@Editable(order=400, name="Build Volume Storage Class", placeholder = "Use default storage class", description = "" +
+			"Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. " +
+			"<b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, " +
+			"as the volume is only used to hold temporary build files")
+	@ShowCondition("isBuildWithPVEnabled")
 	public String getStorageClass() {
 		return storageClass;
 	}
@@ -173,8 +177,10 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.storageClass = storageClass;
 	}
 
-	@Editable(order=500, name="Persistent Volume Storage Size")
-	@ShowCondition("isStagingOnPVEnabled")
+	@Editable(order=500, name="Build Volume Storage Size", description = "Specify storage size to request " +
+			"for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, " +
+			"for instance <i>10Gi</i>")
+	@ShowCondition("isBuildWithPVEnabled")
 	@NotEmpty
 	public String getStorageSize() {
 		return storageSize;
@@ -937,7 +943,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				var trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
 				
-				if (isStagingOnPV()) {
+				if (isBuildWithPV()) {
 					Map<Object, Object> pvcDef = newLinkedHashMap(
 							"apiVersion", "v1",
 							"kind", "PersistentVolumeClaim",
@@ -1173,7 +1179,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					podSpec.put("nodeSelector", toMap(getNodeSelector()));
 				
 				Map<Object, Object> buildHomeVolume;
-				if (isStagingOnPV()) {
+				if (isBuildWithPV()) {
 					buildHomeVolume = newLinkedHashMap(
 							"name", "build-home", 
 							"persistentVolumeClaim", newLinkedHashMap(
