@@ -291,10 +291,13 @@ jobs:
       - ''
       - mvn -Dmaven.test.skip=true package -Pee
       - ''
-      - '# Prepare for docker image build'
-      - cd $projectDir/server-product/docker
-      - docker run --privileged --rm tonistiigi/binfmt --install all
-      - ./prepare.sh
+      - cd server-product/target
+      - cp -r ../docker docker
+      - buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
+      - ''
+      - unzip onedev-$buildVersion.zip -d docker
+      - mv docker/onedev-$buildVersion docker/app
+      - cp -r agent docker/
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
