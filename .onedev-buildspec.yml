@@ -106,9 +106,11 @@ jobs:
       - cp server-product/docker/*.yaml .
       - ''
       - '# Prepare for docker image build'
-      - cd $projectDir/server-product/docker
-      - docker run --privileged --rm tonistiigi/binfmt --install all
-      - ./prepare.sh
+      - cd $projectDir/server-product/target
+      - cp -r ../docker docker
+      - unzip onedev-$buildVersion.zip -d docker
+      - mv docker/onedev-$buildVersion docker/app
+      - cp -r agent docker/
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
@@ -280,6 +282,21 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: detect version
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands:
+      - set -e
+      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
+      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersionStep
+    name: set version
+    buildVersion: '@file:buildVersion@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: build
