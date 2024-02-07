@@ -35,3 +35,4 @@ issue #1580
 issue #7
 issue #1693
 issue #1722
+issue #1729 
