@@ -1,0 +1,12 @@
+.image-upload .preview {
+    margin-top: 10px;
+}
+.image-upload .preview img {
+	margin: 1px;
+}
+.image-upload.no-image .preview {
+    display: none;
+}
+.image-upload input[type="text"] {
+    display: none;
+}

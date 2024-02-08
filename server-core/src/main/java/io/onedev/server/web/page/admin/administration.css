@@ -53,3 +53,10 @@
 .milestone-type-management td.property-id {
 	display: none;
 }
+
+.branding-setting .logo-preview>div {
+	background-color: white !important;
+}
+.branding-setting .dark-mode>.logo-preview>div {
+	background-color: var(--dark-mode-dark) !important;
+}

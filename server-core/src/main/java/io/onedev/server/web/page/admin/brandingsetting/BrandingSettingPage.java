@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.brandingsetting;
 
+import com.google.common.io.Resources;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -9,118 +10,129 @@ import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.fileupload.FileUploadField;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BrandingSettingPage extends AdministrationPage {
 
-	private List<FileUpload> uploads;
+	private static final String DATA_PREFIX = "data:image/png;base64,";
 	
 	public BrandingSettingPage(PageParameters params) {
 		super(params);
 	}
 	
-	private static File getLogoFile() {
-		return new File(OneDev.getAssetsDir(), "logo.png");
+	private static File getCustomLogoFile(boolean darkMode) {
+		if (darkMode)
+			return new File(OneDev.getAssetsDir(), "logo-dark.png");
+		else
+			return new File(OneDev.getAssetsDir(), "logo.png");			
+	}
+	
+	private String getLogoData(boolean darkMode) {
+		var file = getCustomLogoFile(darkMode);
+		if (file.exists()) {
+			try {
+				return DATA_PREFIX + Base64.encodeBase64String(FileUtils.readFileToByteArray(file));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return getDefaultLogoData(darkMode);
+		}
 	}
 
+	private String getDefaultLogoData(boolean darkMode) {
+		try {
+			var fileName = darkMode?"logo-dark.png":"logo.png";
+			URL url = Resources.getResource(ImageScope.class, fileName);
+			return DATA_PREFIX + Base64.encodeBase64String(Resources.toByteArray(url));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private byte[] getLogoBytes(String logoData) {
+		return Base64.decodeBase64(logoData.substring(DATA_PREFIX.length()));
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BrandingSetting setting = OneDev.getInstance(SettingManager.class).getBrandingSetting();
+		var setting = getSettingManager().getBrandingSetting();
+		var bean = new BrandSettingEditBean();
+		bean.setName(setting.getName());
+		bean.setLogoData(getLogoData(false));
+		bean.setDarkLogoData(getLogoData(true));
 		
-		BeanEditor editor = BeanContext.edit("editor", setting);
-		
-		Button saveButton = new Button("save") {
-
+		var form = new Form<Void>("settings") {
 			@Override
-			public void onSubmit() {
+			protected void onSubmit() {
 				super.onSubmit();
-
-				if (uploads != null && !uploads.isEmpty()) {
-					getClusterManager().runOnAllServers(new UpdateLogoTask(
-							uploads.iterator().next().getBytes()));
+				setting.setName(bean.getName());
+				getSettingManager().saveBrandingSetting(setting);
+				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
+					var bytes = getLogoBytes(bean.getLogoData());
+					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, false));
 				}
-				OneDev.getInstance(SettingManager.class).saveBrandingSetting(setting);
-				getSession().success("Branding settings saved");
+				if (!bean.getDarkLogoData().equals(getDefaultLogoData(true))) {
+					var bytes = getLogoBytes(bean.getDarkLogoData());
+					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, true));
+				}
+				Session.get().success("Branding settings updated");
 			}
-			
 		};
-		
-		Form<?> form = new Form<Void>("brandingSetting");
-		form.setMultiPart(true);
-		form.add(editor);
-		
-		form.add(new BrandLogoPanel("logoPreview"));
-		
-		form.add(new FileUploadField("logoUpload", new IModel<List<FileUpload>>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public List<FileUpload> getObject() {
-				return uploads;
-			}
-
-			@Override
-			public void setObject(List<FileUpload> object) {
-				uploads = object;
-			}
-			
-		}) {
-
-			@Override
-			protected String getHint() {
-				return "Select file...";
-			}
-
-			@Override
-			protected String getIcon() {
-				return "image";
-			}
-			
-		});
-		
-		form.add(saveButton);
-		
-		form.add(new Link<Void>("useDefaultLogo") {
+		add(form);
+		form.add(BeanContext.edit("editor", bean));
+		form.add(new Link<Void>("useDefault") {
 
 			@Override
 			public void onClick() {
-				getClusterManager().runOnAllServers(new DeleteLogoTask());
-				getSession().success("Using default logo now");
+				setting.setName(BrandingSetting.DEFAULT_NAME);
+				getSettingManager().saveBrandingSetting(setting);
+				getClusterManager().runOnAllServers(new UpdateLogoTask(null, false));
+				getClusterManager().runOnAllServers(new UpdateLogoTask(null, true));
+				setResponsePage(BrandingSettingPage.class);
+				Session.get().success("Default branding settings restored");
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLogoFile().exists());
+				setVisible(!setting.getName().equals(BrandingSetting.DEFAULT_NAME) 
+						|| getCustomLogoFile(false).exists() 
+						|| getCustomLogoFile(true).exists());
 			}
-			
-		}.add(new ConfirmClickModifier("Do you really want to use the default logo?")));
-		
-		add(form);
+		});
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		return new Label(componentId, "Branding");
+	}
+	
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
 	}
 
 	private ClusterManager getClusterManager() {
@@ -131,30 +143,26 @@ public class BrandingSettingPage extends AdministrationPage {
 
 		private final byte[] logoBytes;
 		
-		UpdateLogoTask(byte[] logoBytes) {
+		private final boolean darkMode;
+		
+		UpdateLogoTask(@Nullable byte[] logoBytes, boolean darkMode) {
 			this.logoBytes = logoBytes;
+			this.darkMode = darkMode;
 		}
 		
 		@Override
 		public Void call() throws Exception {
 			try {
-				FileUtils.writeByteArrayToFile(getLogoFile(), logoBytes);
+				if (logoBytes != null)
+					FileUtils.writeByteArrayToFile(getCustomLogoFile(darkMode), logoBytes);
+				else 
+					FileUtils.deleteFile(getCustomLogoFile(darkMode));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 			return null;
 		}
 		
-	}
-
-	private static class DeleteLogoTask implements ClusterTask<Void> {
-
-		@Override
-		public Void call() throws Exception {
-			FileUtils.deleteFile(getLogoFile());
-			return null;
-		}
-
 	}
 	
 }

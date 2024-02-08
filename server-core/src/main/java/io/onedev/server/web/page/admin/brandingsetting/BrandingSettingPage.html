@@ -1,19 +1,10 @@
 <wicket:extend>
 	<div class="card branding-setting">
 		<div class="card-body">
-			<form wicket:id="brandingSetting" class="leave-confirm">
+			<form wicket:id="settings" class="leave-confirm mb-5">
 				<div wicket:id="editor" class="mb-4"></div>
-				<div class="form-group">
-					<label class="control-label">Logo <span class="text-danger">*</span></label>					
-					<div class="mb-2 logo-preview">
-						<span wicket:id="logoPreview"></span>
-					</div>
-					<input wicket:id="logoUpload" type="file" accept="image/png">
-					<div class="text-muted form-text">Upload a logo to be displayed at left top area of the screen. 
-					It should be a 128x128 transparent png file</div>
-				</div>
-				<input wicket:id="save" type="submit" class="btn btn-primary dirty-aware mr-1" value="Save Settings">
-				<a wicket:id="useDefaultLogo" class="btn btn-light-primary">Use Default Logo</a>
+				<input type="submit" class="btn btn-primary dirty-aware mr-2" value="Update">
+				<a wicket:id="useDefault" class="btn btn-secondary">Use Default</a>
 			</form>
 		</div>
 	</div>

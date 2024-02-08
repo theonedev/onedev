@@ -158,7 +158,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new BrandLogoPanel("brandLogo"));
+				add(new BrandLogoPanel("brandLogo", true));
 				add(new Label("brandName", new LoadableDetachableModel<String>() {
 
 					@Override
@@ -746,7 +746,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new BrandLogoPanel("brandLogo"));
+				add(new BrandLogoPanel("brandLogo", null));
 			}
 
 		});

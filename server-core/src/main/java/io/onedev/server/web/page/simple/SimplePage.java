@@ -56,7 +56,7 @@ public abstract class SimplePage extends BasePage {
 	protected abstract String getSubTitle();
 	
 	protected Component newPageLogo(String componentId) {
-		return new BrandLogoPanel(componentId);
+		return new BrandLogoPanel(componentId, null);
 	}
 	
 }
