@@ -897,6 +897,18 @@ public class Upgrade extends AbstractPlugin {
 			}
 		}
 
+		if (oldAppDataVersion < 155) {
+			try {
+				if (new File(upgradeDir, "site/assets/logo.png").exists()) {
+					FileUtils.copyFile(
+							new File(upgradeDir, "site/assets/logo.png"),
+							new File(upgradeDir, "site/assets/logo-dark.png"));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);

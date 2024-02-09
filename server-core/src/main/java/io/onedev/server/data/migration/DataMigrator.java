@@ -6191,6 +6191,10 @@ public class DataMigrator {
 									executorElement.addElement("buildWithPV").setText("false");
 							}
 						}
+					} else if (key.equals("BRANDING")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("url").setText("https://onedev.io");
 					}
 				}
 				dom.writeToFile(file, false);

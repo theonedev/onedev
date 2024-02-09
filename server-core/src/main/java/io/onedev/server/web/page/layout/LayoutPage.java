@@ -11,6 +11,7 @@ import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.updatecheck.UpdateCheckManager;
@@ -104,6 +105,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -445,7 +447,12 @@ public abstract class LayoutPage extends BasePage {
 		});
 
 		var version = AppLoader.getProduct().getVersion();
-		sidebar.add(new Label("productVersion", "OneDev " + version));
+		var brandingSetting = getSettingManager().getBrandingSetting();
+		if (brandingSetting.isOEM())
+			sidebar.add(new ExternalLink("productVersion", brandingSetting.getUrl(), brandingSetting.getName() + " " + version));
+		else
+			sidebar.add(new ExternalLink("productVersion", BrandingSetting.DEFAULT_URL, BrandingSetting.DEFAULT_NAME + " " + version));
+		
 		sidebar.add(new WebMarkupContainer("tryEE") {
 			@Override
 			protected void onConfigure() {

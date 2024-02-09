@@ -4,15 +4,10 @@ import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.List;
-
 public class TestPage extends BasePage {
-	
-	private List<FileUpload> uploads;
 	
 	public TestPage(PageParameters params) {
 		super(params);
