@@ -7,11 +7,13 @@ import java.util.stream.Collectors;
 import com.google.common.base.Optional;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.interpolative.InterpolativeParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 
@@ -67,5 +69,27 @@ public abstract class InterpolativeAssistBehavior extends ANTLRAssistBehavior {
 	protected abstract List<InputSuggestion> suggestVariables(String matchWith);
 
 	protected abstract List<InputSuggestion> suggestLiterals(String matchWith);
+
+	@Override
+	protected int getReplaceEnd(InputStatus inputStatus) {
+		return doGetReplaceEnd(inputStatus);
+	}
+	
+	public static int doGetReplaceEnd(InputStatus inputStatus) {
+		var contentAfterCaret = inputStatus.getContentAfterCaret();
+		var count = 0;
+		for (var ch: contentAfterCaret.toCharArray()) {
+			if (ch == '@')
+				count++;
+		}
+
+		var replaceEnd = inputStatus.getCaret();
+		if (count % 2 != 0) {
+			var index = contentAfterCaret.indexOf('@');
+			if (index != -1)
+				replaceEnd += index + 1;
+		}
+		return replaceEnd;
+	}
 	
 }

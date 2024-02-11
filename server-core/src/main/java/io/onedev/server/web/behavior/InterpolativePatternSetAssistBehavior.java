@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.onedev.commons.codeassist.InputStatus;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Optional;
@@ -140,4 +141,9 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 	
 	protected abstract List<InputSuggestion> suggestPatterns(String matchWith);
 
+	@Override
+	protected int getReplaceEnd(InputStatus inputStatus) {
+		return InterpolativeAssistBehavior.doGetReplaceEnd(inputStatus);
+	}
+	
 }

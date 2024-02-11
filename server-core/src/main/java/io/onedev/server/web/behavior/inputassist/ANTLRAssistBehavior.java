@@ -82,6 +82,11 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			}
 
 			@Override
+			protected int getReplaceEnd(InputStatus inputStatus) {
+				return ANTLRAssistBehavior.this.getReplaceEnd(inputStatus);
+			}
+
+			@Override
 			protected Optional<String> describe(TerminalExpect terminalExpect, String suggestedLiteral) {
 				return ANTLRAssistBehavior.this.describe(terminalExpect, suggestedLiteral);
 			}
@@ -216,6 +221,10 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		return new ArrayList<>();
+	}
+	
+	protected int getReplaceEnd(InputStatus inputStatus) {
+		return -1;
 	}
 	
 	/**

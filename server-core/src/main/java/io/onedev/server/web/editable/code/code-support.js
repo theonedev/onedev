@@ -101,11 +101,17 @@ onedev.server.codeSupport = {
 		}		
 		
 	    var afterCursor = cm.doc.getLine(line).substring(start);
-		var to = afterCursor.indexOf('@');
-		if (to == -1)
+		afterCursor = afterCursor.replace('@@', '__');
+		
+		if((afterCursor.match(/@/g) || []).length % 2 === 0) {
 			to = cm.getCursor().ch;
-		else
-			to += start+1;
+		} else {
+			to = afterCursor.indexOf('@');
+			if (to === -1)
+				to = cm.getCursor().ch;
+			else
+				to += start+1;
+		}
 		
     	$input.data("showHintCallback")({
     		list: variables,
