@@ -11,6 +11,7 @@ import io.onedev.server.git.hook.GitPreReceiveCallback;
 import io.onedev.server.jetty.ClasspathAssetServlet;
 import io.onedev.server.jetty.FileAssetServlet;
 import io.onedev.server.jetty.ServletConfigurator;
+import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
@@ -35,6 +36,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 
 	private static final int SESSION_TIMEOUT = 300;
 	
+	private final CorsFilter corsFilter;
+	
 	private final ShiroFilter shiroFilter;
 	
     private final GitFilter gitFilter;
@@ -56,11 +59,12 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final ServerSocketServlet serverServlet;
 	
 	@Inject
-	public ProductServletConfigurator(ShiroFilter shiroFilter,
+	public ProductServletConfigurator(ShiroFilter shiroFilter, CorsFilter corsFilter,
 									  GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
 									  GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
 									  WebSocketManager webSocketManager, ServletContainer jerseyServlet,
 									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
+		this.corsFilter = corsFilter;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
         this.gitLfsFilter = gitLfsFilter;
@@ -81,6 +85,9 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, DefaultWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
+
+		context.addFilter(new FilterHolder(corsFilter), "/*", EnumSet.allOf(DispatcherType.class));
+		
 		context.addFilter(new FilterHolder(shiroFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
         context.addFilter(new FilterHolder(gitFilter), "/*", EnumSet.allOf(DispatcherType.class));

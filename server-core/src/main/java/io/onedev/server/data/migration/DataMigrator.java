@@ -6195,6 +6195,10 @@ public class DataMigrator {
 						Element valueElement = element.element("value");
 						if (valueElement != null) 
 							valueElement.addElement("url").setText("https://onedev.io");
+					} else if (key.equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("corsAllowedOrigins");
 					}
 				}
 				dom.writeToFile(file, false);

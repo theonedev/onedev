@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable
 public class SecuritySetting implements Serializable {
@@ -32,6 +34,8 @@ public class SecuritySetting implements Serializable {
 	private String defaultLoginGroupName;
 	
 	private boolean enforce2FA;
+	
+	private List<String> corsAllowedOrigins = new ArrayList<>();
 	
 	@Editable(order=100, description="Whether or not to allow anonymous users to access this server")
 	public boolean isEnableAnonymousAccess() {
@@ -93,6 +97,18 @@ public class SecuritySetting implements Serializable {
 
 	public void setEnforce2FA(boolean enforce2FA) {
 		this.enforce2FA = enforce2FA;
+	}
+
+	@Editable(order=500, name="CORS Allowed Origins", placeholder = "Specify allowed CORS origin, hit ENTER to add more", description = "" +
+			"Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. " +
+			"For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, " +
+			"the response header <code>Access-Control-Allow-Origin</code> will be set to the same value")
+	public List<String> getCorsAllowedOrigins() {
+		return corsAllowedOrigins;
+	}
+
+	public void setCorsAllowedOrigins(List<String> corsAllowedOrigins) {
+		this.corsAllowedOrigins = corsAllowedOrigins;
 	}
 
 	@Nullable
