@@ -1065,7 +1065,7 @@ public class PullRequest extends ProjectBelonging
 		if (commitMessageCheckError == null) {
 			if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
 				commitMessageCheckError = Optional.ofNullable(getProject().checkCommitMessages(getTargetBranch(), getSubmitter(), 
-						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), null));
+						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>()));
 			} else {
 				commitMessageCheckError = Optional.empty();
 			}

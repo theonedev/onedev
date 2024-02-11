@@ -363,7 +363,7 @@ public class MethodDetailPage extends ApiHelpPage {
 			}
 		}
 		
-		Map<String, String> queryParams = new LinkedHashMap<>();
+		Map<String, Serializable> queryParams = new LinkedHashMap<>();
 		
 		for (Parameter queryParam: getResourceMethod().getParameters()) {
 			if (queryParam.getAnnotation(QueryParam.class) != null) {
@@ -374,7 +374,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				if (exampleValue == null)
 					exampleValue = ApiHelpUtils.getExampleValue(queryParam.getParameterizedType(), ValueInfo.Origin.QUERY_PARAM);
 				
-				queryParams.put(paramName, String.valueOf(exampleValue));
+				queryParams.put(paramName, exampleValue);
 			}
 		}
 		
@@ -411,16 +411,25 @@ public class MethodDetailPage extends ApiHelpPage {
 		
 		curlExample.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl()).append(endPoint);
 		
-		for (Map.Entry<String, String> entry: queryParams.entrySet()) {
-			if (entry.getValue().contains(" "))
-				curlExample.append(" --data-urlencode '").append(entry.getKey()).append("=").append(entry.getValue()).append("'");
-			else
-				curlExample.append(" --data-urlencode ").append(entry.getKey()).append("=").append(entry.getValue());
+		for (Map.Entry<String, Serializable> entry: queryParams.entrySet()) {
+			if (entry.getValue() instanceof List) {
+				for (var paramValue: (List<?>)entry.getValue()) 
+					appendParam(curlExample, entry.getKey(), paramValue.toString());
+			} else {
+				appendParam(curlExample, entry.getKey(), entry.getValue().toString());
+			}
 		}
 		
 		add(new Label("curlExample", curlExample));
 		
 		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.substring(1))));
+	}
+	
+	private void appendParam(StringBuilder curlExample, String paramKey, String paramValue) {
+		if (paramValue.contains(" "))
+			curlExample.append(" --data-urlencode '").append(paramKey).append("=").append(paramValue).append("'");
+		else
+			curlExample.append(" --data-urlencode ").append(paramKey).append("=").append(paramValue);
 	}
 
 	@Override

@@ -539,17 +539,17 @@ public abstract class CommitListPanel extends Panel {
 					return commitsModel.getObject().current.get(index);
 				}
 				
-			}, new LoadableDetachableModel<List<Pattern>>() {
+			}, new LoadableDetachableModel<>() {
 
 				@Override
 				protected List<Pattern> load() {
-					List<Pattern> patterns =  new ArrayList<>();
-					for (CommitCriteria criteria: queryModel.getObject().getCriterias()) {
+					List<Pattern> patterns = new ArrayList<>();
+					for (CommitCriteria criteria : queryModel.getObject().getCriterias()) {
 						if (criteria instanceof MessageCriteria) {
-							for (String value: ((MessageCriteria) criteria).getValues())
+							for (String value : ((MessageCriteria) criteria).getValues())
 								patterns.add(Pattern.compile(value, Pattern.CASE_INSENSITIVE));
 						} else if (criteria instanceof FuzzyCriteria) {
-							for (String value: ((FuzzyCriteria) criteria).getValues()) {
+							for (String value : ((FuzzyCriteria) criteria).getValues()) {
 								if (getProject().getObjectId(value, false) == null) {
 									patterns.add(Pattern.compile(value.replace(" ", ".*"), Pattern.CASE_INSENSITIVE));
 								}
@@ -558,7 +558,7 @@ public abstract class CommitListPanel extends Panel {
 					}
 					return patterns;
 				}
-				
+
 			}) {
 
 				@Override

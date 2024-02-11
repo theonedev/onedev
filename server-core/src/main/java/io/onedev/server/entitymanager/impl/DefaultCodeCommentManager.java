@@ -184,7 +184,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		if (oldestDate != null) {
 			RevListOptions options = new RevListOptions();
 			options.revisions(Lists.newArrayList(commitId.name()))
-					.after(ISO_8601_EXTENDED_DATE_FORMAT.format(DateUtils.addDays(oldestDate, -1)))
+					.after(DateUtils.addDays(oldestDate, -1))
 					.ignoreCase(false).skip(0).count(MAX_HISTORY_COMMITS_TO_CHECK);
 			
 			var revisions = new HashSet<>(getGitService().revList(project, options));

@@ -77,7 +77,7 @@ public class CodeCommentResource {
     public Collection<CodeComment> queryBasicInfo(
     		@QueryParam("projectId") Long projectId,
     		@QueryParam("pullRequestId") Long pullRequestId, 
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in project code comments page", example="created by me") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in project code comments page", example="created by me") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, @QueryParam("count") @Api(example="100") int count) {
 
 		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)

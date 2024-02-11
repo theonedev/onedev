@@ -29,57 +29,61 @@ public abstract class LogCommand {
 	
  	private final File workingDir;
  	
-    private final List<String> revisions;
+    private RevListOptions options = new RevListOptions();
+	
+	private boolean noRenames;
 	
 	private Map<String, String> envs = new HashMap<>();
 	
-    private boolean firstParent;
-    
-    private boolean noRenames;
-	
-	private int limit;
-    
     private EnumSet<Field> fields = EnumSet.noneOf(Field.class);
 
-	public LogCommand(File workingDir, List<String> revisions) {
+	public LogCommand(File workingDir) {
 		this.workingDir = workingDir;
-		Preconditions.checkArgument(!revisions.isEmpty());
-		this.revisions = revisions;
+	}
+	
+	public RevListOptions options() {
+		return options;
+	}
+
+	public LogCommand options(RevListOptions options) {
+		this.options = options;
+		return this;
+	}
+
+	public boolean noRenames() {
+		return noRenames;
+	}
+
+	public LogCommand noRenames(boolean noRenames) {
+		this.noRenames = noRenames;
+		return this;
+	}
+
+	public EnumSet<Field> fields() {
+		return fields;
 	}
 	
 	public LogCommand fields(EnumSet<Field> fields) {
 		this.fields = fields;
 		return this;
 	}
+	
+	public Map<String, String> envs() {
+		return envs;
+	}
 
-	public LogCommand envs(@Nullable Map<String, String> envs) {
+	public LogCommand envs(Map<String, String> envs) {
 		this.envs = envs;
 		return this;
 	}
 	
-	public LogCommand firstParent(boolean firstParent) {
-		this.firstParent = firstParent;
-		return this;
-	}
-	
-	public LogCommand noRenames(boolean noRenames) {
-		this.noRenames = noRenames;
-		return this;
-	}
-	
-	public LogCommand limit(int limit) {
-		this.limit = limit;
-		return this;
-	}
-
 	protected Commandline newGit() {
 		return CommandUtils.newGit();
 	}
 	
     public void run() {
         Commandline git = newGit().workingDir(workingDir);
-		if (envs != null)
-			git.environments().putAll(envs);
+		git.environments().putAll(envs);
 
         String format = "hash:%H %n";
 
@@ -121,20 +125,13 @@ public abstract class LogCommand {
     	        git.addArgs("log");
         }
 		
-		if (limit != 0)
-			git.addArgs("-n", String.valueOf(limit));
-		
         git.addArgs("--format=" + format, "--date=raw");
-        if (firstParent) {
-        	git.addArgs("--first-parent");
-            if (fields.contains(Field.LINE_CHANGES) || fields.contains(Field.FILE_CHANGES))
-            	git.addArgs("-m");
-        }
+        if (options.firstParent() && (fields.contains(Field.LINE_CHANGES) || fields.contains(Field.FILE_CHANGES)))
+        	git.addArgs("-m");
 
-    	for (String revision: revisions)
-    		git.addArgs(revision);
+		options.configure(git);
 
-        AtomicReference<GitCommit.Builder> commitBuilderRef = new AtomicReference<>(null);
+        AtomicReference<LogCommit.Builder> commitBuilderRef = new AtomicReference<>(null);
         AtomicBoolean inBodyRef = new AtomicBoolean(false);
         git.execute(new LineConsumer() {
 
@@ -159,7 +156,7 @@ public abstract class LogCommand {
 	        	} else if (line.startsWith("hash:")) {
             		if (commitBuilderRef.get() != null)
 	            		LogCommand.this.consume(commitBuilderRef.get().build());
-            		commitBuilderRef.set(new GitCommit.Builder());
+            		commitBuilderRef.set(new LogCommit.Builder());
             		if (fields.contains(Field.PARENTS))
             			commitBuilderRef.get().parentHashes = new ArrayList<>();
             		if (fields.contains(Field.FILE_CHANGES) || fields.contains(Field.LINE_CHANGES))
@@ -235,6 +232,6 @@ public abstract class LogCommand {
         	consume(commitBuilderRef.get().build());
     }
 	
-	protected abstract void consume(GitCommit commit);
+	protected abstract void consume(LogCommit commit);
 	
 }

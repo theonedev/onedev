@@ -183,7 +183,7 @@ public class IssueResource {
 	@Api(order=900, exampleProvider = "getIssuesExample")
 	@GET
     public List<Map<String, Object>> query(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query,
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query,
 			@QueryParam("withFields") @Api(description = "Whether or not to include issue fields. Default to false", example="true") Boolean withFields, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {

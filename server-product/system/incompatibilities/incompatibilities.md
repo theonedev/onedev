@@ -7,6 +7,12 @@ sharing. As result of this, the cache settings defined at job level are removed.
 use _Set Up Cache_ step now instead. Check out <a href='https://docs.onedev.io/tutorials/cicd/job-cache'>this tutorial</a> 
 to get familiar with the new cache mechanism
 
+### RESTful API
+
+The operation to [query repository commits](/~help/api/io.onedev.server.rest.resource.RepositoryResource/queryCommits) 
+and [get repository commit](/~help/api/io.onedev.server.rest.resource.RepositoryResource/getCommit) now return commit 
+object(s) whose fields can be controlled via the field query parameter
+
 # 9.4.7
 
 ### Mail Service

@@ -2,6 +2,8 @@ package io.onedev.server.git.service;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.git.*;
+import io.onedev.server.git.command.LogCommit;
+import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -14,6 +16,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +73,8 @@ public interface GitService {
 	List<RevCommit> sortValidCommits(Project project, Collection<ObjectId> commitIds);
 	
 	List<String> revList(Project project, RevListOptions options);
+	
+	List<LogCommit> log(Project project, RevListOptions options, EnumSet<LogCommand.Field> fields);
 	
 	ObjectId commit(Project project, BlobEdits blobEdits, String refName, 
 			ObjectId expectedOldCommitId, ObjectId parentCommitId, 
@@ -136,8 +141,7 @@ public interface GitService {
 	
 	@Nullable
 	CommitMessageError checkCommitMessages(Project project, String branch, User user,
-							   ObjectId oldId, ObjectId newId, 
-							   @Nullable Map<String, String> envs);
+							   ObjectId oldId, ObjectId newId, Map<String, String> envs);
 	
 	@Nullable
 	byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs);

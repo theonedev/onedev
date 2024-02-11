@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.onedev.commons.utils.command.Commandline;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import io.onedev.server.git.command.RevListCommand.Order;
+
+import javax.annotation.Nullable;
 
 public class RevListOptions implements Serializable {
 
@@ -28,7 +31,7 @@ public class RevListOptions implements Serializable {
     private Order order;
     
     private boolean firstParent;
-    
+	
     private boolean ignoreCase;
     
     private List<String> messages = new ArrayList<>();
@@ -36,7 +39,7 @@ public class RevListOptions implements Serializable {
     private List<String> authors = new ArrayList<>();
     
     private List<String> committers = new ArrayList<>();
-    
+	
 	public List<String> revisions() {
 		return revisions;
 	}
@@ -55,20 +58,12 @@ public class RevListOptions implements Serializable {
 		return this;
 	}
 
-	public String after() {
-		return after;
-	}
-
-	public RevListOptions after(String after) {
-		this.after = after;
-		return this;
-	}
-	
+	@Nullable
 	public Order order() {
 		return order;
 	}
 	
-	public RevListOptions order(Order order) {
+	public RevListOptions order(@Nullable Order order) {
 		this.order = order;
 		return this;
 	}
@@ -81,7 +76,16 @@ public class RevListOptions implements Serializable {
 		this.firstParent = firstParent;
 		return this;
 	}
-	
+
+	public String after() {
+		return after;
+	}
+
+	public RevListOptions after(String after) {
+		this.after = after;
+		return this;
+	}
+
 	public RevListOptions after(Date after) {
 		this.after = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(after);
 		return this;
@@ -153,6 +157,56 @@ public class RevListOptions implements Serializable {
 	public RevListOptions commmitters(List<String> committers) {
 		this.committers = committers;
 		return this;
-	}		
+	}
 	
+	public void configure(Commandline git) {
+		boolean hasRevisions = false;
+		if (!revisions().isEmpty()) {
+			for (String revision: revisions()) {
+				git.addArgs(revision);
+				if (!revision.startsWith("^"))
+					hasRevisions = true;
+			}
+		}
+		if (!hasRevisions)
+			git.addArgs("--branches");
+
+		if (before() != null)
+			git.addArgs("--before", before());
+
+		if (after() != null)
+			git.addArgs("--after", after());
+
+		if (count() != 0)
+			git.addArgs("-" + count());
+		if (skip() != 0)
+			git.addArgs("--skip=" + skip());
+
+		if (order() == Order.DATE)
+			git.addArgs("--date-order");
+		else if (order() == Order.AUTHOR_DATE)
+			git.addArgs("--author-date-order");
+		else if (order() == Order.TOPO)
+			git.addArgs("--topo-order");
+
+		if (firstParent())
+			git.addArgs("--first-parent");
+
+		for (String author: authors())
+			git.addArgs("--author=" + author);
+
+		for (String committer: committers())
+			git.addArgs("--committer=" + committer);
+
+		for (String message: messages())
+			git.addArgs("--grep=" + message);
+
+		if (ignoreCase())
+			git.addArgs("-i");
+
+		git.addArgs("--");
+
+		for (String path: paths())
+			git.addArgs(path);
+	}
 }

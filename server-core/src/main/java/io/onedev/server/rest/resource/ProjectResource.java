@@ -168,7 +168,7 @@ public class ProjectResource {
 	@Api(order=700)
 	@GET
     public List<Project> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 

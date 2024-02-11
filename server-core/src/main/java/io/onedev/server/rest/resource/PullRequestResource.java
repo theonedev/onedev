@@ -175,7 +175,7 @@ public class PullRequestResource {
 	@Api(order=1100)
 	@GET
     public List<PullRequest> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 

@@ -14,7 +14,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.util.patternset.PatternSet;
 
-public class GitCommit implements Serializable {
+public class LogCommit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,9 +34,9 @@ public class GitCommit implements Serializable {
     
     private final List<FileChange> fileChanges;
     
-    public GitCommit(String hash, @Nullable List<String> parentHashes, @Nullable PersonIdent committer, 
-    		@Nullable PersonIdent author, @Nullable Date commitDate, @Nullable String subject, 
-    		@Nullable String body, @Nullable List<FileChange> fileChanges) {
+    public LogCommit(String hash, @Nullable List<String> parentHashes, @Nullable PersonIdent committer,
+					 @Nullable PersonIdent author, @Nullable Date commitDate, @Nullable String subject,
+					 @Nullable String body, @Nullable List<FileChange> fileChanges) {
     	this.hash = hash;
     	this.parentHashes = parentHashes;
     	this.committer = committer;
@@ -141,7 +141,7 @@ public class GitCommit implements Serializable {
 		
     	public List<FileChange> fileChanges;
     	
-		public GitCommit build() {
+		public LogCommit build() {
 			PersonIdent committer;
 			if (StringUtils.isNotBlank(committerName) || StringUtils.isNotBlank(committerEmail))
 				committer = GitUtils.newPersonIdent(committerName, committerEmail, committerDate);
@@ -160,7 +160,7 @@ public class GitCommit implements Serializable {
 			if (body != null) 
 				body = body.trim();
 			
-			return new GitCommit(hash, parentHashes, committer, author, commitDate, 
+			return new LogCommit(hash, parentHashes, committer, author, commitDate, 
 					subject, body, fileChanges);
 		}
 	}

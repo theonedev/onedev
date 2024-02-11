@@ -1,5 +1,6 @@
 package io.onedev.server.git.command;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -68,26 +69,27 @@ public class LogCommandTest extends AbstractGitTest {
 				+ "9th line\n");
 		commit("second commit\n\nfirst line\n\nsecond line\nthird line\n");
 		
-		List<GitCommit> commits = new ArrayList<>();
+		List<LogCommit> commits = new ArrayList<>();
 
+		var options = new RevListOptions().revisions(newArrayList("main"));
 		EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
 		fields.remove(LogCommand.Field.LINE_CHANGES);
-		new LogCommand(git.getRepository().getDirectory(), Lists.newArrayList("main")) {
+		new LogCommand(git.getRepository().getDirectory()) {
 
 			@Override
-			protected void consume(GitCommit commit) {
+			protected void consume(LogCommit commit) {
 				commits.add(commit);
 			}
 			
-		}.fields(fields).run();
+		}.options(options).fields(fields).run();
 		
 		assertEquals(2, commits.size());
 
-		GitCommit commit1 = commits.get(1);
+		LogCommit commit1 = commits.get(1);
 		assertEquals("initial commit", commit1.getSubject());
 		assertEquals("first line\nsecond line", commit1.getBody());
 		
-		GitCommit commit2 = commits.get(0);
+		LogCommit commit2 = commits.get(0);
 		assertEquals(3, commit2.getFileChanges().size());
 		assertEquals("3rd testfile", commit2.getFileChanges().get(0).getNewPath());
 		assertEquals("another testfile", commit2.getFileChanges().get(1).getNewPath());
@@ -98,16 +100,16 @@ public class LogCommandTest extends AbstractGitTest {
 
 		commits.clear();
 		fields = EnumSet.allOf(LogCommand.Field.class);
-		new LogCommand(git.getRepository().getDirectory(), Lists.newArrayList("main")) {
+		new LogCommand(git.getRepository().getDirectory()) {
 
 			@Override
-			protected void consume(GitCommit commit) {
+			protected void consume(LogCommit commit) {
 				commits.add(commit);
 			}
 			
-		}.fields(fields).run();
+		}.options(options).fields(fields).run();
 		
-		GitCommit commit = commits.get(0);
+		LogCommit commit = commits.get(0);
 		
 		assertEquals(3, commit.getFileChanges().size());
 		assertEquals("3rd testfile", commit.getFileChanges().get(0).getNewPath());

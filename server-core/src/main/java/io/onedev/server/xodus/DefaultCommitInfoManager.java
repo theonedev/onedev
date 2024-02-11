@@ -12,13 +12,16 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.GitContribution;
@@ -38,7 +41,10 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.*;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -244,30 +250,31 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 				else
 					users = new HashSet<>();
 
-				new ElementPumper<GitCommit>() {
+				new ElementPumper<LogCommit>() {
 
 					@Override
-					public void generate(Consumer<GitCommit> consumer) {
+					public void generate(Consumer<LogCommit> consumer) {
 						List<String> revisions = new ArrayList<>();
 						revisions.add(untilCommitId.name());
 
 						if (sinceCommitId != null)
 							revisions.add("^" + sinceCommitId.name());
 
+						var options = new RevListOptions().revisions(revisions);
 						EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
 						fields.remove(LogCommand.Field.LINE_CHANGES);
-						new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
+						new LogCommand(projectManager.getGitDir(project.getId())) {
 							
 							@Override
-							protected void consume(GitCommit commit) {
+							protected void consume(LogCommit commit) {
 								consumer.accept(commit);
 							}
 
-						}.fields(fields).run();
+						}.options(options).fields(fields).run();
 					}
 
 					@Override
-					public void process(GitCommit currentCommit) {
+					public void process(LogCommit currentCommit) {
 						ObjectId currentCommitId = ObjectId.fromString(currentCommit.getHash());
 						ByteIterable currentCommitKey = new CommitByteIterable(currentCommitId);
 						byte[] currentCommitBytes = readBytes(commitsStore, txn, currentCommitKey);
@@ -467,34 +474,36 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 			Map<Integer, Map<Integer, GitContribution>> dailyContributionsCache = new HashMap<>();
 
-			new ElementPumper<GitCommit>() {
+			new ElementPumper<LogCommit>() {
 
 				@Override
-				public void generate(Consumer<GitCommit> consumer) {
+				public void generate(Consumer<LogCommit> consumer) {
 					List<String> revisions = new ArrayList<>();
 					revisions.add(untilCommitId.name());
 
 					if (sinceCommitId != null)
 						revisions.add("^" + sinceCommitId.name());
 
+					var options = new RevListOptions().revisions(revisions);
+					
 					EnumSet<LogCommand.Field> fields = EnumSet.of(
 							LogCommand.Field.AUTHOR,
 							LogCommand.Field.COMMIT_DATE,
 							LogCommand.Field.PARENTS,
 							LogCommand.Field.LINE_CHANGES);
 
-					new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
+					new LogCommand(projectManager.getGitDir(project.getId())) {
 
 						@Override
-						protected void consume(GitCommit commit) {
+						protected void consume(LogCommit commit) {
 							consumer.accept(commit);
 						}
 
-					}.fields(fields).run();
+					}.options(options).fields(fields).run();
 				}
 
 				@Override
-				public void process(GitCommit currentCommit) {
+				public void process(LogCommit currentCommit) {
 					if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
 						int dayValue = new Day(currentCommit.getCommitDate()).getValue();
 						updateContribution(overallContributions, dayValue, currentCommit, filePatterns);
@@ -627,10 +636,10 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			env.executeInTransaction(txn -> {
 				Map<Integer, Map<String, Integer>> lineStats = new HashMap<>();
 
-				new ElementPumper<GitCommit>() {
+				new ElementPumper<LogCommit>() {
 
 					@Override
-					public void generate(Consumer<GitCommit> consumer) {
+					public void generate(Consumer<LogCommit> consumer) {
 						List<String> revisions = new ArrayList<>();
 						revisions.add(commitId.name());
 
@@ -638,18 +647,19 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 								LogCommand.Field.COMMIT_DATE,
 								LogCommand.Field.LINE_CHANGES);
 
-						new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
+						var options = new RevListOptions().revisions(revisions).firstParent(true);
+						new LogCommand(projectManager.getGitDir(project.getId())) {
 
 							@Override
-							protected void consume(GitCommit commit) {
+							protected void consume(LogCommit commit) {
 								consumer.accept(commit);
 							}
 
-						}.firstParent(true).noRenames(true).fields(fields).run();
+						}.options(options).noRenames(true).fields(fields).run();
 					}
 
 					@Override
-					public void process(GitCommit currentCommit) {
+					public void process(LogCommit currentCommit) {
 						updateLineStats(txn, currentCommit, lineStats, filePatterns);
 					}
 
@@ -674,7 +684,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 						lastCommitId.name(), commitId.name(), true);
 				List<FileChange> fileChanges = command.run();
 				RevCommit revCommit = project.getRevCommit(commitId, true);
-				GitCommit gitCommit = new GitCommit(revCommit.name(), null, null, revCommit.getAuthorIdent(),
+				LogCommit gitCommit = new LogCommit(revCommit.name(), null, null, revCommit.getAuthorIdent(),
 						revCommit.getCommitterIdent().getWhen(), null, null, fileChanges);
 
 				updateLineStats(txn, gitCommit, lineStats, filePatterns);
@@ -740,7 +750,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		}
 	}
 
-	private void updateLineStats(Transaction txn, GitCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats,
+	private void updateLineStats(Transaction txn, LogCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats,
 								 PatternSet filePatterns) {
 		int dayValue = new Day(currentCommit.getCommitDate()).getValue();
 
@@ -896,7 +906,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	}
 
-	private void updateContribution(Map<Integer, GitContribution> contributions, int key, GitCommit commit,
+	private void updateContribution(Map<Integer, GitContribution> contributions, int key, LogCommit commit,
 									PatternSet filePatterns) {
 		GitContribution contribution = contributions.get(key);
 		if (contribution != null) {

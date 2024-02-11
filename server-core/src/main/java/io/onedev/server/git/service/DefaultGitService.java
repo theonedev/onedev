@@ -1344,7 +1344,7 @@ public class DefaultGitService implements GitService, Serializable {
 	@Override
 	public CommitMessageError checkCommitMessages(Project project, String branch, User user,
 									  ObjectId oldId, ObjectId newId, 
-									  @Nullable Map<String, String> envs) {
+									  Map<String, String> envs) {
 		Long projectId = project.getId();
 		var branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection.getMaxCommitMessageLineLength() != null
@@ -1361,10 +1361,13 @@ public class DefaultGitService implements GitService, Serializable {
 					else
 						revisions = Lists.newArrayList("^" + oldId.name(), newId.name());
 
-					var logCommand = new LogCommand(gitDir, revisions) {
+					var options = new RevListOptions().revisions(revisions);
+					if (oldId.equals(ObjectId.zeroId()))
+						options.count(1);
+					var logCommand = new LogCommand(gitDir) {
 
 						@Override
-						protected void consume(GitCommit commit) {
+						protected void consume(LogCommit commit) {
 							var commitId = ObjectId.fromString(commit.getHash());
 							if (commit.getParentHashes().size() > 1)
 								mergeCommits.add(commitId);
@@ -1374,10 +1377,8 @@ public class DefaultGitService implements GitService, Serializable {
 							commitMessages.put(commitId, commitMessage);
 						}
 
-					};
-					if (oldId.equals(ObjectId.zeroId()))
-						logCommand.limit(1);
-					logCommand.envs(envs).fields(EnumSet.of(SUBJECT, BODY, PARENTS)).run();
+					}.options(options).envs(envs).fields(EnumSet.of(SUBJECT, BODY, PARENTS));
+					logCommand.run();
 				} else {
 					var repository = projectManager.getRepository(projectId);
 					if (!oldId.equals(ObjectId.zeroId())) {
@@ -1413,5 +1414,20 @@ public class DefaultGitService implements GitService, Serializable {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> new RevListCommand(getGitDir(projectId)).options(options).run());
 	}
-	
+
+	@Override
+	public List<LogCommit> log(Project project, RevListOptions options, EnumSet<LogCommand.Field> fields) {
+		var projectId = project.getId();
+		return runOnProjectServer(projectId, () -> {
+			var commits = new ArrayList<LogCommit>();
+			new LogCommand(getGitDir(projectId)) {
+
+				@Override
+				protected void consume(LogCommit commit) {
+					commits.add(commit);					
+				}
+			}.options(options).fields(fields).run();
+			return commits;
+		});
+	}
 }

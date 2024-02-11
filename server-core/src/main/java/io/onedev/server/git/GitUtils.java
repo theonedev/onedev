@@ -1,7 +1,9 @@
 package io.onedev.server.git;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
-import com.google.common.base.*;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
@@ -39,8 +41,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -56,13 +56,7 @@ import static org.eclipse.jgit.lib.Constants.R_TAGS;
 public class GitUtils {
 
 	public static final int SHORT_SHA_LENGTH = 8;
-
-	private static final Logger logger = LoggerFactory.getLogger(GitUtils.class);
-
-	public static boolean isEmptyPath(String path) {
-		return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
-	}
-
+	
 	public static String abbreviateSHA(String sha, int length) {
 		Preconditions.checkArgument(ObjectId.isId(sha));
 		return sha.substring(0, length);

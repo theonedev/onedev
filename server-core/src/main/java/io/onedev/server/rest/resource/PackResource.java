@@ -69,7 +69,7 @@ public class PackResource {
 	@Api(order=600)
 	@GET
     public List<Pack> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~packages'>packages page</a>", example="\"Type\" is \"Container Image\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~packages'>packages page</a>", example="\"Type\" is \"Container Image\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 

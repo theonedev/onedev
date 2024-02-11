@@ -7,14 +7,16 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.*;
+import io.onedev.server.git.command.LogCommand;
+import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.FileCreateOrUpdateRequest;
 import io.onedev.server.rest.resource.support.FileEditRequest;
 import io.onedev.server.search.commit.CommitQuery;
@@ -25,7 +27,6 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -37,7 +38,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Api(order=1100)
 @Path("/repositories")
@@ -71,7 +73,7 @@ public class RepositoryResource {
 
 		return project.getBranchRefs().stream()
 				.map(it-> GitUtils.ref2branch(it.getName()))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 	
 	@Api(order=15, description="Get default branch. Return status code 204 if no default branch "
@@ -179,7 +181,7 @@ public class RepositoryResource {
 
 		return project.getTagRefs().stream()
 				.map(it-> GitUtils.ref2tag(it.getName()))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 	
 	@Api(order=60, description="Get specified tag")
@@ -245,10 +247,11 @@ public class RepositoryResource {
 	@Api(order=83, description="Query commits of specified project. Will return list of matching commit hashes")
 	@Path("/{projectId}/commits")
 	@GET
-    public List<String> queryCommits(
+    public List<LogCommit> queryCommits(
 			@PathParam("projectId") Long projectId, 
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in commits page", example="since tag(v4.0.0) until tag(v4.7.0)") String query, 
-    		@QueryParam("count") @Api(example="100", description="Number of commits to return") int count) {
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in commits page", example="since tag(v4.0.0) until tag(v4.7.0)") String query, 
+    		@QueryParam("count") @Api(example="100", description="Number of commits to return") int count, 
+			@QueryParam("field") @Api(exampleProvider = "getFieldsExample", description = "Fields to return. Unspecified fields will return as null in returned commit object") List<String> fields) {
 		Project project = projectManager.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
@@ -268,30 +271,30 @@ public class RepositoryResource {
 		options.ignoreCase(true);
 		options.count(count);
 		parsedQuery.fill(project, options);
+
+		var fieldSet = EnumSet.noneOf(LogCommand.Field.class);
+		fieldSet.addAll(fields.stream().map(LogCommand.Field::valueOf).collect(toList()));
 		
-		return gitService.revList(project, options);
+		return gitService.log(project, options, fieldSet);
     }
 	
 	@Api(order=86, description="Get specified commit")
 	@Path("/{projectId}/commits/{commitHash}")
 	@GET
-    public CommitResponse getCommit(
+    public LogCommit getCommit(
 			@PathParam("projectId") Long projectId,
-			@PathParam("commitHash") @Api(example="8cbec3d9eda2050a4ca0676767be3b6bf20251b8") String commitHash) {
-		Project project = projectManager.load(projectId);
-		if (!SecurityUtils.canReadCode(project)) {
-			throw new UnauthorizedException();
-		}
-
-		RevCommit commit = project.getRevCommit(ObjectId.fromString(commitHash), true);
-		CommitResponse response = new CommitResponse();
-		response.commitHash = commit.name();
-		response.author = commit.getAuthorIdent();
-		response.committer = commit.getCommitterIdent();
-		response.commitMessage = commit.getFullMessage();
-		
-		return response;
+			@PathParam("commitHash") @Api(example="8cbec3d9eda2050a4ca0676767be3b6bf20251b8") String commitHash,
+			@QueryParam("field") @Api(exampleProvider = "getFieldsExample", description = "Fields to return. Unspecified fields will return as null in returned commit object") List<String> fields) {
+		var commits = queryCommits(projectId, "commit(" + commitHash + ")", 1, fields);
+		if (!commits.isEmpty())
+			return commits.iterator().next();
+		else
+			throw new ObjectNotFoundException("Commit not found");
     }
+
+	private static List<String> getFieldsExample() {
+		return EnumSet.allOf(LogCommand.Field.class).stream().map(Enum::name).collect(toList());
+	}
 	
 	@Api(order=90, description="Get children of specified directory")
 	@Path("/{projectId}/directories/{revisionAndDirectory:.*}")

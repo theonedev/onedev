@@ -119,7 +119,7 @@ public class BuildResource {
 	@Api(order=600)
 	@GET
     public List<Build> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~builds'>builds page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~builds'>builds page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 
