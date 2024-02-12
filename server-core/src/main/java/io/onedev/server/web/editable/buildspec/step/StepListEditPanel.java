@@ -31,16 +31,20 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.onedev.server.web.component.floating.AlignPlacement.bottom;
 
 @SuppressWarnings("serial")
 class StepListEditPanel extends PropertyEditor<List<Serializable>> {
@@ -56,11 +60,8 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		}
 	}
 	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new DropdownLink("addNew", false, AlignPlacement.bottom(0), true, true) {
+	private DropdownLink newAddStepLink(String componentId, @Nullable Component alignTarget, int index) {
+		return new DropdownLink(componentId, alignTarget, bottom(0), true, true) {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
@@ -69,20 +70,20 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends Step> type) {
 						dropdown.close();
-						
+
 						Step step;
 						try {
 							step = type.getDeclaredConstructor().newInstance();
-						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
-								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+								 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							throw new RuntimeException(e);
 						}
-						
+
 						new StepEditPanel(target, step) {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Step bean) {
-								steps.add(bean);
+								steps.add(index, bean);
 								markFormDirty(target);
 								close();
 								onPropertyUpdating(target);
@@ -98,18 +99,31 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 							public List<ParamSpec> getParamSpecs() {
 								return StepListEditPanel.this.getParamSpecs();
 							}
-							
+
 						};
 					}
-					
+
 				};
 			}
-			
-		});
+
+		};		
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		super.onBeforeRender();
+		replace(newAddStepLink("addNew", null, steps.size()));
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(newAddStepLink("addNew", null, steps.size()));
 		
 		List<IColumn<Step, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
@@ -121,40 +135,44 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("Condition")) {
+		columns.add(new AbstractColumn<>(Model.of("Condition")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getCondition().getDisplayName()));
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
+				Item<?> row = cellItem.findParent(Item.class);
+				row.setOutputMarkupId(true);
+				fragment.add(newAddStepLink("addAbove", row, row.getIndex()));
+				fragment.add(newAddStepLink("addBelow", row, row.getIndex() + 1));
 				fragment.add(new AjaxLink<Void>("edit") {
 
 					@Override
@@ -179,10 +197,10 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 							public List<ParamSpec> getParamSpecs() {
 								return StepListEditPanel.this.getParamSpecs();
 							}
-							
+
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -199,7 +217,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						onPropertyUpdating(target);
 						target.add(StepListEditPanel.this);
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
@@ -208,21 +226,21 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		IDataProvider<Step> dataProvider = new ListDataProvider<Step>() {
+		IDataProvider<Step> dataProvider = new ListDataProvider<>() {
 
 			@Override
 			protected List<Step> getData() {
-				return steps;			
+				return steps;
 			}
 
 		};
 		
 		DataTable<Step, Void> dataTable;
-		add(dataTable = new DataTable<Step, Void>("steps", columns, dataProvider, Integer.MAX_VALUE));
-		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
+		add(dataTable = new DataTable<>("steps", columns, dataProvider, Integer.MAX_VALUE));
+		dataTable.addTopToolbar(new HeadersToolbar<>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
 		dataTable.add(new NoRecordsBehavior());
 		

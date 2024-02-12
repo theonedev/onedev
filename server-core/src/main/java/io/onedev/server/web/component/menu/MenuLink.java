@@ -1,17 +1,15 @@
 package io.onedev.server.web.component.menu;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
+import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class MenuLink extends DropdownLink {
@@ -24,14 +22,6 @@ public abstract class MenuLink extends DropdownLink {
 		super(id, placement);
 	}
 
-	public MenuLink(String id, boolean alignTargetMouse) {
-		super(id, alignTargetMouse);
-	}
-	
-	public MenuLink(String id, boolean alignTargetMouse, AlignPlacement placement, boolean noNarrowThanTarget) {
-		super(id, alignTargetMouse, placement, noNarrowThanTarget, false);
-	}
-	
 	@Override
 	protected void onInitialize(FloatingPanel dropdown) {
 		super.onInitialize(dropdown);

@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.link;
 
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.Alignment;
+import io.onedev.server.web.component.floating.ComponentTarget;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -10,19 +14,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.AlignTarget;
-import io.onedev.server.web.component.floating.Alignment;
-import io.onedev.server.web.component.floating.ComponentTarget;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.floating.RectTarget;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
 public abstract class DropdownLink extends AjaxLink<Void> {
 
-	private final boolean alignTargetMouse;
+	private final Component alignTarget;
 	
-	private final AlignPlacement placement;
+	private final AlignPlacement alignPlacement;
 	
 	private final boolean noNarrowThanTarget;
 	
@@ -34,20 +33,19 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		this(id, AlignPlacement.bottom(0));
 	}
 	
-	public DropdownLink(String id, AlignPlacement placement) {
-		this(id, false, placement, false, false);
+	public DropdownLink(String id, AlignPlacement alignPlacement) {
+		this(id, alignPlacement, false, false);
 	}
 
-	public DropdownLink(String id, boolean alignTargetMouse) {
-		this(id, alignTargetMouse, AlignPlacement.bottom(0), false, false);
+	public DropdownLink(String id, AlignPlacement alignPlacement, boolean noNarrowThanTarget, boolean neverShrink) {
+		this(id, null, alignPlacement, noNarrowThanTarget, neverShrink);
 	}
 	
-	public DropdownLink(String id, boolean alignTargetMouse, AlignPlacement placement, 
-			boolean noNarrowThanTarget, boolean neverShrink) {
+	public DropdownLink(String id, @Nullable Component alignTarget, AlignPlacement alignPlacement, 
+						boolean noNarrowThanTarget, boolean neverShrink) {
 		super(id);
-		
-		this.alignTargetMouse = alignTargetMouse;
-		this.placement = placement;
+		this.alignTarget = alignTarget;
+		this.alignPlacement = alignPlacement;
 		this.noNarrowThanTarget = noNarrowThanTarget;
 		this.neverShrink = neverShrink;
 	}
@@ -81,18 +79,8 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		// if dropdown has not been created, or has been removed from page 
 		// when the same page instance is refreshed 
 		if (dropdown == null || dropdown.getParent() == null) { 
-			AlignTarget alignFloatingWith;
-			if (alignTargetMouse) {
-				int mouseX = RequestCycle.get().getRequest().getPostParameters()
-						.getParameterValue("mouseX").toInt();
-				int mouseY = RequestCycle.get().getRequest().getPostParameters()
-						.getParameterValue("mouseY").toInt();
-				alignFloatingWith = RectTarget.ofMouse(mouseX, mouseY);
-			} else { 
-				alignFloatingWith =  new ComponentTarget(this);
-			} 
-			
-			dropdown = new FloatingPanel(target, new Alignment(alignFloatingWith, placement), noNarrowThanTarget, neverShrink, null) {
+			var alignment = new Alignment(new ComponentTarget(alignTarget!=null? alignTarget: this), alignPlacement);
+			dropdown = new FloatingPanel(target, alignment, noNarrowThanTarget, neverShrink, null) {
 	
 				@Override
 				protected void onInitialize() {
