@@ -31,6 +31,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.EditCompleteAware;
 import io.onedev.server.web.util.AjaxPayload;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -240,31 +241,82 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 										
 									});
 									
-									jobNav.add(new AjaxLink<Void>("delete") {
+									var form = findParent(Form.class);
+									jobNav.add(new MenuLink("actions") {
 
 										@Override
-										public void onClick(AjaxRequestTarget target) {
-											getJobs().remove(jobIndex);
-											
-											Component jobDetail = jobsEditor.get("detail");
-											
-											int activeJobIndex = (int) jobDetail.getDefaultModelObject();
-											if (jobIndex == activeJobIndex) {
-												if (getJobs().isEmpty()) {
-													replaceState(target, "jobs");
-													setupJobDetail(target, -1);
-												} else {
-													replaceState(target, "jobs/" + getJobs().get(0).getName());
-													setupJobDetail(target, 0);
+										protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+											var menuItems = new ArrayList<MenuItem>();
+											menuItems.add(new MenuItem() {
+												@Override
+												public String getLabel() {
+													return "Copy";
 												}
-											} else if (jobIndex < activeJobIndex) {
-												jobDetail.setDefaultModelObject(activeJobIndex-1);
-											}
-											target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
-											target.add(jobsEditor.get("pipeline"));
-											resizeWindow(target);
+
+												@Override
+												public WebMarkupContainer newLink(String id) {
+													return new AjaxSubmitLink(id, form) {
+
+														@Override
+														protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+															super.onSubmit(target, form);
+															dropdown.close();
+															var newJob = SerializationUtils.clone(getJobs().get(jobIndex));
+															newJob.setName(null);
+															addJob(target, newJob);
+														}
+
+														@Override
+														protected void onError(AjaxRequestTarget target, Form<?> form) {
+															super.onError(target, form);
+															target.add(jobsEditor);
+															resizeWindow(target);
+														}
+
+													};
+												}
+												
+											});
+											menuItems.add(new MenuItem() {
+												@Override
+												public String getLabel() {
+													return "Delete";
+												}
+
+												@Override
+												public WebMarkupContainer newLink(String id) {
+													return new AjaxLink<Void>(id) {
+
+														@Override
+														public void onClick(AjaxRequestTarget target) {
+															dropdown.close();
+															
+															getJobs().remove(jobIndex);
+															Component jobDetail = jobsEditor.get("detail");
+
+															int activeJobIndex = (int) jobDetail.getDefaultModelObject();
+															if (jobIndex == activeJobIndex) {
+																if (getJobs().isEmpty()) {
+																	replaceState(target, "jobs");
+																	setupJobDetail(target, -1);
+																} else {
+																	replaceState(target, "jobs/" + getJobs().get(0).getName());
+																	setupJobDetail(target, 0);
+																}
+															} else if (jobIndex < activeJobIndex) {
+																jobDetail.setDefaultModelObject(activeJobIndex-1);
+															}
+															target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
+															target.add(jobsEditor.get("pipeline"));
+															resizeWindow(target);
+														}
+
+													};													
+												}
+												
+											});									
+											return menuItems;
 										}
-										
 									});
 									
 									jobNav.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
@@ -918,6 +970,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 			}
 		}
 		
+		private void addElement(AjaxRequestTarget target, T element) {
+			getElements().add(element);
+			pushState(target, "new-" +  getUrlSegment(elementClass));
+			int elementIndex = getElements().size()-1;
+			setupElementDetail(target, elementIndex);
+			target.add(ElementsEditor.this);
+			resizeWindow(target);
+		}
+		
 		@Override
 		protected void onInitialize() {
 			super.onInitialize();
@@ -984,29 +1045,82 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						
 					});
 					
-					item.add(new AjaxLink<Void>("delete") {
+					var form = findParent(Form.class);
+					item.add(new MenuLink("actions") {
 
 						@Override
-						public void onClick(AjaxRequestTarget target) {
-							getElements().remove(item.getIndex());
-							
-							Component elementDetail = ElementsEditor.this.get("detail");
-							
-							int activeElementIndex = (int) elementDetail.getDefaultModelObject();
-							if (item.getIndex() == activeElementIndex) {
-								if (getElements().isEmpty()) {
-									replaceState(target, getUrlSegment(elementClass) + "s");
-									setupElementDetail(target, -1);
-								} else {
-									replaceState(target, getUrlSegment(elementClass) + "s/" + getElements().get(0).getName());
-									setupElementDetail(target, 0);
+						protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+							var menuItems = new ArrayList<MenuItem>();
+							menuItems.add(new MenuItem() {
+								
+								@Override
+								public String getLabel() {
+									return "Copy";
 								}
-							} else if (item.getIndex() < activeElementIndex) {
-								elementDetail.setDefaultModelObject(activeElementIndex-1);
-							}
-							target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
-							target.add(ElementsEditor.this.get("navs"));
-							resizeWindow(target);
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxSubmitLink(id, form) {
+
+										@Override
+										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+											super.onSubmit(target, form);
+											dropdown.close();
+											var newElement = SerializationUtils.clone(getElements().get(item.getIndex()));
+											newElement.setName(null);
+											addElement(target, newElement);
+										}
+
+										@Override
+										protected void onError(AjaxRequestTarget target, Form<?> form) {
+											super.onError(target, form);
+											target.add(ElementsEditor.this);
+											resizeWindow(target);
+										}
+
+									};
+								}
+								
+							});
+							menuItems.add(new MenuItem() {
+								
+								@Override
+								public String getLabel() {
+									return "Delete";
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxLink<Void>(id) {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											dropdown.close();
+											
+											getElements().remove(item.getIndex());
+											Component elementDetail = ElementsEditor.this.get("detail");
+											int activeElementIndex = (int) elementDetail.getDefaultModelObject();
+											if (item.getIndex() == activeElementIndex) {
+												if (getElements().isEmpty()) {
+													replaceState(target, getUrlSegment(elementClass) + "s");
+													setupElementDetail(target, -1);
+												} else {
+													replaceState(target, getUrlSegment(elementClass) + "s/" + getElements().get(0).getName());
+													setupElementDetail(target, 0);
+												}
+											} else if (item.getIndex() < activeElementIndex) {
+												elementDetail.setDefaultModelObject(activeElementIndex-1);
+											}
+											target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
+											target.add(ElementsEditor.this.get("navs"));
+											resizeWindow(target);
+										}
+
+									};
+								}
+								
+							});
+							return menuItems;
 						}
 						
 					});
@@ -1063,13 +1177,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						throw new RuntimeException(e);
 					}
-					
-					getElements().add(newElement);
-					pushState(target, "new-" +  getUrlSegment(elementClass));
-					int elementIndex = getElements().size()-1;
-					setupElementDetail(target, elementIndex);
-					target.add(ElementsEditor.this);
-					resizeWindow(target);
+					addElement(target, newElement);
 				}
 
 				@Override

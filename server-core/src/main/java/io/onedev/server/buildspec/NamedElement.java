@@ -9,4 +9,6 @@ public interface NamedElement extends Serializable {
 
 	String getName();
 	
+	void setName(String name);
+	
 }

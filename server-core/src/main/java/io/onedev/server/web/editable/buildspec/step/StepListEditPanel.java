@@ -12,11 +12,14 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.typeselect.TypeSelectPanel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -27,6 +30,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -58,66 +62,17 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		}
 	}
 	
-	private DropdownLink newAddStepLink(String componentId, @Nullable Component alignTarget, int index) {
-		return new DropdownLink(componentId, alignTarget, bottom(0), true, true) {
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new TypeSelectPanel<Step>(id) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Class<? extends Step> type) {
-						dropdown.close();
-
-						Step step;
-						try {
-							step = type.getDeclaredConstructor().newInstance();
-						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-								 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-							throw new RuntimeException(e);
-						}
-
-						new StepEditModalPanel(target, step) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target, Step step) {
-								steps.add(index, step);
-								markFormDirty(target);
-								close();
-								onPropertyUpdating(target);
-								target.add(StepListEditPanel.this);
-							}
-
-							@Override
-							public BuildSpec getBuildSpec() {
-								return StepListEditPanel.this.getBuildSpec();
-							}
-
-							@Override
-							public List<ParamSpec> getParamSpecs() {
-								return StepListEditPanel.this.getParamSpecs();
-							}
-
-						};
-					}
-
-				};
-			}
-
-		};		
-	}
-
 	@Override
 	protected void onBeforeRender() {
 		super.onBeforeRender();
-		replace(newAddStepLink("addNew", null, steps.size()));
+		replace(new AddStepLink("addNew", null, steps.size()));
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newAddStepLink("addNew", null, steps.size()));
+		add(new AddStepLink("addNew", null, steps.size()));
 		
 		List<IColumn<Step, Void>> columns = new ArrayList<>();
 		
@@ -163,16 +118,14 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		});		
 		
 		columns.add(new AbstractColumn<>(Model.of("")) {
-
+			
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
 				var index = row.getIndex();
 				row.setOutputMarkupId(true);
-				fragment.add(newAddStepLink("addAbove", row, index));
-				fragment.add(newAddStepLink("addBelow", row, index + 1));
-				fragment.add(new AjaxLink<Void>("edit") {
+				fragment.add(new AjaxLink<Void>("more") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -202,22 +155,118 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 					}
 
 				});
-				fragment.add(new AjaxLink<Void>("delete") {
+				fragment.add(new MenuLink("actions") {
 
 					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this step?"));
-					}
+					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+						var menuItems = new ArrayList<MenuItem>();
+						menuItems.add(new MenuItem() {
+							@Override
+							public String getLabel() {
+								return "Add before";
+							}
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						markFormDirty(target);
-						steps.remove(rowModel.getObject());
-						onPropertyUpdating(target);
-						target.add(StepListEditPanel.this);
-					}
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AddStepLink(id, row, index) {
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										super.onClick(target);
+										dropdown.close();
+									}
+								};
+							}
+						});
+						menuItems.add(new MenuItem() {
+							@Override
+							public String getLabel() {
+								return "Add after";
+							}
 
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AddStepLink(id, row, index+1) {
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										super.onClick(target);
+										dropdown.close();
+									}
+								};
+							}
+						});
+						menuItems.add(new MenuItem() {
+							@Override
+							public String getLabel() {
+								return "Copy";
+							}
+
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AjaxLink<Void>(id) {
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										dropdown.close();
+										Step step = SerializationUtils.clone(steps.get(index));
+										new StepEditModalPanel(target, step) {
+
+											@Override
+											protected void onSave(AjaxRequestTarget target, Step step) {
+												steps.add(step);
+												markFormDirty(target);
+												close();
+												onPropertyUpdating(target);
+												target.add(StepListEditPanel.this);
+											}
+
+											@Override
+											public BuildSpec getBuildSpec() {
+												return StepListEditPanel.this.getBuildSpec();
+											}
+
+											@Override
+											public List<ParamSpec> getParamSpecs() {
+												return StepListEditPanel.this.getParamSpecs();
+											}
+
+										};											
+									}
+									
+								};
+							}
+						});
+						menuItems.add(new MenuItem() {
+							@Override
+							public String getLabel() {
+								return "Delete";
+							}
+
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this step?"));
+									}
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										dropdown.close();
+										markFormDirty(target);
+										steps.remove(rowModel.getObject());
+										onPropertyUpdating(target);
+										target.add(StepListEditPanel.this);
+									}
+
+								};
+							}
+							
+						});
+						return menuItems;
+					}
+					
 				});
 				cellItem.add(fragment);
 			}
@@ -299,6 +348,60 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	public boolean needExplicitSubmit() {
 		return true;
+	}
+	
+	private class AddStepLink extends DropdownLink {
+		
+		private final int index;
+		
+		AddStepLink(String componentId, @Nullable Component alignTarget, int index) {
+			super(componentId, alignTarget, bottom(0), true, true);
+			this.index = index;
+		} 
+
+		@Override
+		protected Component newContent(String id, FloatingPanel dropdown) {
+			return new TypeSelectPanel<Step>(id) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Class<? extends Step> type) {
+					dropdown.close();
+
+					Step step;
+					try {
+						step = type.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						throw new RuntimeException(e);
+					}
+
+					new StepEditModalPanel(target, step) {
+
+						@Override
+						protected void onSave(AjaxRequestTarget target, Step step) {
+							steps.add(index, step);
+							markFormDirty(target);
+							close();
+							onPropertyUpdating(target);
+							target.add(StepListEditPanel.this);
+						}
+
+						@Override
+						public BuildSpec getBuildSpec() {
+							return StepListEditPanel.this.getBuildSpec();
+						}
+
+						@Override
+						public List<ParamSpec> getParamSpecs() {
+							return StepListEditPanel.this.getParamSpecs();
+						}
+
+					};
+				}
+
+			};
+		}
+
 	}
 	
 }
