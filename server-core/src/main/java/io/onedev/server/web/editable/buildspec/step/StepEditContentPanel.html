@@ -1,0 +1,22 @@
+<wicket:panel>
+	<form wicket:id="form" class="bean-edit leave-confirm">
+		<div wicket:id="head" class="modal-header">
+			<h5 class="modal-title">
+				<a wicket:id="typeSelector">
+					<span wicket:id="title"></span>
+					<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
+				</a>
+			</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="description" class="alert alert-light alert-notice"></div>
+			<div wicket:id="feedback"></div>
+            <div wicket:id="editor"></div>
+		</div>
+		<div class="modal-footer">
+			<button wicket:id="ok" class="btn btn-primary">Ok</button>
+			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+		</div>
+	</form>
+</wicket:panel>

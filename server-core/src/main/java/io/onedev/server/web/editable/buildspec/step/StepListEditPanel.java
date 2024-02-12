@@ -10,7 +10,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -31,7 +30,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
@@ -79,11 +77,11 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 							throw new RuntimeException(e);
 						}
 
-						new StepEditPanel(target, step) {
+						new StepEditModalPanel(target, step) {
 
 							@Override
-							protected void onSave(AjaxRequestTarget target, Step bean) {
-								steps.add(index, bean);
+							protected void onSave(AjaxRequestTarget target, Step step) {
+								steps.add(index, step);
 								markFormDirty(target);
 								close();
 								onPropertyUpdating(target);
@@ -170,18 +168,20 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
+				var index = row.getIndex();
 				row.setOutputMarkupId(true);
-				fragment.add(newAddStepLink("addAbove", row, row.getIndex()));
-				fragment.add(newAddStepLink("addBelow", row, row.getIndex() + 1));
+				fragment.add(newAddStepLink("addAbove", row, index));
+				fragment.add(newAddStepLink("addBelow", row, index + 1));
 				fragment.add(new AjaxLink<Void>("edit") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Step step = steps.get(cellItem.findParent(Item.class).getIndex());
-						new StepEditPanel(target, step) {
+						Step step = steps.get(index);
+						new StepEditModalPanel(target, step) {
 
 							@Override
-							protected void onSave(AjaxRequestTarget target, Step bean) {
+							protected void onSave(AjaxRequestTarget target, Step step) {
+								steps.set(index, step);
 								markFormDirty(target);
 								close();
 								onPropertyUpdating(target);

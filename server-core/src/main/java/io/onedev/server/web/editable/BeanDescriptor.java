@@ -1,22 +1,15 @@
 package io.onedev.server.web.editable;
 
+import com.google.common.collect.Sets;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.BeanUtils;
+
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.annotation.Editable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class BeanDescriptor implements Serializable {

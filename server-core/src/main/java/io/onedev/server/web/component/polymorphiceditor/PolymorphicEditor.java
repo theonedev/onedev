@@ -95,16 +95,8 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 						try {
 							bean = (Serializable) each.getDeclaredConstructor().newInstance();
 							Serializable prevBean = PolymorphicEditor.this.getConvertedInput();
-							if (prevBean != null) {
-								BeanDescriptor prevDescriptor = new BeanDescriptor(prevBean.getClass());
-								for (List<PropertyDescriptor> prevGroupProperties : prevDescriptor.getProperties().values()) {
-									for (PropertyDescriptor prevProperty : prevGroupProperties) {
-										Class<?> declaringClass = prevProperty.getPropertyGetter().getDeclaringClass();
-										if (!prevProperty.isPropertyExcluded() && declaringClass.isAssignableFrom(baseClass))
-											prevProperty.copyProperty(prevBean, bean);
-									}
-								}
-							}
+							if (prevBean != null) 
+								new BeanDescriptor(baseClass).copyProperties(prevBean, bean);
 						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 								 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							throw new RuntimeException(e);
