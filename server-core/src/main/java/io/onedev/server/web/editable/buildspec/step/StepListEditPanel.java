@@ -6,7 +6,6 @@ import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -22,7 +21,6 @@ import io.onedev.server.web.editable.PropertyUpdating;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -244,12 +242,6 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 							@Override
 							public WebMarkupContainer newLink(String id) {
 								return new AjaxLink<Void>(id) {
-
-									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this step?"));
-									}
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
