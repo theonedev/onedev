@@ -261,9 +261,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 														protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 															super.onSubmit(target, form);
 															dropdown.close();
-															var newJob = SerializationUtils.clone(getJobs().get(jobIndex));
-															newJob.setName(null);
-															addJob(target, newJob);
+															addJob(target, SerializationUtils.clone(getJobs().get(jobIndex)));
 														}
 
 														@Override
@@ -1066,9 +1064,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 											super.onSubmit(target, form);
 											dropdown.close();
-											var newElement = SerializationUtils.clone(getElements().get(item.getIndex()));
-											newElement.setName(null);
-											addElement(target, newElement);
+											addElement(target, SerializationUtils.clone(getElements().get(item.getIndex())));
 										}
 
 										@Override

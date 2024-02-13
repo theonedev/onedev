@@ -11,7 +11,9 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.TextUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -29,6 +31,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +80,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 		
 		List<IColumn<GroovyScript, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
@@ -89,31 +92,53 @@ public class GroovyScriptListPage extends AdministrationPage {
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
 			}
-		});		
+		});
+		columns.add(new AbstractColumn<>(Model.of("Can Be Used By Jobs")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
+				cellItem.add(new Label(componentId, TextUtils.getDisplayValue(rowModel.getObject().isCanBeUsedByBuildJobs())));
+			}
+		});
+		columns.add(new AbstractColumn<>(Model.of("Job Authorization")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
+				var script = rowModel.getObject();
+				if (script.isCanBeUsedByBuildJobs()) {
+					if (script.getAuthorization() != null)
+						cellItem.add(new Label(componentId, script.getAuthorization()));
+					else
+						cellItem.add(new Label(componentId, "<i>Any job</i>").setEscapeModelStrings(false));
+				} else {
+					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
+				}
+			}
+		});
 		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
 				int scriptIndex = cellItem.findParent(LoopItem.class).getIndex();
-				
+
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", GroovyScriptListPage.this);
 				fragment.add(new ModalLink("edit") {
 
@@ -139,7 +164,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -155,9 +180,9 @@ public class GroovyScriptListPage extends AdministrationPage {
 						OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
 						target.add(scriptsTable);
 					}
-					
+
 				});
-				
+
 				cellItem.add(fragment);
 			}
 
@@ -177,7 +202,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 		};
 		
-		add(scriptsTable = new DataTable<GroovyScript, Void>("scripts", columns, dataProvider, Integer.MAX_VALUE));
+		add(scriptsTable = new DataTable<>("scripts", columns, dataProvider, Integer.MAX_VALUE));
 		scriptsTable.addTopToolbar(new HeadersToolbar<Void>(scriptsTable, null));
 		scriptsTable.addBottomToolbar(new NoRecordsToolbar(scriptsTable));
 		scriptsTable.add(new NoRecordsBehavior());

@@ -86,7 +86,7 @@ abstract class StepEditContentPanel extends Panel {
 		BeanEditor editor = BeanContext.edit("editor", step);
 		form.add(editor);
 		
-		form.add(new AjaxButton("ok") {
+		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onInitialize() {

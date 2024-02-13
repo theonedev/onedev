@@ -51,7 +51,7 @@ public class GroovyScript implements Serializable {
 		this.content = content;
 	}
 	
-	@Editable(order=350)
+	@Editable(order=350, name="Can Be Used By Jobs", description = "Whether or not this script can be used in CI/CD jobs")
 	public boolean isCanBeUsedByBuildJobs() {
 		return canBeUsedByBuildJobs;
 	}

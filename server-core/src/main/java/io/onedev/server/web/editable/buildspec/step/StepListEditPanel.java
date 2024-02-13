@@ -125,7 +125,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 				Item<?> row = cellItem.findParent(Item.class);
 				var index = row.getIndex();
 				row.setOutputMarkupId(true);
-				fragment.add(new AjaxLink<Void>("more") {
+				fragment.add(new AjaxLink<Void>("edit") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
