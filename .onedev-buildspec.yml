@@ -13,20 +13,9 @@ jobs:
     name: set up cache
     templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: detect build version
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
+  - !UseTemplateStep
     name: set build version
-    buildVersion: '@file:buildVersion@'
+    templateName: set build version
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: test
@@ -58,20 +47,9 @@ jobs:
     name: set up cache
     templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: detect version
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: set version
-    buildVersion: '@file:buildVersion@'
+  - !UseTemplateStep
+    name: set build version
+    templateName: set build version
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: build
@@ -289,20 +267,9 @@ jobs:
     name: set up cache
     templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: detect version
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - echo "Detecting project version (may require some time while downloading maven dependencies)..."
-      - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: set version
-    buildVersion: '@file:buildVersion@'
+  - !UseTemplateStep
+    name: set build version
+    templateName: set build version
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: build
