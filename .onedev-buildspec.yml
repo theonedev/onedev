@@ -9,17 +9,9 @@ jobs:
     withLfs: false
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !GenerateChecksumStep
-    name: generate pom checksum
-    files: '**/pom.xml'
-    targetFile: checksum
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetupCacheStep
-    name: set up maven cache
-    key: maven-repository-@file:checksum@
-    loadKeys:
-    - maven-repository
-    path: /root/.m2/repository
+  - !UseTemplateStep
+    name: set up cache
+    templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect build version
@@ -62,17 +54,9 @@ jobs:
     withLfs: false
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !GenerateChecksumStep
-    name: generate pom checksum
-    files: '**/pom.xml'
-    targetFile: checksum
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetupCacheStep
-    name: set up maven cache
-    key: maven-repository-@file:checksum@
-    loadKeys:
-    - maven-repository
-    path: /root/.m2/repository
+  - !UseTemplateStep
+    name: set up cache
+    templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect version
@@ -301,17 +285,9 @@ jobs:
     withLfs: false
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !GenerateChecksumStep
-    name: generate pom checksum
-    files: '**/pom.xml'
-    targetFile: checksum
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetupCacheStep
-    name: set up maven cache
-    key: maven-repository-@file:checksum@
-    loadKeys:
-    - maven-repository
-    path: /root/.m2/repository
+  - !UseTemplateStep
+    name: set up cache
+    templateName: set up cache
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect version
@@ -383,3 +359,7 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+imports:
+- projectPath: onedev
+  revision: main
+  accessTokenSecret: onedev-token
