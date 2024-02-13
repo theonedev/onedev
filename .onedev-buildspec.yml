@@ -1,4 +1,4 @@
-version: 26
+version: 27
 jobs:
 - name: CI
   steps:
@@ -8,6 +8,18 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !GenerateChecksumStep
+    name: generate pom checksum
+    files: '**/pom.xml'
+    targetFile: checksum
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetupCacheStep
+    name: set up maven cache
+    key: maven-repository-@file:checksum@
+    loadKeys:
+    - maven-repository
+    path: /root/.m2/repository
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect build version
@@ -40,9 +52,6 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
   timeout: 3600
 - name: Release
   steps:
@@ -52,6 +61,18 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !GenerateChecksumStep
+    name: generate pom checksum
+    files: '**/pom.xml'
+    targetFile: checksum
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetupCacheStep
+    name: set up maven cache
+    key: maven-repository-@file:checksum@
+    loadKeys:
+    - maven-repository
+    path: /root/.m2/repository
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect version
@@ -208,9 +229,6 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
   timeout: 3600
 - name: Sync Main (GitHub)
   steps:
@@ -283,6 +301,18 @@ jobs:
     withLfs: false
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !GenerateChecksumStep
+    name: generate pom checksum
+    files: '**/pom.xml'
+    targetFile: checksum
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetupCacheStep
+    name: set up maven cache
+    key: maven-repository-@file:checksum@
+    loadKeys:
+    - maven-repository
+    path: /root/.m2/repository
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: detect version
     runInContainer: true
@@ -352,7 +382,4 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
   timeout: 3600
