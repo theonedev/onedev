@@ -27,6 +27,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -58,6 +60,8 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		implements JobCacheManager, Serializable, SchedulableTask {
 	
 	private static final int CACHE_VERSION = 1;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DefaultJobCacheManager.class);
 	
 	private final ProjectManager projectManager;
 	
@@ -425,14 +429,19 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	@Override
 	public void execute() {
 		var now = new DateTime();
-		for (var project: projectManager.query()) {
-			var preserveDays = project.getHierarchyCachePreserveDays();
-			var threshold = now.minusDays(preserveDays);
-			var criteria = newCriteria();
-			criteria.add(Restrictions.eq(PROP_PROJECT, project));
-			criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
-			for (var cache: query(criteria)) 
-				delete(cache);
+		for (var projectId: projectManager.getActiveIds()) {
+			try {
+				var project = projectManager.load(projectId);
+				var preserveDays = project.getHierarchyCachePreserveDays();
+				var threshold = now.minusDays(preserveDays);
+				var criteria = newCriteria();
+				criteria.add(Restrictions.eq(PROP_PROJECT, project));
+				criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
+				for (var cache: query(criteria))
+					delete(cache);
+			} catch (Exception e) {
+				logger.error("Error cleaning up job caches", e);
+			}
 		}
 	}
 
