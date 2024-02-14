@@ -57,7 +57,7 @@ public class BrandSettingEditBean implements Serializable {
 		this.logoData = logoData;
 	}
 
-	@Editable(order=200, name="Logo for Dark Mode", description = "Upload a 128x128 transparent png file to be used " +
+	@Editable(order=300, name="Logo for Dark Mode", description = "Upload a 128x128 transparent png file to be used " +
 			"as logo for dark mode")
 	@Image(accept="image/png", backgroundColor = "#23232d")
 	@NotEmpty
