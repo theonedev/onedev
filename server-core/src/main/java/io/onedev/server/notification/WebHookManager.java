@@ -28,6 +28,9 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.persistence.annotation.Sessional;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 @Singleton
 public class WebHookManager {
 
@@ -58,43 +61,26 @@ public class WebHookManager {
 		for (WebHook webHook: event.getProject().getHierarchyWebHooks()) {
 			for (WebHook.EventType eventType: webHook.getEventTypes()) {
 				if (eventType.includes(event)) {
-					executor.submit(new Runnable() {
+					executor.submit(() -> {
+						try (var client = HttpClients.createDefault()) {
+							HttpPost httpPost = new HttpPost(webHook.getPostUrl());
 
-						@Override
-						public void run() {
-							CloseableHttpClient client = HttpClients.createDefault();
-							try {
-							    HttpPost httpPost = new HttpPost(webHook.getPostUrl());
-							 
-							    StringEntity entity = new StringEntity(jsonOfEvent, StandardCharsets.UTF_8.name());
-							    httpPost.setEntity(entity);
-							    httpPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-							    httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-							    httpPost.setHeader(HttpHeaders.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
-							    httpPost.setHeader(SIGNATURE_HEAD, webHook.getSecret());
-							 
-							    CloseableHttpResponse response = client.execute(httpPost);
-							    try {
-							    	HttpEntity responseEntity = response.getEntity();
-							    	String responseText = EntityUtils.toString(responseEntity);
-							    	if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-							    		logger.error("Error calling web hooks: " + responseText);
-							    } finally {
-							    	try {
-										response.close();
-									} catch (IOException e) {
-									}
-							    }
-							} catch (IOException e) {
-								logger.error("Error calling web hooks", e);
-							} finally {
-								try {
-									client.close();
-								} catch (IOException e) {
-								}
+							StringEntity entity = new StringEntity(jsonOfEvent, UTF_8.name());
+							httpPost.setEntity(entity);
+							httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
+							httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+							httpPost.setHeader(HttpHeaders.ACCEPT_CHARSET, UTF_8.name());
+							httpPost.setHeader(SIGNATURE_HEAD, webHook.getSecret());
+
+							try (var response = client.execute(httpPost)) {
+								HttpEntity responseEntity = response.getEntity();
+								String responseText = EntityUtils.toString(responseEntity);
+								if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+									logger.error("Error calling web hooks: " + responseText);
 							}
+						} catch (IOException e) {
+							logger.error("Error calling web hooks", e);
 						}
-						
 					});
 					break;
 				}

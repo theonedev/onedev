@@ -4,6 +4,7 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.pack.PackEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.annotation.Editable;
@@ -59,6 +60,14 @@ public class WebHook implements Serializable {
 				return event instanceof BuildEvent;
 			}
 			
+		},
+		PACKAGE {
+
+			@Override
+			public boolean includes(Object event) {
+				return event instanceof PackEvent;
+			}
+
 		};
 
 		public abstract boolean includes(Object event);
