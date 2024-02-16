@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.shiro.util.StringUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -59,7 +60,7 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 		if (Strings.isEmpty(input)) {
 			choices = new ArrayList<T>();
 		} else {
-			choices = getProvider().toChoices(Arrays.asList(input.split(",")));
+			choices = getProvider().toChoices(Arrays.asList(StringUtils.split(input, '\n')));
 		}
 
 		setConvertedInput(choices);

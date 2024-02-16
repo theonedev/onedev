@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
@@ -18,6 +19,7 @@ import javax.naming.*;
 import javax.naming.directory.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.*;
 
 @Editable(name="Generic LDAP", order=200)
@@ -37,7 +39,7 @@ public class LdapAuthenticator extends Authenticator {
     
     private String managerPassword;
     
-    private String userSearchBase;
+    private List<String> userSearchBases;
     
     private String userSearchFilter;
     
@@ -101,15 +103,15 @@ public class LdapAuthenticator extends Authenticator {
 		this.managerPassword = managerPassword;
 	}
 
-	@Editable(order=500, description=
-			"Specifies the base node for user search. For example: <i>ou=users, dc=example, dc=com</i>")
-	@NotEmpty
-	public String getUserSearchBase() {
-		return userSearchBase;
+	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add more", description=
+			"Specifies base nodes for user search. For example: <i>ou=users, dc=example, dc=com</i>")
+	@Size(min=1, message = "At least one user search base should be specified")
+	public List<String> getUserSearchBases() {
+		return userSearchBases;
 	}
 
-	public void setUserSearchBase(String userSearchBase) {
-		this.userSearchBase = userSearchBase;
+	public void setUserSearchBases(List<String> userSearchBases) {
+		this.userSearchBases = userSearchBases;
 	}
 
 	@Editable(order=600, description=
@@ -179,13 +181,6 @@ public class LdapAuthenticator extends Authenticator {
 		Collection<String> groupNames = null;
         Collection<String> sshKeys = null;
 
-        Name userSearchBase;
-		try {
-			userSearchBase = new CompositeName().add(getUserSearchBase());
-		} catch (InvalidNameException e) {
-			throw new RuntimeException(e);
-		}
-		
         String userSearchFilter = StringUtils.replace(getUserSearchFilter(), "{0}", 
         		escape(token.getUsername()));
         userSearchFilter = StringUtils.replace(userSearchFilter, "\\", "\\\\");
@@ -233,21 +228,30 @@ public class LdapAuthenticator extends Authenticator {
             } catch (AuthenticationException e) {
         		throw new RuntimeException("Can not bind to ldap server '" + getLdapUrl() + "': " + e.getMessage());
             }
-            NamingEnumeration<SearchResult> results = ctx.search(userSearchBase, userSearchFilter, searchControls);
-            if (results == null || !results.hasMore()) 
-                throw new UnknownAccountException("Invalid credentials");
+
+			NamingEnumeration<SearchResult> results = null;
+			for (var userSearchBase: getUserSearchBases()) {
+				 results = ctx.search(new CompositeName().add(userSearchBase), 
+						userSearchFilter, searchControls);
+				 if (results.hasMore())
+					 break;
+			}
+			if (results == null)
+				throw new ExplicitException("No user search base specified");
+			if (!results.hasMore())
+				throw new UnknownAccountException("Invalid credentials");
             
-            SearchResult searchResult = (SearchResult) results.next();
+            SearchResult searchResult = results.next();
             String userDN = searchResult.getNameInNamespace();
             if (!searchResult.isRelative()) {
-            	StringBuffer buffer = new StringBuffer();
-                buffer.append(StringUtils.substringBefore(searchResult.getName(), "//"));
-                buffer.append("//");
-                buffer.append(StringUtils.substringBefore(
+            	StringBuilder builder = new StringBuilder();
+                builder.append(StringUtils.substringBefore(searchResult.getName(), "//"));
+                builder.append("//");
+                builder.append(StringUtils.substringBefore(
                 		StringUtils.substringAfter(searchResult.getName(), "//"), "/"));
                 
-                ldapEnv.put(Context.PROVIDER_URL, buffer.toString());
-                logger.debug("Binding to referral ldap url '" + buffer.toString() + "'...");
+                ldapEnv.put(Context.PROVIDER_URL, builder.toString());
+                logger.debug("Binding to referral ldap url '" + builder.toString() + "'...");
                 referralCtx = new InitialDirContext(ldapEnv);
             }
             if (userDN.startsWith("ldap")) {

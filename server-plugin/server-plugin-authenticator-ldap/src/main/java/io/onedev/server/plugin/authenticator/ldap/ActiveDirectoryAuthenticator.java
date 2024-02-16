@@ -1,9 +1,12 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
+
+import java.util.List;
 
 @Editable(name="Active Directory", order=100)
 public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
@@ -42,17 +45,17 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 		super.setManagerDN(managerDN);
 	}
 
-	@Editable(order=500, description=
-		"Specifies the base node for user search. For example: <i>cn=Users, dc=example, dc=com</i>")
-	@NotEmpty
+	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add more", description=
+		"Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>")
+	@Size(min=1, message = "At least one user search base should be specified")
 	@Override
-	public String getUserSearchBase() {
-		return super.getUserSearchBase();
+	public List<String> getUserSearchBases() {
+		return super.getUserSearchBases();
 	}
 
 	@Override
-	public void setUserSearchBase(String userSearchBase) {
-		super.setUserSearchBase(userSearchBase);
+	public void setUserSearchBases(List<String> userSearchBases) {
+		super.setUserSearchBases(userSearchBases);
 	}
 
 	@Override

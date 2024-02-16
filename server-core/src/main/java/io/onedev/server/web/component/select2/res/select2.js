@@ -3,7 +3,7 @@ Copyright 2012 Igor Vaynberg
 
 Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
 
-This software is licensed under the Apache License, Version 2.0 (the "Apache License") or the GNU
+This software is licensed under the Apache License, Version 2.0 (the "Apache License") or the ƒGNU
 General Public License version 2 (the "GPL License"). You may choose either license to govern your
 use of this software only upon the condition that you accept all of the terms of either the Apache
 License or the GPL License.
@@ -2765,7 +2765,7 @@ the specific language governing permissions and limitations under the Apache Lic
         matcher: function(term, text) {
             return (''+text).toUpperCase().indexOf((''+term).toUpperCase()) >= 0;
         },
-        separator: ",",
+        separator: "\n",
         tokenSeparators: [],
         tokenizer: defaultTokenizer,
         escapeMarkup: function (markup) {

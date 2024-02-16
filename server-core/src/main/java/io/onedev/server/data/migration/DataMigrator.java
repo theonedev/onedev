@@ -6205,5 +6205,25 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	// Migrate to 10.1.1
+	private void migrate156(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("AUTHENTICATOR")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var userSearchBaseElement = valueElement.element("userSearchBase");
+							valueElement.addElement("userSearchBases").addElement("string").setText(userSearchBaseElement.getText().trim());
+							userSearchBaseElement.detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }
