@@ -126,6 +126,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		File assetsDir = OneDev.getAssetsDir();
 		
 		boolean hasCustomLogo = false;
+		boolean hasCustomDarkLogo = false;
 		boolean hasSiteMapTxt = false;
 		boolean hasSiteMapXml = false;
 		for (File file: assetsDir.listFiles()) {
@@ -133,6 +134,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
 				if (file.getName().equals("logo.png"))
 					hasCustomLogo = true;
+				else if (file.getName().equals("logo-dark.png"))
+					hasCustomDarkLogo = true;
 				else if (file.getName().equals("sitemap.xml"))
 					hasSiteMapXml = true;
 				else if (file.getName().equals("sitemap.txt"))
@@ -141,8 +144,10 @@ public class ProductServletConfigurator implements ServletConfigurator {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 			}
 		}
-		if (!hasCustomLogo)
+		if (!hasCustomLogo) 
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo.png");
+		if (!hasCustomDarkLogo)
+			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo-dark.png");
 		if (!hasSiteMapTxt)
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.txt");
 		if (!hasSiteMapXml)
