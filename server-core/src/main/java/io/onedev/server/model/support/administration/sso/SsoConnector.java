@@ -41,7 +41,7 @@ public abstract class SsoConnector implements Serializable {
 	}
 
 	@Editable(order=20000, placeholder="No default group", description="Optionally add newly authenticated "
-			+ "user to specified group if membership information is not retrieved")
+			+ "user to specified group if membership information is not available")
 	@GroupChoice
 	public String getDefaultGroup() {
 		return defaultGroup;

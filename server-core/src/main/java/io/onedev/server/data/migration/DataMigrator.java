@@ -6238,5 +6238,27 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate157(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var connectorElement: valueElement.elements()) {
+								if (connectorElement.getName().contains("EntraIdConnector"))
+									connectorElement.addElement("retrieveGroups").setText("false");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

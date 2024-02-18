@@ -34,7 +34,9 @@ public class EntraIdConnector extends OpenIdConnector {
 	private static final long serialVersionUID = 1L;
 
 	private String tenantId;
-
+	
+	private boolean retrieveGroups;
+	
 	public EntraIdConnector() {
 		setName("EntraID");
 	}
@@ -46,7 +48,7 @@ public class EntraIdConnector extends OpenIdConnector {
 	}
 
 	public void setClientId(String clientId) {
-		this.setClientId(clientId);
+		super.setClientId(clientId);
 	}
 
 	@Editable(order=1050, name="Directory (tenant) ID", description="Specify directory (tenant) ID of the app registered in Entra ID")
@@ -66,6 +68,18 @@ public class EntraIdConnector extends OpenIdConnector {
 		return super.getClientSecret();
 	}
 
+	@Editable(order=1200, description = "Whether or not to retrieve groups of login user. " +
+			"Make sure to add groups claim via token configuration of the app registered " +
+			"in Entra ID if this option is enabled. The groups claim should return group " +
+			"id (the default option) via various token types in this case")
+	public boolean isRetrieveGroups() {
+		return retrieveGroups;
+	}
+
+	public void setRetrieveGroups(boolean retrieveGroups) {
+		this.retrieveGroups = retrieveGroups;
+	}
+
 	public void setClientSecret(String clientSecret) {
 		super.setClientSecret(clientSecret);
 	}
@@ -79,15 +93,13 @@ public class EntraIdConnector extends OpenIdConnector {
 	public String getRequestScopes() {
 		return "openid email profile";
 	}
-
-	@Editable(order=10100, group = "More Settings", description="Optionally specify the claim to retrieve " +
-			"groups of authenticated user")
+	
+	@Override
 	public String getGroupsClaim() {
-		return super.getGroupsClaim();
-	}
-
-	public void setGroupsClaim(String groupsClaim) {
-		super.setGroupsClaim(groupsClaim);
+		if (isRetrieveGroups())
+			return "groups";
+		else
+			return null;
 	}
 	
 	@Override
