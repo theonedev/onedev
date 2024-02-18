@@ -80,6 +80,16 @@ public class EntraIdConnector extends OpenIdConnector {
 		return "openid email profile";
 	}
 
+	@Editable(order=10100, group = "More Settings", description="Optionally specify the claim to retrieve " +
+			"groups of authenticated user")
+	public String getGroupsClaim() {
+		return super.getGroupsClaim();
+	}
+
+	public void setGroupsClaim(String groupsClaim) {
+		super.setGroupsClaim(groupsClaim);
+	}
+	
 	@Override
 	public String getButtonImageUrl() {
 		ResourceReference logo = new PackageResourceReference(GitHubConnector.class, "entraid.png");
