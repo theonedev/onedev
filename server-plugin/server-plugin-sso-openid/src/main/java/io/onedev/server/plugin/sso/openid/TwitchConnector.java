@@ -54,7 +54,7 @@ public class TwitchConnector extends OpenIdConnector {
 	}
 
 	@Override
-	protected String getBaseScope() {
+	public String getRequestScopes() {
 		return "openid user:read:email";
 	}
 

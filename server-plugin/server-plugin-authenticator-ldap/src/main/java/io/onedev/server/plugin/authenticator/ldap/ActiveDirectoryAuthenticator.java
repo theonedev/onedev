@@ -45,7 +45,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 		super.setManagerDN(managerDN);
 	}
 
-	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add more", description=
+	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add", description=
 		"Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>")
 	@Size(min=1, message = "At least one user search base should be specified")
 	@Override

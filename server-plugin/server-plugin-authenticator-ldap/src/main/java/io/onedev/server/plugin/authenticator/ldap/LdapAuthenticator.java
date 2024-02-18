@@ -103,7 +103,7 @@ public class LdapAuthenticator extends Authenticator {
 		this.managerPassword = managerPassword;
 	}
 
-	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add more", description=
+	@Editable(order=500, placeholder = "Input user search base. Hit ENTER to add", description=
 			"Specifies base nodes for user search. For example: <i>ou=users, dc=example, dc=com</i>")
 	@Size(min=1, message = "At least one user search base should be specified")
 	public List<String> getUserSearchBases() {

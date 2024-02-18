@@ -47,7 +47,7 @@ public class Office365MailService implements MailService {
 	
 	private transient MailPosition mailPosition;
 	
-	@Editable(order=100, name="Application (client) ID", description="Specify application (tenant) ID of this OneDev instance registered in Azure AD")
+	@Editable(order=100, name="Application (client) ID", description="Specify application (client) ID of the app registered in Entra ID")
 	@NotEmpty
 	public String getClientId() {
 		return clientId;
@@ -57,7 +57,7 @@ public class Office365MailService implements MailService {
 		this.clientId = clientId;
 	}
 
-	@Editable(order=150, name="Directory (tenant) ID", description="Specify ID of the Azure AD this OneDev instance is registered in")
+	@Editable(order=150, name="Directory (tenant) ID", description="Specify directory (tenant) ID of the app registered in Entra ID")
 	@NotEmpty
 	public String getTenantId() {
 		return tenantId;
@@ -67,7 +67,7 @@ public class Office365MailService implements MailService {
 		this.tenantId = tenantId;
 	}
 
-	@Editable(order=200, description="Client secret of this OneDev instance registered in Azure AD")
+	@Editable(order=200, description="Specify client secret of the app registered in Entra ID")
 	@Password
 	@NotEmpty
 	public String getClientSecret() {

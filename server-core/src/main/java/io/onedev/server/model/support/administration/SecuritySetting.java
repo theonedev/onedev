@@ -99,7 +99,7 @@ public class SecuritySetting implements Serializable {
 		this.enforce2FA = enforce2FA;
 	}
 
-	@Editable(order=500, name="CORS Allowed Origins", placeholder = "Specify allowed CORS origin, hit ENTER to add more", description = "" +
+	@Editable(order=500, name="CORS Allowed Origins", placeholder = "Input allowed CORS origin, hit ENTER to add", description = "" +
 			"Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. " +
 			"For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, " +
 			"the response header <code>Access-Control-Allow-Origin</code> will be set to the same value")

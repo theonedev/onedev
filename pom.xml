@@ -269,7 +269,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>oauth2-oidc-sdk</artifactId>
-				<version>9.35</version>
+				<version>11.9.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.zaxxer</groupId>

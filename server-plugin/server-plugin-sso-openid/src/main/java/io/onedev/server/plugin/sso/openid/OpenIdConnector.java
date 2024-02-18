@@ -18,13 +18,13 @@ import com.nimbusds.openid.connect.sdk.*;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.UrlSegment;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.util.OAuthUtils;
-import io.onedev.server.annotation.UrlSegment;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -32,6 +32,9 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,15 +60,22 @@ public class OpenIdConnector extends SsoConnector {
 	
 	private static final String SESSION_ATTR_STATE = "state";
 	
+	private String configurationDiscoveryUrl;
+	
 	private String clientId;
 	
 	private String clientSecret;
 	
-	private String configurationDiscoveryUrl;
+	private String requestScopes = "openid email profile";
 	
 	private String groupsClaim;
 	
-	private String buttonImageUrl = "https://openid.net/images/logo/openid-icon-100x100.png";
+	private String buttonImageUrl;
+	
+	public OpenIdConnector() {
+		ResourceReference logo = new PackageResourceReference(OpenIdConnector.class, "openid.png");
+		buttonImageUrl = RequestCycle.get().urlFor(logo, new PageParameters()).toString();
+	}
 	
 	@Override
 	public boolean isManagingMemberships() {
@@ -124,28 +134,7 @@ public class OpenIdConnector extends SsoConnector {
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
 	}
-
-	@Editable(order=1500, description="Optionally specify the OpenID claim to retrieve groups "
-			+ "of authenticated user")
-	public String getGroupsClaim() {
-		return groupsClaim;
-	}
-
-	public void setGroupsClaim(String groupsClaim) {
-		this.groupsClaim = groupsClaim;
-	}
-
-	@Editable(order=19100, description="Specify image on the login button")
-	@NotEmpty
-	@Override
-	public String getButtonImageUrl() {
-		return buttonImageUrl;		
-	}
-
-	public void setButtonImageUrl(String buttonImageUrl) {
-		this.buttonImageUrl = buttonImageUrl;
-	}
-
+	
 	@Override
 	public SsoAuthenticated processLoginResponse() {
 		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
@@ -226,48 +215,73 @@ public class OpenIdConnector extends SsoConnector {
 				throw new AuthenticationException("ID token was expired");
 
 			String subject = claims.getSubject();
+			String email = claims.getStringClaim("email");
+			String userName = claims.getStringClaim("preferred_username");
+			String fullName = claims.getStringClaim("name");
+			List<String> groups;
+			if (getGroupsClaim() != null) {
+				var groupsArray = claims.getStringArrayClaim(getGroupsClaim());
+				if (groupsArray != null)
+					groups = List.of(groupsArray);
+				else 
+					groups = null;
+			} else {
+				groups = null;
+			}
 			
-			BearerAccessToken accessToken = tokenResponse.getOIDCTokens().getBearerAccessToken();
+			var accessToken = tokenResponse.getOIDCTokens().getBearerAccessToken();
+			if (email == null || userName == null || fullName == null 
+					|| getGroupsClaim() != null && groups == null) {
 
-			UserInfoRequest userInfoRequest = new UserInfoRequest(
-					new URI(getCachedProviderMetadata().getUserInfoEndpoint()), accessToken);
-			HTTPResponse httpResponse = userInfoRequest.toHTTPRequest().send();
+				UserInfoRequest userInfoRequest = new UserInfoRequest(
+						new URI(getCachedProviderMetadata().getUserInfoEndpoint()), accessToken);
+				HTTPResponse httpResponse = userInfoRequest.toHTTPRequest().send();
 
-			if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-				JSONObject json = httpResponse.getContentAsJSONObject();
-				if (!subject.equals(json.get("sub")))
-					throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
-				
-				String email = getStringValue(json.get("email"));
-				if (StringUtils.isBlank(email))
-					throw new AuthenticationException("OIDC error: No email claim returned");
-				
-				String userName = getStringValue(json.get("preferred_username"));
-				if (StringUtils.isBlank(userName))
-					userName = email;
-				userName = StringUtils.substringBefore(userName, "@");
-				
-				String fullName = getStringValue(json.get("name"));
+				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
+					JSONObject json = httpResponse.getContentAsJSONObject();
+					if (!subject.equals(json.get("sub")))
+						throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
 
-				List<String> groupNames;
-				if (getGroupsClaim() != null) {
-					groupNames = new ArrayList<>();
-					JSONArray jsonArray = (JSONArray) json.get(getGroupsClaim());
-					if (jsonArray != null) {
-						for (Object group: jsonArray)
-							groupNames.add((String) group);
+					if (email == null) {
+						email = getStringValue(json.get("email"));
+						if (email == null)
+							throw new AuthenticationException("OIDC error: No email claim returned");
+					}
+
+					if (userName == null) {
+						userName = getStringValue(json.get("preferred_username"));
+						if (userName == null)
+							userName = email;
+						userName = StringUtils.substringBefore(userName, "@");
+					}
+
+					if (fullName == null)
+						fullName = getStringValue(json.get("name"));
+
+					if (getGroupsClaim() != null && groups == null) {
+						var jsonArray = (JSONArray) json.get(getGroupsClaim());
+						if (jsonArray != null) {
+							groups = new ArrayList<>();
+							for (Object group: jsonArray)
+								groups.add((String) group);
+						} else {
+							logger.warn("No groups claim returned");
+						}
 					}
 				} else {
-					groupNames = null;
+					throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 				}
-				
-				return new SsoAuthenticated(userName, email, fullName, groupNames, null, this);
-			} else {
-				throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 			}
+			if (groups != null)
+				groups = convertGroups(accessToken, groups);
+			return new SsoAuthenticated(userName, email, fullName, groups, null, this);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
+	}
+	
+	protected List<String> convertGroups(BearerAccessToken accessToken, List<String> groups) {
+		return groups;
 	}
 	
 	protected RuntimeException buildException(ErrorObject error) {
@@ -283,9 +297,7 @@ public class OpenIdConnector extends SsoConnector {
 			Session.get().setAttribute(SESSION_ATTR_STATE, state.getValue());
 			Session.get().setAttribute(SESSION_ATTR_PROVIDER_METADATA, discoverProviderMetadata());
 			
-			String scopes = getBaseScope();
-			if (getGroupsClaim() != null)
-				scopes = scopes + " " + getGroupsClaim();
+			String scopes = getRequestScopes();
 			
 			AuthenticationRequest request = new AuthenticationRequest(
 					new URI(getCachedProviderMetadata().getAuthorizationEndpoint()),
@@ -296,11 +308,39 @@ public class OpenIdConnector extends SsoConnector {
 			throw new RuntimeException(e);
 		}		
 	}
-	
-	protected String getBaseScope() {
-		return "openid email profile";
+
+	@Editable(order=10000, group = "More Settings", description = "Specify OpenID scopes to request")
+	@NotEmpty
+	public String getRequestScopes() {
+		return requestScopes;
 	}
 
+	public void setRequestScopes(String requestScopes) {
+		this.requestScopes = requestScopes;
+	}
+
+	@Editable(order=10100, group = "More Settings", description="Optionally specify the OpenID claim to retrieve " +
+			"groups of authenticated user. Depending on the provider, you may need to request additional scopes " +
+			"above to make this claim available")
+	public String getGroupsClaim() {
+		return groupsClaim;
+	}
+
+	public void setGroupsClaim(String groupsClaim) {
+		this.groupsClaim = groupsClaim;
+	}
+	
+	@Editable(order=10200, group="More Settings", description="Specify image on the login button")
+	@NotEmpty
+	@Override
+	public String getButtonImageUrl() {
+		return buttonImageUrl;
+	}
+
+	public void setButtonImageUrl(String buttonImageUrl) {
+		this.buttonImageUrl = buttonImageUrl;
+	}
+	
 	protected ProviderMetadata discoverProviderMetadata() {
 		try {
 			JsonNode json = OneDev.getInstance(ObjectMapper.class).readTree(

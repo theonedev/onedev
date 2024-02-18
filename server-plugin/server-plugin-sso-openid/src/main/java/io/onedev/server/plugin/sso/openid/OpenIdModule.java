@@ -28,7 +28,9 @@ public class OpenIdModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(GitHubConnector.class, OpenIdConnector.class, TwitchConnector.class);
+				return Sets.newHashSet(
+						GitHubConnector.class, EntraIdConnector.class, 
+						OpenIdConnector.class, TwitchConnector.class);
 			}
 			
 		});

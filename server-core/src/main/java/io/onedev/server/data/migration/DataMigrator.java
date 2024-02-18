@@ -6220,6 +6220,19 @@ public class DataMigrator {
 							valueElement.addElement("userSearchBases").addElement("string").setText(userSearchBaseElement.getText().trim());
 							userSearchBaseElement.detach();
 						}
+					} else if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var connectorElement: valueElement.elements()) {
+								if (connectorElement.getName().contains("OpenIdConnector")) {
+									var requestScopes = "openid email profile";
+									var groupsClaim = connectorElement.elementText("groupsClaim");									
+									if (groupsClaim != null)
+										requestScopes += " " + groupsClaim;
+									connectorElement.addElement("requestScopes").setText(requestScopes);
+								}
+							}
+						}
 					}
 				}
 				dom.writeToFile(file, false);

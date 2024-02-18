@@ -51,8 +51,8 @@ public class GitHubConnector extends OpenIdConnector {
 	}
 
 	@Override
-	protected String getBaseScope() {
-		return super.getBaseScope() + " user:email";
+	public String getRequestScopes() {
+		return "openid profile user:email";
 	}
 
 	@Override
