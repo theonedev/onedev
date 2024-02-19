@@ -309,13 +309,17 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		if (serviceHost != null) {
 			return "http://" + serviceHost;
 		} else {
-			ServerConfig serverConfig = serverConfigProvider.get();
 			String hostName;
-			try {
-				hostName = InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
+			if (Bootstrap.isInDocker()) {
 				hostName = "localhost";
+			} else {
+				try {
+					hostName = InetAddress.getLocalHost().getHostName();
+				} catch (UnknownHostException e) {
+					hostName = "localhost";
+				}
 			}
+			ServerConfig serverConfig = serverConfigProvider.get();
 			var serverUrl = buildServerUrl(hostName, "http", serverConfig.getHttpPort());
 			return UrlUtils.toString(serverUrl);
 		}
