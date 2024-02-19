@@ -8,6 +8,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -135,6 +136,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<SsoConnector>> cellItem, String componentId, IModel<SsoConnector> rowModel) {
 				int connectorIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", SsoConnectorListPage.this);
+				fragment.add(AttributeAppender.append("class", "text-nowrap"));
 				fragment.add(new ModalLink("edit") {
 
 					@Override
@@ -159,7 +161,6 @@ public class SsoConnectorListPage extends AdministrationPage {
 
 						};
 					}
-					
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
