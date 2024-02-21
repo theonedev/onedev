@@ -13,7 +13,10 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +31,9 @@ public class ReferenceParser {
 	private final Pattern buildPattern;
 	
 	private final Pattern pullRequestPattern;
+	
+	private final Pattern buildOrPullRequestPartialPattern = 
+			Pattern.compile("(^|.*\\W+)(build|pull\\s*request|pr)", Pattern.CASE_INSENSITIVE);
 	
 	public ReferenceParser(Class<? extends AbstractEntity> referenceClass) {
 		issue = referenceClass == Issue.class;
@@ -58,31 +64,23 @@ public class ReferenceParser {
 		}
 	}
 
-	private String stripBuildAndPullRequestReferences(String text) {
-		var buffer = new StringBuffer();
-		var matcher = buildPattern.matcher(text);
-		while (matcher.find())
-			matcher.appendReplacement(buffer, "");
-		matcher.appendTail(buffer);
-		text = buffer.toString();
-
-		buffer = new StringBuffer();
-		matcher = pullRequestPattern.matcher(text);
-		while (matcher.find())
-			matcher.appendReplacement(buffer, "");
-		matcher.appendTail(buffer);
-		text = buffer.toString();
-		
-		return text;
+	private boolean isBuildOrPullRequestReference(String text, Matcher matcher) {
+		if (matcher.group(1).trim().length() != 0 || matcher.group(2) != null) {
+			return false;
+		} else {
+			var beforeMatched = text.substring(0, matcher.start());
+			return buildOrPullRequestPartialPattern.matcher(beforeMatched).matches();
+		}
 	}
+	
 	public List<ProjectScopedNumber> parseReferences(String text, @Nullable Project project) {
 		Collection<ProjectScopedNumber> references = new LinkedHashSet<>();
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		if (fastScan(text)) { 
-			if (issue) 
-				text = stripBuildAndPullRequestReferences(text);
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
+				if (issue && isBuildOrPullRequestReference(text, matcher)) 
+					continue;
 				try {
 					String referenceProjectName = matcher.group(4);
 					Long referenceNumber = Long.valueOf(matcher.group(6));
@@ -129,10 +127,12 @@ public class ReferenceParser {
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		for (TextNode node : visitor.getMatchedNodes()) {
 			var text = node.getWholeText();
-			if (issue)
-				text = stripBuildAndPullRequestReferences(text);
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
+				if (issue && isBuildOrPullRequestReference(text, matcher)) {
+					HtmlUtils.appendReplacement(matcher, node, matcher.group());
+					continue;
+				}
 				String referenceText = matcher.group(2);
 				if (referenceText == null)
 					referenceText = "";
