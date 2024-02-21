@@ -1815,5 +1815,37 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
+
+	private void migrate28(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem : jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (var jobTuple: jobNode.getValue()) {
+						if (((ScalarNode)jobTuple.getKeyNode()).getValue().equals("postBuildActions")) {
+							for (var postBuildActionNode: ((SequenceNode)jobTuple.getValueNode()).getValue()) {
+								if (postBuildActionNode.getTag().getValue().equals("!CreateIssueAction")) {
+									for (var actionTuple: ((MappingNode)postBuildActionNode).getValue()) {
+										if ((((ScalarNode)actionTuple.getKeyNode()).getValue()).equals("issueFields")) {
+											for (var fieldNode: ((SequenceNode)actionTuple.getValueNode()).getValue()) {
+												for (var fieldTuple: ((MappingNode)fieldNode).getValue()) {
+													if ((((ScalarNode)fieldTuple.getKeyNode()).getValue()).equals("valueProvider")) {
+														if (fieldTuple.getValueNode().getTag().getValue().equals("!Ignore"))
+															fieldTuple.getValueNode().setTag(new Tag("!IgnoreValue"));
+													}
+												}												
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
 }
