@@ -575,6 +575,7 @@ onedev.server.markdown = {
 					}
 
 					xhr.replaceMessage = message;
+					$input.focus();
 					if ($input.range().length == 0) {
 						document.execCommand("insertText", false, message);
 					} else {
