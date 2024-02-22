@@ -1,6 +1,8 @@
 package io.onedev.server.web;
 
 import io.onedev.server.model.*;
+import io.onedev.server.util.ProjectAndRevision;
+import io.onedev.server.util.ProjectScopedNumber;
 import org.eclipse.jgit.lib.ObjectId;
 
 public interface UrlManager {
@@ -11,9 +13,9 @@ public interface UrlManager {
 	
 	String urlFor(Project project);
 	
-	String urlFor(Project project, ObjectId commitId);
-	
 	String urlFor(PullRequest request);
+	
+	String urlForPullRequest(ProjectScopedNumber requestFQN);
 	
 	String urlFor(PullRequestComment comment);
 	
@@ -21,7 +23,11 @@ public interface UrlManager {
 	
 	String urlFor(Issue issue);
 	
+	String urlForIssue(ProjectScopedNumber issueFQN);
+	
 	String urlFor(Build build);
+
+	String urlForBuild(ProjectScopedNumber buildFQN);
 	
 	String urlFor(IssueComment comment);
 	
@@ -34,6 +40,10 @@ public interface UrlManager {
 	String urlFor(CodeCommentReply reply);
 	
 	String urlFor(CodeCommentStatusChange change);
+	
+	String urlFor(ProjectAndRevision projectAndRevision);
+	
+	String urlFor(Project project, ObjectId commitId);
 	
     String cloneUrlFor(Project project, boolean ssh);
     

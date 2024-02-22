@@ -5,6 +5,8 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.util.ProjectAndRevision;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -68,7 +70,17 @@ public class DefaultUrlManager implements UrlManager {
 	public String urlFor(CodeCommentStatusChange change) {
 		return urlFor(change.getComment(), change.getCompareContext()) + "#" + change.getAnchor();
 	}
-	
+
+	@Override
+	public String urlFor(ProjectAndRevision projectAndRevision) {
+		return urlFor(projectAndRevision.getProject()) + "/~commits/" + projectAndRevision.getRevision();
+	}
+
+	@Override
+	public String urlFor(Project project, ObjectId commitId) {
+		return urlFor(new ProjectAndRevision(project, commitId.name()));
+	}
+
 	private String urlFor(CodeComment comment, CompareContext compareContext) {
 		Project project = comment.getProject();
 		if (comment.isValid()) {
@@ -138,7 +150,12 @@ public class DefaultUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getProject()) + "/~pulls/" + request.getNumber();
+		return urlForPullRequest(request.getFQN());
+	}
+
+	@Override
+	public String urlForPullRequest(ProjectScopedNumber requestFQN) {
+		return urlFor(requestFQN.getProject()) + "/~pulls/" + requestFQN.getNumber();
 	}
 
 	@Override
@@ -153,12 +170,22 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(Issue issue) {
-		return urlFor(issue.getProject()) + "/~issues/" + issue.getNumber();
+		return urlForIssue(issue.getFQN());
+	}
+
+	@Override
+	public String urlForIssue(ProjectScopedNumber issueFQN) {
+		return urlFor(issueFQN.getProject()) + "/~issues/" + issueFQN.getNumber();
 	}
 
 	@Override
 	public String urlFor(Build build) {
-		return urlFor(build.getProject()) + "/~builds/" + build.getNumber();
+		return urlForBuild(build.getFQN());
+	}
+
+	@Override
+	public String urlForBuild(ProjectScopedNumber buildFQN) {
+		return urlFor(buildFQN.getProject()) + "/~builds/" + buildFQN.getNumber();
 	}
 
 	@Override
@@ -175,10 +202,5 @@ public class DefaultUrlManager implements UrlManager {
 	public String urlFor(IssueChange change) {
 		return urlFor(change.getIssue()) + "#" + change.getAnchor();
 	}
-
-	@Override
-	public String urlFor(Project project, ObjectId commitId) {
-		return urlFor(project) + "/~commits/" + commitId.name();
-	}
-
+	
 }
