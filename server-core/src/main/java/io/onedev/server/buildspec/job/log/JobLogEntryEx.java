@@ -14,6 +14,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.job.log.StyleBuilder;
+import io.onedev.server.web.asset.emoji.Emojis;
 
 public class JobLogEntryEx implements Serializable {
 
@@ -30,6 +31,14 @@ public class JobLogEntryEx implements Serializable {
 	
 	public JobLogEntryEx(JobLogEntry entry) {
 		this(entry.getDate(), Lists.newArrayList(new Message(new StyleBuilder().build(), entry.getMessage())));
+	}
+	
+	public JobLogEntryEx transformEmojis() {
+		Emojis emojis = Emojis.getInstance();
+		List<Message> messages = new ArrayList<>();
+		for (Message message: getMessages())
+			messages.add(new Message(message.getStyle(), emojis.apply(message.getText())));
+		return new JobLogEntryEx(getDate(), messages);
 	}
 	
 	// Handle ANSI escape codes according to https://en.wikipedia.org/wiki/ANSI_escape_code

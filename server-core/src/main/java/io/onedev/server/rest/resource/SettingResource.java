@@ -23,7 +23,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
-@Api(order=100000)
+@Api(order=10000)
 @Path("/settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

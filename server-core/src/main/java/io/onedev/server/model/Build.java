@@ -208,12 +208,60 @@ public class Build extends ProjectBelonging
 
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
-		WAITING, PENDING, RUNNING, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
+		WAITING {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+		}, 
+		PENDING {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+			
+		}, 
+		RUNNING {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+			
+		}, 
+		FAILED {
+			@Override
+			public boolean isFinished() {
+				return true;
+			}
+			
+		}, 
+		CANCELLED {
+			@Override
+			public boolean isFinished() {
+				return true;
+			}
+			
+		}, 
+		TIMED_OUT {
+			@Override
+			public boolean isFinished() {
+				return true;
+			}
+		}, 
+		SUCCESSFUL {
+			@Override
+			public boolean isFinished() {
+				return true;
+			}
+			
+		};
 		
 		@Override
 		public String toString() {
 			return WordUtils.toWords(name());
 		}
+		
+		public abstract boolean isFinished();
 		
 		@Nullable
 		public static Status of(String statusName) {
@@ -521,10 +569,7 @@ public class Build extends ProjectBelonging
 	}
 	
 	public boolean isFinished() {
-		return status == Status.FAILED 
-				|| status == Status.CANCELLED 
-				|| status == Status.SUCCESSFUL
-				|| status == Status.TIMED_OUT;
+		return status.isFinished();
 	}
 	
 	public boolean isSuccessful() {

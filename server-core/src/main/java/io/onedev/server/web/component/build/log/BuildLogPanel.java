@@ -1,9 +1,18 @@
 package io.onedev.server.web.component.build.log;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.log.JobLogEntryEx;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogSnippet;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -13,24 +22,11 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.buildspec.job.log.Message;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.job.log.LogManager;
-import io.onedev.server.job.log.LogSnippet;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.ChangeObserver;
+import java.util.Collection;
+import java.util.List;
 
 import static io.onedev.server.model.Build.getDetailChangeObservable;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public class BuildLogPanel extends GenericPanel<Build> {
@@ -52,7 +48,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		add(new ChangeObserver() {
 			
 			private void appendRecentLogEntries(IPartialPageRequestHandler handler) {
-				List<JobLogEntryEx> logEntries = getLogManager().readLogEntries(getBuild(), nextOffset, 0);
+				List<JobLogEntryEx> logEntries = getLogManager().readLogEntries(
+						getBuild().getProject().getId(), getBuild().getNumber(), nextOffset, 0);
 
 				if (!logEntries.isEmpty()) {
 					nextOffset += logEntries.size();
@@ -113,16 +110,9 @@ public class BuildLogPanel extends GenericPanel<Build> {
 	}
 	
 	private String asJSON(List<JobLogEntryEx> entries) {
-		List<JobLogEntryEx> transformed = new ArrayList<>();
-		Emojis emojis = Emojis.getInstance();
-		for (JobLogEntryEx entry: entries) {
-			List<Message> messages = new ArrayList<>();
-			for (Message message: entry.getMessages()) 
-				messages.add(new Message(message.getStyle(), emojis.apply(message.getText())));
-			transformed.add(new JobLogEntryEx(entry.getDate(), messages));
-		}
+		entries = entries.stream().map(JobLogEntryEx::transformEmojis).collect(toList());
 		try {
-			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(transformed);
+			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(entries);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -134,7 +124,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		
 		response.render(JavaScriptHeaderItem.forReference(new BuildLogResourceReference()));
 		
-		LogSnippet snippet = getLogManager().readLogSnippetReversely(getBuild(), MAX_LOG_ENTRIES+1);
+		LogSnippet snippet = getLogManager().readLogSnippetReversely(
+				getBuild().getProject().getId(), getBuild().getNumber(), MAX_LOG_ENTRIES+1);
 		
 		nextOffset = snippet.offset + snippet.entries.size();
 		

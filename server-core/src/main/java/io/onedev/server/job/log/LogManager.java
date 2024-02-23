@@ -31,7 +31,11 @@ public interface LogManager {
 	 * 			log entries. Number of entries may be less than required count if there is no 
 	 * 			enough log entries
 	 */
-	List<JobLogEntryEx> readLogEntries(Build build, int offset, int count);
+	List<JobLogEntryEx> readLogEntries(Long projectId, Long buildNumber, int offset, int count);
+	
+	void registerListener(LogListener listener);
+	
+	void deregisterListener(LogListener logListener);
 	
 	boolean matches(Build build, Pattern pattern);
 	
@@ -46,7 +50,7 @@ public interface LogManager {
 	 * 			log entries with normal order. Number of entries may be less than required count 
 	 * 			if there is no enough log entries
 	 */
-	LogSnippet readLogSnippetReversely(Build build, int count);
+	LogSnippet readLogSnippetReversely(Long projectId, Long buildNumber, int count);
 	
 	InputStream openLogStream(Long projectId, Long buildNumber);
 	

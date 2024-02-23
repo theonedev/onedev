@@ -25,9 +25,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -91,15 +91,16 @@ public class ArtifactResource {
 		if (!SecurityUtils.canAccessBuild(build))
 			throw new UnauthorizedException();
 
-		return output -> {
-			String activeServer = projectManager.getActiveServer(
-					build.getProject().getId(), true);
+		var projectId = build.getProject().getId();
+		var buildNumber = build.getNumber();
+		return os -> {
+			String activeServer = projectManager.getActiveServer(projectId, true);
 			String serverUrl = clusterManager.getServerUrl(activeServer);
 			Client client = ClientBuilder.newClient();
 			try {
 				WebTarget target = client.target(serverUrl).path("~api/cluster/artifact")
-						.queryParam("projectId", build.getProject().getId())
-						.queryParam("buildNumber", build.getNumber())
+						.queryParam("projectId", projectId)
+						.queryParam("buildNumber", buildNumber)
 						.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 				Invocation.Builder builder = target.request();
 				builder.header(AUTHORIZATION, BEARER + " "
@@ -108,9 +109,9 @@ public class ArtifactResource {
 				try (Response response = builder.get()) {
 					checkStatus(response);
 					try (InputStream is = response.readEntity(InputStream.class)) {
-						copy(is, output, BUFFER_SIZE);
+						copy(is, os, BUFFER_SIZE);
 					} finally {
-						output.close();
+						os.close();
 					}
 				}
 			} finally {
@@ -131,8 +132,9 @@ public class ArtifactResource {
 		if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
 
-		String activeServer = projectManager.getActiveServer(
-				build.getProject().getId(), true);
+		var projectId = build.getProject().getId();
+		var buildNumber = build.getNumber();
+		String activeServer = projectManager.getActiveServer(projectId, true);
 		String serverUrl = clusterManager.getServerUrl(activeServer);
 
 		Client client = ClientBuilder.newClient();
@@ -140,8 +142,8 @@ public class ArtifactResource {
 		try {
 			WebTarget target = client.target(serverUrl)
 					.path("~api/cluster/artifact")
-					.queryParam("projectId", build.getProject().getId())
-					.queryParam("buildNumber", build.getNumber())
+					.queryParam("projectId", projectId)
+					.queryParam("buildNumber", buildNumber)
 					.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 			Invocation.Builder builder = target.request();
 			builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());

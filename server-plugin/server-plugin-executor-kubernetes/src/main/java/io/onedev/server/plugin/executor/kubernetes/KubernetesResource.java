@@ -83,94 +83,86 @@ public class KubernetesResource {
 	@Path("/run-server-step")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
-	public Response runServerStep(@QueryParam("jobToken") String jobToken, InputStream is) {
+	public StreamingOutput runServerStep(@QueryParam("jobToken") String jobToken, InputStream is) {
 		JobContext jobContext = jobManager.getJobContext(jobToken, true);
-		// Make sure we are not occupying a database connection here as we will occupy 
-		// database connection when running step at project server side
-		sessionManager.closeSession();
-		try {
-			StreamingOutput os = output -> {
-				File filesDir = FileUtils.createTempDir();
-				try {
-					int length = readInt(is);
-					List<Integer> stepPosition = new ArrayList<>();
-					for (int i=0; i<length; i++) 
-						stepPosition.add(readInt(is));
-					
-					Map<String, String> placeholderValues = new HashMap<>();
-					length = readInt(is);
-					for (int i=0; i<length; i++) 
-						placeholderValues.put(readString(is), readString(is));
-					
-					TarUtils.untar(is, filesDir, false);
-					
-					Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
-							stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
+		return os -> {
+			File filesDir = FileUtils.createTempDir();
+			// Make sure we are not occupying a database connection here as we will occupy 
+			// database connection when running step at project server side
+			sessionManager.closeSession();
+			try {
+				int length = readInt(is);
+				List<Integer> stepPosition = new ArrayList<>();
+				for (int i=0; i<length; i++) 
+					stepPosition.add(readInt(is));
+				
+				Map<String, String> placeholderValues = new HashMap<>();
+				length = readInt(is);
+				for (int i=0; i<length; i++) 
+					placeholderValues.put(readString(is), readString(is));
+				
+				TarUtils.untar(is, filesDir, false);
+				
+				Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
+						stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
-						@Override
-						public void log(String message, String sessionId) {
-							// While testing, ngrok.io buffers response and build can not get log entries 
-							// timely. This won't happen on pagekite however
-							KubernetesHelper.writeInt(output, 1);
-							KubernetesHelper.writeString(output, message);
-							try {
-								output.flush();
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
+					@Override
+					public void log(String message, String sessionId) {
+						// While testing, ngrok.io buffers response and build can not get log entries 
+						// timely. This won't happen on pagekite however
+						KubernetesHelper.writeInt(os, 1);
+						KubernetesHelper.writeString(os, message);
+						try {
+							os.flush();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
-						
-					});
-					if (outputFiles == null)
-						outputFiles = new HashMap<>();
-					byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
-					KubernetesHelper.writeInt(output, 2);
-					KubernetesHelper.writeInt(output, bytes.length);
-					output.write(bytes);
-				} finally {
-					FileUtils.deleteDir(filesDir);
-				}						
-		   };
-			return Response.ok(os).build();
-		} finally {
-			sessionManager.openSession();
-		}
+					}
+					
+				});
+				if (outputFiles == null)
+					outputFiles = new HashMap<>();
+				byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
+				KubernetesHelper.writeInt(os, 2);
+				KubernetesHelper.writeInt(os, bytes.length);
+				os.write(bytes);
+			} finally {
+				sessionManager.openSession();
+				FileUtils.deleteDir(filesDir);
+			}						
+	   };
 	}
 	
 	@Path("/download-dependencies")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadDependencies(@QueryParam("jobToken") String jobToken) {
-		sessionManager.closeSession();
-		try {
-			StreamingOutput output = os -> {
-				JobContext jobContext = jobManager.getJobContext(jobToken, true);
-				File tempDir = FileUtils.createTempDir();
-				try {
-					jobManager.copyDependencies(jobContext, tempDir);
-					TarUtils.tar(tempDir, os, false);
-					os.flush();
-				} finally {
-					FileUtils.deleteDir(tempDir);
-				}
-			};
-			return Response.ok(output).build();
-		} finally {
-			sessionManager.openSession();
-		}
+	public StreamingOutput downloadDependencies(@QueryParam("jobToken") String jobToken) {
+		return os -> {
+			JobContext jobContext = jobManager.getJobContext(jobToken, true);
+			File tempDir = FileUtils.createTempDir();
+			sessionManager.closeSession();
+			try {
+				jobManager.copyDependencies(jobContext, tempDir);
+				TarUtils.tar(tempDir, os, false);
+				os.flush();
+			} finally {
+				sessionManager.openSession();
+				FileUtils.deleteDir(tempDir);
+			}
+		};
 	}
 
 	@Path("/download-cache")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadCache(
+	public StreamingOutput downloadCache(
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("cacheKey") @Nullable String cacheKey, 
 			@QueryParam("cacheLoadKeys") @Nullable String joinedCacheLoadKeys, 
 			@QueryParam("cachePath") String cachePath) {
-		sessionManager.closeSession();
-		try {
-			StreamingOutput output = os -> {
+		return os -> {
+			sessionManager.closeSession();
+			try {
 				var jobContext = jobManager.getJobContext(jobToken, true);
 				if (cacheKey != null) {
 					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheKey, cachePath, os);
@@ -178,11 +170,10 @@ public class KubernetesResource {
 					var cacheLoadKeys = Splitter.on('\n').splitToList(joinedCacheLoadKeys);
 					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheLoadKeys, cachePath, os);
 				}
-			};
-			return Response.ok(output).build();
-		} finally {
-			sessionManager.openSession();
-		}
+			} finally {
+				sessionManager.openSession();
+			}
+		};
 	}
 	
 	@Path("/upload-cache")

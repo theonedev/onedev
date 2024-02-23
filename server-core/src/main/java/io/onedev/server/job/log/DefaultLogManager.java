@@ -11,12 +11,14 @@ import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.ParamContext;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.web.websocket.WebSocketManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -34,6 +36,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 import static io.onedev.commons.utils.LockUtils.*;
@@ -58,15 +62,27 @@ public class DefaultLogManager implements LogManager, Serializable {
 	
 	private final BuildManager buildManager;
 	
+	private final ClusterManager clusterManager;
+	
+	private final TransactionManager transactionManager;
+	
 	private final Map<String, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	private final Map<String, TaskLogger> jobLoggers = new ConcurrentHashMap<>();
 	
+	private final ReadWriteLock logListenersLock = new ReentrantReadWriteLock();
+	
+	private final List<LogListener> logListeners = new ArrayList<>();
+	
 	@Inject
-	public DefaultLogManager(WebSocketManager webSocketManager, ProjectManager projectManager, BuildManager buildManager) {
+	public DefaultLogManager(WebSocketManager webSocketManager, ProjectManager projectManager, 
+							 BuildManager buildManager, ClusterManager clusterManager, 
+							 TransactionManager transactionManager) {
 		this.projectManager = projectManager;
 		this.webSocketManager = webSocketManager;
 		this.buildManager = buildManager;
+		this.clusterManager = clusterManager;
+		this.transactionManager = transactionManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -76,6 +92,20 @@ public class DefaultLogManager implements LogManager, Serializable {
 	@Override
 	public TaskLogger newLogger(Build build) {
 		return newLogger(build, new ArrayList<>());
+	}
+	
+	private void notifyListeners(Long buildId) {
+		clusterManager.submitToAllServers(() -> {
+			var lock = logListenersLock.readLock();
+			lock.lock();
+			try {
+				for (var logListener: logListeners)
+					logListener.logged(buildId);
+			} finally {
+				lock.unlock();
+			}
+			return null;
+		});
 	}
 	
 	@Override
@@ -125,6 +155,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 								}
 							}
 							webSocketManager.notifyObservableChange(Build.getLogChangeObservable(buildId), null);
+							notifyListeners(buildId);
 						}
 					}
 					return null;
@@ -291,11 +322,8 @@ public class DefaultLogManager implements LogManager, Serializable {
 		}
 	}
 	
-	@Sessional
 	@Override
-	public List<JobLogEntryEx> readLogEntries(Build build, int from, int count) {
-		Long projectId = build.getProject().getId();
-		Long buildNumber = build.getNumber();
+	public List<JobLogEntryEx> readLogEntries(Long projectId, Long buildNumber, int from, int count) {
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
@@ -325,11 +353,8 @@ public class DefaultLogManager implements LogManager, Serializable {
 		});
 	}
 
-	@Sessional
 	@Override
-	public LogSnippet readLogSnippetReversely(Build build, int count) {
-		Long projectId = build.getProject().getId();
-		Long buildNumber = build.getNumber();
+	public LogSnippet readLogSnippetReversely(Long projectId, Long buildNumber, int count) {
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
@@ -397,6 +422,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 			}
 			return null;
 		});
+		transactionManager.runAfterCommit(() -> notifyListeners(build.getId()));
 	}
 	
 	private String getLogKey(Long projectId, Long buildNumber) {
@@ -499,6 +525,28 @@ public class DefaultLogManager implements LogManager, Serializable {
 			}
 		}
 				
+	}
+
+	@Override
+	public void registerListener(LogListener listener) {
+		var lock = logListenersLock.writeLock();
+		lock.lock();
+		try {
+			logListeners.add(listener);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void deregisterListener(LogListener listener) {
+		var lock = logListenersLock.writeLock();
+		lock.lock();
+		try {
+			logListeners.remove(listener);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
