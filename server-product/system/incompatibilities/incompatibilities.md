@@ -1,3 +1,10 @@
+# 10.1.6
+
+### Agent
+
+A library upgrade in server causes agent auto-update to fail. To work around this, please update agent manually by pulling 
+latest image or download latest agent package from server. 
+
 # 10.1.0
 
 ### CI/CD
