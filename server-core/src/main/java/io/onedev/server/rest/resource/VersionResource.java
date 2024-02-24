@@ -25,7 +25,9 @@ public class VersionResource {
 	@Path("/compatible-tod-versions")
 	@GET
 	public VersionRange getCompatibleTodVersions() {
-		return new VersionRange();
+		var versionRange = new VersionRange();
+		versionRange.minVersion = "1.0.0";
+		return versionRange;
 	}
 	
 	private static class VersionRange implements Serializable {
