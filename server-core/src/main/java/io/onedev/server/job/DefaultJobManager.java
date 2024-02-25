@@ -42,6 +42,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.HttpResponseAwareException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.log.LogManager;
@@ -86,6 +87,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -104,6 +107,8 @@ import java.util.concurrent.locks.Lock;
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
@@ -243,13 +248,16 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			validateBuildSpec(project, commitId, buildSpec);
 
 			if (!buildSpec.getJobMap().containsKey(jobName)) {
-				throw new ExplicitException(String.format(
+				var errorMessage = String.format(
 						"Job not found (project: %s, commit: %s, job: %s)",
-						project.getPath(), commitId.name(), jobName));
+						project.getPath(), commitId.name(), jobName);
+				throw new HttpResponseAwareException(SC_BAD_REQUEST, errorMessage);
 			}
 
-			return doSubmit(project, commitId, jobName, paramMap, pipeline, refName, 
+			return doSubmit(project, commitId, jobName, paramMap, pipeline, refName,
 					submitter, request, issue, reason);
+		} catch (ValidationException e) {
+			throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
 		} catch (Throwable e) {
 			throw ExceptionUtils.unchecked(e);
 		} finally {
@@ -743,9 +751,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				validateBuildSpec(build.getProject(), build.getCommitId(), buildSpec);
 
 				if (!buildSpec.getJobMap().containsKey(build.getJobName())) {
-					throw new ExplicitException(String.format(
+					var errorMessage = String.format(
 							"Job not found (project: %s, commit: %s, job: %s)",
-							build.getProject().getPath(), build.getCommitId().name(), build.getJobName()));
+							build.getProject().getPath(), build.getCommitId().name(), build.getJobName());
+					throw new HttpResponseAwareException(SC_BAD_REQUEST, errorMessage);
 				}
 
 				build.setStatus(Build.Status.WAITING);
@@ -788,6 +797,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 				buildManager.update(build);
 				buildSubmitted(build);
+			} catch (ValidationException e) {
+				throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
 			} finally {
 				JobAuthorizationContext.pop();
 			}
@@ -798,7 +809,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					resubmit(dependency, "Resubmitted by dependent build");
 			}
 		} else {
-			throw new ExplicitException("Build #" + build.getNumber() + " not finished yet");
+			throw new HttpResponseAwareException(SC_NOT_ACCEPTABLE, "Build #" + build.getNumber() + " not finished yet");
 		}
 	}
 
