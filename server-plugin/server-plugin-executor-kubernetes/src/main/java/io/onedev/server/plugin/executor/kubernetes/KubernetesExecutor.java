@@ -270,7 +270,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 	@Editable(order=28000, group="More Settings", description = "Optionally maps a docker image to a different " +
 			"image. The first matching entry will take effect, or image will remain unchanged if no matching entries " +
-			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper-linux:(.*)</code>, " +
+			"found. For instance a mapping entry with <code>From</code> specified as <code>code.onedev.io/onedev/k8s-helper-linux:(.*)</code>, " +
 			"and <code>To</code> specified as <code>my-local-registry/k8s-helper-linux:$1</code> will map the " +
 			"k8s helper image from official docker registry to local registry, with repository and tag unchanged")
 	public List<ImageMapping> getImageMappings() {
@@ -1015,7 +1015,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				} else {
 					List<Action> actions = new ArrayList<>();
 					CommandFacade facade = new CommandFacade((String) executionContext, null,
-							newArrayList("this does not matter"), false);
+							"this does not matter", false);
 					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
 					entryFacade = new CompositeFacade(actions);
 				}
