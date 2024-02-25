@@ -239,6 +239,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new AccessBuildLog())));
 	}
+
+	public static boolean canAccessPipeline(Build build) {
+		return getSubject().isPermitted(new ProjectPermission(build.getProject(),
+				new JobPermission(build.getJobName(), new AccessBuildPipeline())));
+	}
 	
 	public static boolean canAccessBuild(Build build) {
 		return canAccessJob(build.getProject(), build.getJobName());

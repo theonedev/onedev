@@ -6261,4 +6261,25 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate158(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var jobPrivilegeElement: element.element("jobPrivileges").elements()) {
+						if (jobPrivilegeElement.elementTextTrim("accessLog").equals("true")) {
+							jobPrivilegeElement.addElement("accessPipeline").setText("true");
+							var accessibleReportsElement = jobPrivilegeElement.element("accessibleReports");
+							if (accessibleReportsElement == null)
+								accessibleReportsElement = jobPrivilegeElement.addElement("accessibleReports");
+							accessibleReportsElement.setText("*");
+						} else {
+							jobPrivilegeElement.addElement("accessPipeline").setText("false");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

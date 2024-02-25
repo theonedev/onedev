@@ -1,22 +1,20 @@
 package io.onedev.server.model.support.role;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import javax.validation.constraints.NotEmpty;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.util.SuggestionUtils;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable
 public class JobPrivilege implements Serializable {
@@ -30,6 +28,8 @@ public class JobPrivilege implements Serializable {
 	private boolean runJob;
 	
 	private boolean accessLog;
+	
+	private boolean accessPipeline;
 	
 	private String accessibleReports;
 	
@@ -69,7 +69,7 @@ public class JobPrivilege implements Serializable {
 	}
 
 	@Editable(order=200, description="The permission to run job manually. It also implies the permission "
-			+ "to access build log, and all published reports")
+			+ "to access build log, build pipeline and all published reports")
 	@ShowCondition("isManageJobDisabled")
 	public boolean isRunJob() {
 		return runJob;
@@ -84,8 +84,7 @@ public class JobPrivilege implements Serializable {
 		return !(boolean) EditContext.get().getInputValue("runJob");
 	}
 	
-	@Editable(order=300, name="Access Build Log", description="The permission to access build log. "
-			+ "It also implies the permission to access published reports")
+	@Editable(order=300, name="Access Build Log", description="The permission to access build log")
 	@ShowCondition("isRunJobDisabled")
 	public boolean isAccessLog() {
 		return accessLog;
@@ -95,14 +94,19 @@ public class JobPrivilege implements Serializable {
 		this.accessLog = accessLog;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isAccessLogDisabled() {
-		return !(boolean) EditContext.get().getInputValue("accessLog");
+	@Editable(order=350, name="Access Build Pipeline", description="The permission to access build pipeline")
+	@ShowCondition("isRunJobDisabled")
+	public boolean isAccessPipeline() {
+		return accessPipeline;
+	}
+
+	public void setAccessPipeline(boolean accessPipeline) {
+		this.accessPipeline = accessPipeline;
 	}
 	
 	@Editable(order=400, name="Access Build Reports", placeholder="No accessible reports", description="Optionally specify space-separated reports. "
 			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude")
-	@ShowCondition("isAccessLogDisabled")
+	@ShowCondition("isRunJobDisabled")
 	@Patterns
 	@Nullable
 	public String getAccessibleReports() {

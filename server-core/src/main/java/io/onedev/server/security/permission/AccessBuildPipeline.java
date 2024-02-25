@@ -4,18 +4,15 @@ import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;
 
-public class RunJob implements BasePermission {
+public class AccessBuildPipeline implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof RunJob 
-				|| new AccessBuildLog().implies(p) 
-				|| new AccessBuildPipeline().implies(p)
-				|| new AccessBuildReports("*").implies(p);
+		return p instanceof AccessBuildPipeline;
 	}
 
 	@Override
 	public boolean isApplicable(@Nullable UserFacade user) {
-		return user != null && !user.isEffectiveGuest();
+		return true;
 	}
 }

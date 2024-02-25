@@ -26,7 +26,7 @@ public class BuildDashboardPage extends BuildDetailPage {
 		PageProvider pageProvider;
 		if (SecurityUtils.canAccessLog(getBuild())) {
 			pageProvider = new PageProvider(BuildLogPage.class, BuildLogPage.paramsOf(getBuild()));
-		} else if (SecurityUtils.canReadCode(getProject())) {
+		} else if (SecurityUtils.canAccessPipeline(getBuild())) {
 			pageProvider = new PageProvider(BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild()));
 		} else {
 			Long projectId = getBuild().getProject().getId();

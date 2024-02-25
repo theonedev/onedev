@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.jobprivilege;
 
+import com.google.common.base.Joiner;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -76,7 +77,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<JobPrivilege, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -88,18 +89,18 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Job Names")) {
+		columns.add(new AbstractColumn<>(Model.of("Job Names")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -107,25 +108,30 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Privilege")) {
+		columns.add(new AbstractColumn<>(Model.of("Privilege")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
 				JobPrivilege privilege = rowModel.getObject();
-				if (privilege.isManageJob())
-					cellItem.add(new Label(componentId, "Manage Job"));
-				else if (privilege.isRunJob())
-					cellItem.add(new Label(componentId, "Run Job"));
-				else if (privilege.isAccessLog())
-					cellItem.add(new Label(componentId, "Access Log"));
-				else if (privilege.getAccessibleReports() != null)
-					cellItem.add(new Label(componentId, "Access Reports: " + privilege.getAccessibleReports()));
-				else
-					cellItem.add(new Label(componentId, "Access Artifacts"));
+				if (privilege.isManageJob()) {
+					cellItem.add(new Label(componentId, "manage job"));
+				} else if (privilege.isRunJob()) {
+					cellItem.add(new Label(componentId, "run job"));
+				} else {
+					var accessibles = new ArrayList<>();
+					if (privilege.isAccessLog())
+						accessibles.add("log");
+					if (privilege.isAccessPipeline())
+						accessibles.add("pipeline");
+					accessibles.add("artifacts");
+					if (privilege.getAccessibleReports() != null)
+						accessibles.add("reports:" + privilege.getAccessibleReports());
+					cellItem.add(new Label(componentId, "access [" + Joiner.on(", ").join(accessibles) + "]"));
+				}
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -151,7 +157,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -168,7 +174,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						onPropertyUpdating(target);
 						target.add(JobPrivilegeListEditPanel.this);
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
@@ -177,21 +183,21 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			public String getCssClass() {
 				return "actions";
 			}
-			
+
 		});		
 		
-		IDataProvider<JobPrivilege> dataProvider = new ListDataProvider<JobPrivilege>() {
+		IDataProvider<JobPrivilege> dataProvider = new ListDataProvider<>() {
 
 			@Override
 			protected List<JobPrivilege> getData() {
-				return privileges;			
+				return privileges;
 			}
 
 		};
 		
 		DataTable<JobPrivilege, Void> dataTable;
-		add(dataTable = new DataTable<JobPrivilege, Void>("privileges", columns, dataProvider, Integer.MAX_VALUE));
-		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
+		add(dataTable = new DataTable<>("privileges", columns, dataProvider, Integer.MAX_VALUE));
+		dataTable.addTopToolbar(new HeadersToolbar<>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
 		dataTable.add(new NoRecordsBehavior());
 		

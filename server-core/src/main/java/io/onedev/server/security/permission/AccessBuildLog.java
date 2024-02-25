@@ -8,7 +8,7 @@ public class AccessBuildLog implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof AccessBuildLog || new AccessBuildReports("*").implies(p);
+		return p instanceof AccessBuildLog;
 	}
 
 	@Override

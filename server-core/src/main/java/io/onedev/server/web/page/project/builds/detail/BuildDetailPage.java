@@ -460,9 +460,9 @@ public abstract class BuildDetailPage extends ProjectPage
 					});
 				}
 
-				if (SecurityUtils.canReadCode(getProject()))
+				if (SecurityUtils.canAccessPipeline(getBuild())) 
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
-
+				
 				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
 					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
 				}

@@ -371,6 +371,8 @@ public class Role extends AbstractEntity implements BasePermission {
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new RunJob()));
 			if (jobPrivilege.isAccessLog())
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildLog()));
+			if (jobPrivilege.isAccessPipeline())
+				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildPipeline()));
 			if (jobPrivilege.getAccessibleReports() != null) { 
 				AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
