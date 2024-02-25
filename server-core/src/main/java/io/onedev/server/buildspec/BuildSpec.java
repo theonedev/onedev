@@ -1848,4 +1848,60 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	private void migrate29_commands(MappingNode node) {
+		var commandsBuilder = new StringBuilder();
+		for (var itTuple = node.getValue().iterator(); itTuple.hasNext();) {
+			var tuple = itTuple.next();
+			if (((ScalarNode)tuple.getKeyNode()).getValue().equals("commands")) {
+				for (var elementNode: ((SequenceNode)tuple.getValueNode()).getValue()) 
+					commandsBuilder.append(((ScalarNode)elementNode).getValue()).append("\n");
+				itTuple.remove();
+			}
+		}
+		node.getValue().add(new NodeTuple(
+				new ScalarNode(Tag.STR, "commands"),
+				new ScalarNode(Tag.STR, commandsBuilder.toString())));
+	}
+	
+	private void migrate29_steps(SequenceNode stepsNode) {
+		for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+			MappingNode stepNode = (MappingNode) itStepNode.next();
+			if (stepNode.getTag().getValue().equals("!CommandStep")) {
+				for (var stepTuple: stepNode.getValue()) {
+					if (((ScalarNode) stepTuple.getKeyNode()).getValue().equals("interpreter")) 
+						migrate29_commands((MappingNode) stepTuple.getValueNode());
+				}
+			} else if (stepNode.getTag().getValue().equals("!SSHCommandStep")) {
+				migrate29_commands(stepNode);
+			}
+		}
+	}
+
+	private void migrate29(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps"))
+							migrate29_steps((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps"))
+							migrate29_steps((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
+	
 }

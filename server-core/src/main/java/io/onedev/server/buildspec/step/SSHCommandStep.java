@@ -32,7 +32,7 @@ public class SSHCommandStep extends CommandStep {
 	
 	private String options;
 	
-	private List<String> commands;
+	private String commands;
 
 	@Editable(order=100, description = "Host name or ip address of remote machine to run commands via SSH")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -89,12 +89,12 @@ public class SSHCommandStep extends CommandStep {
 			"commands, set up them explicitly in commands if necessary")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
-	@Size(min=1, message="may not be empty")
-	public List<String> getCommands() {
+	@NotEmpty
+	public String getCommands() {
 		return commands;
 	}
 
-	public void setCommands(List<String> commands) {
+	public void setCommands(String commands) {
 		this.commands = commands;
 	}
 
@@ -124,26 +124,25 @@ public class SSHCommandStep extends CommandStep {
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {
 			@Override
-			public List<String> getCommands() {
-				var commands = newArrayList(
-						"mkdir /root/.ssh",
-						"cat <<EOF>> /root/.ssh/id_rsa");
+			public String getCommands() {
+				var commandsBuilder = new StringBuilder();
+				commandsBuilder.append("mkdir /root/.ssh\n");
+				commandsBuilder.append("cat <<EOF>> /root/.ssh/id_rsa\n");
 				var privateKey = Build.get().getJobAuthorizationContext().getSecretValue(getPrivateKeySecret());
-				commands.addAll(StringUtils.splitToLines(privateKey));
+				for (var line: StringUtils.splitToLines(privateKey))
+					commandsBuilder.append(line).append("\n");
 				
 				var sshBuilder = new StringBuilder("ssh -o StrictHostKeyChecking=no ");
 				if (getOptions() != null)
 					sshBuilder.append(getOptions()).append(" ");
-				sshBuilder.append(getUserName() + "@" + getRemoteMachine() + " << EOF");
-				commands.addAll(newArrayList(
-						"EOF",
-						"chmod 600 /root/.ssh/id_rsa",
-						sshBuilder.toString()));
+				sshBuilder.append(getUserName()).append("@").append(getRemoteMachine()).append(" << EOF");
+				commandsBuilder.append("EOF\n");
+				commandsBuilder.append("chmod 600 /root/.ssh/id_rsa\n");
+				commandsBuilder.append(sshBuilder).append("\n");
 				// Fix issue #1456
-				for (var command: SSHCommandStep.this.getCommands()) 
-					commands.add(command.replace("$", "\\$"));					
-				commands.add("EOF");
-				return commands;
+				commandsBuilder.append(SSHCommandStep.this.getCommands().replace("$", "\\$")); 
+				commandsBuilder.append("EOF\n");
+				return commandsBuilder.toString();
 			}
 		};
 	}

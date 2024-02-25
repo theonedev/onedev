@@ -52,9 +52,9 @@ public class MavenJobSuggestion implements JobSuggestion {
 			CommandStep detectBuildVersion = new CommandStep();
 			detectBuildVersion.setName("detect build version");
 			detectBuildVersion.setImage("maven");
-			detectBuildVersion.getInterpreter().setCommands(Lists.newArrayList(
-					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"",
-					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion"));
+			detectBuildVersion.getInterpreter().setCommands(
+					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n" +
+					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
 			job.getSteps().add(detectBuildVersion);
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
@@ -65,7 +65,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			CommandStep runTests = new CommandStep();
 			runTests.setName("run tests");
 			runTests.setImage("maven");
-			runTests.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
+			runTests.getInterpreter().setCommands("mvn clean test\n");
 			job.getSteps().add(runTests);
 
 			var publishUnitTestReportStep = new PublishJUnitReportStep();

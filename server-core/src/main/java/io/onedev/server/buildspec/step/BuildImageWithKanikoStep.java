@@ -136,34 +136,34 @@ public class BuildImageWithKanikoStep extends CommandStep {
 			@Override
 			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
 											   String builtInRegistryAccessToken, boolean useTTY) {
-				var commands = new ArrayList<String>();
+				var commandsBuilder = new StringBuilder();
 				if (jobExecutor instanceof RegistryLoginAware) {
 					RegistryLoginAware registryLoginAware = (RegistryLoginAware) jobExecutor;
-					commands.add("cat <<EOF>> /kaniko/.docker/config.json");
+					commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
 					var registryLogins = registryLoginAware.getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
 					var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 					var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, jobToken, builtInRegistryAccessToken);
-					commands.add(buildDockerConfig(registryLogins, builtInRegistryLogin));
-					commands.add("EOF");
+					commandsBuilder.append(buildDockerConfig(registryLogins, builtInRegistryLogin)).append("\n");
+					commandsBuilder.append("EOF\n");
 				}
 				if (getTrustCertificates() != null) {
-					commands.add("cat <<EOF>> /kaniko/ssl/certs/additional-ca-cert-bundle.crt");
-					commands.add(getTrustCertificates().replace("\r\n", "\n"));
-					commands.add("EOF");
+					commandsBuilder.append("cat <<EOF>> /kaniko/ssl/certs/additional-ca-cert-bundle.crt\n");
+					commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
+					commandsBuilder.append("EOF\n");
 				}
 				
-				var builder = new StringBuilder("/kaniko/executor");
+				commandsBuilder.append("/kaniko/executor");
 				if (getBuildContext() != null)
-					builder.append(" --context=\"/onedev-build/workspace/" + getBuildContext() + "\"");
+					commandsBuilder.append(" --context=\"/onedev-build/workspace/").append(getBuildContext()).append("\"");
 				else
-					builder.append(" --context=/onedev-build/workspace");
+					commandsBuilder.append(" --context=/onedev-build/workspace");
 				for (var destination: StringUtils.splitAndTrim(getDestinations(), " "))
-					builder.append(" --destination=").append(destination);
+					commandsBuilder.append(" --destination=").append(destination);
 				if (getMoreOptions() != null)
-					builder.append(" ").append(getMoreOptions());
+					commandsBuilder.append(" ").append(getMoreOptions());
 				
-				commands.add(builder.toString());
-				return new CommandFacade(image, builtInRegistryAccessToken, commands, useTTY);
+				commandsBuilder.append("\n");
+				return new CommandFacade(image, builtInRegistryAccessToken, commandsBuilder.toString(), useTTY);
 			}
 			
 		};

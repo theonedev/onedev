@@ -105,21 +105,21 @@ public class SCPCommandStep extends CommandStep {
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {
 			@Override
-			public List<String> getCommands() {
-				var commands = newArrayList(
-						"mkdir /root/.ssh",
-						"cat <<EOF>> /root/.ssh/id_rsa");
+			public String getCommands() {
+				var commandsBuilder = new StringBuilder();
+				commandsBuilder.append("mkdir /root/.ssh\n");
+				commandsBuilder.append("cat <<EOF>> /root/.ssh/id_rsa\n");
 				var privateKey = Build.get().getJobAuthorizationContext().getSecretValue(getPrivateKeySecret());
-				commands.addAll(StringUtils.splitToLines(privateKey));
+				for (var line: StringUtils.splitToLines(privateKey))
+					commandsBuilder.append(line).append("\n");
 				var scpBuilder = new StringBuilder("scp -o StrictHostKeyChecking=no ");
 				if (getOptions() != null)
 					scpBuilder.append(getOptions()).append(" ");
 				scpBuilder.append(getSource()).append(" ").append(getTarget());
-				commands.addAll(newArrayList(
-						"EOF",
-						"chmod 600 /root/.ssh/id_rsa",
-						scpBuilder.toString()));
-				return commands;
+				commandsBuilder.append("EOF\n");
+				commandsBuilder.append("chmod 600 /root/.ssh/id_rsa\n");
+				commandsBuilder.append(scpBuilder).append("\n");
+				return commandsBuilder.toString();
 			}
 		};
 	}

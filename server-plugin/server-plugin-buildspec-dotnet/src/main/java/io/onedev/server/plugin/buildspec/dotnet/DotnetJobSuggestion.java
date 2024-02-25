@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.buildspec.dotnet;
 
-import com.google.common.collect.Lists;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -53,11 +52,10 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			var runTest = new CommandStep();
 			runTest.setName("run tests");
 			runTest.setImage("mcr.microsoft.com/dotnet/sdk");
-			runTest.getInterpreter().setCommands(Lists.newArrayList(
-					"dotnet tool install -g roslynator.dotnet.cli",
-					"dotnet test -l trx --collect:\"XPlat Code Coverage\"", 
-					"/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml"
-					));
+			runTest.getInterpreter().setCommands(
+					"dotnet tool install -g roslynator.dotnet.cli\n" + 
+					"dotnet test -l trx --collect:\"XPlat Code Coverage\"\n" +  
+					"/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml\n");
 			job.getSteps().add(runTest);
 			
 			var publishUnitTestReportStep = new PublishTRXReportStep();

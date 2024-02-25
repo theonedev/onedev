@@ -3,6 +3,7 @@ package io.onedev.server.web.editable;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import io.onedev.server.annotation.Code;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Lists;
@@ -25,7 +26,7 @@ public class InterpolativePatternsEditSupport implements EditSupport {
 		Interpolative interpolative = propertyGetter.getAnnotation(Interpolative.class);
 		Patterns patterns = propertyGetter.getAnnotation(Patterns.class);
 		
-        if (interpolative != null && patterns != null) {
+        if (interpolative != null && patterns != null && propertyGetter.getAnnotation(Code.class) == null) {
         	if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 

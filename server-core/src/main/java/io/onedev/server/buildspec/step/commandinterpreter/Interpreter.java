@@ -17,13 +17,13 @@ public abstract class Interpreter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private List<String> commands = new ArrayList<>();
+	private String commands;
 	
-	public List<String> getCommands() {
+	public String getCommands() {
 		return commands;
 	}
 
-	public void setCommands(List<String> commands) {
+	public void setCommands(String commands) {
 		this.commands = commands;
 	}
 

@@ -1,15 +1,13 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
-import java.util.List;
-
-import javax.validation.constraints.Size;
-
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.PowerShellFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+
+import javax.validation.constraints.NotEmpty;
 
 @Editable(order=300, name="PowerShell")
 public class PowerShellInterpreter extends Interpreter {
@@ -24,14 +22,14 @@ public class PowerShellInterpreter extends Interpreter {
 			+ "your script<br>")
 	@Interpolative
 	@Code(language=Code.POWER_SHELL, variableProvider="suggestVariables")
-	@Size(min=1, message="may not be empty")
+	@NotEmpty
 	@Override
-	public List<String> getCommands() {
+	public String getCommands() {
 		return super.getCommands();
 	}
 
 	@Override
-	public void setCommands(List<String> commands) {
+	public void setCommands(String commands) {
 		super.setCommands(commands);
 	}
 	

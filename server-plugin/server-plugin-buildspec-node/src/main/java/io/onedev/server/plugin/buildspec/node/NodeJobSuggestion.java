@@ -68,9 +68,9 @@ public class NodeJobSuggestion implements JobSuggestion {
 			CommandStep runCommands = new CommandStep();
 			runCommands.setName("build & test");
 			runCommands.setImage("1dev/buildspec-node:10.16-alpine-chrome");
-			List<String> commands = Lists.newArrayList( 
-					"npm install",
-					"npm install @@angular/cli");
+			var commandsBuilder = new StringBuilder();
+			commandsBuilder.append("npm install\n");
+			commandsBuilder.append("npm install @@angular/cli\n");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -94,21 +94,19 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 				if (valueArray[0] != null) {
 					for (int i = 0; i < valueIndex; i++) 
-						commands.add("npx " + valueArray[i]);
+						commandsBuilder.append("npx ").append(valueArray[i]).append("\n");
 				} else {
-					commands.addAll(Lists.newArrayList(
-							"npx ng lint",
-							"npx ng test --watch=false --browsers=ChromeHeadless", 
-							"npx ng build"));
+					commandsBuilder.append("npx ng lint\n");
+					commandsBuilder.append("npx ng test --watch=false --browsers=ChromeHeadless\n");
+					commandsBuilder.append("npx ng build\n");
 				}
 			} else {
-				commands.addAll(Lists.newArrayList(
-						"npx ng lint",
-						"npx ng test --watch=false --browsers=ChromeHeadless", 
-						"npx ng build"));
+				commandsBuilder.append("npx ng lint\n");
+				commandsBuilder.append("npx ng test --watch=false --browsers=ChromeHeadless\n");
+				commandsBuilder.append("npx ng build\n");
 			}
 
-			runCommands.getInterpreter().setCommands(commands);
+			runCommands.getInterpreter().setCommands(commandsBuilder.toString());
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -134,9 +132,9 @@ public class NodeJobSuggestion implements JobSuggestion {
 			runCommands.setName("build & test");
 			runCommands.setImage("node");
 
-			List<String> commands = Lists.newArrayList( 
-					"npm install", 
-					"export CI=TRUE");
+			var commandsBuilder = new StringBuilder();
+			commandsBuilder.append("npm install\n");
+			commandsBuilder.append("export CI=TRUE\n");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -156,20 +154,18 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 				if (valueArray[0] != null) {
 					for (int i = 0; i < valueIndex; i++) {
-						commands.add("npx " + valueArray[i]);
+						commandsBuilder.append("npx ").append(valueArray[i]).append("\n");
 					}
 				} else {
-					commands.addAll(Lists.newArrayList(
-							"npx react-scripts test", 
-							"npx react-scripts build"));
+					commandsBuilder.append("npx react-scripts test\n");
+					commandsBuilder.append("npx react-scripts build\n");
 				}
 			} else {
-				commands.addAll(Lists.newArrayList(
-						"npx react-scripts test", 
-						"npx react-scripts build"));
+				commandsBuilder.append("npx react-scripts test\n");
+				commandsBuilder.append("npx react-scripts build\n");
 			}
 
-			runCommands.getInterpreter().setCommands(commands);
+			runCommands.getInterpreter().setCommands(commandsBuilder.toString());
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -195,7 +191,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			runCommands.setName("build & test");
 			runCommands.setImage("node");
 
-			List<String> commands = Lists.newArrayList("npm install");
+			var commandsBuilder = new StringBuilder("npm install\n");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -215,16 +211,16 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 				if (valueArray[0] != null) {
 					for (int i = 0; i < valueIndex; i++) {
-						commands.add("npx " + valueArray[i]);
+						commandsBuilder.append("npx ").append(valueArray[i]).append("\n");
 					}
 				} else {
-					commands.add("npx jest");
+					commandsBuilder.append("npx jest\n");
 				}
 			} else {
-				commands.add("npx jest");
+				commandsBuilder.append("npx jest\n");
 			}
 
-			runCommands.getInterpreter().setCommands(commands);
+			runCommands.getInterpreter().setCommands(commandsBuilder.toString());
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -250,7 +246,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			runCommands.setName("build & test");
 			runCommands.setImage("node");
 
-			List<String> commands = Lists.newArrayList("npm install");
+			var commandsBuilder = new StringBuilder("npm install\n");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -270,14 +266,14 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 				if (valueArray[0] != null) {
 					for (int i = 0; i < valueIndex; i++) 
-						commands.add("npx " + valueArray[i]);
+						commandsBuilder.append("npx ").append(valueArray[i]).append("\n");
 				} else {
-					commands.add("npx mocha");
+					commandsBuilder.append("npx mocha\n");
 				}
 			} else {
-				commands.add("npx mocha");
+				commandsBuilder.append("npx mocha\n");
 			}
-			runCommands.getInterpreter().setCommands(commands);
+			runCommands.getInterpreter().setCommands(commandsBuilder.toString());
 			
 			job.getSteps().add(runCommands);
 			

@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.buildspec.gradle;
 
-import com.google.common.collect.Lists;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -51,9 +50,9 @@ public class GradleJobSuggestion implements JobSuggestion {
 			CommandStep detectBuildVersion = new CommandStep();
 			detectBuildVersion.setName("detect build version");
 			detectBuildVersion.setImage(imageName);
-			detectBuildVersion.getInterpreter().setCommands(Lists.newArrayList(
-					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",
-					"echo $(gradle properties | grep ^version: | grep -v unspecified | cut -c10-) > buildVersion"));
+			detectBuildVersion.getInterpreter().setCommands(
+					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"\n" + 
+					"echo $(gradle properties | grep ^version: | grep -v unspecified | cut -c10-) > buildVersion\n");
 			job.getSteps().add(detectBuildVersion);
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
@@ -64,7 +63,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			CommandStep runTest = new CommandStep();
 			runTest.setName("run test");
 			runTest.setImage(imageName);
-			runTest.getInterpreter().setCommands(Lists.newArrayList("gradle test"));
+			runTest.getInterpreter().setCommands("gradle test\n");
 			job.getSteps().add(runTest);
 
 			var publishUnitTestReportStep = new PublishJUnitReportStep();

@@ -25,10 +25,11 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang.SystemUtils;
 
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -157,10 +158,10 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 										File jobScriptFile = new File(buildHome, "job-commands" + commandFacade.getScriptExtension());
 										try {
-											FileUtils.writeLines(
+											FileUtils.writeStringToFile(
 													jobScriptFile,
-													new ArrayList<>(replacePlaceholders(execution.getCommands(), buildHome)),
-													commandFacade.getEndOfLine());
+													commandFacade.convertCommands(replacePlaceholders(execution.getCommands(), buildHome)),
+													StandardCharsets.UTF_8);
 										} catch (IOException e) {
 											throw new RuntimeException(e);
 										}
@@ -317,17 +318,17 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 		private static final long serialVersionUID = 1L;
 
-		private List<String> commands = new ArrayList<>();
+		private String commands;
 
 		@Editable
 		@OmitName
 		@Code(language=Code.SHELL)
-		@Size(min=1, message="May not be empty")
-		public List<String> getCommands() {
+		@NotEmpty
+		public String getCommands() {
 			return commands;
 		}
 
-		public void setCommands(List<String> commands) {
+		public void setCommands(String commands) {
 			this.commands = commands;
 		}
 		

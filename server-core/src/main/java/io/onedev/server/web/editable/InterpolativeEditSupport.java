@@ -3,6 +3,7 @@ package io.onedev.server.web.editable;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import io.onedev.server.annotation.Code;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.model.IModel;
@@ -27,7 +28,7 @@ public class InterpolativeEditSupport implements EditSupport {
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
 		Interpolative interpolative = propertyGetter.getAnnotation(Interpolative.class);
-        if (interpolative != null) {
+        if (interpolative != null && propertyGetter.getAnnotation(Code.class) == null) {
         	if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 

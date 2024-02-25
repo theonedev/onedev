@@ -75,13 +75,13 @@ public class GenerateChecksumStep extends CommandStep {
 			}
 
 			@Override
-			public List<String> getCommands() {
-				var commands = new ArrayList<String>();
-				commands.add("set -e");
-				commands.add("shopt -s globstar");
-				commands.add("cat `ls -1 " + files + " 2>/dev/null` | md5sum | awk '{ print $1 }' > " + targetFile);
-				commands.add("echo Generated checksum: `cat " + targetFile + "`");
-				return commands;
+			public String getCommands() {
+				var commandsBuilder = new StringBuilder();
+				commandsBuilder.append("set -e\n");
+				commandsBuilder.append("shopt -s globstar\n");
+				commandsBuilder.append("cat `ls -1 ").append(files).append(" 2>/dev/null` | md5sum | awk '{ print $1 }' > ").append(targetFile).append("\n");
+				commandsBuilder.append("echo Generated checksum: `cat ").append(targetFile).append("`").append("\n");
+				return commandsBuilder.toString();
 			}
 		};
 	}

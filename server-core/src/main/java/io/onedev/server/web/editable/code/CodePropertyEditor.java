@@ -126,7 +126,10 @@ public class CodePropertyEditor extends PropertyEditor<Serializable> {
 		Serializable convertedInput;
 		if (input.getConvertedInput() != null) {
 			if (descriptor.getPropertyClass() == String.class) {
-				convertedInput = input.getConvertedInput();
+				var builder = new StringBuilder();
+				for (var line: Splitter.on("\n").trimResults(CharMatcher.is('\r')).split(input.getConvertedInput()))
+					builder.append(line).append("\n");
+				convertedInput = builder.toString();
 			} else {
 				convertedInput = new ArrayList<String>();
 				((List<String>)convertedInput).addAll(Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(input.getConvertedInput()));
