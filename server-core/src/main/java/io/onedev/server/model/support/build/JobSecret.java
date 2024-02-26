@@ -1,9 +1,9 @@
 package io.onedev.server.model.support.build;
 
-import io.onedev.server.annotation.SecretName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;
 import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.SecretName;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -43,9 +43,9 @@ public class JobSecret implements Serializable {
 		this.value = value;
 	}
 
-	@Editable(order=300, placeholder="All Branches", description=
-			"Optionally specify branches/roles allowed to access this secret")
-	@JobMatch(withProjectCriteria = true)
+	@Editable(order=300, placeholder="Non-pull-request commits", description=
+			"Optionally specify branches/users/groups allowed to access this secret")
+	@JobMatch
     public String getAuthorization() {
 		return authorization;
 	}

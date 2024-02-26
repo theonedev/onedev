@@ -11,12 +11,9 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.job.match.JobMatch;
-import io.onedev.server.job.match.JobMatchLexer;
 import io.onedev.server.job.match.JobMatchParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.search.entity.agent.AgentQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -26,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
 import static io.onedev.server.job.match.JobMatchLexer.*;
 
 @SuppressWarnings("serial")
@@ -97,7 +95,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (suggestedLiteral.equals(AntlrUtils.getLexerRuleName(JobMatchLexer.ruleNames, OnBranch))) 
+		if (suggestedLiteral.equals(getLexerRuleName(ruleNames, OnBranch))) 
 			return Optional.of("branch the build commit is merged into");
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

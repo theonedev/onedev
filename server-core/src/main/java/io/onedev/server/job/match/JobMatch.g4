@@ -5,12 +5,17 @@ jobMatch
     ;
 
 criteria
-	: operator=(OnBranch|SubmittedByUser|SubmittedByGroup) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    : NonPullRequestCommits #OperatorCriteria
+	| operator=(OnBranch|SubmittedByUser|SubmittedByGroup) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
     | LParens WS* criteria WS* RParens #ParensCriteria
+    ;
+
+NonPullRequestCommits
+    : 'non-pull-request' WS+ 'commits'
     ;
 
 OnBranch

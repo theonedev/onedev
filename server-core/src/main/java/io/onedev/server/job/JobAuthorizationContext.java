@@ -2,9 +2,9 @@ package io.onedev.server.job;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.job.match.OnBranchCriteria;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
+import io.onedev.server.job.match.NonPullRequestCommitsCriteria;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Stack;
 
 public class JobAuthorizationContext {
-
+	
 	private final Project project;
 	
 	@Nullable
@@ -43,10 +43,14 @@ public class JobAuthorizationContext {
 	public boolean isScriptAuthorized(GroovyScript script) {
 		if (script.getAuthorization() != null) {
 			JobMatch jobMatch = JobMatch.parse(script.getAuthorization(), true, false);
-			if (request != null && request.getSource() != null) {	
-				JobMatchContext sourceContext = new JobMatchContext(request.getSourceProject(), request.getSourceBranch(), null, request.getSubmitter(), null);
-				JobMatchContext targetContext = new JobMatchContext(request.getTargetProject(), request.getTargetBranch(), null, request.getSubmitter(), null);
-				return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
+			if (request != null) {	
+				if (request.getSource() != null) {
+					JobMatchContext sourceContext = new JobMatchContext(request.getSourceProject(), request.getSourceBranch(), null, request.getSubmitter(), null);
+					JobMatchContext targetContext = new JobMatchContext(request.getTargetProject(), request.getTargetBranch(), null, request.getSubmitter(), null);
+					return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
+				} else {
+					return false;					
+				}
 			} else {
 				return jobMatch.matches(new JobMatchContext(project, null, commitId, user, null));
 			}
@@ -63,7 +67,7 @@ public class JobAuthorizationContext {
 				if (secret.getName().equals(secretName)) {
 					String authorization = secret.getAuthorization();
 					if (authorization == null)
-						authorization = new OnBranchCriteria("**").toString();
+						authorization = new NonPullRequestCommitsCriteria().toString();
 					JobMatch jobMatch = JobMatch.parse(authorization, false, false);
 					if (request != null) {
 						if (project.equals(request.getSourceProject())) {
@@ -72,7 +76,7 @@ public class JobAuthorizationContext {
 							if (jobMatch.matches(sourceMatchContext) && jobMatch.matches(targetMatchContext))
 								return normalizeSecretValue(secret.getValue());
 						} else {
-							JobMatchContext matchContext = new JobMatchContext(project, null, commitId, request.getSubmitter(), null);
+							JobMatchContext matchContext = new JobMatchContext(project, null, null, request.getSubmitter(), null);
 							if (jobMatch.matches(matchContext))
 								return normalizeSecretValue(secret.getValue());
 						}

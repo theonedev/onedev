@@ -441,14 +441,18 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (executor.getJobRequirement() != null) {
 			JobMatch jobMatch = JobMatch.parse(executor.getJobRequirement(), true, true);
 			PullRequest request = build.getRequest();
-			if (request != null && request.getSource() != null) {
-				JobMatchContext sourceContext = new JobMatchContext(
-						request.getSourceProject(), request.getSourceBranch(), 
-						null, request.getSubmitter(), build.getJobName());
-				JobMatchContext targetContext = new JobMatchContext(
-						request.getTargetProject(), request.getTargetBranch(), 
-						null, request.getSubmitter(), build.getJobName());
-				return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
+			if (request != null) {
+				if (request.getSource() != null) {
+					JobMatchContext sourceContext = new JobMatchContext(
+							request.getSourceProject(), request.getSourceBranch(),
+							null, request.getSubmitter(), build.getJobName());
+					JobMatchContext targetContext = new JobMatchContext(
+							request.getTargetProject(), request.getTargetBranch(),
+							null, request.getSubmitter(), build.getJobName());
+					return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
+				} else {
+					return false;
+				}
 			} else {
 				return jobMatch.matches(new JobMatchContext(
 						build.getProject(), null, build.getCommitId(),

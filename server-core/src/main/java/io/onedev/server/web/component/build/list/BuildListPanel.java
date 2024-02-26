@@ -9,6 +9,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -101,6 +102,8 @@ import java.util.*;
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
 	
+	public static final String REF_TOD = "refs/onedev/tod";
+
 	private final IModel<String> queryStringModel;
 	
 	private final boolean showJob;
@@ -1129,6 +1132,8 @@ public abstract class BuildListPanel extends Panel {
 							link.add(new Label("label", "tag " + build.getTag()));
 							fragment.add(link);
 							cellItem.add(fragment);
+						} else if (build.getRefName().equals(REF_TOD)) {
+							cellItem.add(new Label(componentId, "tod").setEscapeModelStrings(false));
 						} else {
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 						}
@@ -1139,6 +1144,8 @@ public abstract class BuildListPanel extends Panel {
 							cellItem.add(new Label(componentId, "branch " + build.getBranch()));
 						else if (build.getTag() != null)
 							cellItem.add(new Label(componentId, "tag " + build.getTag()));
+						else if (build.getRefName().equals(REF_TOD))
+							cellItem.add(new Label(componentId, "tod"));
 						else
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 					}
