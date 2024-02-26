@@ -294,7 +294,7 @@ public class NugetPackService implements PackService {
 								}
 							}));
 						} catch (ParseException e) {
-							logger.warn("Package version is not a SemVer v2 compatible");
+							logger.warn("Package version is not a SemVer v2 compatible version");
 							throw new ClientException(SC_BAD_REQUEST);
 						} finally {
 							FileUtils.deleteFile(tempFile);

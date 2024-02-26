@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,14 +25,14 @@ import java.nio.ByteBuffer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
-@Api(order=4200, description="In most cases, build log resource is operated with build id, which is different from build number. "
+@Api(order=4200, description="Build log stream resource is operated with build id, which is different from build number. "
 		+ "To get build id of a particular build number, use the <a href='/~help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
 		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
-@Path("/build-logs")
+@Path("/streaming/build-logs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class BuildLogResource {
+public class BuildLogStreamResource {
 
 	private static final int MAX_LOG_ENTRIES = 1000;
 	
@@ -46,16 +45,16 @@ public class BuildLogResource {
 	private final SessionManager sessionManager;
 	
 	@Inject
-	public BuildLogResource(BuildManager buildManager, LogManager logManager, 
-							ObjectMapper objectMapper, SessionManager sessionManager) {
+	public BuildLogStreamResource(BuildManager buildManager, LogManager logManager,
+								  ObjectMapper objectMapper, SessionManager sessionManager) {
 		this.buildManager = buildManager;
 		this.logManager = logManager;
 		this.objectMapper = objectMapper;
 		this.sessionManager = sessionManager;
 	}
 	
-	@Api(order=200, description = "Streaming build log of specified build")
-	@Path("/{buildId}/streaming")
+	@Api(order=200, description = "Streaming log of specified build")
+	@Path("/{buildId}")
 	@GET
 	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadLog(@PathParam("buildId") Long buildId) {
