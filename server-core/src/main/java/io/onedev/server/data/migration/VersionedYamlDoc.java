@@ -51,7 +51,6 @@ public class VersionedYamlDoc extends MappingNode {
 	}
 	
 	public static VersionedYamlDoc fromYaml(String yaml) {
-		System.out.println(yaml);
 		return new VersionedYamlDoc((MappingNode) new OneYaml().compose(new StringReader(yaml)));
 	}
 	
