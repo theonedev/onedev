@@ -12,7 +12,7 @@
 <h2>
 <a href="https://docs.onedev.io">Quickstart</a> 
 | <a href="https://docs.onedev.io/category/installation-guide">Installation Guide</a> 
-| <a href="https://docs.onedev.io">All Documentation</a> 
+| <a href="https://code.onedev.io/onedev/tod">Command Line Tool</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
@@ -73,7 +73,7 @@ Queries can be saved and subscribed, so that you won't miss anything interested.
 
 ## A Full-fledge CI/CD Engine without Writing Yaml
 
-OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. 
+OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. Want to test/debug CI/CD jobs against local changes? tod comes to rescue
 
 Build pipeline, matrix jobs, typed parameters, parameter chaining, step templates, build promotions… too many neat features to elaborate…
 
