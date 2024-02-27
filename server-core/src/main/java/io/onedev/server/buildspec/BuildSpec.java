@@ -23,6 +23,7 @@ import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.data.migration.VersionedYamlDoc;
+import io.onedev.server.data.migration.XmlBuildSpecMigrator;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.security.SecurityUtils;
@@ -58,6 +59,8 @@ public class BuildSpec implements Serializable, Validatable {
 		@Override
         public byte[] load(String key) {
 			String buildSpecString = key;
+			if (buildSpecString.trim().startsWith("<?xml"))
+				buildSpecString = XmlBuildSpecMigrator.migrate(buildSpecString);
 			try {
 				return SerializationUtils.serialize(VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class));
 			} catch (Exception e) {
