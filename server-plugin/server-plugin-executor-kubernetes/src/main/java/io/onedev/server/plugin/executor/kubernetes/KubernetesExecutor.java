@@ -1035,7 +1035,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				String helperImage = mapImage(IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion());
 				
-				List<Map<Object, Object>> commonEnvs = new ArrayList<>();
+				ArrayList<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_SERVER_URL, 
 						"value", getServerUrl()));
@@ -1071,8 +1071,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 							stepContainerSpec.put("tty", true);
 						var volumeMounts = buildVolumeMounts(cachePaths);
 						volumeMounts.addAll(commonVolumeMounts);
-						stepContainerSpec.put("volumeMounts", volumeMounts);
-						stepContainerSpec.put("env", commonEnvs);
+						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
+						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
@@ -1090,8 +1090,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 								"image", helperImage);
 						var volumeMounts = buildVolumeMounts(cachePaths);
 						volumeMounts.addAll(commonVolumeMounts);
-						stepContainerSpec.put("volumeMounts", volumeMounts);
-						stepContainerSpec.put("env", commonEnvs);
+						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
+						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
 					}
 					
 					if (stepContainerSpec != null) {
@@ -1142,7 +1142,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					initArgs.add("test");
 				}
 
-				var volumeMounts = buildVolumeMounts(cachePaths);
+				ArrayList<Object> volumeMounts = buildVolumeMounts(cachePaths);
 				volumeMounts.addAll(commonVolumeMounts);
 				
 				Map<Object, Object> initContainerSpec = newHashMap(
@@ -1150,16 +1150,16 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"image", helperImage, 
 						"command", newArrayList("java"), 
 						"args", initArgs,
-						"env", commonEnvs,
-						"volumeMounts", volumeMounts);
+						"env", SerializationUtils.clone(commonEnvs),
+						"volumeMounts", SerializationUtils.clone(volumeMounts));
 				
 				Map<Object, Object> sidecarContainerSpec = newLinkedHashMap(
 						"name", "sidecar", 
 						"image", helperImage, 
 						"command", newArrayList("java"), 
 						"args", sidecarArgs, 
-						"env", commonEnvs, 
-						"volumeMounts", volumeMounts);
+						"env", SerializationUtils.clone(commonEnvs), 
+						"volumeMounts", SerializationUtils.clone(volumeMounts));
 				
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
@@ -1337,8 +1337,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		}
 	}
 	
-	private List<Object> buildVolumeMounts(Collection<String> cachePaths) {
-		var volumeMounts = new ArrayList<>();
+	private ArrayList<Object> buildVolumeMounts(Collection<String> cachePaths) {
+		var volumeMounts = new ArrayList<Object>();
 		int index = 1;
 		for (var cachePath: cachePaths) {
 			if (FilenameUtils.getPrefixLength(cachePath) > 0) {
