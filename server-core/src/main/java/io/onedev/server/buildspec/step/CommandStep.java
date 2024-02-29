@@ -3,10 +3,7 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
@@ -36,6 +33,10 @@ public class CommandStep extends Step {
 	private boolean runInContainer = true;
 	
 	private String image;
+	
+	private String runAsUser;
+	
+	private String runAsGroup;
 	
 	private String builtInRegistryAccessTokenSecret;
 	
@@ -68,7 +69,29 @@ public class CommandStep extends Step {
 	public void setImage(String image) {
 		this.image = image;
 	}
-	
+
+	@Editable(order=103, description="Optionally specify uid to run the container")
+	@ShowCondition("isRunInContainerEnabled")
+	@Numeric
+	public String getRunAsUser() {
+		return runAsUser;
+	}
+
+	public void setRunAsUser(String runAsUser) {
+		this.runAsUser = runAsUser;
+	}
+
+	@Editable(order=107, description="Optionally specify gid to run the container")
+	@ShowCondition("isRunInContainerEnabled")
+	@Numeric
+	public String getRunAsGroup() {
+		return runAsGroup;
+	}
+
+	public void setRunAsGroup(String runAsGroup) {
+		this.runAsGroup = runAsGroup;
+	}
+
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
