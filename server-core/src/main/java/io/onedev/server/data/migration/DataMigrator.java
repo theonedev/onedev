@@ -6217,8 +6217,10 @@ public class DataMigrator {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							var userSearchBaseElement = valueElement.element("userSearchBase");
-							valueElement.addElement("userSearchBases").addElement("string").setText(userSearchBaseElement.getText().trim());
-							userSearchBaseElement.detach();
+							if (userSearchBaseElement != null) {
+								valueElement.addElement("userSearchBases").addElement("string").setText(userSearchBaseElement.getText().trim());
+								userSearchBaseElement.detach();
+							}
 						}
 					} else if (key.equals("SSO_CONNECTORS")) {
 						Element valueElement = element.element("value");
