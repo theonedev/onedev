@@ -19,10 +19,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.administration.IssueCreationSetting;
-import io.onedev.server.model.support.administration.SenderAuthorization;
-import io.onedev.server.model.support.administration.ServiceDeskSetting;
+import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.persistence.TransactionManager;
@@ -88,8 +85,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private static final int MAX_INBOX_LIFE = 3600;
 	
-	private static final String QUOTE_MARK = "[OneDev]";
-	
 	private static final String SIGNATURE_PREFIX = "-- ";
 	
 	private final SettingManager settingManager;
@@ -148,6 +143,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.clusterManager = clusterManager;
+	}
+	
+	private String getQuoteMark() {
+		return "[" + settingManager.getBrandingSetting().getName() + "]";
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -265,15 +264,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 				}
 			}
 			
-			var brandName = settingManager.getBrandingSetting().getName();
-			if (senderName == null || senderName.equalsIgnoreCase(User.SYSTEM_NAME)) {
-				if (brandName.equalsIgnoreCase(User.SYSTEM_NAME))
-					senderName = QUOTE_MARK;
-				else 
-					senderName = brandName + " " + QUOTE_MARK;
-			} else {
-				senderName += " " + QUOTE_MARK;
-			}
+			if (senderName == null || senderName.equalsIgnoreCase(BrandingSetting.DEFAULT_NAME)) 
+				senderName = getQuoteMark();
+			else 
+				senderName += " " + getQuoteMark();
 			message.setFrom(createInetAddress(senderAddress, senderName));
 			
 			if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
@@ -1042,8 +1036,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 			String body = parseBody(project, attachmentGroup, message, attachments);
 			
 			String quotationMark = null;
-			if (body.contains(QUOTE_MARK))
-				quotationMark = QUOTE_MARK;
+			if (body.contains(getQuoteMark()))
+				quotationMark = getQuoteMark();
 
 			if (quotationMark != null) {
 				body = StringUtils.substringBefore(body, quotationMark);
