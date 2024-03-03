@@ -425,23 +425,24 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		taskScheduler.unschedule(taskId);
 	}
 
-	@Transactional
 	@Override
 	public void execute() {
 		var now = new DateTime();
 		for (var projectId: projectManager.getActiveIds()) {
-			try {
-				var project = projectManager.load(projectId);
-				var preserveDays = project.getHierarchyCachePreserveDays();
-				var threshold = now.minusDays(preserveDays);
-				var criteria = newCriteria();
-				criteria.add(Restrictions.eq(PROP_PROJECT, project));
-				criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
-				for (var cache: query(criteria))
-					delete(cache);
-			} catch (Exception e) {
-				logger.error("Error cleaning up job caches", e);
-			}
+			transactionManager.run(() -> {
+				try {
+					var project = projectManager.load(projectId);
+					var preserveDays = project.getHierarchyCachePreserveDays();
+					var threshold = now.minusDays(preserveDays);
+					var criteria = newCriteria();
+					criteria.add(Restrictions.eq(PROP_PROJECT, project));
+					criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
+					for (var cache: query(criteria))
+						delete(cache);
+				} catch (Exception e) {
+					logger.error("Error cleaning up job caches", e);
+				}
+			});
 		}
 	}
 

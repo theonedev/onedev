@@ -4,6 +4,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 
@@ -16,6 +17,7 @@ public class CacheSettingBean implements Serializable {
 			description = "Cache will be deleted to save space if not accessed for this number of days")
 	@OmitName
 	@Min(1)
+	@Max(365)
 	public Integer getPreserveDays() {
 		return preserveDays;
 	}
