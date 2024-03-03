@@ -153,7 +153,7 @@ public class Import implements Serializable, Validatable {
 			Subject subject;
 			if (getAccessTokenSecret() != null) {
 				JobAuthorizationContext context = Preconditions.checkNotNull(JobAuthorizationContext.get());
-				String accessToken = context.getSecretValue(accessTokenSecret);
+				String accessToken = context.getSecretValue(getAccessTokenSecret());
 				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
 				if (user == null) {
 					throw new ExplicitException(String.format(

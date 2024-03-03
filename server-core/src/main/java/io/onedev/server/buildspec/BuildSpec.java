@@ -161,15 +161,15 @@ public class BuildSpec implements Serializable, Validatable {
 					if (!commitChain.contains(importCommit.name())) {
 						Collection<String> newCommitChain = new HashSet<>(commitChain);
 						newCommitChain.add(importCommit.name());
-						BuildSpec importedBuildSpec = aImport.getBuildSpec();
 						JobAuthorizationContext.push(new JobAuthorizationContext(
 								aImport.getProject(), importCommit, SecurityUtils.getUser(), null));
 						try {
+							BuildSpec importedBuildSpec = aImport.getBuildSpec();
 							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newCommitChain));
+							importedBuildSpecs.add(importedBuildSpec);
 						} finally {
 							JobAuthorizationContext.pop();
 						}
-						importedBuildSpecs.add(importedBuildSpec);
 					}
 				} catch (Exception e) {
 					// Ignore here as we rely on this method to show viewer/editor 
