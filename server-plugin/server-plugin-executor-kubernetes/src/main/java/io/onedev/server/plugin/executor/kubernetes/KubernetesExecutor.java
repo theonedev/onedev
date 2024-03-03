@@ -62,6 +62,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
+import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
@@ -898,8 +899,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		if (runAs != null) {
 			var securityContext = new HashMap<>();
 			var fields = Splitter.on(':').trimResults().splitToList(runAs);
-			securityContext.put("runAsUser", fields.get(0));
-			securityContext.put("runAsGroup", fields.get(1));
+			securityContext.put("runAsUser", parseInt(fields.get(0)));
+			securityContext.put("runAsGroup", parseInt(fields.get(1)));
 			containerSpec.put("securityContext", securityContext);
 		}
 	}
