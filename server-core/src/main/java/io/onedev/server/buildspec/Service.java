@@ -25,13 +25,13 @@ public class Service implements NamedElement, Serializable {
 	
 	private String image;
 	
-	private String runAs;
-	
 	private String arguments;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
 	
 	private String readinessCheckCommand;
+	
+	private String runAs;
 	
 	private String builtInRegistryAccessTokenSecret;
 	
@@ -70,18 +70,6 @@ public class Service implements NamedElement, Serializable {
 		this.image = image;
 	}
 
-	@Editable(order=210, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
-			"rootless or use user namespace remapping")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
-	public String getRunAs() {
-		return runAs;
-	}
-
-	public void setRunAs(String runAs) {
-		this.runAs = runAs;
-	}
-	
 	@Editable(order=220, description="Optionally specify arguments to run above image")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArguments() {
@@ -113,6 +101,18 @@ public class Service implements NamedElement, Serializable {
 
 	public void setReadinessCheckCommand(String readinessCheckCommand) {
 		this.readinessCheckCommand = readinessCheckCommand;
+	}
+
+	@Editable(order=450, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
 	}
 
 	@Editable(order=500, name="Built-in Registry Access Token", group="More Settings", description = "Specify access token for built-in docker registry if necessary")

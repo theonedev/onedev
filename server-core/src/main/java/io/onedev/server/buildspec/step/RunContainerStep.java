@@ -34,9 +34,9 @@ public class RunContainerStep extends Step {
 
 	private String image;
 	
-	private String runAs;
-	
 	private String args;
+	
+	private String runAs;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
 
@@ -59,18 +59,6 @@ public class RunContainerStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=150, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
-			"rootless or use user namespace remapping")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
-	public String getRunAs() {
-		return runAs;
-	}
-
-	public void setRunAs(String runAs) {
-		this.runAs = runAs;
-	}
-	
 	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. " +
 			"Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse " +
 			"this with container options which should be specified in executor setting")
@@ -81,6 +69,18 @@ public class RunContainerStep extends Step {
 
 	public void setArgs(String args) {
 		this.args = args;
+	}
+
+	@Editable(order=250, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
 	}
 
 	@Editable(order=300, name="Working Directory", placeholder = "Container default", group="More Settings", description="Optionally specify working directory of the container. "

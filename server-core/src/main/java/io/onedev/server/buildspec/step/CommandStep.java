@@ -34,11 +34,11 @@ public class CommandStep extends Step {
 	
 	private String image;
 	
+	private Interpreter interpreter = new DefaultInterpreter();
+	
 	private String runAs;
 	
 	private String builtInRegistryAccessTokenSecret;
-	
-	private Interpreter interpreter = new DefaultInterpreter();
 
 	private boolean useTTY = true;
 	
@@ -67,20 +67,7 @@ public class CommandStep extends Step {
 	public void setImage(String image) {
 		this.image = image;
 	}
-
-	@Editable(order=105, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
-			"rootless or use user namespace remapping")
-	@ShowCondition("isRunInContainerEnabled")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
-	public String getRunAs() {
-		return runAs;
-	}
-
-	public void setRunAs(String runAs) {
-		this.runAs = runAs;
-	}
-
+	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
@@ -93,6 +80,19 @@ public class CommandStep extends Step {
 
 	public void setInterpreter(Interpreter interpreter) {
 		this.interpreter = interpreter;
+	}
+
+	@Editable(order=8000, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
+	@ShowCondition("isRunInContainerEnabled")
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
 	}
 	
 	@Editable(order=9000, name="Built-in Registry Access Token Secret", group = "More Settings",
