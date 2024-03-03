@@ -270,7 +270,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 	@Editable(order=28000, group="More Settings", description = "Optionally maps a docker image to a different " +
 			"image. The first matching entry will take effect, or image will remain unchanged if no matching entries " +
-			"found. For instance a mapping entry with <code>From</code> specified as <code>code.onedev.io/onedev/k8s-helper-linux:(.*)</code>, " +
+			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper-linux:(.*)</code>, " +
 			"and <code>To</code> specified as <code>my-local-registry/k8s-helper-linux:$1</code> will map the " +
 			"k8s helper image from official docker registry to local registry, with repository and tag unchanged")
 	public List<ImageMapping> getImageMappings() {
@@ -434,7 +434,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
 			logger.trace("Creating resource:\n" + maskedYaml);
 			
-			FileUtils.writeFile(file, resourceYaml, UTF_8.name());
+			FileUtils.writeFile(file, resourceYaml, UTF_8);
 			kubectl.addArgs("create", "-f", file.getAbsolutePath(), "-o", "jsonpath={.metadata.name}");
 			kubectl.execute(new LineConsumer() {
 
@@ -771,6 +771,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			containerSpec.put("args", argList);			
 		}
 		containerSpec.put("env", envs);
+		setupSecurityContext(containerSpec, jobService.getRunAs());
 		
 		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
 		if (imagePullSecretName != null)
@@ -893,6 +894,16 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		return map;
 	}
 	
+	private void setupSecurityContext(Map<Object, Object> containerSpec, @Nullable String runAs) {
+		if (runAs != null) {
+			var securityContext = new HashMap<>();
+			var fields = Splitter.on(':').trimResults().splitToList(runAs);
+			securityContext.put("runAsUser", fields.get(0));
+			securityContext.put("runAsGroup", fields.get(1));
+			containerSpec.put("securityContext", securityContext);
+		}
+	}
+	
 	private void execute(TaskLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
@@ -969,43 +980,28 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				String containerBuildHome;
 				String containerCommandDir;
-				String containerAuthInfoDir;
 				String containerTrustCertsDir;
 				String containerWorkspace;
 				if (osInfo.isWindows()) {
 					containerBuildHome = "C:\\onedev-build";
 					containerWorkspace = containerBuildHome + "\\workspace";
 					containerCommandDir = containerBuildHome + "\\command";
-					containerAuthInfoDir = "C:\\Users\\ContainerAdministrator\\auth-info";
 					containerTrustCertsDir = containerBuildHome + "\\trust-certs";
 				} else {
 					containerBuildHome = "/onedev-build";
 					containerWorkspace = containerBuildHome +"/workspace";
 					containerCommandDir = containerBuildHome + "/command";
-					containerAuthInfoDir = "/root/auth-info";
 					containerTrustCertsDir = containerBuildHome + "/trust-certs";
 				}
 
 				Map<String, String> buildHomeMount = newLinkedHashMap(
 						"name", "build-home", 
 						"mountPath", containerBuildHome);
-				Map<String, String> authInfoMount = newLinkedHashMap(
-						"name", "build-home", 
-						"mountPath", containerAuthInfoDir, 
-						"subPath", "auth-info");
-				
-				// Windows nanoserver default user is ContainerUser
-				Map<String, String> authInfoMount2 = newLinkedHashMap(
-						"name", "build-home", 
-						"mountPath", "C:\\Users\\ContainerUser\\auth-info", 
-						"subPath", "auth-info");
 				Map<String, String> trustCertsMount = newLinkedHashMap(
 						"name", "trust-certs", 
 						"mountPath", containerTrustCertsDir);
 				
-				var commonVolumeMounts = newArrayList(buildHomeMount, authInfoMount);
-				if (osInfo.isWindows())
-					commonVolumeMounts.add(authInfoMount2);
+				var commonVolumeMounts = newArrayList(buildHomeMount);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
 				
@@ -1014,7 +1010,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					entryFacade = new CompositeFacade(jobContext.getActions());
 				} else {
 					List<Action> actions = new ArrayList<>();
-					CommandFacade facade = new CommandFacade((String) executionContext, null,
+					CommandFacade facade = new CommandFacade((String) executionContext, null, null,
 							"this does not matter", false);
 					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
 					entryFacade = new CompositeFacade(actions);
@@ -1073,6 +1069,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
 						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
+						setupSecurityContext(stepContainerSpec, execution.getRunAs());
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");

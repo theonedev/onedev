@@ -16,7 +16,6 @@ import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAw
 import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
@@ -54,7 +53,12 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	public boolean isUseTTY() {
 		return true;
 	}
-	
+
+	@Override
+	public String getRunAs() {
+		return null;
+	}
+
 	@Editable(order=100, description="Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself. The file <code>Dockerfile</code> is expected to exist in build context " +
 			"directory, unless you specify a different location with option <code>--dockerfile</code>")
@@ -134,7 +138,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		return new DefaultInterpreter() {
 			
 			@Override
-			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
+			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs, 
 											   String builtInRegistryAccessToken, boolean useTTY) {
 				var commandsBuilder = new StringBuilder();
 				if (jobExecutor instanceof RegistryLoginAware) {
@@ -163,7 +167,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 					commandsBuilder.append(" ").append(getMoreOptions());
 				
 				commandsBuilder.append("\n");
-				return new CommandFacade(image, builtInRegistryAccessToken, commandsBuilder.toString(), useTTY);
+				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), useTTY);
 			}
 			
 		};

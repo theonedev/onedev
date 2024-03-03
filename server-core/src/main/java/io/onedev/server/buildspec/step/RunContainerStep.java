@@ -8,6 +8,7 @@ import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.RegEx;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -33,6 +34,8 @@ public class RunContainerStep extends Step {
 
 	private String image;
 	
+	private String runAs;
+	
 	private String args;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
@@ -43,7 +46,7 @@ public class RunContainerStep extends Step {
 
 	private String builtInRegistryAccessTokenSecret;
 	
-	private boolean useTTY;
+	private boolean useTTY = true;
 	
 	@Editable(order=100, description="Specify container image to run")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -56,6 +59,18 @@ public class RunContainerStep extends Step {
 		this.image = image;
 	}
 
+	@Editable(order=150, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
+	}
+	
 	@Editable(order=200, name="Arguments", description="Optionally specify container arguments separated by space. " +
 			"Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse " +
 			"this with container options which should be specified in executor setting")
@@ -68,7 +83,7 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=300, name="Working Directory", description="Optionally specify working directory of the container. "
+	@Editable(order=300, name="Working Directory", placeholder = "Container default", group="More Settings", description="Optionally specify working directory of the container. "
 			+ "Leave empty to use default working directory of the container")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable
@@ -80,7 +95,7 @@ public class RunContainerStep extends Step {
 		this.workingDir = workingDir;
 	}
 
-	@Editable(order=400, name="Environment Variables", description="Optionally specify environment "
+	@Editable(order=400, name="Environment Variables", group="More Settings", description="Optionally specify environment "
 			+ "variables for the container")
 	public List<EnvVar> getEnvVars() {
 		return envVars;
@@ -89,7 +104,7 @@ public class RunContainerStep extends Step {
 	public void setEnvVars(List<EnvVar> envVars) {
 		this.envVars = envVars;
 	}
-
+	
 	@Editable(order=500, group = "More Settings", description="Optionally mount directories or files under job workspace into container")
 	public List<VolumeMount> getVolumeMounts() {
 		return volumeMounts;
@@ -155,7 +170,7 @@ public class RunContainerStep extends Step {
 			builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
 		else 
 			builtInRegistryAccessToken = null;
-		return new RunContainerFacade(getImage(), null, getArgs(), envMap, getWorkingDir(), mountMap, 
+		return new RunContainerFacade(getImage(), getRunAs(), getArgs(), envMap, getWorkingDir(), mountMap, 
 				builtInRegistryAccessToken, isUseTTY());
 	}
 	

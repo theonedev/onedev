@@ -39,6 +39,7 @@ import static io.onedev.agent.ExecutorUtils.newInfoLogger;
 import static io.onedev.agent.ExecutorUtils.newWarningLogger;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
 		"This executor runs build jobs with OneDev server's shell facility.<br>" +

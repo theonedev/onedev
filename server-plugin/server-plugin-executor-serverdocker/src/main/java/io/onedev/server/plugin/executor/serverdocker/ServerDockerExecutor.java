@@ -12,7 +12,6 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
@@ -41,8 +40,9 @@ import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.onedev.agent.DockerExecutorUtils.changeOwner;
 import static io.onedev.agent.DockerExecutorUtils.*;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static java.util.stream.Collectors.toList;
@@ -281,11 +281,12 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 							}
 
 							File hostWorkspace = new File(hostBuildHome, "workspace");
+							File hostUserHome = new File(hostBuildHome, "user");
 							FileUtils.createDir(hostWorkspace);
+							FileUtils.createDir(hostUserHome);
 
 							var cacheHelper = new ServerCacheHelper(hostBuildHome, jobContext, jobLogger);
 							
-							AtomicReference<File> hostAuthInfoDir = new AtomicReference<>(null);
 							try {
 								jobLogger.log("Copying job dependencies...");
 								getJobManager().copyDependencies(jobContext, hostWorkspace);
@@ -303,14 +304,15 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 									containerTrustCerts = "/onedev-build/trust-certs.pem";
 								}
 
+								var ownerChanged = new AtomicBoolean(false);
 								getJobManager().reportJobWorkspace(jobContext, containerWorkspace);
 								CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 								boolean successful = entryFacade.execute(new LeafHandler() {
 
-									private int runStepContainer(Commandline docker, String image, @Nullable String entrypoint, 
-																 List<String> options, List<String> arguments, Map<String, String> environments,
-																 @Nullable String workingDir, Map<String, String> volumeMounts,
-																 List<Integer> position, boolean useTTY) {
+									private int runStepContainer(Commandline docker, String image, @Nullable String runAs, 
+																 @Nullable String entrypoint, List<String> arguments, 
+																 Map<String, String> environments, @Nullable String workingDir, 
+																 Map<String, String> volumeMounts, List<Integer> position, boolean useTTY) {
 										image = mapImage(image);
 										containerName = network + "-step-" + stringifyStepPosition(position);
 										try {
@@ -318,6 +320,11 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											docker.clearArgs();
 								
 											docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+											if (runAs != null)
+												docker.addArgs("--user", runAs);
+											else if (!SystemUtils.IS_OS_WINDOWS)
+												docker.addArgs("--user", "0:0");
+											
 											if (getCpuLimit() != null)
 												docker.addArgs("--cpus", getCpuLimit());
 											if (getMemoryLimit() != null)
@@ -355,16 +362,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 												}
 											}
 
-											if (hostAuthInfoDir.get() != null) {
-												String hostPath = getHostPath(hostAuthInfoDir.get().getAbsolutePath());
-												if (SystemUtils.IS_OS_WINDOWS) {
-													docker.addArgs("-v", hostPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
-													docker.addArgs("-v", hostPath + ":C:\\Users\\ContainerUser\\auth-info");
-												} else {
-													docker.addArgs("-v", hostPath + ":/root/auth-info");
-												}
-											}
-
 											for (Map.Entry<String, String> entry : environments.entrySet())
 												docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
 
@@ -378,13 +375,12 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 											if (useProcessIsolation)
 												docker.addArgs("--isolation=process");
-
-											docker.addArgs(options.toArray(new String[0]));
-
+											
 											docker.addArgs(image);
 											docker.addArgs(arguments.toArray(new String[0]));
 											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
-											ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
+
+											var result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
 													ExecutorUtils.newWarningLogger(jobLogger), null);
 											return result.getReturnCode();													
 										} finally {
@@ -398,8 +394,13 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										try {
 											String stepNames = entryFacade.getNamesAsString(position);
 											jobLogger.notice("Running step \"" + stepNames + "\"...");
-
 											long time = System.currentTimeMillis();
+											
+											if (ownerChanged.get() && !Bootstrap.isInDocker()) {
+												changeOwner(hostBuildHome, getOwner(), newDocker(), false);
+												ownerChanged.set(false);
+											}
+											
 											if (facade instanceof CommandFacade) {
 												CommandFacade commandFacade = (CommandFacade) facade;
 
@@ -408,16 +409,18 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 													throw new ExplicitException("This step can only be executed by server shell "
 															+ "executor or remote shell executor");
 												}
-
-												Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
-														hostBuildHome, commandFacade, osInfo, hostAuthInfoDir.get() != null);
-												
-												var docker = newDocker();
+												Commandline entrypoint = getEntrypoint(hostBuildHome, commandFacade, osInfo);
 												var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 														jobContext.getJobToken(), commandFacade.getBuiltInRegistryAccessToken());
+												
+												var docker = newDocker();
+												if (changeOwner(hostBuildHome, execution.getRunAs(), docker, Bootstrap.isInDocker()))
+													ownerChanged.set(true);
+												
+												docker.clearArgs();
 												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-													return runStepContainer(docker, execution.getImage(), entrypoint.executable(),
-															new ArrayList<>(), entrypoint.arguments(), new HashMap<>(), null,
+													return runStepContainer(docker, execution.getImage(), execution.getRunAs(),
+															entrypoint.executable(), entrypoint.arguments(), new HashMap<>(), null, 
 															new HashMap<>(), position, commandFacade.isUseTTY());
 												});
 
@@ -447,20 +450,20 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											} else if (facade instanceof RunContainerFacade) {
 												RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
 												OsContainer container = runContainerFacade.getContainer(osInfo);
-												List<String> options;
-												if (container.getOpts() != null)
-													options = Splitter.on(" ").trimResults().omitEmptyStrings().splitToList(container.getOpts());
-												else 
-													options = new ArrayList<>();
 												List<String> arguments = new ArrayList<>();
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
-												var docker = newDocker();
 												var builtInRegistryLogin =new BuiltInRegistryLogin(serverUrl, 
 														jobContext.getJobToken(), runContainerFacade.getBuiltInRegistryAccessToken());
+
+												var docker = newDocker();
+												if (changeOwner(hostBuildHome, container.getRunAs(), docker, Bootstrap.isInDocker()))
+													ownerChanged.set(true);
+												
+												docker.clearArgs();
 												int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-													return runStepContainer(docker, container.getImage(), null, options, arguments,
-															container.getEnvMap(), container.getWorkingDir(), container.getVolumeMounts(),
+													return runStepContainer(docker, container.getImage(),container.getRunAs(), null,  
+															arguments, container.getEnvMap(), container.getWorkingDir(), container.getVolumeMounts(),
 															position, runContainerFacade.isUseTTY());
 												});
 												if (exitCode != 0) {
@@ -475,9 +478,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 
-													if (hostAuthInfoDir.get() == null)
-														hostAuthInfoDir.set(FileUtils.createTempDir());
-													git.environments().put("HOME", hostAuthInfoDir.get().getAbsolutePath());
+													git.environments().put("HOME", hostUserHome.getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
 
@@ -493,7 +494,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 															ExecutorUtils.newWarningLogger(jobLogger));
 
 													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-													cloneInfo.writeAuthData(hostAuthInfoDir.get(), git, true,
+													cloneInfo.writeAuthData(hostUserHome, git, true,
 															ExecutorUtils.newInfoLogger(jobLogger),
 															ExecutorUtils.newWarningLogger(jobLogger));
 
@@ -560,8 +561,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 								if (SystemUtils.IS_OS_WINDOWS) {
 									FileUtils.deleteDir(hostWorkspace);
 								}
-								if (hostAuthInfoDir.get() != null)
-									FileUtils.deleteDir(hostAuthInfoDir.get());
 							}
 						} finally {
 							deleteNetwork(newDocker(), network, jobLogger);

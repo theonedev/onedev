@@ -35,8 +35,8 @@ public class PowerShellInterpreter extends Interpreter {
 	
 	@Override
 	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
-									   String builtInRegistryAccessToken, boolean useTTY) {
-		return new PowerShellFacade(image, builtInRegistryAccessToken, getCommands(), useTTY);
+									   String runAs, String builtInRegistryAccessToken, boolean useTTY) {
+		return new PowerShellFacade(image, runAs, builtInRegistryAccessToken, getCommands(), useTTY);
 	}
 
 }

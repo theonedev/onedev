@@ -20,6 +20,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
 import static io.onedev.commons.utils.LockUtils.write;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Editable(order=1200, group=StepGroup.PUBLISH, name="Pull Request Markdown Report", 
 		description="This report will be displayed in pull request overview page if build is triggered by pull request")
@@ -61,9 +62,9 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 				File file = new File(workspace, getFile()); 
 				if (file.exists()) {
 					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
-					String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					String markdown = FileUtils.readFileToString(file, UTF_8);
 					FileUtils.createDir(reportDir);
-					FileUtils.writeFile(new File(reportDir, CONTENT), markdown, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(new File(reportDir, CONTENT), markdown, UTF_8);
 					OneDev.getInstance(ProjectManager.class).directoryModified(
 							build.getProject().getId(), reportDir.getParentFile());
 				} else {
