@@ -34,15 +34,13 @@ public class CommandStep extends Step {
 	
 	private String image;
 	
-	private String runAsUser;
-	
-	private String runAsGroup;
+	private String runAs;
 	
 	private String builtInRegistryAccessTokenSecret;
 	
 	private Interpreter interpreter = new DefaultInterpreter();
-	
-	private boolean useTTY;
+
+	private boolean useTTY = true;
 	
 	@Editable(order=50, description="Whether or not to run this step inside container")
 	public boolean isRunInContainer() {
@@ -70,26 +68,17 @@ public class CommandStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=103, description="Optionally specify uid to run the container")
+	@Editable(order=105, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
 	@ShowCondition("isRunInContainerEnabled")
-	@Numeric
-	public String getRunAsUser() {
-		return runAsUser;
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
 	}
 
-	public void setRunAsUser(String runAsUser) {
-		this.runAsUser = runAsUser;
-	}
-
-	@Editable(order=107, description="Optionally specify gid to run the container")
-	@ShowCondition("isRunInContainerEnabled")
-	@Numeric
-	public String getRunAsGroup() {
-		return runAsGroup;
-	}
-
-	public void setRunAsGroup(String runAsGroup) {
-		this.runAsGroup = runAsGroup;
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
@@ -105,7 +94,7 @@ public class CommandStep extends Step {
 	public void setInterpreter(Interpreter interpreter) {
 		this.interpreter = interpreter;
 	}
-
+	
 	@Editable(order=9000, name="Built-in Registry Access Token Secret", group = "More Settings",
 			descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
 	@ChoiceProvider("getAccessTokenSecretChoices")
@@ -148,9 +137,9 @@ public class CommandStep extends Step {
 				builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
 			else
 				builtInRegistryAccessToken = null;
-			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), builtInRegistryAccessToken, isUseTTY());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, builtInRegistryAccessToken, isUseTTY());
 		} else {
-			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, isUseTTY());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, null, isUseTTY());
 		}
 	}
 	

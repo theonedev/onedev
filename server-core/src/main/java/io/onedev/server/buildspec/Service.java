@@ -25,6 +25,8 @@ public class Service implements NamedElement, Serializable {
 	
 	private String image;
 	
+	private String runAs;
+	
 	private String arguments;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
@@ -68,6 +70,18 @@ public class Service implements NamedElement, Serializable {
 		this.image = image;
 	}
 
+	@Editable(order=210, name="Run As", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
+			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
+			"rootless or use user namespace remapping")
+	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	public String getRunAs() {
+		return runAs;
+	}
+
+	public void setRunAs(String runAs) {
+		this.runAs = runAs;
+	}
+	
 	@Editable(order=220, description="Optionally specify arguments to run above image")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArguments() {
@@ -125,7 +139,8 @@ public class Service implements NamedElement, Serializable {
 		var envs = new HashMap<String, String>();
 		for (var envVar: getEnvVars())
 			envs.put(envVar.getName(), envVar.getValue());
-		return new ServiceFacade(getName(), getImage(), getArguments(), envs, getReadinessCheckCommand(), getBuiltInRegistryAccessTokenSecret());		
+		return new ServiceFacade(getName(), getImage(), getRunAs(), getArguments(), envs, 
+				getReadinessCheckCommand(), getBuiltInRegistryAccessTokenSecret());		
 	}
 	
 }

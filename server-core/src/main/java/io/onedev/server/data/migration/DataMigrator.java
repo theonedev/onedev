@@ -390,7 +390,7 @@ public class DataMigrator {
 				String content = FileUtils.readFileToString(file, UTF_8);
 				content = StringUtils.replace(content, "gitplex", "turbodev");
 				content = StringUtils.replace(content, "GitPlex", "TurboDev");
-				FileUtils.writeFile(file, content, UTF_8.name());
+				FileUtils.writeFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -425,7 +425,7 @@ public class DataMigrator {
 				content = StringUtils.replace(content, "turbodev.com", "onedev.io");
 				content = StringUtils.replace(content, "turbodev", "onedev");
 				content = StringUtils.replace(content, "TurboDev", "OneDev");
-				FileUtils.writeFile(file, content, UTF_8.name());
+				FileUtils.writeFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -569,11 +569,11 @@ public class DataMigrator {
 				FileUtils.deleteFile(file);
 			} else if (file.getName().startsWith("UserAuthorizations.xml") || file.getName().startsWith("GroupAuthorizations.xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8);
 					content = StringUtils.replace(content, "ADMIN", "ADMINISTRATION");
 					content = StringUtils.replace(content, "WRITE", "CODE_WRITE");
 					content = StringUtils.replace(content, "READ", "CODE_READ");
-					FileUtils.writeFile(file, content, UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1199,7 +1199,7 @@ public class DataMigrator {
 
 				File renamedFile = new File(dataDir, file.getName().replace(
 						"IssueFieldEntitys.xml", "IssueFields.xml"));
-				FileUtils.writeFile(renamedFile, content, UTF_8.name());
+				FileUtils.writeFile(renamedFile, content, UTF_8);
 			}
 		}
 		try (InputStream is = getClass().getResourceAsStream("migrate25_roles.xml")) {
@@ -1749,12 +1749,12 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				try {
-					String content = FileUtils.readFileToString(file, UTF_8.name());
+					String content = FileUtils.readFileToString(file, UTF_8);
 					content = StringUtils.replace(content, "io.onedev.server.issue.",
 							"io.onedev.server.model.support.issue.");
 					content = StringUtils.replace(content, "io.onedev.server.util.inputspec.",
 							"io.onedev.server.model.support.inputspec.");
-					FileUtils.writeFile(file, content, UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -2016,7 +2016,7 @@ public class DataMigrator {
 					content = StringUtils.replace(content,
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest",
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger");
-					FileUtils.writeFile(file, content, UTF_8.name());
+					FileUtils.writeFile(file, content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -2071,7 +2071,7 @@ public class DataMigrator {
 					content = StringUtils.replace(content, "PullRequestBuild", "PullRequestVerification");
 					FileUtils.deleteFile(file);
 					String newFileName = StringUtils.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
-					FileUtils.writeFile(new File(dataDir, newFileName), content, UTF_8.name());
+					FileUtils.writeFile(new File(dataDir, newFileName), content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

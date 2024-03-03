@@ -111,6 +111,11 @@ public class SSHCommandStep extends CommandStep {
 	}
 
 	@Override
+	public String getRunAs() {
+		return null;
+	}
+
+	@Override
 	public boolean isUseTTY() {
 		return false;
 	}
