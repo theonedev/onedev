@@ -72,8 +72,8 @@ public class RunContainerStep extends Step {
 	}
 
 	@Editable(order=250, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if underlying container facility is " +
-			"rootless or use user namespace remapping")
+			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
+			"using user namespace remapping")
 	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
 	public String getRunAs() {
 		return runAs;
