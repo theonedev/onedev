@@ -201,7 +201,7 @@ onedev.server.markdown = {
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 	    
 		/*
-		 * We intercept the "Enter" key event to do below things to make editing more conveniently:
+		 * We intercept the "Enter" key event to do below things to make editing more convenient:
 		 * 
 		 * 1. When there is a list item in current line, then add an empty list item automatically 
 		 *    to next line. For instance, if current input is:
@@ -234,82 +234,104 @@ onedev.server.markdown = {
 		 * 
 		 */
 		$input.on("keydown", function(e) {
-			if (e.keyCode == 13 && $(".atwho-view, .floating>.content>.input-assist").filter(":visible").length == 0) {
-				if ((e.metaKey || e.ctrlKey) && getSubmit().length != 0) 
-					return;
-					
-				var scrollTop = $input.scrollTop();
-					
-				e.preventDefault();
-				var input = $input.val();
-				var caret = $input.caret();
-				var inputBeforeCaret = input.substring(0, caret);
-				var lastLineBreakPos = inputBeforeCaret.lastIndexOf('\n');
-				var spaces = "";
-				for (var i=lastLineBreakPos+1; i<inputBeforeCaret.length; i++) {
-					if (inputBeforeCaret[i] == ' ') {
-						spaces += " ";
-					} else {
-						break;
-					}
-				}
-				
-				var nonSpacePosInCurrentLine = lastLineBreakPos + spaces.length + 1;
-				var nonSpaceInCurrentLine = input.substring(nonSpacePosInCurrentLine, caret);
-				
-				function clearLastLine() {
-					$input.range(lastLineBreakPos+1, caret);
-					document.execCommand("insertText", false, "\n");
-				}
+			if ((!e.metaKey && !e.ctrlKey || getSubmit().length == 0) && $(".atwho-view, .floating>.content>.input-assist").filter(":visible").length == 0) {
+				if (e.keyCode == 13) {
+					var scrollTop = $input.scrollTop();
 
-				// match against task items
-				var match = /^[-*]\s+\[[x ]\] /.exec(nonSpaceInCurrentLine);
-				if (match != null) {
-					if (nonSpaceInCurrentLine.length > match[0].length) {
-						if (nonSpaceInCurrentLine.indexOf("*") == 0)
-							document.execCommand("insertText", false, "\n" + spaces + "* [ ] ");
-						else
-							document.execCommand("insertText", false, "\n" + spaces + "- [ ] ");
-					} else {
-						clearLastLine();
+					e.preventDefault();
+					var input = $input.val();
+					var caret = $input.caret();
+					var inputBeforeCaret = input.substring(0, caret);
+					var lastLineBreakPos = inputBeforeCaret.lastIndexOf('\n');
+					var spaces = "";
+					for (var i=lastLineBreakPos+1; i<inputBeforeCaret.length; i++) {
+						if (inputBeforeCaret[i] == ' ') {
+							spaces += " ";
+						} else {
+							break;
+						}
 					}
-				} else {
-					if (nonSpaceInCurrentLine.indexOf("* ") == 0) {
-						if (nonSpaceInCurrentLine.length > 2) {
-							document.execCommand("insertText", false, "\n" + spaces + "* ");
-						} else {
-							clearLastLine();
-						}
-					} else if (nonSpaceInCurrentLine.indexOf("- ") == 0) {
-						if (nonSpaceInCurrentLine.length > 2) {
-							document.execCommand("insertText", false, "\n" + spaces + "- ");
+
+					var nonSpacePosInCurrentLine = lastLineBreakPos + spaces.length + 1;
+					var nonSpaceInCurrentLine = input.substring(nonSpacePosInCurrentLine, caret);
+
+					function clearLastLine() {
+						$input.range(lastLineBreakPos+1, caret);
+						document.execCommand("insertText", false, "\n");
+					}
+
+					// match against task items
+					var match = /^[-*]\s+\[[x ]\] /.exec(nonSpaceInCurrentLine);
+					if (match != null) {
+						if (nonSpaceInCurrentLine.length > match[0].length) {
+							if (nonSpaceInCurrentLine.indexOf("*") == 0)
+								document.execCommand("insertText", false, "\n" + spaces + "* [ ] ");
+							else
+								document.execCommand("insertText", false, "\n" + spaces + "- [ ] ");
 						} else {
 							clearLastLine();
 						}
 					} else {
-						// match against ordered list items
-						match = /^\d+\. /.exec(nonSpaceInCurrentLine);
-						if (match != null) {
-							if (nonSpaceInCurrentLine.length > match[0].length) {
-								document.execCommand("insertText", false, "\n" + spaces + (parseInt(match[0])+1) +". ");
+						if (nonSpaceInCurrentLine.indexOf("* ") == 0) {
+							if (nonSpaceInCurrentLine.length > 2) {
+								document.execCommand("insertText", false, "\n" + spaces + "* ");
 							} else {
 								clearLastLine();
 							}
-						} else if (nonSpacePosInCurrentLine == inputBeforeCaret.length) {
-							document.execCommand("insertText", false, "\n");
+						} else if (nonSpaceInCurrentLine.indexOf("- ") == 0) {
+							if (nonSpaceInCurrentLine.length > 2) {
+								document.execCommand("insertText", false, "\n" + spaces + "- ");
+							} else {
+								clearLastLine();
+							}
 						} else {
-							document.execCommand("insertText", false, "\n" + spaces);
+							// match against ordered list items
+							match = /^\d+\. /.exec(nonSpaceInCurrentLine);
+							if (match != null) {
+								if (nonSpaceInCurrentLine.length > match[0].length) {
+									document.execCommand("insertText", false, "\n" + spaces + (parseInt(match[0])+1) +". ");
+								} else {
+									clearLastLine();
+								}
+							} else if (nonSpacePosInCurrentLine == inputBeforeCaret.length) {
+								document.execCommand("insertText", false, "\n");
+							} else {
+								document.execCommand("insertText", false, "\n" + spaces);
+							}
 						}
 					}
-				}
-				
-				// Scroll if necessary to make cursor visible
-				var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
-				if (caretBottom > scrollTop + $input.height()) {
-					$input.scrollTop(caretBottom - $input.height());
-				} else {
-					$input.scrollTop(scrollTop);
-				}
+
+					// Scroll if necessary to make cursor visible
+					var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
+					if (caretBottom > scrollTop + $input.height()) {
+						$input.scrollTop(caretBottom - $input.height());
+					} else {
+						$input.scrollTop(scrollTop);
+					}
+				} else if (e.keyCode == 9) {
+					var selection = $input.range();
+					if (selection.length != 0) {
+						var content = $input.val();
+						var selectedContent = content.substring(selection.start, selection.end);
+						var tabbedContent = "";
+						selectedContent.split("\n").forEach(function(line) {
+							if (e.shiftKey) {
+								if (line.startsWith("\t"))
+									line = line.substring(1);
+								else if (line.startsWith(" "))
+									line = line.substring(1);
+							} else {
+								line = " " + line;
+							}
+							if (tabbedContent.length != 0)
+								tabbedContent += "\n";
+							tabbedContent += line;
+						});
+						document.execCommand("insertText", false, tabbedContent);
+						$input.range(selection.start, selection.start + tabbedContent.length);
+						return false;
+					} 
+				}	
 			}
 		});
 
