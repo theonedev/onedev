@@ -8,6 +8,8 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.server.util.match.WildcardUtils.matchString;
+
 public class CommentCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
@@ -28,15 +30,15 @@ public class CommentCriteria extends Criteria<PullRequest> {
 		predicates.add(builder.equal(commentRoot.get(PullRequestComment.PROP_REQUEST), from));
 		predicates.add(builder.like(
 				builder.lower(commentRoot.get(PullRequestComment.PROP_CONTENT)),
-				"%" + value.toLowerCase() + "%"));
+				"%" + value.toLowerCase().replace('*', '%') + "%"));
 
 		return builder.exists(commentQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		for (PullRequestComment comment: request.getComments()) { 
-			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
+		for (PullRequestComment comment: request.getComments()) {
+			if (matchString("*" + value.toLowerCase() + "*", comment.getContent().toLowerCase()))
 				return true;
 		}
 		return false;

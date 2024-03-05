@@ -10,6 +10,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
+import static io.onedev.server.search.entity.agent.AgentQueryLexer.Is;
+
 public class FuzzyCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
@@ -32,11 +34,11 @@ public class FuzzyCriteria extends Criteria<Agent> {
 	
 	private Criteria<Agent> parse(String value) {
 		return new OrCriteria<>(
-				new NameCriteria("*" + value + "*", AgentQueryLexer.Is),
-				new IpAddressCriteria("*" + value + "*", AgentQueryLexer.Is),
-				new OsCriteria("*" + value + "*", AgentQueryLexer.Is),
-				new OsVersionCriteria("*" + value + "*", AgentQueryLexer.Is),
-				new OsArchCriteria("*" + value + "*", AgentQueryLexer.Is));
+				new NameCriteria("*" + value + "*", Is),
+				new IpAddressCriteria("*" + value + "*", Is),
+				new OsCriteria("*" + value + "*", Is),
+				new OsVersionCriteria("*" + value + "*", Is),
+				new OsArchCriteria("*" + value + "*", Is));
 	}
 
 	@Override

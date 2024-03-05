@@ -9,6 +9,8 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.server.util.match.WildcardUtils.matchString;
+
 public class ReplyCriteria extends Criteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
@@ -29,7 +31,7 @@ public class ReplyCriteria extends Criteria<CodeComment> {
 		predicates.add(builder.equal(replyRoot.get(CodeCommentReply.PROP_COMMENT), from));
 		predicates.add(builder.like(
 				builder.lower(replyRoot.get(CodeCommentReply.PROP_CONTENT)),
-				"%" + value.toLowerCase() + "%"));
+				"%" + value.toLowerCase().replace('*', '%')+ "%"));
 
 		return builder.exists(replyQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
@@ -38,7 +40,7 @@ public class ReplyCriteria extends Criteria<CodeComment> {
 	public boolean matches(CodeComment comment) {
 		for (CodeCommentReply reply: comment.getReplies()) {
 			String content = reply.getContent();
-			if (WildcardUtils.matchString("*" + value.toLowerCase() + "*", content))
+			if (matchString("*" + value.toLowerCase() + "*", content.toLowerCase()))
 				return true;
 		}
 		return false;

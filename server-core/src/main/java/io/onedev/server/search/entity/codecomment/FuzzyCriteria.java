@@ -10,6 +10,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
+
 public class FuzzyCriteria extends Criteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
@@ -31,10 +33,11 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 	}
 	
 	private Criteria<CodeComment> parse(String value) {
+		var normalizedValue = normalizeFuzzyQuery(value);		
 		return new OrCriteria<>(
-				new ContentCriteria(value), 
-				new ReplyCriteria(value), 
-				new PathCriteria("*" + value + "*", CodeCommentQueryLexer.Is));
+				new ContentCriteria(normalizedValue), 
+				new ReplyCriteria(normalizedValue), 
+				new PathCriteria("*" + value + "*", Is));
 	}
 
 	@Override

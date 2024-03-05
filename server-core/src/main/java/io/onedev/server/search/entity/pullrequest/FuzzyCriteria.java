@@ -31,10 +31,11 @@ public class FuzzyCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> parse(String value) {
+		var normalizedValue = normalizeFuzzyQuery(value);
 		return new OrCriteria<>(
-				new TitleCriteria(value),
-				new DescriptionCriteria(value),
-				new CommentCriteria(value));
+				new TitleCriteria(normalizedValue),
+				new DescriptionCriteria(normalizedValue),
+				new CommentCriteria(normalizedValue));
 	}
 
 	@Override

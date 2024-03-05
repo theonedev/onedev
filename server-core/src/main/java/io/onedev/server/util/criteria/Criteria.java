@@ -14,6 +14,9 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -217,6 +220,15 @@ public abstract class Criteria<T> implements Serializable {
 			return criterias.iterator().next();
 		else
 			return null;
+	}
+	
+	protected String normalizeFuzzyQuery(String query) {
+		return Joiner.on("*").join(Splitter.on(new CharMatcher() {
+			@Override
+			public boolean matches(char c) {
+				return !Character.isLetterOrDigit(c);
+			}
+		}).omitEmptyStrings().trimResults().splitToList(query));		
 	}
 	
 }

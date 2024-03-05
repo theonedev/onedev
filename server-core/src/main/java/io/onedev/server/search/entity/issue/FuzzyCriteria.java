@@ -31,7 +31,8 @@ public class FuzzyCriteria extends Criteria<Issue> {
 	}
 	
 	private Criteria<Issue> parse(String value) {
-		return new OrCriteria<>(new TitleCriteria(value), new DescriptionCriteria(value), new CommentCriteria(value));
+		var normalizedValue = normalizeFuzzyQuery(value);
+		return new OrCriteria<>(new TitleCriteria(normalizedValue), new DescriptionCriteria(normalizedValue), new CommentCriteria(normalizedValue));
 	}
 
 	@Override

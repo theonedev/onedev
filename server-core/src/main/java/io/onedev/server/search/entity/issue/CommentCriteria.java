@@ -3,10 +3,13 @@ package io.onedev.server.search.entity.issue;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.match.WildcardUtils;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.onedev.server.util.match.WildcardUtils.matchString;
 
 public class CommentCriteria extends Criteria<Issue> {
 
@@ -28,7 +31,7 @@ public class CommentCriteria extends Criteria<Issue> {
 		predicates.add(builder.equal(commentRoot.get(IssueComment.PROP_ISSUE), from));
 		predicates.add(builder.like(
 				builder.lower(commentRoot.get(IssueComment.PROP_CONTENT)), 
-				"%" + value.toLowerCase() + "%"));
+				"%" + value.toLowerCase().replace('*', '%') + "%"));
 
 		return builder.exists(commentQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
@@ -36,7 +39,7 @@ public class CommentCriteria extends Criteria<Issue> {
 	@Override
 	public boolean matches(Issue issue) {
 		for (IssueComment comment: issue.getComments()) {
-			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
+			if (matchString("*" + value.toLowerCase() + "*", comment.getContent().toLowerCase()))
 				return true;
 		}
 		return false;
