@@ -172,10 +172,7 @@ public class ProjectPacksPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										if (setting.isNew())
-											getPackQueryPersonalizationManager().create(setting);
-										else
-											getPackQueryPersonalizationManager().update(setting);
+										getPackQueryPersonalizationManager().createOrUpdate(setting);
 
 										target.add(savedQueries);
 										close();

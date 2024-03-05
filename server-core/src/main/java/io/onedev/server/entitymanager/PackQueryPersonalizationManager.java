@@ -9,8 +9,6 @@ public interface PackQueryPersonalizationManager extends EntityManager<PackQuery
 	
 	PackQueryPersonalization find(Project project, User user);
 
-    void create(PackQueryPersonalization packQueryPersonalization);
-
-	void update(PackQueryPersonalization packQueryPersonalization);
+    void createOrUpdate(PackQueryPersonalization personalization);
 	
 }

@@ -111,7 +111,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 			public void onClick() {
 				var token = getAgent().getToken();
 				token.setValue(UUID.randomUUID().toString());
-				OneDev.getInstance(AgentTokenManager.class).update(token);
+				OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 				OneDev.getInstance(AgentManager.class).disconnect(getAgent().getId());
 				Session.get().success("Access token regenerated, make sure to update the token at agent side");
 				setResponsePage(AgentOverviewPage.class, paramsOf(getAgent()));

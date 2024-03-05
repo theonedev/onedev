@@ -40,7 +40,7 @@ public class NewMilestonePage extends ProjectPage {
 				var milestone = new Milestone();
 				milestone.setProject(getProject());
 				bean.writeTo(milestone);
-				OneDev.getInstance(MilestoneManager.class).create(milestone);
+				OneDev.getInstance(MilestoneManager.class).createOrUpdate(milestone);
 				Session.get().success("New milestone created");
 				setResponsePage(MilestoneIssuesPage.class, MilestoneIssuesPage.paramsOf(getProject(), milestone, null));
 			}

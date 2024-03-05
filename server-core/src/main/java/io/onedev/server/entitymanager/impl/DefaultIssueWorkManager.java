@@ -9,6 +9,7 @@ import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.entity.EntityQuery;
@@ -42,6 +43,7 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		this.issueFieldManager = issueFieldManager;
     }
 
+	@Transactional
 	@Override
 	public void createOrUpdate(IssueWork work) {
 		dao.persist(work);

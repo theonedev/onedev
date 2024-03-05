@@ -68,7 +68,7 @@ class AddAgentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
-				OneDev.getInstance(AgentTokenManager.class).create(token);
+				OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 				StringBuilder builder = new StringBuilder("docker run -t -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/agent/work:/agent/work -e serverUrl=");
 				builder.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 				builder.append(" -e agentToken=").append(token.getValue()).append(" -h myagent").append(" 1dev/agent");

@@ -420,7 +420,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												IssueWatch watch = issueWatchManager.find(involvedIssue, fromUser);
 												if (watch != null) {
 													watch.setWatching(false);
-													issueWatchManager.update(watch);
+													issueWatchManager.createOrUpdate(watch);
 													String subject = "Unsubscribed successfully from issue " + involvedIssue.getFQN();
 													String template = settingManager.getEmailTemplates().getIssueNotificationUnsubscribed();
 
@@ -448,7 +448,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												PullRequestWatch watch = pullRequestWatchManager.find(involvedPullRequest, fromUser);
 												if (watch != null) {
 													watch.setWatching(false);
-													pullRequestWatchManager.update(watch);
+													pullRequestWatchManager.createOrUpdate(watch);
 													String subject = "Unsubscribed successfully from pull request " + involvedPullRequest.getFQN();
 
 													String template = StringUtils.join(settingManager.getEmailTemplates().getPullRequestNotificationUnsubscribed(), "\n");

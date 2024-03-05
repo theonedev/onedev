@@ -1,24 +1,15 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @Entity
 @Table(
@@ -96,10 +87,7 @@ public class CommitQueryPersonalization extends AbstractEntity implements QueryP
 
 	@Override
 	public void onUpdated() {
-		if (isNew())
-			OneDev.getInstance(CommitQueryPersonalizationManager.class).create(this);
-		else
-			OneDev.getInstance(CommitQueryPersonalizationManager.class).update(this);			
+		OneDev.getInstance(CommitQueryPersonalizationManager.class).createOrUpdate(this);
 	}
 	
 }

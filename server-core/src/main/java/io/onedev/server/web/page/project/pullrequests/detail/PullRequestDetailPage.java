@@ -6,7 +6,6 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.EntityWatch;
@@ -65,6 +64,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.Co
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
 import io.onedev.server.web.util.*;
 import io.onedev.server.web.util.editablebean.LabelsBean;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -1000,10 +1000,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onSaveWatch(EntityWatch watch) {
-						if (watch.isNew())
-							OneDev.getInstance(PullRequestWatchManager.class).create((PullRequestWatch) watch);
-						else
-							OneDev.getInstance(PullRequestWatchManager.class).update((PullRequestWatch) watch);
+						OneDev.getInstance(PullRequestWatchManager.class).createOrUpdate((PullRequestWatch) watch);
 					}
 
 					@Override

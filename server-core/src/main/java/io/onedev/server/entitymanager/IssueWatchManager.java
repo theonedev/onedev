@@ -16,9 +16,7 @@ public interface IssueWatchManager extends EntityManager<IssueWatch> {
 
 	void watch(Issue issue, User user, boolean watching);
 
-    void create(IssueWatch watch);
-
-	void update(IssueWatch watch);
+    void createOrUpdate(IssueWatch watch);
 	
 	void setWatchStatus(User user, Collection<Issue> issues, WatchStatus watchStatus);
 	

@@ -1,10 +1,10 @@
 package io.onedev.server.entitymanager;
 
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
+
+import javax.annotation.Nullable;
 
 public interface MilestoneManager extends EntityManager<Milestone> {
 	
@@ -18,8 +18,6 @@ public interface MilestoneManager extends EntityManager<Milestone> {
 	@Nullable
 	Milestone findNextOpen(Project project);
 
-    void create(Milestone milestone);
-
-	void update(Milestone milestone);
+    void createOrUpdate(Milestone milestone);
 	
 }

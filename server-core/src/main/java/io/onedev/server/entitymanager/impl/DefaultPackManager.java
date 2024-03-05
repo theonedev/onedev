@@ -395,6 +395,7 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	}
 
 	@Transactional
+	@Override
 	public void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs, boolean postPublishEvent) {
 		dao.persist(pack);
 		if (packBlobs != null) {

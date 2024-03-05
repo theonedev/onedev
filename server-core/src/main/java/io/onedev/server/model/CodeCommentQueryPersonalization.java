@@ -1,23 +1,14 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
+
+import javax.persistence.*;
+import java.util.ArrayList;
 
 @Entity
 @Table(
@@ -80,10 +71,7 @@ public class CodeCommentQueryPersonalization extends AbstractEntity implements Q
 
 	@Override
 	public void onUpdated() {
-		if (isNew())
-			OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).create(this);
-		else
-			OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).update(this);			
+		OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).createOrUpdate(this);
 	}
 	
 }

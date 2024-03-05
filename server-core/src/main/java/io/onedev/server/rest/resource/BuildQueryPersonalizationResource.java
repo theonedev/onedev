@@ -49,7 +49,7 @@ public class BuildQueryPersonalizationResource {
 	public Long create(@NotNull BuildQueryPersonalization queryPersonalization) {
     	if (!SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser()))  
 			throw new UnauthorizedException();
-		queryPersonalizationManager.create(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return queryPersonalization.getId();
 	}
 
@@ -59,7 +59,7 @@ public class BuildQueryPersonalizationResource {
 	public Response update(@PathParam("queryPersonalizationId") Long queryPersonalizationId, @NotNull BuildQueryPersonalization queryPersonalization) {
 		if (!SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser()))
 			throw new UnauthorizedException();
-		queryPersonalizationManager.update(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return Response.ok().build();
 	}
 	

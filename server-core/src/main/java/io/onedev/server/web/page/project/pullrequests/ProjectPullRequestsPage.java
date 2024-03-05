@@ -172,10 +172,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										if (setting.isNew()) 
-											getPullRequestQueryPersonalizationManager().create(setting);
-										else
-											getPullRequestQueryPersonalizationManager().update(setting);
+										getPullRequestQueryPersonalizationManager().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();

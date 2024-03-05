@@ -1,11 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
@@ -13,6 +7,10 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class DefaultIssueAuthorizationManager extends BaseEntityManager<IssueAuthorization> 
@@ -48,21 +46,13 @@ public class DefaultIssueAuthorizationManager extends BaseEntityManager<IssueAut
 			authorization.setIssue(issue);
 			authorization.setUser(user);
 			issue.getAuthorizations().add(authorization);
-			create(authorization);
+			createOrUpdate(authorization);
 		}
 	}
 
 	@Transactional
 	@Override
-	public void create(IssueAuthorization authorization) {
-		Preconditions.checkState(authorization.isNew());
-		dao.persist(authorization);
-	}
-
-	@Transactional
-	@Override
-	public void update(IssueAuthorization authorization) {
-		Preconditions.checkState(!authorization.isNew());
+	public void createOrUpdate(IssueAuthorization authorization) {
 		dao.persist(authorization);
 	}
 	

@@ -1,12 +1,12 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.dao.EntityManager;
+
+import java.util.Collection;
 
 public interface UserAuthorizationManager extends EntityManager<UserAuthorization> {
 
@@ -16,8 +16,6 @@ public interface UserAuthorizationManager extends EntityManager<UserAuthorizatio
 
 	void authorize(User user, Project project, Role role);
 	
-    void create(UserAuthorization authorization);
-
-	void update(UserAuthorization authorization);
+    void createOrUpdate(UserAuthorization authorization);
 	
 }

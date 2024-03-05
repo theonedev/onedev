@@ -29,18 +29,12 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 		this.agentManager = agentManager;
 	}
 
+	@Transactional
 	@Override
-	public void create(AgentToken token) {
-		Preconditions.checkState(token.isNew());
+	public void createOrUpdate(AgentToken token) {
 		dao.persist(token);
 	}
 
-	@Override
-	public void update(AgentToken token) {
-		Preconditions.checkState(!token.isNew());
-		dao.persist(token);
-	}
-	
 	@Override
 	public AgentToken find(String value) {
 		EntityCriteria<AgentToken> criteria = newCriteria();

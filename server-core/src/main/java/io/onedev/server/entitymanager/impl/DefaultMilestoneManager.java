@@ -1,24 +1,21 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
-import io.onedev.server.persistence.annotation.Transactional;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implements MilestoneManager {
@@ -80,15 +77,7 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 
 	@Transactional
 	@Override
-	public void create(Milestone milestone) {
-		Preconditions.checkState(milestone.isNew());
-		dao.persist(milestone);
-	}
-
-	@Transactional
-	@Override
-	public void update(Milestone milestone) {
-		Preconditions.checkState(!milestone.isNew());
+	public void createOrUpdate(Milestone milestone) {
 		dao.persist(milestone);
 	}
 	

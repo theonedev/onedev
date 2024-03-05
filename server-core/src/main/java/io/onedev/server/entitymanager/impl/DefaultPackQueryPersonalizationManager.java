@@ -1,6 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.PackQueryPersonalizationManager;
 import io.onedev.server.model.PackQueryPersonalization;
 import io.onedev.server.model.Project;
@@ -37,7 +36,9 @@ public class DefaultPackQueryPersonalizationManager extends BaseEntityManager<Pa
 		return find(criteria);
 	}
 
-	private void createOrUpdate(PackQueryPersonalization personalization) {
+	@Transactional
+	@Override
+	public void createOrUpdate(PackQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
@@ -53,17 +54,4 @@ public class DefaultPackQueryPersonalizationManager extends BaseEntityManager<Pa
 		}
 	}
 
-	@Transactional
-	@Override
-	public void create(PackQueryPersonalization personalization) {
-		Preconditions.checkState(personalization.isNew());
-		createOrUpdate(personalization);
-	}
-
-	@Transactional
-	@Override
-	public void update(PackQueryPersonalization personalization) {
-		Preconditions.checkState(!personalization.isNew());
-		createOrUpdate(personalization);
-	}
 }

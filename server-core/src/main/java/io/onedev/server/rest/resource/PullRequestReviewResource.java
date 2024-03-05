@@ -58,7 +58,7 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		reviewManager.create(review);
+		reviewManager.createOrUpdate(review);
 		return review.getId();
 	}
 
@@ -77,7 +77,7 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 
-		reviewManager.update(review);
+		reviewManager.createOrUpdate(review);
 		return Response.ok().build();
 	}
 	

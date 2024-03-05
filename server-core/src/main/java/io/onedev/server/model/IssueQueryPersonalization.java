@@ -1,24 +1,15 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 @Entity
 @Table(
@@ -99,10 +90,7 @@ public class IssueQueryPersonalization extends AbstractEntity implements QueryPe
 
 	@Override
 	public void onUpdated() {
-		if (isNew())
-			OneDev.getInstance(IssueQueryPersonalizationManager.class).create(this);
-		else
-			OneDev.getInstance(IssueQueryPersonalizationManager.class).update(this);
+		OneDev.getInstance(IssueQueryPersonalizationManager.class).createOrUpdate(this);
 	}
 	
 }

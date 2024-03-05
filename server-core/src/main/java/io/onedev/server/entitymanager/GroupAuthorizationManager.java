@@ -13,8 +13,6 @@ public interface GroupAuthorizationManager extends EntityManager<GroupAuthorizat
 
 	void syncAuthorizations(Project project, Collection<GroupAuthorization> authorizations);
 	
-    void create(GroupAuthorization authorization);
-
-	void update(GroupAuthorization authorization);
+    void createOrUpdate(GroupAuthorization authorization);
 	
 }

@@ -44,7 +44,7 @@ public class IssueWatchResource {
 	public Long create(@NotNull IssueWatch watch) {
 		if (!SecurityUtils.canAccessProject(watch.getIssue().getProject()) || !canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		watchManager.create(watch);
+		watchManager.createOrUpdate(watch);
 		return watch.getId();
 	}
 
@@ -54,7 +54,7 @@ public class IssueWatchResource {
 	public Response update(@PathParam("watchId") Long watchId, @NotNull IssueWatch watch) {
 		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		watchManager.update(watch);
+		watchManager.createOrUpdate(watch);
 		return Response.ok().build();
 	}
 	

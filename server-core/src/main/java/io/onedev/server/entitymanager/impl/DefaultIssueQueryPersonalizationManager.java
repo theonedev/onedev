@@ -45,20 +45,6 @@ public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<I
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
-
-	@Transactional
-	@Override
-	public void create(IssueQueryPersonalization personalization) {
-		Preconditions.checkState(personalization.isNew());
-		createrOrUpdate(personalization);
-	}
-
-	@Transactional
-	@Override
-	public void update(IssueQueryPersonalization personalization) {
-		Preconditions.checkState(!personalization.isNew());
-		createrOrUpdate(personalization);
-	}
 	
 	@Sessional
 	@Override
@@ -84,7 +70,9 @@ public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<I
 		return query.getResultList();
 	}
 
-	private void createrOrUpdate(IssueQueryPersonalization personalization) {
+	@Transactional
+	@Override
+	public void createOrUpdate(IssueQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));

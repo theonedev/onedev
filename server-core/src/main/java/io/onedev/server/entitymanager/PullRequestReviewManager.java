@@ -1,12 +1,11 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.persistence.dao.EntityManager;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 public interface PullRequestReviewManager extends EntityManager<PullRequestReview> {
 	
@@ -14,8 +13,6 @@ public interface PullRequestReviewManager extends EntityManager<PullRequestRevie
 	
 	void populateReviews(Collection<PullRequest> requests);
 
-    void create(PullRequestReview review);
-
-	void update(PullRequestReview review);
+    void createOrUpdate(PullRequestReview review);
 	
 }

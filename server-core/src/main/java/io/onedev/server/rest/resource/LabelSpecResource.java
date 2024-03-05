@@ -66,7 +66,7 @@ public class LabelSpecResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
-		labelSpecManager.create(labelSpec);
+		labelSpecManager.createOrUpdate(labelSpec);
     	return labelSpec.getId();
     }
 
@@ -76,7 +76,7 @@ public class LabelSpecResource {
 	public Response update(@PathParam("labelSpecId") Long labelSpecId, @NotNull LabelSpec labelSpec) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		labelSpecManager.update(labelSpec);
+		labelSpecManager.createOrUpdate(labelSpec);
 		return Response.ok().build();
 	}
 	

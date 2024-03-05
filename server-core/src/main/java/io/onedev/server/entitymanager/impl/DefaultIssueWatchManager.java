@@ -1,21 +1,18 @@
 package io.onedev.server.entitymanager.impl;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.util.watch.WatchStatus;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.watch.WatchStatus;
+import org.hibernate.criterion.Restrictions;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,21 +39,13 @@ public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch>
 		IssueWatch watch = (IssueWatch) issue.getWatch(user, true);
 		if (watch.isNew()) {
 			watch.setWatching(watching);
-			create(watch);
+			createOrUpdate(watch);
 		}
 	}
 
 	@Transactional
 	@Override
-	public void create(IssueWatch watch) {
-		Preconditions.checkState(watch.isNew());
-		dao.persist(watch);
-	}
-
-	@Transactional
-	@Override
-	public void update(IssueWatch watch) {
-		Preconditions.checkState(!watch.isNew());
+	public void createOrUpdate(IssueWatch watch) {
 		dao.persist(watch);
 	}
 
@@ -81,7 +70,7 @@ public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch>
 				watch.setIssue(issue);
 				watch.setUser(user);
 				watch.setWatching(watchStatus == WatchStatus.WATCH);
-				create(watch);
+				createOrUpdate(watch);
 			}
 		}
     }

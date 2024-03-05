@@ -320,7 +320,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		authorization.setProject(project);
 		authorization.setUser(SecurityUtils.getUser());
 		authorization.setRole(roleManager.getOwner());
-		userAuthorizationManager.create(authorization);
+		userAuthorizationManager.createOrUpdate(authorization);
 		
 		Long projectId = project.getId();
 		LinkedHashMap<String, ProjectReplica> replicasOfProject = clusterManager.addProject(

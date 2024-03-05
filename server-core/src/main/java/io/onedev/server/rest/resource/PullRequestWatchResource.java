@@ -51,7 +51,7 @@ public class PullRequestWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.create(watch);
+		watchManager.createOrUpdate(watch);
 		return watch.getId();
 	}
 
@@ -63,7 +63,7 @@ public class PullRequestWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.update(watch);
+		watchManager.createOrUpdate(watch);
 		return Response.ok().build();
 	}
 	

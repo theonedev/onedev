@@ -1,11 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.Project;
@@ -15,6 +9,10 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import org.hibernate.criterion.Restrictions;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Singleton
 public class DefaultCodeCommentQueryPersonalizationManager extends BaseEntityManager<CodeCommentQueryPersonalization> 
@@ -34,26 +32,15 @@ public class DefaultCodeCommentQueryPersonalizationManager extends BaseEntityMan
 		return find(criteria);
 	}
 
-	private void createOrUpdate(CodeCommentQueryPersonalization personalization) {
+	@Transactional
+	@Override
+	public void createOrUpdate(CodeCommentQueryPersonalization personalization) {
 		if (personalization.getQueries().isEmpty()) {
 			if (!personalization.isNew())
 				delete(personalization);
 		} else {
 			dao.persist(personalization);
 		}
-	}
-
-	@Transactional
-	@Override
-	public void create(CodeCommentQueryPersonalization personalization) {
-		Preconditions.checkState(personalization.isNew());
-		createOrUpdate(personalization);
-	}
-
-	@Override
-	public void update(CodeCommentQueryPersonalization personalization) {
-		Preconditions.checkState(!personalization.isNew());
-		createOrUpdate(personalization);
 	}
 	
 }

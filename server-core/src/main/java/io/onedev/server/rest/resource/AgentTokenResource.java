@@ -81,7 +81,7 @@ public class AgentTokenResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		AgentToken token = new AgentToken();
-	    tokenManager.create(token);
+	    tokenManager.createOrUpdate(token);
 	    return token.getId();
     }
 	

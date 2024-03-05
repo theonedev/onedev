@@ -1,20 +1,5 @@
 package io.onedev.server.web.page.project.codecomments;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -25,15 +10,28 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class ProjectCodeCommentsPage extends ProjectPage {
@@ -166,10 +164,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										if (setting.isNew())
-											getCodeCommentQueryPersonalizationManager().create(setting);
-										else
-											getCodeCommentQueryPersonalizationManager().update(setting);
+										getCodeCommentQueryPersonalizationManager().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();

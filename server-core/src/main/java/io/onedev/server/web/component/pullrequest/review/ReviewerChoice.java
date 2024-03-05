@@ -1,10 +1,5 @@
 package io.onedev.server.web.component.pullrequest.review;
 
-import io.onedev.server.web.page.base.BasePage;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
@@ -13,6 +8,10 @@ import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
+import io.onedev.server.web.page.base.BasePage;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToActChoice<User> {
@@ -62,10 +61,7 @@ public abstract class ReviewerChoice extends SelectToActChoice<User> {
 		}
 		
 		if (!getPullRequest().isNew()) {
-			if (review.isNew())
-				OneDev.getInstance(PullRequestReviewManager.class).create(review);
-			else
-				OneDev.getInstance(PullRequestReviewManager.class).update(review);
+			OneDev.getInstance(PullRequestReviewManager.class).createOrUpdate(review);
 			((BasePage)getPage()).notifyObservableChange(target,
 					PullRequest.getChangeObservable(getPullRequest().getId()));
 		}

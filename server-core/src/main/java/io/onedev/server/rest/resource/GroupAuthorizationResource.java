@@ -48,7 +48,7 @@ public class GroupAuthorizationResource {
 	public Long create(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		authorizationManager.create(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return authorization.getId();
 	}
 
@@ -58,7 +58,7 @@ public class GroupAuthorizationResource {
 	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		authorizationManager.update(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return Response.ok().build();
 	}
 	

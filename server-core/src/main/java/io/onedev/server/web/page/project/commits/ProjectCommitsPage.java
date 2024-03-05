@@ -144,10 +144,7 @@ public class ProjectCommitsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										if (setting.isNew())
-											getCommitQueryPersonalizationManager().create(setting);
-										else
-											getCommitQueryPersonalizationManager().update(setting);
+										getCommitQueryPersonalizationManager().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();

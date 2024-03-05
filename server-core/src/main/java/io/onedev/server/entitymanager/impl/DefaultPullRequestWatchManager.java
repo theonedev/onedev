@@ -1,6 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestWatch;
@@ -44,15 +43,9 @@ public class DefaultPullRequestWatchManager extends BaseEntityManager<PullReques
 		}
 	}
 
+	@Transactional
 	@Override
-	public void create(PullRequestWatch watch) {
-		Preconditions.checkState(watch.isNew());
-		dao.persist(watch);
-	}
-
-	@Override
-	public void update(PullRequestWatch watch) {
-		Preconditions.checkState(!watch.isNew());
+	public void createOrUpdate(PullRequestWatch watch) {
 		dao.persist(watch);
 	}
 
@@ -77,7 +70,7 @@ public class DefaultPullRequestWatchManager extends BaseEntityManager<PullReques
 				watch.setRequest(request);
 				watch.setUser(user);
 				watch.setWatching(watchStatus == WatchStatus.WATCH);
-				create(watch);
+				createOrUpdate(watch);
 			}
 		}
 	}

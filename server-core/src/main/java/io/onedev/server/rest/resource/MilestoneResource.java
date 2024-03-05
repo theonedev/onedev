@@ -49,7 +49,7 @@ public class MilestoneResource {
 	public Long create(@NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
 			throw new UnauthorizedException();
-		milestoneManager.create(milestone);
+		milestoneManager.createOrUpdate(milestone);
 		return milestone.getId();
 	}
 
@@ -59,7 +59,7 @@ public class MilestoneResource {
 	public Long update(@PathParam("milestoneId") Long milestoneId, @NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
 			throw new UnauthorizedException();
-		milestoneManager.update(milestone);
+		milestoneManager.createOrUpdate(milestone);
 		return milestone.getId();
 	}
 	

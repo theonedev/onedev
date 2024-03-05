@@ -83,10 +83,7 @@ public class PackQueryPersonalization extends AbstractEntity implements QueryPer
 
 	@Override
 	public void onUpdated() {
-		if (isNew())
-			OneDev.getInstance(PackQueryPersonalizationManager.class).create(this);
-		else
-			OneDev.getInstance(PackQueryPersonalizationManager.class).update(this);			
+		OneDev.getInstance(PackQueryPersonalizationManager.class).createOrUpdate(this);
 	}
 
 }

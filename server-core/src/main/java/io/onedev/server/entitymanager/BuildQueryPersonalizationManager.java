@@ -9,8 +9,6 @@ public interface BuildQueryPersonalizationManager extends EntityManager<BuildQue
 	
 	BuildQueryPersonalization find(Project project, User user);
 
-    void create(BuildQueryPersonalization buildQueryPersonalization);
-
-	void update(BuildQueryPersonalization buildQueryPersonalization);
+    void createOrUpdate(BuildQueryPersonalization buildQueryPersonalization);
 	
 }

@@ -51,7 +51,7 @@ public class CodeCommentQueryPersonalizationResource {
     			|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
-		queryPersonalizationManager.create(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return queryPersonalization.getId();
 	}
 
@@ -63,7 +63,7 @@ public class CodeCommentQueryPersonalizationResource {
 				|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
-		queryPersonalizationManager.update(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return Response.ok().build();
 	}
 	

@@ -87,15 +87,11 @@ public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implem
 		return query.getResultList();
 	}
 
+	@Transactional
 	@Override
-	public void create(Dashboard dashboard) {
-		Preconditions.checkState(dashboard.isNew() && subscriptionManager.isSubscriptionActive());
+	public void createOrUpdate(Dashboard dashboard) {
+		Preconditions.checkState(subscriptionManager.isSubscriptionActive());
 		dao.persist(dashboard);
-	}
-
-	@Override
-	public void update(Dashboard dashboard) {
-		Preconditions.checkState(!dashboard.isNew() && subscriptionManager.isSubscriptionActive());
 	}
 
 	@Override

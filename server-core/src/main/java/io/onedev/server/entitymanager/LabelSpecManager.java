@@ -13,8 +13,6 @@ public interface LabelSpecManager extends EntityManager<LabelSpec> {
 
 	void sync(List<LabelSpec> labelSpecs);
 	
-	void create(LabelSpec labelSpec);
-	
-	void update(LabelSpec labelSpec);
+	void createOrUpdate(LabelSpec labelSpec);
 	
 }

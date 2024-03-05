@@ -2,18 +2,9 @@ package io.onedev.server.model.support;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.User;
 import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.facade.AccessTokenFacade;
-import org.apache.wicket.markup.html.basic.Label;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.annotation.Nullable;
-import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 

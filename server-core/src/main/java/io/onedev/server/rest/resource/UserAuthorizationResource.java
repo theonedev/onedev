@@ -49,7 +49,7 @@ public class UserAuthorizationResource {
 	public Long create(@NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.create(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return authorization.getId();
 	}
 
@@ -59,7 +59,7 @@ public class UserAuthorizationResource {
 	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.update(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return Response.ok().build();
 	}
 	

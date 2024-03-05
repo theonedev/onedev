@@ -60,7 +60,7 @@ public class MilestoneEditPage extends ProjectPage {
 				super.onSubmit();
 				
 				bean.writeTo(getMilestone());
-				OneDev.getInstance(MilestoneManager.class).update(getMilestone());
+				OneDev.getInstance(MilestoneManager.class).createOrUpdate(getMilestone());
 				Session.get().success("Milestone saved");
 				setResponsePage(MilestoneIssuesPage.class, 
 						MilestoneIssuesPage.paramsOf(getMilestone().getProject(), getMilestone(), null));

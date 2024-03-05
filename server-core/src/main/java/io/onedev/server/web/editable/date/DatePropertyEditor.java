@@ -55,6 +55,7 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 			}
 			
 		});
+		input.add(newPlaceholderModifier());
 	}
 
 	@Override

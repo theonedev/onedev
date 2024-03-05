@@ -1,6 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestQueryPersonalization;
@@ -37,7 +36,9 @@ public class DefaultPullRequestQueryPersonalizationManager extends BaseEntityMan
 		return find(criteria);
 	}
 
-	private void createOrUpdate(PullRequestQueryPersonalization personalization) {
+	@Transactional
+	@Override
+	public void createOrUpdate(PullRequestQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
@@ -53,17 +54,4 @@ public class DefaultPullRequestQueryPersonalizationManager extends BaseEntityMan
 		}
 	}
 
-	@Transactional
-	@Override
-	public void create(PullRequestQueryPersonalization personalization) {
-		Preconditions.checkState(personalization.isNew());
-		createOrUpdate(personalization);
-	}
-
-	@Transactional
-	@Override
-	public void update(PullRequestQueryPersonalization personalization) {
-		Preconditions.checkState(!personalization.isNew());
-		createOrUpdate(personalization);
-	}
 }

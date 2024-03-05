@@ -1,15 +1,14 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.List;
+import io.onedev.server.entitymanager.DashboardVisitManager;
+import io.onedev.server.model.DashboardVisit;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.BaseEntityManager;
+import io.onedev.server.persistence.dao.Dao;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
-import io.onedev.server.entitymanager.DashboardVisitManager;
-import io.onedev.server.model.DashboardVisit;
-import io.onedev.server.persistence.dao.BaseEntityManager;
-import io.onedev.server.persistence.dao.Dao;
+import java.util.List;
 
 @Singleton
 public class DefaultDashboardVisitManager extends BaseEntityManager<DashboardVisit> 
@@ -30,15 +29,9 @@ public class DefaultDashboardVisitManager extends BaseEntityManager<DashboardVis
 		return count(true);
 	}
 	
+	@Transactional
 	@Override
-	public void create(DashboardVisit visit) {
-		Preconditions.checkState(visit.isNew());
-		dao.persist(visit);
-	}
-
-	@Override
-	public void update(DashboardVisit visit) {
-		Preconditions.checkState(!visit.isNew());
+	public void createOrUpdate(DashboardVisit visit) {
 		dao.persist(visit);
 	}
 	

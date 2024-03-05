@@ -19,8 +19,6 @@ import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.xodus.PullRequestInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
@@ -49,6 +47,8 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.PullRequestInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -449,10 +449,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 						checkReviews(request, sourceUpdated);
 						
 						for (PullRequestReview review: request.getReviews()) {
-							if (review.isNew())
-								reviewManager.create(review);
-							else if (review.isDirty())
-								reviewManager.update(review);
+							if (review.isNew() || review.isDirty())
+								reviewManager.createOrUpdate(review);
 						}
 
 						Project targetProject = request.getTargetProject();

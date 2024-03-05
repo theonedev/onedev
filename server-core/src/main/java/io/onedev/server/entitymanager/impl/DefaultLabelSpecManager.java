@@ -1,6 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -41,15 +40,8 @@ public class DefaultLabelSpecManager extends BaseEntityManager<LabelSpec> implem
 
 	@Transactional
 	@Override
-	public void create(LabelSpec labelSpec) {
-		Preconditions.checkState(labelSpec.isNew());
+	public void createOrUpdate(LabelSpec labelSpec) {
 		dao.persist(labelSpec);
 	}
 
-	@Transactional
-	@Override
-	public void update(LabelSpec labelSpec) {
-		Preconditions.checkState(!labelSpec.isNew());
-		dao.persist(labelSpec);
-	}
 }

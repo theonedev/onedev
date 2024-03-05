@@ -61,7 +61,7 @@ public class AgentResource extends AbstractResource {
 					props.setProperty("serverUrl", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 					
 					AgentToken token = new AgentToken();
-					OneDev.getInstance(AgentTokenManager.class).create(token);
+					OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 					props.setProperty("agentToken", token.getValue());
 					
 					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {

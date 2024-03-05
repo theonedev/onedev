@@ -471,11 +471,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						private void toggleClose(Milestone milestone) {
 							milestone.setClosed(!milestone.isClosed());
 							if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
-								getMilestoneManager().update(milestone);
+								getMilestoneManager().createOrUpdate(milestone);
 								setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
 										milestone, backlog, queryString, backlogQueryString));
 							} else {
-								getMilestoneManager().update(milestone);
+								getMilestoneManager().createOrUpdate(milestone);
 							}
 							dropdown.close();
 							if (milestone.isClosed())
@@ -552,7 +552,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 											protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
 												var milestone = item.getModelObject();
 												bean.writeTo(milestone);
-												getMilestoneManager().update(milestone);
+												getMilestoneManager().createOrUpdate(milestone);
 												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 														getProject(), getBoard(), milestone, backlog, queryString,
 														backlogQueryString));
@@ -644,7 +644,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									var milestone = new Milestone();
 									milestone.setProject(getProject());
 									bean.writeTo(milestone);
-									getMilestoneManager().create(milestone);
+									getMilestoneManager().createOrUpdate(milestone);
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 											getProject(), getBoard(), milestone, backlog, queryString,
 											backlogQueryString));
