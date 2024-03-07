@@ -18,7 +18,9 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class JobSecretEditPanel extends Panel {
-
+	
+	private static final String MASK = "******";
+	
 	private final int index;
 	
 	public JobSecretEditPanel(String id, int index) {
@@ -36,6 +38,7 @@ public abstract class JobSecretEditPanel extends Panel {
 		JobSecret editingSecret;
 		if (index != -1) {
 			editingSecret = getProject().getBuildSetting().getJobSecrets().get(index);
+			editingSecret.setValue(MASK);
 		} else { 
 			editingSecret = new JobSecret();
 		}
@@ -64,10 +67,13 @@ public abstract class JobSecretEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				List<JobSecret> secrets = getProject().getBuildSetting().getJobSecrets();
-				if (index == -1)
+				if (index == -1) {
 					secrets.add(editingSecret);
-				else
+				} else {
+					if (editingSecret.getValue().equals(MASK))
+						editingSecret.setValue(secrets.get(index).getValue());
 					secrets.set(index, editingSecret);
+				}
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				onSaved(target);
 			}
