@@ -1061,7 +1061,7 @@ public class ProjectListPanel extends Panel {
 
 				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 				
-				if (project.getActiveServer(false) != null) {
+				if (!project.isPendingDelete() && project.getActiveServer(false) != null) {
 					if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
 						fragment.add(new CodeStatsPanel("codeStats", rowModel));
 						fragment.add(new PullRequestStatsPanel("pullRequestStats", rowModel, 

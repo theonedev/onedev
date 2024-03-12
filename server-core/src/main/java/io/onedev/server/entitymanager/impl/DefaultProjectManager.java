@@ -107,7 +107,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.FileUtils.cleanDir;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
@@ -117,6 +116,7 @@ import static io.onedev.server.model.Project.*;
 import static io.onedev.server.replica.ProjectReplica.Type.*;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.DirectoryVersionUtils.*;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.criteria.Criteria.forManyValues;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.naturalOrder;
