@@ -24,7 +24,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
-import io.onedev.server.web.util.editablebean.NewUserBean;
+import io.onedev.server.web.util.editbean.NewUserBean;
 
 @SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {

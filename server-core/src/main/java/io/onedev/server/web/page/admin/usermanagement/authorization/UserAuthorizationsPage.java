@@ -17,8 +17,8 @@ import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
-import io.onedev.server.web.util.editablebean.ProjectAuthorizationBean;
-import io.onedev.server.web.util.editablebean.ProjectAuthorizationsBean;
+import io.onedev.server.web.util.editbean.ProjectAuthorizationBean;
+import io.onedev.server.web.util.editbean.ProjectAuthorizationsBean;
 
 @SuppressWarnings("serial")
 public class UserAuthorizationsPage extends UserPage {

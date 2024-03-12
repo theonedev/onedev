@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.editablebean;
+package io.onedev.server.web.util.editbean;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

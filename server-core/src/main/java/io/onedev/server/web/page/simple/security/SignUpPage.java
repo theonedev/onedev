@@ -25,7 +25,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.util.editablebean.NewUserBean;
+import io.onedev.server.web.util.editbean.NewUserBean;
 
 @SuppressWarnings("serial")
 public class SignUpPage extends SimplePage {

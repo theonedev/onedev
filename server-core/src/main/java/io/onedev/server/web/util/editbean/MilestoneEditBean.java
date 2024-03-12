@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.editablebean;
+package io.onedev.server.web.util.editbean;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;

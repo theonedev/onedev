@@ -36,7 +36,7 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.web.util.editablebean.NewUserBean;
+import io.onedev.server.web.util.editbean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;

@@ -63,7 +63,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
 import io.onedev.server.web.util.*;
-import io.onedev.server.web.util.editablebean.LabelsBean;
+import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;

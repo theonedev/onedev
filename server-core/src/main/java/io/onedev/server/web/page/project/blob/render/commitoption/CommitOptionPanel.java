@@ -1,13 +1,30 @@
 package io.onedev.server.web.page.project.blob.render.commitoption;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.*;
+import io.onedev.server.git.exception.NotTreeException;
+import io.onedev.server.git.exception.ObjectAlreadyExistsException;
+import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.PathChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Provider;
+import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
+import io.onedev.server.web.component.diff.revision.DiffViewMode;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.project.blob.RevisionResolved;
+import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -29,37 +46,8 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.git.BlobChange;
-import io.onedev.server.git.BlobContent;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.exception.NotTreeException;
-import io.onedev.server.git.exception.ObjectAlreadyExistsException;
-import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.PathChange;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Provider;
-import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.diff.revision.DiffViewMode;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.project.blob.RevisionResolved;
-import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.util.CommitMessageBean;
+import javax.annotation.Nullable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class CommitOptionPanel extends Panel {
@@ -95,7 +83,7 @@ public class CommitOptionPanel extends Panel {
 		return context.getMode()!=Mode.ADD? context.getBlobIdent().path: null;
 	}
 	
-	private String getDefaultCommitMessage() {
+	public String getDefaultCommitMessage() {
 		String oldPath = getOldPath();
 		String oldName;
 		if (oldPath != null && oldPath.contains("/"))
@@ -161,7 +149,6 @@ public class CommitOptionPanel extends Panel {
 
 		form.add(new FencedFeedbackPanel("feedback", form));
 		newChangesOfOthersContainer(null);
-		commitMessageBean.setCommitMessage(getDefaultCommitMessage());
 		form.add(BeanContext.edit("commitMessage", commitMessageBean));
 
 		AjaxButton saveButton = new AjaxButton("save") {
@@ -245,6 +232,8 @@ public class CommitOptionPanel extends Panel {
 		} else {
 			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 			String commitMessage = commitMessageBean.getCommitMessage();
+			if (commitMessage == null)
+				commitMessage = getDefaultCommitMessage();
 			var branchProtection = context.getProject().getBranchProtection(context.getBlobIdent().revision, user);
 			var errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
 			if (errorMessage != null) {
@@ -415,8 +404,8 @@ public class CommitOptionPanel extends Panel {
 	}
 
 	private void onBlobChange(IPartialPageRequestHandler partialPageRequestHandler) {
-		String script = String.format("onedev.server.commitOption.onBlobChange('%s', '%s', %b);", getMarkupId(), 
-				JavaScriptEscape.escapeJavaScript(getDefaultCommitMessage()), isBlobModified());
+		String script = String.format("onedev.server.commitOption.onBlobChange('%s', %b);", 
+				getMarkupId(), isBlobModified());
 		partialPageRequestHandler.appendJavaScript(script);
 	}
 	

@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.editablebean;
+package io.onedev.server.web.util.editbean;
 
 import java.io.Serializable;
 import java.util.ArrayList;

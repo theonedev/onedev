@@ -26,7 +26,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
-import io.onedev.server.web.util.editablebean.LabelsBean;
+import io.onedev.server.web.util.editbean.LabelsBean;
 
 import static io.onedev.server.model.Project.*;
 

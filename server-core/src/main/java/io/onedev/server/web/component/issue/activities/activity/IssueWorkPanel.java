@@ -10,7 +10,7 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.web.util.editablebean.IssueWorkBean;
+import io.onedev.server.web.util.editbean.IssueWorkBean;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;

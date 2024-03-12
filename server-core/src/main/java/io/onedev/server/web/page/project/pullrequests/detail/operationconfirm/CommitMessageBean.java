@@ -1,13 +1,12 @@
-package io.onedev.server.web.util;
-
-import java.io.Serializable;
-
-import javax.validation.constraints.NotEmpty;
+package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ReferenceAware;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Editable
 public class CommitMessageBean implements Serializable {
@@ -19,8 +18,8 @@ public class CommitMessageBean implements Serializable {
 	@Editable(order=100, name="Commit Message")
 	@Multiline
 	@OmitName
-	@ReferenceAware
 	@NotEmpty
+	@ReferenceAware
 	public String getCommitMessage() {
 		return commitMessage;
 	}

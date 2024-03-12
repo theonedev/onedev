@@ -14,7 +14,7 @@ import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.editablebean.IssueWorkBean;
+import io.onedev.server.web.util.editbean.IssueWorkBean;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
