@@ -175,34 +175,40 @@ public class DefaultLogManager implements LogManager, Serializable {
 					} else {
 						styleBuilder = new StyleBuilder();
 					}
-					if (message.startsWith(LogInstruction.PREFIX)) {
-						InstructionContext instructionContext = LogInstruction.parse(message);
-						String name = instructionContext.Identifier().getText();
-						
-						LogInstruction instruction = null;
-						for (LogInstruction extension: OneDev.getExtensions(LogInstruction.class)) {
-							if (extension.getName().equals(name)) {
-								instruction = extension;
-								break;
-							}
-						}
+					if (message.contains(LogInstruction.PREFIX)) {
+						// remove ansi codes
+						var normalizedMessage = message.replaceAll("\u001B\\[[;\\d]*m", "");
+						if (normalizedMessage.startsWith(LogInstruction.PREFIX)) {
+							InstructionContext instructionContext = LogInstruction.parse(normalizedMessage);
+							String name = instructionContext.Identifier().getText();
 
-						if (instruction != null) {
-							Map<String, List<String>> params = new HashMap<>();
-							for (ParamContext paramContext: instructionContext.param()) {
-								String paramName;
-								if (paramContext.Identifier() != null)
-									paramName = paramContext.Identifier().getText();
-								else
-									paramName = "";
-								List<String> paramValues = new ArrayList<>();
-								for (TerminalNode terminalNode: paramContext.Value())
-									paramValues.add(LogInstruction.getValue(terminalNode));
-								params.put(paramName, paramValues);
+							LogInstruction instruction = null;
+							for (LogInstruction extension: OneDev.getExtensions(LogInstruction.class)) {
+								if (extension.getName().equals(name)) {
+									instruction = extension;
+									break;
+								}
 							}
-							doInSession(instruction, buildId, params, this);
+
+							if (instruction != null) {
+								Map<String, List<String>> params = new HashMap<>();
+								for (ParamContext paramContext: instructionContext.param()) {
+									String paramName;
+									if (paramContext.Identifier() != null)
+										paramName = paramContext.Identifier().getText();
+									else
+										paramName = "";
+									List<String> paramValues = new ArrayList<>();
+									for (TerminalNode terminalNode: paramContext.Value())
+										paramValues.add(LogInstruction.getValue(terminalNode));
+									params.put(paramName, paramValues);
+								}
+								doInSession(instruction, buildId, params, this);
+							} else {
+								doLog("Unsupported log instruction: " + name, new StyleBuilder());
+							}
 						} else {
-							doLog("Unsupported log instruction: " + name, new StyleBuilder());
+							doLog(message, styleBuilder);
 						}
 					} else {
 						doLog(message, styleBuilder);
