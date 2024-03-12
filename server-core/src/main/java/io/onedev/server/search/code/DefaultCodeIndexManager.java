@@ -71,6 +71,8 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	
 	private static final int DATA_VERSION = 7;
 	
+	private static final int MAX_SYMBOL_LEN = 256;
+	
 	private final BatchWorkManager batchWorkManager;
 	
 	private final SessionManager sessionManager;
@@ -251,7 +253,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 					if (symbols != null) {
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
-							if (fieldValue != null && symbol.isSearchable()) {
+							if (fieldValue != null && fieldValue.length() <= MAX_SYMBOL_LEN && symbol.isSearchable()) {
 								fieldValue = fieldValue.toLowerCase();
 	
 								String fieldName;
