@@ -7,6 +7,7 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
+import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -20,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class MavenJobSuggestion implements JobSuggestion {
-
-	private static final Logger logger = LoggerFactory.getLogger(MavenJobSuggestion.class);
 	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
@@ -52,9 +51,13 @@ public class MavenJobSuggestion implements JobSuggestion {
 			CommandStep detectBuildVersion = new CommandStep();
 			detectBuildVersion.setName("detect build version");
 			detectBuildVersion.setImage("maven");
-			detectBuildVersion.getInterpreter().setCommands(
+			var interpreter = new ShellInterpreter();
+			interpreter.setShell("bash");
+			interpreter.setCommands(
+					"set -e\n" +
 					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n" +
-					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
+							"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
+			detectBuildVersion.setInterpreter(interpreter);						
 			job.getSteps().add(detectBuildVersion);
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
