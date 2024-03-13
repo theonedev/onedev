@@ -1,7 +1,10 @@
 package io.onedev.server.job;
 
+import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.job.match.NonPullRequestCommitsCriteria;
@@ -10,8 +13,10 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +61,18 @@ public class JobAuthorizationContext {
 			}
 		} else {
 			return true;
+		}
+	}
+	
+	public Subject getSubject(@Nullable String accessTokenSecret) {
+		if (accessTokenSecret != null) {
+			String accessToken = getSecretValue(accessTokenSecret);
+			User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
+			if (user == null)
+				throw new ExplicitException("Invalid access token");
+			return user.asSubject();
+		} else {
+			return SecurityUtils.asSubject(0L);
 		}
 	}
 

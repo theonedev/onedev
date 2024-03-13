@@ -1,16 +1,17 @@
 package io.onedev.server.buildspec;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
@@ -18,10 +19,6 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
@@ -62,8 +59,7 @@ public class Import implements Serializable, Validatable {
 	private static ThreadLocal<Stack<String>> importChain = ThreadLocal.withInitial(Stack::new);
 	
 	// change Named("projectPath") also if change name of this property 
-	@Editable(order=100, name="Project", description="Specify project to import build spec from. "
-			+ "Default role of this project should have <tt>read code</tt> permission")
+	@Editable(order=100, name="Project", description="Specify project to import build spec from")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
 	public String getProjectPath() {
@@ -127,9 +123,8 @@ public class Import implements Serializable, Validatable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=500, placeholder="Access Anonymously", description="Specify a secret to be used as "
-			+ "access token to import build spec from above project. If not specified, OneDev will try "
-			+ "to import build spec anonymously")
+	@Editable(order=500, description="Specify a secret to be used as access token to import build spec " +
+			"from above project if its code is not publicly accessible")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable
 	public String getAccessTokenSecret() {
@@ -151,18 +146,12 @@ public class Import implements Serializable, Validatable {
 			Project project = getProject();
 
 			Subject subject;
-			if (getAccessTokenSecret() != null) {
-				JobAuthorizationContext context = Preconditions.checkNotNull(JobAuthorizationContext.get());
-				String accessToken = context.getSecretValue(getAccessTokenSecret());
-				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
-				if (user == null) {
-					throw new ExplicitException(String.format(
-							"Unable to import build spec as access token is invalid (import project: %s, import revision: %s)", 
-							projectPath, revision));
-				}
-				subject = user.asSubject();
-			} else {
-				subject = SecurityUtils.asSubject(0L);
+			try {
+				subject = JobAuthorizationContext.get().getSubject(getAccessTokenSecret());
+			} catch (ExplicitException e) {
+				throw new ExplicitException(String.format(
+						"Unable to import build spec (import project: %s, import revision: %s): %s",
+						projectPath, revision, e.getMessage()));
 			}
 			if (!subject.isPermitted(new ProjectPermission(project, new ReadCode())) 
 					&& !project.isPermittedByLoginUser(new ReadCode())) {
