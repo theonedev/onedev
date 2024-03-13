@@ -3,6 +3,7 @@ package io.onedev.server.git;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.HashingInputStream;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -117,7 +118,10 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getProjectPath(String pathInfo) {
-		return StringUtils.substringBeforeLast(pathInfo, ".git/");
+		String projectPath =  StringUtils.substringBeforeLast(pathInfo, ".git/");
+		if (StringUtils.isBlank(projectPath))
+			throw new ExplicitException("Project not specified");
+		return projectPath;
 	}
 	
 	@Override

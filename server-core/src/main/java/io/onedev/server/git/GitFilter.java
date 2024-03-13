@@ -94,6 +94,8 @@ public class GitFilter implements Filter {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
 			facade = projectManager.findFacadeByPath(projectPath);
 		}
+		if (StringUtils.isBlank(projectPath))
+			throw new ExplicitException("Project not specified");
 		if (facade == null) {
 			if (clusterAccess || upload) { 
 				throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));

@@ -1,6 +1,7 @@
 package io.onedev.server.git;
 
 import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
@@ -86,6 +87,8 @@ class SshCommand implements Command, ServerSessionAware {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
 			projectFacade = projectManager.findFacadeByPath(projectPath);				
 		}
+		if (StringUtils.isBlank(projectPath))
+			throw new ExplicitException("Project not specified");
         if (projectFacade == null) {
         	if (clusterAccess || upload) {
 	            onExit(-1, "Unable to find project '" + projectPath + "'");
