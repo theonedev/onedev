@@ -10,7 +10,7 @@
 <h1>Git Server with CI/CD, Kanban, and Packages</h1>
 
 <h2>
-<a href="https://docs.onedev.io">Documentation</a> 
+<a href="https://docs.onedev.io">Get started</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
