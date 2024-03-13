@@ -10,9 +10,7 @@
 <h1>Git Server with CI/CD, Kanban, and Packages</h1>
 
 <h2>
-<a href="https://docs.onedev.io">Quickstart</a> 
-| <a href="https://docs.onedev.io/category/installation-guide">Installation Guide</a> 
-| <a href="https://code.onedev.io/onedev/tod">Command Line Tool</a> 
+<a href="https://docs.onedev.io">Documentation</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
