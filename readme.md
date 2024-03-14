@@ -10,165 +10,175 @@
 <h1>Git Server with CI/CD, Kanban, and Packages</h1>
 
 <h2>
-<a href="https://docs.onedev.io">Get started</a> 
+<a href="https://docs.onedev.io">Get Started</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
 </div>
 
-## Out-of-box Symbol Search and Navigation
 
-Just push code and you will be able to perform symbol search and navigation in arbitrary commit without any extra setup. You can also jump to symbol definition in diff while reviewing commits or pull requests. 
+## 🔎 Out-of-box code search and navigation
 
-It works by analyzing source code with ANTLR, extracting symbols for storage incrementally, fast and space efficient. Supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
+Language aware symbol search and navigation in any commit.
+Click symbol to show occurrences in current file.
+Fast code search with regular expression. 
+[Try It](https://code.onedev.io/demo/dotnet-runtime)
 
-![searchsymbol](doc/images/search-symbol.gif)
+![code search and navigation](./doc/images/code-navigation.gif)
 
-![jumpsymbol](doc/images/symbol.gif)
+## 🚦 Annotate code with coverage and problems
 
-## Code Search with Regular Expression
+Code will be annotated with coverage info and problems found in 
+CI/CD pipeline, to facilitate code review. 
+[Demo](https://code.onedev.io/demo/react/~files/6039030814aedeaa6ebac706c0886e3675160666/packages/react-dom/src/client/ReactDOMSelect.js?position=source-202.1-202.36-1)
 
-You may switch to any commit, and search code with regular expression. OneDev under the hood indexes the code with Lucene incrementally. At search time, literal tri-grams in the regular expression are extracted for a coarse search, followed by exact match in the result. This makes the regex search blazing fast, even for large repositories like Linux.
+![code annotation](./doc/images/code-annotation.png)
 
-![regex](doc/images/regex-search.gif)
+## 💬 Code discussion anywhere anytime
 
-## Annotate Source/Diff with Static Analysis Result to Facilitate Code Review
+Select any code or diff to start discussion. Suggest and apply changes.
+Discussions stay with code to help code understanding.
+[See It In Action](https://code.onedev.io/onedev/server/~compare?left=160:f96d82a3fa12800b4040cc9ea62af09233307ae9&right=160:e55d152b9cc783fd7e64dc752a6c2b3c5613212c&compare-with-merge-base=false&comment=149&mark=e55d152b9cc783fd7e64dc752a6c2b3c5613212c~server-product/docker/build.sh~22.1-22.148-1&tab=FILE_CHANGES)
 
-Of course this can be done by many third party applications at GitHub, however they display the result on their own applications, and this makes review activities such as adding comment over analysis result difficult. Not to mention that you need to pay for these services.
+![code comment](./doc/images/code-comment.gif)
 
-![annotation](doc/images/annotation.png)
+## 🔒 Versatile code protection rules
 
-## Customizable Issue State and Field, with Deep CI/CD Integration
+Set rule to require review or CI/CD verification when certain users touch certain
+files in certain branches. 
+[Tutorial](https://docs.onedev.io/tutorials/code/pullrequest-approval)
 
-The simple open/close state of GitHub/GitLab issues does not work well for many workflows. Considering issues submitted by customers:
+![code protection](./doc/images/code-protection.gif)
 
-1. If developer closes issue upon committing the code, customer will be notified and may ask for the release fixing the issue.
-2. If developer closes the issue at release time, QA might be confused at what issues to test as they all remain open at test time. 
+## 📋 Automated Kanban to keep team organized
 
-With customizable issue states, we may address the issue with four states: open, committed, test ready and released:
+Move tasks manually in Kanban, or define rules to move them automatically
+when related work is committed/tested/released/deployed.
+[See It In Action](https://code.onedev.io/onedev/server/~boards/State?milestone=4.2.0&backlog=true)
 
-1. When code is committed, issue transits to committed state automatically
-2. When a test build is created and deployed, the issue transits to test ready state automatically. QA will be notified and can check issue detail to know which environment the test build is deployed into.
-3. When test passes, and a release build is created, customers submitting the issue will be notified and they can check issue detail to see which release contains the fix. 
+![issue board](./doc/images/issue-board.png)
 
-![boards](doc/images/boards.png)
+## 🛠 Customizable and flexible issue workflow
 
-![fixing-build](doc/images/fixing-build.png)
+Custom issue states and fields. Manual or automatic state transition rules.
+Issue links to sync operations and states. Confidential issues in public projects.
+[Tutorial](https://docs.onedev.io/tutorials/issue/state-auto-transition)
 
-## Service Desk to Create/Discuss Issues via Email
+![workflow customization](./doc/images/workflow-customization.gif)
 
-Service desk allows your users to submit tickets via email without the need to have a OneDev account. These tickets can then be created in desired projects, and assigned to appropriate members in your team. All further discussions over the tickets can take place completely in email, with discussion contents posted to ticket as comments. User will also get notifications when there are any ticket activities, for instance, when a relevant release is created or deployed
+## 📨 Service desk to link emails with issues
 
-![service-desk.png](doc/images/service-desk.png)
+Use issues as ticket system to support customers via email, without requiring
+them to register accounts. Assign different support contacts for different
+projects or customers.
+[Tutorial](https://docs.onedev.io/tutorials/issue/service-desk)
 
-## A powerful and Intuitive Query Language
+![service desk](./doc/images/service-desk.png)
 
-Thanks to ANTLR again, OneDev ships sophisticated query languages for projects, commits, issues, builds, and pull requests, with intuitive auto-completions and hints. For instance, it enables our customers finding fixed issues between their running release and latest release, and enables us to find all commits submitted by someone touching specified modules, etc. 
+## ⏰ Time tracking and reporting
 
-Queries can be saved and subscribed, so that you won't miss anything interested.
+Track estimated/spent time on tasks. Aggregate time from subtasks automatically.
+Generate time sheets for work statistics and billing.
+[Tutorial](https://docs.onedev.io/tutorials/issue/time-tracking)
 
-![query](doc/images/query.gif)
+![time tracking](./doc/images/time-tracking.png)
 
-## A Full-fledge CI/CD Engine without Writing Yaml
+## 💡 CI/CD as code without writing code
 
-OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. Want to test/debug CI/CD jobs against local changes? tod comes to rescue
+An intuitive GUI to create CI/CD jobs. Template for typical frameworks.
+Typed parameters. Matrix jobs. CI/CD logic reuses. Cache management.
+[Tutorial](https://docs.onedev.io/category/cicd)
 
-Build pipeline, matrix jobs, typed parameters, parameter chaining, step templates, build promotions… too many neat features to elaborate…
+![ci/cd editor](./doc/images/cicd-editor.gif)
 
-![job-def](doc/images/job-command.gif)
+## 🚀 Versatile CI/CD executors from simple to scale
 
-![run-job](doc/images/build-option.gif)
+Run CI/CD out-of-box in container or on bare metal. Run massive jobs concurrently
+with Kubernetes or agents.
+[Example1](https://docs.onedev.io/tutorials/cicd/agent-farm)
+[Example2](https://docs.onedev.io/tutorials/cicd/k8s-farm)
 
-![pipeline.gif](doc/images/pipeline.gif)
+![job executors](./doc/images/job-executors.png)
 
-## Built-in Docker/NPM/Maven/NuGET/PyPi/RubyGems Registry
+## 🛠 Tools to debug CI/CD jobs
 
-The out-of-box integration of binary packages, CI/CD,
-code and issues makes information cross-reference a lot easier. For instance, different package
-versions can be compared to show code changes or fixed issues, published packages will be linked
-with CI/CD builds automatically etc
+Command to pause job execution. Web terminal to check job execution environment.
+Run job locally against uncommitted changes.
+[Tutorial1](https://docs.onedev.io/tutorials/cicd/diagnose-with-web-terminal)
+[Tutorial2](https://docs.onedev.io/tutorials/cicd/run-job-against-local-change)
 
-![build-package](doc/images/package-tab.png)
+![web terminal](./doc/images/web-terminal.gif)
 
-## Flexible Pull Request Review Policy and Reviewer Suggestion
+## 📦 Built-in package registries
 
-Specify pull request review policy based on author, branch, and changed files. OneDev can leverage git change history to suggest most appropriate reviewers for pull requests touching certain files.
+Built-in registry to manage binary packages. Link packages with
+CI/CD jobs.
+[Tutorial](https://docs.onedev.io/category/packages)
 
-![review-policy](doc/images/review-policy.gif)
+![package registry](./doc/images/package-registry.png)
 
-## Lightweight Review without Pull Request
+## 🧩 Deep integration and information cross-reference
 
-Comment on any part of code or diff to start a lightweight review without opening pull request. Review comments live through code modification and even file rename to serve as documentation. 
+Transit issue state via commit, CI/CD, or pull request.
+Show fixing builds of issue. Query fixed issues or code changes between build/package versions.
+[Example1](https://code.onedev.io/onedev/server/~builds/4799/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Priority%22+desc+and+%22Type%22+asc)
+[Example2](https://code.onedev.io/onedev/server/~issues/1794/builds)
 
-Each discussion is threaded so that you can easily know discussions with new comments/updates.
+![deep integration](./doc/images/deep-integration.gif)
 
-![file-comment](doc/images/file-comment.gif)
+## 🌲 Project tree for easy maintenance
 
-![thread-comments](doc/images/threaded-comments.png)
+Use tree to organize projects clearly and efficiently.
+Define common settings in parent project and inherit in child projects.
+[See It In Action](https://code.onedev.io/~projects?query=%22Path%22+is+%22onedev%22)
 
-## Command Palette to Access Features Quickly
+![project tree](./doc/images/project-tree.png)
 
-Press cmd/ctrl-k to bring up command palette from anywhere. Search projects, files, issues, pull requests, builds, and various settings and jump to them without leaving your keyboard
+## 🐒 Smart query that can be saved and subscribed
 
-![command-palette.gif](doc/images/command-palette.gif)
+Powerful and intuitive query for everything. Save query for quick access. Subscribe to
+query to get notified of interesting events.
+[Try It](https://code.onedev.io/onedev/server/~issues)
 
-## Write Markdown Pleasantly With a Smart Editor
+![issue query](./doc/images/issue-query.gif)
 
-When embedding an image in a markdown file in GitHub/GitLab, you need to upload the image in a separate page, and then figure out the relative path to reference that image. With OneDev, you simply upload the image to desired folder in same editor, and the link will be generated automatically. 
+## 🎛️ Dashboard for teams and users
 
-OneDev tracks your cursor in edit window and scrolls the preview window as necessary so that you can always preview what you are typing.
+Arrange gadgets in custom dashboard to get important information
+at a glance. Share dashboard with users or groups, or make it public
+for everyone.
+[See It In Action](https://code.onedev.io/~dashboards)
 
-![markdown](doc/images/markdown.gif)
+![edit dashboard](./doc/images/edit-dashboard.gif)
 
-## SLOC Trend By Language
+## 👯 Effortless high availability and scalability
 
-OneDev inspects git history of main branch to calculate trend of source lines of code by language efficiently. 
+Easy cluster setup. Replicate projects across different servers
+for high availability, or distribute projects for horizontal scalability.
+[More Info](https://docs.onedev.io/administration-guide/high-availabilty-scalabilty)
 
-![stats](doc/images/stats.png)
+![high availability](./doc/images/high-availability.png)
 
-## Project Hierarchy to Facilitate Setting Inheritance
+## 🛸 Command palette for quick access
 
-Organization is ideal for public service. However, for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
+Use cmd/ctrl-k to bring up command palette from anywhere.
+Search anything and jump to it without digging through menus.
+[Try It](https://code.onedev.io)
 
-## Effortless High Availability and Scalability (Enterprise Edition)
+![command palette](./doc/images/command-palette.gif)
 
-Just connect multiple OneDev instances to same database, and you will get a cluster to distribute project load to multiple 
-servers, as well as the ability to sync projects with its replicas in real time. If one server goes down, project replicas 
-on other servers will become active immediately without data loss and service interruption. 
+## 📈 SLOC trend by language
 
-![replication](doc/images/replication.png)
+Inspects git history of main branch to calculate trend of
+source lines of code by language efficiently
+[See It In Action](https://code.onedev.io/onedev/server/~stats/lines)
 
-## Customizable Dashboard (Enterprise Edition)
+![SLOC trends](./doc/images/line-stats.png)
 
-Arrange gadgets in custom dashboard to get important information at a glance. Share dashboard with other users or groups, 
-or make it public for everyone. 
+## 🕊️ Fast, lightweight, and reliable
 
-![dashboard](doc/images/dashboard.png)
+Crafted with resource usage and performance in mind. Get all features above with a 1 core 2G mem box
+for medium-sized projects. Intensively used for more than 5 years, with battle-proven reliability.
+[Performance Comparison](https://faun.pub/performance-compasion-of-onedev-and-gitlab-c11fc27b25be#:~:text=Git%20Push%3A%20OneDev%20is%2040,50%25%20less%20memory%20than%20GitLab)
 
-## Time Tracking and Reporting (Enterprise Edition)
-
-Track issue, milestone and project progress with estimated time and spent time. Log works directly, 
-or start stopwatch while working. Aggregate estimate/spent time from subtasks to parent task 
-automatically. Generate timesheets for work statistics and billing.
-
-![timetrack](doc/images/timetrack.png)
-
-## Cross Project Fast Code Search (Enterprise Edition)
-
-Cross project fast code search to find information scattered in multiple projects. Support to search by symbol and regular
-expression. Works out of box without extra setup. 
-
-![xsearch](doc/images/xcode-search.png)
-
-## Web Terminal to Diagnose CI/CD Job (Enterprise Edition) 
-
-A web terminal to access environment of running CI/CD job. Used together with pause instruction, one can check 
-live environment of the job to help diagnostics, and resume the job afterwards.   
-
-![webterminal](doc/images/web-terminal.gif)
-
-## Fast and Reliable with Moderate Resource Usage
-
-OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium-sized projects. 
-It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
-normally few to no known bugs in the wild.
+![resource usage](./doc/images/resource-usage.png)
