@@ -41,7 +41,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up gradle cache");
 			setupCache.setKey("gradle_@file:checksum@");
-			setupCache.setPath("/home/gradle/.gradle/cache");
+			setupCache.setPath("/home/gradle/.gradle/caches");
 			setupCache.getLoadKeys().add("gradle");
 			job.getSteps().add(setupCache);
 			
