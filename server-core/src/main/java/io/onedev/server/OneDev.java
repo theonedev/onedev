@@ -8,7 +8,6 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -25,10 +24,10 @@ import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.taskschedule.TaskScheduler;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;
@@ -54,6 +53,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
@@ -215,7 +215,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 						BEARER + " " + clusterManager.getCredential());
 
 				try (Response response = builder.get()) {
-					KubernetesHelper.checkStatus(response);
+					checkStatus(response);
 					try (InputStream is = response.readEntity(InputStream.class)) {							
 						TarUtils.untar(is, getAssetsDir(), false);
 					} catch (IOException e) {
