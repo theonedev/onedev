@@ -13,6 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class SetupCacheStep extends Step {
 	
 	private List<String> loadKeys = new ArrayList<>();
 	
-	private String path;
+	private List<String> paths;
 	
 	private String uploadAccessTokenSecret;
 
@@ -62,17 +63,17 @@ public class SetupCacheStep extends Step {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
-	@Editable(order=300, name="Cache Path", description = "For docker aware executors, this path is inside container, " +
+	@Editable(order=300, name="Cache Paths", description = "For docker aware executors, this path is inside container, " +
 			"and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). " +
 			"For shell related executors which runs on host machine directly, only relative path is accepted")
 	@Interpolative(variableSuggester="suggestStaticVariables")
-	@NotEmpty
-	public String getPath() {
-		return path;
+	@Size(min=1, max=100)
+	public List<String> getPaths() {
+		return paths;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public void setPaths(List<String> paths) {
+		this.paths = paths;
 	}
 
 	private static List<InputSuggestion> suggestStaticVariables(String matchWith) {
@@ -104,7 +105,7 @@ public class SetupCacheStep extends Step {
 			accessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
 		else
 			accessToken = null;
-		return new SetupCacheFacade(key, loadKeys, path, accessToken);
+		return new SetupCacheFacade(key, loadKeys, paths, accessToken);
 	}
 	
 }

@@ -51,8 +51,9 @@ public class AgentLibResource extends AbstractResource {
 								FileUtils.copyFileToDirectory(file, tempDir);
 						}
 						
-						OutputStream os = attributes.getResponse().getOutputStream();
-						TarUtils.tar(tempDir, os, false);
+						try(var os = attributes.getResponse().getOutputStream()) {
+							TarUtils.tar(tempDir, os, false);
+						}
 					} finally {
 						FileUtils.deleteDir(tempDir);
 					}

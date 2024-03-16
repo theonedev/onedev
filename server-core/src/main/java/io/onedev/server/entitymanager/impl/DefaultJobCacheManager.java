@@ -1,8 +1,10 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Joiner;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.k8shelper.CacheHelper;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.JobCacheManager;
@@ -59,7 +61,7 @@ import static org.apache.commons.io.IOUtils.copy;
 public class DefaultJobCacheManager extends BaseEntityManager<JobCache> 
 		implements JobCacheManager, Serializable, SchedulableTask {
 	
-	private static final int CACHE_VERSION = 1;
+	private static final int CACHE_VERSION = 2;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobCacheManager.class);
 	
@@ -132,18 +134,19 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 	
 	@Override
-	public void downloadCache(Long projectId, String cacheKey, String cachePath, OutputStream cacheStream) {
+	public void downloadCache(Long projectId, String cacheKey, List<String> cachePaths, 
+							  OutputStream cacheStream) {
 		var cacheId = getDownloadCacheId(projectId, cacheKey);
 		if (cacheId != null) 
-			downloadCache(projectId, cacheId, cachePath, cacheStream);
+			downloadCache(projectId, cacheId, cachePaths, cacheStream);
 		else 
 			writeStream(cacheStream, 0);
 	}
 	
-	private boolean downloadCacheLocal(Long projectId, Long cacheId, String cachePath, 
+	private boolean downloadCacheLocal(Long projectId, Long cacheId, List<String> cachePaths, 
 									   Consumer<InputStream> cacheStreamHandler) {
 		return read(JobCache.getLockName(projectId, cacheId), () -> {
-			var is = openCacheInputStream(projectId, cacheId, cachePath);
+			var is = openCacheInputStream(projectId, cacheId, cachePaths);
 			if (is != null) try (is) {
 				cacheStreamHandler.accept(is);
 				return true;
@@ -154,11 +157,11 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 
 	@Override
-	public boolean downloadCacheLocal(Long projectId, String cacheKey, String cachePath, 
+	public boolean downloadCacheLocal(Long projectId, String cacheKey, List<String> cachePaths, 
 								   Consumer<InputStream> cacheStreamHandler) {
 		var cacheId = getDownloadCacheId(projectId, cacheKey);
 		if (cacheId != null) 
-			return downloadCacheLocal(projectId, cacheId, cachePath, cacheStreamHandler);
+			return downloadCacheLocal(projectId, cacheId, cachePaths, cacheStreamHandler);
 		else 
 			return false;
 	}
@@ -178,35 +181,38 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 	
 	@Override
-	public void downloadCache(Long projectId, List<String> cacheLoadKeys, String cachePath, 
+	public void downloadCache(Long projectId, List<String> cacheLoadKeys, List<String> cachePaths, 
 							  OutputStream cacheStream) {
 		var cacheId = getDownloadCacheId(projectId, cacheLoadKeys);
 		if (cacheId != null)
-			downloadCache(projectId, cacheId, cachePath, cacheStream);
+			downloadCache(projectId, cacheId, cachePaths, cacheStream);
 		else
 			writeStream(cacheStream, 0);
 	}
 
 	@Override
-	public boolean downloadCacheLocal(Long projectId, List<String> cacheLoadKeys, String cachePath, 
+	public boolean downloadCacheLocal(Long projectId, List<String> cacheLoadKeys, List<String> cachePaths, 
 								   Consumer<InputStream> cacheStreamHandler) {
 		var cacheId = getDownloadCacheId(projectId, cacheLoadKeys);
 		if (cacheId != null)
-			return downloadCacheLocal(projectId, cacheId, cachePath, cacheStreamHandler);
+			return downloadCacheLocal(projectId, cacheId, cachePaths, cacheStreamHandler);
 		else
 			return false;
 	}
 	
 	@Nullable
-	private InputStream openCacheInputStream(Long projectId, Long cacheId, String cachePath) {
+	private InputStream openCacheInputStream(Long projectId, Long cacheId, List<String> cachePaths) {
 		var cacheHome = projectManager.getCacheDir(projectId);
 		var cacheDir = new File(cacheHome, String.valueOf(cacheId));
 		if (cacheDir.exists()) {
 			var stamp = readString(new File(cacheDir, "stamp"));
-			if (stamp.equals(CACHE_VERSION + ":" + cachePath)) {
+			if (stamp.equals(CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths))) {
 				try {
-					return new FileInputStream(new File(cacheDir, "data"));
-				} catch (FileNotFoundException e) {
+					var marks = FileUtils.readFileToByteArray(new File(cacheDir, "marks"));
+					return new SequenceInputStream(
+							new ByteArrayInputStream(marks), 
+							new FileInputStream(new File(cacheDir, "data")));
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -215,10 +221,10 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 
 	@Override
-	public void downloadCacheLocal(Long projectId, Long cacheId, String cachePath, 
+	public void downloadCacheLocal(Long projectId, Long cacheId, List<String> cachePaths, 
 								   OutputStream cacheStream, @Nullable AtomicBoolean cacheHit) {
 		read(JobCache.getLockName(projectId, cacheId), () -> {
-			var is = openCacheInputStream(projectId, cacheId, cachePath);
+			var is = openCacheInputStream(projectId, cacheId, cachePaths);
 			if (is != null) {
 				try (is) {
 					writeStream(cacheStream, 1);
@@ -240,13 +246,13 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		});
 	}
 	
-	private void downloadCache(Long projectId, Long cacheId, String cachePath, OutputStream cacheStream) {
+	private void downloadCache(Long projectId, Long cacheId, List<String> cachePaths, OutputStream cacheStream) {
 		var localServer = clusterManager.getLocalServerAddress();
 		var activeServer = projectManager.getActiveServer(projectId, true);
 		boolean found;
 		if (localServer.equals(activeServer)) {
 			var cacheHit = new AtomicBoolean();
-			downloadCacheLocal(projectId, cacheId, cachePath, cacheStream, cacheHit);
+			downloadCacheLocal(projectId, cacheId, cachePaths, cacheStream, cacheHit);
 			found = cacheHit.get();
 		} else {
 			Client client = ClientBuilder.newClient();
@@ -257,7 +263,7 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 						.path("~api/cluster/cache")
 						.queryParam("projectId", projectId)
 						.queryParam("cacheId", cacheId)
-						.queryParam("cachePath", cachePath);
+						.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
 				Invocation.Builder builder = target.request();
 				builder.header(HttpHeaders.AUTHORIZATION,
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
@@ -316,13 +322,14 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 	
 	@Override
-	public void uploadCache(Long projectId, String cacheKey, String cachePath, InputStream cacheStream) {
+	public void uploadCache(Long projectId, String cacheKey, List<String> cachePaths, 
+							InputStream cacheStream) {
 		Long cacheId = getUploadCacheId(projectId, cacheKey);
 		
 		var localServer = clusterManager.getLocalServerAddress();
 		var activeServer = projectManager.getActiveServer(projectId, true);
 		if (localServer.equals(activeServer)) {
-			uploadCacheLocal(projectId, cacheId, cachePath, cacheStream);
+			uploadCacheLocal(projectId, cacheId, cachePaths, cacheStream);
 		} else {
 			Client client = ClientBuilder.newClient();
 			client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -332,7 +339,7 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 						.path("~api/cluster/cache")
 						.queryParam("projectId", projectId)
 						.queryParam("cacheId", cacheId)
-						.queryParam("cachePath", cachePath);
+						.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
 				Invocation.Builder builder = target.request();
 				builder.header(HttpHeaders.AUTHORIZATION,
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
@@ -346,24 +353,69 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		}
 	}
 	
-	private OutputStream openCacheOutputStream(Long projectId, Long cacheId, String cachePath) {
+	private OutputStream openCacheOutputStream(Long projectId, Long cacheId, List<String> cachePaths) {
 		var cacheHome = projectManager.getCacheDir(projectId);
 		var cacheDir = new File(cacheHome, String.valueOf(cacheId));
 		FileUtils.createDir(cacheDir);
-		writeString(new File(cacheDir, "stamp"), CACHE_VERSION + ":" + cachePath);
+		writeString(new File(cacheDir, "stamp"), CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths));
 		try {
-			return new FileOutputStream(new File(cacheDir, "data"));
+			return new FilterOutputStream(new FileOutputStream(new File(cacheDir, "data"))) {
+
+				private final byte[] buffer = new byte[CacheHelper.MARK_BUFFER_SIZE];
+				
+				private final byte[] singeByteArray = new byte[1];
+
+				private int ptr;
+
+				private void append(byte data) {
+					singeByteArray[0] = data;
+					append(singeByteArray, 0, 1);
+				}
+
+				private void append(byte[] data, int offset, int length) {
+					if (length <= buffer.length - ptr) {
+						System.arraycopy(data, offset, buffer, ptr, length);
+						ptr += length;
+					} else if (length < buffer.length) {
+						System.arraycopy(buffer, length - buffer.length + ptr, buffer, 0, buffer.length - length);
+						System.arraycopy(data, offset, buffer, buffer.length - length, length);
+						ptr = buffer.length;
+					} else {
+						System.arraycopy(data, offset + length - buffer.length, buffer, 0, buffer.length);
+						ptr = buffer.length;
+					}
+				}
+
+				@Override
+				public void write(int b) throws IOException {
+					super.write(b);
+					append((byte)b);
+				}
+
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					out.write(b, off, len);
+					append(b, off, len);
+				}
+
+				@Override
+				public void close() throws IOException {
+					super.close();
+					FileUtils.writeByteArrayToFile(new File(cacheDir, "marks"), buffer);
+				}
+				
+			};		
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	} 
-
+	
 	@Override
-	public void uploadCacheLocal(Long projectId, String cacheKey, String cachePath, 
+	public void uploadCacheLocal(Long projectId, String cacheKey, List<String> cachePaths, 
 								 Consumer<OutputStream> cacheStreamHandler) {
 		Long cacheId = getUploadCacheId(projectId, cacheKey);
 		write(JobCache.getLockName(projectId, cacheId), () -> {
-			try (var os = openCacheOutputStream(projectId, cacheId, cachePath)) {
+			try (var os = openCacheOutputStream(projectId, cacheId, cachePaths)) {
 				cacheStreamHandler.accept(os);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -372,9 +424,10 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	}
 	
 	@Override
-	public void uploadCacheLocal(Long projectId, Long cacheId, String cachePath, InputStream cacheStream) {
+	public void uploadCacheLocal(Long projectId, Long cacheId, List<String> cachePaths, 
+								 InputStream cacheStream) {
 		write(JobCache.getLockName(projectId, cacheId), () -> {
-			try (var os = openCacheOutputStream(projectId, cacheId, cachePath)) {
+			try (var os = openCacheOutputStream(projectId, cacheId, cachePaths)) {
 				IOUtils.copy(cacheStream, os, BUFFER_SIZE);	
 			} catch (IOException e) {
 				throw new RuntimeException(e);

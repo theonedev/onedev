@@ -1183,9 +1183,11 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
-					TarUtils.untar(
-							response.readEntity(InputStream.class),
-							getEnvDir(targetProjectId.toString()), false);
+					try (var is = response.readEntity(InputStream.class)) {
+						TarUtils.untar(is, getEnvDir(targetProjectId.toString()), false);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			} finally {
 				client.close();

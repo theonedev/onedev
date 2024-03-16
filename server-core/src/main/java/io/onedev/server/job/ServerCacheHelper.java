@@ -1,6 +1,5 @@
 package io.onedev.server.job;
 
-import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheHelper;
 import io.onedev.server.OneDev;
@@ -12,7 +11,11 @@ import io.onedev.server.security.SecurityUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+
+import static io.onedev.k8shelper.CacheHelper.untar;
 
 public class ServerCacheHelper extends CacheHelper {
 	
@@ -24,20 +27,26 @@ public class ServerCacheHelper extends CacheHelper {
 	}
 
 	@Override
-	protected boolean downloadCache(String cacheKey, String cachePath, File cacheDir) {
-		return getCacheManager().downloadCacheLocal(jobContext.getProjectId(),
-				cacheKey, cachePath, is -> TarUtils.untar(is, cacheDir, true));
+	protected boolean downloadCache(String cacheKey, LinkedHashMap<String, File> cacheDirs) {
+		return getCacheManager().downloadCacheLocal(
+				jobContext.getProjectId(),
+				cacheKey, 
+				new ArrayList<>(cacheDirs.keySet()),
+				is -> untar(new ArrayList<>(cacheDirs.values()), is));
 	}
 
 	@Override
-	protected boolean downloadCache(List<String> cacheLoadKeys, String cachePath, File cacheDir) {
-		return getCacheManager().downloadCacheLocal(jobContext.getProjectId(), 
-				cacheLoadKeys, cachePath, is -> TarUtils.untar(is, cacheDir, true));
+	protected boolean downloadCache(List<String> cacheLoadKeys, LinkedHashMap<String, File> cacheDirs) {
+		return getCacheManager().downloadCacheLocal(
+				jobContext.getProjectId(), 
+				cacheLoadKeys, 
+				new ArrayList<>(cacheDirs.keySet()),
+				is -> untar(new ArrayList<>(cacheDirs.values()), is));
 	}
 
 	@Override
-	protected boolean uploadCache(String cacheKey, String cachePath,
-								  @Nullable String accessToken, File cacheDir) {
+	protected boolean uploadCache(String cacheKey, LinkedHashMap<String, File> cacheDirs,
+								  @Nullable String accessToken) {
 		var authorized = getSessionManager().call(() -> {
 			var projectId = jobContext.getProjectId();
 			var project = getProjectManager().load(projectId);
@@ -51,8 +60,11 @@ public class ServerCacheHelper extends CacheHelper {
 			}
 		});
 		if (authorized) {
-			getCacheManager().uploadCacheLocal(jobContext.getProjectId(), cacheKey, 
-					cachePath, os -> TarUtils.tar(cacheDir, os, true));
+			getCacheManager().uploadCacheLocal(
+					jobContext.getProjectId(), 
+					cacheKey, 
+					new ArrayList<>(cacheDirs.keySet()), 
+					os -> tar(new ArrayList<>(cacheDirs.values()), os));
 			return true;
 		} else {
 			return false;

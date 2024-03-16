@@ -15,11 +15,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -40,10 +38,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -134,7 +129,7 @@ public class GitFilter implements Filter {
 
 		var hookEnvs = HookUtils.getHookEnvs(projectId, userId);
 		
-		InputStream stdin = new InputStreamWrapper(ServletUtils.getInputStream(request)) {
+		InputStream stdin = new FilterInputStream(ServletUtils.getInputStream(request)) {
 
 			@Override
 			public void close() {

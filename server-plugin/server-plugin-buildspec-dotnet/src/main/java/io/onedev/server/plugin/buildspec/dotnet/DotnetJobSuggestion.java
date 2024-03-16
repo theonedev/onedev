@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.buildspec.dotnet;
 
+import com.google.common.collect.Lists;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -45,7 +46,7 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up nuget cache");
 			setupCache.setKey("nuget_packages_@file:checksum@");
-			setupCache.setPath("/root/.nuget/packages");
+			setupCache.setPaths(Lists.newArrayList("/root/.nuget/packages"));
 			setupCache.getLoadKeys().add("nuget_packages");
 			job.getSteps().add(setupCache);
 			

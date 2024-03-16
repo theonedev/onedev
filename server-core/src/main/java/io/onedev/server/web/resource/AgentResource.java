@@ -64,15 +64,15 @@ public class AgentResource extends AbstractResource {
 					OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 					props.setProperty("agentToken", token.getValue());
 					
-					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
+					try (var os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
 						String comment = "For a list of supported agent properties, please visit:\n" 
 								+ "https://docs.onedev.io/administration-guide/agent-management#agent-propertiesenvironments";
 						props.store(os, comment);
 					}
 					
 					try (
-							InputStream is = Agent.class.getClassLoader().getResourceAsStream("agent/conf/logback.xml");
-							OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/logback.xml"));) {
+							var is = Agent.class.getClassLoader().getResourceAsStream("agent/conf/logback.xml");
+							var os = new FileOutputStream(new File(agentDir, "agent/conf/logback.xml"));) {
 						IOUtils.copy(is, os);
 					}
 					FileUtils.touchFile(new File(agentDir, "agent/conf/attributes.properties"));
@@ -102,9 +102,11 @@ public class AgentResource extends AbstractResource {
 						ZipUtils.zip(agentDir, packageFile, "agent/boot/wrapper-*, agent/bin/*.sh");
 						IOUtils.copy(packageFile, attributes.getResponse().getOutputStream());
 					} else {
-						TarUtils.tar(agentDir, Sets.newHashSet("**"), Sets.newHashSet(), 
-								Sets.newHashSet("agent/boot/wrapper-*", "agent/bin/*.sh"),
-								attributes.getResponse().getOutputStream(), true);
+						try (var os = attributes.getResponse().getOutputStream()) {
+							TarUtils.tar(agentDir, Sets.newHashSet("**"), Sets.newHashSet(),
+									Sets.newHashSet("agent/boot/wrapper-*", "agent/bin/*.sh"),
+									os, true);
+						}
 					}
 				} finally {
 					FileUtils.deleteDir(tempDir);

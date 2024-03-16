@@ -1078,11 +1078,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor");
 					} else {
-						if (facade instanceof SetupCacheFacade) {
-							var cachePath = ((SetupCacheFacade) facade).getPath();
-							if (!cachePaths.add(cachePath))
-								throw new ExplicitException("Duplicate cache path: " + cachePath);
-						}
+						if (facade instanceof SetupCacheFacade) 
+							cachePaths.addAll(((SetupCacheFacade) facade).getPaths());
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);

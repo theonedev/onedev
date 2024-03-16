@@ -16,7 +16,6 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.ssh.SshManager;
-import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
@@ -203,7 +202,7 @@ class SshCommand implements Command, ServerSessionAware {
 
 	@Override
 	public void setInputStream(InputStream in) {
-		this.in = new InputStreamWrapper(in) {
+		this.in = new FilterInputStream(in) {
 
 			@Override
 			public void close() {

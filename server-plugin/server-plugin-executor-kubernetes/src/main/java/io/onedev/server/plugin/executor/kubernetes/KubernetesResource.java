@@ -144,7 +144,6 @@ public class KubernetesResource {
 			try {
 				jobManager.copyDependencies(jobContext, tempDir);
 				TarUtils.tar(tempDir, os, false);
-				os.flush();
 			} finally {
 				sessionManager.openSession();
 				FileUtils.deleteDir(tempDir);
@@ -159,16 +158,16 @@ public class KubernetesResource {
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("cacheKey") @Nullable String cacheKey, 
 			@QueryParam("cacheLoadKeys") @Nullable String joinedCacheLoadKeys, 
-			@QueryParam("cachePath") String cachePath) {
+			@QueryParam("cachePaths") String cachePaths) {
 		return os -> {
 			sessionManager.closeSession();
 			try {
 				var jobContext = jobManager.getJobContext(jobToken, true);
 				if (cacheKey != null) {
-					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheKey, cachePath, os);
+					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheKey, Splitter.on('\n').splitToList(cachePaths), os);
 				} else {
 					var cacheLoadKeys = Splitter.on('\n').splitToList(joinedCacheLoadKeys);
-					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheLoadKeys, cachePath, os);
+					jobCacheManager.downloadCache(jobContext.getProjectId(), cacheLoadKeys, Splitter.on('\n').splitToList(cachePaths), os);
 				}
 			} finally {
 				sessionManager.openSession();
@@ -181,7 +180,7 @@ public class KubernetesResource {
 	public Response checkUploadCache(
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("cacheKey") String cacheKey,
-			@QueryParam("cachePath") String cachePath) {
+			@QueryParam("cachePaths") String cachePaths) {
 		var jobContext = jobManager.getJobContext(jobToken, true);
 		var project = projectManager.load(jobContext.getProjectId());
 		if (project.isCommitOnBranch(jobContext.getCommitId(), project.getDefaultBranch())
@@ -198,13 +197,13 @@ public class KubernetesResource {
 	public Response uploadCache(
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("cacheKey") String cacheKey, 
-			@QueryParam("cachePath") String cachePath, 
+			@QueryParam("cachePaths") String cachePaths, 
 			InputStream is) {
-		checkUploadCache(jobToken, cacheKey, cachePath);
+		checkUploadCache(jobToken, cacheKey, cachePaths);
 		var jobContext = jobManager.getJobContext(jobToken, true);
 		sessionManager.closeSession();
 		try {
-			jobCacheManager.uploadCache(jobContext.getProjectId(), cacheKey, cachePath, is);
+			jobCacheManager.uploadCache(jobContext.getProjectId(), cacheKey, Splitter.on('\n').splitToList(cachePaths), is);
 			return Response.ok().build();
 		} finally {
 			sessionManager.openSession();

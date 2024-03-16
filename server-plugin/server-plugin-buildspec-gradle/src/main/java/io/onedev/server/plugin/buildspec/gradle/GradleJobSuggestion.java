@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.buildspec.gradle;
 
+import com.google.common.collect.Lists;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -41,7 +42,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up gradle cache");
 			setupCache.setKey("gradle_@file:checksum@");
-			setupCache.setPath("/home/gradle/.gradle/caches");
+			setupCache.setPaths(Lists.newArrayList("/home/gradle/.gradle/caches"));
 			setupCache.getLoadKeys().add("gradle");
 			job.getSteps().add(setupCache);
 			

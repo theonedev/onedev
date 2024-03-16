@@ -39,7 +39,6 @@ import static io.onedev.agent.ExecutorUtils.newInfoLogger;
 import static io.onedev.agent.ExecutorUtils.newWarningLogger;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
 		"This executor runs build jobs with OneDev server's shell facility.<br>" +
@@ -220,9 +219,10 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										}
 									} else if (facade instanceof SetupCacheFacade) {
 										SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
-										var cachePath = setupCacheFacade.getPath();
-										if (new File(cachePath).isAbsolute()) 
-											throw new ExplicitException("Shell executor does not allow absolute cache path: " + cachePath);
+										for (var cachePath: setupCacheFacade.getPaths()) {
+											if (new File(cachePath).isAbsolute())
+												throw new ExplicitException("Shell executor does not allow absolute cache path: " + cachePath);
+										}
 										cacheHelper.setupCache(setupCacheFacade);
 									} else if (facade instanceof ServerSideFacade) {
 										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;

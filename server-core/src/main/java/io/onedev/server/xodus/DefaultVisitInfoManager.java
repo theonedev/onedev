@@ -29,10 +29,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Date;
 
 import static java.lang.Long.valueOf;
@@ -250,9 +247,11 @@ public class DefaultVisitInfoManager extends AbstractMultiEnvironmentManager
 						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
-					TarUtils.untar(
-							response.readEntity(InputStream.class),
-							getEnvDir(projectId.toString()), false);
+					try (var is = response.readEntity(InputStream.class)) {
+						TarUtils.untar(is, getEnvDir(projectId.toString()), false);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			} finally {
 				client.close();

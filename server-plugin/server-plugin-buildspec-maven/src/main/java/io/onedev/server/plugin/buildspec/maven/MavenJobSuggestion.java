@@ -44,7 +44,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up maven cache");
 			setupCache.setKey("maven_repository_@file:checksum@");
-			setupCache.setPath("/root/.m2/repository");
+			setupCache.setPaths(Lists.newArrayList("/root/.m2/repository"));
 			setupCache.getLoadKeys().add("maven_repository");
 			job.getSteps().add(setupCache);
 			

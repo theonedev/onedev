@@ -292,7 +292,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 		var setupCache = new SetupCacheStep();
 		setupCache.setName("set up npm cache");
 		setupCache.setKey("node_modules_@file:checksum@");
-		setupCache.setPath("node_modules");
+		setupCache.setPaths(Lists.newArrayList("node_modules"));
 		setupCache.getLoadKeys().add("node_modules");
 		
 		return Lists.newArrayList(generateChecksum, setupCache);
