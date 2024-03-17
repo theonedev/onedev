@@ -7,10 +7,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestLabel;
-import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
@@ -49,6 +46,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.*;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -627,6 +625,47 @@ public abstract class PullRequestListPanel extends Panel {
 
 					});
 				}
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Pull Requests as Read";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(requestsTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No pull requests to set as read");
+								}
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+									visitInfoManager.visitPullRequest(SecurityUtils.getUser(), it.next());
+								target.add(body);
+							}
+
+						};
+					}
+
+				});
 				
 				return menuItems;
 			}

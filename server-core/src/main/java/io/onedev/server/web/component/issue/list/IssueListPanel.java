@@ -64,6 +64,8 @@ import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.*;
+import io.onedev.server.xodus.IssueInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -551,61 +553,6 @@ public abstract class IssueListPanel extends Panel {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Watch/Unwatch Selected Issues";
-					}
-
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
-
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new WatchStatusPanel(id) {
-
-									@Override
-									protected WatchStatus getWatchStatus() {
-										return null;
-									}
-
-									@Override
-									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-										dropdown.close();
-										dropdown2.close();
-
-										var issues = selectionColumn.getSelections().stream()
-												.map(it->it.getObject()).collect(toList());
-										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
-										selectionColumn.getSelections().clear();
-										Session.get().success("Watch status changed");
-									}
-								};
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to watch/unwatch");
-								}
-							}
-
-						};
-					}
-
-				});
-
 				if (getProject() != null && getProject().isTimeTracking() 
 						&& SecurityUtils.canManageIssues(getProject()) 
 						&& WicketUtils.isSubscriptionActive()) {
@@ -959,12 +906,11 @@ public abstract class IssueListPanel extends Panel {
 
 					});
 				}
-				
 				menuItems.add(new MenuItem() {
 
 					@Override
 					public String getLabel() {
-						return "Watch/Unwatch All Queried Issues";
+						return "Watch/Unwatch Selected Issues";
 					}
 
 					@Override
@@ -985,20 +931,19 @@ public abstract class IssueListPanel extends Panel {
 										dropdown.close();
 										dropdown2.close();
 
-										Collection<Issue> issues = new ArrayList<>();
-										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-											issues.add(it.next());
+										var issues = selectionColumn.getSelections().stream()
+												.map(it->it.getObject()).collect(toList());
 										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										selectionColumn.getSelections().clear();
 										Session.get().success("Watch status changed");
 									}
-
 								};
 							}
 
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(issuesTable.getItemCount() != 0);
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 
 							@Override
@@ -1007,14 +952,15 @@ public abstract class IssueListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to watch/unwatch");
+									tag.put("title", "Please select issues to watch/unwatch");
 								}
 							}
+
 						};
 					}
 
 				});
-
+				
 				if (getProject() != null && getProject().isTimeTracking() 
 						&& SecurityUtils.canManageIssues(getProject())
 						&& WicketUtils.isSubscriptionActive()) {
@@ -1371,6 +1317,102 @@ public abstract class IssueListPanel extends Panel {
 
 					});
 				}
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Watch/Unwatch All Queried Issues";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new DropdownLink(id) {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new WatchStatusPanel(id) {
+
+									@Override
+									protected WatchStatus getWatchStatus() {
+										return null;
+									}
+
+									@Override
+									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+										dropdown.close();
+										dropdown2.close();
+
+										Collection<Issue> issues = new ArrayList<>();
+										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+											issues.add(it.next());
+										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										Session.get().success("Watch status changed");
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(issuesTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No issues to watch/unwatch");
+								}
+							}
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Issues as Read";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(issuesTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No issues to set as read");
+								}
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+									visitInfoManager.visitIssue(SecurityUtils.getUser(), it.next());
+								target.add(body);
+							}
+
+						};
+					}
+
+				});
 				
 				return menuItems;
 			}

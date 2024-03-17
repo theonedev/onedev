@@ -36,6 +36,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -539,7 +540,49 @@ public abstract class CodeCommentListPanel extends Panel {
 						}
 						
 					});
-				}				
+				}
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Comments as Read";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(commentsTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No comments to set as read");
+								}
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext(); )
+									visitInfoManager.visitCodeComment(SecurityUtils.getUser(), it.next());
+								target.add(body);
+							}
+
+						};
+					}
+
+				});
+				
 				return menuItems;
 			}
 
@@ -607,7 +650,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		}.setVisible(getPage() instanceof PullRequestCodeCommentsPage));
 		
-		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput = new TextField<>("input", queryStringModel);
 		queryInput.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -654,14 +697,14 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 
-		dataProvider = new LoadableDetachableDataProvider<CodeComment, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
 				var query = queryModel.getObject();
 				if (query != null) {
 					return getCodeCommentManager().query(getProject(), getPullRequest(),
-							query, (int)first, (int)count).iterator();
+							query, (int) first, (int) count).iterator();
 				} else {
 					return new ArrayList<CodeComment>().iterator();
 				}
@@ -671,7 +714,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			public long calcSize() {
 				try {
 					var query = queryModel.getObject();
-					if (query != null) 
+					if (query != null)
 						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
@@ -682,22 +725,22 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public IModel<CodeComment> model(CodeComment object) {
 				Long commentId = object.getId();
-				return new LoadableDetachableModel<CodeComment>() {
+				return new LoadableDetachableModel<>() {
 
 					@Override
 					protected CodeComment load() {
 						return OneDev.getInstance(CodeCommentManager.class).load(commentId);
 					}
-					
+
 				};
 			}
-			
+
 		};
 		
 		List<IColumn<CodeComment, Void>> columns = new ArrayList<>();
 		
 		if (SecurityUtils.canManageCodeComments(getProject())) {
-			columns.add(selectionColumn = new SelectionColumn<CodeComment, Void>());
+			columns.add(selectionColumn = new SelectionColumn<>());
 		} else if (getPullRequest() != null) {
 			Collection<User> keyUsers = Sets.newHashSet(getPullRequest().getSubmitter());
 			for (PullRequestReview review: getPullRequest().getReviews())
@@ -705,10 +748,10 @@ public abstract class CodeCommentListPanel extends Panel {
 			for (PullRequestAssignment assignment: getPullRequest().getAssignments())
 				keyUsers.add(assignment.getUser());
 			if (keyUsers.contains(SecurityUtils.getUser()))
-				columns.add(selectionColumn = new SelectionColumn<CodeComment, Void>());				
+				columns.add(selectionColumn = new SelectionColumn<>());				
 		} 
 		
-		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
@@ -719,10 +762,10 @@ public abstract class CodeCommentListPanel extends Panel {
 			public String getCssClass() {
 				return "new-indicator";
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
@@ -757,14 +800,14 @@ public abstract class CodeCommentListPanel extends Panel {
 						setEscapeModelStrings(false);
 					}
 				});
-				
+
 				String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
 				var link = new ExternalLink("description", UrlUtils.makeRelative(url));
 				link.add(new Label("label", StringUtils.abbreviate(comment.getContent(), MAX_DESCRIPTION_LEN)));
 				fragment.add(link);
-				
+
 				fragment.add(new Label("file", "on file " + comment.getMark().getPath()));
-				
+
 				LastActivity lastActivity = comment.getLastActivity();
 				if (lastActivity.getUser() != null) {
 					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));
@@ -774,13 +817,13 @@ public abstract class CodeCommentListPanel extends Panel {
 				fragment.add(new Label("activity", lastActivity.getDescription()));
 				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
 						.add(new AttributeAppender("title", DateUtils.formatDateTime(lastActivity.getDate()))));
-				
+
 				cellItem.add(fragment);
 			}
-			
+
 		});
 		
-		body.add(commentsTable = new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(commentsTable = new DefaultDataTable<>("comments", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override
@@ -794,7 +837,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						return comment.isVisitedAfter(comment.getLastActivity().getDate()) ? "comment" : "comment new";
 					}
 				}));
-				
+
 				var commentId = comment.getId();
 				item.add(new ChangeObserver() {
 					@Override
