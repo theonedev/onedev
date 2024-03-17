@@ -379,7 +379,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											docker.addArgs(image);
 											docker.addArgs(arguments.toArray(new String[0]));
 											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
-
+											
 											var result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
 													ExecutorUtils.newWarningLogger(jobLogger), null);
 											return result.getReturnCode();													
@@ -409,7 +409,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 													throw new ExplicitException("This step can only be executed by server shell "
 															+ "executor or remote shell executor");
 												}
-												Commandline entrypoint = getEntrypoint(hostBuildHome, commandFacade, osInfo);
+												Commandline entrypoint = getEntrypoint(hostBuildHome, commandFacade, osInfo, position);
 												var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 														jobContext.getJobToken(), commandFacade.getBuiltInRegistryAccessToken());
 												

@@ -51,13 +51,9 @@ public class MavenJobSuggestion implements JobSuggestion {
 			CommandStep detectBuildVersion = new CommandStep();
 			detectBuildVersion.setName("detect build version");
 			detectBuildVersion.setImage("maven");
-			var interpreter = new ShellInterpreter();
-			interpreter.setShell("bash");
-			interpreter.setCommands(
-					"set -e\n" +
+			detectBuildVersion.getInterpreter().setCommands("" +
 					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n" +
-							"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
-			detectBuildVersion.setInterpreter(interpreter);						
+					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
 			job.getSteps().add(detectBuildVersion);
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();

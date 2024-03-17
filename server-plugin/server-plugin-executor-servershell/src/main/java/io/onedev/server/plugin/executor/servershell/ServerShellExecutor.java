@@ -156,11 +156,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 										commandFacade.generatePauseCommand(buildHome);
 
-										File jobScriptFile = new File(buildHome, "job-commands" + commandFacade.getScriptExtension());
+										var commandDir = new File(buildHome, "command");
+										FileUtils.createDir(commandDir);
+										File stepScriptFile = new File(commandDir, "step-" + stringifyStepPosition(position) + commandFacade.getScriptExtension());
 										try {
 											FileUtils.writeStringToFile(
-													jobScriptFile,
-													commandFacade.convertCommands(replacePlaceholders(execution.getCommands(), buildHome)),
+													stepScriptFile,
+													commandFacade.normalizeCommands(replacePlaceholders(execution.getCommands(), buildHome)),
 													StandardCharsets.UTF_8);
 										} catch (IOException e) {
 											throw new RuntimeException(e);
@@ -171,7 +173,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										environments.put("GIT_HOME", userHome.getAbsolutePath());
 										environments.put("ONEDEV_WORKSPACE", workspaceDir.getAbsolutePath());
 										interpreter.workingDir(workspaceDir).environments(environments);
-										interpreter.addArgs(jobScriptFile.getAbsolutePath());
+										interpreter.addArgs(stepScriptFile.getAbsolutePath());
 
 										ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 										if (result.getReturnCode() != 0) {
