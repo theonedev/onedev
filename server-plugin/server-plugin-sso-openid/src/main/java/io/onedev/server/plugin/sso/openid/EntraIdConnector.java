@@ -126,10 +126,15 @@ public class EntraIdConnector extends OpenIdConnector {
 					var groupName = groupInfo.getAsString("displayName");
 					groupNames.put(groupId, groupName);
 				}
-				return groups.stream()
-						.map(groupNames::get)
-						.filter(Objects::nonNull)
-						.collect(toList());
+				var convertedGroups = new ArrayList<String>();
+				for (var group: groups) {
+					var convertedGroup = groupNames.get(group);
+					if (convertedGroup != null)
+						convertedGroups.add(convertedGroup);
+					else 
+						convertedGroups.add(group);
+				}
+				return convertedGroups;
 			} else {
 				List<String> details = new ArrayList<>();
 				var body = httpResponse.getBody();
