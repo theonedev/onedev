@@ -1,7 +1,6 @@
 <div class='d-none'>
 
-> **Note**
-> We develop OneDev at <a href="https://code.onedev.io">code.onedev.io</a> for sake of dogfooding. Please submit issues and pull requests there
+> **NOTE: ** We develop OneDev at <a href="https://code.onedev.io">code.onedev.io</a> for sake of dogfooding. Please submit issues and pull requests there
 
 </div>
 
