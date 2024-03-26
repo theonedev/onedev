@@ -32,7 +32,13 @@ public class SetBuildVersion extends LogInstruction {
 	@Transactional
 	@Override
 	public void execute(Build build, Map<String, List<String>> params, TaskLogger taskLogger) {
-		String version = params.values().iterator().next().iterator().next();
+		String version = null;
+		if (!params.isEmpty()) {
+			List<String> values = params.values().iterator().next();
+			if (!values.isEmpty()) {
+				version = values.iterator().next();
+			}
+		}
 		if (StringUtils.isNotBlank(version))
 			build.setVersion(version);
 		else
