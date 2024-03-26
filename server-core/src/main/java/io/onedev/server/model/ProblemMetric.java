@@ -1,9 +1,9 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
-
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.util.MetricIndicator;
+
+import javax.persistence.*;
 
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 
@@ -23,6 +23,8 @@ public class ProblemMetric extends AbstractEntity implements BuildMetric {
 	@Column(nullable=false)
 	private String reportName;
 
+	private int criticalSeverities;
+	
 	private int highSeverities;
 	
 	private int mediumSeverities;
@@ -47,16 +49,25 @@ public class ProblemMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(group="Total Problems", order=100, minValue=0, name="High Severity", color="#F64E60")
+	@MetricIndicator(group="Total Problems", order=100, minValue=0, name="Critical Severity", color="#F64E60")
+	public int getCriticalSeverities() {
+		return criticalSeverities;
+	}
+
+	public void setCriticalSeverities(int criticalSeverities) {
+		this.criticalSeverities = criticalSeverities;
+	}
+	
+	@MetricIndicator(group="Total Problems", order=200, minValue=0, name="High Severity", color="#F64E60")
 	public int getHighSeverities() {
 		return highSeverities;
 	}
 
-	public void setHighSeverities(int totalErrors) {
-		this.highSeverities = totalErrors;
+	public void setHighSeverities(int highSeverities) {
+		this.highSeverities = highSeverities;
 	}
 
-	@MetricIndicator(group="Total Problems", order=200, minValue=0, name="Medium Severity", color="#FFA800")
+	@MetricIndicator(group="Total Problems", order=300, minValue=0, name="Medium Severity", color="#FFA800")
 	public int getMediumSeverities() {
 		return mediumSeverities;
 	}
@@ -64,8 +75,8 @@ public class ProblemMetric extends AbstractEntity implements BuildMetric {
 	public void setMediumSeverities(int mediumSeverities) {
 		this.mediumSeverities = mediumSeverities;
 	}
-
-	@MetricIndicator(group="Total Problems", order=300, minValue=0, name="Low Severity", color="#8950FC")
+	
+	@MetricIndicator(group="Total Problems", order=500, minValue=0, name="Low Severity", color="#8950FC")
 	public int getLowSeverities() {
 		return lowSeverities;
 	}
@@ -73,5 +84,5 @@ public class ProblemMetric extends AbstractEntity implements BuildMetric {
 	public void setLowSeverities(int lowSeverities) {
 		this.lowSeverities = lowSeverities;
 	}
-
+	
 }

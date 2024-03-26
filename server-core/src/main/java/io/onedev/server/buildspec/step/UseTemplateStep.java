@@ -2,8 +2,6 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -27,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 @Editable(order=10000, name="Use Step Template", description="Run specified step template")
-public class UseTemplateStep extends Step {
+public class UseTemplateStep extends CompositeStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -103,7 +101,7 @@ public class UseTemplateStep extends Step {
 	}
 	
 	@Override
-	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, 
+	protected List<Action> getActions(Build build, JobExecutor jobExecutor, String jobToken, 
 								ParamCombination paramCombination) {
 		StepTemplate template = build.getSpec().getStepTemplateMap().get(templateName);
 		if (template == null)
@@ -126,7 +124,7 @@ public class UseTemplateStep extends Step {
 				actions.add(step.getAction(actionName, build, jobExecutor, jobToken, newParamCombination));
 			}
 		}
-		return new CompositeFacade(actions);
+		return actions;
 	}
 
 }

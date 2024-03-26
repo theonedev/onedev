@@ -1,33 +1,24 @@
 package io.onedev.server.buildspec.step;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TaskLogger;
+import io.onedev.commons.utils.*;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.SubPath;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.ProjectChoice;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
@@ -93,32 +84,35 @@ public class PublishSiteStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
-		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
-		if (jobContext.getJobExecutor().isSitePublishEnabled()) {
-			Project project;
-			if (projectPath != null) {
-				project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
-				if (project == null)
-					throw new ExplicitException("Unable to find project: " + projectPath);
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
+			if (jobContext.getJobExecutor().isSitePublishEnabled()) {
+				Project project;
+				if (projectPath != null) {
+					project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+					if (project == null)
+						throw new ExplicitException("Unable to find project: " + projectPath);
+				} else {
+					project = build.getProject();
+				}
+				var projectId = project.getId();
+				LockUtils.write(project.getSiteLockName(), () -> {
+					File projectSiteDir = OneDev.getInstance(ProjectManager.class).getSiteDir(projectId);
+					FileUtils.cleanDir(projectSiteDir);
+					FileUtils.copyDirectory(inputDir, projectSiteDir);
+					OneDev.getInstance(ProjectManager.class).directoryModified(projectId, projectSiteDir);
+					return null;
+				});
+				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				jobLogger.log("Site published as "
+						+ StringUtils.stripEnd(serverUrl, "/") + "/" + project.getPath() + "/~site");
 			} else {
-				project = build.getProject();
+				throw new UnauthorizedException("Site publish is prohibited by current job executor");
 			}
-			var projectId = project.getId();
-			LockUtils.write(project.getSiteLockName(), () -> {
-				File projectSiteDir = OneDev.getInstance(ProjectManager.class).getSiteDir(projectId);
-				FileUtils.cleanDir(projectSiteDir);
-				FileUtils.copyDirectory(inputDir, projectSiteDir);
-				OneDev.getInstance(ProjectManager.class).directoryModified(projectId, projectSiteDir);
-				return null;
-			});
-			String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-			jobLogger.log("Site published as " 
-					+ StringUtils.stripEnd(serverUrl, "/") + "/" + project.getPath() + "/~site");
-			return null;
-		} else {
-			throw new UnauthorizedException("Site publish is prohibited by current job executor");
-		}
+		});
+		return null;
 	}
 
 }

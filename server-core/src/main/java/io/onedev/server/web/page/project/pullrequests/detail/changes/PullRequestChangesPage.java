@@ -943,10 +943,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-						if (range != null) {
-							problems.add(new CodeProblem(problem.getSeverity(), problem.getType(), 
-									problem.getBlobPath(), range, problem.getMessage()));
+						if (problem.getRange() != null) {
+							PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
+							if (range != null) {
+								problems.add(new CodeProblem(problem.getSeverity(),
+										problem.getBlobPath(), range, problem.getMessage()));
+							}
 						}
 					} else {
 						problems.add(problem);
@@ -974,10 +976,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						if (!state.newCommitHash.equals(buildCommitId.name())) {
 							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
 									ObjectId.fromString(state.newCommitHash), blobPath);
-							PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-							if (range != null) {
-								problems.add(new CodeProblem(problem.getSeverity(), problem.getType(),
-										problem.getBlobPath(), range, problem.getMessage()));
+							if (problem.getRange() != null) {
+								PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
+								if (range != null) {
+									problems.add(new CodeProblem(problem.getSeverity(),
+											problem.getBlobPath(), range, problem.getMessage()));
+								}
 							}
 						} else {
 							problems.add(problem);

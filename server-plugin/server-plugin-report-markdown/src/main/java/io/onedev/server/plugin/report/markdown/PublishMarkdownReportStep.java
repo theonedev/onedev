@@ -1,23 +1,24 @@
 package io.onedev.server.plugin.report.markdown;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.persistence.SessionManager;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
@@ -57,32 +58,34 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		write(getReportLockName(build), () -> {
-			File startPage = new File(inputDir, getStartPage()); 
-			if (startPage.exists()) {
-				File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			write(getReportLockName(build), () -> {
+				File startPage = new File(inputDir, getStartPage());
+				if (startPage.exists()) {
+					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 
-				FileUtils.createDir(reportDir);
-				File startPageFile = new File(reportDir, START_PAGE);
-				FileUtils.writeFile(startPageFile, getStartPage());
-				
-				int baseLen = inputDir.getAbsolutePath().length() + 1;
-				for (File file: getPatternSet().listFiles(inputDir)) {
-					try {
-						FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					FileUtils.createDir(reportDir);
+					File startPageFile = new File(reportDir, START_PAGE);
+					FileUtils.writeFile(startPageFile, getStartPage());
+
+					int baseLen = inputDir.getAbsolutePath().length() + 1;
+					for (File file: getPatternSet().listFiles(inputDir)) {
+						try {
+							FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 					}
+					OneDev.getInstance(ProjectManager.class).directoryModified(
+							build.getProject().getId(), reportDir.getParentFile());
+				} else {
+					logger.log("WARNING: Markdown report start page not found: " + startPage.getAbsolutePath());
 				}
-				OneDev.getInstance(ProjectManager.class).directoryModified(
-						build.getProject().getId(), reportDir.getParentFile());
-			} else {
-				logger.log("WARNING: Markdown report start page not found: " + startPage.getAbsolutePath());
-			}
-			return null;
+				return null;
+			});
 		});
-		
 		return null;
 	}
 

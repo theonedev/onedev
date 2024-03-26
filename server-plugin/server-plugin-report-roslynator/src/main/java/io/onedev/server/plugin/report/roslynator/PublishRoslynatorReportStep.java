@@ -87,6 +87,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 						var message = messages.get(id);
 						if (message == null)
 							message = diagnosticsElement.elementText("Message");
+						message = id + ": " + message;
 						CodeProblem.Severity severity;
 						switch (diagnosticsElement.elementText("Severity").trim()) {
 							case "Error":
@@ -111,7 +112,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 							int line = parseInt(locationElement.attributeValue("Line"));
 							int character = parseInt(locationElement.attributeValue("Character"));
 							var range = new PlanarRange(line-1, character-1, line-1, character);
-							problems.add(new CodeProblem(severity, id, blobPath.get(), range, message));
+							problems.add(new CodeProblem(severity, blobPath.get(), range, message));
 						}
 					}
 				}

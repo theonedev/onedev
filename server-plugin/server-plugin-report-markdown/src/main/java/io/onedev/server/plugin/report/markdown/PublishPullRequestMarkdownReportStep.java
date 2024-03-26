@@ -1,23 +1,22 @@
 package io.onedev.server.plugin.report.markdown;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.persistence.SessionManager;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -56,23 +55,26 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File workspace, TaskLogger logger) {
-		if (build.getRequest() != null) {
-			write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
-				File file = new File(workspace, getFile()); 
-				if (file.exists()) {
-					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
-					String markdown = FileUtils.readFileToString(file, UTF_8);
-					FileUtils.createDir(reportDir);
-					FileUtils.writeFile(new File(reportDir, CONTENT), markdown, UTF_8);
-					OneDev.getInstance(ProjectManager.class).directoryModified(
-							build.getProject().getId(), reportDir.getParentFile());
-				} else {
-					logger.log("WARNING: Markdown report file not found: " + file.getAbsolutePath());
-				}
-				return null;
-			});
-		}
+	public Map<String, byte[]> run(Long buildId, File workspace, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			if (build.getRequest() != null) {
+				write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
+					File file = new File(workspace, getFile());
+					if (file.exists()) {
+						File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
+						String markdown = FileUtils.readFileToString(file, UTF_8);
+						FileUtils.createDir(reportDir);
+						FileUtils.writeFile(new File(reportDir, CONTENT), markdown, UTF_8);
+						OneDev.getInstance(ProjectManager.class).directoryModified(
+								build.getProject().getId(), reportDir.getParentFile());
+					} else {
+						logger.log("WARNING: Markdown report file not found: " + file.getAbsolutePath());
+					}
+					return null;
+				});
+			}
+		});			
 		return null;
 	}
 

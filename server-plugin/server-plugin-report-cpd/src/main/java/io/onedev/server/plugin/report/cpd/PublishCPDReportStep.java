@@ -121,7 +121,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 									+ "Duplicated with '%s' at <a href='%s'>line %s - %s</a>", 
 									HtmlEscape.escapeHtml5(duplicateWith.blobPath), url, duplicateWith.range.getFromRow()+1, 
 									duplicateWith.range.getToRow()+1);
-							CodeProblem problem = new CodeProblem(Severity.LOW, "Code Duplication", duplication.blobPath, 
+							CodeProblem problem = new CodeProblem(Severity.LOW, duplication.blobPath, 
 									duplication.range, message);
 							problems.add(problem);
 						}

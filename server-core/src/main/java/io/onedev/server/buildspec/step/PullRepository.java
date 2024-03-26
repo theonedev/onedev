@@ -19,6 +19,7 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
@@ -141,17 +142,19 @@ public class PullRepository extends SyncRepository {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		Project buildProject = build.getProject();
-		if (!buildProject.isCommitOnBranch(build.getCommitId(), buildProject.getDefaultBranch()))
-			throw new ExplicitException("For security reason, this step is only allowed to run from default branch");
-		
-		String remoteUrl = getRemoteUrlWithCredential(build);
-		Long projectId = getTargetProject(build).getId();
-		
-		var task = new PullTask(projectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
-		getProjectManager().runOnActiveServer(projectId, task);
-		
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			Project buildProject = build.getProject();
+			if (!buildProject.isCommitOnBranch(build.getCommitId(), buildProject.getDefaultBranch()))
+				throw new ExplicitException("For security reason, this step is only allowed to run from default branch");
+
+			String remoteUrl = getRemoteUrlWithCredential(build);
+			Long projectId = getTargetProject(build).getId();
+
+			var task = new PullTask(projectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
+			getProjectManager().runOnActiveServer(projectId, task);
+		});
 		return null;
 	}
 	

@@ -1,23 +1,21 @@
 package io.onedev.server.buildspec.step;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.build.BuildUpdated;
-import io.onedev.server.model.Build;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Markdown;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.persistence.TransactionManager;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 @Editable(order=265, name="Set Build Description")
 public class SetBuildDescriptionStep extends ServerSideStep {
@@ -44,16 +42,12 @@ public class SetBuildDescriptionStep extends ServerSideStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
-		return OneDev.getInstance(TransactionManager.class).call(new Callable<Map<String, byte[]>>() {
-
-			@Override
-			public Map<String, byte[]> call() {
-				build.setDescription(buildDescription);
-				OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(build));
-				return null;
-			}
-			
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
+		return OneDev.getInstance(TransactionManager.class).call(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			build.setDescription(buildDescription);
+			OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(build));
+			return null;
 		});
 		
 	}

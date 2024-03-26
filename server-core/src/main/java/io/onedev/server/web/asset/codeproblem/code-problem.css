@@ -6,6 +6,9 @@
 	border-top: 1px solid var(--light);
 	padding-top: 0.75rem;
 }
+.problem-popover .problem-content>.badge {
+	width: 64px;
+}
 .dark-mode .problem-popover .problem-content+.problem-content {
 	border-top-color: var(--dark-mode-light-dark);
 }

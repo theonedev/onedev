@@ -2,6 +2,8 @@ package io.onedev.server.buildspec.step;
 
 public class StepGroup {
 
+	public static final String SECURITY_COMPLIANCE = "Security & Compliance";
+	
 	public static final String PUBLISH = "Publish";
 	
 	public static final String REPOSITORY_SYNC = "Repository Sync";

@@ -82,8 +82,8 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 								severity = Severity.MEDIUM;
 							else
 								severity = Severity.LOW;
-							String message = HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
-							String rule = violationElement.attributeValue("source");
+							String message = violationElement.attributeValue("source") + ": " 
+									+ HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
 							int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
 							String column = violationElement.attributeValue("column");
 
@@ -95,7 +95,7 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 								range = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
 							}
 							
-							problems.add(new CodeProblem(severity, rule, blobPath, range, message));
+							problems.add(new CodeProblem(severity, blobPath, range, message));
 						}
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);

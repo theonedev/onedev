@@ -5,14 +5,15 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.StorageManager;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.validation.constraints.NotEmpty;
@@ -69,13 +70,16 @@ public class PublishArtifactStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
-		LockUtils.write(build.getArtifactsLockName(), () -> {
-			var projectId = build.getProject().getId();
-			var artifactsDir = OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
-			FileUtils.copyDirectory(inputDir, artifactsDir);
-			OneDev.getInstance(ProjectManager.class).directoryModified(projectId, artifactsDir);
-			return null;
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			LockUtils.write(build.getArtifactsLockName(), () -> {
+				var projectId = build.getProject().getId();
+				var artifactsDir = OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
+				FileUtils.copyDirectory(inputDir, artifactsDir);
+				OneDev.getInstance(ProjectManager.class).directoryModified(projectId, artifactsDir);
+				return null;
+			});
 		});
 		return null;
 	}

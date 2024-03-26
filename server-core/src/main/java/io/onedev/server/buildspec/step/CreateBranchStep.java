@@ -9,11 +9,12 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.Repository;
 
@@ -90,27 +91,29 @@ public class CreateBranchStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		Project project = build.getProject();
-		String branchName = getBranchName();
-		
-		if (!Repository.isValidRefName(GitUtils.branch2ref(branchName)))
-			throw new ExplicitException("Invalid branch name: " + branchName);
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			Project project = build.getProject();
+			String branchName = getBranchName();
 
-		if (build.canCreateBranch(getAccessTokenSecret(), branchName)) {
-			RefFacade branchRef = project.getBranchRef(branchName);
-			if (branchRef != null) {
-				logger.warning("Branch '" + branchName + "' already exists");
+			if (!Repository.isValidRefName(GitUtils.branch2ref(branchName)))
+				throw new ExplicitException("Invalid branch name: " + branchName);
+
+			if (build.canCreateBranch(getAccessTokenSecret(), branchName)) {
+				RefFacade branchRef = project.getBranchRef(branchName);
+				if (branchRef != null) {
+					logger.warning("Branch '" + branchName + "' already exists");
+				} else {
+					String branchRevision = getBranchRevision();
+					if (branchRevision == null)
+						branchRevision = build.getCommitHash();
+					OneDev.getInstance(GitService.class).createBranch(project, branchName, branchRevision);
+				}
 			} else {
-				String branchRevision = getBranchRevision();
-				if (branchRevision == null)
-					branchRevision = build.getCommitHash();
-				OneDev.getInstance(GitService.class).createBranch(project, branchName, branchRevision);
+				throw new ExplicitException("This build is not authorized to create branch '" + branchName + "'");
 			}
-		} else {
-			throw new ExplicitException("This build is not authorized to create branch '" + branchName + "'");
-		}
-		
+		});
 		return null;
 	}
 

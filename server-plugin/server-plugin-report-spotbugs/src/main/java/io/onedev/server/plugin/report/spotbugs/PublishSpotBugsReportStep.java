@@ -92,7 +92,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						if (StringUtils.isBlank(message))
 							message = bugElement.elementText("ShortMessage");
 						
-						message = HtmlEscape.escapeHtml5(message);
+						message = type + ": " + HtmlEscape.escapeHtml5(message);
 						
 						PlanarRange range = getRange(bugElement, true);
 
@@ -105,7 +105,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						if (range == null) 
 							range = new PlanarRange(0, -1, 0, -1);
 
-						problems.add(new CodeProblem(severity, type, blobPath, range, message));
+						problems.add(new CodeProblem(severity, blobPath, range, message));
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);
 					}

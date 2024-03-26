@@ -250,10 +250,10 @@ onedev.server.sourceView = {
 		for (var i in problems) 
 			markRanges.push(problems[i].range);			
 		
-		var iconInfo = onedev.server.codeProblem.getIconInfo(problems);
+		var severityInfo = onedev.server.codeProblem.getSeverityInfo(problems);
 		
-		let svg = `<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`;
-		$gutter.append(`<a class='problem-trigger ${iconInfo[1]}'>${svg}</a>`);
+		let svg = `<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#exclamation-circle-o'/></svg>`;
+		$gutter.append(`<a class='problem-trigger ${severityInfo}'>${svg}</a>`);
 		var $trigger = $gutter.children("a");
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);

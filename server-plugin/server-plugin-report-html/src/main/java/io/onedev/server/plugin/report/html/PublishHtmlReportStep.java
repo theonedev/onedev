@@ -9,10 +9,12 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.persistence.SessionManager;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,35 +55,38 @@ public class PublishHtmlReportStep extends PublishReportStep {
 
 	@Nullable
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
-		if (jobContext.getJobExecutor().isHtmlReportPublishEnabled()) {
-			return write(getReportLockName(build), () -> {
-				File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
-				File startPage = new File(inputDir, getStartPage());
-				if (startPage.exists()) {
-					FileUtils.createDir(reportDir);
-					File startPageFile = new File(reportDir, START_PAGE);
-					FileUtils.writeFile(startPageFile, getStartPage());
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
+			if (jobContext.getJobExecutor().isHtmlReportPublishEnabled()) {
+				write(getReportLockName(build), () -> {
+					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
+					File startPage = new File(inputDir, getStartPage());
+					if (startPage.exists()) {
+						FileUtils.createDir(reportDir);
+						File startPageFile = new File(reportDir, START_PAGE);
+						FileUtils.writeFile(startPageFile, getStartPage());
 
-					int baseLen = inputDir.getAbsolutePath().length() + 1;
-					for (File file : getPatternSet().listFiles(inputDir)) {
-						try {
-							FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+						int baseLen = inputDir.getAbsolutePath().length() + 1;
+						for (File file : getPatternSet().listFiles(inputDir)) {
+							try {
+								FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
 						}
+						OneDev.getInstance(ProjectManager.class).directoryModified(
+								build.getProject().getId(), reportDir.getParentFile());
+					} else {
+						logger.warning("Html report start page not found: " + startPage.getAbsolutePath());
 					}
-					OneDev.getInstance(ProjectManager.class).directoryModified(
-							build.getProject().getId(), reportDir.getParentFile());
-				} else {
-					logger.warning("Html report start page not found: " + startPage.getAbsolutePath());
-				}
-				return null;
-			});
-		} else {
-			throw new UnauthorizedException("Html report publish is prohibited by current job executor");
-		}
+				});
+			} else {
+				throw new UnauthorizedException("Html report publish is prohibited by current job executor");
+			}
+		});		
+		return null;
 	}
 
 	public static String getReportLockName(Build build) {

@@ -47,7 +47,15 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 		super.onInitialize();
 		
 		PageParameters params = ProjectBlobPage.paramsOf(getProject());
-		Link<Void> filesLink = new BookmarkablePageLink<Void>("files", ProjectBlobPage.class, params);
+		Link<Void> filesLink = new BookmarkablePageLink<Void>("files", ProjectBlobPage.class, params) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getCommitInfoManager().getFileCount(getProject().getId()) != 0);
+			}
+			
+		};
 		filesLink.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override

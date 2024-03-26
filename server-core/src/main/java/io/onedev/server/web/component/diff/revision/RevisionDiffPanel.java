@@ -1136,7 +1136,7 @@ public abstract class RevisionDiffPanel extends Panel {
 									oldProblems = new HashSet<>();
 									if (getOldBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getOldProblems(getOldBlobIdent().path)) {
-											if (isVisible(new DiffPlanarRange(true, problem.getRange())))
+											if (problem.getRange() != null && isVisible(new DiffPlanarRange(true, problem.getRange())))
 												oldProblems.add(problem);
 										}
 									}
@@ -1152,7 +1152,7 @@ public abstract class RevisionDiffPanel extends Panel {
 									newProblems = new HashSet<>();
 									if (getNewBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getNewProblems(getNewBlobIdent().path)) {
-											if (isVisible(new DiffPlanarRange(false, problem.getRange())))
+											if (problem.getRange() != null && isVisible(new DiffPlanarRange(false, problem.getRange())))
 												newProblems.add(problem);
 										}
 									}

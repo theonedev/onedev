@@ -1059,10 +1059,9 @@ onedev.server.blobTextDiff = {
 		let $trigger = $(document.createElement("a"));
 		$trigger.addClass("problem-trigger");
 		
-		let iconInfo = onedev.server.codeProblem.getIconInfo(problems);
-		$trigger.addClass(iconInfo[1]);
+		$trigger.addClass(onedev.server.codeProblem.getSeverityInfo(problems));
 
-		$trigger.append(`<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`);
+		$trigger.append(`<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#exclamation-circle-o'/></svg>`);
 		
 		let markRanges = [];
 		for (var i in problems) 

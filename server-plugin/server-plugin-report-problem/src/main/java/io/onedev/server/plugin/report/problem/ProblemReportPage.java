@@ -246,9 +246,7 @@ public class ProblemReportPage extends BuildReportPage {
 					state.problemReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params));
-
-					item.add(new Label("numOfProblems", file.getProblems().size() + " problems"));
-
+					
 					item.add(new Label("tooManyProblems",
 							"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {
 
@@ -269,10 +267,21 @@ public class ProblemReportPage extends BuildReportPage {
 							problems.sort((o1, o2) -> {
 								if (o1.getSeverity() != o2.getSeverity())
 									return o1.getSeverity().ordinal() - o2.getSeverity().ordinal();
-								else if (o1.getRange().getFromRow() != o2.getRange().getFromRow())
-									return o1.getRange().getFromRow() - o2.getRange().getFromRow();
-								else 
-									return o1.getRange().getFromColumn() - o2.getRange().getFromColumn();
+								if (o1.getRange() != null) {
+									if (o2.getRange() != null) {
+										if (o1.getRange().getFromRow() != o2.getRange().getFromRow())
+											return o1.getRange().getFromRow() - o2.getRange().getFromRow();
+										else
+											return o1.getRange().getFromColumn() - o2.getRange().getFromColumn();
+									} else {
+										return -1;
+									}
+								} else {
+									if (o2.getRange() != null)
+										return 1;
+									else 
+										return 0;
+								}
 							});
 							if (problems.size() > MAX_PROBLEMS_TO_DISPLAY)
 								return problems.subList(0, MAX_PROBLEMS_TO_DISPLAY);
@@ -285,19 +294,34 @@ public class ProblemReportPage extends BuildReportPage {
 						@Override
 						protected void populateItem(ListItem<CodeProblem> item) {
 							CodeProblem problem = item.getModelObject();
-							item.add(newSeverityIcon("icon", problem.getSeverity()));
+							var severityLabel = new Label("severity", problem.getSeverity().name());
+							item.add(severityLabel);
+							if (problem.getSeverity() == Severity.CRITICAL || problem.getSeverity() == Severity.HIGH)
+								severityLabel.add(AttributeAppender.append("class", "badge-danger"));
+							else if (problem.getSeverity() == Severity.MEDIUM)
+								severityLabel.add(AttributeAppender.append("class", "badge-warning"));
+							else
+								severityLabel.add(AttributeAppender.append("class", "badge-secondary"));
+							
 							item.add(new Label("message", problem.getMessage()).setEscapeModelStrings(false));
 
-							ProjectBlobPage.State state = new ProjectBlobPage.State();
-							state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
-									filePath, FileMode.REGULAR_FILE.getBits());
-							state.problemReport = getReportName();
-							state.position = BlobRenderer.getSourcePosition(problem.getRange());
-							PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
-							BookmarkablePageLink<Void> rangeLink = new BookmarkablePageLink<Void>("range",
-									ProjectBlobPage.class, params);
-							rangeLink.add(new Label("label", describe(problem.getRange())));
-							item.add(rangeLink);
+							if (problem.getRange() != null) {
+								ProjectBlobPage.State state = new ProjectBlobPage.State();
+								state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
+										filePath, FileMode.REGULAR_FILE.getBits());
+								state.problemReport = getReportName();
+								state.position = BlobRenderer.getSourcePosition(problem.getRange());
+								PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
+								BookmarkablePageLink<Void> rangeLink = new BookmarkablePageLink<Void>("range",
+										ProjectBlobPage.class, params);
+								rangeLink.add(new Label("label", describe(problem.getRange())));
+								item.add(rangeLink);
+							} else {
+								var rangeLink = new WebMarkupContainer("range");
+								rangeLink.add(new WebMarkupContainer("label"));
+								rangeLink.setVisible(false);
+								item.add(rangeLink);
+							}
 						}
 
 						@Override
@@ -371,28 +395,6 @@ public class ProblemReportPage extends BuildReportPage {
 			return "Line: " + (range.getFromRow()+1);
 		else
 			return "Line: " + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
-	}
-	
-	protected SpriteImage newSeverityIcon(String componentId, Severity severity) {
-		String iconHref;
-		String iconClass;
-		switch (severity) {
-		case HIGH:
-			iconHref = "times-circle-o";
-			iconClass = "text-danger";
-			break;
-		case MEDIUM:
-			iconHref = "warning-o";
-			iconClass = "text-warning";
-			break;
-		default:
-			iconClass = "text-info";
-			iconHref = "info-circle-o";
-		}
-		
-		SpriteImage icon = new SpriteImage(componentId, iconHref);
-		icon.add(AttributeAppender.append("class", iconClass));
-		return icon;
 	}
 	
 	public static PageParameters paramsOf(Build build, String reportName, @Nullable String file) {

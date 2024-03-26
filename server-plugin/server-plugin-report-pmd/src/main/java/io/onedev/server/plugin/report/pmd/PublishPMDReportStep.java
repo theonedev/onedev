@@ -92,8 +92,8 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 							else
 								severity = Severity.LOW;
 							
-							String message = HtmlEscape.escapeHtml5(violationElement.getText());
-							problems.add(new CodeProblem(severity, type, blobPath, range, message));
+							String message = type + ": " + HtmlEscape.escapeHtml5(violationElement.getText());
+							problems.add(new CodeProblem(severity, blobPath, range, message));
 						}
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);						

@@ -1,26 +1,22 @@
 package io.onedev.server.codequality;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import io.onedev.commons.utils.PlanarRange;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import io.onedev.commons.utils.PlanarRange;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
+
+import static java.util.Comparator.comparingInt;
 
 public class CodeProblem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static enum Severity {HIGH, MEDIUM, LOW};
+	public enum Severity {CRITICAL, HIGH, MEDIUM, LOW};
 
 	private final Severity severity;
-	
-	private final String type;
 	
 	private final String blobPath;
 
@@ -28,9 +24,8 @@ public class CodeProblem implements Serializable {
 	
 	private final String message;
 	
-	public CodeProblem(Severity severity, String type, String blobPath, PlanarRange range, String message) {
+	public CodeProblem(Severity severity, String blobPath, @Nullable PlanarRange range, String message) {
 		this.severity = severity;
-		this.type = type;
 		this.blobPath = blobPath;
 		this.range = range;
 		this.message = message;
@@ -39,15 +34,12 @@ public class CodeProblem implements Serializable {
 	public Severity getSeverity() {
 		return severity;
 	}
-	
-	public String getType() {
-		return type;
-	}
 
 	public String getBlobPath() {
 		return blobPath;
 	}
 
+	@Nullable
 	public PlanarRange getRange() {
 		return range;
 	}
@@ -57,7 +49,7 @@ public class CodeProblem implements Serializable {
 	}
 
 	public CodeProblem normalizeRange(List<String> lines) {
-		return new CodeProblem(severity, type, blobPath, range.normalize(lines), message);
+		return new CodeProblem(severity, blobPath, range!=null?range.normalize(lines):null, message);
 	}
 
 	@Override
@@ -69,7 +61,6 @@ public class CodeProblem implements Serializable {
 		CodeProblem otherProblem = (CodeProblem) other;
 		return new EqualsBuilder()
 				.append(severity, otherProblem.severity)
-				.append(type, otherProblem.type)
 				.append(blobPath, otherProblem.blobPath)
 				.append(range, otherProblem.range)
 				.append(message, otherProblem.message)
@@ -80,7 +71,6 @@ public class CodeProblem implements Serializable {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 				.append(severity)
-				.append(type)
 				.append(blobPath)
 				.append(range)
 				.append(message)
@@ -91,18 +81,20 @@ public class CodeProblem implements Serializable {
 		Map<Integer, List<CodeProblem>> problemsByLine = new HashMap<>();
 		
 		for (CodeProblem problem: problems) {
-			PlanarRange position = problem.getRange();
-			int line = position.getFromRow();
-			List<CodeProblem> problemsAtLine = problemsByLine.get(line);
-			if (problemsAtLine == null) {
-				problemsAtLine = new ArrayList<>();
-				problemsByLine.put(line, problemsAtLine);
+			PlanarRange range = problem.getRange();
+			if (range != null) {
+				int line = range.getFromRow();
+				List<CodeProblem> problemsAtLine = problemsByLine.get(line);
+				if (problemsAtLine == null) {
+					problemsAtLine = new ArrayList<>();
+					problemsByLine.put(line, problemsAtLine);
+				}
+				problemsAtLine.add(problem);
 			}
-			problemsAtLine.add(problem);
 		}
 		
 		for (List<CodeProblem> value: problemsByLine.values()) {
-			value.sort((o1, o2)->(int)(o1.getSeverity().ordinal()-o2.getSeverity().ordinal()));
+			value.sort(comparingInt(o -> o.getSeverity().ordinal()));
 		}
 		
 		return problemsByLine;

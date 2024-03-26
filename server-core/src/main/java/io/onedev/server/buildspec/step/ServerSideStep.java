@@ -43,7 +43,7 @@ public abstract class ServerSideStep extends Step {
 	}
 	
 	@Nullable
-	public abstract Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger);
+	public abstract Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger);
 	
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();

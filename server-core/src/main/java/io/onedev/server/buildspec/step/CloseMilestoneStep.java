@@ -8,8 +8,8 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
@@ -63,27 +63,23 @@ public class CloseMilestoneStep extends ServerSideStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-			@Override
-			public void run() {
-				Project project = build.getProject();
-				String milestoneName = getMilestoneName();
-				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-				Milestone milestone = milestoneManager.findInHierarchy(project, milestoneName);
-				if (milestone != null) {
-					if (build.canCloseMilestone(getAccessTokenSecret())) {
-						milestone.setClosed(true);
-						milestoneManager.createOrUpdate(milestone);
-					} else {
-						throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
-					}
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(TransactionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			Project project = build.getProject();
+			String milestoneName = getMilestoneName();
+			MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
+			Milestone milestone = milestoneManager.findInHierarchy(project, milestoneName);
+			if (milestone != null) {
+				if (build.canCloseMilestone(getAccessTokenSecret())) {
+					milestone.setClosed(true);
+					milestoneManager.createOrUpdate(milestone);
 				} else {
-					logger.warning("Unable to find milestone '" + milestoneName + "' to close. Ignored.");
+					throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
 				}
+			} else {
+				logger.warning("Unable to find milestone '" + milestoneName + "' to close. Ignored.");
 			}
-			
 		});
 		return null;
 	}

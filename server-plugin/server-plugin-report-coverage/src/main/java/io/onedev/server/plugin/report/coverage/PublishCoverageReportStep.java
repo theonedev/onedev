@@ -7,10 +7,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang.SerializationUtils;
 
@@ -27,46 +29,48 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		ProcessResult result = write(getReportLockName(build), () -> {
-			File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			ProcessResult result = write(getReportLockName(build), () -> {
+				File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
 
-			FileUtils.createDir(reportDir);
-			try {
-				ProcessResult aResult = process(build, inputDir, logger);
-				if (aResult != null) {
-					aResult.getReport().writeTo(reportDir);
-					for (var entry: aResult.getStatuses().entrySet()) 
-						writeLineStatuses(build, entry.getKey(), entry.getValue());
-					
-					OneDev.getInstance(ProjectManager.class).directoryModified(
-							build.getProject().getId(), reportDir.getParentFile());
-					return aResult;
-				} else {
+				FileUtils.createDir(reportDir);
+				try {
+					ProcessResult aResult = process(build, inputDir, logger);
+					if (aResult != null) {
+						aResult.getReport().writeTo(reportDir);
+						for (var entry: aResult.getStatuses().entrySet())
+							writeLineStatuses(build, entry.getKey(), entry.getValue());
+
+						OneDev.getInstance(ProjectManager.class).directoryModified(
+								build.getProject().getId(), reportDir.getParentFile());
+						return aResult;
+					} else {
+						FileUtils.deleteDir(reportDir);
+						return null;
+					}
+				} catch (Exception e) {
 					FileUtils.deleteDir(reportDir);
-					return null;
+					throw ExceptionUtils.unchecked(e);
 				}
-			} catch (Exception e) {
-				FileUtils.deleteDir(reportDir);
-				throw ExceptionUtils.unchecked(e);
+			});
+
+			if (result != null) {
+				var metric = OneDev.getInstance(BuildMetricManager.class).find(CoverageMetric.class, build, getReportName());
+				if (metric == null) {
+					metric = new CoverageMetric();
+					metric.setBuild(build);
+					metric.setReportName(getReportName());
+				}
+
+				CoverageInfo coverages = result.getReport().getOverallCoverages();
+				metric.setBranchCoverage(coverages.getBranchCoverage());
+				metric.setLineCoverage(coverages.getLineCoverage());
+
+				OneDev.getInstance(Dao.class).persist(metric);
 			}
 		});
-		
-		if (result != null) {
-			var metric = OneDev.getInstance(BuildMetricManager.class).find(CoverageMetric.class, build, getReportName());
-			if (metric == null) {
-				metric = new CoverageMetric();
-				metric.setBuild(build);
-				metric.setReportName(getReportName());
-			}
-			
-			CoverageInfo coverages = result.getReport().getOverallCoverages();
-			metric.setBranchCoverage(coverages.getBranchCoverage());
-			metric.setLineCoverage(coverages.getLineCoverage());
-			
-			OneDev.getInstance(Dao.class).persist(metric);
-		}	
-		
 		return null;
 	}
 

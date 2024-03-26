@@ -4,6 +4,7 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 
@@ -19,15 +20,27 @@ public class ProblemReport implements Serializable {
 	
 	private final Collection<CodeProblem> problems;
 	
-	private transient Collection<ProblemFile> problemFiles;
+	private final String failBuildReason;
 	
-	public ProblemReport(Collection<CodeProblem> problems) {
+	private transient Collection<ProblemFile> problemFiles;
+
+	public ProblemReport(Collection<CodeProblem> problems, @Nullable String failBuildReason) {
 		this.problems = problems;
+		this.failBuildReason = failBuildReason;
 	}
 
+	public ProblemReport(Collection<CodeProblem> problems) {
+		this(problems, null);
+	}
+	
 	public Collection<CodeProblem> getProblems() {
 		return problems;
-	} 
+	}
+
+	@Nullable
+	public String getFailBuildReason() {
+		return failBuildReason;
+	}
 
 	public Collection<ProblemFile> getProblemFiles() {
 		if (problemFiles == null) {
@@ -72,17 +85,20 @@ public class ProblemReport implements Serializable {
 	}
 	
 	public Comparator<ProblemFile> newProblemFileComparator() {
+		Map<String, Long> criticalSeverityCounts = new HashMap<>();
 		Map<String, Long> highSeverityCounts = new HashMap<>();
 		Map<String, Long> mediumSeverityCounts = new HashMap<>();
+		Map<String, Long> unknownSeverityCounts = new HashMap<>();
 		Map<String, Long> lowSeverityCounts = new HashMap<>();
 		
 		for (var problemFile: problemFiles) {
+			criticalSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.CRITICAL).count());
 			highSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.HIGH).count());
 			mediumSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.MEDIUM).count());
 			lowSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.LOW).count());
 		}
 
-		return new Comparator<ProblemFile>() {
+		return new Comparator<>() {
 
 			private int compareSeverityCount(Map<String, Long> severityCounts, ProblemFile file1, ProblemFile file2) {
 				var severityCount1 = severityCounts.getOrDefault(file1.getBlobPath(), 0L);
@@ -92,15 +108,21 @@ public class ProblemReport implements Serializable {
 
 			@Override
 			public int compare(ProblemFile o1, ProblemFile o2) {
-				var order = compareSeverityCount(highSeverityCounts, o1, o2);
+				var order = compareSeverityCount(criticalSeverityCounts, o1, o2);
+				if (order != 0)
+					return order;
+				order = compareSeverityCount(highSeverityCounts, o1, o2);
 				if (order != 0)
 					return order;
 				order = compareSeverityCount(mediumSeverityCounts, o1, o2);
 				if (order != 0)
 					return order;
+				order = compareSeverityCount(unknownSeverityCounts, o1, o2);
+				if (order != 0)
+					return order;
 				return compareSeverityCount(lowSeverityCounts, o1, o2);
 			}
-			
+
 		};
 	}
 }

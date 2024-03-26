@@ -6,13 +6,14 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
@@ -79,24 +80,26 @@ public class CreateTagStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		PersonIdent taggerIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
-		Project project = build.getProject();
-		String tagName = getTagName();
-		
-		if (!Repository.isValidRefName(GitUtils.tag2ref(tagName)))
-			throw new ExplicitException("Invalid tag name: " + tagName);
-		
-		if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
-			RefFacade tagRef = project.getTagRef(tagName);
-			if (tagRef != null) 
-				OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);
-			OneDev.getInstance(GitService.class).createTag(project, tagName, build.getCommitHash(), 
-					taggerIdent, getTagMessage(), false);
-		} else {
-			throw new ExplicitException("This build is not authorized to create tag '" + tagName + "'");
-		}
-		
+	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+		OneDev.getInstance(SessionManager.class).run(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+			PersonIdent taggerIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
+			Project project = build.getProject();
+			String tagName = getTagName();
+
+			if (!Repository.isValidRefName(GitUtils.tag2ref(tagName)))
+				throw new ExplicitException("Invalid tag name: " + tagName);
+
+			if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
+				RefFacade tagRef = project.getTagRef(tagName);
+				if (tagRef != null)
+					OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);
+				OneDev.getInstance(GitService.class).createTag(project, tagName, build.getCommitHash(),
+						taggerIdent, getTagMessage(), false);
+			} else {
+				throw new ExplicitException("This build is not authorized to create tag '" + tagName + "'");
+			}
+		});
 		return null;
 	}
 

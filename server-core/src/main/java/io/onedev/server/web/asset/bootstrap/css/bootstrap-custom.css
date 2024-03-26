@@ -171,7 +171,15 @@ a.link-gray:hover, a.link-gray:focus {
 .dark-mode a.link-gray:hover, .dark-mode a.link-gray:focus {
 	color: var(--primary) !important;
 }
-
+.text-muted, a.link-muted {
+	color: var(--muted) !important;
+}
+a.link-muted:hover, a.link-muted:focus {
+	color: var(--gray) !important;
+}
+.dark-mode .text-muted, .dark-mode .link-muted {
+	color: rgb(98, 101, 126) !important;
+}
 
 .text-hover-primary:hover, .text-hover-primary:focus, 
 a.link-hover-primary:hover, a.link-hover-primary:focus {
@@ -444,12 +452,6 @@ pre code {
     border-color: var(--dark-mode-light-dark);
 }
 
-.text-muted {
-    color: var(--muted) !important;
-}
-.dark-mode .text-muted {
-	color: rgb(98, 101, 126) !important;
-}
 .form-group .form-text {
     font-size: 0.9rem;
     font-weight: 400;

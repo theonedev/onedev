@@ -87,7 +87,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.ws.rs.client.Client;
@@ -1463,10 +1462,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						}
 					}
 					
-					return sessionManager.call(() -> {
-						Build build = buildManager.load(jobContext.getBuildId());
-						return transformedServerSideStep.run(build, inputDir, logger);
-					});
+					return transformedServerSideStep.run(jobContext.getBuildId(), inputDir, logger);
 				} else {
 					throw new IllegalStateException("Job actions not found");
 				}
