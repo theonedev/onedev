@@ -14,7 +14,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.ExposeOutputStream;
-import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.commons.utils.command.ProcessTreeKiller;
 import io.onedev.commons.utils.command.PtyMode;
 import io.onedev.commons.utils.command.PtyMode.ResizeSupport;

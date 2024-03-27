@@ -1,7 +1,7 @@
 .build-status-successful {
 	color: var(--success) !important;
 }
-.build-status-failed, .build-status-in_error, .build-status-cancelled, .build-status-timed_out {
+.build-status-failed, .build-status-cancelled, .build-status-timed_out {
 	color: var(--danger) !important;
 }
 .build-status-running, .build-status-paused, .build-status-waiting, .build-status-pending {

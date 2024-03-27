@@ -29,7 +29,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +102,7 @@ public class KubernetesResource {
 				
 				TarUtils.untar(is, filesDir, false);
 				
-				Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
+				var result = jobManager.runServerStep(jobContext, 
 						stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
 					@Override
@@ -120,9 +119,7 @@ public class KubernetesResource {
 					}
 					
 				});
-				if (outputFiles == null)
-					outputFiles = new HashMap<>();
-				byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
+				byte[] bytes = SerializationUtils.serialize(result); 
 				KubernetesHelper.writeInt(os, 2);
 				KubernetesHelper.writeInt(os, bytes.length);
 				os.write(bytes);

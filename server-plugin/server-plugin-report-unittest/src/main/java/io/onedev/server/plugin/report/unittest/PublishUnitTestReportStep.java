@@ -2,6 +2,7 @@ package io.onedev.server.plugin.report.unittest;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
@@ -15,7 +16,6 @@ import io.onedev.server.persistence.dao.Dao;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
@@ -26,7 +26,7 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		OneDev.getInstance(SessionManager.class).run(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			File reportDir = new File(build.getDir(), UnitTestReport.CATEGORY + "/" + getReportName());
@@ -60,7 +60,7 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 			}
 
 		});
-		return null;
+		return new ServerStepResult(true);
 	}
 
 	@Nullable

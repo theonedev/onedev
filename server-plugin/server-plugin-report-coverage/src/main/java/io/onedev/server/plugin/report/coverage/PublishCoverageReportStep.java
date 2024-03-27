@@ -3,6 +3,7 @@ package io.onedev.server.plugin.report.coverage;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
@@ -29,8 +30,8 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			ProcessResult result = write(getReportLockName(build), () -> {
 				File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
@@ -70,8 +71,8 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 
 				OneDev.getInstance(Dao.class).persist(metric);
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 
 	@Nullable

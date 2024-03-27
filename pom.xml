@@ -9,7 +9,7 @@
 		<version>1.2.3</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>10.3.3</version>
+	<version>10.4.0</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -630,8 +630,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.8.11</commons.version>
-		<agent.version>1.11.0</agent.version>
+		<commons.version>2.9.0</commons.version>
+		<agent.version>1.11.2</agent.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<logback.version>1.4.14</logback.version>
 		<antlr.version>4.7.2</antlr.version>

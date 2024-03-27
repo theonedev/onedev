@@ -247,7 +247,7 @@ public class Build extends ProjectBelonging
 			public boolean isFinished() {
 				return true;
 			}
-		}, 
+		},
 		SUCCESSFUL {
 			@Override
 			public boolean isFinished() {
@@ -285,7 +285,7 @@ public class Build extends ProjectBelonging
 			return Restrictions.or(
 					Restrictions.eq(PROP_STATUS, Status.FAILED), 
 					Restrictions.eq(PROP_STATUS, Status.CANCELLED), 
-					Restrictions.eq(PROP_STATUS, Status.TIMED_OUT), 
+					Restrictions.eq(PROP_STATUS, Status.TIMED_OUT),
 					Restrictions.eq(PROP_STATUS, Status.SUCCESSFUL));
 		}
 		
@@ -552,19 +552,19 @@ public class Build extends ProjectBelonging
 
 	public Date getStatusDate() {
 		switch (status) {
-		case FAILED:
-		case CANCELLED:
-		case SUCCESSFUL:
-		case TIMED_OUT:
-			return getFinishDate();
-		case WAITING:
-			return getRetryDate()!=null?getRetryDate():getSubmitDate();
-		case RUNNING:
-			return getRunningDate();
-		case PENDING:
-			return getPendingDate();
-		default:
-			throw new RuntimeException("Unexpected build status: " + status);
+			case FAILED:
+			case CANCELLED:
+			case SUCCESSFUL:
+			case TIMED_OUT:
+				return getFinishDate();
+			case WAITING:
+				return getRetryDate() != null ? getRetryDate() : getSubmitDate();
+			case RUNNING:
+				return getRunningDate();
+			case PENDING:
+				return getPendingDate();
+			default:
+				throw new RuntimeException("Unexpected build status: " + status);
 		}
 	}
 	

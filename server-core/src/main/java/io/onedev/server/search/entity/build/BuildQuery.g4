@@ -26,7 +26,7 @@ order
 Successful
 	: 'successful'
 	;
-	
+
 Failed
 	: 'failed'
 	;

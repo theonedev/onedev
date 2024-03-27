@@ -4,7 +4,6 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 
@@ -20,28 +19,16 @@ public class ProblemReport implements Serializable {
 	
 	private final Collection<CodeProblem> problems;
 	
-	private final String failBuildReason;
-	
 	private transient Collection<ProblemFile> problemFiles;
 
-	public ProblemReport(Collection<CodeProblem> problems, @Nullable String failBuildReason) {
-		this.problems = problems;
-		this.failBuildReason = failBuildReason;
-	}
-
 	public ProblemReport(Collection<CodeProblem> problems) {
-		this(problems, null);
+		this.problems = problems;
 	}
 	
 	public Collection<CodeProblem> getProblems() {
 		return problems;
 	}
-
-	@Nullable
-	public String getFailBuildReason() {
-		return failBuildReason;
-	}
-
+	
 	public Collection<ProblemFile> getProblemFiles() {
 		if (problemFiles == null) {
 			Map<String, ProblemFile> map = new LinkedHashMap<>();

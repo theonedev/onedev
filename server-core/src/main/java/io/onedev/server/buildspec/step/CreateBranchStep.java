@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.BranchName;
 import io.onedev.server.annotation.ChoiceProvider;
@@ -22,7 +23,6 @@ import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Editable(name="Create Branch", order=280)
@@ -91,8 +91,8 @@ public class CreateBranchStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			Project project = build.getProject();
 			String branchName = getBranchName();
@@ -111,10 +111,11 @@ public class CreateBranchStep extends ServerSideStep {
 					OneDev.getInstance(GitService.class).createBranch(project, branchName, branchRevision);
 				}
 			} else {
-				throw new ExplicitException("This build is not authorized to create branch '" + branchName + "'");
+				logger.error("This build is not authorized to create branch '" + branchName + "'");
+				return new ServerStepResult(false);
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 
 }

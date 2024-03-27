@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.taskbutton;
 
-import io.onedev.agent.job.FailedException;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -159,17 +158,15 @@ public abstract class TaskButton extends AjaxButton {
 				try {
 					return runTask(logger);
 				} catch (Exception e) {	
-					if (ExceptionUtils.find(e, FailedException.class) == null) {
-						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
-						if (explicitException != null) {
-							logger.error(explicitException.getMessage());
-						} else {
-							UnauthorizedException unauthorizedException = ExceptionUtils.find(e, UnauthorizedException.class);
-							if (unauthorizedException != null && unauthorizedException.getMessage() != null)
-								logger.error(unauthorizedException.getMessage());
-							else								
-								logger.error(null, e);
-						}
+					ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null) {
+						logger.error(explicitException.getMessage());
+					} else {
+						UnauthorizedException unauthorizedException = ExceptionUtils.find(e, UnauthorizedException.class);
+						if (unauthorizedException != null && unauthorizedException.getMessage() != null)
+							logger.error(unauthorizedException.getMessage());
+						else								
+							logger.error(null, e);
 					}
 					return new TaskResult(false, new PlainMessage("Error " + title));
 				} 

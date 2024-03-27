@@ -1,7 +1,11 @@
 package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.*;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
@@ -13,12 +17,10 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.patternset.PatternSet;
-import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
@@ -84,16 +86,18 @@ public class PublishSiteStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
 			if (jobContext.getJobExecutor().isSitePublishEnabled()) {
 				Project project;
 				if (projectPath != null) {
 					project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
-					if (project == null)
-						throw new ExplicitException("Unable to find project: " + projectPath);
+					if (project == null) {
+						logger.error("Unable to find project: " + projectPath);
+						return new ServerStepResult(false);
+					}
 				} else {
 					project = build.getProject();
 				}
@@ -106,13 +110,14 @@ public class PublishSiteStep extends ServerSideStep {
 					return null;
 				});
 				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-				jobLogger.log("Site published as "
+				logger.log("Site published as "
 						+ StringUtils.stripEnd(serverUrl, "/") + "/" + project.getPath() + "/~site");
 			} else {
-				throw new UnauthorizedException("Site publish is prohibited by current job executor");
+				logger.error("Site publish is prohibited by current job executor");
+				return new ServerStepResult(false);
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 
 }

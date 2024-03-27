@@ -3,6 +3,7 @@ package io.onedev.server.plugin.report.html;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -15,14 +16,11 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.SessionManager;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.jetbrains.annotations.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
@@ -53,10 +51,9 @@ public class PublishHtmlReportStep extends PublishReportStep {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
-	@Nullable
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
 			if (jobContext.getJobExecutor().isHtmlReportPublishEnabled()) {
@@ -83,10 +80,11 @@ public class PublishHtmlReportStep extends PublishReportStep {
 					}
 				});
 			} else {
-				throw new UnauthorizedException("Html report publish is prohibited by current job executor");
+				logger.error("Html report publish is prohibited by current job executor");
+				return new ServerStepResult(false);
 			}
+			return new ServerStepResult(true);
 		});		
-		return null;
 	}
 
 	public static String getReportLockName(Build build) {

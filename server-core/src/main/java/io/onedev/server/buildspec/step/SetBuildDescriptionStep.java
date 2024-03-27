@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -15,7 +16,6 @@ import io.onedev.server.persistence.TransactionManager;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 @Editable(order=265, name="Set Build Description")
 public class SetBuildDescriptionStep extends ServerSideStep {
@@ -42,12 +42,12 @@ public class SetBuildDescriptionStep extends ServerSideStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger jobLogger) {
 		return OneDev.getInstance(TransactionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			build.setDescription(buildDescription);
 			OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(build));
-			return null;
+			return new ServerStepResult(true);
 		});
 		
 	}

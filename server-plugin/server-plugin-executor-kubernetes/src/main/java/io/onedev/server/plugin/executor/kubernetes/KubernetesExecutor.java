@@ -7,12 +7,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.agent.job.FailedException;
 import io.onedev.agent.job.ImageMappingFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
@@ -283,98 +281,96 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	}
 
 	@Override
-	public void execute(JobContext jobContext, TaskLogger jobLogger) {
+	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		var clusterManager = OneDev.getInstance(ClusterManager.class);
 		var servers = clusterManager.getServerAddresses();
 		var server = servers.get(RandomUtils.nextInt(0, servers.size()));
-		getJobManager().runJob(server, ()-> {
-			getJobManager().runJob(jobContext, new JobRunnable() {
+		return getJobManager().runJob(server, ()-> getJobManager().runJob(jobContext, new JobRunnable() {
 
-				private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-				@Override
-				public void run(TaskLogger jobLogger) {
-					execute(jobLogger, jobContext);
+			@Override
+			public boolean run(TaskLogger jobLogger) {
+				return execute(jobLogger, jobContext);
+			}
+
+			@Override
+			public void resume(JobContext jobContext) {
+				if (osInfo != null) {
+					Commandline kubectl = newKubeCtl();
+					kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", getNamespace(jobContext), "--");
+					if (osInfo.isLinux())
+						kubectl.addArgs("touch", "/onedev-build/continue");
+					else
+						kubectl.addArgs("cmd", "-c", "copy", "NUL", "C:\\onedev-build\\continue");
+					kubectl.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.debug(line);
+						}
+
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.error("Kubernetes: " + line);
+						}
+
+					}).checkReturnCode();
 				}
+			}
 
-				@Override
-				public void resume(JobContext jobContext) {
-					if (osInfo != null) {
-						Commandline kubectl = newKubeCtl();
-						kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", getNamespace(jobContext), "--");
-						if (osInfo.isLinux())
-							kubectl.addArgs("touch", "/onedev-build/continue");
-						else
-							kubectl.addArgs("cmd", "-c", "copy", "NUL", "C:\\onedev-build\\continue");
-						kubectl.execute(new LineConsumer() {
+			@Override
+			public Shell openShell(JobContext jobContext, Terminal terminal) {
+				String containerNameCopy = containerName;
+				if (osInfo != null && containerNameCopy != null) {
+					Commandline kubectl = newKubeCtl();
+					kubectl.addArgs("exec", "-it", POD_NAME, "-c", containerNameCopy,
+							"--namespace", getNamespace(jobContext), "--");
 
-							@Override
-							public void consume(String line) {
-								logger.debug(line);
-							}
-
-						}, new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								logger.error("Kubernetes: " + line);
-							}
-
-						}).checkReturnCode();
-					}
-				}
-
-				@Override
-				public Shell openShell(JobContext jobContext, Terminal terminal) {
-					String containerNameCopy = containerName;
-					if (osInfo != null && containerNameCopy != null) {
-						Commandline kubectl = newKubeCtl();
-						kubectl.addArgs("exec", "-it", POD_NAME, "-c", containerNameCopy,
-								"--namespace", getNamespace(jobContext), "--");
-
-						String workingDir;
-						if (containerNameCopy.startsWith("step-")) {
-							List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
-							LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
-							if (step instanceof RunContainerFacade)
-								workingDir = ((RunContainerFacade)step).getContainer(osInfo).getWorkingDir();
-							else if (osInfo.isLinux())
-								workingDir = "/onedev-build/workspace";
-							else
-								workingDir = "C:\\onedev-build\\workspace";
-						} else if (osInfo.isLinux()) {
+					String workingDir;
+					if (containerNameCopy.startsWith("step-")) {
+						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
+						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
+						if (step instanceof RunContainerFacade)
+							workingDir = ((RunContainerFacade)step).getContainer(osInfo).getWorkingDir();
+						else if (osInfo.isLinux())
 							workingDir = "/onedev-build/workspace";
-						} else {
+						else
 							workingDir = "C:\\onedev-build\\workspace";
-						}
-
-						String[] shell = null;
-						if (containerNameCopy.startsWith("step-")) {
-							List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
-							LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
-							if (step instanceof CommandFacade)
-								shell = ((CommandFacade)step).getShell(osInfo.isWindows(), workingDir);
-						}
-						if (shell == null) {
-							if (workingDir != null) {
-								if (osInfo.isLinux())
-									shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
-								else
-									shell = new String[]{"cmd", "/c", String.format("cd %s && cmd", workingDir)};
-							} else if (osInfo.isLinux()) {
-								shell = new String[]{"sh"};
-							} else {
-								shell = new String[]{"cmd"};
-							}
-						}
-						kubectl.addArgs(shell);
-						return new CommandlineShell(terminal, kubectl);
+					} else if (osInfo.isLinux()) {
+						workingDir = "/onedev-build/workspace";
 					} else {
-						throw new ExplicitException("Shell not ready");
+						workingDir = "C:\\onedev-build\\workspace";
 					}
+
+					String[] shell = null;
+					if (containerNameCopy.startsWith("step-")) {
+						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
+						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
+						if (step instanceof CommandFacade)
+							shell = ((CommandFacade)step).getShell(osInfo.isWindows(), workingDir);
+					}
+					if (shell == null) {
+						if (workingDir != null) {
+							if (osInfo.isLinux())
+								shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
+							else
+								shell = new String[]{"cmd", "/c", String.format("cd %s && cmd", workingDir)};
+						} else if (osInfo.isLinux()) {
+							shell = new String[]{"sh"};
+						} else {
+							shell = new String[]{"cmd"};
+						}
+					}
+					kubectl.addArgs(shell);
+					return new CommandlineShell(terminal, kubectl);
+				} else {
+					throw new ExplicitException("Shell not ready");
 				}
-			});
-		});
+			}
+		}));
 	}
 	
 	private JobManager getJobManager() {
@@ -838,12 +834,17 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			if (containerStatusesNode != null)
 				containerStatusNodes.add(containerStatusesNode.iterator().next());				
 			
-			Map<String, ContainerError> containerErrors = getContainerErrors(containerStatusNodes);
+			Map<String, Object> containerErrors = getContainerErrors(containerStatusNodes);
 			if (!containerErrors.isEmpty()) {
-				ContainerError error = containerErrors.values().iterator().next();
-				if (!error.isFatal()) 
+				Object error = containerErrors.values().iterator().next();
+				String errorMessage;
+				if (error instanceof Integer) {
 					collectContainerLog(namespace, podName, "default", null, jobLogger);
-				throw new ExplicitException("Service " + jobService.getName() + ": " + error.getMessage());
+					errorMessage = "Exited with code " + error;
+				} else {
+					errorMessage = (String) error;
+				}
+				throw new ExplicitException("Service " + jobService.getName() + ": " + errorMessage);
 			} 
 			
 			if (!getStoppedContainers(containerStatusNodes).isEmpty()) {
@@ -859,7 +860,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				else 
 					kubectl.addArgs("cmd.exe", "/c");
 				kubectl.addArgs(jobService.getReadinessCheckCommand());
-				ExecutionResult result = kubectl.execute(new LineConsumer() {
+				var result = kubectl.execute(new LineConsumer() {
 
 					@Override
 					public void consume(String line) {
@@ -905,7 +906,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		}
 	}
 	
-	private void execute(TaskLogger jobLogger, Object executionContext) {
+	private boolean execute(TaskLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
 		String jobToken;
@@ -1229,8 +1230,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				jobLogger.log("Starting job containers...");
 				
-				AtomicBoolean failed = new AtomicBoolean(false);
-				
+				var successful = new AtomicBoolean(true);
 				for (String containerName: containerNames) {
 					logger.debug("Waiting for start of container (pod: {}, container: {})...", 
 							podFQN, containerName);
@@ -1239,21 +1239,20 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 						@Override
 						public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
-							ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
+							var error = getContainerErrors(containerStatusNodes).get(containerName);
 							if (error != null) {
 								/*
 								 * For non-fatal errors (command exited with non-zero code), we abort the watch 
 								 * without an exception, and will continue to collect the container log which 
 								 * might contain error details
 								 */
-								if (error.isFatal()) {
+								if (error instanceof String) {
 									String errorMessage;
 									if (containerName.startsWith("step-")) {
-										List<Integer> position = KubernetesHelper.parseStepPosition(containerName.substring("step-".length()));
-										errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
-												+ ": " + error.getMessage();
+										List<Integer> position = parseStepPosition(containerName.substring("step-".length()));
+										errorMessage = "Step \"" + entryFacade.getPathAsString(position) + "\": " + error;
 									} else {
-										errorMessage = containerName + ": " + error.getMessage();
+										errorMessage = "Container \"" + containerName + "\": " + error;
 									}
 									return new Abort(errorMessage);
 								} else {
@@ -1282,32 +1281,40 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 							@Override
 							public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
-								ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
+								var error = getContainerErrors(containerStatusNodes).get(containerName);
 								if (error != null) {
-									String errorMessage;
-									if (containerName.startsWith("step-")) {
-										List<Integer> position = KubernetesHelper.parseStepPosition(containerName.substring("step-".length()));
-										errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
-												+ " is failed: " + error.getMessage();
-									} else {
-										errorMessage = containerName + ": " + error.getMessage();
-									}
-									
-									/*
-									 * We abort the watch with an exception for two reasons:
-									 * 
-									 * 1. Init container error will prevent other containers to start. 
-									 * 2. Step containers may not run command in case of fatal error and sidecar 
-									 *    container will wait indefinitely on the successful/failed mark file in 
-									 *    this case, causing log following last indefinitely 
-									 */
-									if (error.isFatal() || containerName.equals("init")) {
+									// init container error will prevent other containers to start.
+									if (containerName.equals("init")) {
+										String errorMessage;
+										if (error instanceof Integer)
+											errorMessage = "Container \"init\": Exited with code " + error;
+										else
+											errorMessage = "Container \"init\": " + error;
 										return new Abort(errorMessage);
-									} else { 
-										jobLogger.error(errorMessage);
-										failed.set(true);
-										return new Abort(null);
-									} 
+									} else if (containerName.startsWith("step-")) {
+										/*
+										 * Step containers may not run command in case of errors and sidecar container 
+										 * will wait indefinitely on the successful/failed mark file in this case, so 
+										 * we just abort with error
+										 */
+										List<Integer> position = parseStepPosition(containerName.substring("step-".length()));
+										var stepPath = entryFacade.getPathAsString(position);
+										if (error instanceof Integer)
+											return new Abort("Step \"" + stepPath + "\": Exited with code " + error);
+										else
+											return new Abort("Step \"" + stepPath + "\": " + error);
+									} else {
+										if (error instanceof Integer) {
+											if ((int)error == 1) {
+												successful.set(false);
+												return new Abort(null);
+											} else {
+												return new Abort("Container \"sidecar\": Exited with code " + error);												
+											}
+										} else {
+											return new Abort("Container \"sidecar\": " + error);
+										}
+									}
 								} else if (getStoppedContainers(containerStatusNodes).contains(containerName)) {
 									return new Abort(null);
 								} else {
@@ -1320,9 +1327,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						KubernetesExecutor.this.containerName = null;
 					}
 				}
-				
-				if (failed.get())
-					throw new FailedException();
+				return successful.get();
 			} finally {
 				deleteNamespace(namespace, jobLogger);
 			}			
@@ -1333,7 +1338,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	}
 	
 	private ArrayList<Object> buildVolumeMounts(Collection<String> cachePaths) {
-		var volumeMounts = new ArrayList<Object>();
+		var volumeMounts = new ArrayList<>();
 		int index = 1;
 		for (var cachePath: cachePaths) {
 			if (FilenameUtils.getPrefixLength(cachePath) > 0) {
@@ -1352,8 +1357,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		return "step-" + stringifyStepPosition(stepPosition);
 	}
 	
-	private Map<String, ContainerError> getContainerErrors(Collection<JsonNode> containerStatusNodes) {
-		Map<String, ContainerError> containerErrors = new HashMap<>();
+	private Map<String, Object> getContainerErrors(Collection<JsonNode> containerStatusNodes) {
+		Map<String, Object> containerErrors = new HashMap<>();
 		for (JsonNode containerStatusNode: containerStatusNodes) {
 			String containerName = containerStatusNode.get("name").asText();
 
@@ -1366,9 +1371,9 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						|| reason.equals("RegistryUnavailable")) {
 					JsonNode messageNode = waitingNode.get("message");
 					if (messageNode != null)
-						containerErrors.put(containerName, new ContainerError(messageNode.asText(), true));
+						containerErrors.put(containerName, messageNode.asText());
 					else
-						containerErrors.put(containerName, new ContainerError(reason, true));
+						containerErrors.put(containerName, reason);
 				}
 			} 
 
@@ -1385,13 +1390,13 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					if (!reason.equals("Completed")) {
 						JsonNode messageNode = terminatedNode.get("message");
 						if (messageNode != null) {
-							containerErrors.put(containerName, new ContainerError(messageNode.asText(), true));
+							containerErrors.put(containerName, messageNode.asText());
 						} else {
 							JsonNode exitCodeNode = terminatedNode.get("exitCode");
-							if (exitCodeNode != null && exitCodeNode.asInt() != 0)
-								containerErrors.put(containerName, new ContainerError("Command failed with exit code " + exitCodeNode.asText(), false));
+							if (exitCodeNode != null)
+								containerErrors.put(containerName, exitCodeNode.asInt());
 							else
-								containerErrors.put(containerName, new ContainerError(reason, true));
+								containerErrors.put(containerName, reason);
 						}
 					}
 				}
@@ -1623,27 +1628,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		@Nullable
 		public String getErrorMessage() {
 			return errorMessage;
-		}
-		
-	}
-	
-	private static class ContainerError {
-		
-		private final String message;
-		
-		private final boolean fatal;
-		
-		public ContainerError(String message, boolean fatal) {
-			this.message = message;
-			this.fatal = fatal;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
-		public boolean isFatal() {
-			return fatal;
 		}
 		
 	}

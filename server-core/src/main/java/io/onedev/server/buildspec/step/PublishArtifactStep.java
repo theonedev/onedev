@@ -4,6 +4,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.StorageManager;
 import io.onedev.server.annotation.Editable;
@@ -19,7 +20,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
@@ -70,18 +70,17 @@ public class PublishArtifactStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger jobLogger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			LockUtils.write(build.getArtifactsLockName(), () -> {
+			return LockUtils.write(build.getArtifactsLockName(), () -> {
 				var projectId = build.getProject().getId();
 				var artifactsDir = OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
 				FileUtils.copyDirectory(inputDir, artifactsDir);
 				OneDev.getInstance(ProjectManager.class).directoryModified(projectId, artifactsDir);
-				return null;
+				return new ServerStepResult(true);
 			});
 		});
-		return null;
 	}
 
 }

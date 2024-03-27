@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.ServerSideFacade;
@@ -42,8 +43,7 @@ public abstract class ServerSideStep extends Step {
 		return false;
 	}
 	
-	@Nullable
-	public abstract Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger);
+	public abstract ServerStepResult run(Long buildId, File inputDir, TaskLogger logger);
 	
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();

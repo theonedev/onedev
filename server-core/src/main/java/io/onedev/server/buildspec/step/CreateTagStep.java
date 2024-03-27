@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
@@ -20,7 +21,6 @@ import org.eclipse.jgit.lib.Repository;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Editable(name="Create Tag", order=300)
@@ -80,15 +80,17 @@ public class CreateTagStep extends ServerSideStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			PersonIdent taggerIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 			Project project = build.getProject();
 			String tagName = getTagName();
 
-			if (!Repository.isValidRefName(GitUtils.tag2ref(tagName)))
-				throw new ExplicitException("Invalid tag name: " + tagName);
+			if (!Repository.isValidRefName(GitUtils.tag2ref(tagName))) {
+				logger.error("Invalid tag name: " + tagName);
+				return new ServerStepResult(false);
+			}
 
 			if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
 				RefFacade tagRef = project.getTagRef(tagName);
@@ -99,8 +101,8 @@ public class CreateTagStep extends ServerSideStep {
 			} else {
 				throw new ExplicitException("This build is not authorized to create tag '" + tagName + "'");
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 
 }

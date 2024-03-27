@@ -37,13 +37,13 @@ public class JobContext implements Serializable {
 	
 	private final long timeout;
 	
-	private final int retried;
+	private volatile int retried;
 	
 	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, 
 					  String projectPath, String projectGitDir, Long buildId, 
 					  Long buildNumber, List<Action> actions, String refName, 
 					  ObjectId commitId, List<ServiceFacade> services, 
-					  long timeout, int retried) {
+					  long timeout) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -56,7 +56,6 @@ public class JobContext implements Serializable {
 		this.commitId = commitId;
 		this.services = services;
 		this.timeout = timeout;
-		this.retried = retried;
 	}
 	
 	public String getJobToken() {
@@ -109,6 +108,10 @@ public class JobContext implements Serializable {
 
 	public int getRetried() {
 		return retried;
+	}
+
+	public void setRetried(int retried) {
+		this.retried = retried;
 	}
 
 	public LeafFacade getStep(List<Integer> stepPosition) {

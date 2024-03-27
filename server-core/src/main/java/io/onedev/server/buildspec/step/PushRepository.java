@@ -4,6 +4,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.BuildManager;
@@ -18,7 +19,6 @@ import org.eclipse.jgit.lib.Repository;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Editable(order=1080, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
@@ -28,8 +28,8 @@ public class PushRepository extends SyncRepository {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var certificateFile = writeCertificate(getCertificate());
 			try {
 				var build = OneDev.getInstance(BuildManager.class).load(buildId);
@@ -166,8 +166,8 @@ public class PushRepository extends SyncRepository {
 				if (certificateFile != null)
 					FileUtils.deleteFile(certificateFile);
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 	
 }

@@ -1,14 +1,13 @@
 package io.onedev.server.job;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
-import javax.annotation.Nullable;
-
 public class JobExecution {
 
-	private final Future<?> future;
+	private final Future<Boolean> future;
 
 	private final long timeout;
 	
@@ -16,7 +15,7 @@ public class JobExecution {
 	
 	private volatile Long cancellerId;
 	
-	public JobExecution(Future<?> future, long timeout) {
+	public JobExecution(Future<Boolean> future, long timeout) {
 		this.future = future;
 		beginTime = System.currentTimeMillis();
 		this.timeout = timeout;
@@ -47,13 +46,13 @@ public class JobExecution {
 		return future.isDone();
 	}
 
-	public void check() throws InterruptedException, TimeoutException, ExecutionException {
+	public boolean check() throws InterruptedException, TimeoutException, ExecutionException {
 		if (isTimedout())
 			throw new TimeoutException();
 		else if (cancellerId != null)
 			throw new CancellationException(cancellerId);
 		else
-			future.get();
+			return future.get();
 	}
 
 }

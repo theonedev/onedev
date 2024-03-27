@@ -3,7 +3,7 @@ package io.onedev.server.util;
 import com.google.common.collect.Lists;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
-import io.onedev.agent.ExecutorUtils;
+import io.onedev.k8shelper.KubernetesHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -56,7 +56,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
     
     public static String formatDuration(long durationMillis) {
-		return ExecutorUtils.formatDuration(durationMillis);
+		return KubernetesHelper.formatDuration(durationMillis);
     }
     
 	public static Date parseISO8601Date(String dateString) {

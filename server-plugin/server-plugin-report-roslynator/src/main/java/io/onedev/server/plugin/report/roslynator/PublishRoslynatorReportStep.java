@@ -13,7 +13,6 @@ import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
 import org.dom4j.Document;
@@ -56,7 +55,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected List<CodeProblem> process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
@@ -122,11 +121,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 				throw new RuntimeException(e);
 			}
 		}
-
-		if (!problems.isEmpty())
-			return new ProblemReport(problems);
-		else 
-			return null;
+		return problems;
 	}
 	
 }

@@ -4,7 +4,7 @@ import com.hazelcast.core.HazelcastInstance;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.agent.AgentConnected;
@@ -273,24 +273,23 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	}
 
 	@Override
-	public void runServerJob(String resourceType, int totalResources,
-							 int requiredResources, ClusterRunnable runnable) {
+	public boolean runServerJob(String resourceType, int totalResources, 
+								int requiredResources, ClusterTask<Boolean> runnable) {
 		while (true) {
 			var servers = clusterManager.getServerAddresses();
 			servers.retainAll(clusterManager.getOnlineServers());
 			var server = allocateResource(servers, resourceType, totalResources, requiredResources);
 			if (server != null) {
-				jobManager.runJob(server, () -> {
+				return jobManager.runJob(server, () -> {
 					int effectiveTotalResources = getEffectiveTotalResources(server, totalResources);
 					var resourceKey = server + ":" + resourceType;
 					acquireResource(resourceKey, effectiveTotalResources, requiredResources);
 					try {
-						jobManager.runJob(server, runnable);
+						return jobManager.runJob(server, runnable);
 					} finally {
 						releaseResource(resourceKey, requiredResources);
 					}
 				});
-				break;
 			}
 			try {
 				Thread.sleep(1000);
@@ -301,7 +300,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	}
 
 	@Override
-	public void runAgentJob(AgentQuery agentQuery, String resourceType,
+	public boolean runAgentJob(AgentQuery agentQuery, String resourceType,
 							int totalResources, int requiredResources, 
 							AgentRunnable runnable) {
 		while (true) {
@@ -319,18 +318,17 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 				if (server == null)
 					throw new ExplicitException("Can not find server managing allocated agent, please retry later");
 
-				jobManager.runJob(server, () -> {
+				return jobManager.runJob(server, () -> {
 					var effectiveTotalResources = getEffectiveTotalResources(agentIdString, totalResources);
 					var resourceKey = agentId + ":" + resourceType;
 					acquireResource(resourceKey, effectiveTotalResources, requiredResources);
 					try {
 						updateLastUsedDate(agentId);
-						runnable.run(agentId);
+						return runnable.run(agentId);
 					} finally {
 						releaseResource(resourceKey, requiredResources);
 					}
 				});
-				break;
 			}
 			try {
 				Thread.sleep(1000);

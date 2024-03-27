@@ -5,7 +5,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.hazelcast.map.IMap;
-import io.onedev.agent.job.FailedException;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.*;
 import io.onedev.k8shelper.*;
@@ -31,7 +30,6 @@ import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspec.step.ServerSideStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
@@ -99,7 +97,6 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
@@ -524,8 +521,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 		BuildSpec buildSpec = build.getSpec();
 
-		AtomicInteger maxRetries = new AtomicInteger(0);
-		AtomicInteger retryDelay = new AtomicInteger(0);
 		List<ServiceFacade> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
 		long timeout;
@@ -545,9 +540,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Service service = buildSpec.getServiceMap().get(serviceName);
 				services.add(interpolator.interpolateProperties(service).getFacade(build, jobToken));
 			}
-
-			maxRetries.set(job.getMaxRetries());
-			retryDelay.set(job.getRetryDelay());
 			
 			timeout = job.getTimeout();
 		} finally {
@@ -555,70 +547,25 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
-		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
-		executionRef.set(new JobExecution(executorService.submit(() -> {
-			AtomicInteger retried = new AtomicInteger(0);
+		JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
+				projectGitDir, buildId, buildNumber, actions, refName, commitId, services,
+				timeout);
+		
+		return new JobExecution(executorService.submit(() -> {
 			while (true) {
-				JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
-						projectGitDir, buildId, buildNumber, actions, refName, commitId, services, 
-						timeout, retried.get());
 				// Store original job actions as the copy in job context will be fetched from cluster and 
 				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
 				jobActions.put(jobToken, actions);
 				logManager.addJobLogger(jobToken, jobLogger);
 				serverStepThreads.put(jobToken, new ArrayList<>());
 				try {
-					jobExecutor.execute(jobContext, jobLogger);
-					break;
+					if (jobExecutor.execute(jobContext, jobLogger))
+						return true;
+					if (!retryJob(job, jobContext, jobLogger, null))
+						return false;
 				} catch (Throwable e) {
-					if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
-
-						@Override
-						public Boolean call() {
-							RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-
-							AtomicReference<String> errorMessage = new AtomicReference<>(null);
-							log(e, new TaskLogger() {
-
-								@Override
-								public void log(String message, String sessionId) {
-									errorMessage.set(message);
-								}
-
-							});
-							return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
-						}
-
-					})) {
-						log(e, jobLogger);
-						jobLogger.warning("Job will be retried after a while...");
-						transactionManager.run(() -> {
-							Build innerBuild = buildManager.load(buildId);
-							innerBuild.setRunningDate(null);
-							innerBuild.setPendingDate(null);
-							innerBuild.setRetryDate(new Date());
-							innerBuild.setStatus(Status.WAITING);
-							listenerRegistry.post(new BuildRetrying(innerBuild));
-							buildManager.update(innerBuild);
-						});
-						try {
-							Thread.sleep(retryDelay.get() * (long) (Math.pow(2, retried.get())) * 1000L);
-						} catch (InterruptedException e2) {
-							throw new RuntimeException(e2);
-						}
-						transactionManager.run(() -> {
-							JobExecution execution = executionRef.get();
-							if (execution != null)
-								execution.updateBeginTime();
-							Build innerBuild = buildManager.load(buildId);
-							innerBuild.setPendingDate(new Date());
-							innerBuild.setStatus(Status.PENDING);
-							listenerRegistry.post(new BuildPending(innerBuild));
-							buildManager.update(innerBuild);
-						});
-					} else {
-						throw ExceptionUtils.unchecked(e);
-					}
+					if (!retryJob(job, jobContext, jobLogger, e))
+						throw e;
 				} finally {
 					Collection<Thread> threads = serverStepThreads.remove(jobToken);
 					synchronized (threads) {
@@ -629,16 +576,65 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					jobActions.remove(jobToken);
 				}
 			}
-		}), job.getTimeout() * 1000L));
+		}), job.getTimeout() * 1000L);
+	}
+	
+	private boolean retryJob(Job job, JobContext jobContext, TaskLogger jobLogger, @Nullable Throwable e) {
+		int retried = jobContext.getRetried();
+		if (retried < job.getMaxRetries() && sessionManager.call(() -> {
+			RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
+			AtomicReference<String> errorMessage = new AtomicReference<>(null);
+			if (e != null) {
+				log(e, new TaskLogger() {
 
-		return executionRef.get();
+					@Override
+					public void log(String message, String sessionId) {
+						errorMessage.set(message);
+					}
+
+				});
+			}
+			return retryCondition.matches(new RetryContext(buildManager.load(jobContext.getBuildId()), errorMessage.get()));
+		})) {
+			if (e != null)
+				log(e, jobLogger);
+			jobLogger.warning("Job will be retried after a while...");
+			transactionManager.run(() -> {
+				Build innerBuild = buildManager.load(jobContext.getBuildId());
+				innerBuild.setRunningDate(null);
+				innerBuild.setPendingDate(null);
+				innerBuild.setRetryDate(new Date());
+				innerBuild.setStatus(Status.WAITING);
+				listenerRegistry.post(new BuildRetrying(innerBuild));
+				buildManager.update(innerBuild);
+			});
+			try {
+				Thread.sleep(job.getRetryDelay() * (long) (Math.pow(2, retried)) * 1000L);
+			} catch (InterruptedException e2) {
+				throw new RuntimeException(e2);
+			}
+			transactionManager.run(() -> {
+				var jobExecution = jobExecutions.get(jobContext.getBuildId());
+				if (jobExecution != null)
+					jobExecution.updateBeginTime();
+				Build innerBuild = buildManager.load(jobContext.getBuildId());
+				innerBuild.setPendingDate(new Date());
+				innerBuild.setStatus(Status.PENDING);
+				listenerRegistry.post(new BuildPending(innerBuild));
+				buildManager.update(innerBuild);
+			});
+			jobContext.setRetried(retried+1);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private void log(Throwable e, TaskLogger logger) {
 		if (e instanceof ExplicitException)
 			logger.error(e.getMessage());
 		else
-			logger.error("Exception catched", e);
+			logger.error("Exception caught", e);
 	}
 
 	@Override
@@ -1216,8 +1212,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							it.remove();
 							TaskLogger jobLogger = logManager.newLogger(build);
 							try {
-								execution.check();
-								build.setStatus(Status.SUCCESSFUL);
+								if (execution.check())
+									build.setStatus(Status.SUCCESSFUL);
+								else
+									build.setStatus(Status.FAILED);
 								jobLogger.log("Job finished");
 							} catch (TimeoutException e) {
 								build.setStatus(Status.TIMED_OUT);
@@ -1233,7 +1231,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
 								if (explicitException != null)
 									jobLogger.error(explicitException.getMessage());
-								else if (ExceptionUtils.find(e, FailedException.class) == null)
+								else 
 									jobLogger.error("Error running job", e);
 							} catch (InterruptedException ignored) {
 							} finally {
@@ -1292,18 +1290,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public void runJob(String server, ClusterRunnable runnable) {
-		Future<?> future = null;
+	public boolean runJob(String server, ClusterTask<Boolean> runnable) {
+		Future<Boolean> future = null;
 		try {
-			future = clusterManager.submitToServer(server, () -> {
-				runnable.run();
-				return null;
-			});
+			future = clusterManager.submitToServer(server, runnable);
 
 			// future.get() here does not respond to thread interruption
 			while (!future.isDone())
 				Thread.sleep(1000);
-			future.get(); // call get() to throw possible execution exceptions
+			return future.get(); 
 		} catch (InterruptedException e) {
 			if (future != null)
 				future.cancel(true);
@@ -1314,7 +1309,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public void runJob(JobContext jobContext, JobRunnable runnable) {
+	public boolean runJob(JobContext jobContext, JobRunnable runnable) {
 		while (thread == null) {
 			try {
 				Thread.sleep(100);
@@ -1334,12 +1329,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				jobLogger = new ServerJobLogger(activeServer, jobContext.getJobToken());
 				logManager.addJobLogger(jobToken, jobLogger);
 				try {
-					runnable.run(jobLogger);
+					return runnable.run(jobLogger);
 				} finally {
 					logManager.removeJobLogger(jobToken);
 				}
 			} else {
-				runnable.run(jobLogger);
+				return runnable.run(jobLogger);
 			}
 		} finally {
 			jobRunnables.remove(jobToken);
@@ -1433,7 +1428,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public Map<String, byte[]> runServerStep(JobContext jobContext, List<Integer> stepPosition,
+	public ServerStepResult runServerStep(JobContext jobContext, List<Integer> stepPosition,
 											 File inputDir, Map<String, String> placeholderValues,
 											 boolean callByAgent, TaskLogger logger) {
 		String activeServer = projectManager.getActiveServer(jobContext.getProjectId(), true);

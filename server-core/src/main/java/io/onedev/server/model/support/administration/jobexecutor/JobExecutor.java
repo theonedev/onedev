@@ -111,7 +111,7 @@ public abstract class JobExecutor implements Serializable {
 		this.jobRequirement = jobRequirement;
 	}
 	
-	public abstract void execute(JobContext jobContext, TaskLogger jobLogger);
+	public abstract boolean execute(JobContext jobContext, TaskLogger jobLogger);
 	
 	public boolean isPlaceholderAllowed() {
 		return true;

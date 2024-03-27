@@ -1,8 +1,8 @@
 package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -17,7 +17,6 @@ import io.onedev.server.persistence.TransactionManager;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Editable(name="Close Milestone", order=400)
@@ -63,8 +62,8 @@ public class CloseMilestoneStep extends ServerSideStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(TransactionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(TransactionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			Project project = build.getProject();
 			String milestoneName = getMilestoneName();
@@ -75,13 +74,14 @@ public class CloseMilestoneStep extends ServerSideStep {
 					milestone.setClosed(true);
 					milestoneManager.createOrUpdate(milestone);
 				} else {
-					throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
+					logger.error("This build is not authorized to close milestone '" + milestoneName + "'");
+					return new ServerStepResult(false);
 				}
 			} else {
 				logger.warning("Unable to find milestone '" + milestoneName + "' to close. Ignored.");
 			}
+			return new ServerStepResult(true);
 		});
-		return null;
 	}
 
 }

@@ -73,62 +73,61 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	}
 	
 	@Override
-	public void execute(JobContext jobContext, TaskLogger jobLogger) {
-		AgentRunnable runnable = (agentId) -> {
-			getJobManager().runJob(jobContext, new JobRunnable() {
+	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
+		AgentRunnable runnable = (agentId) -> getJobManager().runJob(jobContext, new JobRunnable() {
 
-				private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-				@Override
-				public void run(TaskLogger jobLogger) {
-					notifyJobRunning(jobContext.getBuildId(), agentId);
-					
-					var agentData = getSessionManager().call(
-							() -> getAgentManager().load(agentId).getAgentData());
-
-					agentSession = getAgentManager().getAgentSession(agentId);
-					if (agentSession == null)
-						throw new ExplicitException("Allocated agent not connected to current server, please retry later");
-
-					jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...",
-							getName(), agentData.getName()));
-
-					if (!jobContext.getServices().isEmpty()) {
-						throw new ExplicitException("This job requires services, which can only be supported "
-								+ "by docker aware executors");
-					}
-
-					String jobToken = jobContext.getJobToken();
-					ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(),
-							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
-							jobContext.getBuildNumber(), jobContext.getActions());
-
-					try {
-						call(agentSession, jobData, jobContext.getTimeout()*1000L);
-					} catch (InterruptedException | TimeoutException e) {
-						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
-					}
-				}
-
-				@Override
-				public void resume(JobContext jobContext) {
-					if (agentSession != null)
-						new Message(MessageTypes.RESUME_JOB, jobContext.getJobToken()).sendBy(agentSession);
-				}
-
-				@Override
-				public Shell openShell(JobContext jobContext, Terminal terminal) {
-					if (agentSession != null)
-						return new AgentShell(terminal, agentSession, jobContext.getJobToken());
-					else
-						throw new ExplicitException("Shell not ready");
-				}
+			@Override
+			public boolean run(TaskLogger jobLogger) {
+				notifyJobRunning(jobContext.getBuildId(), agentId);
 				
-			});
-		};
+				var agentData = getSessionManager().call(
+						() -> getAgentManager().load(agentId).getAgentData());
+
+				agentSession = getAgentManager().getAgentSession(agentId);
+				if (agentSession == null)
+					throw new ExplicitException("Allocated agent not connected to current server, please retry later");
+
+				jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...",
+						getName(), agentData.getName()));
+
+				if (!jobContext.getServices().isEmpty()) {
+					throw new ExplicitException("This job requires services, which can only be supported "
+							+ "by docker aware executors");
+				}
+
+				String jobToken = jobContext.getJobToken();
+				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(),
+						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
+						jobContext.getBuildNumber(), jobContext.getActions());
+
+				try {
+					return call(agentSession, jobData, jobContext.getTimeout()*1000L);
+				} catch (InterruptedException | TimeoutException e) {
+					new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void resume(JobContext jobContext) {
+				if (agentSession != null)
+					new Message(MessageTypes.RESUME_JOB, jobContext.getJobToken()).sendBy(agentSession);
+			}
+
+			@Override
+			public Shell openShell(JobContext jobContext, Terminal terminal) {
+				if (agentSession != null)
+					return new AgentShell(terminal, agentSession, jobContext.getJobToken());
+				else
+					throw new ExplicitException("Shell not ready");
+			}
+			
+		});
 
 		jobLogger.log("Pending resource allocation...");
-		getResourceAllocator().runAgentJob(AgentQuery.parse(agentQuery, true), getName(), 
+		return getResourceAllocator().runAgentJob(AgentQuery.parse(agentQuery, true), getName(), 
 				getConcurrencyNumber(), 1, runnable);
 	}
 	
@@ -180,17 +179,19 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				if (getLogManager().getJobLogger(jobToken) == null) {
 					getLogManager().addJobLogger(jobToken, currentJobLogger);
 					try {
-						call(agentSession, jobData, timeout);
+						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+						throw new RuntimeException(e);
 					} finally {
 						getLogManager().removeJobLogger(jobToken);
 					}
 				} else {
 					try {
-						call(agentSession, jobData, timeout);
+						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+						throw new RuntimeException(e);
 					}
 				}
 			};

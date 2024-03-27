@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -44,14 +45,14 @@ public class SetBuildVersionStep extends ServerSideStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger jobLogger) {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		return OneDev.getInstance(TransactionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			build.setVersion(buildVersion);
 			OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(build));
 			Map<String, byte[]> outputFiles = new HashMap<>();
 			outputFiles.put(BUILD_VERSION, buildVersion.getBytes(StandardCharsets.UTF_8));
-			return outputFiles;
+			return new ServerStepResult(true, outputFiles);
 		});
 		
 	}

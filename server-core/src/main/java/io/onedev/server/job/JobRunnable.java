@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public interface JobRunnable extends Serializable {
 	
-	void run(TaskLogger jobLogger);
+	boolean run(TaskLogger jobLogger);
 
 	void resume(JobContext jobContext);
 

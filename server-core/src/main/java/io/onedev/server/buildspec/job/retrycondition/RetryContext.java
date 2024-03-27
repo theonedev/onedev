@@ -2,13 +2,15 @@ package io.onedev.server.buildspec.job.retrycondition;
 
 import io.onedev.server.model.Build;
 
+import javax.annotation.Nullable;
+
 public class RetryContext {
 
 	private final Build build;
 	
 	private final String errorMessage;
 	
-	public RetryContext(Build build, String errorMessage) {
+	public RetryContext(Build build, @Nullable String errorMessage) {
 		this.build = build;
 		this.errorMessage = errorMessage;
 	}
@@ -17,6 +19,7 @@ public class RetryContext {
 		return build;
 	}
 
+	@Nullable
 	public String getErrorMessage() {
 		return errorMessage;
 	}

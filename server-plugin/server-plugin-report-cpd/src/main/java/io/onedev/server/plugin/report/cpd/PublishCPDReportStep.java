@@ -14,7 +14,6 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -61,7 +60,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger) {
+	protected List<CodeProblem> process(Build build, File inputDir, File reportDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
@@ -133,11 +132,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 				throw new RuntimeException(e);
 			}
 		}
-
-		if (!problems.isEmpty())
-			return new ProblemReport(problems);
-		else
-			return null;
+		return problems;
 	}
 
 	private static class CodeDuplication {

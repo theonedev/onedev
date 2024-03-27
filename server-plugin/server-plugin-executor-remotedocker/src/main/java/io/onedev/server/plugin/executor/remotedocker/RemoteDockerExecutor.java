@@ -85,16 +85,15 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	}
 	
 	@Override
-	public void execute(JobContext jobContext, TaskLogger jobLogger) {
+	public boolean execute(JobContext jobContext, TaskLogger logger) {
 		AgentRunnable runnable = (agentId) -> {
-			getJobManager().runJob(jobContext, new JobRunnable() {
+			return getJobManager().runJob(jobContext, new JobRunnable() {
 				
 				@Override
-				public void run(TaskLogger jobLogger) {
+				public boolean run(TaskLogger jobLogger) {
 					notifyJobRunning(jobContext.getBuildId(), agentId);
 					
-					var agentData = getSessionManager().call(
-							() -> getAgentManager().load(agentId).getAgentData());
+					var agentData = getSessionManager().call(() -> getAgentManager().load(agentId).getAgentData());
 
 					agentSession = getAgentManager().getAgentSession(agentId);
 					if (agentSession == null)
@@ -116,9 +115,10 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							getRunOptions(), getNetworkOptions());
 
 					try {
-						call(agentSession, jobData, jobContext.getTimeout()*1000L);
+						return call(agentSession, jobData, jobContext.getTimeout()*1000L);
 					} catch (InterruptedException|TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+						throw new RuntimeException(e);
 					}
 				}
 
@@ -139,8 +139,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 			});
 		};
 
-		jobLogger.log("Pending resource allocation...");
-		getResourceAllocator().runAgentJob(
+		logger.log("Pending resource allocation...");
+		return getResourceAllocator().runAgentJob(
 				AgentQuery.parse(agentQuery, true), getName(), getConcurrencyNumber(),
 				jobContext.getServices().size()+1, runnable);
 	}
@@ -184,17 +184,19 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				if (getLogManager().getJobLogger(jobToken) == null) {
 					getLogManager().addJobLogger(jobToken, currentJobLogger);
 					try {
-						call(agentSession, jobData, timeout);
+						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+						throw new RuntimeException(e);
 					} finally {
 						getLogManager().removeJobLogger(jobToken);
 					}
 				} else {
 					try {
-						call(agentSession, jobData, timeout);
+						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+						throw new RuntimeException(e);
 					}
 				}
 			};

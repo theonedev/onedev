@@ -3,6 +3,7 @@ package io.onedev.server.plugin.report.markdown;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -18,7 +19,6 @@ import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
 
@@ -58,7 +58,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		OneDev.getInstance(SessionManager.class).run(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			write(getReportLockName(build), () -> {
@@ -81,12 +81,12 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 					OneDev.getInstance(ProjectManager.class).directoryModified(
 							build.getProject().getId(), reportDir.getParentFile());
 				} else {
-					logger.log("WARNING: Markdown report start page not found: " + startPage.getAbsolutePath());
+					logger.warning("Markdown report start page not found: " + startPage.getAbsolutePath());
 				}
 				return null;
 			});
 		});
-		return null;
+		return new ServerStepResult(true);
 	}
 
 }

@@ -30,7 +30,7 @@ public class LogCriteria extends Criteria<RetryContext> {
 	@Override
 	public boolean matches(RetryContext context) {
 		Pattern pattern = Pattern.compile(value);
-		return pattern.matcher(context.getErrorMessage()).find() 
+		return context.getErrorMessage() != null && pattern.matcher(context.getErrorMessage()).find() 
 				|| OneDev.getInstance(LogManager.class).matches(context.getBuild(), pattern);
 	}
 

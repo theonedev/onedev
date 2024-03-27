@@ -1,7 +1,8 @@
 package io.onedev.server.job;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.k8shelper.ServerStepResult;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.model.*;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -30,9 +31,9 @@ public interface JobManager {
 	
 	void resume(Build build);
 
-	void runJob(String server, ClusterRunnable runnable);
+	boolean runJob(String server, ClusterTask<Boolean> runnable);
 
-	void runJob(JobContext jobContext, JobRunnable runnable);
+	boolean runJob(JobContext jobContext, JobRunnable runnable);
 	
 	WebShell openShell(Long buildId, Terminal terminal);
 	
@@ -48,7 +49,8 @@ public interface JobManager {
 
 	void copyDependencies(JobContext jobContext, File targetDir);
 	
-	Map<String, byte[]> runServerStep(JobContext jobContext, List<Integer> stepPosition, File inputDir, 
-			Map<String, String> placeholderValues, boolean callByAgent, TaskLogger logger);
+	ServerStepResult runServerStep(JobContext jobContext, List<Integer> stepPosition, File inputDir,
+								   Map<String, String> placeholderValues, boolean callByAgent,
+								   TaskLogger logger);
 	
 }

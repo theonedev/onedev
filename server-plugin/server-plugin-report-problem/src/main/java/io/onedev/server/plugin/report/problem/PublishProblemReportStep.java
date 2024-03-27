@@ -1,6 +1,10 @@
 package io.onedev.server.plugin.report.problem;
 
-import io.onedev.commons.utils.*;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
@@ -15,27 +19,43 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang3.SerializationUtils;
 
-import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+
+import static io.onedev.server.codequality.CodeProblem.Severity.*;
 
 @Editable
 public abstract class PublishProblemReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
+
+	private Severity failThreshold = HIGH;
+	
+	@Editable(order=1000, name="Fail Threshold", description = "Fail build if there are vulnerabilities " +
+			"with or severer than specified severity level")
+	@NotNull
+	public Severity getFailThreshold() {
+		return failThreshold;
+	}
+
+	public void setFailThreshold(Severity failThreshold) {
+		this.failThreshold = failThreshold;
+	}
 	
 	@Override
-	public Map<String, byte[]> run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
+	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
 
 			ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), () -> {
 				FileUtils.createDir(reportDir);
 				try {
-					ProblemReport aReport = process(build, inputDir, reportDir, logger);
-					if (aReport != null) {
+					var problems = process(build, inputDir, reportDir, logger);
+					if (!problems.isEmpty()) {
+						var aReport = new ProblemReport(problems);
 						aReport.writeTo(reportDir);
 						for (var problemFile: aReport.getProblemFiles())
 							writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
@@ -63,25 +83,29 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 					metric.setReportName(getReportName());
 				}
 				metric.setCriticalSeverities((int) report.getProblems().stream()
-						.filter(it->it.getSeverity()==Severity.CRITICAL)
+						.filter(it-> it.getSeverity() == CRITICAL)
 						.count());
 				metric.setHighSeverities((int) report.getProblems().stream()
-						.filter(it->it.getSeverity()==Severity.HIGH)
+						.filter(it-> it.getSeverity() == HIGH)
 						.count());
 				metric.setMediumSeverities((int) report.getProblems().stream()
-						.filter(it->it.getSeverity()==Severity.MEDIUM)
+						.filter(it-> it.getSeverity() == MEDIUM)
 						.count());
 				metric.setLowSeverities((int) report.getProblems().stream()
-						.filter(it->it.getSeverity()==Severity.LOW)
+						.filter(it-> it.getSeverity() == LOW)
 						.count());
-
 				OneDev.getInstance(Dao.class).persist(metric);
-				
-				if (report.getFailBuildReason() != null)
-					throw new ExplicitException(report.getFailBuildReason());
-			}				
+
+				if (report.getProblems().stream().anyMatch(it -> it.getSeverity().ordinal() <= failThreshold.ordinal())) {
+					logger.error(getReportName() + ": found problems with or severer than " + failThreshold + " severity");
+					return new ServerStepResult(false);
+				} else {
+					return new ServerStepResult(true);
+				}
+			} else {
+				return new ServerStepResult(true);
+			}
 		});
-		return null;
 	}
 	
 	private void writeFileProblems(Build build, String blobPath, Collection<CodeProblem> problemsOfFile) {
@@ -95,7 +119,6 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		}
 	}
 
-	@Nullable
-	protected abstract ProblemReport process(Build build, File inputDir, File reportDir, TaskLogger logger);
+	protected abstract List<CodeProblem> process(Build build, File inputDir, File reportDir, TaskLogger logger);
 	
 }
