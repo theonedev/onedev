@@ -24,7 +24,7 @@ public abstract class PublishReportStep extends ServerSideStep {
 	
 	private transient PatternSet patternSet;
 
-	@Editable(order=50, description="Specify report name")
+	@Editable(order=50, description="Specify name of the report to be displayed in build detail page")
 	@PathSegment
 	@NotEmpty
 	public String getReportName() {
