@@ -16,10 +16,6 @@ import java.util.Map;
 
 public interface JobManager {
 	
-	void schedule(Project project, boolean recursive);
-	
-	void unschedule(Long projectId);
-	
 	Build submit(Project project, ObjectId commitId, String jobName,
 				 Map<String, List<String>> paramMap, String pipeline,
 				 String refName, User submitter, @Nullable PullRequest request,

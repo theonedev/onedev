@@ -284,22 +284,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				for (IssueQueryUpdater updater : link.getQueryUpdaters())
 					updater.onMoveProject(oldPath, project.getPath());
 			}
-
-			transactionManager.runAfterCommit(() -> scheduleJobs(project));
 		}
-	}
-
-	private void scheduleJobs(Project project) {
-		Long projectId = project.getId();
-		String projectPath = project.getPath();
-		submitToActiveServer(projectId, () -> {
-			try {
-				sessionManager.run(() -> jobManager.schedule(load(projectId), true));
-			} catch (Exception e) {
-				logger.error("Error scheduling project tree '" + projectPath + "'", e);
-			}
-			return null;
-		});
 	}
 
 	@Transactional

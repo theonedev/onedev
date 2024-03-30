@@ -7,11 +7,16 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.List;
 
-public class TriggerMatch {
+public class TriggerMatch implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	private final String refName;
 	
@@ -67,4 +72,36 @@ public class TriggerMatch {
 	public String getReason() {
 		return reason;
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		if (other == this)
+			return true;
+		if (other.getClass() != getClass())
+			return false;
+		TriggerMatch otherTriggerMatch = (TriggerMatch) other;
+		return new EqualsBuilder()
+				.append(refName, otherTriggerMatch.refName)
+				.append(requestId, otherTriggerMatch.requestId)
+				.append(issueId, otherTriggerMatch.issueId)
+				.append(paramMatrix, otherTriggerMatch.paramMatrix)
+				.append(excludeParamMaps, otherTriggerMatch.excludeParamMaps)
+				.append(reason, otherTriggerMatch.reason)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+				.append(refName)
+				.append(requestId)
+				.append(issueId)
+				.append(paramMatrix)
+				.append(excludeParamMaps)
+				.append(reason)
+				.toHashCode();
+	}
+	
 }

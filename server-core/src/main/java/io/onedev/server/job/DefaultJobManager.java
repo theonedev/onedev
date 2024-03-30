@@ -22,7 +22,6 @@ import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.retrycondition.RetryContext;
-import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
@@ -34,7 +33,10 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.*;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.ScheduledTimeReaches;
 import io.onedev.server.event.project.build.*;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -75,8 +77,11 @@ import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
+import org.joda.time.DateTime;
+import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,10 +110,10 @@ import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
-public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
-		Serializable, SchedulableTask {
+public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 
@@ -121,9 +126,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final Map<String, List<Action>> jobActions = new ConcurrentHashMap<>();
 
 	private final Map<String, JobRunnable> jobRunnables = new ConcurrentHashMap<>();
-
-	private final Map<Long, Collection<String>> projectTasks = new ConcurrentHashMap<>();
-
+	
 	private final Map<String, Shell> jobShells = new ConcurrentHashMap<>();
 
 	private final Dao dao;
@@ -170,9 +173,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private volatile IMap<String, String> jobServers;
 
-	private volatile Map<String, Collection<String>> allocatedCaches;
+
+	private volatile Map<String, List<JobSchedule>> branchSchedules;
 	
 	private volatile String maintenanceTaskId;
+	
+	private volatile String branchSchedulesTaskId;
 
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry,
@@ -661,13 +667,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Listen
-	public void on(ProjectCreated event) {
-		schedule(event.getProject(), false);
-	}
-
-	@Listen
 	public void on(ProjectDeleted event) {
-		unschedule(event.getProjectId());
+		var keysToRemove = new HashSet<String>();
+		for (var key: branchSchedules.keySet()) {
+			if (key.startsWith(event.getProjectId() + ":"))
+				keysToRemove.add(key);
+		}
+		for (var key: keysToRemove)
+			branchSchedules.remove(key);
 	}
 	
 	@Sessional
@@ -967,122 +974,111 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(SystemStarting event) {
 		var hazelcastInstance = clusterManager.getHazelcastInstance();
-		allocatedCaches = hazelcastInstance.getMap("allocatedCaches");
 		jobServers = hazelcastInstance.getMap("jobServers");
+		branchSchedules = hazelcastInstance.getReplicatedMap("jobSchedules");
+	}
+	
+	private void cacheBranchSchedules(Project project, String branch, ObjectId commitId) {
+		JobAuthorizationContext.push(new JobAuthorizationContext(project, commitId, SecurityUtils.getUser(), null));
+		try {
+			var schedules = new ArrayList<JobSchedule>();
+			if (!commitId.equals(ObjectId.zeroId())) {
+				var buildSpec = project.getBuildSpec(commitId);
+				if (buildSpec != null) {
+					validateBuildSpec(project, commitId, buildSpec);
+					var triggerEvent = new ScheduledTimeReaches(project, branch);
+					for (var job : buildSpec.getJobMap().values()) {
+						for (var trigger : job.getTriggers()) {
+							var match = trigger.matches(triggerEvent, job);
+							if (match != null) {
+								var cronExpression = new CronExpression(((ScheduleTrigger)trigger).getCronExpression());
+								schedules.add(new JobSchedule(commitId, job.getName(), cronExpression, match));
+							}
+						}
+					}
+				}
+			}
+			var key = project.getId() + ":" + branch;
+			if (schedules.isEmpty())
+				branchSchedules.remove(key);
+			else
+				branchSchedules.put(key, schedules);
+		} catch (BuildSpecParseException e) {
+			logger.warn("Malformed build spec (project: {}, branch: {})", project.getPath(), branch);
+		} catch (Exception e) {
+			logger.error(String.format("Error caching branch schedules (project: %s, branch: %s)", project.getPath(), branch), e);
+		} finally {
+			JobAuthorizationContext.pop();
+		}
 	}
 	
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		var localServer = clusterManager.getLocalServerAddress();
-		for (var projectId: projectManager.getIds()) {
-			if (localServer.equals(projectManager.getActiveServer(projectId, false))) {
-				schedule(projectManager.load(projectId), false);
-			}
-		}
-		thread = new Thread(this);
-		thread.start();
-		maintenanceTaskId = taskScheduler.schedule(this);
-	}
-	
-	@Sessional
-	@Listen
-	public void on(ActiveServerChanged event) {
-		for (var projectId: event.getProjectIds())
-			schedule(projectManager.load(projectId), false);
-	}
-
-	@Sessional
-	@Listen
-	public void on(DefaultBranchChanged event) {
-		schedule(event.getProject(), false);
-	}
-
-	@Sessional
-	@Listen
-	public void on(RefUpdated event) {
-		String branch = GitUtils.ref2branch(event.getRefName());
-		Project project = event.getProject();
-		if (branch != null && branch.equals(project.getDefaultBranch()) && !event.getNewCommitId().equals(ObjectId.zeroId()))
-			schedule(project, false);
-	}
-
-	@Sessional
-	@Override
-	public void schedule(Project project, boolean recursive) {
-		Collection<String> tasksOfProject = new HashSet<>();
-		try {
-			String defaultBranch = project.getDefaultBranch();
-			if (defaultBranch != null) {
-				ObjectId commitId = project.getObjectId(defaultBranch, false);
-				if (commitId != null) {
-					JobAuthorizationContext.push(new JobAuthorizationContext(project, commitId, SecurityUtils.getUser(), null));
-					try {
-						BuildSpec buildSpec = project.getBuildSpec(commitId);
-						if (buildSpec != null) {
-							validateBuildSpec(project, commitId, buildSpec);
-							ScheduledTimeReaches event = new ScheduledTimeReaches(project);
-							for (Job job : buildSpec.getJobMap().values()) {
-								for (JobTrigger trigger : job.getTriggers()) {
-									if (trigger instanceof ScheduleTrigger) {
-										ScheduleTrigger scheduledTrigger = (ScheduleTrigger) trigger;
-										TriggerMatch match = trigger.matches(event, job);
-										if (match != null) {
-											String taskId = taskScheduler.schedule(newSchedulableTask(project, commitId, job, scheduledTrigger, match.getRefName(), match.getReason()));
-											tasksOfProject.add(taskId);
-										}
-									}
-								}
-							}
-						}
-					} catch (BuildSpecParseException e) {
-						logger.warn("Malformed build spec (project: {}, branch: {})",
-								project.getPath(), defaultBranch);
-					} finally {
-						JobAuthorizationContext.pop();
-					}
+		for (var projectId: projectManager.getActiveIds()) {
+			var project = projectManager.load(projectId);
+			var repository = projectManager.getRepository(projectId);
+			try {
+				for (var ref: repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
+					var branch = GitUtils.ref2branch(ref.getName());
+					cacheBranchSchedules(project, branch, ref.getObjectId());
 				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (Exception e) {
-			logger.error("Error scheduling project '" + project.getPath() + "'", e);
-		} finally {
-			tasksOfProject = projectTasks.put(project.getId(), tasksOfProject);
-			if (tasksOfProject != null)
-				tasksOfProject.forEach(taskScheduler::unschedule);
 		}
-		if (recursive) {
-			for (var child : project.getChildren())
-				schedule(child, true);
-		}
-	}
-
-	@Sessional
-	@Override
-	public void unschedule(Long projectId) {
-		var tasksOfProject = projectTasks.remove(projectId);
-		if (tasksOfProject != null)
-			tasksOfProject.forEach(taskScheduler::unschedule);
-	}
-
-	private SchedulableTask newSchedulableTask(Project project, ObjectId commitId, Job job,
-											   ScheduleTrigger trigger, String refName, 
-											   String reason) {
-		Long projectId = project.getId();
-		var localServer = clusterManager.getLocalServerAddress();
-		return new SchedulableTask() {
+		
+		maintenanceTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
 			@Override
 			public void execute() {
-				if (thread != null && localServer.equals(projectManager.getActiveServer(projectId, false))) {
+				if (clusterManager.isLeaderServer()) {
+					var activeJobTokens = getActiveJobTokens();
+					jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
+				}
+			}
+
+			@Override
+			public ScheduleBuilder<?> getScheduleBuilder() {
+				return CronScheduleBuilder.dailyAtHourAndMinute(4, 0);
+			}
+			
+		});
+		branchSchedulesTaskId = taskScheduler.schedule(new SchedulableTask() {
+			@Override
+			public void execute() {
+				if (thread != null) {
 					sessionManager.run(() -> {
 						SecurityUtils.bindAsSystem();
-						Project aProject = projectManager.load(projectId);
-						String pipeline = UUID.randomUUID().toString();
-						var paramMaps = resolveParams(null, null, 
-								trigger.getParamMatrix(), trigger.getExcludeParamMaps());
-						for (var paramMap: paramMaps) {
-							submit(aProject, commitId, job.getName(), paramMap, pipeline,
-									refName, SecurityUtils.getUser(), null, null, reason);
+						var currentTime = new Date();
+						var nextCheckTime = new DateTime(currentTime.getTime()).plusMinutes(1).toDate();
+						var activeProjectIds = projectManager.getActiveIds();
+						for (var entry: branchSchedules.entrySet()) {
+							var projectId = Long.valueOf(StringUtils.substringBefore(entry.getKey(), ":"));
+							if (activeProjectIds.contains(projectId)) {
+								Project project = projectManager.load(projectId);
+								for (var schedule: entry.getValue()) {
+									var match = schedule.getMatch();
+									try {
+										var commitId = schedule.getCommitId();
+										var nextFireTime = schedule.getCronExpression().getNextValidTimeAfter(currentTime);
+										if (nextFireTime != null && !nextFireTime.after(nextCheckTime)) {
+											String pipeline = UUID.randomUUID().toString();
+											var paramMaps = resolveParams(null, null,
+													match.getParamMatrix(), match.getExcludeParamMaps());
+											for (var paramMap : paramMaps) {
+												submit(project, commitId, schedule.getJobName(), paramMap, pipeline,
+														match.getRefName(), SecurityUtils.getUser(), null,
+														null, match.getReason());
+											}
+										}
+									} catch (Exception e) {
+										String errorMessage = String.format("Error triggering scheduled job (project: %s, branch: %s)",
+												project.getPath(), GitUtils.ref2branch(match.getRefName()));
+										logger.error(errorMessage, e);
+									}
+								}
+							}
 						}
 					});
 				}
@@ -1090,12 +1086,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return CronScheduleBuilder.cronSchedule(trigger.getCronExpression());
+				return SimpleScheduleBuilder.repeatMinutelyForever();
 			}
-
-		};
+			
+		});
+		
+		thread = new Thread(this);
+		thread.start();
 	}
 
+	@Sessional
+	@Listen
+	public void on(RefUpdated event) {
+		String branch = GitUtils.ref2branch(event.getRefName());
+		Project project = event.getProject();
+		cacheBranchSchedules(project, branch, event.getNewCommitId());
+	}
+	
 	@Listen
 	public void on(SystemStopping event) {
 		Thread copy = thread;
@@ -1106,9 +1113,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} catch (InterruptedException ignored) {
 			}
 		}
-		projectTasks.values().forEach(it -> it.forEach(taskScheduler::unschedule));
-		projectTasks.clear();
-		
+		if (branchSchedulesTaskId != null)
+			taskScheduler.unschedule(branchSchedulesTaskId);
 		if (maintenanceTaskId != null)
 			taskScheduler.unschedule(maintenanceTaskId);
 	}
@@ -1480,19 +1486,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			activeJobTokens.addAll(value);
 		}
 		return activeJobTokens;
-	}
-
-	@Override
-	public void execute() {
-		if (clusterManager.isLeaderServer()) {
-			var activeJobTokens = getActiveJobTokens();
-			jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
-		}
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(4, 0);
 	}
 	
 }

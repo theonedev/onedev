@@ -58,9 +58,10 @@ public class ParamInstance implements Serializable {
 			return true;
 		ParamInstance otherParamValue = (ParamInstance) other;
 		return new EqualsBuilder()
-			.append(name, otherParamValue.name)
-			.append(valueProvider, otherParamValue.valueProvider)
-			.isEquals();
+				.append(name, otherParamValue.name)
+				.append(secret, otherParamValue.secret)
+				.append(valueProvider, otherParamValue.valueProvider)
+				.isEquals();
 	}
 
 	@Override

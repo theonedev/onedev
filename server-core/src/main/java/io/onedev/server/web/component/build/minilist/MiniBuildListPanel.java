@@ -77,7 +77,7 @@ public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 			});
 			add(fragment);
 		} else {
-			add(new Label("content", "No builds").add(AttributeAppender.append("class", "no-builds font-italic mx-5 my-4")));
+			add(new Label("content", "No builds").add(AttributeAppender.append("class", "no-builds font-italic mx-5 my-4 text-nowrap")));
 		}
 	}
 
