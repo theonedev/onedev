@@ -827,14 +827,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Nullable
 	public BuildSpec getBuildSpec(ObjectId commitId) {
-		if (buildSpecCache == null)
-			buildSpecCache = new HashMap<>();
-		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
-		if (buildSpec == null) {
-			buildSpec = Optional.fromNullable(loadBuildSpec(commitId));
-			buildSpecCache.put(commitId, buildSpec);
+		Project.push(this);
+		try {
+			if (buildSpecCache == null)
+				buildSpecCache = new HashMap<>();
+			Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
+			if (buildSpec == null) {
+				buildSpec = Optional.fromNullable(loadBuildSpec(commitId));
+				buildSpecCache.put(commitId, buildSpec);
+			}
+			return buildSpec.orNull();
+		} finally {
+			Project.pop();
 		}
-		return buildSpec.orNull();
 	}
 	
 	public List<String> getJobNames() {

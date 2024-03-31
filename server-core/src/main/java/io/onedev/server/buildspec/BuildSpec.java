@@ -25,6 +25,7 @@ import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.data.migration.XmlBuildSpecMigrator;
 import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -1958,6 +1959,35 @@ public class BuildSpec implements Serializable, Validatable {
 								new ScalarNode(Tag.STR, "paths"),
 								new SequenceNode(Tag.SEQ, pathNodes, FlowStyle.BLOCK)));
 
+					}
+				}
+			}
+		});
+	}
+
+	private void migrate31(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				if (stepNode.getTag().getValue().equals("!PullRepository")) {
+					boolean syncToChild = false;
+					String childProject = null;
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("syncToChildProject")) {
+							syncToChild = Boolean.parseBoolean(((ScalarNode) stepTuple.getValueNode()).getValue());
+							itStepTuple.remove();
+						} else if (propName.equals("childProject")) {
+							childProject = ((ScalarNode) stepTuple.getValueNode()).getValue();
+							itStepTuple.remove();
+						}
+					}
+					if (syncToChild) {
+						var targetProject = Project.get() + "/" + childProject;
+						stepNode.getValue().add(new NodeTuple(
+								new ScalarNode(Tag.STR, "targetProject"),
+								new ScalarNode(Tag.STR, targetProject)));
 					}
 				}
 			}

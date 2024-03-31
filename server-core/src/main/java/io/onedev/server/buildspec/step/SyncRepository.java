@@ -1,6 +1,5 @@
 package io.onedev.server.buildspec.step;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -54,7 +53,7 @@ public abstract class SyncRepository extends ServerSideStep {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
-	@Editable(order=300, description="Optionally specify user name to access above repository")
+	@Editable(order=300, description="Optionally specify user name to access remote repository")
 	public String getUserName() {
 		return userName;
 	}
@@ -63,9 +62,9 @@ public abstract class SyncRepository extends ServerSideStep {
 		this.userName = userName;
 	}
 
-	@Editable(order=400, name="Password / Access Token", 
-			description="Specify a secret to be used as password or access token to access above repository")
-	@ChoiceProvider("getPasswordSecretChoices")
+	@Editable(order=400, name="Password or Access Token for Remote Repository", 
+			description="Specify a secret to be used as password or access token to access remote repository")
+	@ChoiceProvider("getSecretChoices")
 	public String getPasswordSecret() {
 		return passwordSecret;
 	}
@@ -75,14 +74,14 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<String> getPasswordSecretChoices() {
+	static List<String> getSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 
 	@Editable(order=450, name="Certificates to Trust", placeholder = "Base64 encoded PEM format, starting with " +
 			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
-			description = "Specify certificate to trust if you are using self-signed certificate for above url")
+			description = "Specify certificate to trust if you are using self-signed certificate for remote repository")
 	@Multiline(monospace = true)
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getCertificate() {
@@ -92,18 +91,18 @@ public abstract class SyncRepository extends ServerSideStep {
 	public void setCertificate(String certificate) {
 		this.certificate = certificate;
 	}
-	
-	@SuppressWarnings("unused")
-	private static String getLfsDescription() {
-		if (!Bootstrap.isInDocker()) {
-			return "If this option is enabled, git lfs command needs to be installed on OneDev server "
-					+ "(even this step runs on other node)";
-		} else {
-			return null;
-		}
+
+	@Editable(order=500, placeholder = "No proxy", description = "Optionally configure proxy to access remote repository. " +
+			"Proxy should be in the format of &lt;proxy host&gt;:&lt;proxy port&gt;")
+	public String getProxy() {
+		return proxy;
 	}
 
-	@Editable(order=500, description="Whether or not use force option to overwrite changes in case ref updating "
+	public void setProxy(String proxy) {
+		this.proxy = proxy;
+	}
+	
+	@Editable(order=1000, description="Whether or not use force option to overwrite changes in case ref updating "
 			+ "can not be fast-forwarded")
 	public boolean isForce() {
 		return force;
@@ -112,17 +111,7 @@ public abstract class SyncRepository extends ServerSideStep {
 	public void setForce(boolean force) {
 		this.force = force;
 	}
-
-	@Editable(order=600, placeholder = "No proxy", description = "Optionally configure proxy for this step. Proxy " +
-			"should be in the format of &lt;proxy host&gt;:&lt;proxy port&gt;")
-	public String getProxy() {
-		return proxy;
-	}
-
-	public void setProxy(String proxy) {
-		this.proxy = proxy;
-	}
-
+	
 	public String getRemoteUrlWithCredential(Build build) {
 		String encodedPassword = null;
 		if (getPasswordSecret() != null) {

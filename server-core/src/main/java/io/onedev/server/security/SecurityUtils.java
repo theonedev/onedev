@@ -199,7 +199,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canManageProject(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new ManageProject()));
+		return canManageProject(getUser(), project);
+	}
+
+	public static boolean canManageProject(@Nullable User user, Project project) {
+		return asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()));
 	}
 	
 	public static boolean canManageIssues(Project project) {

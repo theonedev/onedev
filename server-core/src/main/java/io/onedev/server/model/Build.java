@@ -967,7 +967,7 @@ public class Build extends ProjectBelonging
 				|| accessTokenSecret != null && SecurityUtils.canCreateTag(getUser(accessTokenSecret), project, tagName);
 	}
 	
-	private User getUser(String accessTokenSecret) {
+	public User getUser(String accessTokenSecret) {
 		String accessToken = getJobAuthorizationContext().getSecretValue(accessTokenSecret);
 		User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
 		if (user == null)

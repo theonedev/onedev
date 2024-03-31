@@ -3,7 +3,6 @@ package io.onedev.server.buildspec.step;
 import com.google.common.base.Splitter;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
@@ -17,7 +16,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.BuildManager;
@@ -28,10 +27,9 @@ import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.util.EditContext;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.match.WildcardUtils;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,50 +59,39 @@ public class PullRepository extends SyncRepository {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PullRepository.class);
 	
-	private boolean syncToChildProject;
+	private String targetProject;
 	
-	private String childProject;
-
+	private String accessTokenSecret;
+	
 	private String refs = "refs/heads/* refs/tags/*";
 	
 	private boolean withLfs;
-	
-	@Editable(order=205, description="If enabled, sync to child project instead of current project")
-	public boolean isSyncToChildProject() {
-		return syncToChildProject;
+
+	@Editable(order=600, placeholder = "Current project", description=
+			"Select project to sync to. Leave empty to sync to current project")
+	@ProjectChoice
+	public String getTargetProject() {
+		return targetProject;
 	}
 
-	public void setSyncToChildProject(boolean syncToChildProject) {
-		this.syncToChildProject = syncToChildProject;
+	public void setTargetProject(String targetProject) {
+		this.targetProject = targetProject;
 	}
 
-	@Editable(order=210, description="Select child project to sync to")
-	@ShowCondition("isSyncToChildProjectEnabled")
-	@ChoiceProvider("getChildProjects")
-	@NotEmpty
-	public String getChildProject() {
-		return childProject;
+	@Editable(order=650, name="Access Token for Target Project", description = "Specify a secret to be used " +
+			"as access token with project management permission for target project. Note that access token " +
+			"is not required when sync to current or child project and build commit is reachable from " +
+			"default branch")
+	@ChoiceProvider("getSecretChoices")
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
 	}
 
-	public void setChildProject(String childProject) {
-		this.childProject = childProject;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isSyncToChildProjectEnabled() {
-		return (boolean) EditContext.get().getInputValue("syncToChildProject");
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
 	}
 	
-	@SuppressWarnings("unused")
-	private static List<String> getChildProjects() {
-		int prefixLen = Project.get().getPath().length() + 1;
-		List<String> choices = new ArrayList<>(Project.get().getDescendants()
-				.stream().map(pr -> pr.getPath().substring(prefixLen)).collect(toList()));
-		Collections.sort(choices);
-		return choices;
-	}
-
-	@Editable(order=410, description="Specify space separated refs to pull from remote. '*' can be used in ref "
+	@Editable(order=700, description="Specify space separated refs to pull from remote. '*' can be used in ref "
 			+ "name for wildcard match<br>"
 			+ "<b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update "
 			+ "branches/tags via this step")
@@ -123,7 +109,7 @@ public class PullRepository extends SyncRepository {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 
-	@Editable(order=450, name="Transfer LFS Files", descriptionProvider="getLfsDescription")
+	@Editable(order=800, name="Transfer LFS Files", descriptionProvider="getLfsDescription")
 	public boolean isWithLfs() {
 		return withLfs;
 	}
@@ -146,36 +132,36 @@ public class PullRepository extends SyncRepository {
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			Project buildProject = build.getProject();
-			if (!buildProject.isCommitOnBranch(build.getCommitId(), buildProject.getDefaultBranch())) {
-				logger.error("For security reason, this step is only allowed to run from default branch");
-				return new ServerStepResult(false);
+			Project project = build.getProject();
+			Project targetProject;
+			if (getTargetProject() != null) {
+				targetProject = getProjectManager().findByPath(getTargetProject());
+				if (targetProject == null)
+					throw new ExplicitException("Target project not found: " + getTargetProject());
+			} else {
+				targetProject = project;
 			}
+			boolean authorized = false;
+			if (project.isCommitOnBranch(build.getCommitId(), project.getDefaultBranch()) 
+					&& project.isSelfOrAncestorOf(targetProject)) {
+				authorized = true;
+			} else if (getAccessTokenSecret() != null && 
+					SecurityUtils.canManageProject(build.getUser(getAccessTokenSecret()), targetProject)) {
+				authorized = true;
+			}
+			if (!authorized) 
+				throw new ExplicitException("This build is not authorized to sync to project: " + targetProject.getPath());
 
 			String remoteUrl = getRemoteUrlWithCredential(build);
-			Long projectId = getTargetProject(build).getId();
-
-			var task = new PullTask(projectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
-			getProjectManager().runOnActiveServer(projectId, task);
+			Long targetProjectId = targetProject.getId();
+			var task = new PullTask(targetProjectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
+			getProjectManager().runOnActiveServer(targetProjectId, task);
 			return new ServerStepResult(true);
 		});
 	}
 	
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
-	}
-	
-	private Project getTargetProject(Build build) {
-		Project buildProject = build.getProject();
-		if (isSyncToChildProject()) {
-			String projectPath = buildProject.getPath() + "/" + getChildProject();
-			Project childProject = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
-			if (childProject == null)
-				throw new ExplicitException("Unable to find child project: " + getChildProject());
-			return childProject;
-		} else {
-			return buildProject;
-		}
 	}
 	
 	private static class PullTask implements ClusterTask<Void> {
