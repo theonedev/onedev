@@ -186,8 +186,8 @@ public class ProblemReportPage extends BuildReportPage {
 			fragment.add(filesContainer);
 
 			PageableListView<ProblemFile> filesView;
-			filesContainer.add(filesView = new PageableListView<ProblemFile>("files",
-					new LoadableDetachableModel<>() {
+			filesContainer.add(filesView = new PageableListView<>("files",
+					new LoadableDetachableModel<List<ProblemFile>>() {
 
 						@Override
 						protected List<ProblemFile> load() {
@@ -198,7 +198,7 @@ public class ProblemReportPage extends BuildReportPage {
 											.filter(it -> filePatterns.get().matches(matcher, it.getBlobPath().toLowerCase()))
 											.collect(toList());
 									problemFiles.sort(getReport().newProblemFileComparator());
-									return problemFiles;									
+									return problemFiles;
 								} else {
 									var problemFiles = new ArrayList<>(getReport().getProblemFiles());
 									problemFiles.sort(getReport().newProblemFileComparator());
@@ -246,7 +246,7 @@ public class ProblemReportPage extends BuildReportPage {
 					state.problemReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params));
-					
+
 					item.add(new Label("tooManyProblems",
 							"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {
 
@@ -279,7 +279,7 @@ public class ProblemReportPage extends BuildReportPage {
 								} else {
 									if (o2.getRange() != null)
 										return 1;
-									else 
+									else
 										return 0;
 								}
 							});
@@ -302,7 +302,7 @@ public class ProblemReportPage extends BuildReportPage {
 								severityLabel.add(AttributeAppender.append("class", "badge-warning"));
 							else
 								severityLabel.add(AttributeAppender.append("class", "badge-secondary"));
-							
+
 							item.add(new Label("message", problem.getMessage()).setEscapeModelStrings(false));
 
 							if (problem.getRange() != null) {
@@ -334,9 +334,14 @@ public class ProblemReportPage extends BuildReportPage {
 					item.setOutputMarkupId(true);
 				}
 
+				@Override
+				protected void onBeforeRender() {
+					expandedFiles.clear();
+					if (!getModelObject().isEmpty()) 
+						expandedFiles.add(getModelObject().iterator().next().getBlobPath());
+					super.onBeforeRender();
+				}
 			});
-			if (!filesView.getModelObject().isEmpty())
-				expandedFiles.add(filesView.getModelObject().iterator().next().getBlobPath());
 
 			filesContainer.add(new OnePagingNavigator("pagingNavigator", filesView, null));
 			filesContainer.add(new NoRecordsPlaceholder("noRecords", filesView));			
