@@ -631,13 +631,13 @@
 	</repositories>
 	<properties>
 		<commons.version>2.9.1</commons.version>
-		<agent.version>1.11.4</agent.version>
+		<agent.version>1.11.6</agent.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<logback.version>1.4.14</logback.version>
 		<antlr.version>4.7.2</antlr.version>
 		<jetty.version>9.4.54.v20240208</jetty.version>
 		<wicket.version>7.18.0</wicket.version>
-		<jersey.version>2.37</jersey.version>
+		<jersey.version>2.38</jersey.version>
 		<hibernate.version>5.4.24.Final</hibernate.version>
 		<lucene.version>8.7.0</lucene.version>
 		<shiro.version>1.13.0</shiro.version>
