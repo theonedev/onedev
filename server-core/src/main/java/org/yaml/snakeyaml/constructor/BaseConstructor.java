@@ -57,29 +57,36 @@ public abstract class BaseConstructor {
   protected static final Object NOT_INSTANTIATED_OBJECT = new Object();
 
   /**
-   * It maps the node kind to the the Construct implementation. When the runtime class is known then
-   * the implicit tag is ignored.
+   * It maps the node kind to the Construct implementation. When the runtime class is known then the
+   * implicit tag is ignored.
    */
   protected final Map<NodeId, Construct> yamlClassConstructors =
       new EnumMap<NodeId, Construct>(NodeId.class);
   /**
    * It maps the (explicit or implicit) tag to the Construct implementation. It is used: 1) explicit
    * tag - if present. 2) implicit tag - when the runtime class of the instance is unknown (the node
-   * has the Object.class)
+   * has the Object.class) 3) when nothing else is found the Construct for the key 'null' is chosen
+   * (which is ConstructYamlObject)
    */
   protected final Map<Tag, Construct> yamlConstructors = new HashMap<Tag, Construct>();
   /**
    * It maps the (explicit or implicit) tag to the Construct implementation. It is used when no
-   * exact match found.
+   * exact match found. The key in the Map is checked if it starts the class name
    */
   protected final Map<String, Construct> yamlMultiConstructors = new HashMap<String, Construct>();
 
+  /**
+   * No graph creator
+   */
   protected Composer composer;
   final Map<Node, Object> constructedObjects;
   private final Set<Node> recursiveObjects;
   private final ArrayList<RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>> maps2fill;
   private final ArrayList<RecursiveTuple<Set<Object>, Object>> sets2fill;
 
+  /**
+   * the tag for the root node
+   */
   protected Tag rootTag;
   private PropertyUtils propertyUtils;
   private boolean explicitPropertyUtils;
@@ -88,16 +95,29 @@ public abstract class BaseConstructor {
 
   private boolean enumCaseSensitive = false;
 
+  /**
+   * Mapping from a class to its manager
+   */
   protected final Map<Class<? extends Object>, TypeDescription> typeDefinitions;
+  /**
+   * register classes for tags
+   */
   protected final Map<Tag, Class<? extends Object>> typeTags;
 
+  /**
+   * options
+   */
   protected LoaderOptions loadingConfig;
 
-  public BaseConstructor() {
-    this(new LoaderOptions());
-  }
-
+  /**
+   * Create
+   *
+   * @param loadingConfig - options
+   */
   public BaseConstructor(LoaderOptions loadingConfig) {
+    if (loadingConfig == null) {
+      throw new NullPointerException("LoaderOptions must be provided.");
+    }
     constructedObjects = new HashMap<Node, Object>();
     recursiveObjects = new HashSet<Node>();
     maps2fill =
@@ -228,6 +248,12 @@ public abstract class BaseConstructor {
     return constructObjectNoCheck(node);
   }
 
+  /**
+   * Construct object from the specified Node without the check if it was already created.
+   *
+   * @param node - the source
+   * @return constructed instance
+   */
   protected Object constructObjectNoCheck(Node node) {
     if (recursiveObjects.contains(node)) {
       throw new ConstructorException(null, null, "found unconstructable recursive node",
@@ -249,7 +275,7 @@ public abstract class BaseConstructor {
 
   /**
    * Get the constructor to construct the Node. For implicit tags if the runtime class is known a
-   * dedicated Construct implementation is used. Otherwise the constructor is chosen by the tag.
+   * dedicated Construct implementation is used. Otherwise, the constructor is chosen by the tag.
    *
    * @param node {@link Node} to construct an instance from
    * @return {@link Construct} implementation for the specified node
@@ -258,10 +284,11 @@ public abstract class BaseConstructor {
     if (node.useClassConstructor()) {
       return yamlClassConstructors.get(node.getNodeId());
     } else {
-      Construct constructor = yamlConstructors.get(node.getTag());
+      Tag tag = node.getTag();
+      Construct constructor = yamlConstructors.get(tag);
       if (constructor == null) {
         for (String prefix : yamlMultiConstructors.keySet()) {
-          if (node.getTag().startsWith(prefix)) {
+          if (tag.startsWith(prefix)) {
             return yamlMultiConstructors.get(prefix);
           }
         }
@@ -271,6 +298,12 @@ public abstract class BaseConstructor {
     }
   }
 
+  /**
+   * Create string from scalar
+   *
+   * @param node - the source
+   * @return the data
+   */
   protected String constructScalar(ScalarNode node) {
     return node.getValue();
   }
@@ -402,28 +435,60 @@ public abstract class BaseConstructor {
   // <<<< NEW instance
 
   // >>>> Construct => NEW, 2ndStep(filling)
+
+  /**
+   * Create List and fill it with data
+   *
+   * @param node - the source
+   * @return filled List
+   */
   protected List<? extends Object> constructSequence(SequenceNode node) {
     List<Object> result = newList(node);
     constructSequenceStep2(node, result);
     return result;
   }
 
+  /**
+   * create Set from sequence
+   *
+   * @param node - sequence
+   * @return constructed Set
+   */
   protected Set<? extends Object> constructSet(SequenceNode node) {
     Set<Object> result = newSet(node);
     constructSequenceStep2(node, result);
     return result;
   }
 
+  /**
+   * Create array from sequence
+   *
+   * @param node - sequence
+   * @return constructed array
+   */
   protected Object constructArray(SequenceNode node) {
     return constructArrayStep2(node, createArray(node.getType(), node.getValue().size()));
   }
 
+  /**
+   * Fill the provided collection with the data from the Node
+   *
+   * @param node - the source
+   * @param collection - data to fill
+   */
   protected void constructSequenceStep2(SequenceNode node, Collection<Object> collection) {
     for (Node child : node.getValue()) {
       collection.add(constructObject(child));
     }
   }
 
+  /**
+   * Fill array from node
+   *
+   * @param node - the source
+   * @param array - the destination
+   * @return filled array
+   */
   protected Object constructArrayStep2(SequenceNode node, Object array) {
     final Class<?> componentType = node.getType().getComponentType();
 
@@ -481,18 +546,36 @@ public abstract class BaseConstructor {
     return array;
   }
 
+  /**
+   * Create Set from mapping
+   *
+   * @param node - mapping
+   * @return constructed Set
+   */
   protected Set<Object> constructSet(MappingNode node) {
     final Set<Object> set = newSet(node);
     constructSet2ndStep(node, set);
     return set;
   }
 
+  /**
+   * Create Map from mapping
+   *
+   * @param node - mapping
+   * @return constructed Map
+   */
   protected Map<Object, Object> constructMapping(MappingNode node) {
     final Map<Object, Object> mapping = newMap(node);
     constructMapping2ndStep(node, mapping);
     return mapping;
   }
 
+  /**
+   * Fill provided Map with constructed data
+   *
+   * @param node - source
+   * @param mapping - map to fill
+   */
   protected void constructMapping2ndStep(MappingNode node, Map<Object, Object> mapping) {
     List<NodeTuple> nodeValue = node.getValue();
     for (NodeTuple tuple : nodeValue) {
@@ -526,8 +609,7 @@ public abstract class BaseConstructor {
    * different hash after initialization compared to clean just created one. And map of course does
    * not observe key hashCode changes.
    */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
+  protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
     maps2fill.add(0, new RecursiveTuple(mapping, new RecursiveTuple(key, value)));
   }
 
@@ -640,5 +722,9 @@ protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Objec
 
   public void setEnumCaseSensitive(boolean enumCaseSensitive) {
     this.enumCaseSensitive = enumCaseSensitive;
+  }
+
+  public LoaderOptions getLoadingConfig() {
+    return loadingConfig;
   }
 }

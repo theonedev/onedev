@@ -1,25 +1,16 @@
 package io.onedev.server.data.migration;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.BeanUtils;
 import org.hibernate.proxy.HibernateProxyHelper;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.emitter.Emitter;
@@ -27,22 +18,19 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.MethodProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.nodes.*;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 import org.yaml.snakeyaml.serializer.Serializer;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.annotation.Editable;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class VersionedYamlDoc extends MappingNode {
 
@@ -127,6 +115,10 @@ public class VersionedYamlDoc extends MappingNode {
 	
 	private static class OneConstructor extends Constructor {
 		
+		public OneConstructor() {
+			super(new LoaderOptions());
+		}
+		
 		public Object construct(Node node) {
 			return constructDocument(node);
 		}
@@ -170,7 +162,7 @@ public class VersionedYamlDoc extends MappingNode {
 		}
 		
 		private static Representer newRepresenter() {
-			Representer representer = new Representer() {
+			Representer representer = new Representer(new DumperOptions()) {
 				
 			    @SuppressWarnings("rawtypes")
 				@Override
