@@ -34,7 +34,8 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	private Severity failThreshold = HIGH;
 	
 	@Editable(order=1000, name="Fail Threshold", description = "Fail build if there are vulnerabilities " +
-			"with or severer than specified severity level")
+			"with or severer than specified severity level. Note that this only takes effect if build " +
+			"is not failed by other steps")
 	@NotNull
 	public Severity getFailThreshold() {
 		return failThreshold;

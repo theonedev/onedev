@@ -174,7 +174,6 @@ public class BuildSpec implements Serializable, Validatable {
 						importedBuildSpecs.add(importedBuildSpec);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
 					// Ignore here as we rely on this method to show viewer/editor 
 					// Errors relating to this will be shown when validated
 				}
@@ -1969,7 +1968,8 @@ public class BuildSpec implements Serializable, Validatable {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
 				MappingNode stepNode = (MappingNode) itStepNode.next();
-				if (stepNode.getTag().getValue().equals("!PullRepository")) {
+				var stepType = stepNode.getTag().getValue();
+				if (stepType.equals("!PullRepository")) {
 					boolean syncToChild = false;
 					String childProject = null;
 					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
@@ -1989,6 +1989,12 @@ public class BuildSpec implements Serializable, Validatable {
 								new ScalarNode(Tag.STR, "targetProject"),
 								new ScalarNode(Tag.STR, targetProject)));
 					}
+				} else if (stepType.equals("!PublishCPDReportStep") || stepType.equals("!PublishCheckstyleReportStep") 
+						|| stepType.equals("!PublishESLintReportStep") || stepType.equals("!PublishPMDReportStep")
+						|| stepType.equals("!PublishRoslynatorReportStep") || stepType.equals("!PublishSpotBugsReportStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "failThreshold"),
+							new ScalarNode(Tag.STR, "HIGH")));
 				}
 			}
 		});
