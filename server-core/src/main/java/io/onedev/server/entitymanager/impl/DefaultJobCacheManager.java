@@ -475,7 +475,8 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		if (taskId != null)
+			taskScheduler.unschedule(taskId);
 	}
 
 	@Override
