@@ -344,3 +344,7 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+  postBuildActions:
+  - !SendNotificationAction
+    condition: failed
+    receivers: committers
