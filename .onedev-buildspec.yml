@@ -12,6 +12,7 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
+    cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !UseTemplateStep
     name: set up cache
@@ -327,6 +328,7 @@ jobs:
     cloneCredential: !DefaultCredential {}
     withLfs: false
     withSubmodules: false
+    cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !ScanDepVulnersStep
     name: scan
