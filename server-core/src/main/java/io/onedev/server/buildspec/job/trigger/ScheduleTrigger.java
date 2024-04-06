@@ -74,7 +74,12 @@ public class ScheduleTrigger extends JobTrigger {
 
 	@Override
 	public String getTriggerDescription() {
-		return "Schedule at " + cronExpression;
+		var builder = new StringBuilder("Schedule at ").append(cronExpression);
+		if (getBranches() != null)
+			builder.append(" for branches '").append(getBranches()).append("'");
+		else 
+			builder.append(" for default branch");
+		return builder.toString();
 	}
 
 }
