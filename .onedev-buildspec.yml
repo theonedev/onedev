@@ -1,39 +1,9 @@
-version: 27
+version: 31
+imports:
+- projectPath: onedev
+  revision: main
+  accessTokenSecret: onedev-token
 jobs:
-- name: CI
-  steps:
-  - !CheckoutStep
-    name: checkout
-    cloneCredential: !HttpCredential
-      accessTokenSecret: onedev-token
-    withLfs: false
-    withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
-    name: set up cache
-    templateName: set up cache
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
-    name: set build version
-    templateName: set build version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: test
-    runInContainer: true
-    image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
-      commands:
-      - mvn test -Pee
-    useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  triggers:
-  - !BranchUpdateTrigger
-    branches: main
-    projects: onedev/server
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  timeout: 3600
 - name: Release
   steps:
   - !CheckoutStep
@@ -56,44 +26,44 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - set -o pipefail
-      - ''
-      - buildVersion=@build_version@
-      - ''
-      - projectDir=`pwd`
-      - ''
-      - '# Skip test as we''ve already tested in CI build'
-      - mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
-      - ''
-      - '# Prepare for artifact and site publish'
-      - cp server-product/target/onedev-${buildVersion}.zip .
-      - ''
-      - mkdir server-plugin-archetype-${buildVersion}
-      - cd server-plugin/server-plugin-archetype
-      - mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
-      - cd $projectDir
-      - sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///' server-plugin-archetype-${buildVersion}/pom.xml
-      - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
-      - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
-      - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
-      - ''
-      - unzip onedev-${buildVersion}.zip
-      - tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
-      - sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256
-      - sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
-      - sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
-      - sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
-      - ''
-      - cp server-product/docker/*.yaml .
-      - ''
-      - '# Prepare for docker image build'
-      - cd $projectDir/server-product/target
-      - cp -r ../docker docker
-      - unzip onedev-$buildVersion.zip -d docker
-      - mv docker/onedev-$buildVersion docker/app
-      - cp -r agent docker/
+      commands: |
+        set -e
+        set -o pipefail
+
+        buildVersion=@build_version@
+
+        projectDir=`pwd`
+
+        # Skip test as we've already tested in CI build
+        mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
+
+        # Prepare for artifact and site publish
+        cp server-product/target/onedev-${buildVersion}.zip .
+
+        mkdir server-plugin-archetype-${buildVersion}
+        cd server-plugin/server-plugin-archetype
+        mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
+        cd $projectDir
+        sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///' server-plugin-archetype-${buildVersion}/pom.xml
+        cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
+        zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
+        tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
+
+        unzip onedev-${buildVersion}.zip
+        tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
+        sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256
+        sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
+        sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
+        sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
+
+        cp server-product/docker/*.yaml .
+
+        # Prepare for docker image build
+        cd $projectDir/server-product/target
+        cp -r ../docker docker
+        unzip onedev-$buildVersion.zip -d docker
+        mv docker/onedev-$buildVersion docker/app
+        cp -r agent docker/
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
@@ -129,17 +99,17 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - ''
-      - buildVersion=@build_version@
-      - projectDir=`pwd`
-      - ''
-      - cd $projectDir/server-product/helm
-      - ./prepare.sh
-      - ''
-      - cd $projectDir/server-product/target/helm-chart
-      - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
+      commands: |
+        set -e
+
+        buildVersion=@build_version@
+        projectDir=`pwd`
+
+        cd $projectDir/server-product/helm
+        ./prepare.sh
+
+        cd $projectDir/server-product/target/helm-chart
+        cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
@@ -147,37 +117,37 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - set -o pipefail
-      - ''
-      - buildVersion=@build_version@
-      - ''
-      - projectDir=`pwd`
-      - ''
-      - echo "Creating release tag..."
-      - ''
-      - git config --global user.name "Robin Shen"
-      - git config --global user.email "robin@@onedev.io"
-      - git config --global --add safe.directory /onedev-build/workspace
-      - ''
-      - git tag v$buildVersion -m "Release tag"
-      - git push -f origin v$buildVersion:v$buildVersion
-      - git config --global --unset http.extraHeader
-      - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
-      - ''
-      - echo "Creating release in GitHub..."
-      - ''
-      - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion | jq '.id')
-      - ''
-      - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
-      - ''
-      - 'acceptHeader="Accept: application/vnd.github.v3+json"'
-      - if [ "$releaseId" == "null" ]; then
-      - '  curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases'
-      - else
-      - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
-      - fi
+      commands: |
+        set -e
+        set -o pipefail
+
+        buildVersion=@build_version@
+
+        projectDir=`pwd`
+
+        echo "Creating release tag..."
+
+        git config --global user.name "Robin Shen"
+        git config --global user.email "robin@@onedev.io"
+        git config --global --add safe.directory /onedev-build/workspace
+
+        git tag v$buildVersion -m "Release tag"
+        git push -f origin v$buildVersion:v$buildVersion
+        git config --global --unset http.extraHeader
+        git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
+
+        echo "Creating release in GitHub..."
+
+        releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion | jq '.id')
+
+        releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
+
+        acceptHeader="Accept: application/vnd.github.v3+json"
+        if [ "$releaseId" == "null" ]; then
+          curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases
+        else
+          curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId
+        fi
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CloseMilestoneStep
@@ -188,32 +158,8 @@ jobs:
   jobDependencies:
   - jobName: CI
     requireSuccessful: true
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  timeout: 3600
-- name: Sync Main (GitHub)
-  steps:
-  - !CheckoutStep
-    name: checkout
-    cloneCredential: !DefaultCredential {}
-    withLfs: false
-    withSubmodules: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: sync
-    runInContainer: true
-    image: alpine/git:1.0.7
-    interpreter: !DefaultInterpreter
-      commands:
-      - git config --global --unset http.extraHeader
-      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  triggers:
-  - !BranchUpdateTrigger
-    branches: main
-    projects: onedev/server
+  - jobName: Scan Vulnerabilities
+    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -225,17 +171,7 @@ jobs:
     runInContainer: true
     image: ubuntu
     interpreter: !DefaultInterpreter
-      commands:
-      - 'apt update '
-      - apt install -y zip
-      - buildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\K.*(?=.tar.gz)'`
-      - tar zxvf onedev-$buildVersion.tar.gz
-      - mv onedev-$buildVersion onedev-latest
-      - tar zcvf onedev-latest.tar.gz onedev-latest
-      - zip -r onedev-latest.zip onedev-latest
-      - sha256sum onedev-latest.zip > onedev-latest.zip.sha256
-      - sha256sum onedev-latest.tar.gz > onedev-latest.tar.gz.sha256
-      - echo $buildVersion > build_version
+      commands: "apt update \napt install -y zip\nbuildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\\K.*(?=.tar.gz)'`\ntar zxvf onedev-$buildVersion.tar.gz\nmv onedev-$buildVersion onedev-latest\ntar zcvf onedev-latest.tar.gz onedev-latest\nzip -r onedev-latest.zip onedev-latest\nsha256sum onedev-latest.zip > onedev-latest.zip.sha256\nsha256sum onedev-latest.tar.gz > onedev-latest.tar.gz.sha256\necho $buildVersion > build_version\n"
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
@@ -276,18 +212,18 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
-      commands:
-      - set -e
-      - ''
-      - mvn -Dmaven.test.skip=true package -Pee
-      - ''
-      - cd server-product/target
-      - cp -r ../docker docker
-      - buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
-      - ''
-      - unzip onedev-$buildVersion.zip -d docker
-      - mv docker/onedev-$buildVersion docker/app
-      - cp -r agent docker/
+      commands: |
+        set -e
+
+        mvn -Dmaven.test.skip=true package -Pee
+
+        cd server-product/target
+        cp -r ../docker docker
+        buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
+
+        unzip onedev-$buildVersion.zip -d docker
+        mv docker/onedev-$buildVersion docker/app
+        cp -r agent docker/
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
@@ -326,7 +262,91 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-imports:
-- projectPath: onedev
-  revision: main
-  accessTokenSecret: onedev-token
+- name: Scan Vulnerabilities
+  steps:
+  - !CheckoutStep
+    name: checkout
+    cloneCredential: !DefaultCredential {}
+    withLfs: false
+    withSubmodules: false
+    cloneDepth: 1
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !ScanDepVulnersStep
+    name: scan
+    recursive: true
+    reportName: Dependency Vulnerabilities
+    failThreshold: HIGH
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  triggers:
+  - !ScheduleTrigger
+    cronExpression: 0 0 1 * * ?
+  - !BranchUpdateTrigger {}
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
+  postBuildActions:
+  - !SendNotificationAction
+    condition: failed
+    receivers: committers
+- name: CI
+  steps:
+  - !CheckoutStep
+    name: checkout
+    cloneCredential: !HttpCredential
+      accessTokenSecret: onedev-token
+    withLfs: false
+    withSubmodules: true
+    cloneDepth: 1
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: set up cache
+    templateName: set up cache
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: set build version
+    templateName: set build version
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: test
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands: |
+        mvn test -Pee
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  triggers:
+  - !BranchUpdateTrigger
+    branches: main
+    projects: onedev/server
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
+- name: Sync Main (GitHub)
+  steps:
+  - !CheckoutStep
+    name: checkout
+    cloneCredential: !DefaultCredential {}
+    withLfs: false
+    withSubmodules: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: sync
+    runInContainer: true
+    image: alpine/git:1.0.7
+    interpreter: !DefaultInterpreter
+      commands: |
+        git config --global --unset http.extraHeader
+        git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
+    useTTY: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  triggers:
+  - !BranchUpdateTrigger
+    branches: main
+    projects: onedev/server
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
