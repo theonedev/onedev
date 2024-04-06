@@ -1294,7 +1294,7 @@ onedev.server.markdown = {
 		return quoted.join('\n');
 	},
 	onQuote: function(containerId, content) {
-		var quoted = onedev.server.markdown.getQuoted(content);
+		var quoted = onedev.server.markdown.getQuoted(content).replace(/\r/g, "");
 		var $input = $("#" + containerId + ">.body>.edit>textarea");
 		$input.focus();
 		document.execCommand("insertText", false, quoted + "\n\n");
