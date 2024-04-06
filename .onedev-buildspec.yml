@@ -280,7 +280,8 @@ jobs:
   triggers:
   - !ScheduleTrigger
     cronExpression: 0 0 1 * * ?
-  - !BranchUpdateTrigger {}
+  - !BranchUpdateTrigger
+    paths: '**/pom.xml'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
