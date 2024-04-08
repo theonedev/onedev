@@ -245,7 +245,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					}, new ArrayList<>());
 
 					if (successful) 
-						cacheHelper.uploadCaches();
+						cacheHelper.buildSuccessful();
 					return successful;
 				} finally {
 					// Fix https://code.onedev.io/onedev/server/~issues/597

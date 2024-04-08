@@ -224,11 +224,13 @@ public class ClusterResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
 	public Response downloadCache(
-			@QueryParam("projectId") Long projectId, @QueryParam("cacheId") Long cacheId, 
-			@QueryParam("cachePaths") String cachePaths) {
+			@QueryParam("projectId") Long projectId, 
+			@QueryParam("cacheId") Long cacheId, 
+			@QueryParam("cachePaths") String joinedCachePaths) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		StreamingOutput out = os -> jobCacheManager.downloadCacheLocal(projectId, cacheId, Splitter.on('\n').splitToList(cachePaths), os, null);
+		var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths);
+		StreamingOutput out = os -> jobCacheManager.downloadCache(projectId, cacheId, cachePaths, os);
 		return ok(out).build();
 	}
 
@@ -455,7 +457,7 @@ public class ClusterResource {
 			InputStream cacheStream) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		jobCacheManager.uploadCacheLocal(projectId, cacheId, Splitter.on('\n').splitToList(cachePaths), cacheStream);
+		jobCacheManager.uploadCache(projectId, cacheId, Splitter.on('\n').splitToList(cachePaths), cacheStream);
 		return ok().build();
 	}
 	

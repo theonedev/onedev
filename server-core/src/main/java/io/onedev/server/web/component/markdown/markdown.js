@@ -1299,6 +1299,8 @@ onedev.server.markdown = {
 		$input.focus();
 		document.execCommand("insertText", false, quoted + "\n\n");
 		onedev.server.markdown.fireInputEvent($input);
+		$input.blur();
+		$input.focus();
 	}
 	
 };

@@ -1999,5 +1999,18 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		});
 	}
+
+	private void migrate32(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				if (stepNode.getTag().getValue().equals("!SetupCacheStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "uploadStrategy"),
+							new ScalarNode(Tag.STR, "UPLOAD_IF_NOT_HIT")));
+				}
+			}
+		});
+	}
 	
 }

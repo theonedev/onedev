@@ -3,20 +3,22 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.EditContext;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.NEVER_UPLOAD;
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
 import static java.util.stream.Collectors.toList;
 
 @Editable(order=55, name="Set Up Cache", description = "Set up job cache to speed up job execution. " +
@@ -25,16 +27,21 @@ import static java.util.stream.Collectors.toList;
 public class SetupCacheStep extends Step {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private String key;
 	
 	private List<String> loadKeys = new ArrayList<>();
 	
 	private List<String> paths;
 	
+	private SetupCacheFacade.UploadStrategy uploadStrategy = UPLOAD_IF_NOT_HIT;
+	
+	private String uploadProjectPath;
+	
 	private String uploadAccessTokenSecret;
 
-	@Editable(order=100, name="Cache Key", description = "This key is used to determine if there is a cache hit. " +
+	@Editable(order=100, name="Cache Key", description = "This key is used to determine if there is a cache hit in " +
+			"project hierarchy (search from current project to root project in order, same for load keys below). " +
 			"A cache is considered hit if its key is exactly the same as the key defined here")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
@@ -46,10 +53,10 @@ public class SetupCacheStep extends Step {
 		this.key = key;
 	}
 
-	@Editable(order=200, name="Cache Load Keys", description = "In case cache is not hit via above key, OneDev will " +
-			"loop through load keys defined here in order until a matching cache is found. A cache is considered " +
-			"matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache " +
-			"will be returned")
+	@Editable(order=200, name="Load Keys", description = "In case cache is not hit via above key, " +
+			"OneDev will loop through load keys defined here in order until a matching cache is found " +
+			"in project hierarchy. A cache is considered matching if its key is prefixed with the load " +
+			"key. If multiple caches matches, the most recent cache will be returned")
 	@Interpolative(variableSuggester="suggestVariables")
 	public List<String> getLoadKeys() {
 		return loadKeys;
@@ -76,21 +83,50 @@ public class SetupCacheStep extends Step {
 		this.paths = paths;
 	}
 
+	@Editable(order=400, description = "Specify cache upload strategy after build succeeds. " +
+			"<var>Upload If Not Hit</var> means to upload when cache is not found with " +
+			"cache key, and <var>Upload If Not Found</var> means cache is not found with both " +
+			"cache key and load keys")
+	@NotNull
+	public SetupCacheFacade.UploadStrategy getUploadStrategy() {
+		return uploadStrategy;
+	}
+
+	public void setUploadStrategy(SetupCacheFacade.UploadStrategy uploadStrategy) {
+		this.uploadStrategy = uploadStrategy;
+	}
+
+	@Editable(order=450, placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
+			"specifies target project for the upload. Leave empty for current project")
+	@ProjectChoice
+	@ShowCondition("isMayUpload")
+	public String getUploadProjectPath() {
+		return uploadProjectPath;
+	}
+
+	public void setUploadProjectPath(String uploadProjectPath) {
+		this.uploadProjectPath = uploadProjectPath;
+	}
+
 	private static List<InputSuggestion> suggestStaticVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 	
-	@Editable(order=500, description = "When build is successful, OneDev tries to upload caches not " +
-			"hit previously (note matching caches via load keys also considered not hit). This upload " +
-			"is permitted only when the build commit is reachable from default branch, or an access " +
-			"token is provided with upload cache permission")
+	@Editable(order=500, description = "Specify a secret whose value is an access token with upload cache permission " +
+			"for above project. Note that this property is not required if upload cache to current or child project " +
+			"and build commit is reachable from default branch")
 	@ChoiceProvider("getAccessTokenSecretChoices")
+	@ShowCondition("isMayUpload")
 	public String getUploadAccessTokenSecret() {
 		return uploadAccessTokenSecret;
 	}
 
 	public void setUploadAccessTokenSecret(String uploadAccessTokenSecret) {
 		this.uploadAccessTokenSecret = uploadAccessTokenSecret;
+	}
+	
+	private static boolean isMayUpload() {
+		return EditContext.get().getInputValue("uploadStrategy") != NEVER_UPLOAD;
 	}
 
 	private static List<String> getAccessTokenSecretChoices() {
@@ -100,12 +136,12 @@ public class SetupCacheStep extends Step {
 	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		String accessToken;
+		String uploadAccessToken;
 		if (getUploadAccessTokenSecret() != null)
-			accessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
+			uploadAccessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
 		else
-			accessToken = null;
-		return new SetupCacheFacade(key, loadKeys, paths, accessToken);
+			uploadAccessToken = null;
+		return new SetupCacheFacade(key, loadKeys, paths, uploadStrategy, uploadProjectPath, uploadAccessToken);
 	}
 	
 }

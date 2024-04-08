@@ -535,7 +535,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 							}, new ArrayList<>());
 
 							if (successful) 
-								cacheHelper.uploadCaches();
+								cacheHelper.buildSuccessful();
 							
 							return successful;
 						} finally {
