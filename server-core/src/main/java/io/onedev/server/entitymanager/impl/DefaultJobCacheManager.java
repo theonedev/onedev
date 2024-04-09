@@ -278,9 +278,8 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	} 
 	
 	@Override
-	public void uploadCache(Long projectId, String cacheKey, List<String> cachePaths,
+	public void uploadCache(Long projectId, Long cacheId, List<String> cachePaths,
 							Consumer<OutputStream> cacheStreamHandler) {
-		Long cacheId = getCacheIdForUpload(projectId, cacheKey);
 		write(JobCache.getLockName(projectId, cacheId), () -> {
 			try (var os = openCacheOutputStream(projectId, cacheId, cachePaths)) {
 				cacheStreamHandler.accept(os);

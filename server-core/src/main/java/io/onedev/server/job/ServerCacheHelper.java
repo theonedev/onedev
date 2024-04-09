@@ -1,6 +1,7 @@
 package io.onedev.server.job;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheHelper;
@@ -19,13 +20,19 @@ import org.glassfish.jersey.client.ClientProperties;
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static org.apache.commons.io.IOUtils.copy;
 
 public class ServerCacheHelper extends CacheHelper {
 	
@@ -94,25 +101,49 @@ public class ServerCacheHelper extends CacheHelper {
 	protected boolean uploadCache(String cacheKey, List<String> cachePaths, List<File> cacheDirs,
 								  @Nullable String projectPath, @Nullable String accessToken) {
 		var projectId = getSessionManager().call(() -> {
-			Project uploadProject;
+			Project project;
 			if (projectPath != null) {
-				uploadProject = getProjectManager().findByPath(projectPath);
-				if (uploadProject == null)
+				project = getProjectManager().findByPath(projectPath);
+				if (project == null)
 					throw new ExplicitException("Upload project not found: " + projectPath);
 			} else {
-				uploadProject = getProjectManager().load(jobContext.getProjectId());
+				project = getProjectManager().load(jobContext.getProjectId());
 			}
-			if (jobContext.canManageProject(uploadProject)) {
-				return uploadProject.getId();
+			if (jobContext.canManageProject(project)) {
+				return project.getId();
 			} else if (accessToken != null) {
 				var user = getUserManager().findByAccessToken(accessToken);
-				if (user != null && SecurityUtils.canUploadCache(user.asSubject(), uploadProject))
-					return uploadProject.getId();
+				if (user != null && SecurityUtils.canUploadCache(user.asSubject(), project))
+					return project.getId();
 			} 
 			return null;
 		});
 		if (projectId != null) {
-			getCacheManager().uploadCache(projectId, cacheKey, cachePaths, os -> tar(cacheDirs, os));
+			Long cacheId = getCacheManager().getCacheIdForUpload(projectId, cacheKey);
+			var activeServer = getProjectManager().getActiveServer(projectId, true);
+			if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
+				getCacheManager().uploadCache(projectId, cacheId, cachePaths, os -> tar(cacheDirs, os));
+			} else {
+				Client client = ClientBuilder.newClient();
+				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
+				try {
+					String serverUrl = getClusterManager().getServerUrl(activeServer);
+					var target = client.target(serverUrl)
+							.path("~api/cluster/cache")
+							.queryParam("projectId", projectId)
+							.queryParam("cacheId", cacheId)
+							.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
+					Invocation.Builder builder = target.request();
+					builder.header(HttpHeaders.AUTHORIZATION,
+							KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+					StreamingOutput output = os -> tar(cacheDirs, os);
+					try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
+						KubernetesHelper.checkStatus(response);
+					}
+				} finally {
+					client.close();
+				}
+			}
 			return true;
 		} else {
 			return false;

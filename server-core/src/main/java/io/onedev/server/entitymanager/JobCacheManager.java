@@ -28,7 +28,7 @@ public interface JobCacheManager extends EntityManager<JobCache> {
 
 	void uploadCache(Long projectId, Long cacheId, List<String> cachePaths, InputStream cacheStream);
 
-	void uploadCache(Long projectId, String cacheKey, List<String> cachePaths,
+	void uploadCache(Long projectId, Long cacheId, List<String> cachePaths,
 					 Consumer<OutputStream> cacheStreamHandler);
 	
 	@Nullable
