@@ -7,7 +7,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import static io.onedev.server.util.match.WildcardUtils.matchPath;
+import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 
 public class OnBranchCriteria extends Criteria<JobMatchContext> {
 

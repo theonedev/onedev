@@ -630,8 +630,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.9.2</commons.version>
-		<agent.version>1.12.1</agent.version>
+		<commons.version>2.9.3</commons.version>
+		<agent.version>1.12.2</agent.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<logback.version>1.4.14</logback.version>
 		<antlr.version>4.7.2</antlr.version>

@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 public class SourceBranchCriteria extends Criteria<PullRequest> {
 

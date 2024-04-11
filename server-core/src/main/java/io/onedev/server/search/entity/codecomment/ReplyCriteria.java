@@ -3,13 +3,12 @@ package io.onedev.server.search.entity.codecomment;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.server.util.match.WildcardUtils.matchString;
+import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
 public class ReplyCriteria extends Criteria<CodeComment> {
 

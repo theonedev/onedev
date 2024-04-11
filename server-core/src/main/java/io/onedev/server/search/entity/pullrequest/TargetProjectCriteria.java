@@ -12,7 +12,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 public class TargetProjectCriteria extends Criteria<PullRequest> {
 

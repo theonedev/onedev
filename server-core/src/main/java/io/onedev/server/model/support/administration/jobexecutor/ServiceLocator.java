@@ -7,9 +7,8 @@ import java.util.List;
 import javax.validation.constraints.Size;
 
 import io.onedev.k8shelper.ServiceFacade;
-import io.onedev.server.buildspec.Service;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;

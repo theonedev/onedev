@@ -2,8 +2,7 @@ package io.onedev.server.buildspec.job.action.condition;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -11,7 +10,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import static io.onedev.server.buildspec.job.action.condition.ActionCondition.getRuleName;
-import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.Is;
 import static io.onedev.server.model.Build.NAME_TAG;
 
 public class TagCriteria extends Criteria<Build> {

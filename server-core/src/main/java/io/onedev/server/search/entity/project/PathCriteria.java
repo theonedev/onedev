@@ -6,7 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 public class PathCriteria extends Criteria<Project> {
 

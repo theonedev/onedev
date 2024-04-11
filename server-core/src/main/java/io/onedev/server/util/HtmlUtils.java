@@ -1,18 +1,13 @@
 package io.onedev.server.util;
 
-import java.util.Collection;
-import java.util.regex.Matcher;
-
+import com.google.common.collect.Lists;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.*;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
 
-import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.regex.Matcher;
 
 public class HtmlUtils {
 
@@ -108,6 +103,10 @@ public class HtmlUtils {
 	
 	public static String sanitize(String html) {
 		return sanitize(parse(html)).body().html();
+	}
+	
+	public static String getText(String html) {
+		return Jsoup.parse(html).text();		
 	}
 	
 }

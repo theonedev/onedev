@@ -16,8 +16,8 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 
 public class PathCriteria extends CommitCriteria {
 

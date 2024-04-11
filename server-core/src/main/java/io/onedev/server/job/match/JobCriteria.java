@@ -3,7 +3,7 @@ package io.onedev.server.job.match;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;

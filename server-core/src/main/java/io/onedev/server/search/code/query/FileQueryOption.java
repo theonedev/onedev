@@ -2,7 +2,7 @@ package io.onedev.server.search.code.query;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.web.component.codequeryoption.FileQueryOptionEditor;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
-import static io.onedev.server.util.match.WildcardUtils.rangeOfMatch;
+import static io.onedev.commons.utils.match.WildcardUtils.rangeOfMatch;
 import static java.util.Optional.ofNullable;
 
 public class FileQueryOption implements QueryOption {

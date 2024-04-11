@@ -6,6 +6,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CodeProblem;
@@ -15,15 +17,12 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
@@ -229,6 +228,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 					};
 					toggleLink.add(new Label("label", filePath));
+						
 					toggleLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 						@Override
@@ -245,7 +245,7 @@ public class ProblemReportPage extends BuildReportPage {
 							FileMode.REGULAR_FILE.getBits());
 					state.problemReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
-					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params));
+					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params).setVisible(file.isInRepo()));
 
 					item.add(new Label("tooManyProblems",
 							"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {

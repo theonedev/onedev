@@ -1028,9 +1028,6 @@ public class Build extends ProjectBelonging
 
 	@Nullable
 	public String getBlobPath(String filePath) {
-		if (checkoutPaths.isEmpty())
-			throw new ExplicitException("No checkout path detected");
-		
 		filePath = filePath.replace('\\', '/');
 		filePath = Paths.get(filePath).normalize().toString();
 		filePath = filePath.replace('\\', '/');

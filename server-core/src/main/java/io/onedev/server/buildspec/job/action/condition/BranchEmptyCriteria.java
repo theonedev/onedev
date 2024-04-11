@@ -2,7 +2,6 @@ package io.onedev.server.buildspec.job.action.condition;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.PathMatcher;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;

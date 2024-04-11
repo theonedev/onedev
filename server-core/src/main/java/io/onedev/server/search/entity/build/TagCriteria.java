@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 public class TagCriteria extends Criteria<Build> {
 

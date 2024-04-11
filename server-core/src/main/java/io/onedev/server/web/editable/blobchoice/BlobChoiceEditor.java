@@ -10,7 +10,7 @@ import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.blob.BlobPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;

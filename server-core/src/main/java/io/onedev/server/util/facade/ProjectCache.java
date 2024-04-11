@@ -6,14 +6,14 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
-import static io.onedev.server.util.match.WildcardUtils.matchPath;
+import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 

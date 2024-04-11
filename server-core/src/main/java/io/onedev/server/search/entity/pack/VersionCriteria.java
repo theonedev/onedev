@@ -5,7 +5,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 import javax.persistence.criteria.*;
 
-import static io.onedev.server.util.match.WildcardUtils.matchString;
+import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
 public class VersionCriteria extends Criteria<Pack> {
 

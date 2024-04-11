@@ -1,12 +1,14 @@
 package io.onedev.server.web.component.typeselect;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.editable.EditableUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.Component;
@@ -30,16 +32,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.editable.EditableUtils;
-import org.unbescape.html.HtmlEscape;
+import java.io.Serializable;
+import java.util.*;
+
+import static io.onedev.server.util.HtmlUtils.getText;
+import static io.onedev.server.web.editable.EditableUtils.getDescription;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @SuppressWarnings("serial")
 public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
@@ -249,12 +247,13 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 					}
 					fragment.add(link);
 					
-					String description = StringUtils.trimToNull(StringUtils.substringBefore(
-							EditableUtils.getDescription(typeNode.type), "."));
-					if (description != null) 
-						link.add(new Label("description", description).setEscapeModelStrings(false));
-					else 
+					var description = getDescription(typeNode.type);
+					if (description != null) {
+						description = substringBefore(getText(description), ".");
+						link.add(new Label("description", description));
+					} else {
 						link.add(new WebMarkupContainer("description").setVisible(false));
+					}
 					
 					return fragment;
 				}

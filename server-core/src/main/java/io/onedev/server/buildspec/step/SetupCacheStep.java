@@ -3,13 +3,15 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.EditContext;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -17,7 +19,6 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.NEVER_UPLOAD;
 import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
 import static java.util.stream.Collectors.toList;
 
@@ -35,6 +36,8 @@ public class SetupCacheStep extends Step {
 	private List<String> paths;
 	
 	private SetupCacheFacade.UploadStrategy uploadStrategy = UPLOAD_IF_NOT_HIT;
+	
+	private String changeDetectionExcludes;
 	
 	private String uploadProjectPath;
 	
@@ -83,10 +86,10 @@ public class SetupCacheStep extends Step {
 		this.paths = paths;
 	}
 
-	@Editable(order=400, description = "Specify cache upload strategy after build succeeds. " +
+	@Editable(order=400, description = "Specify cache upload strategy. " +
 			"<var>Upload If Not Hit</var> means to upload when cache is not found with " +
-			"cache key, and <var>Upload If Not Found</var> means cache is not found with both " +
-			"cache key and load keys")
+			"cache key, and <var>Upload If Changed</var> means to upload if some files " +
+			"in cache path are changed")
 	@NotNull
 	public SetupCacheFacade.UploadStrategy getUploadStrategy() {
 		return uploadStrategy;
@@ -96,10 +99,19 @@ public class SetupCacheStep extends Step {
 		this.uploadStrategy = uploadStrategy;
 	}
 
+	@Editable(order=425)
+	@Interpolative(variableSuggester="suggestStaticVariables")
+	public String getChangeDetectionExcludes() {
+		return changeDetectionExcludes;
+	}
+
+	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
+		this.changeDetectionExcludes = changeDetectionExcludes;
+	}
+
 	@Editable(order=450, placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
 			"specifies target project for the upload. Leave empty for current project")
 	@ProjectChoice
-	@ShowCondition("isMayUpload")
 	public String getUploadProjectPath() {
 		return uploadProjectPath;
 	}
@@ -116,17 +128,12 @@ public class SetupCacheStep extends Step {
 			"for above project. Note that this property is not required if upload cache to current or child project " +
 			"and build commit is reachable from default branch")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@ShowCondition("isMayUpload")
 	public String getUploadAccessTokenSecret() {
 		return uploadAccessTokenSecret;
 	}
 
 	public void setUploadAccessTokenSecret(String uploadAccessTokenSecret) {
 		this.uploadAccessTokenSecret = uploadAccessTokenSecret;
-	}
-	
-	private static boolean isMayUpload() {
-		return EditContext.get().getInputValue("uploadStrategy") != NEVER_UPLOAD;
 	}
 
 	private static List<String> getAccessTokenSecretChoices() {
@@ -141,7 +148,8 @@ public class SetupCacheStep extends Step {
 			uploadAccessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
 		else
 			uploadAccessToken = null;
-		return new SetupCacheFacade(key, loadKeys, paths, uploadStrategy, uploadProjectPath, uploadAccessToken);
+		return new SetupCacheFacade(getKey(), getLoadKeys(), getPaths(), getUploadStrategy(), 
+				getChangeDetectionExcludes(), getUploadProjectPath(), uploadAccessToken);
 	}
 	
 }

@@ -23,8 +23,7 @@ import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
 @Editable(order=200, name="Build Docker Image (Kaniko)", group = DOCKER_IMAGE, description="Build and publish docker image with Kaniko. " +
-		"This step can be executed by server docker executor, remote docker executor, or Kubernetes executor, " +
-		"without the need to mount docker sock")
+		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class BuildImageWithKanikoStep extends CommandStep {
 
 	private static final long serialVersionUID = 1L;

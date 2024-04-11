@@ -12,7 +12,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;

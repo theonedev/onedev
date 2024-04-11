@@ -13,13 +13,32 @@ import static java.util.Comparator.comparingInt;
 public class CodeProblem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	public enum Severity {CRITICAL, HIGH, MEDIUM, LOW};
+	
+	public static final String NON_REPO_FILE_PREFIX = ":";
+			
+	public enum Severity {
+		CRITICAL, 
+		HIGH, 
+		MEDIUM, 
+		LOW;
+		
+		public static Severity ofCvssScore(double cvssScore) {
+			if (cvssScore >= 9.0)
+				return CRITICAL;
+			else if (cvssScore >= 7.0)
+				return HIGH;
+			else if (cvssScore >= 4.0)
+				return MEDIUM;
+			else
+				return LOW;
+		}
+		
+	};
 
 	private final Severity severity;
 	
 	private final String blobPath;
-
+	
 	private final PlanarRange range;
 	
 	private final String message;
@@ -30,7 +49,7 @@ public class CodeProblem implements Serializable {
 		this.range = range;
 		this.message = message;
 	}
-
+	
 	public Severity getSeverity() {
 		return severity;
 	}

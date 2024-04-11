@@ -43,9 +43,9 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.UrlManager;
@@ -80,7 +80,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Project.PROP_NAME;
-import static io.onedev.server.util.match.WildcardUtils.matchPath;
+import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 
 @Entity
 @Table(

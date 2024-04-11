@@ -1,11 +1,11 @@
 package io.onedev.server.job;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheHelper;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.JobCacheManager;
@@ -17,7 +17,6 @@ import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.client.ClientProperties;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -30,9 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static org.apache.commons.io.IOUtils.copy;
 
 public class ServerCacheHelper extends CacheHelper {
 	
@@ -98,8 +94,11 @@ public class ServerCacheHelper extends CacheHelper {
 	}
 
 	@Override
-	protected boolean uploadCache(String cacheKey, List<String> cachePaths, List<File> cacheDirs,
-								  @Nullable String projectPath, @Nullable String accessToken) {
+	protected boolean uploadCache(SetupCacheFacade cacheConfig, List<File> cacheDirs) {
+		var cacheKey = cacheConfig.getKey();
+		var projectPath = cacheConfig.getUploadProjectPath();
+		var accessToken = cacheConfig.getUploadAccessToken();
+		var cachePaths = cacheConfig.getPaths();
 		var projectId = getSessionManager().call(() -> {
 			Project project;
 			if (projectPath != null) {

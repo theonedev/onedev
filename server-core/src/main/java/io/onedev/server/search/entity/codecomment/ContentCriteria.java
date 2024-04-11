@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 
 public class ContentCriteria extends Criteria<CodeComment> {
 

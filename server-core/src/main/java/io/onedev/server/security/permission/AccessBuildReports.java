@@ -1,7 +1,7 @@
 package io.onedev.server.security.permission;
 
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;

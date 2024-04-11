@@ -3,8 +3,8 @@ package io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultv
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.validation.constraints.Size;

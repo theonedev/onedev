@@ -4,11 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.codequeryoption.SymbolQueryOptionEditor;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -20,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.server.search.code.FieldConstants.*;
-import static io.onedev.server.util.match.WildcardUtils.matchString;
-import static io.onedev.server.util.match.WildcardUtils.rangeOfMatch;
+import static io.onedev.commons.utils.match.WildcardUtils.matchString;
+import static io.onedev.commons.utils.match.WildcardUtils.rangeOfMatch;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 

@@ -8,8 +8,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import io.onedev.server.util.FileExtension;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 @SuppressWarnings("serial")
