@@ -75,7 +75,7 @@ public class ServerConfig {
 			try {
 				serverName = InetAddress.getLocalHost().getHostName();
 			} catch (UnknownHostException e) {
-				throw new RuntimeException(e);
+				serverName = "localhost";
 			}
 		}
 		this.serverName = serverName;
