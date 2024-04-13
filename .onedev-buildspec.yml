@@ -35,7 +35,7 @@ jobs:
         projectDir=`pwd`
 
         # Skip test as we've already tested in CI build
-        mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy -Pee
+        mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
 
         # Prepare for artifact and site publish
         cp server-product/target/onedev-${buildVersion}.zip .
@@ -314,7 +314,7 @@ jobs:
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands: |
-        mvn test -Pee
+        mvn test
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
