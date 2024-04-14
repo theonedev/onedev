@@ -98,7 +98,7 @@ public class SetupCacheStep extends Step {
 		this.uploadStrategy = uploadStrategy;
 	}
 
-	@Editable(order=425, description = "Optionally specify files inside the cache path to ignore when " +
+	@Editable(order=425, description = "Optionally specify files relative to cache path to ignore when " +
 			"detect cache changes")
 	@Interpolative(variableSuggester="suggestStaticVariables")
 	@ShowCondition("isUploadIfChanged")
