@@ -92,18 +92,24 @@
 			</resource>
 		</resources>
 	</build>
-	<modules>
-		<module>server-core</module>
-		<module>server-plugin</module>
-		<module>server-ee</module>
-		<module>server-product</module>
-	</modules>
 	<profiles>
 		<profile>
 			<id>ce</id>
 			<modules>
 				<module>server-core</module>
 				<module>server-plugin</module>
+				<module>server-product</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>server-core</module>
+				<module>server-plugin</module>
+				<module>server-ee</module>
 				<module>server-product</module>
 			</modules>
 		</profile>
