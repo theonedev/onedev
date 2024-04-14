@@ -85,7 +85,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 		form.add(new AjaxButton("upload") {
 
 			private String getArtifactPath(FileItem file) {
-				String artifactPath = FilenameUtils.sanitizeFilename(FileUpload.getFileName(file));
+				String artifactPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(file));
 				if (directory != null)
 					artifactPath = directory + "/" + artifactPath;
 				return artifactPath;

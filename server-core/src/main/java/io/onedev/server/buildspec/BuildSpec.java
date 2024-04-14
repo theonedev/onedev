@@ -2004,10 +2004,15 @@ public class BuildSpec implements Serializable, Validatable {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
 				MappingNode stepNode = (MappingNode) itStepNode.next();
-				if (stepNode.getTag().getValue().equals("!SetupCacheStep")) {
+				var stepType = stepNode.getTag().getValue();
+				if (stepType.equals("!SetupCacheStep")) {
 					stepNode.getValue().add(new NodeTuple(
 							new ScalarNode(Tag.STR, "uploadStrategy"),
 							new ScalarNode(Tag.STR, "UPLOAD_IF_NOT_HIT")));
+				} else if (stepType.equals("!ScanDepVulnersStep")) {
+					stepNode.setTag(new Tag("!OsvVulnerScannerStep"));					
+				} else if (stepType.equals("!ScanLicenseViolationsStep")) {
+					stepNode.setTag(new Tag("!OsvLicenseScannerStep"));
 				}
 			}
 		});

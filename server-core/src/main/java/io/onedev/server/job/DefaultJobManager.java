@@ -1349,22 +1349,26 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 
+	private String normalizeFilePath(String filePath) {
+		var normalizedFilePath = filePath.replace('\\', '/');
+		normalizedFilePath = Paths.get(normalizedFilePath).normalize().toString();
+		normalizedFilePath = normalizedFilePath.replace('\\', '/');
+		return normalizedFilePath;
+	}
+
 	@Override
-	public void reportJobWorkspace(JobContext jobContext, String jobWorkspace) {
+	public void reportJobWorkspace(JobContext jobContext, String workspacePath) {
 		transactionManager.run(() -> {
 			Build build = buildManager.load(jobContext.getBuildId());
-			
+			build.setWorkspacePath(normalizeFilePath(workspacePath));
 			CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 			entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
 				if (executable instanceof CheckoutFacade) {
 					CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
-					var checkoutPath = jobWorkspace;
+					var checkoutPath = workspacePath;
 					if (checkoutFacade.getCheckoutPath() != null)
 						checkoutPath += "/" + checkoutFacade.getCheckoutPath();
-					checkoutPath = checkoutPath.replace('\\', '/');
-					checkoutPath = Paths.get(checkoutPath).normalize().toString();
-					checkoutPath = checkoutPath.replace('\\', '/');
-					build.getCheckoutPaths().add(checkoutPath);
+					build.getCheckoutPaths().add(normalizeFilePath(checkoutPath));
 				}
 				return null;
 			}, new ArrayList<>());

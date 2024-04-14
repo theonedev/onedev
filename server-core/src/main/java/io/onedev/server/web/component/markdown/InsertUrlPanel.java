@@ -410,7 +410,7 @@ abstract class InsertUrlPanel extends Panel {
 						for (var item : upload.getItems()) {
 							try (InputStream is = item.getInputStream()) {
 								attachmentName = attachmentSupport.saveAttachment(
-										FilenameUtils.sanitizeFilename(FileUpload.getFileName(item)), is);
+										FilenameUtils.sanitizeFileName(FileUpload.getFileName(item)), is);
 								markdownEditor.insertUrl(target, isImage,
 										attachmentSupport.getAttachmentUrlPath(attachmentName),
 										linkText!=null?linkText:attachmentName, null);

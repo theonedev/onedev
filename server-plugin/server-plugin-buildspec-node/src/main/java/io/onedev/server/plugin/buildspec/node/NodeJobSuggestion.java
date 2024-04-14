@@ -286,7 +286,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 	private List<Step> newCacheSteps() {
 		var generateChecksum = new GenerateChecksumStep();
 		generateChecksum.setName("generate package checksum");
-		generateChecksum.setFiles("package-lock.json");
+		generateChecksum.setFiles("package-lock.json yarn.lock");
 		generateChecksum.setTargetFile("checksum");
 		
 		var setupCache = new SetupCacheStep();

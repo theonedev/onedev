@@ -521,7 +521,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 				HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
 				try {
-					String fileName = FilenameUtils.sanitizeFilename(
+					String fileName = FilenameUtils.sanitizeFileName(
 							URLDecoder.decode(request.getHeader("File-Name"), StandardCharsets.UTF_8.name()));
 					String attachmentName = getAttachmentSupport().saveAttachment(fileName, request.getInputStream());
 					response.getWriter().print(URLEncoder.encode(attachmentName, StandardCharsets.UTF_8.name()));

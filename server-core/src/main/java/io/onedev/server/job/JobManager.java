@@ -38,7 +38,7 @@ public interface JobManager {
 	@Nullable
 	Shell getShell(String sessionId);
 	
-	void reportJobWorkspace(JobContext jobContext, String jobWorkspace);
+	void reportJobWorkspace(JobContext jobContext, String workspacePath);
 	
 	@Nullable
 	JobContext getJobContext(Long buildId);

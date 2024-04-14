@@ -316,6 +316,9 @@ public class Build extends ProjectBelonging
 	@Column(nullable=false)
 	private String jobToken;
 	
+	@Column
+	private String workspacePath;
+	
 	@Lob
 	@Column(nullable=false)
 	private ArrayList<String> checkoutPaths = new ArrayList<>();
@@ -471,6 +474,15 @@ public class Build extends ProjectBelonging
 
 	public void setJobToken(String jobToken) {
 		this.jobToken = jobToken;
+	}
+
+	@Nullable
+	public String getWorkspacePath() {
+		return workspacePath;
+	}
+
+	public void setWorkspacePath(String workspacePath) {
+		this.workspacePath = workspacePath;
 	}
 
 	public Collection<String> getCheckoutPaths() {
@@ -1025,9 +1037,11 @@ public class Build extends ProjectBelonging
 		}
 		return rootArtifacts;
 	}
-
+	
 	@Nullable
 	public String getBlobPath(String filePath) {
+		if (FilenameUtils.getPrefix(filePath).length() == 0 && workspacePath != null)
+			filePath = workspacePath + "/" + filePath;
 		filePath = filePath.replace('\\', '/');
 		filePath = Paths.get(filePath).normalize().toString();
 		filePath = filePath.replace('\\', '/');

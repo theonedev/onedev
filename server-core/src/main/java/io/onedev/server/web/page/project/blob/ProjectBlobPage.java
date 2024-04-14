@@ -1517,7 +1517,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		
 		boolean signRequired = false;
 		for (var item: upload.getItems()) {
-			String blobPath = FilenameUtils.sanitizeFilename(FileUpload.getFileName(item));
+			String blobPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(item));
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			

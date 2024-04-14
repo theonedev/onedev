@@ -3,15 +3,13 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.ProjectChoice;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.EditContext;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -19,6 +17,7 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_CHANGED;
 import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
 import static java.util.stream.Collectors.toList;
 
@@ -99,16 +98,22 @@ public class SetupCacheStep extends Step {
 		this.uploadStrategy = uploadStrategy;
 	}
 
-	@Editable(order=425)
+	@Editable(order=425, description = "Optionally specify files inside the cache path to ignore when " +
+			"detect cache changes")
 	@Interpolative(variableSuggester="suggestStaticVariables")
+	@ShowCondition("isUploadIfChanged")
 	public String getChangeDetectionExcludes() {
 		return changeDetectionExcludes;
 	}
-
+	
 	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
 		this.changeDetectionExcludes = changeDetectionExcludes;
 	}
 
+	private static boolean isUploadIfChanged() {
+		return UPLOAD_IF_CHANGED == EditContext.get().getInputValue("uploadStrategy");	
+	}
+	
 	@Editable(order=450, placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
 			"specifies target project for the upload. Leave empty for current project")
 	@ProjectChoice

@@ -58,8 +58,10 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 					if (!problems.isEmpty()) {
 						var aReport = new ProblemReport(problems);
 						aReport.writeTo(reportDir);
-						for (var problemFile: aReport.getProblemFiles())
-							writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
+						for (var problemFile: aReport.getProblemFiles()) {
+							if (problemFile.isInRepo())
+								writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
+						}
 						OneDev.getInstance(ProjectManager.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
 						return aReport;
