@@ -742,7 +742,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		Map<String, Object> podSpec = new LinkedHashMap<>();
 		Map<Object, Object> containerSpec = newLinkedHashMap(
 				"name", "default", 
-				"image", mapImage(jobService.getImage()));
+				"image", mapImage(jobService.getImage()), 
+				"imagePullPolicy", "always");
 		Map<Object, Object> resourcesSpec = newLinkedHashMap(
 				"requests", newLinkedHashMap(
 						"cpu", getCpuRequest(),

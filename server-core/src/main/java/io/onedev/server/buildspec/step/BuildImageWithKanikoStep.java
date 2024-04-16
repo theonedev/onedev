@@ -7,6 +7,7 @@ import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.entitymanager.SettingManager;

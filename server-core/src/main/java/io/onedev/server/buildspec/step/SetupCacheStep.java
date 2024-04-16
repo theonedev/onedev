@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toList;
 
 @Editable(order=55, name="Set Up Cache", description = "Set up job cache to speed up job execution. " +
 		"Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> " +
-		"to get familiar with job cache")
+		"on how to use job cache")
 public class SetupCacheStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -99,7 +99,8 @@ public class SetupCacheStep extends Step {
 	}
 
 	@Editable(order=425, description = "Optionally specify files relative to cache path to ignore when " +
-			"detect cache changes")
+			"detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
+			"Multiple files should be separated by space, and single file containing space should be quoted")
 	@Interpolative(variableSuggester="suggestStaticVariables")
 	@ShowCondition("isUploadIfChanged")
 	public String getChangeDetectionExcludes() {

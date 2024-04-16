@@ -9,6 +9,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;

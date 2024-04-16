@@ -14,6 +14,8 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
@@ -29,10 +31,8 @@ public class BuildImageStep extends Step {
 	private String buildPath;
 	
 	private String dockerfile;
-	
-	private String tags;
 
-	private boolean publish = true;
+	private Output output = new RegistryOutput();
 	
 	private String builtInRegistryAccessTokenSecret;
 	
@@ -64,26 +64,14 @@ public class BuildImageStep extends Step {
 		this.dockerfile = dockerfile;
 	}
 
-	@Editable(order=300, description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, "
-			+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. "
-			+ "Multiple tags should be separated with space.<br>")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getTags() {
-		return tags;
+	@Editable(order=300)
+	@NotNull
+	public Output getOutput() {
+		return output;
 	}
 
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-
-	@Editable(order=330, name="Publish After Build", description="Whether or not to publish built image to docker registry")
-	public boolean isPublish() {
-		return publish;
-	}
-
-	public void setPublish(boolean publish) {
-		this.publish = publish;
+	public void setOutput(Output output) {
+		this.output = output;
 	}
 
 	@Editable(order=1000, name="Built-in Registry Access Token Secret", group = "More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
@@ -141,8 +129,71 @@ public class BuildImageStep extends Step {
 			accessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
 		else
 			accessToken = null;
-		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish(), 
+		return new BuildImageFacade(getBuildPath(), getDockerfile(), getOutput().getFacade(), 
 				isRemoveDanglingImages(), accessToken, getMoreOptions());
+	}
+	
+	@Editable
+	public static interface Output extends Serializable {
+		
+		BuildImageFacade.Output getFacade();
+		
+	}
+	
+	@Editable(order=100, name="Push to Container registry")
+	public static class RegistryOutput implements Output {
+
+		private static final long serialVersionUID = 1L;
+
+		private String tags;
+
+		@Editable(description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, "
+				+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. "
+				+ "Multiple tags should be separated with space.<br>")
+		@Interpolative(variableSuggester="suggestVariables")
+		@NotEmpty
+		public String getTags() {
+			return tags;
+		}
+
+		public void setTags(String tags) {
+			this.tags = tags;
+		}
+
+		static List<InputSuggestion> suggestVariables(String matchWith) {
+			return BuildSpec.suggestVariables(matchWith, true, true, false);
+		}
+
+		@Override
+		public BuildImageFacade.Output getFacade() {
+			return new BuildImageFacade.RegistryOutput(getTags());
+		}
+	}
+	
+	@Editable(order=200, name="Export to OCI layout")
+	public static class OCIOutput implements Output {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String destPath;
+
+		@Editable(name="OCI Layout Directory", description = "Specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
+		@SubPath
+		@Interpolative(variableSuggester="suggestVariables")
+		@NotEmpty
+		public String getDestPath() {
+			return destPath;
+		}
+
+		public void setDestPath(String destPath) {
+			this.destPath = destPath;
+		}
+
+		@Override
+		public BuildImageFacade.Output getFacade() {
+			return new BuildImageFacade.OCIOutput(destPath);
+		}
+
 	}
 	
 }

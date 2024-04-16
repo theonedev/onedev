@@ -67,6 +67,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	
 	private String dockerSockPath;
 	
+	private String dockerBuilder = "onedev";
+	
 	private String networkOptions;
 	
 	private String cpuLimit;
@@ -117,6 +119,17 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 	public void setDockerSockPath(String dockerSockPath) {
 		this.dockerSockPath = dockerSockPath;
+	}
+
+	@Editable(order=515, group="More Settings", name="Buildx Builder", description = "Specify dockerx builder used to " +
+			"build docker image")
+	@NotEmpty
+	public String getDockerBuilder() {
+		return dockerBuilder;
+	}
+
+	public void setDockerBuilder(String dockerBuilder) {
+		this.dockerBuilder = dockerBuilder;
 	}
 
 	@Editable(order=520, group="Privilege Settings", description="Whether or not to mount docker sock into job container to "
@@ -318,7 +331,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
 										docker.clearArgs();
 							
-										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+										docker.addArgs("run", "--pull=always", "--name=" + containerName, "--network=" + network);
 										if (runAs != null)
 											docker.addArgs("--user", runAs);
 										else if (!SystemUtils.IS_OS_WINDOWS)
@@ -437,7 +450,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 												jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
 										callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-											buildImage(docker, buildImageFacade, hostBuildHome, jobLogger);
+											buildImage(docker, getDockerBuilder(), buildImageFacade, hostBuildHome, jobLogger);
 											return null;
 										});
 									} else if (facade instanceof RunImagetoolsFacade) {
