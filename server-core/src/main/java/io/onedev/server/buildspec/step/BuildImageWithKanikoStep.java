@@ -7,7 +7,6 @@ import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.entitymanager.SettingManager;
@@ -17,13 +16,16 @@ import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAw
 import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=200, name="Build Docker Image (Kaniko)", group = DOCKER_IMAGE, description="Build and publish docker image with Kaniko. " +
+@Editable(order=200, name="Build Docker Image (Kaniko)", group = DOCKER_IMAGE, description="Build docker image with kaniko. " +
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class BuildImageWithKanikoStep extends CommandStep {
 
@@ -31,7 +33,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	private String buildContext;
 	
-	private String destinations;
+	private Output output = new RegistryOutput();
 	
 	private String trustCertificates;
 	
@@ -72,19 +74,16 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.buildContext = buildContext;
 	}
 
-	@Editable(order=300, description="Specify destinations, for instance <tt>myorg/myrepo:latest</tt>, "
-			+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>myregistry:5000/myorg/myrepo:1.0.0</tt>. "
-			+ "Multiple destinations should be separated with space.<br>")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getDestinations() {
-		return destinations;
+	@Editable(order=300)
+	@NotNull
+	public Output getOutput() {
+		return output;
 	}
 
-	public void setDestinations(String destinations) {
-		this.destinations = destinations;
+	public void setOutput(Output output) {
+		this.output = output;
 	}
-	
+
 	@Editable(order=1000, name="Certificates to Trust", group = "More Settings", placeholder = "Base64 encoded PEM format, starting with " +
 			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----",
 			description = "Specify certificates to trust if you are using self-signed certificates for your docker registries")
@@ -117,20 +116,15 @@ public class BuildImageWithKanikoStep extends CommandStep {
 				"<code>" + server + "</code>";
 	}
 	
-	@Editable(order=1200, group="More Settings", description="Optionally specify additional options to build image, " +
-			"separated by spaces")
+	@Editable(order=1200, group="More Settings", description="Optionally specify <a href='https://github.com/GoogleContainerTools/kaniko?tab=readme-ov-file#additional-flags' target='_blank'>additional options</a> of kaniko")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"(--context)=.*", "(--destination)=.*"})
+	@ReservedOptions({"(--context)=.*", "(--destination)=.*", "(--oci-layout-path)=.*", "--no-push"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
 
 	public void setMoreOptions(String moreOptions) {
 		this.moreOptions = moreOptions;
-	}
-
-	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
 	@Override
@@ -161,8 +155,9 @@ public class BuildImageWithKanikoStep extends CommandStep {
 					commandsBuilder.append(" --context=\"/onedev-build/workspace/").append(getBuildContext()).append("\"");
 				else
 					commandsBuilder.append(" --context=/onedev-build/workspace");
-				for (var destination: StringUtils.splitAndTrim(getDestinations(), " "))
-					commandsBuilder.append(" --destination=").append(destination);
+
+				commandsBuilder.append(" ").append(getOutput().getOptions());			
+				
 				if (getMoreOptions() != null)
 					commandsBuilder.append(" ").append(getMoreOptions());
 				
@@ -173,4 +168,74 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		};
 	}
 
+	@Editable
+	public static interface Output extends Serializable {
+		
+		String getOptions();
+		
+	}
+
+	@Editable(order=100, name="Push to Container registry")
+	public static class RegistryOutput implements Output {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String destinations;
+
+		@Editable(order=300, description="Specify destinations, for instance <tt>myorg/myrepo:latest</tt>, "
+				+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>myregistry:5000/myorg/myrepo:1.0.0</tt>. "
+				+ "Multiple destinations should be separated with space.<br>")
+		@Interpolative(variableSuggester="suggestVariables")
+		@NotEmpty
+		public String getDestinations() {
+			return destinations;
+		}
+
+		public void setDestinations(String destinations) {
+			this.destinations = destinations;
+		}
+
+		static List<InputSuggestion> suggestVariables(String matchWith) {
+			return BuildSpec.suggestVariables(matchWith, true, true, false);
+		}
+
+		@Override
+		public String getOptions() {
+			var options = new ArrayList<String>();
+			for (var destination: StringUtils.splitAndTrim(getDestinations(), " "))
+				options.add("--destination=" + destination);
+			return StringUtils.join(options, " ");
+		}
+		
+	}
+	
+	@Editable(order=200, name="Export as OCI layout")
+	public static class OCIOutput implements Output {
+
+		private static final long serialVersionUID = 1L;
+
+		private String destPath;
+
+		@Editable(name="OCI Layout Directory", description = "Specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
+		@Interpolative(variableSuggester="suggestVariables")
+		@NotEmpty
+		public String getDestPath() {
+			return destPath;
+		}
+
+		public void setDestPath(String destPath) {
+			this.destPath = destPath;
+		}
+
+		static List<InputSuggestion> suggestVariables(String matchWith) {
+			return BuildSpec.suggestVariables(matchWith, true, true, false);
+		}
+
+		@Override
+		public String getOptions() {
+			return "--no-push --oci-layout-path /onedev-build/workspace/" + getDestPath();
+		}
+		
+	}
+	
 }

@@ -2013,6 +2013,44 @@ public class BuildSpec implements Serializable, Validatable {
 					stepNode.setTag(new Tag("!OsvVulnerScannerStep"));					
 				} else if (stepType.equals("!ScanLicenseViolationsStep")) {
 					stepNode.setTag(new Tag("!OsvLicenseScannerStep"));
+				} else if (stepType.equals("!BuildImageStep")) {
+ 					String tags = "";
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();						
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("tags")) {
+							tags = ((ScalarNode)stepTuple.getValueNode()).getValue();
+							itStepTuple.remove();
+						} else if (propName.equals("publish")) {
+							itStepTuple.remove();							
+						}
+					}
+					var outputNode = new MappingNode(new Tag("!RegistryOutput"), Lists.newArrayList(), FlowStyle.BLOCK);					
+					outputNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "tags"), 
+							new ScalarNode(Tag.STR, tags)));
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "output"),
+							outputNode
+					));
+				} else if (stepType.equals("!BuildImageWithKanikoStep")) {
+					String destinations = "";
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("destinations")) {
+							destinations = ((ScalarNode)stepTuple.getValueNode()).getValue();
+							itStepTuple.remove();
+						}
+					}
+					var outputNode = new MappingNode(new Tag("!RegistryOutput"), Lists.newArrayList(), FlowStyle.BLOCK);
+					outputNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "destinations"),
+							new ScalarNode(Tag.STR, destinations)));
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "output"),
+							outputNode
+					));
 				}
 			}
 		});

@@ -21,9 +21,10 @@ import java.util.List;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=160, name="Build Docker Image", group = DOCKER_IMAGE, description="Build and publish docker image with docker buildx. " +
-		"This step can only be executed by server docker executor or remote docker executor. To build image with " +
-		"Kubernetes executor, please use kaniko step instead")
+@Editable(order=160, name="Build Docker Image", group = DOCKER_IMAGE, description="Build docker image with docker buildx. " +
+		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +
+		"builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko " +
+		"step instead")
 public class BuildImageStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -106,10 +107,9 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=1200, group = "More Settings", description="Optionally specify additional options to build image, " +
-			"separated by spaces. For instance <code>--builder</code> and <code>--platform</code> can be " +
-			"used to build multi-arch images")
+			"separated by spaces. For instance <code>--platform</code> can be used to build multi-arch images")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*"})
+	@ReservedOptions({"--builder", "--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
@@ -147,9 +147,9 @@ public class BuildImageStep extends Step {
 
 		private String tags;
 
-		@Editable(description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, "
-				+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. "
-				+ "Multiple tags should be separated with space.<br>")
+		@Editable(description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, " +
+				"<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. " +
+				"Multiple tags should be separated with space")
 		@Interpolative(variableSuggester="suggestVariables")
 		@NotEmpty
 		public String getTags() {
@@ -170,7 +170,7 @@ public class BuildImageStep extends Step {
 		}
 	}
 	
-	@Editable(order=200, name="Export to OCI layout")
+	@Editable(order=200, name="Export as OCI layout")
 	public static class OCIOutput implements Output {
 
 		private static final long serialVersionUID = 1L;
@@ -189,6 +189,10 @@ public class BuildImageStep extends Step {
 			this.destPath = destPath;
 		}
 
+		static List<InputSuggestion> suggestVariables(String matchWith) {
+			return BuildSpec.suggestVariables(matchWith, true, true, false);
+		}
+		
 		@Override
 		public BuildImageFacade.Output getFacade() {
 			return new BuildImageFacade.OCIOutput(destPath);

@@ -151,7 +151,7 @@ public class CommandUtils {
 		UploadPackCommand upload = new UploadPackCommand(gitDir, stdin, stdout, stderr, environments);
 		upload.statelessRpc(true).protocol(protocol);
 		result = upload.run();
-		result.setStderr(stderr.getMessage());
+		result.setErrorMessage(stderr.getMessage());
 		
 		if (result.getReturnCode() != 0 && !toleratedErrors.get())
 			throw result.buildException();
@@ -172,7 +172,7 @@ public class CommandUtils {
 		ReceivePackCommand receive = new ReceivePackCommand(gitDir, stdin, stdout, stderr, environments);
 		receive.statelessRpc(true).protocol(protocol);
 		ExecutionResult result = receive.run();
-		result.setStderr(stderr.getMessage());
+		result.setErrorMessage(stderr.getMessage());
 		result.checkReturnCode();
 	}
 	

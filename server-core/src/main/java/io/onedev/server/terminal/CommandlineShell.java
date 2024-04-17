@@ -1,24 +1,24 @@
 package io.onedev.server.terminal;
 
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.ImmediateFuture;
+import io.onedev.commons.utils.command.*;
+import io.onedev.commons.utils.command.PtyMode.ResizeSupport;
+import io.onedev.server.OneDev;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecutionResult;
-import io.onedev.commons.utils.command.ExposeOutputStream;
-import io.onedev.commons.utils.command.ProcessTreeKiller;
-import io.onedev.commons.utils.command.PtyMode;
-import io.onedev.commons.utils.command.PtyMode.ResizeSupport;
-import io.onedev.commons.utils.command.PumpInputToOutput;
-import io.onedev.server.OneDev;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class CommandlineShell implements Shell {
 
@@ -26,7 +26,7 @@ public class CommandlineShell implements Shell {
 	
 	private final PtyMode ptyMode;
 	
-	private final ExposeOutputStream shellInput;
+	private volatile OutputStream shellStdin;
 	
 	private final Future<?> execution;
 	
@@ -34,49 +34,61 @@ public class CommandlineShell implements Shell {
         ptyMode = new PtyMode();
         cmdline.ptyMode(ptyMode);
 
-        shellInput = new ExposeOutputStream();
         execution = OneDev.getInstance(ExecutorService.class).submit(new Runnable() {
 
 			@Override
 			public void run() {
                 try {
-                    PumpInputToOutput outputHandler = new PumpInputToOutput(new OutputStream() {
+					var stdoutHolder = new AtomicReference<InputStream>(null);
+					Function<InputStream, Future<?>> stdoutHandler = is -> {
+						stdoutHolder.set(is);
+						return StreamPumper.pump(is, new OutputStream() {
 
-            	        @Override
-            	        public void write(byte[] b, int off, int len) throws IOException {
-                            terminal.sendOutput(new String(b, off, len, StandardCharsets.UTF_8));
-            	        }
-            	
-            	        @Override
-            	        public void write(int b) throws IOException {
-            	        	throw new UnsupportedOperationException();
-            	        }
+							@Override
+							public void write(byte[] b, int off, int len) {
+								terminal.sendOutput(new String(b, off, len, StandardCharsets.UTF_8));
+							}
 
-                    });
-                    PumpInputToOutput errorHandler = new PumpInputToOutput(new OutputStream() {
+							@Override
+							public void write(int b) {
+								throw new UnsupportedOperationException();
+							}
 
-                        @Override
-                        public void write(byte[] b, int off, int len) throws IOException {
-                        	terminal.sendError(new String(b, off, len, StandardCharsets.UTF_8));
-                        }
+						});
+					};
 
-                        @Override
-                        public void write(int b) throws IOException {
-                        	throw new UnsupportedOperationException();
-                        }
+					var stderrHolder = new AtomicReference<InputStream>(null);
+					Function<InputStream, Future<?>> stderrHandler = is -> {
+						stderrHolder.set(is);
+						return StreamPumper.pump(is, new OutputStream() {
 
-                    });
+							@Override
+							public void write(byte[] b, int off, int len) {
+								terminal.sendError(new String(b, off, len, StandardCharsets.UTF_8));
+							}
+
+							@Override
+							public void write(int b) {
+								throw new UnsupportedOperationException();
+							}
+
+						});
+					};
+					
                     cmdline.processKiller(new ProcessTreeKiller() {
 
                         @Override
                         public void kill(Process process, String executionId) {
-	                        outputHandler.close();
-	                        errorHandler.close();
+	                        closeQuietly(stdoutHolder.get());
+							closeQuietly(stderrHolder.get());
 	                        super.kill(process, executionId);
                         }
 
                     });
-                    ExecutionResult result = cmdline.execute(outputHandler, errorHandler, shellInput);
+                    ExecutionResult result = cmdline.execute(stdoutHandler, stderrHandler, os -> {
+						shellStdin = os;
+						return new ImmediateFuture<Void>(null);
+					});
                     if (result.getReturnCode() != 0)
                     	terminal.sendError("Shell exited");
                     else
@@ -93,7 +105,10 @@ public class CommandlineShell implements Shell {
 	                	logger.error("Error running shell", e);
 	                    terminal.sendError("Error running shell, check server log for details");
 	                }
-	            }
+	            } finally {
+					closeQuietly(shellStdin);
+					shellStdin = null;
+				}
 			}
         	
         });
@@ -102,9 +117,13 @@ public class CommandlineShell implements Shell {
 
 	@Override
 	public void sendInput(String input) {
-		try {
-			shellInput.write(input);
-		} catch (IOException e) {
+		var shellStdinCopy = shellStdin;
+		if (shellStdinCopy != null) {
+			try {
+				shellStdinCopy.write(input.getBytes(StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
