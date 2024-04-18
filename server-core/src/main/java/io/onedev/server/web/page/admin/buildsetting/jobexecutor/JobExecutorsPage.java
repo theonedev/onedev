@@ -43,13 +43,13 @@ public class JobExecutorsPage extends AdministrationPage {
 		container = new WebMarkupContainer("jobExecutorSetting");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<JobExecutor>("executors", new AbstractReadOnlyModel<List<JobExecutor>>() {
+		container.add(new ListView<>("executors", new AbstractReadOnlyModel<List<JobExecutor>>() {
 
 			@Override
 			public List<JobExecutor> getObject() {
 				return getSettingManager().getJobExecutors();
 			}
-			
+
 		}) {
 
 			@Override
@@ -76,7 +76,7 @@ public class JobExecutorsPage extends AdministrationPage {
 
 				});
 			}
-			
+
 		});
 		
 		container.add(new SortBehavior() {
@@ -92,6 +92,13 @@ public class JobExecutorsPage extends AdministrationPage {
 		}.items("li.executor").handle(".card-header"));
 		
 		container.add(newAddNewFrag());
+		container.add(new WebMarkupContainer("noExecutors") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getSettingManager().getJobExecutors().isEmpty());
+			}
+		});
 	}
 
 	private Component newAddNewFrag() {

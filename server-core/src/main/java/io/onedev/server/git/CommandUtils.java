@@ -5,7 +5,6 @@ import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ErrorCollector;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -24,10 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CommandUtils {
 
@@ -131,11 +131,10 @@ public class CommandUtils {
 	public static void uploadPack(File gitDir, Map<String, String> environments, String protocol, 
 			InputStream stdin, OutputStream stdout) {
 		AtomicBoolean toleratedErrors = new AtomicBoolean(false);
-		ErrorCollector stderr = new ErrorCollector(StandardCharsets.UTF_8.name()) {
+		var stderr = new LineConsumer(UTF_8.name()) {
 
 			@Override
 			public void consume(String line) {
-				super.consume(line);
 				// This error may happen during a normal shallow fetch/clone 
 				if (line.contains("remote end hung up unexpectedly")) {
 					toleratedErrors.set(true);
@@ -148,31 +147,27 @@ public class CommandUtils {
 		};
 
 		ExecutionResult result;
-		UploadPackCommand upload = new UploadPackCommand(gitDir, stdin, stdout, stderr, environments);
+		var upload = new UploadPackCommand(gitDir, stdin, stdout, stderr, environments);
 		upload.statelessRpc(true).protocol(protocol);
 		result = upload.run();
-		result.setErrorMessage(stderr.getMessage());
-		
 		if (result.getReturnCode() != 0 && !toleratedErrors.get())
 			throw result.buildException();
 	}
 	
 	public static void receivePack(File gitDir, Map<String, String> environments, String protocol, 
 			InputStream stdin, OutputStream stdout) {
-		ErrorCollector stderr = new ErrorCollector(StandardCharsets.UTF_8.name()) {
+		var stderr = new LineConsumer(UTF_8.name()) {
 
 			@Override
 			public void consume(String line) {
-				super.consume(line);
 				logger.error(line);
 			}
 			
 		};
 		
-		ReceivePackCommand receive = new ReceivePackCommand(gitDir, stdin, stdout, stderr, environments);
+		var receive = new ReceivePackCommand(gitDir, stdin, stdout, stderr, environments);
 		receive.statelessRpc(true).protocol(protocol);
 		ExecutionResult result = receive.run();
-		result.setErrorMessage(stderr.getMessage());
 		result.checkReturnCode();
 	}
 	

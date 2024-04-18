@@ -34,7 +34,6 @@ import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.job.JobManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.code.BranchProtection;
@@ -155,9 +154,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private final PullRequestManager pullRequestManager;
 
 	private final LinkSpecManager linkSpecManager;
-
-	private final JobManager jobManager;
-
+	
 	private final ProjectLastEventDateManager lastEventDateManager;
 
 	private final ListenerRegistry listenerRegistry;
@@ -201,7 +198,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 SettingManager settingManager, TransactionManager transactionManager,
 								 SessionManager sessionManager, ListenerRegistry listenerRegistry,
 								 UserAuthorizationManager userAuthorizationManager, RoleManager roleManager,
-								 JobManager jobManager, IssueManager issueManager, LinkSpecManager linkSpecManager,
+								 IssueManager issueManager, LinkSpecManager linkSpecManager,
 								 ClusterManager clusterManager, GitService gitService, TaskScheduler taskScheduler,
 								 ProjectLastEventDateManager lastEventDateManager, PullRequestManager pullRequestManager,
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
@@ -218,7 +215,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.listenerRegistry = listenerRegistry;
 		this.userAuthorizationManager = userAuthorizationManager;
 		this.roleManager = roleManager;
-		this.jobManager = jobManager;
 		this.issueManager = issueManager;
 		this.linkSpecManager = linkSpecManager;
 		this.clusterManager = clusterManager;
