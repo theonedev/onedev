@@ -6310,6 +6310,7 @@ public class DataMigrator {
 										|| executorElement.getName().contains("RemoteDockerExecutor")) {
 									executorElement.addElement("dockerBuilder").setText("onedev");
 								}
+								executorElement.element("shellAccessEnabled").detach();
 							}
 						}
 					}

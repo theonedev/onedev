@@ -135,6 +135,14 @@ public class ReviewRequirement {
 		return false;
 	}
 	
+	public boolean canBeSatisfiedByUserRoughly(User user) {
+		for (var entry: users) {
+			if (!entry.equals(user))
+				return false;
+		}
+		return user.getGroups().containsAll(groups.keySet());
+	}
+	
 	@Nullable
 	@Override
 	public String toString() {

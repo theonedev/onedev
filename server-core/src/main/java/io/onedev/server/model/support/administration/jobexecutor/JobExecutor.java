@@ -6,7 +6,6 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
@@ -37,8 +36,6 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String jobRequirement;
 	
-	private boolean shellAccessEnabled;
-	
 	private boolean htmlReportPublishEnabled;
 	
 	private boolean sitePublishEnabled;
@@ -60,19 +57,6 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Editable(order=20, group = "Privilege Settings", description="Enable this to allow to open interactive shell to diagnose running builds. "
-			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
-			+ "the executor. You should configure job requirement below to make sure the executor can only be "
-			+ "used by trusted jobs if this option is enabled")
-	@ShowCondition("isSubscriptionActive")
-	public boolean isShellAccessEnabled() {
-		return shellAccessEnabled;
-	}
-
-	public void setShellAccessEnabled(boolean shellAccessEnabled) {
-		this.shellAccessEnabled = shellAccessEnabled;
 	}
 
 	@Editable(order=30, group = "Privilege Settings", description="Enable this to allow to run site publish step. OneDev will serve project "

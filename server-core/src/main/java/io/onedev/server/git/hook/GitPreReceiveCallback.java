@@ -149,7 +149,7 @@ public class GitPreReceiveCallback extends HttpServlet {
     							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
     						errorMessages.add("Can not push to this branch as branch protection rule requires "
     								+ "valid signature for head commit");
-    					} else if (protection.isReviewRequiredForPush(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
+    					} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
         					errorMessages.add("Review required for your change. Please submit pull request instead");
     					}
 						if (errorMessages.isEmpty() && !newObjectId.equals(ObjectId.zeroId())) {

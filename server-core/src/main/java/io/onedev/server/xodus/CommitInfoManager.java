@@ -29,7 +29,7 @@ public interface CommitInfoManager {
 	 * Given an ancestor commit, get all its descendant commits including the ancestor commit itself. 
 	 * The result might be incomplete if some commits have not be cached yet
 	 *  
-	 * @param project
+	 * @param projectId
 	 * 			project to get descendant commits
 	 * @param ancestors
 	 * 			for which commits to get descendants
@@ -45,7 +45,7 @@ public interface CommitInfoManager {
 	/**
 	 * Get overall contributions
 	 * 
-	 * @param project
+	 * @param projectId
 	 * 			project to get daily commits for
 	 * @return
 	 * 			map of day to contribution
@@ -55,7 +55,7 @@ public interface CommitInfoManager {
 	/**
 	 * Get list of top contributors
 	 * 
-	 * @param project
+	 * @param projectId
 	 * 			project to get top contributors for
 	 * @param top
 	 * 			number of top contributors to get
@@ -74,7 +74,7 @@ public interface CommitInfoManager {
 	/**
 	 * Get source code line statistics over time
 	 * 
-	 * @param project
+	 * @param projectId
 	 * 			project to get line stats for
 	 * @return
 	 * 			line statistics data

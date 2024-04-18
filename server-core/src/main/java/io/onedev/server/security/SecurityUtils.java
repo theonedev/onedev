@@ -18,7 +18,6 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
-import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -111,12 +110,32 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				&& !project.isReviewRequiredForModification(user, branch, file)
 				&& !project.isBuildRequiredForModification(user, branch, file); 
 	}
-	
-	public static boolean canPushCode(Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
-		User user = getUser();
-		return canWriteCode(project) 
-				&& !project.isReviewRequiredForPush(user, branch, oldObjectId, newObjectId, null)
-				&& !project.isBuildRequiredForPush(user, branch, oldObjectId, newObjectId, null); 
+
+	/**
+	 * This method checks if current user is able to open terminal of specified build. 
+	 * Terminal access means that the user can view secrets used in the build as well 
+	 * as modifying build logic. So as long as the user can modify build spec of the 
+	 * build, it should be allowed to open terminal
+	 * 
+	 * @param build
+	 * @return
+	 */
+	public static boolean canOpenTerminal(Build build) {
+		var user = SecurityUtils.getUser();
+		if (user == null)
+			return false;
+		var project = build.getProject();
+		if (SecurityUtils.canManageProject(project) 
+				|| build.getRequest() != null && build.getRequest().getSubmitter().equals(user)) {
+			return true;
+		}
+		if (!canWriteCode(user, project))
+			return false;
+		for (var branch: project.getReachableBranches(build.getCommitId())) {
+			if (!project.canModifyBuildSpecRoughly(user, branch))
+				return false;
+		}
+		return true;
 	}
 	
 	public static boolean canEditIssueField(Project project, String fieldName) {

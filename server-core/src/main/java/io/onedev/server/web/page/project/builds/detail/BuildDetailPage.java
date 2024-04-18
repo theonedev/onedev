@@ -332,12 +332,10 @@ public abstract class BuildDetailPage extends ProjectPage
 						if (WicketUtils.isSubscriptionActive()) {
 							JobManager jobManager = OneDev.getInstance(JobManager.class);
 							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
-							if (jobContext!= null) {
-								setVisible(SecurityUtils.isAdministrator()
-										|| SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()) && jobContext.getJobExecutor().isShellAccessEnabled());
-							} else {
+							if (jobContext!= null) 
+								setVisible(SecurityUtils.canOpenTerminal(getBuild()));
+							else 
 								setVisible(false);
-							}
 						} else {
 							setVisible(false);
 						}

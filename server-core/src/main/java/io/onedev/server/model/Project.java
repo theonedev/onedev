@@ -9,6 +9,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
@@ -43,9 +46,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.UrlManager;
@@ -79,8 +79,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
+import static io.onedev.server.model.Project.PROP_NAME;
 
 @Entity
 @Table(
@@ -1473,7 +1473,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return null;
 	}
 	
-	private Collection<String> getReachableBranches(ObjectId commitId) {
+	public Collection<String> getReachableBranches(ObjectId commitId) {
 		if (reachableBranchesCache == null) 
 			reachableBranchesCache = new HashMap<>();
 		Collection<String> reachableBranches = reachableBranchesCache.get(commitId);
@@ -1500,7 +1500,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			return getReachableBranches(commitId).stream().anyMatch(it->branches.matches(matcher, it));
 		else 
 			return branches.matches(matcher, "main");
-		
 	}
 	
 	public boolean isCommitOnBranch(ObjectId commitId, String branch) {
@@ -1508,7 +1507,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
-		return getBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
+		return getBranchProtection(branch, user).isReviewRequiredForModification(file);
+	}
+	
+	public boolean canModifyBuildSpecRoughly(User user, String branch) {
+		return getBranchProtection(branch, user).canModifyBuildSpecRoughly(user);
 	}
 
 	public boolean isCommitSignatureRequiredButNoSigningKey(User user, String branch) {
@@ -1531,11 +1534,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		return getBranchProtection(branch, user).isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isReviewRequiredForPush(this, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	public boolean isBuildRequiredForModification(User user, String branch, @Nullable String file) {
-		return getBranchProtection(branch, user).isBuildRequiredForModification(this, branch, file);
+		return getBranchProtection(branch, user).isBuildRequiredForModification(file);
 	}
 	
 	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 

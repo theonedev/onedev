@@ -849,14 +849,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 
+	@Sessional
 	@Override
-	public WebShell openShell(Long buildId, Terminal terminal) {
-		JobContext jobContext = getJobContext(buildId);
+	public WebShell openShell(Build build, Terminal terminal) {
+		JobContext jobContext = getJobContext(build.getId());
 		if (jobContext != null) {
 			String jobToken = jobContext.getJobToken();
 			String shellServer = jobServers.get(jobToken);
 			if (shellServer != null) {
-				if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {
+				if (SecurityUtils.canOpenTerminal(build)) {
 					clusterManager.runOnServer(shellServer, () -> {
 						JobContext innerJobContext = getJobContext(jobToken, true);
 						JobRunnable jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
@@ -869,7 +870,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						return null;
 					});
 
-					return new WebShell(buildId, terminal.getSessionId()) {
+					return new WebShell(build.getId(), terminal.getSessionId()) {
 
 						private static final long serialVersionUID = 1L;
 

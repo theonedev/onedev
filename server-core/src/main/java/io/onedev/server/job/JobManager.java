@@ -31,7 +31,7 @@ public interface JobManager {
 
 	boolean runJob(JobContext jobContext, JobRunnable runnable);
 	
-	WebShell openShell(Long buildId, Terminal terminal);
+	WebShell openShell(Build build, Terminal terminal);
 	
 	JobContext getJobContext(String jobToken, boolean mustExist);
 	

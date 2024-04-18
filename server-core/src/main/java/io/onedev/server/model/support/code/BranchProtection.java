@@ -3,8 +3,10 @@ package io.onedev.server.model.support.code;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -12,7 +14,6 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
@@ -360,17 +361,12 @@ public class BranchProtection implements Serializable {
 	/**
 	 * Check if specified user can modify specified file in specified branch.
 	 *
-	 * @param user
-	 * 			user to be checked
-	 * @param branch
-	 * 			branch to be checked
 	 * @param file
 	 * 			file to be checked
 	 * @return
 	 * 			result of the check. 
 	 */
-	public boolean isReviewRequiredForModification(User user, Project project, 
-			String branch, @Nullable String file) {
+	public boolean isReviewRequiredForModification(@Nullable String file) {
 		ReviewRequirement requirement = getParsedReviewRequirement();
 		if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty()) 
 			return true;
@@ -382,16 +378,22 @@ public class BranchProtection implements Serializable {
 		
 		return false;
 	}
+
+	public boolean canModifyBuildSpecRoughly(User user) {
+		ReviewRequirement requirement = getParsedReviewRequirement();
+		if (!requirement.canBeSatisfiedByUserRoughly(user))
+			return false;
+		requirement = getFileProtection(BuildSpec.BLOB_PATH).getParsedReviewRequirement();
+		return requirement.canBeSatisfiedByUserRoughly(user);
+	}
 	
-	public boolean isBuildRequiredForModification(Project project, String branch, @Nullable String file) {
+	public boolean isBuildRequiredForModification(@Nullable String file) {
 		return !getJobNames().isEmpty() || file != null && !getFileProtection(file).getJobNames().isEmpty();
 	}
 
 	/**
 	 * Check if specified user can push specified commit to specified ref.
 	 *
-	 * @param user
-	 * 			user to be checked
 	 * @param oldObjectId
 	 * 			old object id of the ref
 	 * @param newObjectId
@@ -401,7 +403,7 @@ public class BranchProtection implements Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	public boolean isReviewRequiredForPush(User user, Project project, String branch, ObjectId oldObjectId, 
+	public boolean isReviewRequiredForPush(Project project, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		ReviewRequirement requirement = getParsedReviewRequirement();
 		if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty()) 
