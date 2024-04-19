@@ -37,6 +37,7 @@ import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -53,7 +54,10 @@ import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.*;
+import io.onedev.server.web.util.BuildAware;
+import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -321,24 +325,28 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
-								getTerminalManager().getTerminalUrl(getBuild())));
+						if (isSubscriptionActive()) {
+							target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
+									getTerminalManager().getTerminalUrl(getBuild())));
+						} else {
+							new MessageModal(target) {
+
+								@Override
+								protected Component newMessageContent(String componentId) {
+									return new Label(componentId, "Web shell access to running job " +
+											"is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days").setEscapeModelStrings(false);
+								}
+							};
+						}
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (WicketUtils.isSubscriptionActive()) {
-							JobManager jobManager = OneDev.getInstance(JobManager.class);
-							JobContext jobContext = jobManager.getJobContext(getBuild().getId());
-							if (jobContext!= null) 
-								setVisible(SecurityUtils.canOpenTerminal(getBuild()));
-							else 
-								setVisible(false);
-						} else {
-							setVisible(false);
-						}
+						JobManager jobManager = OneDev.getInstance(JobManager.class);
+						JobContext jobContext = jobManager.getJobContext(getBuild().getId());
+						setVisible(jobContext!= null && SecurityUtils.canOpenTerminal(getBuild()));
 					}
 
 				}.setOutputMarkupId(true));
