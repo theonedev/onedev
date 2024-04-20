@@ -333,7 +333,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 								@Override
 								protected Component newMessageContent(String componentId) {
-									return new Label(componentId, "Web shell access to running job " +
+									return new Label(componentId, "Interactive web shell access to running jobs " +
 											"is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days").setEscapeModelStrings(false);
 								}
 							};

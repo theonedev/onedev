@@ -37,7 +37,7 @@ public class BuildImageStep extends Step {
 	
 	private String builtInRegistryAccessTokenSecret;
 	
-	private boolean removeDanglingImages = true;
+	private String platforms;
 	
 	private String moreOptions;
 	
@@ -96,20 +96,24 @@ public class BuildImageStep extends Step {
 		return "Optionally specify a secret to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
 	}
-	
-	@Editable(order=1100, name="Remove Dangling Images After Build", group = "More Settings")
-	public boolean isRemoveDanglingImages() {
-		return removeDanglingImages;
-	}
 
-	public void setRemoveDanglingImages(boolean removeDanglingImages) {
-		this.removeDanglingImages = removeDanglingImages;
-	}
-
-	@Editable(order=1200, group = "More Settings", description="Optionally specify additional options to build image, " +
-			"separated by spaces. For instance <code>--platform</code> can be used to build multi-arch images")
+	@Editable(order=1300, group = "More Settings", placeholder = "Current platform", description = "Optionally specify " +
+			"<span class='text-info'>comma separated</span> platforms to build, for instance <tt>linux/amd64,linux/arm64</tt>. " +
+			"Leave empty to build for platform of the node running the job")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"--builder", "--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*"})
+	@NoSpace
+	public String getPlatforms() {
+		return platforms;
+	}
+
+	public void setPlatforms(String platforms) {
+		this.platforms = platforms;
+	}
+
+	@Editable(order=1400, group = "More Settings", description="Optionally specify additional options for " +
+			"buildx build command")
+	@Interpolative(variableSuggester="suggestVariables")
+	@ReservedOptions({"--builder", "(--builder)=.*", "--platform", "(--platform)=.*", "--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*", "-o", "--output", "(-o|--output)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
@@ -130,7 +134,7 @@ public class BuildImageStep extends Step {
 		else
 			accessToken = null;
 		return new BuildImageFacade(getBuildPath(), getDockerfile(), getOutput().getFacade(), 
-				isRemoveDanglingImages(), accessToken, getMoreOptions());
+				accessToken, getPlatforms(), getMoreOptions());
 	}
 	
 	@Editable
@@ -177,8 +181,9 @@ public class BuildImageStep extends Step {
 		
 		private String destPath;
 
-		@Editable(name="OCI Layout Directory", description = "Specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
+		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
 		@SubPath
+		@NoSpace
 		@Interpolative(variableSuggester="suggestVariables")
 		@NotEmpty
 		public String getDestPath() {

@@ -216,8 +216,10 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 		private String destPath;
 
-		@Editable(name="OCI Layout Directory", description = "Specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
+		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
 		@Interpolative(variableSuggester="suggestVariables")
+		@SubPath
+		@NoSpace
 		@NotEmpty
 		public String getDestPath() {
 			return destPath;

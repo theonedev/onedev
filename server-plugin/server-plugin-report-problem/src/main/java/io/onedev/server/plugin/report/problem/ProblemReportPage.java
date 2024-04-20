@@ -212,28 +212,34 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				protected void populateItem(ListItem<ProblemFile> item) {
-					ProblemFile file = item.getModelObject();
-					String filePath = file.getBlobPath();
+					var file = item.getModelObject();
+					var fileString = file.toString();
+					var filePath = file.getBlobPath();
 
 					AjaxLink<Void> toggleLink = new AjaxLink<Void>("toggle") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							if (expandedFiles.contains(filePath))
-								expandedFiles.remove(filePath);
+							if (expandedFiles.contains(fileString))
+								expandedFiles.remove(fileString);
 							else
-								expandedFiles.add(filePath);
+								expandedFiles.add(fileString);
 							target.add(item);
 						}
 
 					};
 					toggleLink.add(new Label("label", filePath));
+					
+					if (file.getMoreInfo() != null)
+						toggleLink.add(new Label("moreInfo", "(" + file.getMoreInfo() + ")"));
+					else
+						toggleLink.add(new WebMarkupContainer("moreInfo").setVisible(false));
 						
 					toggleLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 						@Override
 						public String getObject() {
-							return expandedFiles.contains(filePath) ? "expanded" : "collapsed";
+							return expandedFiles.contains(fileString) ? "expanded" : "collapsed";
 						}
 
 					}));
@@ -253,7 +259,7 @@ public class ProblemReportPage extends BuildReportPage {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(expandedFiles.contains(filePath)
+							setVisible(expandedFiles.contains(fileString)
 									&& item.getModelObject().getProblems().size() > MAX_PROBLEMS_TO_DISPLAY);
 						}
 
@@ -327,7 +333,7 @@ public class ProblemReportPage extends BuildReportPage {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(expandedFiles.contains(filePath));
+							setVisible(expandedFiles.contains(fileString));
 						}
 
 					});
@@ -338,7 +344,7 @@ public class ProblemReportPage extends BuildReportPage {
 				protected void onBeforeRender() {
 					expandedFiles.clear();
 					if (!getModelObject().isEmpty()) 
-						expandedFiles.add(getModelObject().iterator().next().getBlobPath());
+						expandedFiles.add(getModelObject().iterator().next().toString());
 					super.onBeforeRender();
 				}
 			});

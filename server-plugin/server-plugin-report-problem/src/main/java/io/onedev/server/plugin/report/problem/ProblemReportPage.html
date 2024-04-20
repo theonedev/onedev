@@ -17,7 +17,10 @@
 			<tr wicket:id="files">
 				<td>
 					<div class="file d-flex flex-wrap align-items-center">
-						<a wicket:id="toggle" class="name mr-2"><wicket:svg href="arrow" class="icon"/> <span wicket:id="label" class="text-break"></span></a>
+						<a wicket:id="toggle" class="name mr-2"><wicket:svg href="arrow" class="icon"/> 
+							<span wicket:id="label" class="text-break"></span>
+							<span wicket:id="moreInfo" class="ml-1 text-muted"></span>
+						</a>
 						<a wicket:id="view" title="Show problems in file view" class="mr-auto"><wicket:svg href="file" class="icon"/></a>
 					</div>
 					<wicket:enclosure child="problems">

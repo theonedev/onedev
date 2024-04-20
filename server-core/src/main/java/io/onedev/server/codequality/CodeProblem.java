@@ -15,7 +15,7 @@ public class CodeProblem implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String NON_REPO_FILE_PREFIX = ":";
-			
+	
 	public enum Severity {
 		CRITICAL, 
 		HIGH, 

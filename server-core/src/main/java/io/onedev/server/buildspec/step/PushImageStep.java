@@ -1,8 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 
 import javax.validation.constraints.NotEmpty;
@@ -24,6 +23,8 @@ public class PushImageStep extends CraneStep {
 	
 	@Editable(order=100, name="OCI Layout Directory", description = "Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to push from")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SubPath
+	@NoSpace
 	@NotEmpty
 	public String getSrcPath() {
 		return srcPath;
@@ -33,7 +34,8 @@ public class PushImageStep extends CraneStep {
 		this.srcPath = srcPath;
 	}
 
-	@Editable(order=200, name="Target Docker Image", description="Specify target docker image to push to")
+	@Editable(order=200, name="Target Docker Image", description="Specify full tag of target docker image to push to, " +
+			"for instance <tt>registry-server/org/repo:tag</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getDestImage() {
@@ -43,8 +45,9 @@ public class PushImageStep extends CraneStep {
 	public void setDestImage(String destImage) {
 		this.destImage = destImage;
 	}
-	
+
 	@Editable(order=1200, group="More Settings", description="Optionally specify <a href='https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_push.md' target='_blank'>additional options</a> of crane")
+	@ReservedOptions({"--platform", "(--platform)=.*"})
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getMoreOptions() {
 		return moreOptions;
@@ -60,7 +63,11 @@ public class PushImageStep extends CraneStep {
 
 	@Override
 	public String getCommand() {
-		return "crane push /onedev-build/workspace/" + getSrcPath() + " " + getDestImage();
+		var builder = new StringBuilder("crane push");
+		if (getMoreOptions() != null)
+			builder.append(" ").append(getMoreOptions());			
+		builder.append(" /onedev-build/workspace/").append(getSrcPath()).append(" ").append(getDestImage());
+		return builder.toString();
 	}
 	
 }

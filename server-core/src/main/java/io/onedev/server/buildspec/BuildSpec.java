@@ -2021,7 +2021,7 @@ public class BuildSpec implements Serializable, Validatable {
 						if (propName.equals("tags")) {
 							tags = ((ScalarNode)stepTuple.getValueNode()).getValue();
 							itStepTuple.remove();
-						} else if (propName.equals("publish")) {
+						} else if (propName.equals("publish") || propName.equals("removeDanglingImages")) {
 							itStepTuple.remove();							
 						}
 					}
