@@ -12,6 +12,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
@@ -83,10 +84,10 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							int endLine = Integer.parseInt(fileElement.attributeValue("endline"));
 							int beginColumn = Integer.parseInt(fileElement.attributeValue("column"));
 							int endColumn = Integer.parseInt(fileElement.attributeValue("endcolumn"));
-							PlanarRange range = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn);
+							PlanarRange location = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn);
 							CodeDuplication duplication = new CodeDuplication();
 							duplication.blobPath = blobPath;
-							duplication.range = range;
+							duplication.location = location;
 							duplications.add(duplication);
 						} else {
 							logger.warning("Unable to find blob path for file: " + filePath);
@@ -105,7 +106,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
 							state.blobIdent = new BlobIdent();
 							state.problemReport = getReportName();
-							state.position = BlobRenderer.getSourcePosition(duplicateWith.range); 
+							state.position = BlobRenderer.getSourcePosition(duplicateWith.location); 
 							
 							params.set(0, build.getCommitHash());
 							List<String> pathSegments = Splitter.on("/").splitToList(duplicateWith.blobPath);
@@ -118,10 +119,12 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							String url  = "/" + build.getProject().getPath() + "/~files/" + paramsEncoder.encodePageParameters(params);
 							String message = String.format(""
 									+ "Duplicated with '%s' at <a href='%s'>line %s - %s</a>", 
-									HtmlEscape.escapeHtml5(duplicateWith.blobPath), url, duplicateWith.range.getFromRow()+1, 
-									duplicateWith.range.getToRow()+1);
-							CodeProblem problem = new CodeProblem(Severity.LOW, duplication.blobPath, 
-									duplication.range, message);
+									HtmlEscape.escapeHtml5(duplicateWith.blobPath), url, duplicateWith.location.getFromRow()+1, 
+									duplicateWith.location.getToRow()+1);
+							CodeProblem problem = new CodeProblem(
+									Severity.LOW, 
+									new RepoTarget(duplication.blobPath, duplication.location), 
+									message);
 							problems.add(problem);
 						}
 					}
@@ -139,7 +142,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 		
 		String blobPath;
 		
-		PlanarRange range;
+		PlanarRange location;
 		
 	}
 }

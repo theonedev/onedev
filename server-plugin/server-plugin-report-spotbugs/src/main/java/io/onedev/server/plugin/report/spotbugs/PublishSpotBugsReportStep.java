@@ -11,6 +11,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -93,18 +94,18 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						
 						message = type + ": " + HtmlEscape.escapeHtml5(message);
 						
-						PlanarRange range = getRange(bugElement, true);
+						PlanarRange location = getLocation(bugElement, true);
 
-						if (range == null)
-							range = getRange(bugElement.element("Field"), false);
-						if (range == null)
-							range = getRange(bugElement.element("Method"), false);
-						if (range == null)
-							range = getRange(bugElement.element("Class"), false);
-						if (range == null) 
-							range = new PlanarRange(0, -1, 0, -1);
+						if (location == null)
+							location = getLocation(bugElement.element("Field"), false);
+						if (location == null)
+							location = getLocation(bugElement.element("Method"), false);
+						if (location == null)
+							location = getLocation(bugElement.element("Class"), false);
+						if (location == null) 
+							location = new PlanarRange(0, -1, 0, -1);
 
-						problems.add(new CodeProblem(severity, blobPath, range, message));
+						problems.add(new CodeProblem(severity, new RepoTarget(blobPath, location), message));
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);
 					}
@@ -119,7 +120,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 	}
 
 	@Nullable
-	private PlanarRange getRange(@Nullable Element element, boolean isOriginal) {
+	private PlanarRange getLocation(@Nullable Element element, boolean isOriginal) {
 		if (element != null) {
 			Element sourceElement = element.element("SourceLine");
 			String start = sourceElement.attributeValue("start");

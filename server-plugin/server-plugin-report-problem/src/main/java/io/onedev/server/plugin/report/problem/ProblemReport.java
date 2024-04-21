@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.problem;
 
 import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.ProblemTarget;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -19,7 +20,7 @@ public class ProblemReport implements Serializable {
 	
 	private final Collection<CodeProblem> problems;
 	
-	private transient Collection<ProblemFile> problemFiles;
+	private transient Collection<ProblemGroup> problemGroups;
 
 	public ProblemReport(Collection<CodeProblem> problems) {
 		this.problems = problems;
@@ -29,20 +30,20 @@ public class ProblemReport implements Serializable {
 		return problems;
 	}
 	
-	public Collection<ProblemFile> getProblemFiles() {
-		if (problemFiles == null) {
-			Map<String, ProblemFile> map = new LinkedHashMap<>();
+	public Collection<ProblemGroup> getProblemGroups() {
+		if (problemGroups == null) {
+			Map<ProblemTarget.GroupKey, ProblemGroup> map = new LinkedHashMap<>();
 			for (CodeProblem problem: problems) {
-				ProblemFile file = map.get(problem.getBlobPath());
-				if (file == null) {
-					file = new ProblemFile(problem.getBlobPath());
-					map.put(problem.getBlobPath(), file);
+				ProblemGroup group = map.get(problem.getTarget().getGroupKey());
+				if (group == null) {
+					group = new ProblemGroup(problem.getTarget().getGroupKey());
+					map.put(problem.getTarget().getGroupKey(), group);
 				}
-				file.getProblems().add(problem);
+				group.getProblems().add(problem);
 			}
-			problemFiles = map.values();
+			problemGroups = map.values();
 		}
-		return problemFiles;
+		return problemGroups;
 	}
 	
 	public static ProblemReport readFrom(File reportDir) {
@@ -71,30 +72,29 @@ public class ProblemReport implements Serializable {
 		return ProblemReport.class.getName() + ":" + projectId + ":" +  buildNumber;
 	}
 	
-	public Comparator<ProblemFile> newProblemFileComparator() {
-		Map<String, Long> criticalSeverityCounts = new HashMap<>();
-		Map<String, Long> highSeverityCounts = new HashMap<>();
-		Map<String, Long> mediumSeverityCounts = new HashMap<>();
-		Map<String, Long> unknownSeverityCounts = new HashMap<>();
-		Map<String, Long> lowSeverityCounts = new HashMap<>();
+	public Comparator<ProblemGroup> newProblemGroupComparator() {
+		Map<ProblemTarget.GroupKey, Long> criticalSeverityCounts = new HashMap<>();
+		Map<ProblemTarget.GroupKey, Long> highSeverityCounts = new HashMap<>();
+		Map<ProblemTarget.GroupKey, Long> mediumSeverityCounts = new HashMap<>();
+		Map<ProblemTarget.GroupKey, Long> lowSeverityCounts = new HashMap<>();
 		
-		for (var problemFile: problemFiles) {
-			criticalSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.CRITICAL).count());
-			highSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.HIGH).count());
-			mediumSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.MEDIUM).count());
-			lowSeverityCounts.put(problemFile.getBlobPath(), problemFile.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.LOW).count());
+		for (var problemGroup: problemGroups) {
+			criticalSeverityCounts.put(problemGroup.getKey(), problemGroup.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.CRITICAL).count());
+			highSeverityCounts.put(problemGroup.getKey(), problemGroup.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.HIGH).count());
+			mediumSeverityCounts.put(problemGroup.getKey(), problemGroup.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.MEDIUM).count());
+			lowSeverityCounts.put(problemGroup.getKey(), problemGroup.getProblems().stream().filter(it -> it.getSeverity() == CodeProblem.Severity.LOW).count());
 		}
 
 		return new Comparator<>() {
 
-			private int compareSeverityCount(Map<String, Long> severityCounts, ProblemFile file1, ProblemFile file2) {
-				var severityCount1 = severityCounts.getOrDefault(file1.getBlobPath(), 0L);
-				var severityCount2 = severityCounts.getOrDefault(file2.getBlobPath(), 0L);
+			private int compareSeverityCount(Map<ProblemTarget.GroupKey, Long> severityCounts, ProblemGroup group1, ProblemGroup group2) {
+				var severityCount1 = severityCounts.getOrDefault(group1.getKey(), 0L);
+				var severityCount2 = severityCounts.getOrDefault(group2.getKey(), 0L);
 				return severityCount2.compareTo(severityCount1);
 			}
 
 			@Override
-			public int compare(ProblemFile o1, ProblemFile o2) {
+			public int compare(ProblemGroup o1, ProblemGroup o2) {
 				var order = compareSeverityCount(criticalSeverityCounts, o1, o2);
 				if (order != 0)
 					return order;
@@ -102,9 +102,6 @@ public class ProblemReport implements Serializable {
 				if (order != 0)
 					return order;
 				order = compareSeverityCount(mediumSeverityCounts, o1, o2);
-				if (order != 0)
-					return order;
-				order = compareSeverityCount(unknownSeverityCounts, o1, o2);
 				if (order != 0)
 					return order;
 				return compareSeverityCount(lowSeverityCounts, o1, o2);

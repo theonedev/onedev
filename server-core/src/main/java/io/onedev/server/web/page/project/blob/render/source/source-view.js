@@ -248,7 +248,7 @@ onedev.server.sourceView = {
 
 		var markRanges = [];
 		for (var i in problems) 
-			markRanges.push(problems[i].range);			
+			markRanges.push(problems[i].target.location);			
 		
 		var severityInfo = onedev.server.codeProblem.getSeverityInfo(problems);
 		
@@ -278,7 +278,7 @@ onedev.server.sourceView = {
 					var $currentPopover = $(".problem-popover[data-line='" + line + "']");
 					$(".popover").not($currentPopover).popover("hide");
 					$currentPopover.find(".problem-content").mouseover(function() {
-						onedev.server.codemirror.mark(cm, problems[$(this).index()].range);
+						onedev.server.codemirror.mark(cm, problems[$(this).index()].target.location);
 					}).mouseout(function() {
 						onedev.server.sourceView.restoreMark();
 					}).each(function() {
@@ -286,7 +286,7 @@ onedev.server.sourceView = {
 						$(this).children(".add-comment").click(function() {
 							if (onedev.server.sourceView.confirmUnsavedChanges()) {
 								$currentPopover.popover("hide");
-								var range = problem.range;
+								var range = problem.target.location;
 								callback("addComment", range.fromRow, range.fromColumn, 
 										range.toRow, range.toColumn);
 							}

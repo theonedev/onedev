@@ -11,6 +11,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -78,7 +79,7 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 							int endLine = Integer.parseInt(violationElement.attributeValue("endline"));
 							int beginColumn = Integer.parseInt(violationElement.attributeValue("begincolumn"));
 							int endColumn = Integer.parseInt(violationElement.attributeValue("endcolumn"));
-							PlanarRange range = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn, TAB_WIDTH);
+							PlanarRange location = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn, TAB_WIDTH);
 							
 							String type = violationElement.attributeValue("rule");
 							
@@ -92,7 +93,7 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 								severity = Severity.LOW;
 							
 							String message = type + ": " + HtmlEscape.escapeHtml5(violationElement.getText());
-							problems.add(new CodeProblem(severity, blobPath, range, message));
+							problems.add(new CodeProblem(severity, new RepoTarget(blobPath, location), message));
 						}
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);						

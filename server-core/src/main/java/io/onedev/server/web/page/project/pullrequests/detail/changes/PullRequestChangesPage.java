@@ -4,10 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.*;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
@@ -943,11 +940,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-						if (problem.getRange() != null) {
-							PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-							if (range != null) {
-								problems.add(new CodeProblem(problem.getSeverity(),
-										problem.getBlobPath(), range, problem.getMessage()));
+						if (problem.getTarget() instanceof RepoTarget) {
+							RepoTarget repoTarget = (RepoTarget) problem.getTarget();
+							if (repoTarget.getLocation() != null) {
+								PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
+								if (location != null) {
+									repoTarget = new RepoTarget(repoTarget.getGroupKey().getName(), location);
+									problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
+								}
 							}
 						}
 					} else {
@@ -976,11 +976,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						if (!state.newCommitHash.equals(buildCommitId.name())) {
 							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
 									ObjectId.fromString(state.newCommitHash), blobPath);
-							if (problem.getRange() != null) {
-								PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-								if (range != null) {
-									problems.add(new CodeProblem(problem.getSeverity(),
-											problem.getBlobPath(), range, problem.getMessage()));
+							if (problem.getTarget() instanceof RepoTarget) {
+								RepoTarget repoTarget = (RepoTarget) problem.getTarget();
+								if (repoTarget.getLocation() != null) {
+									PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
+									if (location != null) {
+										repoTarget = new RepoTarget(repoTarget.getGroupKey().getName(), location);
+										problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
+									}
 								}
 							}
 						} else {

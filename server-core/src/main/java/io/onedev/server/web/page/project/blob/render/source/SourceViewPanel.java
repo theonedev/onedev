@@ -11,10 +11,7 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.*;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -140,24 +137,23 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			CodeCommentManager codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
 			Map<CodeComment, PlanarRange> comments = codeCommentManager.queryInHistory(project, commitId, path);
 
-			Set<CodeProblem> problems = new HashSet<>();
+			var problems = new HashSet<CodeProblem>();
 			Map<Integer, CoverageStatus> coverages = new HashMap<>();
-			
-			List<String> lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+			var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (Build build: buildManager.query(project, commitId, null, null, null, null, new HashMap<>(), null)) {
-				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
-					for (CodeProblem problem: contribution.getCodeProblems(build, path, context.getProblemReport())) 
-						problems.add(problem.normalizeRange(lines));
-				}
-				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
+			for (var build: buildManager.query(project, commitId, null, null, null, null, new HashMap<>(), null)) {
+				for (var contribution: OneDev.getExtensions(CodeProblemContribution.class)) 
+					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
+				for (var contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
 					contribution.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
-						coverages.merge(key, value, (v1, v2)->v1.mergeWith(v2));
+						coverages.merge(key, value, CoverageStatus::mergeWith);
 					});
 				}
 			}
 			
-			return new AnnotationInfo(CodeCommentInfo.groupByLine(comments), CodeProblem.groupByLine(problems), coverages);
+			return new AnnotationInfo(
+					CodeCommentInfo.groupByLine(comments), 
+					RepoTarget.groupByLine(problems, lines), coverages);
 		}
 		
 	};

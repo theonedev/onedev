@@ -1,20 +1,13 @@
 package io.onedev.server.codequality;
 
-import io.onedev.commons.utils.PlanarRange;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.*;
-
-import static java.util.Comparator.comparingInt;
 
 public class CodeProblem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String NON_REPO_FILE_PREFIX = ":";
 	
 	public enum Severity {
 		CRITICAL, 
@@ -37,16 +30,13 @@ public class CodeProblem implements Serializable {
 
 	private final Severity severity;
 	
-	private final String blobPath;
-	
-	private final PlanarRange range;
+	private final ProblemTarget target;
 	
 	private final String message;
 	
-	public CodeProblem(Severity severity, String blobPath, @Nullable PlanarRange range, String message) {
+	public CodeProblem(Severity severity, ProblemTarget target, String message) {
 		this.severity = severity;
-		this.blobPath = blobPath;
-		this.range = range;
+		this.target = target;
 		this.message = message;
 	}
 	
@@ -54,21 +44,12 @@ public class CodeProblem implements Serializable {
 		return severity;
 	}
 
-	public String getBlobPath() {
-		return blobPath;
-	}
-
-	@Nullable
-	public PlanarRange getRange() {
-		return range;
+	public ProblemTarget getTarget() {
+		return target;
 	}
 
 	public String getMessage() {
 		return message;
-	}
-
-	public CodeProblem normalizeRange(List<String> lines) {
-		return new CodeProblem(severity, blobPath, range!=null?range.normalize(lines):null, message);
 	}
 
 	@Override
@@ -80,8 +61,7 @@ public class CodeProblem implements Serializable {
 		CodeProblem otherProblem = (CodeProblem) other;
 		return new EqualsBuilder()
 				.append(severity, otherProblem.severity)
-				.append(blobPath, otherProblem.blobPath)
-				.append(range, otherProblem.range)
+				.append(target, otherProblem.target)
 				.append(message, otherProblem.message)
 				.isEquals();
 	}
@@ -90,33 +70,9 @@ public class CodeProblem implements Serializable {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 				.append(severity)
-				.append(blobPath)
-				.append(range)
+				.append(target)
 				.append(message)
 				.toHashCode();
-	}
-	
-	public static Map<Integer, List<CodeProblem>> groupByLine(Collection<CodeProblem> problems) {
-		Map<Integer, List<CodeProblem>> problemsByLine = new HashMap<>();
-		
-		for (CodeProblem problem: problems) {
-			PlanarRange range = problem.getRange();
-			if (range != null) {
-				int line = range.getFromRow();
-				List<CodeProblem> problemsAtLine = problemsByLine.get(line);
-				if (problemsAtLine == null) {
-					problemsAtLine = new ArrayList<>();
-					problemsByLine.put(line, problemsAtLine);
-				}
-				problemsAtLine.add(problem);
-			}
-		}
-		
-		for (List<CodeProblem> value: problemsByLine.values()) {
-			value.sort(comparingInt(o -> o.getSeverity().ordinal()));
-		}
-		
-		return problemsByLine;
 	}
 	
 }

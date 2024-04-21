@@ -9,10 +9,13 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
@@ -30,8 +33,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -1136,8 +1137,11 @@ public abstract class RevisionDiffPanel extends Panel {
 									oldProblems = new HashSet<>();
 									if (getOldBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getOldProblems(getOldBlobIdent().path)) {
-											if (problem.getRange() != null && isVisible(new DiffPlanarRange(true, problem.getRange())))
-												oldProblems.add(problem);
+											if (problem.getTarget() instanceof RepoTarget) {
+												var repoTarget = (RepoTarget) problem.getTarget();
+												if (repoTarget.getLocation() != null && isVisible(new DiffPlanarRange(true, repoTarget.getLocation())))
+													oldProblems.add(problem);
+											}
 										}
 									}
 								}
@@ -1152,8 +1156,11 @@ public abstract class RevisionDiffPanel extends Panel {
 									newProblems = new HashSet<>();
 									if (getNewBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getNewProblems(getNewBlobIdent().path)) {
-											if (problem.getRange() != null && isVisible(new DiffPlanarRange(false, problem.getRange())))
-												newProblems.add(problem);
+											if (problem.getTarget() instanceof RepoTarget) {
+												var repoTarget = (RepoTarget) problem.getTarget();
+												if (repoTarget.getLocation() != null && isVisible(new DiffPlanarRange(false, repoTarget.getLocation())))
+													newProblems.add(problem);
+											}
 										}
 									}
 								}

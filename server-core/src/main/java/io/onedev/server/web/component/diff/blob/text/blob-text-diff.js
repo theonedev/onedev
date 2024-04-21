@@ -429,7 +429,7 @@ onedev.server.blobTextDiff = {
 			if (oldProblems.hasOwnProperty(line)) { 
 				let oldProblemsOnLine = oldProblems[line];
 				for (var i in oldProblemsOnLine) 
-					oldProblemsOnLine[i].range.leftSide = true;
+					oldProblemsOnLine[i].target.location.leftSide = true;
 				onedev.server.blobTextDiff.addProblemInfo($container, true, line, oldProblems[line]);
 			}
 		}
@@ -439,7 +439,7 @@ onedev.server.blobTextDiff = {
 			if (newProblems.hasOwnProperty(line)) {  
 				let newProblemsOnLine = newProblems[line];
 				for (var i in newProblemsOnLine) 
-					newProblemsOnLine[i].range.leftSide = false;
+					newProblemsOnLine[i].target.location.leftSide = false;
 				onedev.server.blobTextDiff.addProblemInfo($container, false, line, newProblems[line]);
 			}
 		}
@@ -452,7 +452,7 @@ onedev.server.blobTextDiff = {
 		    if (oldComments.hasOwnProperty(line)) {
 				let oldCommentsOnLine = oldComments[line];
 				for (var i in oldCommentsOnLine) 
-					oldCommentsOnLine[i].range.leftSide = true;
+					oldCommentsOnLine[i].target.location.leftSide = true;
 		    	onedev.server.blobTextDiff.addCommentIndicator($container, true, line, oldCommentsOnLine);
 		    }
 		}
@@ -461,7 +461,7 @@ onedev.server.blobTextDiff = {
 		    if (newComments.hasOwnProperty(line)) {
 				let newCommentsOnLine = newComments[line];
 				for (var i in newCommentsOnLine) 
-					newCommentsOnLine[i].range.leftSide = false;
+					newCommentsOnLine[i].target.location.leftSide = false;
 		    	onedev.server.blobTextDiff.addCommentIndicator($container, false, line, newCommentsOnLine);
 		    }
 		}
@@ -1065,7 +1065,7 @@ onedev.server.blobTextDiff = {
 		
 		let markRanges = [];
 		for (var i in problems) 
-			markRanges.push(problems[i].range);			
+			markRanges.push(problems[i].target.location);			
 		
 		$trigger.mouseover(function() {
 			onedev.server.blobTextDiff.mark($container, markRanges);
@@ -1090,7 +1090,7 @@ onedev.server.blobTextDiff = {
 					var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
 					$(".popover").not($currentPopover).popover("hide");
 					$currentPopover.find(".problem-content").mouseover(function() {
-						onedev.server.blobTextDiff.mark($container, problems[$(this).index()].range);
+						onedev.server.blobTextDiff.mark($container, problems[$(this).index()].target.location);
 					}).mouseout(function() {
 						onedev.server.blobTextDiff.restoreMark($container);
 					}).each(function() {
@@ -1098,7 +1098,7 @@ onedev.server.blobTextDiff = {
 						$(this).children(".add-comment").click(function() {
 							if (onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 								$currentPopover.popover("hide");
-								var range = problem.range;
+								var range = problem.target.location;
 								$container.data("callback")("addComment", leftSide, range.fromRow, range.fromColumn, 
 										range.toRow, range.toColumn);
 							}

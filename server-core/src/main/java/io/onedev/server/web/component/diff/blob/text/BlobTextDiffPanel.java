@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.diff.blob.text;
 
+import static io.onedev.server.codequality.RepoTarget.groupByLine;
 import static io.onedev.server.util.diff.DiffRenderer.toHtml;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.codequality.RepoTarget;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -100,20 +102,17 @@ public class BlobTextDiffPanel extends Panel {
 				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = 
 						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getNewComments());
 
-				List<CodeProblem> oldProblems = new ArrayList<>();
-				for (CodeProblem problem: change.getAnnotationSupport().getOldProblems()) 
-					oldProblems.add(problem.normalizeRange(change.getOldText().getLines()));
-				Map<Integer, List<CodeProblem>> oldProblemsByLine = CodeProblem.groupByLine(oldProblems);
-				
-				List<CodeProblem> newProblems = new ArrayList<>();
-				for (CodeProblem problem: change.getAnnotationSupport().getNewProblems()) 
-					newProblems.add(problem.normalizeRange(change.getNewText().getLines()));
-				Map<Integer, List<CodeProblem>> newProblemsByLine = CodeProblem.groupByLine(newProblems);
+				Map<Integer, List<CodeProblem>> oldProblems = groupByLine(
+						change.getAnnotationSupport().getOldProblems(), 
+						change.getOldText().getLines());
+				Map<Integer, List<CodeProblem>> newProblems = groupByLine(
+						change.getAnnotationSupport().getNewProblems(),
+						change.getNewText().getLines());
 				
 				return new DiffAnnotationInfo(
-						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, 
+						new AnnotationInfo(oldCommentsByLine, oldProblems, 
 								change.getAnnotationSupport().getOldCoverages()), 
-						new AnnotationInfo(newCommentsByLine, newProblemsByLine, 
+						new AnnotationInfo(newCommentsByLine, newProblems, 
 								change.getAnnotationSupport().getNewCoverages()));
 			} else {
 				return new DiffAnnotationInfo(

@@ -10,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -58,9 +59,9 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 					if (!problems.isEmpty()) {
 						var aReport = new ProblemReport(problems);
 						aReport.writeTo(reportDir);
-						for (var problemFile: aReport.getProblemFiles()) {
-							if (problemFile.isInRepo())
-								writeFileProblems(build, problemFile.getBlobPath(), problemFile.getProblems());
+						for (var group: aReport.getProblemGroups()) {
+							if (group.getKey() instanceof RepoTarget.GroupKey)
+								writeFileProblems(build, group.getKey().getName(), group.getProblems());
 						}
 						OneDev.getInstance(ProjectManager.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
