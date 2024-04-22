@@ -1,3 +1,17 @@
+# 10.5.0
+
+### CI/CD
+
+1. The build image step now always uses buildx builder to build images to avoid polluting images used by other jobs. 
+The builder should be specified in more settings section of corresponding executors. If you are accessing insecure
+private docker registries, please follow [this tutorial](https://docs.onedev.io/tutorials/cicd/insecure-docker-registry) to configure the builder
+
+2. Builder and platform option can not be specified via _More Options_ property of build image step now. The builder option
+should be specified in executor (see above note), and platform option should be specified via property _Platform_
+
+3. Build image step now either push image to registry, or save image as OCI layout. The option to build local image without
+pushing is removed, as this imposes a security vulnerability (built image can pollute images used by other jobs)
+
 # 10.1.6
 
 ### Agent
