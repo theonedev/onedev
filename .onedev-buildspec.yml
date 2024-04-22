@@ -1,4 +1,4 @@
-version: 31
+version: 32
 imports:
 - projectPath: onedev
   revision: main
@@ -80,19 +80,17 @@ jobs:
     name: build server docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.server
-    tags: 1dev/server 1dev/server:@build_version@
-    publish: true
-    removeDanglingImages: true
-    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
+    output: !RegistryOutput
+      tags: 1dev/server 1dev/server:@build_version@
+    platforms: linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build agent docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.agent
-    tags: 1dev/agent
-    publish: true
-    removeDanglingImages: true
-    moreOptions: --builder onedev --platform linux/amd64,linux/arm64
+    output: !RegistryOutput
+      tags: 1dev/agent
+    platforms: linux/amd64,linux/arm64
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: publish helm chart
@@ -230,19 +228,17 @@ jobs:
     name: build server docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.server
-    tags: 1dev/server:test
-    publish: true
-    removeDanglingImages: true
-    moreOptions: --builder onedev --platform @param:Platforms@
+    output: !RegistryOutput
+      tags: 1dev/server:test
+    platforms: '@param:Platforms@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: build agent docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.agent
-    tags: 1dev/agent:test
-    publish: true
-    removeDanglingImages: true
-    moreOptions: --builder onedev --platform @param:Platforms@
+    output: !RegistryOutput
+      tags: 1dev/agent:test
+    platforms: '@param:Platforms@'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   paramSpecs:
   - !ChoiceParam
@@ -271,11 +267,11 @@ jobs:
     withSubmodules: false
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !ScanDepVulnersStep
+  - !OsvVulnerScannerStep
     name: scan
     recursive: true
-    reportName: Dependency Vulnerabilities
     failThreshold: HIGH
+    reportName: Dependency Vulnerabilities
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
