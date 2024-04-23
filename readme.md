@@ -24,6 +24,14 @@ Fast code search with regular expression.
 
 ![code search and navigation](./doc/images/code-navigation.gif)
 
+## 👮‍ Flexible security and compliance scan
+
+Scan code dependencies, built binaries, or container images to find security
+vulnerabilities, license violations, or secret exposures.
+[**Tutorial**] (https://docs.onedev.io/category/security-and-compliance-scan)
+
+![vulnerabilities](./doc/images/vulnerabilities.png)
+
 ## 🚦 Annotate code with coverage and problems
 
 Code will be annotated with coverage info and problems found in 
