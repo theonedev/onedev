@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.issue;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
@@ -50,9 +52,10 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 
 	@Override
 	public String toStringWithoutParens() {
+		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 		return quote(NAME_SPENT_TIME) + " "
 				+ IssueQuery.getRuleName(operator) + " "
-				+ quote(DateUtils.formatWorkingPeriod(value));
+				+ quote(timeTrackingSetting.formatWorkingPeriod(value));
 	}
 
 	@Override

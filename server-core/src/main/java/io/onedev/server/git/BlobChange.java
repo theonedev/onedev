@@ -79,7 +79,7 @@ public abstract class BlobChange implements Serializable {
 						List<String> newLines = getNewText().getLines();
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> oldLines = new ArrayList<>();
-							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.DEFAULT);
+							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.IGNORE_TRAILING);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}
@@ -91,7 +91,7 @@ public abstract class BlobChange implements Serializable {
 						List<String> oldLines = getOldText().getLines();
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
-							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.DEFAULT);
+							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.IGNORE_TRAILING);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}

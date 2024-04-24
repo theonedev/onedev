@@ -116,12 +116,12 @@ public class Mark implements Serializable {
 		if (newBlob == null || newBlob.getText() == null)
 			return null;
 		for (String line: newBlob.getText().getLines())
-			newLines.add(WhitespaceOption.DEFAULT.apply(line));
+			newLines.add(WhitespaceOption.IGNORE_TRAILING.apply(line));
 		
 		List<String> oldLines = new ArrayList<>();
 		Blob oldBlob = gitService.getBlob(project, ObjectId.fromString(commitHash), path);
 		for (String line: oldBlob.getText().getLines())
-			oldLines.add(WhitespaceOption.DEFAULT.apply(line));
+			oldLines.add(WhitespaceOption.IGNORE_TRAILING.apply(line));
 
 		Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
 		

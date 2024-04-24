@@ -122,7 +122,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	private String blameFile;
 	
-	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 	
 	public static PageParameters paramsOf(Project project, ProjectAndBranch target, ProjectAndBranch source) {
 		PageParameters params = paramsOf(project);

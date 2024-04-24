@@ -153,7 +153,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		else
 			params.add(PARAM_RIGHT, state.rightSide.getProjectId());
 		params.add(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
-		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
@@ -222,7 +222,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(
-				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
+				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.IGNORE_TRAILING.name()));
 		
 		state.commitQuery = params.get(PARAM_COMMIT_QUERY).toString();
 		
@@ -758,7 +758,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		
 		public boolean compareWithMergeBase = true;
 		
-		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 		
 		@Nullable
 		public TabPanel tabPanel;

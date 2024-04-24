@@ -46,7 +46,7 @@ public class CompareContext implements Serializable {
 	private String currentFile;
 	
 	@Column(nullable=false)
-	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 
 	public String getOldCommitHash() {
 		return oldCommitHash;

@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.activities.activity;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueWorkManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -26,7 +27,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import static io.onedev.server.util.DateUtils.formatDateTime;
-import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
 @SuppressWarnings("serial")
 class IssueWorkPanel extends GenericPanel<IssueWork> {
@@ -57,7 +57,8 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 	
 	private Component newDetailViewer(String componentId) {
 		var fragment = new Fragment(componentId, "detailViewFrag", this);
-		fragment.add(new Label("workingPeriod", formatWorkingPeriod(getWork().getMinutes())));
+		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		fragment.add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes())));
 		if (getWork().getNote() != null)
 			fragment.add(new MarkdownViewer("note", Model.of(getWork().getNote()), null));
 		else 

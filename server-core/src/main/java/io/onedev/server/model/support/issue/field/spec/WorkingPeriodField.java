@@ -5,8 +5,10 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.WorkingPeriodInput;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.annotation.Editable;
 
@@ -50,10 +52,12 @@ public class WorkingPeriodField extends FieldSpec {
 
 	@Override
 	public long getOrdinal(String fieldValue) {
-		if (fieldValue != null) 
-			return DateUtils.parseWorkingPeriod(fieldValue);
-		else
+		if (fieldValue != null) {
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			return timeTrackingSetting.parseWorkingPeriod(fieldValue);
+		} else {
 			return super.getOrdinal(fieldValue);
+		}
 	}
 
 	@Override

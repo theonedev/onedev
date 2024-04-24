@@ -1,19 +1,19 @@
 package io.onedev.server.web.editable;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.model.Project;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.WorkingPeriod;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.interpolative.VariableInterpolator;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.List;
 
 public class EditableUtils {
 	
@@ -97,13 +97,14 @@ public class EditableUtils {
 			}
 			return description;
 		} else if (element.getAnnotation(WorkingPeriod.class) != null) {
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 			String description = getDescription(element, editable);
 			if (description.length() != 0) {
 				if (!description.endsWith("."))
 					description += ".";
-				description += " " + DateUtils.WORKING_PERIOD_HELP;
+				description += " " + timeTrackingSetting.getWorkingPeriodHelp();
 			} else {
-				description = DateUtils.WORKING_PERIOD_HELP;
+				description = timeTrackingSetting.getWorkingPeriodHelp();
 			}
 			return description;
 		} else {

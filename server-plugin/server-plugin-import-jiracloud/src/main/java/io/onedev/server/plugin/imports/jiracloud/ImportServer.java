@@ -446,6 +446,8 @@ public class ImportServer implements Serializable, Validatable {
 			apiEndpoint = getApiEndpoint("/issuetype/project?projectId=" + jiraProject.get("id").asText());
 			for (JsonNode typeNode: list(client, apiEndpoint, logger)) 
 				untranslatedTypeNames.put(typeNode.get("id").asText(), typeNode.get("untranslatedName").asText());
+
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 			
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
@@ -647,7 +649,7 @@ public class ImportServer implements Serializable, Validatable {
 								issueField.setIssue(issue);
 								issueField.setName(option.getTimeEstimateIssueField());
 								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(Integer.valueOf(timeEstimate)/60));
+								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(Integer.valueOf(timeEstimate)/60));
 								issue.getFields().add(issueField);
 							}
 						}
@@ -658,7 +660,7 @@ public class ImportServer implements Serializable, Validatable {
 								issueField.setIssue(issue);
 								issueField.setName(option.getTimeSpentIssueField());
 								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(Integer.valueOf(timeSpent)/60));
+								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(Integer.valueOf(timeSpent)/60));
 								issue.getFields().add(issueField);
 							}
 						}

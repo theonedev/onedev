@@ -15,7 +15,7 @@ public class DiffOption implements Serializable {
 
 	private DiffViewMode viewMode = DiffViewMode.UNIFIED;
 	
-	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 
 	@Editable(order=100)
 	@RadioChoice

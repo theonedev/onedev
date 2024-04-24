@@ -62,7 +62,8 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static int getWorkingPeriodValue(String value) {
 		try {
-			return DateUtils.parseWorkingPeriod(value);
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			return timeTrackingSetting.parseWorkingPeriod(value);
 		} catch (ValidationException e) {
 			throw new ExplicitException("Invalid working period: " + value);
 		}

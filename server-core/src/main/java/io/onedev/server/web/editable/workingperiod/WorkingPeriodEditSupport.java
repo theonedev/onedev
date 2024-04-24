@@ -1,20 +1,15 @@
 package io.onedev.server.web.editable.workingperiod;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.WorkingPeriod;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.annotation.WorkingPeriod;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 
 @SuppressWarnings("serial")
 public class WorkingPeriodEditSupport implements EditSupport {
@@ -34,7 +29,8 @@ public class WorkingPeriodEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new Label(id, DateUtils.formatWorkingPeriod(model.getObject()));
+									var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+									return new Label(id, timeTrackingSetting.formatWorkingPeriod(model.getObject()));
 								} else { 
 									return new EmptyValueLabel(id) {
 

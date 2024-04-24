@@ -44,7 +44,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -365,7 +364,7 @@ public class CommitOptionPanel extends Panel {
 			changeType = DiffEntry.ChangeType.DELETE;
 		}
 		
-		return new BlobChange(changeType, oldBlobIdent, newBlobIdent, WhitespaceOption.DEFAULT) {
+		return new BlobChange(changeType, oldBlobIdent, newBlobIdent, WhitespaceOption.IGNORE_TRAILING) {
 
 			@Override
 			public Project getProject() {

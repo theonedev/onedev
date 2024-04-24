@@ -142,7 +142,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(
-				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
+				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.IGNORE_TRAILING.name()));
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
@@ -580,7 +580,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			params.set(PARAM_COMMIT, state.revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
-		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
@@ -627,7 +627,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		@Nullable
 		public Long commentId;
 		
-		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 		
 		@Nullable
 		public String pathFilter;

@@ -32,7 +32,6 @@ import java.util.*;
 
 import static io.onedev.server.model.Issue.*;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
-import static io.onedev.server.util.DateUtils.parseWorkingPeriod;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
@@ -153,7 +152,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						int operator = ctx.operator.getType();
 						if (validate)
 							checkField(fieldName, operator, option);
-						if (fieldName.equals(Issue.NAME_PROJECT)) {
+						if (fieldName.equals(NAME_PROJECT)) {
 							return new ProjectIsCurrentCriteria();
 						} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 							return new MilestoneEmptyCriteria(operator);
@@ -222,44 +221,46 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						if (validate)
 							checkField(fieldName, operator, option);
 
+						var timeTrackingSetting = OneDev.getInstance(SettingManager.class)
+								.getIssueSetting().getTimeTrackingSetting();
 						switch (operator) {
 							case IssueQueryLexer.IsUntil:
 							case IssueQueryLexer.IsSince:
-								if (fieldName.equals(Issue.NAME_SUBMIT_DATE))
+								if (fieldName.equals(NAME_SUBMIT_DATE))
 									return new SubmitDateCriteria(value, operator);
-								else if (fieldName.equals(Issue.NAME_LAST_ACTIVITY_DATE))
+								else if (fieldName.equals(NAME_LAST_ACTIVITY_DATE))
 									return new LastActivityDateCriteria(value, operator);
 								else
 									return new DateFieldCriteria(fieldName, value, operator);
 							case IssueQueryLexer.Contains:
-								if (fieldName.equals(Issue.NAME_TITLE)) {
+								if (fieldName.equals(NAME_TITLE)) {
 									return new TitleCriteria(value);
-								} else if (fieldName.equals(Issue.NAME_DESCRIPTION)) {
+								} else if (fieldName.equals(NAME_DESCRIPTION)) {
 									return new DescriptionCriteria(value);
-								} else if (fieldName.equals(Issue.NAME_COMMENT)) {
+								} else if (fieldName.equals(NAME_COMMENT)) {
 									return new CommentCriteria(value);
 								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
 								}
 							case IssueQueryLexer.Is:
 							case IssueQueryLexer.IsNot:
-								if (fieldName.equals(Issue.NAME_PROJECT)) {
+								if (fieldName.equals(NAME_PROJECT)) {
 									return new ProjectCriteria(value, operator);
 								} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 									return new MilestoneCriteria(value, operator);
-								} else if (fieldName.equals(Issue.NAME_STATE)) {
+								} else if (fieldName.equals(NAME_STATE)) {
 									return new StateCriteria(value, operator);
-								} else if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
+								} else if (fieldName.equals(NAME_VOTE_COUNT)) {
 									return new VoteCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(Issue.NAME_COMMENT_COUNT)) {
+								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
-								} else if (fieldName.equals(Issue.NAME_ESTIMATED_TIME)) {
-									int intValue = parseWorkingPeriod(value);
+								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
+									int intValue = timeTrackingSetting.parseWorkingPeriod(value);
 									return new EstimatedTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(Issue.NAME_SPENT_TIME)) {
-									int intValue = parseWorkingPeriod(value);
+								} else if (fieldName.equals(NAME_SPENT_TIME)) {
+									int intValue = timeTrackingSetting.parseWorkingPeriod(value);
 									return new SpentTimeCriteria(intValue, operator);
 								} else {
 									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -287,19 +288,19 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								}
 							case IssueQueryLexer.IsLessThan:
 							case IssueQueryLexer.IsGreaterThan:
-								if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
+								if (fieldName.equals(NAME_VOTE_COUNT)) {
 									return new VoteCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(Issue.NAME_COMMENT_COUNT)) {
+								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 									return new NumberCriteria(project, value, operator);
 								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
-									int intValue = value.equals(NAME_SPENT_TIME)? -1: parseWorkingPeriod(value);
+									int intValue = value.equals(NAME_SPENT_TIME)? -1: timeTrackingSetting.parseWorkingPeriod(value);
 									return new EstimatedTimeCriteria(intValue, operator);
 								} else if (fieldName.equals(NAME_SPENT_TIME)) {
-									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: parseWorkingPeriod(value);
+									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: timeTrackingSetting.parseWorkingPeriod(value);
 									return new SpentTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(Issue.NAME_PROGRESS)) {
+								} else if (fieldName.equals(NAME_PROGRESS)) {
 									var floatValue = getFloatValue(value);
 									return new ProgressCriteria(floatValue, operator);
 								} else {

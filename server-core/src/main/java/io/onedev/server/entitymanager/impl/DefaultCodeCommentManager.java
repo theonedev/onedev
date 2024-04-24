@@ -50,8 +50,6 @@ import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT;
-
 @Singleton
 public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> implements CodeCommentManager {
 
@@ -191,7 +189,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			
 			List<String> newLines = Preconditions.checkNotNull(project.readLines(
 					new BlobIdent(commitId.name(), path, FileMode.REGULAR_FILE.getBits()), 
-					WhitespaceOption.DEFAULT, true));
+					WhitespaceOption.IGNORE_TRAILING, true));
 
 			Collections.sort(historyCommits, new Comparator<RevCommit>() {
 
@@ -209,7 +207,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 					for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
 						List<String> oldLines = project.readLines( 
 								new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
-								WhitespaceOption.DEFAULT, false);
+								WhitespaceOption.IGNORE_TRAILING, false);
 						if (oldLines != null) {
 							Map<Integer, Integer> lineMapping;
 							if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)

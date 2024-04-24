@@ -1,16 +1,16 @@
 package io.onedev.server.buildspecmodel.inputspec.workingperiodinput;
 
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.issue.TimeTrackingSetting;
+
+import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.validation.ValidationException;
-
-import com.google.common.collect.Lists;
-
-import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.util.DateUtils;
 
 public class WorkingPeriodInput {
 
@@ -27,11 +27,15 @@ public class WorkingPeriodInput {
 		
 		return buffer.toString();
 	}
+	
+	private static TimeTrackingSetting getTimeTrackingSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+	}
 
 	public static Object convertToObject(List<String> strings) {
 		try {
 			if (strings.size() == 1)
-				return DateUtils.parseWorkingPeriod(strings.iterator().next());
+				return getTimeTrackingSetting().parseWorkingPeriod(strings.iterator().next());
 			else if (strings.size() == 0)
 				return null;
 			else
@@ -43,7 +47,7 @@ public class WorkingPeriodInput {
 
 	public static List<String> convertToStrings(Object value) {
 		if (value != null)
-			return Lists.newArrayList(DateUtils.formatWorkingPeriod((int) value));
+			return Lists.newArrayList(getTimeTrackingSetting().formatWorkingPeriod((int) value));
 		else
 			return new ArrayList<>();
 	}

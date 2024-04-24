@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
@@ -49,10 +51,11 @@ public class IssueTotalEstimatedTimeChangeData extends IssueChangeData {
 
 	@Override
 	public ActivityDetail getActivityDetail() {
+		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 		Map<String, String> oldFieldValues = new HashMap<>();
-		oldFieldValues.put("Total Estimated Time", DateUtils.formatWorkingPeriod(oldValue));
+		oldFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(oldValue));
 		Map<String, String> newFieldValues = new HashMap<>();
-		newFieldValues.put("Total Estimated Time", DateUtils.formatWorkingPeriod(newValue));
+		newFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(newValue));
 		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	

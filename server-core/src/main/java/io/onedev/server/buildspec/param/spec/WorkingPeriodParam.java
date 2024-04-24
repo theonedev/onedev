@@ -1,14 +1,14 @@
 package io.onedev.server.buildspec.param.spec;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.WorkingPeriodInput;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.annotation.Editable;
+import io.onedev.server.entitymanager.SettingManager;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
 
 @Editable(order=700, name=ParamSpec.WORKING_PERIOD)
 public class WorkingPeriodParam extends ParamSpec {
@@ -50,10 +50,12 @@ public class WorkingPeriodParam extends ParamSpec {
 
 	@Override
 	public long getOrdinal(String fieldValue) {
-		if (fieldValue != null) 
-			return DateUtils.parseWorkingPeriod(fieldValue);
-		else
+		if (fieldValue != null) {
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			return timeTrackingSetting.parseWorkingPeriod(fieldValue);
+		} else {
 			return super.getOrdinal(fieldValue);
+		}
 	}
 
 }

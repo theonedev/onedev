@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum WhitespaceOption implements Function<String, String> {
 	
-	DEFAULT() {
+	IGNORE_TRAILING() {
 
 		@Override
 		public String apply(String line) {

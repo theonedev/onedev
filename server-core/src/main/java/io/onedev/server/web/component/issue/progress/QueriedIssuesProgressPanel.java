@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.progress;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.ProjectScope;
@@ -16,8 +17,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import javax.annotation.Nullable;
-
-import static io.onedev.server.util.DateUtils.formatWorkingPeriod;
 
 public abstract class QueriedIssuesProgressPanel extends Panel {
 	
@@ -49,9 +48,10 @@ public abstract class QueriedIssuesProgressPanel extends Panel {
 					return timesModel.getObject().getSpentTime();
 				}
 			}));
-			
-			fragment.add(new Label("estimatedTime", formatWorkingPeriod(timesModel.getObject().getEstimatedTime())));
-			fragment.add(new Label("spentTime", formatWorkingPeriod(timesModel.getObject().getSpentTime())));
+
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(timesModel.getObject().getEstimatedTime())));
+			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(timesModel.getObject().getSpentTime())));
 			add(fragment);
 		} else {
 			add(new Fragment("content", "noQueryFrag", this));

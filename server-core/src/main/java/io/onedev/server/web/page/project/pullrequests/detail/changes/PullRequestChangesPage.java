@@ -172,7 +172,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 		}
 		if (state.whitespaceOption == null)
-			state.whitespaceOption = WhitespaceOption.DEFAULT;
+			state.whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -220,10 +220,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		Map<Integer, Integer> lineMapping = lineMappingCache.get(key);
 		if (lineMapping == null) {
 			BlobIdent newBlobIdent = new BlobIdent(newCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
-			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.DEFAULT, false);
+			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
 			if (newLines != null) {
 				BlobIdent oldBlobIdent = new BlobIdent(oldCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
-				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.DEFAULT, true);
+				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, true);
 				if (oldLines != null) 
 					lineMapping = DiffUtils.mapLines(oldLines, newLines);
 				else 
@@ -610,7 +610,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			params.add(PARAM_OLD_COMMIT, state.oldCommitHash);
 		if (state.newCommitHash != null)
 			params.add(PARAM_NEW_COMMIT, state.newCommitHash);
-		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
@@ -892,7 +892,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		public String createdCommitHash;
 		
-		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 		
 		@Nullable
 		public String pathFilter;

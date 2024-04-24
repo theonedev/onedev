@@ -11,12 +11,12 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
-import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
@@ -26,7 +26,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
@@ -384,9 +383,9 @@ public class ImportServer implements Serializable, Validatable {
 				milestoneMappings.put(milestone.getName(), milestone);
 			
 			String initialIssueState = getIssueSetting().getInitialStateSpec().getName();
+			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 				
 			List<Issue> issues = new ArrayList<>();
-			
 			Map<Long, Long> issueNumberMappings = new HashMap<>();
 			
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
@@ -546,7 +545,7 @@ public class ImportServer implements Serializable, Validatable {
 								issueField.setIssue(issue);
 								issueField.setName(option.getEstimatedTimeIssueField());
 								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
+								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(value/60));
 								issue.getFields().add(issueField);
 							}
 						}
@@ -557,7 +556,7 @@ public class ImportServer implements Serializable, Validatable {
 								issueField.setIssue(issue);
 								issueField.setName(option.getSpentTimeIssueField());
 								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
+								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(value/60));
 								issue.getFields().add(issueField);
 							}
 						}
