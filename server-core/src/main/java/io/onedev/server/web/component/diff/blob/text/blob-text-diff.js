@@ -452,7 +452,7 @@ onedev.server.blobTextDiff = {
 		    if (oldComments.hasOwnProperty(line)) {
 				let oldCommentsOnLine = oldComments[line];
 				for (var i in oldCommentsOnLine) 
-					oldCommentsOnLine[i].target.location.leftSide = true;
+					oldCommentsOnLine[i].range.leftSide = true;
 		    	onedev.server.blobTextDiff.addCommentIndicator($container, true, line, oldCommentsOnLine);
 		    }
 		}
@@ -461,7 +461,7 @@ onedev.server.blobTextDiff = {
 		    if (newComments.hasOwnProperty(line)) {
 				let newCommentsOnLine = newComments[line];
 				for (var i in newCommentsOnLine) 
-					newCommentsOnLine[i].target.location.leftSide = false;
+					newCommentsOnLine[i].range.leftSide = false;
 		    	onedev.server.blobTextDiff.addCommentIndicator($container, false, line, newCommentsOnLine);
 		    }
 		}

@@ -6342,4 +6342,17 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate162(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().contains(".xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (var whitespaceOptionNode: dom.selectNodes(".//whitespaceOption")) {
+					Element whitespaceOptionElement = (Element) whitespaceOptionNode;
+					if (whitespaceOptionElement.getText().equals("DEFAULT"))
+						whitespaceOptionElement.setText("IGNORE_TRAILING");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }
