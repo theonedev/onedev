@@ -102,12 +102,13 @@ public class BlobTextDiffPanel extends Panel {
 				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = 
 						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getNewComments());
 
+				var oldLines = change.getType()!=ChangeType.ADD? change.getOldText().getLines(): new ArrayList<String>();
 				Map<Integer, List<CodeProblem>> oldProblems = groupByLine(
-						change.getAnnotationSupport().getOldProblems(), 
-						change.getOldText().getLines());
+						change.getAnnotationSupport().getOldProblems(), oldLines);
+
+				var newLines = change.getType()!=ChangeType.DELETE? change.getNewText().getLines(): new ArrayList<String>();
 				Map<Integer, List<CodeProblem>> newProblems = groupByLine(
-						change.getAnnotationSupport().getNewProblems(),
-						change.getNewText().getLines());
+						change.getAnnotationSupport().getNewProblems(), newLines);
 				
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(oldCommentsByLine, oldProblems, 
@@ -659,38 +660,46 @@ public class BlobTextDiffPanel extends Panel {
 	private void appendBlame(StringBuilder builder, int oldLineNo, int newLineNo) {
 		BlameCommit commit;
 		if (newLineNo != -1)
-			commit = Preconditions.checkNotNull(blameInfo.newBlame.get(newLineNo));
+			commit = blameInfo.newBlame.get(newLineNo);
 		else
-			commit = Preconditions.checkNotNull(blameInfo.oldBlame.get(oldLineNo));
-		if (diffMode == DiffViewMode.UNIFIED && !commit.getHash().equals(blameInfo.lastCommitHash)
-				|| diffMode == DiffViewMode.SPLIT && newLineNo != -1 && !commit.getHash().equals(blameInfo.lastNewCommitHash)
-				|| diffMode == DiffViewMode.SPLIT && oldLineNo != -1 && !commit.getHash().equals(blameInfo.lastOldCommitHash)) {
-			CommitDetailPage.State state = new CommitDetailPage.State();
-			state.revision = commit.getHash();
-			state.whitespaceOption = change.getWhitespaceOption();
-			PageParameters params = CommitDetailPage.paramsOf(getProject(), state);
-			String url = urlFor(CommitDetailPage.class, params).toString();
-			if (diffMode == DiffViewMode.UNIFIED) {
-				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
-						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()), 
-						DateUtils.formatDate(commit.getCommitter().getWhen()),
-						HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
+			commit = blameInfo.oldBlame.get(oldLineNo);
+		if (commit != null) {
+			if (diffMode == DiffViewMode.UNIFIED && !commit.getHash().equals(blameInfo.lastCommitHash)
+					|| diffMode == DiffViewMode.SPLIT && newLineNo != -1 && !commit.getHash().equals(blameInfo.lastNewCommitHash)
+					|| diffMode == DiffViewMode.SPLIT && oldLineNo != -1 && !commit.getHash().equals(blameInfo.lastOldCommitHash)) {
+				CommitDetailPage.State state = new CommitDetailPage.State();
+				state.revision = commit.getHash();
+				state.whitespaceOption = change.getWhitespaceOption();
+				PageParameters params = CommitDetailPage.paramsOf(getProject(), state);
+				String url = urlFor(CommitDetailPage.class, params).toString();
+				if (diffMode == DiffViewMode.UNIFIED) {
+					builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>",
+							url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()),
+							DateUtils.formatDate(commit.getCommitter().getWhen()),
+							HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
+				} else {
+					builder.append(String.format("<td class='abbr blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a></td>",
+							url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash())));
+				}
 			} else {
-				builder.append(String.format("<td class='abbr blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a></td>", 
-						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash())));
+				if (diffMode == DiffViewMode.UNIFIED) {
+					builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
+				} else {
+					builder.append("<td class='abbr blame noselect'><div class='same-as-above'>...</div></td>");
+				}
 			}
-		} else {
+			blameInfo.lastCommitHash = commit.getHash();
+			if (newLineNo != -1)
+				blameInfo.lastNewCommitHash = commit.getHash();
+			if (oldLineNo != -1)
+				blameInfo.lastOldCommitHash = commit.getHash();
+		} else { // commit will be null if we add a new blank file
 			if (diffMode == DiffViewMode.UNIFIED) {
-				builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
+				builder.append("<td class='blame noselect'>&nbsp;</td>");
 			} else {
-				builder.append("<td class='abbr blame noselect'><div class='same-as-above'>...</div></td>");
+				builder.append("<td class='abbr blame noselect'>&nbsp;</td>");
 			}
 		}
-		blameInfo.lastCommitHash = commit.getHash();
-		if (newLineNo != -1)
-			blameInfo.lastNewCommitHash = commit.getHash();
-		if (oldLineNo != -1)
-			blameInfo.lastOldCommitHash = commit.getHash();
 	}
 	
 	private String getOperationClass(Operation operation) {
