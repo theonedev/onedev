@@ -2055,5 +2055,25 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		});
 	}
-	
+
+	private void migrate33(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				var stepType = stepNode.getTag().getValue();
+				if (stepType.equals("!CommandStep")) {
+					for (var stepTuple: stepNode.getValue()) {
+						String key = ((ScalarNode)stepTuple.getKeyNode()).getValue();
+						if (key.equals("interpreter")) {
+							MappingNode interpreterNode = (MappingNode) stepTuple.getValueNode();
+							if (interpreterNode.getTag().getValue().equals("!PowerShellInterpreter")) {
+								interpreterNode.getValue().add(new NodeTuple(
+										new ScalarNode(Tag.STR, "powershell"), new ScalarNode(Tag.STR, "powershell.exe")));
+							}
+						}
+					}
+				}
+			}
+		});
+	}	
 }

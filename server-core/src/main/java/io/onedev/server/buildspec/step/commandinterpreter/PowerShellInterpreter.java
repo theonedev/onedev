@@ -13,6 +13,18 @@ import javax.validation.constraints.NotEmpty;
 public class PowerShellInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
+	
+	private String powershell = "powershell.exe";
+
+	@Editable(order=100, name="Executable", description="Specify powershell executable to be used")
+	@NotEmpty
+	public String getPowershell() {
+		return powershell;
+	}
+
+	public void setPowershell(String powershell) {
+		this.powershell = powershell;
+	}
 
 	@Editable(order=110, description="Specify PowerShell commands to execute "
 			+ "under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>.<br>"
@@ -36,7 +48,7 @@ public class PowerShellInterpreter extends Interpreter {
 	@Override
 	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
 									   String runAs, String builtInRegistryAccessToken, boolean useTTY) {
-		return new PowerShellFacade(image, runAs, builtInRegistryAccessToken, getCommands(), useTTY);
+		return new PowerShellFacade(image, runAs, builtInRegistryAccessToken, getPowershell(), getCommands(), useTTY);
 	}
 
 }
