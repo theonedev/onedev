@@ -17,6 +17,7 @@ public class PowerShellInterpreter extends Interpreter {
 	private String powershell = "powershell.exe";
 
 	@Editable(order=100, name="Executable", description="Specify powershell executable to be used")
+	@Interpolative(variableSuggester = "suggestVariables")
 	@NotEmpty
 	public String getPowershell() {
 		return powershell;

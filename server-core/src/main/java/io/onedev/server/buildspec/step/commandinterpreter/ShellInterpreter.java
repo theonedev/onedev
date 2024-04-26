@@ -1,13 +1,16 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.ShellFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Editable(order=200, name="Custom Linux Shell")
 public class ShellInterpreter extends Interpreter {
@@ -17,6 +20,7 @@ public class ShellInterpreter extends Interpreter {
 	private String shell = "bash";
 
 	@Editable(order=100, name="Shell", description="Specify shell to be used")
+	@Interpolative(variableSuggester = "suggestVariables")
 	@NotEmpty
 	public String getShell() {
 		return shell;
@@ -40,7 +44,7 @@ public class ShellInterpreter extends Interpreter {
 	public void setCommands(String commands) {
 		super.setCommands(commands);
 	}
-
+	
 	@Override
 	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
 									   String runAs, String builtInRegistryAccessToken, boolean useTTY) {
