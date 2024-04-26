@@ -1,49 +1,46 @@
 package io.onedev.server.util;
 
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import javax.annotation.Nullable;
-
-import org.apache.tika.Tika;
-import org.apache.tika.mime.MediaType;
-
 public class ContentDetector {
 	
 	private static final Tika tika = new Tika();
-
-	/**
-	 * Read leading information of specified stream until the charset is detected.
-	 * 
-	 * @param contentStream
-	 *			stream to be read for charset detection
-	 * @return
-	 * 			detected charset, or <tt>null</tt> if charset can not be detected
-	 */
-	public static @Nullable Charset detectCharset(InputStream contentStream) {
-		try {
-			return UniversalEncodingDetector.detect(contentStream);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+	
 	/**
 	 * Read leading information of specified content bytes to detect content charset.
 	 *  
-	 * @param contentBytes
+	 * @param bytes
 	 * 			content to be detected
 	 * @return
 	 * 			charset of the content, or <tt>null</tt> if charset can not be detected
 	 */
-	public static @Nullable Charset detectCharset(byte[] contentBytes) {
-		if (contentBytes.length != 0) {
-			try {
-				return UniversalEncodingDetector.detect(contentBytes);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+	@Nullable
+	public static Charset detectCharset(byte[] bytes) {
+		if (bytes.length != 0) {
+			var listener = new UniversalEncodingListener(new Metadata());
+			var pos = 0;
+			var lookAhead = 1024;
+			while (true) {
+				var left = bytes.length - pos;
+				if (left < lookAhead) {
+					listener.handleData(bytes, pos, left);
+					break;
+				} else {
+					listener.handleData(bytes, pos, lookAhead);
+					if (listener.isDone())
+						break;
+					else
+						pos += lookAhead;
+				}
 			}
+			return listener.dataEnd();
 		} else {
 			return null;
 		}
