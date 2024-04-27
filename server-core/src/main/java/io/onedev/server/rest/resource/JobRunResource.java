@@ -105,8 +105,8 @@ public class JobRunResource {
 		}
 		
 		Build build = jobManager.submit(project, commitId, jobRun.getJobName(), 
-				jobRun.getParams(), UUID.randomUUID().toString(), refName, 
-				SecurityUtils.getUser(), request, null, jobRun.getReason());
+				jobRun.getParams(), refName, SecurityUtils.getUser(), request, 
+				null, jobRun.getReason());
 		return build.getId();
     }
 

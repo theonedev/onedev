@@ -69,11 +69,6 @@ public class BuildPipelinePage extends BuildDetailPage {
 						return getBuild();
 					}
 
-					@Override
-					protected Build getPipelineOf() {
-						return getBuild();
-					}
-
 				};
 			}
 			

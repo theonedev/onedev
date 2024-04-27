@@ -129,9 +129,8 @@ public class TriggerJobResource {
 			}
 			
 			Build build = jobManager.submit(project, commit.copy(), job, 
-					jobParams, UUID.randomUUID().toString(), refName, 
-					SecurityUtils.getUser(), null, null,
-					"Triggered via restful api");
+					jobParams, refName, SecurityUtils.getUser(), null, 
+					null, "Triggered via restful api");
 			return build.getId();
 		} finally {
 			ThreadContext.unbindSubject();

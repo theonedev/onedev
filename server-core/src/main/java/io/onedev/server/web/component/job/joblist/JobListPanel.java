@@ -63,9 +63,6 @@ public abstract class JobListPanel extends Panel {
 	protected abstract Project getProject();
 	
 	@Nullable
-	protected abstract String getPipeline();
-	
-	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
 	protected abstract void onRunJob(AjaxRequestTarget target);
@@ -88,7 +85,7 @@ public abstract class JobListPanel extends Panel {
 		add(jobsView);
 		for (Job job: accessibleJobsModel.getObject()) {
 			WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
-			Status status = getProject().getCommitStatuses(commitId, null, getPullRequest(), refName).get(job.getName());
+			Status status = getProject().getCommitStatuses(commitId, getPullRequest(), refName).get(job.getName());
 					
 			Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
 
@@ -118,19 +115,11 @@ public abstract class JobListPanel extends Panel {
 				protected PullRequest getPullRequest() {
 					return JobListPanel.this.getPullRequest();
 				}
-
-				@Override
-				protected String getPipeline() {
-					String pipeline = JobListPanel.this.getPipeline();
-					if (pipeline == null)
-						pipeline = UUID.randomUUID().toString();
-					return pipeline;
-				}
 				
 			});
 			
 			jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
-					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), null, refName, getPullRequest()), 0)) {
+					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), refName, getPullRequest()), 0)) {
 				
 				@Override
 				protected void onConfigure() {
@@ -147,7 +136,7 @@ public abstract class JobListPanel extends Panel {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
-							null, new HashMap<>(), getPipeline()));
+							null, new HashMap<>()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

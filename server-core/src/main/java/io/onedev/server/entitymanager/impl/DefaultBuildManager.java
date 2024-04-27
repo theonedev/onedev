@@ -243,21 +243,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId, String pipeline) {
-		return query(project, commitId, null, pipeline);
+	public Collection<Build> query(Project project, ObjectId commitId) {
+		return query(project, commitId, null);
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId, String jobName, String pipeline) {
-		return query(project, commitId, jobName, null, null, null, new HashMap<>(), pipeline);
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
+		return query(project, commitId, jobName, null, null, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, String refName, 
 								   Optional<PullRequest> request, Optional<Issue> issue, 
-								   Map<String, List<String>> params, String pipeline) {
+								   Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -265,8 +265,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
 		predicates.add(builder.equal(root.get(Build.PROP_COMMIT_HASH), commitId.name()));
-		if (pipeline != null)
-			predicates.add(builder.equal(root.get(Build.PROP_PIPELINE), pipeline));
 		if (jobName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
 		if (refName != null)
@@ -624,17 +622,16 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@SuppressWarnings("unchecked")
 	private void fillStatus(Project project, Collection<ObjectId> commitIds, 
 			Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses) {
-		Query<?> query = getSession().createQuery("select commitHash, pipeline, jobName, status, refName, request.id from Build "
+		Query<?> query = getSession().createQuery("select commitHash, jobName, status, refName, request.id from Build "
 				+ "where project=:project and commitHash in :commitHashes");
 		query.setParameter("project", project);
 		query.setParameter("commitHashes", commitIds.stream().map(it->it.name()).collect(Collectors.toList()));
 		for (Object[] row: (List<Object[]>)query.list()) {
 			ObjectId commitId = ObjectId.fromString((String) row[0]);
-			String pipeline = (String) row[1];
-			String jobName = (String) row[2];
-			Status status = (Status) row[3];
-			String refName = (String) row[4];
-			Long requestId = (Long) row[5];
+			String jobName = (String) row[1];
+			Status status = (Status) row[2];
+			String refName = (String) row[3];
+			Long requestId = (Long) row[4];
 			
 			Map<String, Collection<StatusInfo>> commitStatus = commitStatuses.get(commitId);
 			if (commitStatus == null) {
@@ -646,7 +643,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				jobStatus = new HashSet<>();
 				commitStatus.put(jobName, jobStatus);
 			}
-			jobStatus.add(new StatusInfo(status, pipeline, requestId, refName));
+			jobStatus.add(new StatusInfo(status, requestId, refName));
 		}
 	}
 	

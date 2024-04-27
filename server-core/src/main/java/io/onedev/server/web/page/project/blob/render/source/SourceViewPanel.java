@@ -141,7 +141,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			Map<Integer, CoverageStatus> coverages = new HashMap<>();
 			var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (var build: buildManager.query(project, commitId, null, null, null, null, new HashMap<>(), null)) {
+			for (var build: buildManager.query(project, commitId, null, null, null, null, new HashMap<>())) {
 				for (var contribution: OneDev.getExtensions(CodeProblemContribution.class)) 
 					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
 				for (var contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 

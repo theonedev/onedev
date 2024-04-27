@@ -17,8 +17,8 @@ import java.util.Map;
 public interface JobManager {
 	
 	Build submit(Project project, ObjectId commitId, String jobName,
-				 Map<String, List<String>> paramMap, String pipeline,
-				 String refName, User submitter, @Nullable PullRequest request,
+				 Map<String, List<String>> paramMap, String refName, 
+				 User submitter, @Nullable PullRequest request,
 				 @Nullable Issue issue, String reason);
 	
 	void resubmit(Build build, String reason);

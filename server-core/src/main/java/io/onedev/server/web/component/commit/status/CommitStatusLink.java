@@ -67,7 +67,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 
 		@Override
 		protected Status load() {
-			return Status.getOverallStatus(getProject().getCommitStatuses(commitId, null, getPullRequest(), refName).values());
+			return Status.getOverallStatus(getProject().getCommitStatuses(commitId, getPullRequest(), refName).values());
 		}
 		
 	};
@@ -143,11 +143,6 @@ public abstract class CommitStatusLink extends DropdownLink {
 			@Override
 			protected PullRequest getPullRequest() {
 				return CommitStatusLink.this.getPullRequest();
-			}
-
-			@Override
-			protected String getPipeline() {
-				return null;
 			}
 			
 		};

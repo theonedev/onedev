@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class JobRunSelector extends Panel {
 	
@@ -163,11 +162,6 @@ public abstract class JobRunSelector extends Panel {
 			@Override
 			protected Project getProject() {
 				return JobRunSelector.this.getProject();
-			}
-
-			@Override
-			protected String getPipeline() {
-				return UUID.randomUUID().toString();
 			}
 
 			@Nullable

@@ -52,8 +52,6 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 	
 	protected abstract Project getProject();
 	
-	protected abstract String getPipeline();
-	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
@@ -105,11 +103,10 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 											  Serializable populatedParamBean) {
 							Map<String, List<String>> paramMap = ParamUtils.getParamMap(
 									job, populatedParamBean, job.getParamSpecMap().keySet());
-							String pipeline = getPipeline();
 							List<Build> builds = new ArrayList<>();
 							for (String refName : selectedRefNames) {
 								builds.add(getJobManager().submit(getProject(), commitId, job.getName(),
-										paramMap, pipeline, refName, SecurityUtils.getUser(),
+										paramMap, refName, SecurityUtils.getUser(),
 										getPullRequest(), null, "Submitted manually"));
 							}
 							if (builds.size() == 1)
@@ -117,7 +114,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 							else
 								close();
 							if (builds.stream().allMatch(it -> it.isFinished()))
-								Session.get().warn("Build already fired in current pipeline");
+								Session.get().warn("Build already finished. You may re-run the build");
 						}
 
 						@Override
@@ -138,11 +135,11 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 					};
 				} else {
 					Build build = getJobManager().submit(getProject(), commitId, job.getName(),
-							new HashMap<>(), getPipeline(), refNames.iterator().next(),
+							new HashMap<>(), refNames.iterator().next(),
 							SecurityUtils.getUser(), getPullRequest(), null, "Submitted manually");
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					if (build.isFinished())
-						Session.get().warn("Build already fired in current pipeline");
+						Session.get().warn("Build already finished. You may re-run the build");
 				}
 			} else {
 				new MessageModal(target) {

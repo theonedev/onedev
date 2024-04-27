@@ -1,20 +1,21 @@
 package io.onedev.server.entitymanager;
 
-import java.io.File;
-import java.util.*;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.*;
-import io.onedev.server.util.artifact.ArtifactInfo;
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
+import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface BuildManager extends EntityManager<Build> {
 	
@@ -40,13 +41,11 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
 							@Nullable String refName, @Nullable Optional<PullRequest> request, 
-							@Nullable Optional<Issue> issue, Map<String, List<String>> params, 
-							@Nullable String pipeline);
+							@Nullable Optional<Issue> issue, Map<String, List<String>> params);
 
-	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
-			@Nullable String pipeline);
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName);
 
-	Collection<Build> query(Project project, ObjectId commitId, @Nullable String pipeline);
+	Collection<Build> query(Project project, ObjectId commitId);
 
 	Map<ObjectId, Map<String, Collection<StatusInfo>>> queryStatus(Project project, Collection<ObjectId> commitIds);
 

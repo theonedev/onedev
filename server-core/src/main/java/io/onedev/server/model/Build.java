@@ -61,7 +61,7 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="o_request_id"),  
-				@Index(columnList= PROP_COMMIT_HASH), @Index(columnList=PROP_PIPELINE),
+				@Index(columnList= PROP_COMMIT_HASH), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList= PROP_JOB_NAME), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
@@ -101,8 +101,6 @@ public class Build extends ProjectBelonging
 	public static final String NAME_STATUS = "Status";
 	
 	public static final String PROP_STATUS = "status";
-	
-	public static final String PROP_PIPELINE = "pipeline";
 	
 	public static final String NAME_SUBMITTER = "Submitter";
 	
@@ -355,9 +353,6 @@ public class Build extends ProjectBelonging
 	
 	private Date retryDate;
 	
-	@Column(nullable=false)
-	private String pipeline;
-	
 	@JsonIgnore
 	private Integer finishDay;
 	
@@ -553,15 +548,7 @@ public class Build extends ProjectBelonging
 	public void setPaused(boolean paused) {
 		this.paused = paused;
 	}
-
-	public String getPipeline() {
-		return pipeline;
-	}
-
-	public void setPipeline(String pipeline) {
-		this.pipeline = pipeline;
-	}
-
+	
 	public Date getStatusDate() {
 		switch (status) {
 			case FAILED:

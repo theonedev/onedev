@@ -654,11 +654,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						return PullRequestDetailPage.this.getProject();
 					}
 
-					@Override
-					protected String getPipeline() {
-						return UUID.randomUUID().toString();
-					}
-
 					@Nullable
 					@Override
 					protected PullRequest getPullRequest() {

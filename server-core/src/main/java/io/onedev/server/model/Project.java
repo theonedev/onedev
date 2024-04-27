@@ -753,8 +753,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 
-	public Map<String, Status> getCommitStatuses(ObjectId commitId,
-												 @Nullable String pipeline, @Nullable PullRequest request, @Nullable String refName) {
+	public Map<String, Status> getCommitStatuses(ObjectId commitId, @Nullable PullRequest request, 
+												 @Nullable String refName) {
 		Map<String, Collection<StatusInfo>> commitStatusInfos = getCommitStatusCache().get(commitId);
 		if (commitStatusInfos == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
@@ -765,8 +765,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		for (Map.Entry<String, Collection<StatusInfo>> entry: commitStatusInfos.entrySet()) {
 			Collection<Status> statuses = new ArrayList<>();
 			for (StatusInfo statusInfo: entry.getValue()) {
-				if ((pipeline == null || pipeline.equals(statusInfo.getPipeline()))
-						&& (refName == null || refName.equals(statusInfo.getRefName())) 
+				if ((refName == null || refName.equals(statusInfo.getRefName())) 
 						&& Objects.equals(idOf(request), statusInfo.getRequestId())) {
 					statuses.add(statusInfo.getStatus());
 				}
@@ -1872,7 +1871,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		Collection<Build> builds = buildsCache.get(commitId);
 		if (builds == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			builds = buildManager.query(this, commitId, null, null, null, null, new HashMap<>(), null);
+			builds = buildManager.query(this, commitId, null, null, null, null, new HashMap<>());
 			buildsCache.put(commitId, builds);
 		}
 		return builds;

@@ -105,8 +105,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == BuildQueryLexer.SubmittedBy || operator == BuildQueryLexer.CancelledBy) {
 									return SuggestionUtils.suggestUsers(matchWith);
-								} else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf 
-										|| operator == BuildQueryLexer.InPipelineOf) {
+								} else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf) {
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								} else if (operator == BuildQueryLexer.FixedIssue) {
 									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);

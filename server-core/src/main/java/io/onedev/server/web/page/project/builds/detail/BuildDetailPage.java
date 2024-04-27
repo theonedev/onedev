@@ -373,11 +373,6 @@ public abstract class BuildDetailPage extends ProjectPage
 								return getBuild().getRequest();
 							}
 
-							@Override
-							protected String getPipeline() {
-								return getBuild().getPipeline();
-							}
-
 						};
 					}
 

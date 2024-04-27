@@ -374,13 +374,11 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 	
 	public static String getBuildQuery(ObjectId commitId, String jobName, 
-			@Nullable Build pipelineOf, @Nullable String refName, @Nullable PullRequest request) {
+			@Nullable String refName, @Nullable PullRequest request) {
 		String query = "" 
 				+ Criteria.quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
 				+ Criteria.quote(NAME_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
-		if (pipelineOf != null) 
-			query = query + " " + getRuleName(And) + " " + getRuleName(InPipelineOf) + " " + Criteria.quote("#" + pipelineOf.getNumber());
 		if (request != null) {
 			query = query 
 					+ " " + getRuleName(And) + " " 

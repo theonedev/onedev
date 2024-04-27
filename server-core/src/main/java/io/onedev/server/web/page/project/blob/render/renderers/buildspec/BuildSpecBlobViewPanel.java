@@ -1,21 +1,35 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getPosition;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getSelection;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
+import com.google.common.base.Throwables;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.Import;
+import io.onedev.server.buildspec.NamedElement;
+import io.onedev.server.buildspec.Service;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.step.StepTemplate;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.job.RunJobLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.pipeline.JobSelectionChange;
+import io.onedev.server.web.component.pipeline.PipelinePanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -37,36 +51,15 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.eclipse.jgit.lib.FileMode;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Throwables;
+import javax.annotation.Nullable;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.Import;
-import io.onedev.server.buildspec.NamedElement;
-import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.step.StepTemplate;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.asset.icon.IconScope;
-import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.job.RunJobLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.pipeline.JobSelectionChange;
-import io.onedev.server.web.component.pipeline.PipelinePanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.*;
 
 @SuppressWarnings("serial")
 public class BuildSpecBlobViewPanel extends BlobViewPanel {
@@ -249,11 +242,6 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 												@Override
 												protected PullRequest getPullRequest() {
 													return null;
-												}
-
-												@Override
-												protected String getPipeline() {
-													return UUID.randomUUID().toString();
 												}
 		
 											});

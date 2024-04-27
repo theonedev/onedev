@@ -30,7 +30,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class JobInfoButton extends Panel {
@@ -52,7 +55,7 @@ public abstract class JobInfoButton extends Panel {
 					@Override
 					protected List<Build> load() {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						List<Build> builds = new ArrayList<>(buildManager.query(getProject(), getCommitId(), getJobName(), getPipeline()));
+						List<Build> builds = new ArrayList<>(buildManager.query(getProject(), getCommitId(), getJobName()));
 						builds.sort(Comparator.comparing(Build::getNumber));
 						return builds;
 					}
@@ -64,7 +67,7 @@ public abstract class JobInfoButton extends Panel {
 					@Override
 					protected Component newListLink(String componentId) {
 						return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-								ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(getCommitId(), getJobName(), getPipelineOf(), null, null), 0)) {
+								ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(getCommitId(), getJobName(), null, null), 0)) {
 							
 							@Override
 							protected void onConfigure() {
@@ -88,7 +91,7 @@ public abstract class JobInfoButton extends Panel {
 				super.onComponentTag(tag);
 				
 				String cssClasses = "btn btn-outline-secondary";
-				Build.Status status = getProject().getCommitStatuses(getCommitId(), getPipeline(), null, null).get(getJobName());
+				Build.Status status = getProject().getCommitStatuses(getCommitId(), null, null).get(getJobName());
 				String title;
 				if (status != null) {
 					if (status != Status.SUCCESSFUL)
@@ -109,7 +112,7 @@ public abstract class JobInfoButton extends Panel {
 
 			@Override
 			protected Status load() {
-				return getProject().getCommitStatuses(getCommitId(), getPipeline(), null, null).get(getJobName());
+				return getProject().getCommitStatuses(getCommitId(), null, null).get(getJobName());
 			}
 			
 		}));
@@ -128,7 +131,7 @@ public abstract class JobInfoButton extends Panel {
 		detailLink.setOutputMarkupId(true);
 		add(detailLink);
 		
-		String refName = getPipelineOf()!=null?getPipelineOf().getRefName():null;
+		String refName = getActiveBuild()!=null?getActiveBuild().getRefName():null;
 		add(new RunJobLink("run", getCommitId(), getJobName(), refName) {
 
 			@Override
@@ -139,14 +142,6 @@ public abstract class JobInfoButton extends Panel {
 			@Override
 			protected PullRequest getPullRequest() {
 				return null;
-			}
-
-			@Override
-			protected String getPipeline() {
-				if (getPipelineOf() != null)
-					return getPipelineOf().getPipeline();
-				else
-					return UUID.randomUUID().toString();
 			}
 			
 		});
@@ -165,17 +160,7 @@ public abstract class JobInfoButton extends Panel {
 	protected abstract String getJobName();
 	
 	@Nullable
-	private String getPipeline() {
-		return getPipelineOf()!=null? getPipelineOf().getPipeline(): null;
-	}
-	
-	@Nullable
 	protected Build getActiveBuild() {
-		return null;
-	}
-
-	@Nullable
-	protected Build getPipelineOf() {
 		return null;
 	}
 

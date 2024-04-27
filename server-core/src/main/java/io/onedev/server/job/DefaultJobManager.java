@@ -228,8 +228,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public Build submit(Project project, ObjectId commitId, String jobName, 
-						Map<String, List<String>> paramMap, String pipeline,
-						String refName, User submitter, @Nullable PullRequest request,
+						Map<String, List<String>> paramMap, String refName, 
+						User submitter, @Nullable PullRequest request,
 						@Nullable Issue issue, String reason) {
 		Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
 		transactionManager.mustRunAfterTransaction(() -> lock.unlock());
@@ -256,7 +256,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				throw new HttpResponseAwareException(SC_BAD_REQUEST, errorMessage);
 			}
 
-			return doSubmit(project, commitId, jobName, paramMap, pipeline, refName,
+			return doSubmit(project, commitId, jobName, paramMap, refName,
 					submitter, request, issue, reason);
 		} catch (ValidationException e) {
 			throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
@@ -268,8 +268,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private Build doSubmit(Project project, ObjectId commitId, String jobName,
-						   Map<String, List<String>> paramMap, String pipeline,
-						   String refName, User submitter, @Nullable PullRequest request, 
+						   Map<String, List<String>> paramMap, String refName, 
+						   User submitter, @Nullable PullRequest request, 
 						   @Nullable Issue issue, String reason) {
 		if (request != null) {
 			request.setBuildCommitHash(commitId.name());
@@ -288,7 +288,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setRefName(refName);
 		build.setRequest(request);
 		build.setIssue(issue);
-		build.setPipeline(pipeline);
 
 		Project.push(project);
 		try {
@@ -305,7 +304,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 		Collection<Build> builds = buildManager.query(project, commitId, jobName,
 				refName, Optional.ofNullable(request), Optional.ofNullable(issue), 
-				paramMapToQuery, pipeline);
+				paramMapToQuery);
 
 		if (builds.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
@@ -335,7 +334,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						interpolated.getParamMatrix(), interpolated.getExcludeParamMaps());
 				for (var dependencyParamMap: dependencyParamMaps) {
 					Build dependencyBuild = doSubmit(project, commitId,
-							interpolated.getJobName(), dependencyParamMap, pipeline,
+							interpolated.getJobName(), dependencyParamMap, 
 							refName, submitter, request, issue, reason);
 					BuildDependence dependence = new BuildDependence();
 					dependence.setDependency(dependencyBuild);
@@ -683,11 +682,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (event instanceof CommitAware && ((CommitAware) event).getCommit() != null) {
 			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
 			if (!commitId.equals(ObjectId.zeroId())) {
-				String pipeline;
-				if (event instanceof BuildEvent)
-					pipeline = ((BuildEvent) event).getBuild().getPipeline();
-				else
-					pipeline = UUID.randomUUID().toString();
 				PullRequest request = null;
 				if (event instanceof PullRequestEvent)
 					request = ((PullRequestEvent) event).getRequest();
@@ -715,7 +709,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										try {
 											for (var paramMap: paramMaps) {
 												submit(project, commitId, job.getName(), paramMap,
-														pipeline, match.getRefName(), SecurityUtils.getUser(),
+														match.getRefName(), SecurityUtils.getUser(),
 														match.getRequest(), match.getIssue(), match.getReason());
 											}
 										} catch (Throwable e) {
@@ -1064,13 +1058,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										var commitId = schedule.getCommitId();
 										var nextFireTime = schedule.getCronExpression().getNextValidTimeAfter(currentTime);
 										if (nextFireTime != null && !nextFireTime.after(nextCheckTime)) {
-											String pipeline = UUID.randomUUID().toString();
 											var paramMaps = resolveParams(null, null,
 													match.getParamMatrix(), match.getExcludeParamMaps());
 											for (var paramMap : paramMaps) {
-												submit(project, commitId, schedule.getJobName(), paramMap, pipeline,
+												var build = submit(project, commitId, schedule.getJobName(), paramMap,
 														match.getRefName(), SecurityUtils.getUser(), null,
 														null, match.getReason());
+												if (build.isFinished()) 
+													resubmit(build, match.getReason());
 											}
 										}
 									} catch (Exception e) {
