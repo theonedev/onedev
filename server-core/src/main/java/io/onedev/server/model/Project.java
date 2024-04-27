@@ -550,14 +550,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.children = children;
 	}
 
-	public Collection<Project> getDescendants() {
-		Collection<Project> descendants = new ArrayList<>(getChildren());
+	public List<Project> getDescendants() {
+		List<Project> descendants = new ArrayList<>(getChildren());
 		for (Project child: getChildren())
 			descendants.addAll(child.getDescendants());
 		return descendants;
 	}
 
-	public Collection<Project> getAncestors() {
+	public List<Project> getAncestors() {
 		List<Project> ancestors = new ArrayList<>();
 		if (getParent() != null) {
 			ancestors.add(getParent());
@@ -615,23 +615,23 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 * @return
 	 * 			all descendant projects forking from current project
 	 */
-	public List<Project> getForkChildren() {
-		List<Project> children = new ArrayList<>();
+	public List<Project> getForkDescendants() {
+		List<Project> forkDescendants = new ArrayList<>();
 		for (Project fork: getForks()) {  
-			children.add(fork);
-			children.addAll(fork.getForkChildren());
+			forkDescendants.add(fork);
+			forkDescendants.addAll(fork.getForkDescendants());
 		}
 		
-		return children;
+		return forkDescendants;
 	}
 	
-	public List<Project> getForkParents() {
-		List<Project> forkParents = new ArrayList<>();
+	public List<Project> getForkAncestors() {
+		List<Project> forkAncestors = new ArrayList<>();
 		if (getForkedFrom() != null) {
-			forkParents.add(getForkedFrom());
-			forkParents.addAll(getForkedFrom().getForkParents());
+			forkAncestors.add(getForkedFrom());
+			forkAncestors.addAll(getForkedFrom().getForkAncestors());
 		}
-		return forkParents;
+		return forkAncestors;
 	}
 	
 	private ProjectManager getProjectManager() {

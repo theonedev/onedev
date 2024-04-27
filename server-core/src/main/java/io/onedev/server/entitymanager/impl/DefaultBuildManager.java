@@ -383,7 +383,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 		
 		Set<Project> projects = Sets.newHashSet(project);
-		projects.addAll(project.getForkParents());
+		projects.addAll(project.getForkAncestors());
 
 		List<Criterion> projectCriterions = new ArrayList<>();
 		for (Project each: projects) {

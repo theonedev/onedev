@@ -66,7 +66,7 @@ public abstract class AffinalRevisionPicker extends Panel {
 			@Override
 			protected List<Project> load() {
 				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
-				List<Project> affinals = project.getForkRoot().getForkChildren();
+				List<Project> affinals = project.getForkRoot().getForkDescendants();
 				affinals.add(0, project.getForkRoot());
 				affinals.retainAll(OneDev.getInstance(ProjectManager.class).getPermittedProjects(new ReadCode()));
 				

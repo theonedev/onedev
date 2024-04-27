@@ -374,7 +374,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			usage.checkInUse("Project '" + project.getPath() + "'");
 			
 			for (Project fork : project.getForks()) {
-				Collection<Project> forkChildren = fork.getForkChildren();
+				Collection<Project> forkChildren = fork.getForkDescendants();
 				forkChildren.add(fork);
 				for (Project forkChild : forkChildren) {
 					Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",

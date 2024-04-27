@@ -951,7 +951,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		}
 		
 		Set<Project> projects = Sets.newHashSet(project);
-		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
+		projects.addAll(project.getForkAncestors().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
 		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));
 		
 		if (fuzzyQuery.startsWith("#"))

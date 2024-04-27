@@ -828,7 +828,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, project));
 		}
 		
-		for (Project forkParent: project.getForkParents()) {
+		for (Project forkParent: project.getForkAncestors()) {
 			if (SecurityUtils.canAccessConfidentialIssues(forkParent)) {
 				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
 			} else if (SecurityUtils.canAccessProject(forkParent)) {
