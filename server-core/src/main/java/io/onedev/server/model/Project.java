@@ -111,6 +111,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NAME_NAME = "Name";
 	
 	public static final String PROP_NAME = "name";
+
+	public static final String NAME_KEY = "Key";
+	
+	public static final String PROP_KEY = "key";
 	
 	public static final String NAME_PATH = "Path";
 	
@@ -149,15 +153,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
 	
 	public static final String PROP_PENDING_DELETE = "pendingDelete";
+
+	public static final String NULL_KEY_PREFIX = "<$NullKey$>";
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
+			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
+			NAME_KEY, PROP_KEY,
 			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
 			NAME_LAST_ACTIVITY_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY,
 			NAME_LAST_COMMIT_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT);
@@ -207,6 +214,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@JsonIgnore
 	@Column(nullable=false)
 	private String path;
+
+	// SQL Server does not allow duplicate null values for unique column. So we use 
+	// special prefix to indicate null
+	@JsonIgnore
+	@Column(unique=true, nullable=false)
+	private String key = NULL_KEY_PREFIX + UUID.randomUUID();
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	@Api(description = "May be null")
@@ -331,7 +344,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	// special prefix to indicate null
 	@JsonIgnore
 	@Column(unique=true, nullable=false)
-	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
+	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
 	
 	@JsonIgnore
 	@Lob
@@ -411,6 +424,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.name = name;
 	}
 
+	@Editable(order=150, description = "Optionally define a unique key for the project with two or " +
+			"more upper case letters. This key can be used to reference issues, builds, and pull requests " +
+			"with a stable and short notion <code>&lt;project key&gt;-&lt;number&gt;</code> instead of " +
+			"<code>&lt;project path&gt;#&lt;number&gt;</code>")
+	@ProjectKey
+	@Nullable
+	public String getKey() {
+		if (key.startsWith(NULL_KEY_PREFIX))
+			return null;
+		else
+			return key;
+	}
+	
+	public void setKey(@Nullable String key) {
+		if (key != null)
+			this.key = key;
+		else if (!this.key.startsWith(NULL_KEY_PREFIX))
+			this.key = NULL_KEY_PREFIX + UUID.randomUUID();
+	}
+	
 	public String getPath() {
 		return path;
 	}
@@ -674,7 +707,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Override
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
+		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskName(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
 				lastEventDate.getId(), idOf(getDefaultRole()), isPendingDelete(), idOf(getParent()));
 	}
@@ -1001,7 +1034,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		if (serviceDeskName != null)
 			this.serviceDeskName = serviceDeskName;
 		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
-			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
+			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
 	}
 
 	public GitPackConfig getGitPackConfig() {

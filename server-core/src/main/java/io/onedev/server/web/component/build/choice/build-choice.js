@@ -1,12 +1,9 @@
 onedev.server.buildChoiceFormatter = {
 	formatBuild: function(build) {
-		var buildNumber = "#" + build.number;
-		if (build.project)
-			buildNumber = build.project + buildNumber;
         if (build.version)
-            return buildNumber + " (" + build.version + ") : " + build.jobName;
+            return build.jobName + ": " + build.version + " (" + build.reference + ")";
         else
-            return buildNumber + " : " + build.jobName;
+            return build.jobName + " (" + build.reference + ")";
 	},
 	formatSelection: function(build) {
 		return onedev.server.buildChoiceFormatter.formatBuild(build);

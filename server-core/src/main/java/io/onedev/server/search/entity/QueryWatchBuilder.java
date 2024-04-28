@@ -66,11 +66,11 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 				if (getEntity() instanceof Issue) {
 					Issue issue = (Issue) getEntity();
 					message = String.format("Error processing watches (user: %s, issue: %s, query: %s)", 
-							user.getName(), issue.getFQN(), namedQuery.getQuery());
+							user.getName(), issue.getReference(), namedQuery.getQuery());
 				} else if (getEntity() instanceof PullRequest) {
 					PullRequest request = (PullRequest) getEntity();
 					message = String.format("Error processing watches (user: %s, pull request: %s, query: %s)", 
-							user.getName(), request.getFQN(), namedQuery.getQuery());
+							user.getName(), request.getReference().toString(null), namedQuery.getQuery());
 				} else {
 					throw new RuntimeException("Unexpected watch entity type: " + getEntity().getClass());
 				}

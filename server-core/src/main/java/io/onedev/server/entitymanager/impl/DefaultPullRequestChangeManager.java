@@ -3,7 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.entityreference.ReferenceChangeManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
@@ -31,11 +31,11 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 
 	private final ListenerRegistry listenerRegistry;
 	
-	private final EntityReferenceManager entityReferenceManager;
+	private final ReferenceChangeManager entityReferenceManager;
 	
 	@Inject
 	public DefaultPullRequestChangeManager(Dao dao, ListenerRegistry listenerRegistry, 
-										   EntityReferenceManager entityReferenceManager) {
+										   ReferenceChangeManager entityReferenceManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
 		this.entityReferenceManager = entityReferenceManager;

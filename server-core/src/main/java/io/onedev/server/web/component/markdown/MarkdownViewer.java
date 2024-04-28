@@ -1,12 +1,27 @@
 package io.onedev.server.web.component.markdown;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ColorUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.asset.lozad.LozadResourceReference;
+import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
@@ -26,26 +41,10 @@ import org.hibernate.StaleStateException;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ColorUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.asset.lozad.LozadResourceReference;
-import io.onedev.server.web.avatar.AvatarManager;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import javax.annotation.Nullable;
+import java.util.List;
+
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
@@ -184,7 +183,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
 				switch (referenceType) {
 				case "issue":
-					Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(referenceId);
+					EntityReference reference = IssueReference.of(referenceId, null);
+					var issue = OneDev.getInstance(IssueManager.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as issue project may not be the same as current project
 					if (issue != null && SecurityUtils.canAccessIssue(issue)) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
@@ -198,7 +198,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "pull request":
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).findByFQN(referenceId);
+					reference = PullRequestReference.of(referenceId, null);
+					var request = OneDev.getInstance(PullRequestManager.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as target project may not be the same as current project
 					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
  	 					String status = request.getStatus().toString();
@@ -223,7 +224,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "build":
-					Build build = OneDev.getInstance(BuildManager.class).find(referenceId);
+					reference = BuildReference.of(referenceId, null);
+					var build = OneDev.getInstance(BuildManager.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as build project may not be the same as current project
 					if (build != null && SecurityUtils.canAccessBuild(build)) {
 						String iconHref = SpriteImage.getVersionedHref(BuildStatusIcon.getIconHref(build.getStatus()));

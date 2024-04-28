@@ -1,20 +1,17 @@
 package io.onedev.server.persistence;
 
-import java.util.Map;
-
-import org.hibernate.query.Query;
-
 import com.hazelcast.map.IMap;
-
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.query.Query;
+
+import java.util.Map;
 
 public class SequenceGenerator {
 
-	private final Class<? extends Referenceable> sequenceClass;
+	private final Class<? extends AbstractEntity> sequenceClass;
 	
 	private final ClusterManager clusterManager;
 	
@@ -22,7 +19,7 @@ public class SequenceGenerator {
 	
 	private IMap<Long, Long> nextSequences;
 	
-	public SequenceGenerator(Class<? extends Referenceable> sequenceClass, ClusterManager clusterManager, Dao dao) {
+	public SequenceGenerator(Class<? extends AbstractEntity> sequenceClass, ClusterManager clusterManager, Dao dao) {
 		this.sequenceClass = sequenceClass;
 		this.dao = dao;
 		this.clusterManager = clusterManager;

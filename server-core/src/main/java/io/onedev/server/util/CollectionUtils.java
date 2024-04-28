@@ -1,16 +1,10 @@
 package io.onedev.server.util;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.google.common.base.Preconditions;
 
+import java.util.*;
+
 public class CollectionUtils extends org.apache.commons.collections.CollectionUtils {
-	
-	public static <T> Set<T> findDuplicates(Collection<T> collection) {
-	    Set<T> uniques = new HashSet<>();
-	    return collection.stream().filter(e -> !uniques.add(e)).collect(Collectors.toSet());
-	}
 
 	public static <T> Map<T, T> newLinkedHashMap(@SuppressWarnings("unchecked") T...args) {
 		Map<T, T> map = new LinkedHashMap<>();
@@ -62,4 +56,12 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
 				Collections.swap(list, fromIndex-i, fromIndex-i-1);
 		}
 	}
+	
+	public static <T> Collection<T> emptyAsNull(Collection<T> collection) {
+		if (collection.isEmpty())
+			return null;
+		else 
+			return collection;
+	}
+	
 }

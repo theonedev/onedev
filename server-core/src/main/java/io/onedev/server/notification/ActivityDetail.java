@@ -165,8 +165,8 @@ public class ActivityDetail implements Serializable {
 	public static ActivityDetail referencedFrom(Issue issue) {
 		String url = OneDev.getInstance(UrlManager.class).urlFor(issue);
 		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>", 
-				url, issue.getFQN(), HtmlEscape.escapeHtml5(issue.getTitle()));
-		String textVersion = String.format("[%s] %s\n", issue.getFQN(), issue.getTitle());
+				url, issue.getReference(), HtmlEscape.escapeHtml5(issue.getTitle()));
+		String textVersion = String.format("[%s] %s\n", issue.getReference(), issue.getTitle());
 		
 		Long issueId = issue.getId();
 		return new ActivityDetail(htmlVersion, textVersion) {
@@ -184,8 +184,8 @@ public class ActivityDetail implements Serializable {
 	public static ActivityDetail referencedFrom(PullRequest request) {
 		String url = OneDev.getInstance(UrlManager.class).urlFor(request);
 		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>", 
-				url, request.getFQN(), HtmlEscape.escapeHtml5(request.getTitle()));
-		String textVersion = String.format("[%s] %s\n", request.getFQN(), request.getTitle());
+				url, request.getReference().toString(null), HtmlEscape.escapeHtml5(request.getTitle()));
+		String textVersion = String.format("[%s] %s\n", request.getReference().toString(null), request.getTitle());
 		
 		Long requestId = request.getId();
 		return new ActivityDetail(htmlVersion, textVersion) {

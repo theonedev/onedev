@@ -67,11 +67,13 @@ public class PackNotificationManager extends AbstractNotificationManager {
 		
 		if (!emails.isEmpty()) {
 			Pack pack = event.getPack();
-			String subject = String.format("[%s] %s", 
-					pack.getProject().getPath(), 
-					pack.getType() + " " + pack.getReference(false));
+			String subject = String.format("[%s %s] Package published", pack.getType(), pack.getReference(true));
 
-			String summary = "Package published";
+			String summary;
+			if (pack.getUser() != null)
+				summary = "Package published by user " + pack.getUser().getDisplayName();
+			else
+				summary = "Package published via build " + pack.getBuild().getReference();
 
 			String url = urlManager.urlFor(pack);
 			String threadingReferences = "<" + pack.getProject().getPath() + "-pack-" + pack.getId() + "@onedev>";

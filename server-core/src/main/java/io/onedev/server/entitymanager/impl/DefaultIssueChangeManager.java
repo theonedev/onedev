@@ -2,10 +2,13 @@ package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.entityreference.ReferenceChangeManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
@@ -30,16 +33,13 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.issue.*;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -83,7 +83,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final ClusterManager clusterManager;
 	
-	private final EntityReferenceManager entityReferenceManager;
+	private final ReferenceChangeManager entityReferenceManager;
 	
 	private String taskId;
 	
@@ -92,7 +92,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 									 ProjectManager projectManager, ListenerRegistry listenerRegistry, 
 									 TaskScheduler taskScheduler, IssueScheduleManager issueScheduleManager, 
 									 IssueLinkManager issueLinkManager, ClusterManager clusterManager, 
-									 EntityReferenceManager entityReferenceManager) {
+									 ReferenceChangeManager entityReferenceManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -699,12 +699,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 	}
 
-	@Nullable
 	private String getLinkedIssueNumber(Issue issue, Issue linkedIssue) {
-		if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
-			return "#" + linkedIssue.getNumber();
-		else
-			return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
+		return linkedIssue.getReference().toString(issue.getProject());
 	}
 	
 	@Transactional

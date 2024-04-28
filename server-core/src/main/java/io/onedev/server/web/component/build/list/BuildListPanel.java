@@ -9,11 +9,9 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntitySort;
@@ -36,7 +34,6 @@ import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.job.runselector.JobRunSelector;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -52,7 +49,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.builds.BuildListPage;
-import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
@@ -106,8 +102,6 @@ public abstract class BuildListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;
 	
-	private final boolean showJob;
-	
 	private final boolean showRef;
 	
 	private final int expectedCount;
@@ -137,10 +131,9 @@ public abstract class BuildListPanel extends Panel {
 	
 	private boolean querySubmitted = true;
 	
-	public BuildListPanel(String id, IModel<String> queryModel, boolean showJob, boolean showRef, int expectedCount) {
+	public BuildListPanel(String id, IModel<String> queryModel, boolean showRef, int expectedCount) {
 		super(id);
 		this.queryStringModel = queryModel;
-		this.showJob = showJob;
 		this.showRef = showRef;
 		this.expectedCount = expectedCount;
 	}
@@ -1022,22 +1015,11 @@ public abstract class BuildListPanel extends Panel {
 					}
 
 				}));
-				link.add(new Label("text", new AbstractReadOnlyModel<String>() {
+				link.add(new Label("summary", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						Build build = rowModel.getObject();
-						StringBuilder builder = new StringBuilder();
-
-						Project currentProject = null;
-						if (getPage() instanceof ProjectPage)
-							currentProject = ((ProjectPage) getPage()).getProject();
-						if (currentProject == null || !currentProject.equals(build.getProject()))
-							builder.append(build.getProject().getPath());
-						builder.append("#" + build.getNumber());
-						if (build.getVersion() != null)
-							builder.append(" (" + build.getVersion() + ")");
-						return builder.toString();
+						return rowModel.getObject().getSummary(getProject());
 					}
 
 				}));
@@ -1050,44 +1032,6 @@ public abstract class BuildListPanel extends Panel {
 				cellItem.add(fragment);
 			}
 		});
-		
-		if (showJob) {
-			columns.add(new AbstractColumn<>(Model.of(Build.NAME_JOB)) {
-
-				@Override
-				public String getCssClass() {
-					return "job";
-				}
-
-				@Override
-				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-										 IModel<Build> rowModel) {
-					Build build = rowModel.getObject();
-					if (SecurityUtils.canReadCode(build.getProject())) {
-						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-						Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
-
-							@Override
-							protected Project getProject() {
-								return rowModel.getObject().getProject();
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(isEnabled() && build.getJob() != null);
-							}
-
-						};
-						link.add(new Label("label", build.getJobName()));
-						fragment.add(link);
-						cellItem.add(fragment);
-					} else {
-						cellItem.add(new Label(componentId, build.getJobName()));
-					}
-				}
-			});
-		}
 		
 		if (showRef) {
 			columns.add(new AbstractColumn<>(Model.of("On Behalf Of")) {

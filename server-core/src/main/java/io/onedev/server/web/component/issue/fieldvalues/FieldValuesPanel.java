@@ -250,10 +250,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> issueLink = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
 								IssueActivitiesPage.paramsOf(issue));
-						if (issue.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-							issueLink.add(new Label("label", "#" + issue.getNumber()));
-						else
-							issueLink.add(new Label("label", issue.getFQN().toString()));
+						issueLink.add(new Label("label", issue.getReference().toString(getProject())));
 						linkFrag.add(issueLink);
 						valueContainer.add(linkFrag);
 					} else {
@@ -265,15 +262,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> buildLink = new BookmarkablePageLink<Void>("link", 
 								BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
-						String buildInfo = "#" + build.getNumber();
-						if (build.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-							buildInfo = "#" + build.getNumber();
-						else
-							buildInfo = build.getFQN().toString();
-						
-						if (build.getVersion() != null)
-							buildInfo += " (" + build.getVersion() + ")";
-						buildLink.add(new Label("label", buildInfo));
+						buildLink.add(new Label("label", build.getReference().toString(getProject())));
 						linkFrag.add(buildLink);
 						valueContainer.add(linkFrag);
 					} else {
@@ -285,10 +274,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> requestLink = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
 								PullRequestActivitiesPage.paramsOf(request));
-						if (request.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-							requestLink.add(new Label("label", "#" + request.getNumber()));
-						else
-							requestLink.add(new Label("label", request.getFQN().toString()));
+						requestLink.add(new Label("label", request.getReference().toString(getProject())));
 						linkFrag.add(requestLink);
 						valueContainer.add(linkFrag);
 					} else {

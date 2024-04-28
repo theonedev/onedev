@@ -5,15 +5,15 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.util.ReferenceTransformer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
@@ -39,29 +39,14 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 		
 		Issue issue = getModelObject();
 		
-		Emojis emojis = Emojis.getInstance();
 		if (SecurityUtils.canAccessProject(issue.getProject())) {
 			String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(issue)).toString();
-			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), url);
-			String transformed = emojis.apply(transformer.apply(issue.getTitle()));
-			String title;
-			if (issue.getProject().equals(project)) { 
-				title = String.format("<a href='%s'>#%d</a> %s", url, issue.getNumber(), transformed);
-			} else { 
-				title = String.format("<a href='%s'>%s#%d</a> %s", 
-						url, issue.getProject().getPath(), issue.getNumber(), transformed);
-			}
-			add(new Label("title", title).setEscapeModelStrings(false));
+			String summary = String.format("<a href='%s'>%s</a>", 
+					url, escapeHtml5(issue.getSummary(project)));
+			add(new Label("summary", summary).setEscapeModelStrings(false));
 		} else {
-			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), null);
-			String transformed = emojis.apply(transformer.apply(issue.getTitle()));
-			String title;
-			if (issue.getProject().equals(project)) 
-				title = "#" + issue.getNumber() + " " + transformed;
-			else 
-				title = issue.getProject().getPath() + "#" + issue.getNumber() + " " + transformed;
-			add(new Label("title", title).setEscapeModelStrings(false));
+			add(new Label("summary", issue.getSummary(project)));
 		}
 	}
 

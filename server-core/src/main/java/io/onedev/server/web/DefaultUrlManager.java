@@ -6,7 +6,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.util.ProjectAndRevision;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -150,12 +149,12 @@ public class DefaultUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlForPullRequest(request.getFQN());
+		return urlForPullRequest(request.getProject(), request.getNumber());
 	}
 
 	@Override
-	public String urlForPullRequest(ProjectScopedNumber requestFQN) {
-		return urlFor(requestFQN.getProject()) + "/~pulls/" + requestFQN.getNumber();
+	public String urlForPullRequest(Project project, Long pullRequestNumber) {
+		return urlFor(project) + "/~pulls/" + pullRequestNumber;
 	}
 
 	@Override
@@ -170,22 +169,22 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(Issue issue) {
-		return urlForIssue(issue.getFQN());
+		return urlForIssue(issue.getProject(), issue.getNumber());
 	}
 
 	@Override
-	public String urlForIssue(ProjectScopedNumber issueFQN) {
-		return urlFor(issueFQN.getProject()) + "/~issues/" + issueFQN.getNumber();
+	public String urlForIssue(Project project, Long issueNumber) {
+		return urlFor(project) + "/~issues/" + issueNumber;
 	}
 
 	@Override
 	public String urlFor(Build build) {
-		return urlForBuild(build.getFQN());
+		return urlForBuild(build.getProject(), build.getNumber());
 	}
 
 	@Override
-	public String urlForBuild(ProjectScopedNumber buildFQN) {
-		return urlFor(buildFQN.getProject()) + "/~builds/" + buildFQN.getNumber();
+	public String urlForBuild(Project project, Long buildNumber) {
+		return urlFor(project) + "/~builds/" + buildNumber;
 	}
 
 	@Override

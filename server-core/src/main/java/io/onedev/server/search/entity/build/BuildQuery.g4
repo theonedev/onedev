@@ -11,7 +11,7 @@ criteria
     | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | PoundSign? number=Number #NumberCriteria
+    | Reference #ReferenceCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -151,16 +151,12 @@ RParens
 	: ')'
 	;
 
-PoundSign
-    : '#'
-    ;
-
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
     ;
 
-Number
-    : [0-9]+
+Reference
+    : ([a-zA-Z0-9_]([a-zA-Z0-9_\-/.]*[a-zA-Z0-9_])?)? '#' [0-9]+ | [A-Z][A-Z]+ '-' [0-9]+
     ;
 
 WS

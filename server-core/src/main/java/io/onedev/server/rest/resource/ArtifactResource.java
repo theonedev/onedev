@@ -36,7 +36,7 @@ import static org.apache.commons.compress.utils.IOUtils.copy;
 
 @Api(order=4100, description="In most cases, artifact resource is operated with build id, which is different from build number. "
 		+ "To get build id of a particular build number, use the <a href='/~help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
-		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
+		+ "instance <code>&quot;Number&quot; is &quot;path/to/project#100&quot;</code> or <code>&quot;Number&quot; is &quot;PROJECTKEY-100&quot;</code>")
 @Path("/artifacts")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

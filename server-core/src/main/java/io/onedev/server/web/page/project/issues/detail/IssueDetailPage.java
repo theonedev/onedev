@@ -6,7 +6,6 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -15,7 +14,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -36,6 +34,7 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -322,12 +321,12 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	}
 
 	public static PageParameters paramsOf(Issue issue) {
-		return paramsOf(issue.getFQN());
+		return paramsOf(issue.getProject(), issue.getNumber());
 	}
 
-	public static PageParameters paramsOf(ProjectScopedNumber issueFQN) {
-		PageParameters params = ProjectPage.paramsOf(issueFQN.getProject());
-		params.add(PARAM_ISSUE, issueFQN.getNumber());
+	public static PageParameters paramsOf(Project project, Long issueNumber) {
+		PageParameters params = ProjectPage.paramsOf(project);
+		params.add(PARAM_ISSUE, issueNumber);
 		return params;
 	}
 	
@@ -370,13 +369,13 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, 
 				ProjectIssueListPage.paramsOf(getProject(), 0)));
-		fragment.add(new Label("issueNumber", "#" + getIssue().getNumber()));
+		fragment.add(new Label("issueNumber", getIssue().getReference().toString(getProject())));
 		return fragment;
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return getIssue().getTitle() + " - Issue #" +  getIssue().getNumber() + " - " + getProject().getPath();
+		return getIssue().getTitle() + " (" + getIssue().getReference().toString(getProject()) + ")";
 	}
 
 	@Override

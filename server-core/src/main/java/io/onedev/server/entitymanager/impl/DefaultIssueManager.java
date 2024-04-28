@@ -5,7 +5,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -39,7 +38,10 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.util.*;
+import io.onedev.server.util.IssueTimes;
+import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -54,7 +56,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.*;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -162,23 +163,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	}
 	
 	@Override
-	public Issue findByUUID(String uuid) {
+	public Issue find(String uuid) {
 		EntityCriteria<Issue> criteria = newCriteria();
 		criteria.add(Restrictions.eq(Issue.PROP_UUID, uuid));
 		criteria.setCacheable(true);
 		return find(criteria);
-	}
-	
-	@Sessional
-	@Override
-	public Issue findByFQN(String fqn) {
-		return find(ProjectScopedNumber.from(fqn));
-	}
-	
-	@Sessional
-	@Override
-	public Issue find(ProjectScopedNumber fqn) {
-		return find(fqn.getProject(), fqn.getNumber());
 	}
 	
 	@Transactional
@@ -802,15 +791,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public List<Issue> query(EntityQuery<Issue> scope, Project project, String fuzzyQuery, int count) {
-		if (fuzzyQuery.contains("#")) {
-			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
-			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
-				project = specifiedProject;
-				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
-			}
-		}
-				
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -838,8 +818,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		
-		if (fuzzyQuery.startsWith("#"))
-			fuzzyQuery = fuzzyQuery.substring(1);
 		if (fuzzyQuery.length() != 0) {
 			try {
 				long buildNumber = Long.parseLong(fuzzyQuery);
@@ -1195,17 +1173,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public Collection<Long> parseFixedIssueIds(Project project, String commitMessage) {
 		Collection<Long> issueIds = new HashSet<>();
 		
-		for (var issue: getIssueSetting().getCommitMessageFixPatterns().parseFixedIssues(commitMessage)) {
-			Project projectOfIssue;
-			var projectPath = issue.getLeft();
-			if (projectPath == null)
-				projectOfIssue = project;
-			else
-				projectOfIssue = projectManager.findByPath(projectPath);
-			if (projectOfIssue != null
-					&& (projectOfIssue.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(projectOfIssue))) {
-				var issueNumber = issue.getRight();
-				Long issueId = getIssueId(projectOfIssue.getId(), issueNumber);
+		for (var reference: getIssueSetting().getCommitMessageFixPatterns().parseFixedIssues(commitMessage, project)) {
+			var referenceProject = reference.getProject();
+			if (referenceProject.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(referenceProject)) {
+				Long issueId = getIssueId(referenceProject.getId(), reference.getNumber());
 				if (issueId != null)
 					issueIds.add(issueId);
 			}

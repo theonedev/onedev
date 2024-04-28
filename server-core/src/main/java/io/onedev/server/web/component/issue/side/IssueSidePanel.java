@@ -3,7 +3,7 @@ package io.onedev.server.web.component.issue.side;
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
@@ -20,7 +20,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
+import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -128,11 +128,11 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		addOrReplace(new ReferencePanel("reference") {
+		addOrReplace(new EntityReferencePanel("reference") {
 
 			@Override
-			protected Referenceable getReferenceable() {
-				return getIssue();
+			protected EntityReference getReference() {
+				return getIssue().getReference();
 			}
 			
 		});
@@ -483,12 +483,9 @@ public abstract class IssueSidePanel extends Panel {
 		if (SecurityUtils.canAccessIssue(linkedIssue)) {
 			Long linkedIssueId = linkedIssue.getId();
 			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
-			Link<Void> link = new BookmarkablePageLink<Void>("number", IssueActivitiesPage.class, 
+			Link<Void> link = new BookmarkablePageLink<Void>("reference", IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(linkedIssue));
-			if (linkedIssue.getNumberScope().equals(getIssue().getNumberScope()))
-				link.add(new Label("label", "#" + linkedIssue.getNumber()));
-			else
-				link.add(new Label("label", linkedIssue.getFQN().toString()));
+			link.add(new Label("label", linkedIssue.getReference().toString(getProject())));
 			fragment.add(link);
 			
 			fragment.add(new AjaxLink<Void>("delete") {

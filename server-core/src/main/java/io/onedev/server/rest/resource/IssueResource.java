@@ -31,7 +31,7 @@ import java.util.*;
 
 @Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
 		+ "To get issue id of a particular issue number, use the <a href='/~help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
-		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
+		+ "instance <code>&quot;Number&quot; is &quot;path/to/project#100&quot;</code> or <code>&quot;Number&quot; is &quot;PROJECTKEY-100&quot;</code>")
 @Path("/issues")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -183,7 +183,7 @@ public class IssueResource {
 	@Api(order=900, exampleProvider = "getIssuesExample")
 	@GET
     public List<Map<String, Object>> query(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query,
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~issues'>issues page</a>", example="\"State\" is \"Open\"") String query,
 			@QueryParam("withFields") @Api(description = "Whether or not to include issue fields. Default to false", example="true") Boolean withFields, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {

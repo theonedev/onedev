@@ -1,50 +1,35 @@
 package io.onedev.server.web.component.pullrequest.choice;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.wicket.model.IModel;
-import org.hibernate.Hibernate;
-import org.json.JSONException;
-import org.json.JSONWriter;
-import org.unbescape.html.HtmlEscape;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
+import org.hibernate.Hibernate;
+import org.json.JSONException;
+import org.json.JSONWriter;
+import org.unbescape.html.HtmlEscape;
 
-public class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+
+public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final IModel<Project> projectModel;
-	
-	public PullRequestChoiceProvider(IModel<Project> projectModel) {
-		this.projectModel = projectModel;
-	}
-	
-	@Override
-	public void detach() {
-		projectModel.detach();
-		super.detach();
-	}
-
 	@Override
 	public void toJson(PullRequest choice, JSONWriter writer) throws JSONException {
 		writer
 			.key("id").value(choice.getId())
-			.key("number").value(choice.getNumber())
+			.key("reference").value(choice.getReference().toString(getProject()))
 			.key("title").value(Emojis.getInstance().apply(HtmlEscape.escapeHtml5(choice.getTitle())));
-		if (!choice.getNumberScope().equals(projectModel.getObject().getForkRoot()))
-			writer.key("project").value(HtmlEscape.escapeHtml5(choice.getProject().getPath()));
 	}
 
 	@Override
@@ -62,10 +47,17 @@ public class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
 	@Override
 	public void query(String term, int page, Response<PullRequest> response) {
 		int count = (page+1) * WebConstants.PAGE_SIZE + 1;
-		Project project = projectModel.getObject();
-		List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class)
-				.query(project, term, count);		
-		new ResponseFiller<>(response).fill(requests, page, WebConstants.PAGE_SIZE);
+		var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
+		if (scopedQuery != null) {
+			List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class)
+					.query(scopedQuery.getProject(), scopedQuery.getQuery(), count);
+			new ResponseFiller<>(response).fill(requests, page, WebConstants.PAGE_SIZE);
+		} else {
+			response.setHasMore(false);
+		}
 	}
+	
+	@Nullable
+	protected abstract Project getProject();
 	
 }

@@ -72,8 +72,8 @@ public class BuildQuery extends EntityQuery<Build> {
 				buildCriteria = new BuildQueryBaseVisitor<Criteria<Build>>() {
 
 					@Override
-					public Criteria<Build> visitNumberCriteria(NumberCriteriaContext ctx) {
-						return new SimpleNumberCriteria(getLongValue(ctx.number.getText()));
+					public Criteria<Build> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
+						return new ReferenceCriteria(project, ctx.getText(), Is);
 					}
 
 					@Override
@@ -199,7 +199,7 @@ public class BuildQuery extends EntityQuery<Build> {
 									case NAME_JOB:
 										return new JobCriteria(value, operator);
 									case NAME_NUMBER:
-										return new NumberCriteria(project, value, operator);
+										return new ReferenceCriteria(project, value, operator);
 									case NAME_VERSION:
 										return new VersionCriteria(value, operator);
 									case NAME_BRANCH:
@@ -215,7 +215,7 @@ public class BuildQuery extends EntityQuery<Build> {
 								}
 							case BuildQueryLexer.IsLessThan:
 							case BuildQueryLexer.IsGreaterThan:
-								return new NumberCriteria(project, value, operator);
+								return new ReferenceCriteria(project, value, operator);
 							default:
 								throw new IllegalStateException();
 						}

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackLabelManager;
 import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
@@ -61,7 +62,7 @@ public abstract class PackSidePanel extends Panel {
 		
 		var build = getPack().getBuild();
 		if (build != null) {
-			var label = build.getReference(getPack().getProject());
+			var label = BuildReference.TYPE + " " + build.getReference().toString(getPack().getProject());
 			var buildLink = new BookmarkablePageLink<Void>("publisher",
 					BuildDashboardPage.class, BuildDashboardPage.paramsOf(build)) {
 				@Override

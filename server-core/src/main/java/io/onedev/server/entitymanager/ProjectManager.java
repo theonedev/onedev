@@ -35,6 +35,12 @@ public interface ProjectManager extends EntityManager<Project> {
 	ProjectFacade findFacadeById(Long id);
 
 	@Nullable
+	ProjectFacade findFacadeByKey(String key);
+
+	@Nullable
+	Project findByKey(String key);
+	
+	@Nullable
 	ProjectFacade findFacadeByPath(String path);
 	
 	@Nullable

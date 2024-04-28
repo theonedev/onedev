@@ -234,7 +234,7 @@ public abstract class ParsedUrl implements Serializable {
 					segments.add(paramValue);
 					if (paramSegment.getName().equals(ProjectMapperUtils.PARAM_PROJECT)) {
 						if (matchWith.contains("/~")) { 
-							matchWith = StringUtils.substringAfter(matchWith, "/~");
+							matchWith = "~" + StringUtils.substringAfter(matchWith, "/~");
 						} else if (matchWith.endsWith("/")) {
 							matchWith = StringUtils.substringAfterLast(matchWith, "/");
 						} else {

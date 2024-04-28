@@ -64,7 +64,7 @@ onedev.server.markdown = {
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
-			projectPathPattern) {
+			projectPathPattern, projectKeyPattern) {
 		var $container = $("#" + containerId);
 		var useFixedWidthFontCookieName = "markdownEditor.useFixedWidthFont";
 		var useFixedWidthFont = Cookies.get(useFixedWidthFontCookieName);
@@ -462,7 +462,6 @@ onedev.server.markdown = {
 		});
 		
 		$input[0].cachedEmojis = [];
-		
 	    $input.atwho({
 	    	at: ':',
 	        callbacks: {
@@ -496,49 +495,87 @@ onedev.server.markdown = {
 				insertTpl: "@${name} ",
 		        limit: atWhoLimit
 		    });	
-	    } 
+	    } 	    
 
-		var referencePattern = "(^|[\\W|/]+)((pull\\s*request|pr|issue|build)\\s+)?(" + projectPathPattern + ")?#(\\S*)$";
-		
 	    if (canReferenceEntity) {
-	    	function matchReference() {
-	    		var input = $input.val().substring(0, $input.caret()).trim();
-	    		var match = new RegExp(referencePattern, 'gi').exec(input);
+	    	function matchReference(atChar) {
+	    		var input = $input.val().substring(0, $input.caret());
+	    		var match;
+				if (atChar === '#')
+					match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>\\S*)$", 'gi').exec(input);
+				else
+					match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>\\S*)$", 'gi').exec(input);					
 	    		if (match) {
-	    			var referenceType = match[3];
-	    			if (referenceType)
-	    				referenceType = referenceType.replace(/\s+/g, '').toLowerCase();
+					var index = match.index + match[1].length;
+					if (match[2])
+						index += match[2].length;
+	    			var type = match.groups.type;
+	    			if (type)
+	    				type = type.replace(/\s+/g, '').toLowerCase();
 	    			return {
-	    				type: referenceType,
-	    				project: match[4],
-	    				query: match[6]
+	    				type: type,
+	    				project: match.groups.project,
+	    				query: match.groups.query,
+						index: index
 	    			}
-	    		} else { 
-	    			return undefined;   		
 	    		}
 	    	}
-
+			function remoteFilterReference(atChar, query, renderCallback) {
+				$container.data("atWhoReferenceRenderCallback", renderCallback);
+				var match = matchReference(atChar);
+				if (match)
+					callback("referenceQuery", atChar, match.query, match.type, match.project);
+			}
+			function beforeInsertReference(atChar) {
+				var match = matchReference(atChar);
+				if (match) {
+					$input.range(match.index, $input.caret());
+					document.execCommand("insertText", false, "");
+				}
+			}
 		    $input.atwho({
 		    	at: '#',
 		    	startWithSpace: false,
 		    	searchKey: "searchKey",
 		        callbacks: {
 		        	remoteFilter: function(query, renderCallback) {
-		        		$container.data("atWhoReferenceRenderCallback", renderCallback);
-		        		var match = matchReference();
-		        		if (match) 
-                            callback("referenceQuery", match.query, match.type, match.project);
-		        	}
+						remoteFilterReference('#', query, renderCallback);
+		        	},
+					beforeInsert: function(value) {
+						beforeInsertReference('#');
+						return value;
+					}
 		        },
 		        displayTpl: function() {
-					return "<li><span>#${referenceNumber}</span> - ${referenceTitle}</li>";
+					return "<li>${title} (${reference})</li>";
 		        },
 		        insertTpl: function() {
-					return "#${referenceNumber} ";
+					return "${reference} ";
 		        }, 
 		        limit: atWhoLimit
-		    });		
-	    }
+		    });		   
+			$input.atwho({
+				at: '-',
+				startWithSpace: false,
+				searchKey: "searchKey",
+				callbacks: {
+					remoteFilter: function(query, renderCallback) {
+						remoteFilterReference('-', query, renderCallback);
+					},
+					beforeInsert: function(value) {
+						beforeInsertReference('-');
+						return value;
+					}
+				},
+				displayTpl: function() {
+					return "<li>${title} (${reference})</li>";
+				},
+				insertTpl: function() {
+					return "${reference} ";
+				},
+				limit: atWhoLimit
+			});
+		}
 	    
 	    if (attachmentUploadUrl) {
 	    	var inputEl = $input[0];
@@ -838,27 +875,32 @@ onedev.server.markdown = {
 			closeMenu();			
 		});
 		
-		$actionMenu.find(".do-mention, .do-reference").click(function() {
-			closeMenu();			
-			
+		$actionMenu.find(".do-mention").click(function() {
+			closeMenu();
 			if (!$edit.is(":visible")) 
 				return;
-
-			var atChar = $(this).hasClass("do-mention")? "@": "#";	
-			
-			var type = $(this).data("reference");
-			if (type === undefined)
-				type = "";
-			else 
-				type = type + " ";
-			
 			var prefix = onedev.server.markdown.getAtWhoPrefix($input);
-			
 			$input.focus();
-			document.execCommand("insertText", false, prefix + type + atChar);
-
+			document.execCommand("insertText", false, prefix + "@");
 			onedev.server.markdown.fireInputEvent($input);
-			
+			$input.atwho("run");
+		});
+		$actionMenu.find(".do-reference").click(function() {
+			closeMenu();
+			if (!$edit.is(":visible"))
+				return;
+			var text = onedev.server.markdown.getAtWhoPrefix($input);
+			var type = $(this).data("type");
+			if (type !== undefined)
+				text += type + " ";
+			var key = $(this).data("key");
+			if (key !== undefined)
+				text += key + "-";
+			else
+				text += "#";
+			$input.focus();
+			document.execCommand("insertText", false, text);
+			onedev.server.markdown.fireInputEvent($input);
 			$input.atwho("run");
 		});
 		
@@ -1226,6 +1268,13 @@ onedev.server.markdown = {
 			document.execCommand("insertText", false, prefix + ":" + $(this).attr("title") + ": ");
 			onedev.server.markdown.fireInputEvent($input);
 		});
+	},
+	insertText: function(containerId, text) {
+		var $body = $("#" + containerId + ">.body");
+		var $input = $body.find(">.edit>textarea");
+		$input.focus();
+		document.execCommand("insertText", false, text);
+		onedev.server.markdown.fireInputEvent($input);
 	},
 	insertUrl: function(containerId, isImage, url, name, replaceMessage) {
 		var $body = $("#" + containerId + ">.body");

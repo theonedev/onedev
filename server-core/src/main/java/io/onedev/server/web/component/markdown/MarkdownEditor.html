@@ -18,7 +18,7 @@
 					<span class="separator"></span>
 					<a class="do-emoji" title="Show emojis"><wicket:svg href="smile" class="icon"></wicket:svg></a>
 					<a wicket:id="doMention" class="do-mention" title="Mention someone"><wicket:svg href="at" class="icon"></wicket:svg></a>
-					<a wicket:id="doReference" title="Reference issue, build, or pull request"><wicket:svg href="hash" class="icon"></wicket:svg></a>
+					<a wicket:id="doReference" title="Reference issue, build, or pull request"><wicket:svg href="reference" class="icon"></wicket:svg></a>
 				</div>
 				<div class="compact-mode mr-2">
 					<a wicket:id="actionMenuTrigger"><wicket:svg href="menu" class="icon"></wicket:svg></a>
@@ -26,7 +26,7 @@
 				<div class="ml-auto d-flex flex-wrap">
 					<a wicket:id="doSuggestion" class="do-suggestion mr-2" title="Code suggestion"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 					<a class="do-fixedwidth" title="Toggle fixed width font"><wicket:svg href="text-width" class="icon"></wicket:svg></a>
-					<a class="do-fullscreen" title="Full screen"><wicket:svg href="expand" class="icon"></wicket:svg></a>
+					<a class="do-fullscreen" title="Full screen"><wicket:svg href="maximize" class="icon"></wicket:svg></a>
 					<a class="do-help" title="Help"><wicket:svg href="question" class="icon"></wicket:svg></a>
 					<span class="separator"></span>
 					<a wicket:id="editLink" class="edit" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
@@ -59,9 +59,9 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="referenceMenuFrag">
-		<a class="dropdown-item do-reference" data-reference=""><wicket:svg href="bug" class="icon mr-1"></wicket:svg> Reference Issue</a>
-		<a class="dropdown-item do-reference" data-reference="pr"><wicket:svg href="pull-request" class="icon mr-1"></wicket:svg> Reference Pull Request</a>
-		<a class="dropdown-item do-reference" data-reference="build"><wicket:svg href="play-circle" class="icon mr-1"></wicket:svg> Reference Build</a>
+		<a wicket:id="issue" class="dropdown-item do-reference"><wicket:svg href="bug" class="icon mr-1"></wicket:svg> Reference Issue</a>
+		<a wicket:id="pullRequest" class="dropdown-item do-reference" data-type="pr"><wicket:svg href="pull-request" class="icon mr-1"></wicket:svg> Reference Pull Request</a>
+		<a wicket:id="build" class="dropdown-item do-reference" data-type="build"><wicket:svg href="play-circle" class="icon mr-1"></wicket:svg> Reference Build</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionMenuFrag">
 		<a class="dropdown-item do-bold"><wicket:svg href="bold" class="icon mr-1"></wicket:svg> Bold</a>

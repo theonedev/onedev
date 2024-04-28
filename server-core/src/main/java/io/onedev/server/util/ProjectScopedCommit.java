@@ -83,7 +83,7 @@ public class ProjectScopedCommit implements Serializable {
 		ProjectScopedRevision revision = ProjectScopedRevision.from(revisionFQN);
 		if (revision != null) {
 			Project project = revision.getProject();
-			return new ProjectScopedCommit(project, project.getObjectId(revision.getRevision(), false));
+			return new ProjectScopedCommit(project, project.getObjectId(revision.getRevision(), true));
 		} else {
 			return null;
 		}

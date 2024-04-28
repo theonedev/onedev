@@ -1,23 +1,8 @@
 package io.onedev.server.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
-
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
@@ -32,6 +17,19 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.web.UrlManager;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 @Singleton
 public class CommitNotificationManager extends AbstractNotificationManager {
@@ -110,18 +108,15 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 					}
 				}
 				
-				String target = GitUtils.ref2branch(event.getRefName());
-				if (target == null) {
-					target = GitUtils.ref2tag(event.getRefName());
-					if (target == null) 
-						target = event.getRefName();
-				}
-				
-				String subject = String.format("[Commit %s:%s] (%s) %s", 
-						project.getPath(), GitUtils.abbreviateSHA(commit.name()), target, commit.getShortMessage());
+				String subject = String.format(
+						"[Commit %s:%s] (%s) %s", 
+						project.getPath(), 
+						GitUtils.abbreviateSHA(commit.name()), 
+						commit.getShortMessage(),
+						StringUtils.capitalize(event.getActivity()));
 
 				String url = urlManager.urlFor(project, commit);
-				String summary = String.format("Authored by %s", commit.getAuthorIdent().getName());
+				String summary = String.format("Commit authored by %s", commit.getAuthorIdent().getName());
 
 				String threadingReferences = "<commit-" + commit.name() + "@onedev>";
 				

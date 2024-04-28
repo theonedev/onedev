@@ -58,15 +58,14 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			Issue issue = event.getIssue();
 			User user = event.getUser();
 
-			String issueInfo = format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle());
-
+			String issueSummary = format("[Issue %s] (%s)", issue.getReference(), issue.getTitle());
 			String eventDescription;
 			if (user != null) 
 				eventDescription = user.getDisplayName() + " " + event.getActivity();
 			else 
 				eventDescription = StringUtils.capitalize(event.getActivity());
 
-			postIfApplicable(issueInfo + " " + eventDescription, event);
+			postIfApplicable(issueSummary + " " + eventDescription, event);
 		}
 	}
 
@@ -77,13 +76,14 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
 
-			String pullRequestInfo = format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle());
-
+			String pullRequestSummary = format("[Pull Request %s] (%s)", request.getReference(), request.getTitle());
 			String eventDescription;
-			if (user != null) eventDescription = user.getDisplayName() + " " + event.getActivity();
-			else eventDescription = StringUtils.capitalize(event.getActivity());
+			if (user != null) 
+				eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else 
+				eventDescription = StringUtils.capitalize(event.getActivity());
 
-			postIfApplicable(pullRequestInfo + " " + eventDescription, event);
+			postIfApplicable(pullRequestSummary + " " + eventDescription, event);
 		}
 
 	}
@@ -93,20 +93,20 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
 
-		String eventDescription = build.getStatus().toString();
+		var status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
+		String title;
 		if (build.getVersion() != null) 
-			eventDescription = build.getVersion() + " " + eventDescription;
-
-		String buildInfo = format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
-		postIfApplicable(buildInfo + " " + eventDescription, event);
+			title = format("[Build %s] (%s: %s) %s", build.getReference(), build.getJobName(), build.getVersion(), status);
+		else
+			title = format("[Build %s] (%s) %s", build.getReference(), build.getJobName(), status);			
+		postIfApplicable(title, event);
 	}
 
 	@Sessional
 	@Listen
 	public void on(PackEvent event) {
 		Pack pack = event.getPack();
-		var title = format("[%s] %s published", 
-				pack.getProject().getPath(), pack.getType() + " " + pack.getReference(false));
+		var title = format("[%s %s] Package published", pack.getType(), pack.getReference(true));
 		postIfApplicable(title, event);
 	}
 	
@@ -117,14 +117,12 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			Project project = event.getProject();
 			RevCommit commit = project.getRevCommit(event.getNewCommitId(), false);
 			if (commit != null) {
-				String target = GitUtils.ref2branch(event.getRefName());
-				if (target == null) {
-					target = GitUtils.ref2tag(event.getRefName());
-					if (target == null) target = event.getRefName();
-				}
-
-				String commitInfo = format("[Commit] (%s:%s - %s)", project.getPath(), GitUtils.abbreviateSHA(commit.name()), target);
-				postIfApplicable(commitInfo + " " + commit.getShortMessage(), event);
+				String title = format("[Commit %s:%s] (%s) %s", 
+						project.getPath(), 
+						GitUtils.abbreviateSHA(commit.name()), 
+						commit.getShortMessage(), 
+						StringUtils.capitalize(event.getActivity()));
+				postIfApplicable(title, event);
 			}
 		}
 	}
@@ -135,11 +133,13 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		if (!(event instanceof CodeCommentEdited)) {
 			CodeComment comment = event.getComment();
 
-			String commentInfo = format("[Code Comment] (%s:%s)", event.getProject().getPath(), comment.getMark().getPath());
-
-			String eventDescription = format("%s %s", event.getUser().getDisplayName(), event.getActivity());
-
-			postIfApplicable(commentInfo + " " + eventDescription, event);
+			String title = format("[Code Comment %s:%s] %s %s", 
+					event.getProject().getPath(), 
+					comment.getMark().getPath(),
+					event.getUser().getDisplayName(), 
+					event.getActivity()
+			);
+			postIfApplicable(title, event);
 		}
 	}
 

@@ -1,18 +1,47 @@
 package io.onedev.server.web.page.project.branches;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.AheadBehind;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.search.entity.pullrequest.OpenCriteria;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
+import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.link.ArchiveMenuLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -50,49 +79,11 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.AheadBehind;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.search.entity.pullrequest.OpenCriteria;
-import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
-import io.onedev.server.web.component.commit.status.CommitStatusLink;
-import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.link.ArchiveMenuLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.ReferenceTransformer;
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
@@ -482,8 +473,9 @@ public class ProjectBranchesPage extends ProjectPage {
 						RevCommit lastCommit = getProject().getRevCommit(rowModel.getObject().getObjectId(), true);
 						PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name()); 
 						String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
-						ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
-						return Emojis.getInstance().apply(transformer.apply(lastCommit.getShortMessage()));
+						var transformed = transformReferences(lastCommit.getShortMessage(), getProject(), 
+								new LinkTransformer(commitUrl));
+						return Emojis.getInstance().apply(transformed);
 					}
 					
 				}).setEscapeModelStrings(false));

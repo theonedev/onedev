@@ -19,7 +19,7 @@ public class PublishedByBuildCriteria extends Criteria<Pack> {
 
 	public PublishedByBuildCriteria(Build build) {
 		this.build = build;
-		this.value = build.getFQN().toString();
+		this.value = build.getReference().toString(null);
 	}
 	
 	public PublishedByBuildCriteria(@Nullable Project project, String value) {

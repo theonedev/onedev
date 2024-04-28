@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.facade.EntityFacade;
@@ -146,4 +147,9 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		return null;
 	}
 
+	@Nullable
+	public EntityReference getReference() {
+		return null;
+	}
+	
 }

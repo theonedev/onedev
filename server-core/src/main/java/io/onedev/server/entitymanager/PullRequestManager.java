@@ -6,7 +6,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStats;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -31,18 +30,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable
     PullRequest find(Project targetProject, long number);
-    
+
     @Nullable
-    PullRequest findByFQN(String fqn);
-    
-    @Nullable
-    PullRequest findByUUID(String uuid);
-    
-    @Nullable
-    PullRequest find(ProjectScopedNumber fqn);
-    
-	@Nullable
-	PullRequest findLatest(Project targetProject);
+    PullRequest find(String uuid);
 	
     void discard(PullRequest request, @Nullable String note);
     

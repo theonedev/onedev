@@ -1,20 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.markdown;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.form.FormComponentPanel;
-import org.apache.wicket.model.Model;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -22,11 +8,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.Similarities;
@@ -36,6 +18,16 @@ import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.model.Model;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
@@ -99,20 +91,21 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			}
 			
 			@Override
-			protected final AtWhoReferenceSupport getReferenceSupport() {
+			protected AtWhoReferenceSupport getReferenceSupport() {
 				return new AtWhoReferenceSupport() {
 
 					@Override
-					public List<PullRequest> findPullRequests(@Nullable Project project, String query, int count) {
-						if (project == null)
-							project = context.getProject();
+					public Project getCurrentProject() {
+						return context.getProject();
+					}
+
+					@Override
+					public List<PullRequest> queryPullRequests(Project project, String query, int count) {
 						return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
 					}
 
 					@Override
-					public List<Issue> findIssues(@Nullable Project project, String query, int count) {
-						if (project == null) 
-							project = context.getProject();
+					public List<Issue> queryIssues(Project project, String query, int count) {
 						if (SecurityUtils.canAccessProject(project))
 							return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
 						else
@@ -120,9 +113,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 					}
 
 					@Override
-					public List<Build> findBuilds(@Nullable Project project, String query, int count) {
-						if (project == null)
-							project = context.getProject();
+					public List<Build> queryBuilds(Project project, String query, int count) {
 						return OneDev.getInstance(BuildManager.class).query(project, query, count);
 					}
 					

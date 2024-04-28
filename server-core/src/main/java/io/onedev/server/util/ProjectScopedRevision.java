@@ -41,15 +41,15 @@ public class ProjectScopedRevision implements Serializable {
 	
 	@Nullable
 	public static ProjectScopedRevision from(String revisionFQN) {
-		String projectName = StringUtils.substringBefore(revisionFQN, ":");
+		String projectPath = StringUtils.substringBefore(revisionFQN, ":");
 		String revision = StringUtils.substringAfter(revisionFQN, ":");
-		Project project = getProjectManager().findByPath(projectName);
+		Project project = getProjectManager().findByPath(projectPath);
 		if (project != null)
 			return new ProjectScopedRevision(project, revision);
 		else
 			return null;
 	}
-
+	
 	public String getFQN() {
 		return getProject().getPath() + ":" + revision;
 	}

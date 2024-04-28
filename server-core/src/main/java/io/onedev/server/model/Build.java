@@ -18,10 +18,10 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
@@ -37,7 +37,6 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -72,7 +71,7 @@ import static io.onedev.server.model.Project.BUILDS_DIR;
 )
 @DynamicUpdate
 public class Build extends ProjectBelonging 
-		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
+		implements AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -424,11 +423,6 @@ public class Build extends ProjectBelonging
 		this.project = project;
 	}
 
-	@Override
-	public String getType() {
-		return "build";
-	}
-
 	@Nullable
 	public Agent getAgent() {
 		return agent;
@@ -504,6 +498,10 @@ public class Build extends ProjectBelonging
 	}
 
 	@Override
+	public EntityReference getReference() {
+		return new BuildReference(getProject(), getNumber());
+	}
+
 	public long getNumber() {
 		return number;
 	}
@@ -680,25 +678,15 @@ public class Build extends ProjectBelonging
 	public void setRefName(String refName) {
 		this.refName = refName;
 	}
-
-	public String getReference(@Nullable Project currentProject) {
-		return Referenceable.asReference(this, currentProject);
-	}
 	
 	@Nullable
 	public String getBranch() {
-		if (refName != null)
-			return GitUtils.ref2branch(refName);
-		else
-			return null;
+		return GitUtils.ref2branch(refName);
 	}
 
 	@Nullable
 	public String getTag() {
-		if (refName != null)
-			return GitUtils.ref2tag(refName);
-		else
-			return null;
+		return GitUtils.ref2tag(refName);
 	}
 	
 	@Nullable
@@ -903,26 +891,6 @@ public class Build extends ProjectBelonging
 		return "build-artifacts:" + projectId + ":" + buildNumber;
 	}
 	
-	public ProjectScopedNumber getFQN() {
-		return new ProjectScopedNumber(getProject(), getNumber());
-	}
-	
-	public Collection<String> getOnBranches() {
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		Collection<ObjectId> descendants = commitInfoManager.getDescendants(
-				getProject().getId(), Sets.newHashSet(getCommitId()));
-		descendants.add(getCommitId());
-	
-		Collection<String> branches = new ArrayList<>();
-		for (RefFacade ref: getProject().getBranchRefs()) {
-			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
-			if (descendants.contains(ref.getPeeledObj()))
-				branches.add(branchName);
-		}
-		
-		return branches;
-	}
-	
 	public static String getLogChangeObservable(Long buildId) {
 		return "build-log:" + buildId;
 	}
@@ -1042,6 +1010,13 @@ public class Build extends ProjectBelonging
 			}
 		}
 		return null;
+	}
+	
+	public String getSummary(@Nullable Project currentProject) {
+		var summary = getJobName();
+		if (getVersion() != null)
+			summary += ": " + getVersion();
+		return summary + " (" + getReference().toString(currentProject) + ")";
 	}
 	
 }

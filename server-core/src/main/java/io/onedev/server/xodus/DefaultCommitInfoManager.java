@@ -16,7 +16,7 @@ import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.entityreference.ReferenceChangeManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -157,7 +157,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private final IssueManager issueManager;
 	
-	private final EntityReferenceManager entityReferenceManager;
+	private final ReferenceChangeManager entityReferenceManager;
 
 	private final ListenerRegistry listenerRegistry;
 
@@ -174,7 +174,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 									BatchWorkManager batchWorkManager, SessionManager sessionManager,
 									EmailAddressManager emailAddressManager, UserManager userManager,
 									ClusterManager clusterManager, ListenerRegistry listenerRegistry,
-									IssueManager issueManager, EntityReferenceManager entityReferenceManager) {
+									IssueManager issueManager, ReferenceChangeManager entityReferenceManager) {
 		this.projectManager = projectManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;

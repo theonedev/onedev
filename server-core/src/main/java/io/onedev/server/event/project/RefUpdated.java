@@ -1,19 +1,18 @@
 package io.onedev.server.event.project;
 
-import java.util.Date;
-
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.PlainText;
+import io.onedev.server.web.UrlManager;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import java.util.Date;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
@@ -69,9 +68,18 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 
 	@Override
 	public String getActivity() {
-		return "Git ref updated";
+		var branch = GitUtils.ref2branch(getRefName());
+		if (branch != null) {
+			return "branch '" + branch + "' updated";
+		} else {
+			var tag = GitUtils.ref2tag(getRefName());
+			if (tag != null)
+				return "tag '" + tag + "' created";
+			else
+				return "ref '" + getRefName() + "' updated";
+		}
 	}
-
+	
 	@Override
 	protected CommentText newCommentText() {
 		if (!newCommitId.equals(ObjectId.zeroId())) { 

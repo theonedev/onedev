@@ -68,8 +68,8 @@ public abstract class ForkOptionPanel extends Panel {
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_PACK_MANAGEMENT, 
-				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, PROP_DESCRIPTION, 
+				PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
@@ -91,6 +91,10 @@ public abstract class ForkOptionPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				try {
+					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
+						editor.error(new Path(new PathNode.Named(PROP_KEY)),
+								"This key has already been used by another project");
+					}
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
@@ -98,9 +102,10 @@ public abstract class ForkOptionPanel extends Panel {
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
 								"This name has already been used by another project");
-						target.add(form);
-					} else {
+					} 
+					if (editor.isValid()) {
 						newProject.setForkedFrom(getProject());
+						newProject.setKey(editProject.getKey());
 						newProject.setDescription(editProject.getDescription());
 						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
@@ -116,6 +121,8 @@ public abstract class ForkOptionPanel extends Panel {
 						});
 						Session.get().success("Project forked");
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
+					} else {
+						target.add(form);
 					}
 				} catch (UnauthorizedException e) {
 					parentEditor.error(new Path(new PathNode.Named("parentPath")), e.getMessage());

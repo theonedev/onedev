@@ -146,6 +146,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 								switch (fieldName) {
 									case Project.NAME_NAME:
 										return new NameCriteria(value, operator);
+									case Project.NAME_KEY:
+										return new KeyCriteria(value, operator);
 									case Project.NAME_SERVICE_DESK_NAME:
 										return new ServiceDeskNameCriteria(value, operator);
 									case Project.NAME_PATH:
@@ -228,6 +230,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			case Is:
 			case IsNot:
 				if (!fieldName.equals(Project.NAME_NAME)
+						&& !fieldName.equals(Project.NAME_KEY)
 						&& !fieldName.equals(Project.NAME_LABEL)
 						&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME)
 						&& !fieldName.equals(Project.NAME_PATH)) {

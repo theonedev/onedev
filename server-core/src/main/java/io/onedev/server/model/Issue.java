@@ -6,15 +6,15 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.Referenceable;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.xodus.PullRequestInfoManager;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -26,13 +26,17 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.milestone.burndown.BurndownIndicators;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.IssueAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.PullRequestInfoManager;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -66,7 +70,7 @@ import static java.util.Comparator.comparingInt;
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Editable
-public class Issue extends ProjectBelonging implements Referenceable, AttachmentStorageSupport {
+public class Issue extends ProjectBelonging implements AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -393,15 +397,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 			threadingReferences = getMessageId() + " " + threadingReferences;
 		return threadingReferences;
 	}
-	
+
 	@Override
-	public long getNumber() {
-		return number;
+	public EntityReference getReference() {
+		return new IssueReference(getProject(), getNumber());
 	}
 	
-	@Override
-	public String getType() {
-		return "issue";
+	public long getNumber() {
+		return number;
 	}
 	
 	public void setNumber(long number) {
@@ -814,10 +817,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		return participants;
 	}
 	
-	public String getReference(@Nullable Project currentProject) {
-		return Referenceable.asReference(this, currentProject);
-	}
-
 	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {
 		if (!checkedFieldNames.add(fieldName))
 			return false;
@@ -901,10 +900,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	@Override
 	public String getAttachmentGroup() {
 		return uuid;
-	}
-
-	public ProjectScopedNumber getFQN() {
-		return new ProjectScopedNumber(getProject(), getNumber());
 	}
 	
 	public String getUrl() {
@@ -1027,4 +1022,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		}
 		return false;
 	}
+	
+	public String getSummary(@Nullable Project currentProject) {
+		return Emojis.getInstance().apply(getTitle()) + " (" + getReference().toString(currentProject)+ ")";		
+	}
+	
 }

@@ -1,18 +1,17 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Collection;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.criteria.Criteria;
+import java.util.Collection;
 
 public class FixedInBuildCriteria extends Criteria<Issue> {
 
@@ -32,7 +31,7 @@ public class FixedInBuildCriteria extends Criteria<Issue> {
 	public FixedInBuildCriteria(Build build) {
 		this.build = build;
 		project = build.getProject();
-		value = build.getFQN().toString();
+		value = build.getReference().toString(null);
 	}
 	
 	private Build getBuild() {

@@ -181,7 +181,10 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(NeedMyAction)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(ToBeReviewedByMe)) || suggestedLiteral.equals(getRuleName(RequestedForChangesByMe)) || suggestedLiteral.equals(getRuleName(ApprovedByMe)) || suggestedLiteral.equals(getRuleName(AssignedToMe)) || suggestedLiteral.equals(getRuleName(ToBeChangedByMe)) || suggestedLiteral.equals(getRuleName(ToBeMergedByMe)))) {
 			return null;
 		} else if (suggestedLiteral.equals("#")) {
-			return Optional.of("find pull request by number");
+			if (getProject() != null)
+				return Optional.of("find pull request by number");
+			else
+				return null;
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

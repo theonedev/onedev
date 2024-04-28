@@ -6,10 +6,12 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.model.*;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ProjectScopedRevision;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -128,13 +130,8 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static Issue getIssue(@Nullable Project project, String value) {
-		if (project != null) {
-			if (value.startsWith("#"))
-				value = project.getPath() + value;
-			else if (!value.contains("#"))
-				value = project.getPath() + "#" + value;
-		}
-		Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(value);
+		var reference = IssueReference.of(value, project);
+		var issue = OneDev.getInstance(IssueManager.class).find(reference.getProject(), reference.getNumber());
 		if (issue != null)
 			return issue;
 		else
@@ -142,13 +139,8 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static PullRequest getPullRequest(@Nullable Project project, String value) {
-		if (project != null) {
-			if (value.startsWith("#"))
-				value = project.getPath() + value;
-			else if (!value.contains("#"))
-				value = project.getPath() + "#" + value;
-		}
-		PullRequest pullRequest = OneDev.getInstance(PullRequestManager.class).findByFQN(value);
+		var reference = PullRequestReference.of(value, project);
+		var pullRequest = OneDev.getInstance(PullRequestManager.class).find(reference.getProject(), reference.getNumber());
 		if (pullRequest != null)
 			return pullRequest;
 		else
@@ -156,27 +148,12 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static Build getBuild(@Nullable Project project, String value) {
-		if (project != null) {
-			if (value.startsWith("#"))
-				value = project.getPath() + value;
-			else if (!value.contains("#"))
-				value = project.getPath() + "#" + value;
-		}
-		Build build = OneDev.getInstance(BuildManager.class).find(value);
+		var reference = BuildReference.of(value, project);
+		var build = OneDev.getInstance(BuildManager.class).find(reference.getProject(), reference.getNumber());
 		if (build != null)
 			return build;
 		else
 			throw new ExplicitException("Unable to find build: " + value);
-	}
-	
-	public static ProjectScopedNumber getProjectScopedNumber(@Nullable Project project, String value) {
-		if (project != null) {
-			if (value.startsWith("#"))
-				value = project.getPath() + value;
-			else if (!value.contains("#"))
-				value = project.getPath() + "#" + value;
-		}
-		return ProjectScopedNumber.from(value);
 	}
 	
 	public static Milestone getMilestone(@Nullable Project project, String value) {

@@ -1,10 +1,5 @@
 package io.onedev.server.web.component.pullrequest.referencedfrom;
 
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
@@ -13,7 +8,12 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.ReferenceTransformer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
@@ -42,25 +42,11 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 		if (SecurityUtils.canReadCode(request.getTargetProject())) {
 			String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 					PullRequestActivitiesPage.paramsOf(request)).toString();
-			ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
-			String transformed = transformer.apply(request.getTitle());
-			String title;
-			if (request.getTargetProject().equals(project)) { 
-				title = String.format("<a href='%s'>#%d</a> %s", url, request.getNumber(), transformed);
-			} else { 
-				title = String.format("<a href='%s'>%s#%d</a> %s", 
-						url, request.getTargetProject().getPath(), request.getNumber(), transformed);
-			}
-			add(new Label("title", title).setEscapeModelStrings(false));
+			String summary = String.format("<a href='%s'>%s</a>", 
+					url, escapeHtml5(request.getSummary(project)));
+			add(new Label("summary", summary).setEscapeModelStrings(false));
 		} else {
-			ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
-			String transformed = transformer.apply(request.getTitle());
-			String title;
-			if (request.getTargetProject().equals(project)) 
-				title = "#" + request.getNumber() + " " + transformed;
-			else 
-				title = request.getTargetProject().getPath() + "#" + request.getNumber() + " " + transformed;
-			add(new Label("title", title).setEscapeModelStrings(false));
+			add(new Label("summary", request.getSummary(project)));
 		}
 	}
 

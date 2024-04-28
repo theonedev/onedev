@@ -2,19 +2,19 @@
 	<div class="project-info p-4">
 		<div class="d-flex justify-content-between">
 			<div class="mr-4">
-				<a wicket:id="pathAndId" class="mb-0 h5"></a>
-				<wicket:enclosure child="forkedFrom">
-					<div class="text-muted">
-						Forked from <a wicket:id="forkedFrom"></a>			
-					</div>
-				</wicket:enclosure>
-				<div wicket:id="labels" class="mt-2"></div>
+				<div class="d-flex">
+					<span wicket:id="path" class="mb-0 mr-2 h6"></span>
+					<span wicket:id="labels"></span>
+				</div>
+				<div class="font-size-sm">
+					<span wicket:id="id"></span><span wicket:id="key"></span><wicket:enclosure child="forkedFrom">, forked from <a wicket:id="forkedFrom"></a></wicket:enclosure>
+				</div>
 			</div>
 			<wicket:enclosure child="forkInfo">
 			<div>
-				<span wicket:id="forkInfo" class="btn-group">
-				    <a wicket:id="forks" class="btn btn-sm btn-light btn-hover-primary"><span wicket:id="label"></span></a>
-					<a wicket:id="forkNow" class="btn btn-sm btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
+				<span wicket:id="forkInfo" class="btn-group fork-info">
+				    <a wicket:id="forks" class="btn btn-light btn-hover-primary"><span wicket:id="label"></span></a>
+					<a wicket:id="forkNow" class="btn btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
 				</span>			
 			</div>
 			</wicket:enclosure>

@@ -43,7 +43,7 @@ public class PullRequestChoiceEditSupport implements EditSupport {
 										if (Project.get() != null && Project.get().getForkRoot().equals(request.getNumberScope()))
 											return new Label(id, "#" + request.getNumber());
 										else
-											return new Label(id, request.getFQN().toString());
+											return new Label(id, request.getReference().toString(null));
 									} else {
 										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
 									}

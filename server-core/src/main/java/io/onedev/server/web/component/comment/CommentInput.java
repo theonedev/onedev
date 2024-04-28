@@ -1,30 +1,22 @@
 package io.onedev.server.web.component.comment;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.model.IModel;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class CommentInput extends MarkdownEditor {
@@ -71,9 +63,12 @@ public abstract class CommentInput extends MarkdownEditor {
 		return new AtWhoReferenceSupport() {
 
 			@Override
-			public List<PullRequest> findPullRequests(@Nullable Project project, String query, int count) {
-				if (project == null)
-					project = getProject();
+			public Project getCurrentProject() {
+				return getProject();
+			}
+
+			@Override
+			public List<PullRequest> queryPullRequests(Project project, String query, int count) {
 				if (SecurityUtils.canReadCode(project))
 					return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
 				else
@@ -81,9 +76,7 @@ public abstract class CommentInput extends MarkdownEditor {
 			}
 
 			@Override
-			public List<Issue> findIssues(@Nullable Project project, String query, int count) {
-				if (project == null) 
-					project = getProject();
+			public List<Issue> queryIssues(Project project, String query, int count) {
 				if (SecurityUtils.canAccessProject(project)) 
 					return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
 				else
@@ -91,9 +84,7 @@ public abstract class CommentInput extends MarkdownEditor {
 			}
 
 			@Override
-			public List<Build> findBuilds(@Nullable Project project, String query, int count) {
-				if (project == null)
-					project = getProject();
+			public List<Build> queryBuilds(Project project, String query, int count) {
 				return OneDev.getInstance(BuildManager.class).query(project, query, count);
 			}
 			

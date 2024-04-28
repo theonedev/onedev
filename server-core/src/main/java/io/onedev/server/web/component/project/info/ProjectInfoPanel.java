@@ -72,18 +72,26 @@ public abstract class ProjectInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BookmarkablePageLink<Void>("pathAndId", ProjectDashboardPage.class, 
-				ProjectDashboardPage.paramsOf(getProject())) {
-
-			@Override
-			public IModel<?> getBody() {
-				return Model.of(getProject().getPath() + " (id: " + getProject().getId() + ")");
-			}
-			
-		});
-		
+		add(new Label("path", getProject().getPath()));
 		add(new EntityLabelsPanel<>("labels", projectModel));
-		
+
+		add(new Label("id", "id: " + getProject().getId()));
+		add(new Label("key", ", key: " + getProject().getKey())
+				.setVisible(getProject().getKey() != null));
+		if (getProject().getForkedFrom() != null) {
+			add(new BookmarkablePageLink<Void>("forkedFrom", ProjectDashboardPage.class,
+					ProjectDashboardPage.paramsOf(getProject().getForkedFrom())) {
+
+				@Override
+				public IModel<?> getBody() {
+					return Model.of(getProject().getForkedFrom().getPath());
+				}
+
+			});
+		} else {
+			add(new WebMarkupContainer("forkedFrom").setVisible(false));
+		}
+
 		WebMarkupContainer forkInfo = new WebMarkupContainer("forkInfo");
 		forkInfo.setVisible(getProject().isCodeManagement());
 		add(forkInfo);
@@ -91,18 +99,8 @@ public abstract class ProjectInfoPanel extends Panel {
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
 				+ Criteria.quote(getProject().getPath());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
-		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params) {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				if (!isEnabled())
-					tag.setName("span");
-			}
-			
-		};
+		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params);
 		forksLink.add(new Label("label", getProject().getForks().size() + " forks"));
-		forksLink.setVisible(getProject().isCodeManagement());
 		forkInfo.add(forksLink);
 		
 		ModalLink forkNow = new ModalLink("forkNow") {
@@ -171,20 +169,6 @@ public abstract class ProjectInfoPanel extends Panel {
 		else 
 			add(new WebMarkupContainer("description").setVisible(false));
 				
-		if (getProject().getForkedFrom() != null) {
-			add(new BookmarkablePageLink<Void>("forkedFrom", ProjectDashboardPage.class, 
-					ProjectDashboardPage.paramsOf(getProject().getForkedFrom())) {
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(getProject().getForkedFrom().getPath());
-				}
-				
-			});
-		} else {
-			add(new WebMarkupContainer("forkedFrom").setVisible(false));
-		}
-		
 		long latestVersion;
 		if (activeServer != null) {
 			var replica = replicasModel.getObject().get(activeServer);

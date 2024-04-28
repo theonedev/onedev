@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.*;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
@@ -156,7 +157,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			senderName = null;
 			summary = StringUtils.capitalize(event.getActivity());
 		}
-
+		
+		var emojis = Emojis.getInstance();
 		String replyAddress = mailManager.getReplyAddress(request);
 		boolean replyable = replyAddress != null;
 
@@ -176,8 +178,11 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					|| changeData instanceof PullRequestRequestedForChangesData
 					|| changeData instanceof PullRequestDiscardData)
 					&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-				String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(),
-						WordUtils.capitalize(changeData.getActivity()), request.getTitle());
+				String subject = String.format(
+						"[Pull Request %s] (%s) %s", 
+						request.getReference(),
+						WordUtils.capitalize(changeData.getActivity()), 
+						emojis.apply(request.getTitle()));
 				String threadingReferences = String.format("<%s-%s@onedev>",
 						changeData.getActivity().replace(' ', '-'), request.getUUID());
 				EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
@@ -199,8 +204,10 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		for (User assignee : assignees) {
 			watchManager.watch(request, assignee, true);
 			if (!notifiedUsers.contains(assignee)) {
-				String subject = String.format("[Pull Request %s] (Assigned) %s",
-						request.getFQN(), request.getTitle());
+				String subject = String.format(
+						"[Pull Request %s] (Assigned) %s",
+						request.getReference(), 
+						emojis.apply(request.getTitle()));
 				String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
 				String assignmentSummary;
 				if (user != null)
@@ -222,8 +229,10 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		for (User reviewer : reviewers) {
 			watchManager.watch(request, reviewer, true);
 			if (!notifiedUsers.contains(reviewer)) {
-				String subject = String.format("[Pull Request %s] (Review Request) %s",
-						request.getFQN(), request.getTitle());
+				String subject = String.format(
+						"[Pull Request %s] (Review Request) %s",
+						request.getReference(), 
+						emojis.apply(request.getTitle()));
 				String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
 				String reviewInvitationSummary;
 				if (user != null)
@@ -257,7 +266,10 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					mentionManager.mention(request, mentionedUser);
 					watchManager.watch(request, mentionedUser, true);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-						String subject = String.format("[Pull Request %s] (Mentioned You) %s", request.getFQN(), request.getTitle());
+						String subject = String.format(
+								"[Pull Request %s] (Mentioned You) %s", 
+								request.getReference(), 
+								emojis.apply(request.getTitle()));
 						String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
 
 						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
@@ -293,8 +305,11 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 
 			if (!bccEmailAddresses.isEmpty()) {
-				String subject = String.format("[Pull Request %s] (%s) %s",
-						request.getFQN(), (event instanceof PullRequestOpened) ? "Opened" : "Updated", request.getTitle());
+				String subject = String.format(
+						"[Pull Request %s] (%s) %s",
+						request.getReference(), 
+						(event instanceof PullRequestOpened) ? "Opened" : "Updated", 
+						emojis.apply(request.getTitle()));
 				String threadingReferences = "<" + request.getUUID() + "@onedev>";
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
 				String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);

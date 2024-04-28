@@ -66,14 +66,14 @@ public class AttachmentResource extends AbstractResource {
 					|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), UTF_8).equals(attachmentGroup)) {
 				Issue issue;
 				Build build;
-				if (OneDev.getInstance(PullRequestManager.class).findByUUID(attachmentGroup) != null 
+				if (OneDev.getInstance(PullRequestManager.class).find(attachmentGroup) != null 
 						|| OneDev.getInstance(CodeCommentManager.class).findByUUID(attachmentGroup) != null) {
 					if (!SecurityUtils.canReadCode(project))
 						throw new UnauthorizedException();
-				} else if ((issue = OneDev.getInstance(IssueManager.class).findByUUID(attachmentGroup)) != null) {
+				} else if ((issue = OneDev.getInstance(IssueManager.class).find(attachmentGroup)) != null) {
 					if (!SecurityUtils.canAccessIssue(issue))
 						throw new UnauthorizedException();
-				} else if ((build = OneDev.getInstance(BuildManager.class).findByUUID(attachmentGroup)) != null) {
+				} else if ((build = OneDev.getInstance(BuildManager.class).find(attachmentGroup)) != null) {
 					if (!SecurityUtils.canAccessBuild(build))
 						throw new UnauthorizedException();
 				} else if (!SecurityUtils.canAccessProject(project)) {

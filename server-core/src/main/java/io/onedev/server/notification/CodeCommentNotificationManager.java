@@ -1,6 +1,7 @@
 package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.CodeCommentMentionManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -78,10 +79,14 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 
 			if (!emailAddresses.isEmpty() && !(event instanceof CodeCommentEdited)) {
 				String url = event.getUrl();
-				String subject = String.format("[Code Comment] %s:%s",
-						event.getProject().getPath(), comment.getMark().getPath());
+				String subject = String.format(
+						"[Code Comment %s:%s] %s",
+						event.getProject().getPath(), 
+						comment.getMark().getPath(),
+						StringUtils.capitalize(event.getActivity()));
 
-				String summary = String.format("%s %s code comment",
+				String summary = String.format(
+						"%s %s", 
 						event.getUser().getDisplayName(), event.getActivity());
 
 				String threadingReferences = "<" + comment.getProject().getPath()

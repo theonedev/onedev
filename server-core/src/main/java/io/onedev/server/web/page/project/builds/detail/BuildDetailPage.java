@@ -23,7 +23,6 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -186,15 +185,11 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
+		add(new Label("summary", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				StringBuilder builder = new StringBuilder("#" + getBuild().getNumber());
-				if (getBuild().getVersion() != null)
-					builder.append(" (" + getBuild().getVersion() + ")");
-				return builder.toString();
-				
+				return getBuild().getSummary(getProject());
 			}
 			
 		}) {
@@ -637,12 +632,12 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 
 	public static PageParameters paramsOf(Build build) {
-		return paramsOf(build.getFQN());
+		return paramsOf(build.getProject(), build.getNumber());
 	}
 	
-	public static PageParameters paramsOf(ProjectScopedNumber buildFQN) {
-		PageParameters params = ProjectPage.paramsOf(buildFQN.getProject());
-		params.add(PARAM_BUILD, buildFQN.getNumber());
+	public static PageParameters paramsOf(Project project, Long buildNumber) {
+		PageParameters params = ProjectPage.paramsOf(project);
+		params.add(PARAM_BUILD, buildNumber);
 		return params;
 	}
 	
@@ -667,16 +662,16 @@ public abstract class BuildDetailPage extends ProjectPage
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("builds", ProjectBuildsPage.class, 
 				ProjectBuildsPage.paramsOf(getProject(), 0)));
-		fragment.add(new Label("buildNumber", "#" + getBuild().getNumber()));
+		fragment.add(new Label("buildNumber", getBuild().getReference().toString(getProject())));
 		return fragment;
 	}
 
 	@Override
 	protected String getPageTitle() {
+		var pageTitle = getBuild().getReference().toString(getProject());
 		if (getBuild().getVersion() != null)
-			return getBuild().getVersion() + " - Build #" +  getBuild().getNumber() + " - " + getProject().getPath();
-		else
-			return "Build #" +  getBuild().getNumber() + " - " + getProject().getPath();
+			pageTitle += " (" + getBuild().getVersion() + ")";
+		return pageTitle;
 	}
 
 	@Override

@@ -5,11 +5,12 @@ import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -54,12 +55,12 @@ public abstract class CommandPalettePanel extends Panel {
 	
 	private static final List<String[]> availableUrls = new ArrayList<>();
 
-	private static final PatternSet excludedUrlPatterns = PatternSet.parse(""
-			+ "~test/** ~errors/** ~sso/** ~oauth/** ~verify-email-address/** ~create-user-from-invitation/** "
-			+ "~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** ~builds/** issues/** "
-			+ "~pulls/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
-			+ "**/${build}/** -**/${build} **/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
-			+ "**/${group}/** -**/${group} projects/**");
+	private static final PatternSet excludedUrlPatterns = PatternSet.parse("" +
+			"~test/** ~errors/** ~sso/** ~oauth/** ~verify-email-address/** ~create-user-from-invitation/** " +
+			"~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** **/invalid " +
+			"**/${issue}/** -**/${issue} **/${request}/** -**/${request} **/${build}/** -**/${build} " +
+			"**/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} **/${group}/** -**/${group} " +
+			"projects/**");
 
 	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +
 			"~dashboards/** ~code-search/** ~administration/settings/storage-setting " +
@@ -132,43 +133,39 @@ public abstract class CommandPalettePanel extends Panel {
 	
 	private TextField<String> input;
 	
-	private final IModel<List<CommandSuggestion>> suggestionsModel = 
-			new LoadableDetachableModel<List<CommandSuggestion>>() {
+	private final IModel<List<CommandSuggestion>> suggestionsModel =
+			new LoadableDetachableModel<>() {
 
-		@Override
-		protected List<CommandSuggestion> load() {
-			List<CommandSuggestion> suggestions = new ArrayList<>();
-			String matchWith = input.getModelObject();
-			if (matchWith != null)
-				matchWith = matchWith.toLowerCase();
-			else
-				matchWith = "";
+				@Override
+				protected List<CommandSuggestion> load() {
+					List<CommandSuggestion> suggestions = new ArrayList<>();
+					String matchWith = StringUtils.stripToEmpty(input.getModelObject());
 
-			Map<String, SuggestionContent> suggestionMap = new LinkedHashMap<>();
-			
-			for (ParsedUrl url: parsedUrls) {
-				int leftOver = numSuggestionsToLoad - suggestionMap.size();
-				if (leftOver > 0) {
-					for (Map.Entry<String, SuggestionContent> entry: url.suggest(matchWith, leftOver).entrySet()) {
-						SuggestionContent content = suggestionMap.get(entry.getKey());
-						if (content != null)
-							content = content.mergeWith(entry.getValue());
-						else
-							content = entry.getValue();
-						suggestionMap.put(entry.getKey(), content);
+					Map<String, SuggestionContent> suggestionMap = new LinkedHashMap<>();
+
+					for (ParsedUrl url : parsedUrls) {
+						int leftOver = numSuggestionsToLoad - suggestionMap.size();
+						if (leftOver > 0) {
+							for (Map.Entry<String, SuggestionContent> entry : url.suggest(matchWith, leftOver).entrySet()) {
+								SuggestionContent content = suggestionMap.get(entry.getKey());
+								if (content != null)
+									content = content.mergeWith(entry.getValue());
+								else
+									content = entry.getValue();
+								suggestionMap.put(entry.getKey(), content);
+							}
+						} else {
+							break;
+						}
 					}
-				} else {
-					break;
-				}
-			}
-			
-			for (Map.Entry<String, SuggestionContent> entry: suggestionMap.entrySet())
-				suggestions.add(new CommandSuggestion(entry.getKey(), entry.getValue()));
-			
-			return suggestions;
-		}
 
-	};	
+					for (Map.Entry<String, SuggestionContent> entry : suggestionMap.entrySet())
+						suggestions.add(new CommandSuggestion(entry.getKey(), entry.getValue()));
+
+					return suggestions;
+				}
+
+			};	
 	
 	public CommandPalettePanel(String id) {
 		super(id);
@@ -204,7 +201,7 @@ public abstract class CommandPalettePanel extends Panel {
 							System.arraycopy(url, 1, relativeUrl, 0, relativeUrl.length);
 							parsedUrls.add(newProjectAwareParsedUrl(relativeUrl));
 						}
-					} catch (IgnoredUrlParam e) {
+					} catch (IgnoredUrlParam ignored) {
 					}
 				}
 			}
@@ -230,7 +227,7 @@ public abstract class CommandPalettePanel extends Panel {
 								return null;
 							}
 						});
-					} catch (IgnoredUrlParam e) {
+					} catch (IgnoredUrlParam ignored) {
 					}
 				};
 			}

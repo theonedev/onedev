@@ -18,6 +18,7 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
+import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -48,7 +49,7 @@ public class NewProjectPage extends LayoutPage {
 		
 		Project editProject = new Project();
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, PROP_DESCRIPTION, 
 				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
 				PROP_TIME_TRACKING);
 		
@@ -75,10 +76,16 @@ public class NewProjectPage extends LayoutPage {
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
 					Project newProject = getProjectManager().setup(projectPath);
+					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
+						editor.error(new Path(new PathNode.Named(PROP_KEY)),
+								"This key has already been used by another project");
+					}
 					if (!newProject.isNew()) {
-						editor.error(new Path(new PathNode.Named("name")),
+						editor.error(new Path(new PathNode.Named(PROP_NAME)),
 								"This name has already been used by another project");
-					} else {
+					}
+					if (editor.isValid()) {
+						newProject.setKey(editProject.getKey());
 						newProject.setDescription(editProject.getDescription());
 						newProject.setCodeManagement(editProject.isCodeManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
@@ -86,14 +93,9 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						
-						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-							@Override
-							public void run() {
-								getProjectManager().create(newProject);
-								OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
-							}
-							
+						OneDev.getInstance(TransactionManager.class).run(() -> {
+							getProjectManager().create(newProject);
+							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
 						});
 						
 						Session.get().success("New project created");

@@ -432,13 +432,16 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public Project findByPath(String path) {
-		ProjectFacade project = cache.find(path);
-		if (project != null)
-			return load(project.getId());
-		else
-			return null;
+		var facade = findFacadeByPath(path);
+		return facade!=null? load(facade.getId()): null;
 	}
 
+	@Override
+	public Project findByKey(String key) {
+		var facade = findFacadeByKey(key);
+		return facade!=null? load(facade.getId()): null;
+	}
+	
 	@Sessional
 	@Override
 	public Project findByServiceDeskName(String serviceDeskName) {
@@ -1270,9 +1273,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Override
 	public ProjectFacade findFacadeByPath(String path) {
-		return cache.find(path);
+		return cache.findByPath(path);
 	}
 
+	@Override
+	public ProjectFacade findFacadeByKey(String key) {
+		return cache.findByKey(key);
+	}
+	
 	@Override
 	public ProjectFacade findFacadeById(Long id) {
 		return cache.get(id);

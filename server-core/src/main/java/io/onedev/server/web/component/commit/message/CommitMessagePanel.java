@@ -1,12 +1,11 @@
 package io.onedev.server.web.component.commit.message;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.Highlighter;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,12 +18,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.Highlighter;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.ReferenceTransformer;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
 public abstract class CommitMessagePanel extends Panel {
@@ -53,22 +53,20 @@ public abstract class CommitMessagePanel extends Panel {
 	}
 	
 	private String highlight(String text, @Nullable String commitUrl) {
-		ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
-		
-		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Function<String, String>() {
+		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Function<>() {
 
 			@Override
 			public String apply(String text) {
-				return "<span class='highlight'>" + transformer.apply(text) + "</span>";
+				return "<span class='highlight'>" + transformReferences(text, getProject(), new LinkTransformer(commitUrl)) + "</span>";
 			}
-			
-		}, new Function<String, String>() {
+
+		}, new Function<>() {
 
 			@Override
 			public String apply(String text) {
-				return transformer.apply(text);
+				return transformReferences(text, getProject(), new LinkTransformer(commitUrl));
 			}
-			
+
 		});
 	}
 	

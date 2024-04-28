@@ -1,24 +1,30 @@
 package io.onedev.server.model.support.issue;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.entityreference.ReferenceParser;
-import io.onedev.server.util.Pair;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.model.Project;
 import io.onedev.server.validation.Validatable;
+import io.onedev.server.validation.validator.ProjectKeyValidator;
 import io.onedev.server.validation.validator.ProjectPathValidator;
-import org.unbescape.java.JavaEscape;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.onedev.server.entityreference.ReferenceUtils.mayContainReferences;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static org.unbescape.java.JavaEscape.unescapeJava;
 
 @Editable
 @ClassValidating
@@ -46,11 +52,9 @@ public class CommitMessageFixPatterns implements Serializable, Validatable {
 				var builder = new StringBuilder();
 				if (entry.getPrefix() != null)
 					builder.append("(").append(entry.getPrefix()).append(")");
-				builder.append("(issue\\s+)?");
-				builder.append("(?<project>").append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern())).append(")?");
-				builder.append("#(?<issue>\\d+)");
+				builder.append(String.format("(issue\\s+)?(((?<projectPath>%s)?#)|(?<projectKey>%s)-)(?<number>\\d+)", unescapeJava(ProjectPathValidator.PATTERN.pattern()), unescapeJava(ProjectKeyValidator.PATTERN.pattern())));
 				if (entry.getSuffix() != null)
-					builder.append("(").append(entry.getSuffix()).append(")");					
+					builder.append("(").append(entry.getSuffix()).append(")");
 				patterns.add(Pattern.compile(builder.toString(), CASE_INSENSITIVE));
 			}
 		}
@@ -101,23 +105,33 @@ public class CommitMessageFixPatterns implements Serializable, Validatable {
 		return isValid;
 	}
 
-	public List<Pair<String, Long>> parseFixedIssues(String commitMessage) {
-		List<Pair<String, Long>> issues = new ArrayList<>();
+	public List<IssueReference> parseFixedIssues(String commitMessage, Project currentProject) {
+		Set<IssueReference> references = new LinkedHashSet<>();
 		
-		commitMessage = commitMessage.toLowerCase();
+		var projectManager = OneDev.getInstance(ProjectManager.class);
 		for (var line: StringUtils.splitAndTrim(commitMessage, "\n")) {
-			if (ReferenceParser.fastScan(commitMessage)) {
+			if (mayContainReferences(commitMessage)) {
 				for (var pattern: getPatterns()) {
 					Matcher matcher = pattern.matcher(line);
 					while (matcher.find()) {
-						String projectPath = matcher.group("project");
-						Long issueNumber = Long.parseLong(matcher.group("issue"));
-						issues.add(new Pair<>(projectPath, issueNumber));
+						Project project;
+						var projectKey = matcher.group("projectKey");
+						if (projectKey != null) {
+							project = projectManager.findByKey(projectKey);
+						} else {
+							var projectPath = matcher.group("projectPath");
+							if (projectPath != null)
+								project = projectManager.findByPath(projectPath);
+							else 
+								project = currentProject;
+						}
+						if (project != null) 
+							references.add(new IssueReference(project, Long.parseLong(matcher.group("number"))));
 					}
 				}
 			}
 		}
-		return issues;
+		return new ArrayList<>(references);
 	}	
 	
 	@Editable

@@ -37,6 +37,7 @@
 				<a wicket:id="delete" title="Remove this image" class="delete btn btn-light-danger">Remove</a>
 			</li>
 		</ul>
+		<div wicket:id="noAttachments" class="alert alert-light-warning">No image attachments</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="pickAttachedFileFrag">
 		<ul class="attachments list-unstyled">
@@ -45,6 +46,7 @@
 				<a wicket:id="delete" title="Remove this file" class="delete btn btn-light-danger btn-icon btn-hover-danger flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			</li>
 		</ul>
+		<div wicket:id="noAttachments" class="alert alert-light-warning">No file attachments</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="uploadAttachmentFrag">
 		<form wicket:id="form" class="upload-attachment">

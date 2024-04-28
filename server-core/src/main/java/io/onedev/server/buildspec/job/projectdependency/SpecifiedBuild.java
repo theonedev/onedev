@@ -45,7 +45,7 @@ public class SpecifiedBuild implements BuildProvider {
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestBuilds(String matchWith) {
 		Project project = ProjectDependency.getInputProject(EditContext.get(1));
-		if (project != null)
+		if (project != null) 
 			return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 		else
 			return new ArrayList<>();

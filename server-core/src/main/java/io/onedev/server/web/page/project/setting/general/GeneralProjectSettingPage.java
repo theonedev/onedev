@@ -46,9 +46,9 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
-				PROP_TIME_TRACKING);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, 
+				PROP_DESCRIPTION, PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, 
+				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
@@ -121,11 +121,19 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				if (parentError != null) {
 					parentEditor.error(new Path(new PathNode.Named("parentPath")), parentError);
 				} else {
-					Project projectWithSameName = getProjectManager().find(project.getParent(), project.getName());
+					var projectWithSameName = getProjectManager().find(project.getParent(), project.getName());
 					if (projectWithSameName != null && !projectWithSameName.equals(project)) {
-						editor.error(new Path(new PathNode.Named("name")),
+						editor.error(new Path(new PathNode.Named(PROP_NAME)),
 								"This name has already been used by another project");
-					} else {
+					} 
+					if (project.getKey() != null) {
+						var projectWithSameKey = getProjectManager().findByKey(project.getKey());
+						if (projectWithSameKey != null && !projectWithSameKey.equals(project)) {
+							editor.error(new Path(new PathNode.Named(PROP_KEY)),
+									"This key has already been used by another project");
+						}
+					}
+					if (editor.isValid()) {
 						project.setDefaultRole(defaultRoleBean.getRole());
 						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 

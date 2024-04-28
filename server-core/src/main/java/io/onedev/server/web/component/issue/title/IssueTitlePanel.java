@@ -1,7 +1,13 @@
 package io.onedev.server.web.component.issue.title;
 
-import javax.annotation.Nullable;
-
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.util.Cursor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -13,14 +19,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.ReferenceTransformer;
+import javax.annotation.Nullable;
+
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
 public abstract class IssueTitlePanel extends Panel {
@@ -32,17 +33,9 @@ public abstract class IssueTitlePanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		String label;
-		
-		Project currentProject = getCurrentProject();
 		Issue issue = getIssue();
-		if (currentProject == null)
-			label = issue.getProject() + "#" + issue.getNumber();
-		else if (currentProject.equals(issue.getProject()))
-			label = "#" + issue.getNumber();
-		else 
-			label = issue.getProject() + "#" + issue.getNumber();
 		
+		var label = "(" + issue.getReference().toString(getCurrentProject()) + ")";
 		WebMarkupContainer numberLink;
 		if (getCursor() != null) {
 			add(numberLink = new ActionablePageLink("number", 
@@ -77,7 +70,8 @@ public abstract class IssueTitlePanel extends Panel {
 		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 				IssueActivitiesPage.paramsOf(issue)).toString();
 
-		String transformed = Emojis.getInstance().apply(new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle()));
+		var transformed = transformReferences(issue.getTitle(), issue.getProject(), new LinkTransformer(url));
+		transformed = Emojis.getInstance().apply(transformed);
 		add(new Label("title", transformed) {
 
 			@Override

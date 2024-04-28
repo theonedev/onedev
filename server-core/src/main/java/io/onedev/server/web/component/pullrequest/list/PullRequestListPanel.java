@@ -7,7 +7,11 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.model.*;
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestLabel;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
@@ -45,7 +49,10 @@ import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.*;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -87,8 +94,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static java.util.stream.Collectors.toList;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
@@ -836,14 +843,7 @@ public abstract class PullRequestListPanel extends Panel {
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 
-				String label;
-				Project currentProject = null;
-				if (getPage() instanceof ProjectPage)
-					currentProject = ((ProjectPage) getPage()).getProject();
-				if (currentProject == null || !currentProject.equals(request.getProject()))
-					label = request.getProject().getPath() + "#" + request.getNumber();
-				else
-					label = "#" + request.getNumber();
+				String label = "(" + request.getReference().toString(getProject()) + ")";
 					
 				ActionablePageLink numberLink;
 				fragment.add(numberLink = new ActionablePageLink("number", 
@@ -868,9 +868,9 @@ public abstract class PullRequestListPanel extends Panel {
 				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(request)).toString();
 				
-				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
-				
-				String title = Emojis.getInstance().apply(transformer.apply(request.getTitle()));
+				var transformed = transformReferences(request.getTitle(), request.getTargetProject(), 
+						new LinkTransformer(url));
+				String title = Emojis.getInstance().apply(transformed);
 				fragment.add(new Label("title", title) {
 
 					@Override

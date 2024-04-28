@@ -95,8 +95,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					}
 
 					@Override
-					public Criteria<Issue> visitNumberCriteria(NumberCriteriaContext ctx) {
-						return new SimpleNumberCriteria(getLongValue(ctx.number.getText()));
+					public Criteria<Issue> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
+						return new ReferenceCriteria(project, ctx.getText(), Is);
 					}
 
 					@Override
@@ -255,7 +255,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
-									return new NumberCriteria(project, value, operator);
+									return new ReferenceCriteria(project, value, operator);
 								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
 									int intValue = timeTrackingSetting.parseWorkingPeriod(value);
 									return new EstimatedTimeCriteria(intValue, operator);
@@ -293,7 +293,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
 									return new CommentCountCriteria(getIntValue(value), operator);
 								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
-									return new NumberCriteria(project, value, operator);
+									return new ReferenceCriteria(project, value, operator);
 								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
 									int intValue = value.equals(NAME_SPENT_TIME)? -1: timeTrackingSetting.parseWorkingPeriod(value);
 									return new EstimatedTimeCriteria(intValue, operator);

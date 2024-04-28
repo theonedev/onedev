@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.markdown;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,6 +18,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.validation.validator.ProjectKeyValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
@@ -43,7 +45,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -198,12 +199,13 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		container.add(AttributeAppender.append("class", compactMode?"compact-mode":"normal-mode"));
 		
+		var referenceSupport = getReferenceSupport();
 		container.add(new DropdownLink("doReference") {
 
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new Fragment(id, "referenceMenuFrag", MarkdownEditor.this) {
+				var fragment = new Fragment(id, "referenceMenuFrag", MarkdownEditor.this) {
 
 					@Override
 					public void renderHead(IHeaderResponse response) {
@@ -213,13 +215,21 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
 					
-				}.setOutputMarkupId(true);
+				};
+				setupReferenceMenuItems(fragment, referenceSupport);
+				fragment.setOutputMarkupId(true);
+				return fragment;
 			}
 			
-		}.setVisible(getReferenceSupport() != null));
+		}.setVisible(referenceSupport != null));
 		
 		container.add(new DropdownLink("actionMenuTrigger") {
 
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "markdown-action-menu"));
+			}
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
@@ -230,10 +240,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						super.onInitialize();
 						add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
 						
-						if (getReferenceSupport() != null) 
-							add(new Fragment("doReference", "referenceMenuFrag", MarkdownEditor.this));
-						else 
+						var referenceSupport = getReferenceSupport();
+						if (referenceSupport != null) { 
+							var fragment = new Fragment("doReference", "referenceMenuFrag", MarkdownEditor.this);
+							setupReferenceMenuItems(fragment, referenceSupport);
+							add(fragment);
+						} else {
 							add(new WebMarkupContainer("doReference").setVisible(false));
+						}
 					}
 
 					@Override
@@ -333,7 +347,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					String script = String.format(
 							"onedev.server.markdown.onRendered('%s', '%s');", 
 							container.getMarkupId(), 
-							JavaScriptEscape.escapeJavaScript(rendered));
+							escapeJavaScript(rendered));
 					target.appendJavaScript(script);
 					break;
 				case "emojiQuery":
@@ -413,46 +427,52 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					target.appendJavaScript(script);	
 					break;
 				case "referenceQuery":
-					String referenceQuery = params.getParameterValue("param1").toOptionalString();
-					String referenceQueryType = params.getParameterValue("param2").toOptionalString();
-					String referenceProjectPath = params.getParameterValue("param3").toOptionalString();
+					var referenceSupport = getReferenceSupport();
+					var currentProject = referenceSupport.getCurrentProject();
+					String atChar = params.getParameterValue("param1").toOptionalString();
+					String query = params.getParameterValue("param2").toOptionalString();
+					String type = params.getParameterValue("param3").toOptionalString();
+					String projectKeyOrPath = params.getParameterValue("param4").toOptionalString();
 					List<Map<String, String>> referenceList = new ArrayList<>();
-					Project referenceProject;
-					if (StringUtils.isNotBlank(referenceProjectPath)) 
-						referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectPath);
-					else
-						referenceProject = null;
-					if (referenceProject != null || StringUtils.isBlank(referenceProjectPath)) {
-						if (referenceQueryType.length() == 0 || "issue".equals(referenceQueryType)) {
-							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+					Project project;
+					var projectManager = OneDev.getInstance(ProjectManager.class);
+					if (atChar.equals("#")) {
+						if (StringUtils.isNotBlank(projectKeyOrPath))
+							project = projectManager.findByPath(projectKeyOrPath);
+						else
+							project = currentProject;
+					} else {
+						project = projectManager.findByKey(projectKeyOrPath);
+					}
+					if (project != null) {
+						if (type.length() == 0 || "issue".equals(type)) {
+							for (Issue issue: referenceSupport.queryIssues(project, query, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
-								referenceMap.put("referenceType", "issue");
-								referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
-								referenceMap.put("referenceTitle", Emojis.getInstance().apply(issue.getTitle()));
+								referenceMap.put("type", "issue");
+								referenceMap.put("reference", issue.getReference().toString(currentProject));
+								referenceMap.put("title", Emojis.getInstance().apply(issue.getTitle()));
 								referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
 								referenceList.add(referenceMap);
 							}
-						} else if ("pr".equals(referenceQueryType) || "pullrequest".equals(referenceQueryType)) {
-							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+						} else if ("pr".equals(type) || "pullrequest".equals(type)) {
+							for (PullRequest request: referenceSupport.queryPullRequests(project, query, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
-								referenceMap.put("referenceType", "pull request");
-								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
-								referenceMap.put("referenceTitle", Emojis.getInstance().apply(request.getTitle()));
+								referenceMap.put("type", "pull request");
+								referenceMap.put("reference", request.getReference().toString(currentProject));
+								referenceMap.put("title", Emojis.getInstance().apply(request.getTitle()));
 								referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
 								referenceList.add(referenceMap);
 							}
-						} else if ("build".equals(referenceQueryType)) {
-							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+						} else if ("build".equals(type)) {
+							for (Build build: referenceSupport.queryBuilds(project, query, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
-								referenceMap.put("referenceType", "build");
-								referenceMap.put("referenceNumber", String.valueOf(build.getNumber()));
+								referenceMap.put("type", "build");
+								referenceMap.put("reference", build.getReference().toString(currentProject));
 								
-								String title;
+								String title = build.getJobName();
 								if (build.getVersion() != null) 
-									title = "(" + build.getVersion() + ") " + build.getJobName();
-								else
-									title = build.getJobName();
-								referenceMap.put("referenceTitle", title);
+									title += " - " + build.getVersion();
+								referenceMap.put("title", title);
 								referenceMap.put("searchKey", build.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);
 							}
@@ -542,6 +562,22 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			
 		});
 	}
+	
+	private void setupReferenceMenuItems(Fragment fragment, AtWhoReferenceSupport referenceSupport) {
+		var issueItem = new WebMarkupContainer("issue");
+		var pullRequestItem = new WebMarkupContainer("pullRequest");
+		var buildItem = new WebMarkupContainer("build");
+		var projectKey = referenceSupport.getCurrentProject().getKey();
+		if (projectKey != null) {
+			var keyAppender = AttributeAppender.append("data-key", projectKey);
+			issueItem.add(keyAppender);
+			pullRequestItem.add(keyAppender);
+			buildItem.add(keyAppender);
+		}
+		fragment.add(issueItem);
+		fragment.add(pullRequestItem);
+		fragment.add(buildItem);
+	}
 
 	@Override
 	public void onEvent(IEvent<?> event) {
@@ -550,7 +586,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			ContentQuoted contentQuoted = (ContentQuoted) event.getPayload();
 			
 			String script = String.format("onedev.server.markdown.onQuote('%s', '%s');", 
-					container.getMarkupId(), JavaScriptEscape.escapeJavaScript(contentQuoted.getContent()));
+					container.getMarkupId(), escapeJavaScript(contentQuoted.getContent()));
 			contentQuoted.getHandler().appendJavaScript(script);			
 			event.stop();
 		}
@@ -566,11 +602,12 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 		
-		String actionCallback = actionBehavior.getCallbackFunction(explicit("action"), explicit("param1"), explicit("param2"), 
-				explicit("param3")).toString();
+		String actionCallback = actionBehavior.getCallbackFunction(
+				explicit("action"), explicit("param1"), explicit("param2"), 
+				explicit("param3"), explicit("param4")).toString();
 		String attachmentUploadUrl = attachmentUploadBehavior.getCallbackUrl().toString();
 		
-		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s');", 
+		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', '%s');", 
 				container.getMarkupId(), 
 				actionCallback, 
 				ATWHO_LIMIT, 
@@ -578,7 +615,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null? getAttachmentSupport().getAttachmentMaxSize(): 0,
 				getUserMentionSupport() != null,
 				getReferenceSupport() != null, 
-				JavaScriptEscape.escapeJavaScript(ProjectPathValidator.PATTERN.pattern()));
+				escapeJavaScript(ProjectPathValidator.PATTERN.pattern()),
+				escapeJavaScript(ProjectKeyValidator.PATTERN.pattern()));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("onedev.server.markdown.onLoad('%s');", container.getMarkupId());
@@ -591,6 +629,12 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				container.getMarkupId(), isImage, StringEscapeUtils.escapeEcmaScript(url), 
 				StringEscapeUtils.escapeEcmaScript(name), 
 				replaceMessage!=null?"'"+replaceMessage+"'":"undefined");
+		target.appendJavaScript(script);
+	}
+
+	public void insertText(AjaxRequestTarget target, String text) {
+		String script = String.format("onedev.server.markdown.insertText('%s', '%s');",
+				container.getMarkupId(), StringEscapeUtils.escapeEcmaScript(text));
 		target.appendJavaScript(script);
 	}
 	

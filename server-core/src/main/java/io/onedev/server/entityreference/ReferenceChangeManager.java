@@ -8,7 +8,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 
 import javax.annotation.Nullable;
 
-public interface EntityReferenceManager {
+public interface ReferenceChangeManager {
 
 	void addReferenceChange(User user, Issue issue, @Nullable String markdown);
 	

@@ -1,20 +1,18 @@
 package io.onedev.server.web.component.commandpalette;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.search.entity.build.BuildQueryLexer;
-import io.onedev.server.search.entity.build.JobCriteria;
-import io.onedev.server.search.entity.build.VersionCriteria;
+import io.onedev.server.search.entity.build.BuildQueryParser;
+import io.onedev.server.search.entity.build.FuzzyCriteria;
+import io.onedev.server.search.entity.build.ReferenceCriteria;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BuildParam extends ParamSegment {
 
@@ -27,28 +25,25 @@ public class BuildParam extends ParamSegment {
 	@Override
 	public Map<String, String> suggest(String matchWith, 
 			Map<String, String> paramValues, int count) {
+		var project = ParsedUrl.getProject(paramValues);
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		BuildQuery query;
 		if (matchWith.length() == 0) {
 			query = new BuildQuery();
-		} else {		
-			List<Criteria<Build>> criterias = new ArrayList<>();
-			criterias.add(new VersionCriteria("*" + matchWith + "*", BuildQueryLexer.Is));
-			criterias.add(new JobCriteria("*" + matchWith + "*", BuildQueryLexer.Is));
-			query = new BuildQuery(new OrCriteria<Build>(criterias));
-		}
-		List<Build> builds = buildManager.query(ParsedUrl.getProject(paramValues), query, 0, count);
-		
-		for (Build build: builds) {
-			if (build.getVersion() != null) {
-				suggestions.put("#" + build.getNumber() + " (" + build.getVersion() + ") - " + build.getJobName(), 
-						String.valueOf(build.getNumber()));
-			} else {
-				suggestions.put("#" + build.getNumber() + " - " + build.getJobName(), 
-						String.valueOf(build.getNumber()));
+		} else {	
+			Criteria<Build> criteria;
+			try {
+				criteria = new ReferenceCriteria(project, matchWith, BuildQueryParser.Is);
+			} catch (Exception e) {
+				criteria = new FuzzyCriteria(matchWith);
 			}
+			query = new BuildQuery(criteria);
 		}
+		List<Build> builds = buildManager.query(project, query, 0, count);
+		
+		for (Build build: builds) 
+			suggestions.put(build.getSummary(project), String.valueOf(build.getNumber()));
 		return suggestions;
 	}
 

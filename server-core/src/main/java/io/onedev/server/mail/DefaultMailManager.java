@@ -421,7 +421,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												if (watch != null) {
 													watch.setWatching(false);
 													issueWatchManager.createOrUpdate(watch);
-													String subject = "Unsubscribed successfully from issue " + involvedIssue.getFQN();
+													String subject = "Unsubscribed successfully from issue " + involvedIssue.getReference();
 													String template = settingManager.getEmailTemplates().getIssueNotificationUnsubscribed();
 
 													Map<String, Object> bindings = new HashMap<>();
@@ -449,7 +449,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 												if (watch != null) {
 													watch.setWatching(false);
 													pullRequestWatchManager.createOrUpdate(watch);
-													String subject = "Unsubscribed successfully from pull request " + involvedPullRequest.getFQN();
+													String subject = "Unsubscribed successfully from pull request " + involvedPullRequest.getReference().toString(null);
 
 													String template = StringUtils.join(settingManager.getEmailTemplates().getPullRequestNotificationUnsubscribed(), "\n");
 													Map<String, Object> bindings = new HashMap<>();

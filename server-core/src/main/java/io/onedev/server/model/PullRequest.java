@@ -8,7 +8,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
@@ -25,7 +26,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.VisitInfoManager;
@@ -58,7 +59,7 @@ import static java.lang.ThreadLocal.withInitial;
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 public class PullRequest extends ProjectBelonging 
-		implements Referenceable, AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
+		implements AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -682,7 +683,6 @@ public class PullRequest extends ProjectBelonging
 		this.uuid = uuid;
 	}
 	
-	@Override
 	public long getNumber() {
 		return number;
 	}
@@ -920,12 +920,8 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	@Override
-	public String getType() {
-		return "pull request";
-	}
-	
-	public ProjectScopedNumber getFQN() {
-		return new ProjectScopedNumber(getTargetProject(), getNumber());
+	public EntityReference getReference() {
+		return new PullRequestReference(getProject(), getNumber());
 	}
 	
 	public static void push(PullRequest request) {
@@ -1076,9 +1072,9 @@ public class PullRequest extends ProjectBelonging
 	public static String getSerialLockName(Long requestId) {
 		return "pull-request-" + requestId + "-serial";
 	}
-
-	public String getReference(@Nullable Project currentProject) {
-		return Referenceable.asReference(this, currentProject);
+	
+	public String getSummary(@Nullable Project currentProject) {
+		return Emojis.getInstance().apply(getTitle()) + " (" + getReference().toString(currentProject)+ ")";
 	}
 	
 }

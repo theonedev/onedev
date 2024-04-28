@@ -84,8 +84,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				requestCriteria = new PullRequestQueryBaseVisitor<Criteria<PullRequest>>() {
 
 					@Override
-					public Criteria<PullRequest> visitNumberCriteria(NumberCriteriaContext ctx) {
-						return new SimpleNumberCriteria(getLongValue(ctx.number.getText()));
+					public Criteria<PullRequest> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
+						return new ReferenceCriteria(project, ctx.getText(), Is);
 					}
 
 					@Override
@@ -236,7 +236,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							case PullRequestQueryLexer.IsNot:
 								switch (fieldName) {
 									case PullRequest.NAME_NUMBER:
-										return new NumberCriteria(project, value, operator);
+										return new ReferenceCriteria(project, value, operator);
 									case PullRequest.NAME_STATUS:
 										try {
 											return new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()), operator);
@@ -264,7 +264,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							case PullRequestQueryLexer.IsGreaterThan:
 								switch (fieldName) {
 									case PullRequest.NAME_NUMBER:
-										return new NumberCriteria(project, value, operator);
+										return new ReferenceCriteria(project, value, operator);
 									case PullRequest.NAME_COMMENT_COUNT:
 										return new CommentCountCriteria(getIntValue(value), operator);
 									default:

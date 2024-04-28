@@ -45,14 +45,15 @@ public class PullRequestChoiceEditor extends PropertyEditor<Long> {
 		else
 			request = null;
 		
-		PullRequestChoiceProvider choiceProvider = new PullRequestChoiceProvider(new AbstractReadOnlyModel<Project>() {
+		PullRequestChoiceProvider choiceProvider = new PullRequestChoiceProvider() {
+
 
 			@Override
-			public Project getObject() {
-				return getProject();
+			protected Project getProject() {
+				return PullRequestChoiceEditor.this.getProject();
 			}
-    		
-    	});
+			
+		};
     	input = new PullRequestSingleChoice("input", Model.of(request), choiceProvider) {
 
     		@Override

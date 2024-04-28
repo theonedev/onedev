@@ -7,11 +7,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
-import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -38,6 +38,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -53,7 +54,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -62,6 +62,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
@@ -76,11 +78,11 @@ abstract class InsertUrlPanel extends Panel {
 	
 	private static final MetaDataKey<HashSet<String>> FOLDER_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
 	
-	static final String TAB_INPUT_URL = "Input URL";
+	private static final String TAB_INPUT_URL = "Input URL";
 	
-	static final String TAB_PICK_EXISTING = "Pick Existing";
+	private static final String TAB_PICK_EXISTING = "Pick Existing";
 	
-	static final String TAB_UPLOAD = "Upload";
+	private static final String TAB_UPLOAD = "Upload";
 	
 	private static final String CONTENT_ID = "content";
 	
@@ -206,21 +208,19 @@ abstract class InsertUrlPanel extends Panel {
 		if (context != null) {
 			fragment = new Fragment(CONTENT_ID, "pickBlobFrag", this);
 			BlobIdentFilter blobIdentFilter = new BlobIdentFilter() {
-
 				@Override
 				public boolean filter(BlobIdent blobIdent) {
 					if (isImage) {
 						if (blobIdent.isTree()) {
 							return true;
 						} else {
-					        String mimetype= MIME_TYPES.getContentType(new File(blobIdent.path));
-					        return mimetype.split("/")[0].equals("image");									
+							String mimetype = MIME_TYPES.getContentType(new File(blobIdent.path));
+							return mimetype.split("/")[0].equals("image");
 						}
 					} else {
 						return true;
 					}
 				}
-				
 			};
 			
 			ObjectId commitId = resolveCommitId(context);
@@ -271,113 +271,94 @@ abstract class InsertUrlPanel extends Panel {
 			});
 		} else {
 			AttachmentSupport attachmentSupport = Preconditions.checkNotNull(markdownEditor.getAttachmentSupport());
+			IModel<List<String>> attachmentsModel;
 			if (isImage) {
 				fragment = new Fragment(CONTENT_ID, "pickAttachedImageFrag", this);
-				fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
+				attachmentsModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected List<String> load() {
-						List<String> attachmentNames = new ArrayList<>();
-						for (String attachmentName: attachmentSupport.getAttachments()) {
-							if (markdownEditor.isWebSafeImage(attachmentName))
-								attachmentNames.add(attachmentName);
+						List<String> attachments = new ArrayList<>();
+						for (String attachment : attachmentSupport.getAttachments()) {
+							if (markdownEditor.isWebSafeImage(attachment))
+								attachments.add(attachment);
 						}
-						return attachmentNames;
-					}
-					
-				}) {
-
-					@Override
-					protected void populateItem(final ListItem<String> item) {
-						String attachmentName = item.getModelObject();
-						String attachmentUrl = attachmentSupport.getAttachmentUrlPath(attachmentName);
-						
-						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								markdownEditor.insertUrl(target, true, attachmentUrl, 
-										linkText!=null?linkText:attachmentName, null);
-								onClose(target);
-							}
-
-						};
-						selectLink.add(new ExternalImage("image", HtmlEscape.escapeHtml5(attachmentUrl)));
-						item.add(selectLink);
-						
-						item.add(new AjaxLink<Void>("delete") {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setVisible(attachmentSupport.canDeleteAttachment());
-							}
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								attachmentSupport.deleteAttachemnt(attachmentName);
-								target.add(fragment);
-							}
-							
-						});
+						return attachments;
 					}
 
-				});			
-				
+				};
 			} else {
 				fragment = new Fragment(CONTENT_ID, "pickAttachedFileFrag", this);
-				fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
+				attachmentsModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected List<String> load() {
 						return attachmentSupport.getAttachments();
 					}
-					
-				}) {
 
-					@Override
-					protected void populateItem(final ListItem<String> item) {
-						String attachmentName = item.getModelObject();
-						String attachmentUrl = attachmentSupport.getAttachmentUrlPath(attachmentName);
-						
-						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								markdownEditor.insertUrl(target, false, attachmentUrl, 
-										linkText!=null?linkText:attachmentName, null);
-								onClose(target);
-							}
-
-						};
-						selectLink.add(new Label("file", HtmlEscape.escapeHtml5(attachmentName)));
-						item.add(selectLink);
-						
-						item.add(new AjaxLink<Void>("delete") {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
-							}
-							
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								attachmentSupport.deleteAttachemnt(attachmentName);
-								target.add(fragment);
-							}
-							
-						});
-					}
-
-				});			
+				};
 			}
+			fragment.add(new ListView<>("attachments", attachmentsModel) {
+
+				@Override
+				protected void populateItem(final ListItem<String> item) {
+					String attachmentName = item.getModelObject();
+					String attachmentUrl = attachmentSupport.getAttachmentUrlPath(attachmentName);
+
+					AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							markdownEditor.insertUrl(target, true, attachmentUrl,
+									linkText != null ? linkText : attachmentName, null);
+							onClose(target);
+						}
+
+					};
+					if (isImage)
+						selectLink.add(new ExternalImage("image", escapeHtml5(attachmentUrl)));
+					else
+						selectLink.add(new Label("file", escapeHtml5(attachmentName)));
+					
+					item.add(selectLink);
+
+					item.add(new AjaxLink<Void>("delete") {
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
+						}
+
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(attachmentSupport.canDeleteAttachment());
+						}
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							attachmentSupport.deleteAttachemnt(attachmentName);
+							target.add(fragment);
+						}
+
+					});
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!attachmentsModel.getObject().isEmpty());
+				}
+				
+			});
+			fragment.add(new WebMarkupContainer("noAttachments") {
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(attachmentsModel.getObject().isEmpty());
+				}
+			});
 		}
 		fragment.setOutputMarkupId(true);
 		return fragment;
@@ -590,7 +571,7 @@ abstract class InsertUrlPanel extends Panel {
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

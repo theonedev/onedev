@@ -64,7 +64,6 @@ import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.*;
-import io.onedev.server.xodus.IssueInfoManager;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -1595,7 +1594,7 @@ public abstract class IssueListPanel extends Panel {
 				});
 				
 				fragment.add(new CopyToClipboardLink("copy",
-						Model.of(issue.getTitle() + " (" + issue.getReference(getProject()) + ")")));
+						Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
 
 				fragment.add(new AjaxLink<Void>("pin") {
 

@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.match.PatternApplied;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -19,23 +21,23 @@ import io.onedev.server.pack.PackSupport;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import io.onedev.commons.utils.match.PatternApplied;
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 import static java.util.Collections.sort;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 public class SuggestionUtils {
@@ -47,7 +49,7 @@ public class SuggestionUtils {
 		for (var candidate: candidates) {
 			var match = LinearRange.match(candidate, matchWith);
 			if (match != null) 
-				suggestions.add(new InputSuggestion(candidate, null, match));
+				suggestions.add(new InputSuggestion(candidate, match));
 		}
 		
 		return sortAndTruncate(suggestions, matchWith);
@@ -63,21 +65,13 @@ public class SuggestionUtils {
 
 	public static List<InputSuggestion> suggestPackTypes(String matchWith) {
 		List<PackSupport> packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
-		packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+		packSupports.sort(comparing(PackSupport::getOrder));
 		return suggest(packSupports.stream().map(PackSupport::getPackType).collect(toList()), matchWith);
 	}
 	
 	private static List<InputSuggestion> sortAndTruncate(List<InputSuggestion> suggestions, String matchWith) {
-		if (matchWith.length() != 0) {
-			suggestions.sort(new Comparator<InputSuggestion>() {
-
-				@Override
-				public int compare(InputSuggestion o1, InputSuggestion o2) {
-					return o1.getContent().length() - o2.getContent().length();
-				}
-				
-			});
-		}
+		if (matchWith.length() != 0) 
+			suggestions.sort(comparingInt(o -> o.getContent().length()));
 		if (suggestions.size() > InputAssistBehavior.MAX_SUGGESTIONS)
 			return suggestions.subList(0, InputAssistBehavior.MAX_SUGGESTIONS);
 		else
@@ -96,97 +90,98 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestBranches(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				if (SecurityUtils.canReadCode(project)) {
-					List<String> branchNames = project.getBranchRefs()
-							.stream()
-							.map(it-> GitUtils.ref2branch(it.getName()))
-							.sorted()
-							.collect(toList());
-					return SuggestionUtils.suggest(branchNames, matchWith);
-				} else {
-					return new ArrayList<>();
-				}
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, ':', null);
+		if (scopedQuery != null) {
+			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
+				List<String> branchNames = scopedQuery.getProject().getBranchRefs()
+						.stream()
+						.map(it -> GitUtils.ref2branch(it.getName()))
+						.sorted()
+						.collect(toList());
+				suggestions = SuggestionUtils.suggest(branchNames, scopedQuery.getQuery());
+				if (project == null)
+					suggestions = prefix(suggestions, scopedQuery.getProject().getPath() + ":");
 			}
-			
-		}, ":");
+		}
+		if (suggestions.isEmpty() && project == null && matchWith.length() == 0) 
+			suggestions.add(new InputSuggestion("path/to/project:mybranch", "An example branch", null));
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestTags(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				if (SecurityUtils.canReadCode(project)) {
-					List<String> tags = project.getTagRefs()
-							.stream()
-							.sorted()
-							.map(it-> GitUtils.ref2tag(it.getName()))
-							.collect(toList());
-					Collections.reverse(tags);
-					return SuggestionUtils.suggest(tags, matchWith);
-				} else {
-					return new ArrayList<>();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, ':', null);
+		if (scopedQuery != null) {
+			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
+				List<String> tags = scopedQuery.getProject().getTagRefs()
+						.stream()
+						.sorted()
+						.map(it -> GitUtils.ref2tag(it.getName()))
+						.collect(toList());
+				Collections.reverse(tags);
+				suggestions = SuggestionUtils.suggest(tags, scopedQuery.getQuery());
+				if (project == null)
+					suggestions = prefix(suggestions, scopedQuery.getProject().getPath() + ":");
+			}
+		}
+		if (suggestions.isEmpty() && project == null && matchWith.length() == 0)
+			suggestions.add(new InputSuggestion("path/to/project:mytag", "An example tag", null));
+		return suggestions;
+	}
+
+	public static List<InputSuggestion> suggestRevisions(Project project, String matchWith) {
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, ':', null);
+		if (scopedQuery != null) {
+			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
+				List<String> branches = scopedQuery.getProject().getBranchRefs()
+						.stream()
+						.sorted()
+						.map(it -> GitUtils.ref2branch(it.getName()))
+						.collect(toList());
+				Collections.reverse(branches);
+				if (scopedQuery.getProject().getDefaultBranch() != null) {
+					branches.remove(scopedQuery.getProject().getDefaultBranch());
+					branches.add(0, scopedQuery.getProject().getDefaultBranch());
 				}
+
+				List<String> tags = scopedQuery.getProject().getTagRefs()
+						.stream()
+						.sorted()
+						.map(it -> GitUtils.ref2tag(it.getName()))
+						.collect(toList());
+				Collections.reverse(tags);
+
+				List<String> revisions = new ArrayList<>();
+				revisions.addAll(branches);
+				revisions.addAll(tags);
+
+				suggestions = SuggestionUtils.suggest(revisions, scopedQuery.getQuery());
+				if (project == null)
+					suggestions = prefix(suggestions, scopedQuery.getProject().getPath() + ":");
 			}
-			
-		}, ":");
+		}
+		if (suggestions.isEmpty() && project == null && matchWith.length() == 0)
+			suggestions.add(new InputSuggestion("path/to/project:branch-or-tag", "An example revision", null));
+		return suggestions;
 	}
 
-	public static List<InputSuggestion> suggestRevisions(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				if (SecurityUtils.canReadCode(project)) {
-					List<String> branches = project.getBranchRefs()
-							.stream()
-							.sorted()
-							.map(it-> GitUtils.ref2branch(it.getName()))
-							.collect(toList());
-					Collections.reverse(branches);
-					if (project.getDefaultBranch() != null) {
-						branches.remove(project.getDefaultBranch());
-						branches.add(0, project.getDefaultBranch());
-					}
-					
-					List<String> tags = project.getTagRefs()
-							.stream()
-							.sorted()
-							.map(it-> GitUtils.ref2tag(it.getName()))
-							.collect(toList());
-					Collections.reverse(tags);
-					
-					List<String> revisions = new ArrayList<>();
-					revisions.addAll(branches);
-					revisions.addAll(tags);
-					
-					return SuggestionUtils.suggest(revisions, matchWith);
-				} else {
-					return new ArrayList<>();
-				}
-			}
-
-		}, ":");
+	private static List<InputSuggestion> prefix(List<InputSuggestion> suggestions, String prefix) {
+		var prefixedSuggestions = new ArrayList<InputSuggestion>();
+		for (var suggestion: suggestions) {
+			var match = suggestion.getMatch();
+			if (match != null)
+				match = new LinearRange(match.getFrom() + prefix.length(), match.getTo() + prefix.length());
+			var caret = suggestion.getCaret();
+			if (caret != -1)
+				caret += prefix.length();
+			suggestion = new InputSuggestion(prefix + suggestion.getContent(), caret, suggestion.getDescription(), match);
+			prefixedSuggestions.add(suggestion);
+		}
+		return prefixedSuggestions;
 	}
-	
-	public static List<InputSuggestion> suggestCommits(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				if (SecurityUtils.canReadCode(project)) 
-					return null;
-				else 
-					return new ArrayList<>();
-			}
-			
-		}, ":");
-	}
-	
+
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
@@ -215,6 +210,20 @@ public class SuggestionUtils {
 				.sorted()
 				.collect(toList());
 		return suggest(projectNames, matchWith);
+	}
+
+	public static List<InputSuggestion> suggestProjectKeys(String matchWith) {
+		Collection<Project> projects = getProjectManager().getPermittedProjects(new AccessProject());
+		ProjectCache cache = getProjectManager().cloneCache();
+
+		var projectKeys = new ArrayList<String>();
+		for (var project: projects) {
+			var key = cache.get(project.getId()).getKey();
+			if (key != null)
+				projectKeys.add(key);
+		}
+		Collections.sort(projectKeys);
+		return suggest(projectKeys, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestAgents(String matchWith) {
@@ -346,61 +355,64 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith, int count) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (SecurityUtils.canAccessProject(project)) {
-					for (Issue issue: OneDev.getInstance(IssueManager.class).query(null, project, matchWith, count)) {
-						String title = Emojis.getInstance().apply(issue.getTitle());
-						suggestions.add(new InputSuggestion("#" + issue.getNumber(), title, null));
-					}
-				}				
-				return suggestions;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', '-');
+		if (scopedQuery != null) {
+			if (SecurityUtils.canAccessProject(scopedQuery.getProject())) {
+				for (Issue issue : OneDev.getInstance(IssueManager.class).query(null, scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
+					String title = Emojis.getInstance().apply(issue.getTitle());
+					suggestions.add(new InputSuggestion(issue.getReference().toString(project), title, null));
+				}
 			}
-			
-		}, "#");
+		}
+		if (suggestions.isEmpty() && matchWith.length() == 0) {
+			suggestions.add(new InputSuggestion("PROJECTKEY-100", "An example issue", null));
+			suggestions.add(new InputSuggestion("path/to/project#100", "An example issue", null));
+			if (project != null)
+				suggestions.add(new InputSuggestion("#100", "An example issue", null));				
+		}
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestPullRequests(@Nullable Project project, String matchWith, int count) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (SecurityUtils.canReadCode(project)) {
-					PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-					for (PullRequest request: pullRequestManager.query(project, matchWith, count)) {
-						String title = Emojis.getInstance().apply(request.getTitle());
-						suggestions.add(new InputSuggestion("#" + request.getNumber(), title, null));
-					}
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', '-');
+		if (scopedQuery != null) {
+			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
+				PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
+				for (PullRequest request: pullRequestManager.query(scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
+					String title = Emojis.getInstance().apply(request.getTitle());
+					suggestions.add(new InputSuggestion(request.getReference().toString(project), title, null));
 				}
-				return suggestions;
 			}
-			
-		}, "#");
+		}
+		if (suggestions.isEmpty() && matchWith.length() == 0) {
+			suggestions.add(new InputSuggestion("PROJECTKEY-100", "An example pull request", null));
+			suggestions.add(new InputSuggestion("path/to/project#100", "An example pull request", null));
+			if (project != null)
+				suggestions.add(new InputSuggestion("#100", "An example pull request", null));
+		}
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestBuilds(@Nullable Project project, String matchWith, int count) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public List<InputSuggestion> suggest(Project project, String matchWith) {
-				List<InputSuggestion> suggestions = new ArrayList<>();
-				for (Build build: OneDev.getInstance(BuildManager.class)
-						.query(project, matchWith, count)) {
-					String description;
-					if (build.getVersion() != null) 
-						description = "(" + build.getVersion() + ") " + build.getJobName();
-					else
-						description = build.getJobName();
-					suggestions.add(new InputSuggestion("#" + build.getNumber(), description, null));
-				}
-				return suggestions;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', '-');
+		if (scopedQuery != null) {
+			for (Build build: OneDev.getInstance(BuildManager.class).query(scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
+				String description = build.getJobName();
+				if (build.getVersion() != null)
+					description += " - " + build.getVersion();
+				suggestions.add(new InputSuggestion(build.getReference().toString(project), description, null));
 			}
-			
-		}, "#");
+		}
+		if (suggestions.isEmpty() && matchWith.length() == 0) {
+			suggestions.add(new InputSuggestion("PROJECTKEY-100", "An example build", null));
+			suggestions.add(new InputSuggestion("path/to/project#100", "An example build", null));
+			if (project != null)
+				suggestions.add(new InputSuggestion("#100", "An example build", null));
+		}
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestGroups(String matchWith) {
@@ -412,83 +424,9 @@ public class SuggestionUtils {
 		return suggest(groupNames, matchWith);
 	}
 
-	public static List<InputSuggestion> suggestRoles(String matchWith) {
-		List<String> roleNames = OneDev.getInstance(RoleManager.class).query()
-				.stream()
-				.map(it->it.getName())
-				.sorted()
-				.collect(toList());
-		return suggest(roleNames, matchWith);
-	}
-	
 	public static List<InputSuggestion> suggestBlobs(Project project, String matchWith) {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		return suggestByPattern(commitInfoManager.getFiles(project.getId()), matchWith);
-	}
-	
-	private static List<InputSuggestion> suggest(@Nullable Project project, String matchWith, 
-			ProjectScopedSuggester projectScopedSuggester, String scopeSeparator) {
-		if (project == null) {
-			if (matchWith.contains(scopeSeparator)) {
-				String projectName = StringUtils.substringBefore(matchWith, scopeSeparator);
-				matchWith = StringUtils.substringAfter(matchWith, scopeSeparator);
-				project = getProjectManager().findByPath(projectName);
-				if (project != null) {
-					List<InputSuggestion> projectScopedSuggestions = projectScopedSuggester.suggest(project, matchWith);
-					if (projectScopedSuggestions != null) {
-						List<InputSuggestion> suggestions = new ArrayList<>();
-						for (InputSuggestion suggestion: projectScopedSuggestions) {
-							LinearRange match = suggestion.getMatch();
-							if (suggestion.getContent().startsWith(scopeSeparator)) {
-								if (match != null) {
-									int length = project.getPath().length();
-									match = new LinearRange(match.getFrom() + length, match.getTo() + length);
-								}
-								suggestions.add(new InputSuggestion(
-										project.getPath() + suggestion.getContent(), 
-										suggestion.getDescription(), 
-										match));
-							} else {
-								if (match != null) {
-									int length = project.getPath().length() + scopeSeparator.length();
-									match = new LinearRange(match.getFrom() + length, match.getTo() + length);
-								}
-								suggestions.add(new InputSuggestion(
-										project.getPath() + scopeSeparator + suggestion.getContent(), 
-										suggestion.getDescription(), 
-										match));
-							}
-						}
-						return suggestions;
-					} else {
-						return null;
-					}
-				} else {
-					return new ArrayList<>();
-				}
-			} else {
-				List<InputSuggestion> suggestions = new ArrayList<>();
-				ProjectCache cache = getProjectManager().cloneCache();
-				List<String> projectPaths = getProjectManager().getPermittedProjects(new AccessProject()).stream()
-						.map(it->cache.get(it.getId()).getPath())
-						.collect(toList());
-				Collections.sort(projectPaths);
-				
-				for (String projectPath: projectPaths) {
-					LinearRange match = LinearRange.match(projectPath + scopeSeparator, matchWith);
-					if (match != null) {
-						suggestions.add(new InputSuggestion(
-								projectPath + scopeSeparator, 
-								projectPath.length() + scopeSeparator.length(), 
-								"select project first", 
-								match));
-					}
-				}
-				return sortAndTruncate(suggestions, matchWith);
-			}
-		} else {
-			return projectScopedSuggester.suggest(project, matchWith);
-		}
 	}
 	
 	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
@@ -617,13 +555,6 @@ public class SuggestionUtils {
 		}
 		
 		return suggestions;		
-	}
-
-	static interface ProjectScopedSuggester {
-		
-		@Nullable
-		List<InputSuggestion> suggest(Project project, String matchWith);
-		
 	}
 	
 }

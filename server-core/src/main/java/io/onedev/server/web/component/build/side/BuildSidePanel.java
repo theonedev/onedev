@@ -5,7 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildLabelManager;
-import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -20,7 +20,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
+import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
@@ -477,11 +477,11 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 
-		add(new ReferencePanel("reference") {
+		add(new EntityReferencePanel("reference") {
 
 			@Override
-			protected Referenceable getReferenceable() {
-				return getBuild();
+			protected EntityReference getReference() {
+				return getBuild().getReference();
 			}
 			
 		});

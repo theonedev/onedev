@@ -15,17 +15,17 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
@@ -41,8 +41,8 @@ import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.RevisionDiff;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -74,6 +74,8 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements RevisionDiff.AnnotationSupport, JobAuthorizationContextAware {
@@ -176,9 +178,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		super.onInitialize();
 		
 		Emojis emojis = Emojis.getInstance();
-		ReferenceTransformer transformer = new ReferenceTransformer(getProject(), null);
-		String title = emojis.apply(transformer.apply(getCommit().getShortMessage()));
-		add(new Label("title", title).setEscapeModelStrings(false));
+		var transformed = transformReferences(
+				getCommit().getShortMessage(), getProject(), new LinkTransformer(null));
+		add(new Label("title", emojis.apply(transformed)).setEscapeModelStrings(false));
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
@@ -206,8 +208,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
-			add(new Label("detail", emojis.apply(transformer.apply(message)))
-					.setEscapeModelStrings(false));
+			transformed = transformReferences(
+					message, getProject(), new LinkTransformer(null));
+			add(new Label("detail", emojis.apply(transformed)).setEscapeModelStrings(false));
 		} else { 
 			add(new WebMarkupContainer("detail").setVisible(false));
 		}

@@ -6,7 +6,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.util.*;
+import io.onedev.server.util.IssueTimes;
+import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -14,7 +17,10 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 import javax.annotation.Nullable;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +29,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	
     @Nullable
     Issue find(Project project, long number);
-    
-    @Nullable
-    Issue find(ProjectScopedNumber fqn);
-    
-    @Nullable
-    Issue findByFQN(String fqn);
 
     @Nullable
-    Issue findByUUID(String uuid);
+    Issue find(String uuid);
     
 	void open(Issue issue);
 	

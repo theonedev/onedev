@@ -155,7 +155,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							case "tag":
 								return SuggestionUtils.suggestTags(project, matchWith);
 							case "commit":
-								return SuggestionUtils.suggestCommits(project, matchWith);
+								return null;
 							case "build":
 								return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							}
@@ -175,7 +175,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								else if (operator == HasAny) 
 									return SuggestionUtils.suggestLinkSpecs(matchWith);
 								else
-									return SuggestionUtils.suggestCommits(project, matchWith);
+									return null;
 							} else {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								
@@ -197,7 +197,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} else if (fieldSpec instanceof BuildChoiceField) {
 											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 										} else if (fieldSpec instanceof CommitField) {
-											return SuggestionUtils.suggestCommits(project, matchWith);
+											return null;
 										} else if (fieldSpec instanceof PullRequestChoiceField) {
 											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 										} else if (fieldSpec instanceof BooleanField) {
@@ -294,7 +294,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		} else if (suggestedLiteral.equals("#")) {
-			return Optional.of("find issue by number");
+			if (getProject() != null)
+				return Optional.of("find issue by number");
+			else 
+				return null;
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
@@ -322,7 +325,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Issue.NAME_PROJECT)) {
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
-					} else if (fieldName.equals(Issue.NAME_TITLE) 
+					} else if (fieldName.equals(Issue.NAME_TITLE)
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
 							|| fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
@@ -334,7 +337,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return hints;
 	}
-
+	
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
 		return suggestion.getDescription() != null 

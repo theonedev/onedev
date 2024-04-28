@@ -1,41 +1,36 @@
 package io.onedev.server.notification;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.shiro.authz.Permission;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
-
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildQueryPersonalization;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.web.UrlManager;
+import org.apache.shiro.authz.Permission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.util.stream.Collectors.*;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class BuildNotificationManager extends AbstractNotificationManager {
@@ -76,12 +71,34 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		
 		if (!emails.isEmpty()) {
 			Build build = event.getBuild();
-			String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
 
-			String summary = build.getStatus().toString();
-			if (build.getVersion() != null)
-				summary = build.getVersion() + " " + summary;
+			String status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
+			String subject;
+			if (build.getVersion() != null) {
+				subject = format(
+						"[Build %s] (%s: %s) %s", 
+						build.getReference(), 
+						build.getJobName(), 
+						build.getVersion(), 
+						status);
+			} else {
+				subject = format(
+						"[Build %s] (%s) %s", 
+						build.getReference(), 
+						build.getJobName(), 
+						status);
+			}
 
+			String summary;
+			if (build.getBranch() != null)
+				summary = status + " on branch " + build.getBranch();
+			else if (build.getTag() != null)
+				summary = status + " on tag " + build.getTag();
+			else if (build.getRequest() != null)
+				summary = status + " on pull request " + build.getRequest().getReference();
+			else
+				summary = status + " on ref " + build.getRefName();
+			
 			String url = urlManager.urlFor(build);
 			String threadingReferences = "<" + build.getProject().getPath() + "-build-" + build.getNumber() + "@onedev>";
 			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
@@ -130,7 +147,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 							}
 						} catch (Exception e) {
 							String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
-									user.getName(), build.getFQN(), queryString);
+									user.getName(), build.getReference().toString(null), queryString);
 							logger.error(message, e);
 						} finally {
 							User.pop();
@@ -171,7 +188,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 							}
 						} catch (Exception e) {
 							String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
-									user.getName(), build.getFQN(), queryString);
+									user.getName(), build.getReference().toString(null), queryString);
 							logger.error(message, e);
 						} finally {
 							User.pop();

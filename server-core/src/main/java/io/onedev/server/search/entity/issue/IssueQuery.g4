@@ -12,7 +12,7 @@ criteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
-    | PoundSign? number=Number #NumberCriteria
+    | Reference #ReferenceCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -221,16 +221,12 @@ RParens
 	: ')'
 	;
 
-PoundSign
-    : '#'
-    ;
-
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
     ;
 
-Number
-    : [0-9]+
+Reference
+    : ([a-zA-Z0-9_]([a-zA-Z0-9_\-/.]*[a-zA-Z0-9_])?)? '#' [0-9]+ | [A-Z][A-Z]+ '-' [0-9]+
     ;
 
 WS

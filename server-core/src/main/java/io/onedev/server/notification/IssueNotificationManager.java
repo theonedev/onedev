@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.asset.emoji.Emojis;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -156,13 +157,18 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				watchManager.watch(issue, user, true);
 		}
 
+		var emojis = Emojis.getInstance();
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
 		String replyAddress = mailManager.getReplyAddress(issue);
 		boolean replyable = replyAddress != null;
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
-			String subject = String.format("[Issue %s] (%s: You) %s", issue.getFQN(), entry.getKey(), issue.getTitle());
+			String subject = String.format(
+					"[Issue %s] (%s: You) %s", 
+					issue.getReference(), 
+					entry.getKey(), 
+					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue().getMembers()) {
 				if (!member.equals(user)) {
@@ -186,7 +192,11 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		}
 		
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
-			String subject = String.format("[Issue %s] (%s: You) %s", issue.getFQN(), entry.getKey(), issue.getTitle());
+			String subject = String.format(
+					"[Issue %s] (%s: You) %s", 
+					issue.getReference(), 
+					entry.getKey(), 
+					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue()) {
 				if (!member.equals(user)) {
@@ -223,7 +233,10 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					watchManager.watch(issue, mentionedUser, true);
 					authorizationManager.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-						String subject = String.format("[Issue %s] (Mentioned You) %s", issue.getFQN(), issue.getTitle());
+						String subject = String.format(
+								"[Issue %s] (Mentioned You) %s", 
+								issue.getReference(), 
+								emojis.apply(issue.getTitle()));
 						String threadingReferences = String.format("<mentioned-%s@onedev>", issue.getUUID());
 						
 						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
@@ -256,8 +269,11 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		}
 
 		if (!bccEmailAddresses.isEmpty()) {
-			String subject = String.format("[Issue %s] (%s) %s", 
-					issue.getFQN(), (event instanceof IssueOpened)?"Opened":"Updated", issue.getTitle()); 
+			String subject = String.format(
+					"[Issue %s] (%s) %s", 
+					issue.getReference(), 
+					(event instanceof IssueOpened)?"Opened":"Updated", 
+					emojis.apply(issue.getTitle())); 
 
 			Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
 			String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);

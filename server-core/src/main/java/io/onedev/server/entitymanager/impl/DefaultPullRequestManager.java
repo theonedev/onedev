@@ -43,13 +43,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStats;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.PullRequestInfoManager;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Session;
@@ -565,16 +563,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	@Sessional
 	@Override
-	public PullRequest findLatest(Project project) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSourceProject(project), ofTargetProject(project)));
-		criteria.addOrder(Order.desc(PullRequest.PROP_ID));
-		return find(criteria);
-	}
-	
-	@Sessional
-	@Override
 	public Collection<PullRequest> queryOpenTo(ProjectAndBranch target) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
@@ -915,7 +903,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	}
 	
 	@Sessional
-	public PullRequest findByUUID(String uuid) {
+	public PullRequest find(String uuid) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(Restrictions.eq(PullRequest.PROP_UUID, uuid));
 		criteria.setCacheable(true);
@@ -924,38 +912,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	@Sessional
 	@Override
-	public PullRequest findByFQN(String pullRequestFQN) {
-		return find(ProjectScopedNumber.from(pullRequestFQN));
-	}
-	
-	@Sessional
-	@Override
-	public PullRequest find(ProjectScopedNumber pullRequestFQN) {
-		return find(pullRequestFQN.getProject(), pullRequestFQN.getNumber());
-	}
-	
-	@Sessional
-	@Override
 	public List<PullRequest> query(Project project, String fuzzyQuery, int count) {
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-
-		if (fuzzyQuery.contains("#")) {
-			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
-			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
-				project = specifiedProject;
-				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
-			}
-		}
-		
 		Set<Project> projects = Sets.newHashSet(project);
 		projects.addAll(project.getForkAncestors().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
 		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));
 		
-		if (fuzzyQuery.startsWith("#"))
-			fuzzyQuery = fuzzyQuery.substring(1);
 		if (fuzzyQuery.length() != 0) {
 			try {
 				long buildNumber = Long.parseLong(fuzzyQuery);

@@ -43,7 +43,7 @@ public class IssueChoiceEditSupport implements EditSupport {
 										if (Project.get() != null && Project.get().getForkRoot().equals(issue.getNumberScope()))
 											return new Label(id, "#" + issue.getNumber());
 										else
-											return new Label(id, issue.getFQN().toString());
+											return new Label(id, issue.getReference().toString());
 									} else {
 										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
 									}

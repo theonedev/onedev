@@ -32,7 +32,7 @@ public class FixedInPullRequestCriteria extends Criteria<Issue> {
 	public FixedInPullRequestCriteria(PullRequest request) {
 		this.request = request;
 		project = request.getProject();
-		value = request.getFQN().toString();
+		value = request.getReference().toString(null);
 	}
 	
 	public PullRequest getRequest() {

@@ -6360,11 +6360,22 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.element("pipeline").detach();
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("key").setText(Project.NULL_KEY_PREFIX + UUID.randomUUID());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Dashboards.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (var showJobNode: dom.selectNodes(".//showJob")) 
+					showJobNode.detach();
 				dom.writeToFile(file, false);
 			}
 		}
 	}
-	
+
 }

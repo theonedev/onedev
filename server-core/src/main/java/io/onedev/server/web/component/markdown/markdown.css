@@ -454,3 +454,7 @@
 .markdown-rendered div.paragraph {
 	margin-bottom: 1.2rem;
 }
+
+.markdown-action-menu {
+	min-width: 320px !important;
+}

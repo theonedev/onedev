@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.issue.editabletitle;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -11,7 +11,6 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.ReferenceTransformer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -26,6 +25,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
 public abstract class IssueEditableTitlePanel extends Panel {
@@ -112,15 +113,9 @@ public abstract class IssueEditableTitlePanel extends Panel {
 
 			@Override
 			protected String load() {
-				ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), null);
-				String prefix;
-				if (getIssue().getProject().equals(getProject()))
-					prefix = "";
-				else
-					prefix = getIssue().getProject().getPath().substring(getProject().getPath().length()+1);
-				
-				return prefix + "#" + getIssue().getNumber() + "&nbsp;&nbsp;" 
-						+ Emojis.getInstance().apply(transformer.apply(getIssue().getTitle()));
+				var transformed = transformReferences(getIssue().getTitle(), getIssue().getProject(), 
+						new LinkTransformer(null));
+				return Emojis.getInstance().apply(transformed) + " (" + getIssue().getReference().toString(getProject()) + ")";
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -153,7 +148,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			
 		});
 		titleViewer.add(new CopyToClipboardLink("copy", 
-				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
+				Model.of(getIssue().getTitle() + " (" + getIssue().getReference().toString(getProject()) + ")")));
 		
 		titleViewer.add(new IssueProgressPanel("progress") {
 

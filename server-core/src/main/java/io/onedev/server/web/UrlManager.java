@@ -2,7 +2,6 @@ package io.onedev.server.web;
 
 import io.onedev.server.model.*;
 import io.onedev.server.util.ProjectAndRevision;
-import io.onedev.server.util.ProjectScopedNumber;
 import org.eclipse.jgit.lib.ObjectId;
 
 public interface UrlManager {
@@ -15,7 +14,7 @@ public interface UrlManager {
 	
 	String urlFor(PullRequest request);
 	
-	String urlForPullRequest(ProjectScopedNumber requestFQN);
+	String urlForPullRequest(Project project, Long pullRequestNumber);
 	
 	String urlFor(PullRequestComment comment);
 	
@@ -23,11 +22,11 @@ public interface UrlManager {
 	
 	String urlFor(Issue issue);
 	
-	String urlForIssue(ProjectScopedNumber issueFQN);
+	String urlForIssue(Project project, Long issueNumber);
 	
 	String urlFor(Build build);
 
-	String urlForBuild(ProjectScopedNumber buildFQN);
+	String urlForBuild(Project project, Long buildNumber);
 	
 	String urlFor(IssueComment comment);
 	

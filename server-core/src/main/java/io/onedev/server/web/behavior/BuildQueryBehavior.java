@@ -212,8 +212,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				return null;
 			}
 		}
-		if (suggestedLiteral.equals("#")) 
-			return Optional.of("find build by number");
+		if (suggestedLiteral.equals("#")) {
+			if (getProject() != null)
+				return Optional.of("find build by number");
+			else
+				return null;
+		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

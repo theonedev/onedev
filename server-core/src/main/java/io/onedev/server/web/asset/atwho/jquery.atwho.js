@@ -977,7 +977,7 @@ DEFAULT_CALLBACKS = {
   },
   matcher: function(flag, subtext, should_startWithSpace, acceptSpaceBar) {
     var _a, _y, match, regexp, space;
-    flag = flag.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+	flag = flag.replace(/[\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     if (should_startWithSpace) {
       flag = '(?:^|\\s|\\p{P})' + flag;
     }

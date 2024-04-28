@@ -99,6 +99,11 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjectNames(matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Project.NAME_KEY)) {
+										if (!matchWith.contains("*"))
+											return SuggestionUtils.suggestProjectKeys(matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(Project.NAME_PATH)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjectPaths(matchWith);
@@ -191,7 +196,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Project.NAME_NAME) || fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
+					if (fieldName.equals(Project.NAME_NAME)
+							|| fieldName.equals(Project.NAME_KEY) 
+							|| fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
 						hints.add("Use '*' for wildcard match");
 					} else if (fieldName.equals(Project.NAME_DESCRIPTION)) {
 						hints.add("Use '*' for wildcard match");

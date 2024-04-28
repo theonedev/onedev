@@ -4,7 +4,6 @@ import io.onedev.server.model.*;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectBuildStats;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
@@ -21,15 +20,9 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	@Nullable
 	Build find(Project project, long number);
-
-	@Nullable
-	Build find(String buildFQN);
 	
     @Nullable
-    Build findByUUID(String uuid);
-
-	@Nullable
-	Build find(ProjectScopedNumber buildFQN);
+    Build find(String uuid);
 	
 	@Nullable
 	Build findLastFinished(Project project, String jobName, @Nullable String refName);

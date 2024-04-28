@@ -54,14 +54,13 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			}
 		} 
 		
-		BuildChoiceProvider choiceProvider = new BuildChoiceProvider(new AbstractReadOnlyModel<Project>() {
+		BuildChoiceProvider choiceProvider = new BuildChoiceProvider() {
 
 			@Override
-			public Project getObject() {
-				return getProject();
+			protected Project getProject() {
+				return BuildMultiChoiceEditor.this.getProject();
 			}
-    		
-    	});
+		};
     	input = new BuildMultiChoice("input", Model.of(selections), choiceProvider) {
 
     		@Override

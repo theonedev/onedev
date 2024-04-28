@@ -1,12 +1,12 @@
 package io.onedev.server.util.facade;
 
 import com.google.common.collect.Sets;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 import javax.annotation.Nullable;
@@ -70,19 +70,28 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
 	
     @Nullable
     public Long findId(String path) {
-    	ProjectFacade project = find(path);
+    	ProjectFacade project = findByPath(path);
     	return project != null? project.getId(): null;
     }
     
     @Nullable
-    public ProjectFacade find(String path) {
+    public ProjectFacade findByPath(String path) {
     	for (ProjectFacade project: values()) {
     		if (project.getPath().equalsIgnoreCase(path))
     			return project;
     	}
     	return null;
     }
-    
+
+	@Nullable
+	public ProjectFacade findByKey(String key) {
+		for (ProjectFacade project: values()) {
+			if (key.equals(project.getKey()))
+				return project;
+		}
+		return null;
+	}
+	
 	public List<ProjectFacade> getChildren(Long id) {
 		return getChildren(values(), id);
 	}

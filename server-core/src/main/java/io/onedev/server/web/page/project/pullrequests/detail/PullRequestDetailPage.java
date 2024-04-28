@@ -3,7 +3,8 @@ package io.onedev.server.web.page.project.pullrequests.detail;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
@@ -18,7 +19,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -27,7 +27,7 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
+import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
@@ -62,7 +62,10 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
-import io.onedev.server.web.util.*;
+import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +110,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -184,9 +188,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected String load() {
 				PullRequest request = getPullRequest();
-				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
-				String transformed = Emojis.getInstance().apply(transformer.apply(request.getTitle()));
-				return "#" + request.getNumber() + "&nbsp;&nbsp;" + transformed;
+				var transformed = transformReferences(request.getTitle(), request.getTargetProject(), 
+						new LinkTransformer(null));
+				transformed = Emojis.getInstance().apply(transformed);
+				return transformed + " (" + getPullRequest().getReference().toString(getProject()) + ")";
 			}
 			
 		}) {
@@ -982,11 +987,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						.setVisible(SecurityUtils.canModifyPullRequest(getPullRequest())));
 				fragment.add(labelsContainer);				
 				
-				fragment.add(new ReferencePanel("reference") {
+				fragment.add(new EntityReferencePanel("reference") {
 
 					@Override
-					protected Referenceable getReferenceable() {
-						return getPullRequest();
+					protected EntityReference getReference() {
+						return getPullRequest().getReference();
 					}
 					
 				});
@@ -1603,13 +1608,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(PullRequest request) {
-		return paramsOf(request.getFQN());
+	public static PageParameters paramsOf(PullRequest pullRequest) {
+		return paramsOf(pullRequest.getProject(), pullRequest.getNumber());
 	}
 	
-	public static PageParameters paramsOf(ProjectScopedNumber requestFQN) {
-		PageParameters params = ProjectPage.paramsOf(requestFQN.getProject());
-		params.add(PARAM_REQUEST, requestFQN.getNumber());
+	public static PageParameters paramsOf(Project project, Long pullRequestNumber) {
+		PageParameters params = ProjectPage.paramsOf(project);
+		params.add(PARAM_REQUEST, pullRequestNumber);
 		return params;
 	}
 	
@@ -1687,13 +1692,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("pullRequests", ProjectPullRequestsPage.class, 
 				ProjectPullRequestsPage.paramsOf(getProject(), 0)));
-		fragment.add(new Label("pullRequestNumber", "#" + getPullRequest().getNumber()));
+		fragment.add(new Label("pullRequestNumber", getPullRequest().getReference().toString(getProject())));
 		return fragment;
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return getPullRequest().getTitle() + " - Pull Request #" +  getPullRequest().getNumber() + " - " + getProject().getPath();
+		return getPullRequest().getTitle() + " (" + getPullRequest().getReference().toString(getProject()) + ")";
 	}
 
 	@Override

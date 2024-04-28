@@ -1,23 +1,10 @@
 package io.onedev.server.web.page.project.blob.render.folder;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -27,7 +14,19 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.ReferenceTransformer;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 
@@ -66,19 +65,18 @@ class LastCommitsResource extends AbstractResource {
 				
 				LastCommitsOfChildren lastCommits = project.getLastCommitsOfChildren(revision, path);
 				
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				
-				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				var avatarManager = OneDev.getInstance(AvatarManager.class);
+				var emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
 				Map<String, LastCommitInfo> map = new HashMap<>();
-				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
-					LastCommitInfo info = new LastCommitInfo();
+				for (var entry: lastCommits.entrySet()) {
+					var info = new LastCommitInfo();
 
-					LastCommitsOfChildren.Value value = entry.getValue();
-					PageParameters params = CommitDetailPage.paramsOf(project, value.getId().name());
-					String url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+					var value = entry.getValue();
+					var params = CommitDetailPage.paramsOf(project, value.getId().name());
+					var url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 					
-					ReferenceTransformer transformer = new ReferenceTransformer(project, url);
-					info.html = Emojis.getInstance().apply(transformer.apply(value.getSummary()));
+					var transformed = transformReferences(value.getSummary(), project, new LinkTransformer(url));
+					info.html = Emojis.getInstance().apply(transformed);
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();

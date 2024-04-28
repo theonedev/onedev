@@ -38,14 +38,12 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStats;
-import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -166,18 +164,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		criteria.addOrder(Order.desc(Build.PROP_NUMBER));
 		criteria.setCacheable(true);
 		return find(criteria);
-	}
-	
-	@Sessional
-	@Override
-	public Build find(String buildFQN) {
-		return find(ProjectScopedNumber.from(buildFQN));
-	}
-
-	@Sessional
-	@Override
-	public Build find(ProjectScopedNumber buildFQN) {
-		return find(buildFQN.getProject(), buildFQN.getNumber());
 	}
 	
 	@Transactional
@@ -372,16 +358,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
-
-		if (fuzzyQuery.contains("#")) {
-			String projectPath = StringUtils.substringBefore(fuzzyQuery, "#");
-			Project specifiedProject = projectManager.findByPath(projectPath);
-			if (specifiedProject != null && SecurityUtils.canAccessProject(specifiedProject)) {
-				project = specifiedProject;
-				fuzzyQuery = StringUtils.substringAfter(fuzzyQuery, "#");
-			}
-		}
-		
 		Set<Project> projects = Sets.newHashSet(project);
 		projects.addAll(project.getForkAncestors());
 
@@ -408,8 +384,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (!projectCriterions.isEmpty()) {
 			criteria.add(Restrictions.or(projectCriterions.toArray(new Criterion[0])));
 			
-			if (fuzzyQuery.startsWith("#"))
-				fuzzyQuery = fuzzyQuery.substring(1);
 			if (fuzzyQuery.length() != 0) {
 				try {
 					long buildNumber = Long.parseLong(fuzzyQuery);
@@ -701,7 +675,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				}
 				for (Build build: builds) {
 					if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
-						logger.debug("Deleting build " + build.getFQN() + "...");
+						logger.debug("Deleting " + build.getReference() + "...");
 						delete(build);
 					}
 				}
@@ -977,7 +951,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 
 	@Override
-	public Build findByUUID(String uuid) {
+	public Build find(String uuid) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq(Issue.PROP_UUID, uuid));
 		criteria.setCacheable(true);
