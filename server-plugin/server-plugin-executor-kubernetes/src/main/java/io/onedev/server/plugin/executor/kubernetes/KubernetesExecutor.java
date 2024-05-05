@@ -1076,7 +1076,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
-					} else if (facade instanceof RunContainerFacade || facade instanceof RunImagetoolsFacade) {
+					} else if (facade instanceof RunContainerFacade || facade instanceof RunImagetoolsFacade 
+							|| facade instanceof PruneBuilderCacheFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor");
 					} else {

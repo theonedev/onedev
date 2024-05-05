@@ -9,7 +9,7 @@ import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
-@Editable(order=250, name="Push Docker Image", group = DOCKER_IMAGE, description="Push docker image from OCI layout via crane. " +
+@Editable(order=250, name="Push Image", group = DOCKER_IMAGE, description="Push docker image from OCI layout via crane. " +
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class PushImageStep extends CraneStep {
 

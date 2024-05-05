@@ -287,7 +287,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 							var docker = newDocker();
 							var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl, 
 									jobContext.getJobToken(), jobService.getBuiltInRegistryAccessToken());
-							callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+							callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 								startService(docker, network, jobService, osInfo, getImageMappingFacades(),
 										getCpuLimit(), getMemoryLimit(), jobLogger);
 									return null;
@@ -436,7 +436,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											ownerChanged.set(true);
 
 										docker.clearArgs();
-										int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+										int exitCode = callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 											return runStepContainer(docker, execution.getImage(), execution.getRunAs(),
 													entrypoint.executable(), entrypoint.arguments(), new HashMap<>(), null,
 													new HashMap<>(), position, commandFacade.isUseTTY());
@@ -451,7 +451,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var docker = newDocker();
 										var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 												jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
-										callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+										callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 											buildImage(docker, getDockerBuilder(), buildImageFacade, hostBuildHome, jobLogger);
 											return null;
 										});
@@ -460,8 +460,16 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var docker = newDocker();
 										var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 												jobContext.getJobToken(), runImagetoolsFacade.getBuiltInRegistryAccessToken());
-										callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+										callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 											runImagetools(docker, runImagetoolsFacade, hostBuildHome, jobLogger);
+											return null;
+										});
+									} else if (facade instanceof PruneBuilderCacheFacade) {
+										var pruneBuilderCacheFacade = (PruneBuilderCacheFacade) facade;
+										var docker = newDocker();
+										callWithDockerConfig(docker, new ArrayList<>(), null, () -> {
+											pruneBuilderCache(docker, getDockerBuilder(), pruneBuilderCacheFacade, 
+													hostBuildHome, jobLogger);
 											return null;
 										});
 									} else if (facade instanceof RunContainerFacade) {
@@ -478,7 +486,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 											ownerChanged.set(true);
 
 										docker.clearArgs();
-										int exitCode = callWithDockerAuth(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
+										int exitCode = callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
 											return runStepContainer(docker, container.getImage(), container.getRunAs(), null,
 													arguments, container.getEnvMap(), container.getWorkingDir(), container.getVolumeMounts(),
 													position, runContainerFacade.isUseTTY());
@@ -665,7 +673,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		var docker = newDocker();
-		callWithDockerAuth(docker, getRegistryLoginFacades(), null, () -> {
+		callWithDockerConfig(docker, getRegistryLoginFacades(), null, () -> {
 			File workspaceDir = null;
 			try {
 				workspaceDir = FileUtils.createTempDir("workspace");

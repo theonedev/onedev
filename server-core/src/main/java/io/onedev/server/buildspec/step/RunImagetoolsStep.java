@@ -22,7 +22,7 @@ import java.util.List;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=230, name="Run Docker Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
+@Editable(order=230, name="Run Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
 		"command with specified arguments. This step can only be executed by server docker executor " +
 		"or remote docker executor")
 public class RunImagetoolsStep extends Step {

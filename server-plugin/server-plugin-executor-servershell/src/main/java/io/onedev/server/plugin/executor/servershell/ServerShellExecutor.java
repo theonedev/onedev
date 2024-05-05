@@ -182,7 +182,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									return false;
 								}
 							} else if (facade instanceof BuildImageFacade || facade instanceof RunContainerFacade
-									|| facade instanceof RunImagetoolsFacade) {
+									|| facade instanceof RunImagetoolsFacade || facade instanceof PruneBuilderCacheFacade) {
 								throw new ExplicitException("This step can only be executed by server docker executor or "
 										+ "remote docker executor");
 							} else if (facade instanceof CheckoutFacade) {

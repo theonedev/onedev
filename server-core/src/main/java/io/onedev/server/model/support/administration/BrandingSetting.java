@@ -31,7 +31,7 @@ public class BrandingSetting implements Serializable {
 	}
 	
 	public static boolean isOEM(String brandName) {
-		return "GitOn".equals(brandName);
+		return "".equals(brandName);
 	}
 	
 	public boolean isOEM() {

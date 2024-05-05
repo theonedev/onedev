@@ -21,7 +21,7 @@ import java.util.List;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
-@Editable(order=160, name="Build Docker Image", group = DOCKER_IMAGE, description="Build docker image with docker buildx. " +
+@Editable(order=160, name="Build Image", group = DOCKER_IMAGE, description="Build docker image with docker buildx. " +
 		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +
 		"builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko " +
 		"step instead")
