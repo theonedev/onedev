@@ -527,6 +527,7 @@ onedev.server.markdown = {
 					callback("referenceQuery", atChar, match.query, match.type, match.project);
 			}
 			function beforeInsertReference(atChar) {
+				$input.focus();
 				var match = matchReference(atChar);
 				if (match) {
 					$input.range(match.index, $input.caret());

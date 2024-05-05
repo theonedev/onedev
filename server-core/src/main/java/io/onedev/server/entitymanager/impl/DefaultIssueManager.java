@@ -807,15 +807,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			projectPredicates.add(buildNonConfidentialPredicate(builder, root, project));
 			projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, project));
 		}
-		
-		for (Project forkParent: project.getForkAncestors()) {
-			if (SecurityUtils.canAccessConfidentialIssues(forkParent)) {
-				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
-			} else if (SecurityUtils.canAccessProject(forkParent)) {
-				projectPredicates.add(buildNonConfidentialPredicate(builder, root, forkParent));
-				projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, forkParent));
-			}
-		}
 		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		
 		if (fuzzyQuery.length() != 0) {

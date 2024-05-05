@@ -916,9 +916,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		Set<Project> projects = Sets.newHashSet(project);
-		projects.addAll(project.getForkAncestors().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
-		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));
+		criteria.add(Restrictions.eq(PullRequest.PROP_TARGET_PROJECT, project));
 		
 		if (fuzzyQuery.length() != 0) {
 			try {

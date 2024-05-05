@@ -1,7 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -358,25 +357,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
-		Set<Project> projects = Sets.newHashSet(project);
-		projects.addAll(project.getForkAncestors());
 
 		List<Criterion> projectCriterions = new ArrayList<>();
-		for (Project each: projects) {
-			Collection<String> availableJobNames = jobNames.get(each.getId());
-			if (availableJobNames != null && !availableJobNames.isEmpty()) {
-				Collection<String> accessibleJobNames = getAccessibleJobNames(each);
-				if (accessibleJobNames.containsAll(availableJobNames)) {
-					projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, each));
-				} else {
-					List<Criterion> jobCriterions = new ArrayList<>();
-					for (String jobName: accessibleJobNames) 
-						jobCriterions.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
-					if (!jobCriterions.isEmpty()) {
-						projectCriterions.add(Restrictions.and(
-								Restrictions.eq(Build.PROP_PROJECT, each), 
-								Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
-					}
+		Collection<String> availableJobNames = jobNames.get(project.getId());
+		if (availableJobNames != null && !availableJobNames.isEmpty()) {
+			Collection<String> accessibleJobNames = getAccessibleJobNames(project);
+			if (accessibleJobNames.containsAll(availableJobNames)) {
+				projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, project));
+			} else {
+				List<Criterion> jobCriterions = new ArrayList<>();
+				for (String jobName: accessibleJobNames) 
+					jobCriterions.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
+				if (!jobCriterions.isEmpty()) {
+					projectCriterions.add(Restrictions.and(
+							Restrictions.eq(Build.PROP_PROJECT, project), 
+							Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
 				}
 			}
 		}

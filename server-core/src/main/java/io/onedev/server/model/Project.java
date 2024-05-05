@@ -426,7 +426,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@Editable(order=150, description = "Optionally define a unique key for the project with two or " +
 			"more upper case letters. This key can be used to reference issues, builds, and pull requests " +
-			"with a stable and short notion <code>&lt;project key&gt;-&lt;number&gt;</code> instead of " +
+			"with a stable and short form <code>&lt;project key&gt;-&lt;number&gt;</code> instead of " +
 			"<code>&lt;project path&gt;#&lt;number&gt;</code>")
 	@ProjectKey
 	@Nullable
