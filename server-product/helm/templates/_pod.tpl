@@ -119,7 +119,7 @@ containers:
     - name: trust-certs
       mountPath: "/opt/onedev/conf/trust-certs"
 {{- if .Values.extraVolumeMounts }}
-{{ toYaml .Values.extraVolumeMounts | indent 6 }}
+{{ toYaml .Values.extraVolumeMounts | indent 4 }}
 {{- end }}
 {{- if .Values.extraContainers }}
 {{ toYaml .Values.extraContainers | indent 2 }}
@@ -143,6 +143,6 @@ volumes:
     secretName: {{ .Values.onedev.trustCerts.secretName }}
     optional: true
 {{- if .Values.extraVolumes }}
-{{ toYaml .Values.extraVolumes | indent 2 }}
+{{ toYaml .Values.extraVolumes | indent 0 }}
 {{- end }}
 {{- end }}
