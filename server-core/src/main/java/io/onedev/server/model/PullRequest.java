@@ -919,7 +919,6 @@ public class PullRequest extends ProjectBelonging
 		return getTargetProject();
 	}
 	
-	@Override
 	public EntityReference getReference() {
 		return new PullRequestReference(getProject(), getNumber());
 	}

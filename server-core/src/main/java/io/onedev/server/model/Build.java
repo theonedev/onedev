@@ -497,7 +497,6 @@ public class Build extends ProjectBelonging
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
-	@Override
 	public EntityReference getReference() {
 		return new BuildReference(getProject(), getNumber());
 	}

@@ -398,7 +398,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return threadingReferences;
 	}
 
-	@Override
 	public EntityReference getReference() {
 		return new IssueReference(getProject(), getNumber());
 	}

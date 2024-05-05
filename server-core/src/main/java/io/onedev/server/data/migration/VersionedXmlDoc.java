@@ -430,7 +430,8 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 					|| ch == 0xD 
 					|| (ch >= 0x20 && ch <= 0xD7FF) 
 					|| (ch >= 0xE000 && ch <= 0xFFFD) 
-					|| (ch >= 0x10000 && ch <= 0x10FFFF)) {
+					|| (ch >= 0x10000 && ch <= 0x10FFFF)
+					|| Character.isSurrogate(ch)) {
 				builder.append(ch);
 			} else {
 				builder.append('?');
