@@ -471,7 +471,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								
 								String title = build.getJobName();
 								if (build.getVersion() != null) 
-									title += " - " + build.getVersion();
+									title += ": " + build.getVersion();
 								referenceMap.put("title", title);
 								referenceMap.put("searchKey", build.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);
