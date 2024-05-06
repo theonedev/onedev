@@ -29,7 +29,7 @@ public abstract class IssueProgressPanel extends Panel {
 	private final IModel<Stopwatch> stopwatchModel = new LoadableDetachableModel<>() {
 		@Override
 		protected Stopwatch load() {
-			var user = SecurityUtils.getUser();
+			var user = SecurityUtils.getAuthUser();
 			if (user != null)
 				return getStopWatchManager().find(user, getIssue());
 			else

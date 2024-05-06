@@ -45,7 +45,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.FieldNamesProvider;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 
 @SuppressWarnings("serial")
 class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
@@ -131,7 +131,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 					
 					container.add(new Label("required", required).setEscapeModelStrings(false));
 					
-					boolean isSecret = property.getPropertyGetter().getAnnotation(Password.class) != null;
+					boolean isSecret = property.getPropertyGetter().getAnnotation(Secret.class) != null;
 
 					List<String> choices = new ArrayList<>();
 					if (isSecret) {
@@ -247,7 +247,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 				logger.error("Error setting property value", e);
 			}
 			
-			if (property.getPropertyGetter().getAnnotation(Password.class) == null) {
+			if (property.getPropertyGetter().getAnnotation(Secret.class) == null) {
 				return PropertyContext.edit("value", fieldBean, property.getPropertyName());
 			} else { 
 				JobSecretEditBean bean = new JobSecretEditBean();

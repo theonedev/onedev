@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.simple.security;
 
-import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -8,14 +7,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthorizingRealm;
+import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
 import io.onedev.server.web.page.simple.SimpleCssResourceReference;
 import io.onedev.server.web.page.simple.SimplePage;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.mgt.RememberMeManager;
-import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -58,7 +56,7 @@ public class LoginPage extends SimplePage {
 	public LoginPage(PageParameters params) {
 		super(params);
 		
-		if (SecurityUtils.getUser() != null)
+		if (SecurityUtils.getAuthUser() != null)
 			throw new RestartResponseException(getApplication().getHomePage());
 	}
 	
@@ -79,11 +77,8 @@ public class LoginPage extends SimplePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				try {
-					AuthenticationToken token = new UsernamePasswordToken(userName, password, rememberMe);
-					
-					PrincipalCollection principals = OneDev.getInstance(PasswordAuthorizingRealm.class)
-							.getAuthenticationInfo(token).getPrincipals();
-					User user = Preconditions.checkNotNull(SecurityUtils.toUser(principals));
+					var token = new UsernamePasswordToken(userName, password, rememberMe);
+					var user = (User) OneDev.getInstance(PasswordAuthenticatingRealm.class).getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
 						if (user.getTwoFactorAuthentication() != null) {
 							subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
@@ -111,7 +106,7 @@ public class LoginPage extends SimplePage {
 		if (errorMessage != null) 
 			form.error(errorMessage);
 		
-		form.add(new TextField<String>("userName", new IModel<String>() {
+		form.add(new TextField<>("userName", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -126,7 +121,7 @@ public class LoginPage extends SimplePage {
 			public void setObject(String object) {
 				userName = object;
 			}
-			
+
 		}).setLabel(Model.of("User name")).setRequired(true));
 		
 		form.add(new PasswordTextField("password", new IModel<String>() {

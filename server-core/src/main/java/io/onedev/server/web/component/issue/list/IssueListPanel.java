@@ -203,7 +203,7 @@ public abstract class IssueListPanel extends Panel {
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -241,7 +241,7 @@ public abstract class IssueListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -413,7 +413,7 @@ public abstract class IssueListPanel extends Panel {
 	
 						@Override
 						protected List<Project> load() {
-							List<Project> projects = new ArrayList<>(getProjectManger().getPermittedProjects(new AccessProject()));
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
 							
 							ProjectCache cache = getProjectManger().cloneCache();
 							CollectionUtils.filter(projects, new Predicate<Project>() {
@@ -932,7 +932,7 @@ public abstract class IssueListPanel extends Panel {
 
 										var issues = selectionColumn.getSelections().stream()
 												.map(it->it.getObject()).collect(toList());
-										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Watch status changed");
 									}
@@ -1345,7 +1345,7 @@ public abstract class IssueListPanel extends Panel {
 										Collection<Issue> issues = new ArrayList<>();
 										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 											issues.add(it.next());
-										getWatchManager().setWatchStatus(SecurityUtils.getUser(), issues, watchStatus);
+										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
 										Session.get().success("Watch status changed");
 									}
 
@@ -1404,7 +1404,7 @@ public abstract class IssueListPanel extends Panel {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
 								for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitIssue(SecurityUtils.getUser(), it.next());
+									visitInfoManager.visitIssue(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -1417,7 +1417,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 			private List<Project> getTargetProjects(boolean excludeCurrent) {
-				Collection<Project> collection = getProjectManger().getPermittedProjects(new AccessProject());
+				Collection<Project> collection = SecurityUtils.getAuthorizedProjects(new AccessProject());
 				ProjectCache cache = getProjectManger().cloneCache();
 				
 				CollectionUtils.filter(collection, new Predicate<Project>() {
@@ -1441,7 +1441,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 			
 		});
@@ -1537,7 +1537,7 @@ public abstract class IssueListPanel extends Panel {
 
 		});
 		
-		if (SecurityUtils.getUser() != null)
+		if (SecurityUtils.getAuthUser() != null)
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>());
 		
 		columns.add(new AbstractColumn<>(Model.of("")) {

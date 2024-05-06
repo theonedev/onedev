@@ -1,8 +1,6 @@
 package io.onedev.server.event.project.issue;
 
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 
 import java.util.Date;

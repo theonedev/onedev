@@ -270,7 +270,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		@Override
 		protected List<PendingSuggestionApply> load() {
 			return OneDev.getInstance(PendingSuggestionApplyManager.class)
-					.query(SecurityUtils.getUser(), getPullRequest());
+					.query(SecurityUtils.getAuthUser(), getPullRequest());
 		}
 		
 	};
@@ -416,7 +416,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getPullRequest() != null 
-								&& SecurityUtils.getUser() != null 
+								&& SecurityUtils.getAuthUser() != null 
 								&& !pendingSuggestionAppliesModel.getObject().isEmpty());
 					}
 
@@ -445,7 +445,7 @@ public abstract class RevisionDiffPanel extends Panel {
 												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
 												try {
 													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyManager.class)
-															.apply(SecurityUtils.getUser(), request, commitMessage);
+															.apply(SecurityUtils.getAuthUser(), request, commitMessage);
 													
 													PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 													state.oldCommitHash = commitId.name();
@@ -497,7 +497,7 @@ public abstract class RevisionDiffPanel extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										OneDev.getInstance(PendingSuggestionApplyManager.class)
-												.discard(SecurityUtils.getUser(), getPullRequest());
+												.discard(SecurityUtils.getAuthUser(), getPullRequest());
 										target.add(commentContainer);
 										target.add(RevisionDiffPanel.this.get("operations"));
 										dropdown.close();
@@ -1005,7 +1005,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											CodeComment comment = new CodeComment();
 											comment.setUUID(uuid);
 											comment.setProject(getProject());
-											comment.setUser(SecurityUtils.getUser());
+											comment.setUser(SecurityUtils.getAuthUser());
 											comment.setMark(mark);
 											comment.setCompareContext(getCompareContext());
 											comment.setContent(content);
@@ -1680,7 +1680,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											PendingSuggestionApply pendingApply = new PendingSuggestionApply();
 											pendingApply.setComment(annotationSupport.getOpenComment());
 											pendingApply.setRequest(getPullRequest());
-											pendingApply.setUser(SecurityUtils.getUser());
+											pendingApply.setUser(SecurityUtils.getAuthUser());
 											pendingApply.setSuggestion(new ArrayList<String>(suggestion));
 											OneDev.getInstance(PendingSuggestionApplyManager.class).create(pendingApply);
 											onBatchChange(target);
@@ -1692,7 +1692,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											for (Iterator<PendingSuggestionApply> it = pendingSuggestionAppliesModel.getObject().iterator(); it.hasNext();) {
 												PendingSuggestionApply pendingApply = it.next();
 												if (pendingApply.getRequest().equals(getPullRequest())
-														&& pendingApply.getUser().equals(SecurityUtils.getUser())
+														&& pendingApply.getUser().equals(SecurityUtils.getAuthUser())
 														&& pendingApply.getComment().equals(annotationSupport.getOpenComment())) {
 													it.remove();
 													OneDev.getInstance(PendingSuggestionApplyManager.class).delete(pendingApply);

@@ -11,17 +11,16 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
-import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
@@ -106,15 +105,17 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 							List<Build> builds = new ArrayList<>();
 							for (String refName : selectedRefNames) {
 								builds.add(getJobManager().submit(getProject(), commitId, job.getName(),
-										paramMap, refName, SecurityUtils.getUser(),
+										paramMap, refName, SecurityUtils.getAuthUser(),
 										getPullRequest(), null, "Submitted manually"));
 							}
 							if (builds.size() == 1)
 								setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
 							else
 								close();
-							if (builds.stream().allMatch(it -> it.isFinished()))
-								Session.get().warn("Build already finished. You may re-run the build");
+							for (var build: builds) {
+								if (build.isFinished())
+									getJobManager().resubmit(build, "Rebuild manually");
+							}
 						}
 
 						@Override
@@ -136,10 +137,10 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 				} else {
 					Build build = getJobManager().submit(getProject(), commitId, job.getName(),
 							new HashMap<>(), refNames.iterator().next(),
-							SecurityUtils.getUser(), getPullRequest(), null, "Submitted manually");
+							SecurityUtils.getAuthUser(), getPullRequest(), null, "Submitted manually");
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					if (build.isFinished())
-						Session.get().warn("Build already finished. You may re-run the build");
+						getJobManager().resubmit(build, "Rebuild manually");
 				}
 			} else {
 				new MessageModal(target) {
@@ -168,7 +169,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getUser(), getPullRequest());
+		return new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getAuthUser(), getPullRequest());
 	}
 	
 }

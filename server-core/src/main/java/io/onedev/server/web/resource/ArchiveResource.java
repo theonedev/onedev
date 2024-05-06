@@ -6,7 +6,6 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +67,7 @@ public class ArchiveResource extends AbstractResource {
 			throw new IllegalArgumentException("format parameter should be specified either zip or tar.gz");
 		}
 		
-		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
+		if (!SecurityUtils.isSystem()) {
 			// Perform database operations only if it is not a cluster access to avoid possible deadlocks
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			if (!SecurityUtils.canReadCode(project)) 

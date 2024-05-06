@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.password;
+package io.onedev.server.web.editable.secret;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -11,16 +11,16 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 
 @SuppressWarnings("serial")
-public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
+public class ConfirmativeSecretPropertyEditor extends PropertyEditor<String> {
 	
 	private PasswordTextField input;
 	
 	private PasswordTextField inputAgain;
 	
-	public ConfirmativePasswordPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public ConfirmativeSecretPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -40,7 +40,7 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		inputAgain.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(inputAgain);
 		
-		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
+		Secret password = getDescriptor().getPropertyGetter().getAnnotation(Secret.class);
 		String autoComplete = password.autoComplete();
 		if (StringUtils.isNotBlank(autoComplete)) {
 			input.add(AttributeAppender.append("autocomplete", autoComplete));

@@ -327,7 +327,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject()); 
 			if (!projects.isEmpty()) { 
 				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(toSet());
 				predicates.add(builder.or(

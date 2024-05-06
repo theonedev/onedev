@@ -34,7 +34,7 @@ public class IssueVoteResource {
 	@GET
 	public IssueVote get(@PathParam("voteId") Long voteId) {
 		IssueVote vote = voteManager.load(voteId);
-		if (!SecurityUtils.canAccessProject(vote.getIssue().getProject()))
+		if (!SecurityUtils.canAccessIssue(vote.getIssue()))
 			throw new UnauthorizedException();
 		return vote;
 	}
@@ -42,8 +42,10 @@ public class IssueVoteResource {
 	@Api(order=200, description="Create new issue vote")
 	@POST
 	public Long create(@NotNull IssueVote vote) {
-		if (!SecurityUtils.canAccessProject(vote.getIssue().getProject()) || !canModifyOrDelete(vote)) 
+		if (!SecurityUtils.canAccessIssue(vote.getIssue())
+				|| !SecurityUtils.isAdministrator() && !vote.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
+		}
 		voteManager.create(vote);
 		return vote.getId();
 	}

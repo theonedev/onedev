@@ -9,7 +9,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
@@ -82,7 +82,7 @@ public class ImportServer implements Serializable, Validatable {
 
 	@Editable(order=100, name="GitHub Personal Access Token", description="GitHub personal access token should be generated with "
 			+ "scope <b>repo</b> and <b>read:org</b>")
-	@Password
+	@Secret
 	@NotEmpty
 	public String getAccessToken() {
 		return accessToken;

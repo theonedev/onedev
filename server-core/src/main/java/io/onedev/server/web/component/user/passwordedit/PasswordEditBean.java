@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.CurrentPassword;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 
 @Editable
 public class PasswordEditBean implements Serializable {
@@ -19,7 +19,7 @@ public class PasswordEditBean implements Serializable {
 
 	@Editable(order=100)
 	@CurrentPassword
-	@Password
+	@Secret
 	@NotEmpty
 	public String getOldPassword() {
 		return oldPassword;
@@ -30,7 +30,7 @@ public class PasswordEditBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Password(needConfirm=true)
+	@Secret(needConfirm=true)
 	@NotEmpty
 	public String getNewPassword() {
 		return newPassword;

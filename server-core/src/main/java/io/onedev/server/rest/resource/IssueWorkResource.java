@@ -41,7 +41,7 @@ public class IssueWorkResource {
 		if (!subscriptionManager.isSubscriptionActive())
 			throw new UnsupportedOperationException("This feature requires an active subscription");
 		IssueWork work = workManager.load(workId);
-    	if (!SecurityUtils.canAccessProject(work.getIssue().getProject()))  
+    	if (!SecurityUtils.canAccessIssue(work.getIssue()))  
 			throw new UnauthorizedException();
     	return work;
 	}
@@ -54,8 +54,10 @@ public class IssueWorkResource {
 		if (!work.getIssue().getProject().isTimeTracking())
 			throw new UnsupportedOperationException("Time tracking not enabled for project");
 		
-    	if (!SecurityUtils.canAccessProject(work.getIssue().getProject()) || !canModifyOrDelete(work))  
+    	if (!SecurityUtils.canAccessIssue(work.getIssue()) 
+				|| !SecurityUtils.isAdministrator() && !work.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
+		}
 
 		work.setDay(DateUtils.toLocalDate(work.getDate()).toEpochDay());		
 		workManager.createOrUpdate(work);

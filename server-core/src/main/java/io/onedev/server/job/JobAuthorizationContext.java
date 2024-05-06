@@ -1,10 +1,9 @@
 package io.onedev.server.job;
 
-import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.job.match.NonPullRequestCommitsCriteria;
@@ -66,13 +65,13 @@ public class JobAuthorizationContext {
 	
 	public Subject getSubject(@Nullable String accessTokenSecret) {
 		if (accessTokenSecret != null) {
-			String accessToken = getSecretValue(accessTokenSecret);
-			User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
-			if (user == null)
+			String secretValue = getSecretValue(accessTokenSecret);
+			var accessToken = OneDev.getInstance(AccessTokenManager.class).findByValue(secretValue);
+			if (accessToken == null)
 				throw new ExplicitException("Invalid access token");
-			return user.asSubject();
+			return accessToken.asSubject();
 		} else {
-			return SecurityUtils.asSubject(0L);
+			return SecurityUtils.asAnonymous();
 		}
 	}
 

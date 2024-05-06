@@ -126,7 +126,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		};
 		
 		var activeServer = getProject().getActiveServer(false);		
-		forkNow.setVisible(SecurityUtils.getUser() != null 
+		forkNow.setVisible(SecurityUtils.getAuthUser() != null 
 				&& SecurityUtils.canReadCode(getProject()) 
 				&& activeServer != null);
 		forkInfo.add(forkNow);

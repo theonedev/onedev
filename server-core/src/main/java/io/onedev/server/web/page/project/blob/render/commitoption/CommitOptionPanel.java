@@ -229,7 +229,7 @@ public class CommitOptionPanel extends Panel {
 			target.add(form);
 			return false;
 		} else {
-			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+			User user = SecurityUtils.getAuthUser();
 			String commitMessage = commitMessageBean.getCommitMessage();
 			if (commitMessage == null)
 				commitMessage = getDefaultCommitMessage();

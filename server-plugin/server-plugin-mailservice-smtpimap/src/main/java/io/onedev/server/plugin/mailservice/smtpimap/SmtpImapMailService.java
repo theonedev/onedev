@@ -2,7 +2,7 @@ package io.onedev.server.plugin.mailservice.smtpimap;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.mail.*;
 import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.mailservice.SmtpExplicitSsl;
@@ -70,7 +70,7 @@ public class SmtpImapMailService implements MailService {
 	}
 
 	@Editable(order=400, name="SMTP Password")
-	@Password(autoComplete="new-password")
+	@Secret(autoComplete="new-password")
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}

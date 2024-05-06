@@ -1,24 +1,18 @@
 package io.onedev.server.rest.resource;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Api(order=3300)
 @Path("/pull-request-reviews")
@@ -48,7 +42,7 @@ public class PullRequestReviewResource {
 	@POST
 	public Long create(@NotNull PullRequestReview review) {
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
-				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getUser())) {
+				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
 
@@ -66,10 +60,8 @@ public class PullRequestReviewResource {
 	@Path("/{reviewId}")
 	@POST
 	public Response update(@PathParam("reviewId") Long reviewId, @NotNull PullRequestReview review) {
-		if (!SecurityUtils.canReadCode(review.getRequest().getProject())
-				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getUser())) {
+		if (!SecurityUtils.canModifyOrDelete(review)) 
 			throw new UnauthorizedException();
-		}
 
 		if (review.getUser().equals(review.getRequest().getSubmitter()))
 			throw new ExplicitException("Pull request submitter can not be reviewer");

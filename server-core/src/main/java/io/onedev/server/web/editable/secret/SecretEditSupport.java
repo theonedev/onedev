@@ -1,28 +1,22 @@
-package io.onedev.server.web.editable.password;
+package io.onedev.server.web.editable.secret;
 
-import java.lang.reflect.AnnotatedElement;
-
+import io.onedev.server.annotation.Secret;
+import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.annotation.Password;
+import java.lang.reflect.AnnotatedElement;
 
 @SuppressWarnings("serial")
-public class PasswordEditSupport implements EditSupport {
+public class SecretEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (descriptor.getPropertyClass() == String.class) {
-			Password password = descriptor.getPropertyGetter().getAnnotation(Password.class);
-			if (password != null) {
-				if (password.needConfirm()) {
+			Secret secret = descriptor.getPropertyGetter().getAnnotation(Secret.class);
+			if (secret != null) {
+				if (secret.needConfirm()) {
 					return new PropertyContext<String>(descriptor) {
 
 						@Override
@@ -32,7 +26,10 @@ public class PasswordEditSupport implements EditSupport {
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 									if (model.getObject() != null) {
-										return new Label(id, "******");
+										if (secret.copyable())
+											return new CopyableSecretPanel(id, model.getObject());
+										else
+											return new Label(id, "************");
 									} else {
 										return new EmptyValueLabel(id) {
 
@@ -50,7 +47,7 @@ public class PasswordEditSupport implements EditSupport {
 
 						@Override
 						public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-							return new ConfirmativePasswordPropertyEditor(componentId, descriptor, model);
+							return new ConfirmativeSecretPropertyEditor(componentId, descriptor, model);
 						}
 						
 					};
@@ -64,7 +61,10 @@ public class PasswordEditSupport implements EditSupport {
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 									if (model.getObject() != null) {
-										return new Label(id, "******");
+										if (secret.copyable())
+											return new CopyableSecretPanel(id, model.getObject());
+										else
+											return new Label(id, "************");
 									} else {
 										return new EmptyValueLabel(id) {
 
@@ -82,7 +82,7 @@ public class PasswordEditSupport implements EditSupport {
 
 						@Override
 						public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-							return new PasswordPropertyEditor(componentId, descriptor, model);
+							return new SecretPropertyEditor(componentId, descriptor, model);
 						}
 						
 					};

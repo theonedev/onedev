@@ -52,8 +52,6 @@ import io.onedev.server.job.DefaultJobManager;
 import io.onedev.server.job.DefaultResourceAllocator;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.ResourceAllocator;
-import io.onedev.server.entitymanager.JobCacheManager;
-import io.onedev.server.entitymanager.impl.DefaultJobCacheManager;
 import io.onedev.server.job.log.DefaultLogManager;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.mail.DefaultMailManager;
@@ -83,7 +81,7 @@ import io.onedev.server.search.code.DefaultCodeSearchManager;
 import io.onedev.server.search.entitytext.DefaultIssueTextManager;
 import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.*;
-import io.onedev.server.security.realm.AbstractAuthorizingRealm;
+import io.onedev.server.security.realm.GeneralAuthorizingRealm;
 import io.onedev.server.ssh.*;
 import io.onedev.server.taskschedule.DefaultTaskScheduler;
 import io.onedev.server.taskschedule.TaskScheduler;
@@ -293,6 +291,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PackBlobManager.class).to(DefaultPackBlobManager.class);
 		bind(PackBlobReferenceManager.class).to(DefaultPackBlobReferenceManager.class);
 		bind(PackBlobAuthorizationManager.class).to(DefaultPackBlobAuthorizationManager.class);
+		bind(AccessTokenManager.class).to(DefaultAccessTokenManager.class);
+		bind(AccessTokenAuthorizationManager.class).to(DefaultAccessTokenAuthorizationManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -333,7 +333,7 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configureSecurity() {
-		contributeFromPackage(Realm.class, AbstractAuthorizingRealm.class);
+		contributeFromPackage(Realm.class, GeneralAuthorizingRealm.class);
 
 		bind(ShiroFilterConfiguration.class).to(DefaultShiroFilterConfiguration.class);
 		bind(RememberMeManager.class).to(DefaultRememberMeManager.class);

@@ -6378,4 +6378,38 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate164(File dataDir, Stack<Integer> versions) {
+		VersionedXmlDoc accessTokensDom;
+		File accessTokensFile = new File(dataDir, "AccessTokens.xml");
+		accessTokensDom = new VersionedXmlDoc();
+		Element listElement = accessTokensDom.addElement("list");
+		var accessTokenId = 1;
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var ownerId = element.elementTextTrim("id");
+					var nameIndex = 1;
+					var accessTokensElement = element.element("accessTokens");
+					for (var accessTokenElement: accessTokensElement.elements()) {
+						var newAccessTokenElement = listElement.addElement("io.onedev.server.model.AccessToken");
+						newAccessTokenElement.addAttribute("revision", "0.0");
+						newAccessTokenElement.addElement("id").setText(String.valueOf(accessTokenId++));
+						newAccessTokenElement.addElement("owner").setText(ownerId);
+						newAccessTokenElement.addElement("name").setText("token" + (nameIndex++));
+						newAccessTokenElement.addElement("value").setText(accessTokenElement.elementText("value"));
+						newAccessTokenElement.addElement("hasOwnerPermissions").setText("true");
+						newAccessTokenElement.addElement("createDate").setText(accessTokenElement.elementText("createDate"));
+						var expireDateElement = accessTokenElement.element("expireDate");
+						if (expireDateElement != null)
+							newAccessTokenElement.addElement("expireDate").setText(expireDateElement.getText());
+					}
+					accessTokensElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		accessTokensDom.writeToFile(accessTokensFile, true);
+	}
+	
 }

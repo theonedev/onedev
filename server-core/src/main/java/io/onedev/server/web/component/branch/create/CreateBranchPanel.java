@@ -8,8 +8,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
@@ -54,7 +52,7 @@ abstract class CreateBranchPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				Project project = projectModel.getObject();
-				User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+				User user = SecurityUtils.getAuthUser();
 				String branchName = helperBean.getName();
 				if (project.getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 

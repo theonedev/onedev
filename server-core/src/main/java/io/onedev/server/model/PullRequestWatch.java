@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.rest.annotation.Immutable;
 
 import javax.persistence.*;
 
@@ -21,10 +22,12 @@ public class PullRequestWatch extends EntityWatch {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 	
 	private boolean watching;

@@ -23,8 +23,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.util.CollectionUtils;
@@ -92,7 +92,7 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 			SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
 			sessionManager.openSession(); 
 			try {
-				String accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(userId, 300);
+				String accessToken = OneDev.getInstance(AccessTokenManager.class).createTemporal(userId, 300);
 				String projectPath = StringUtils.strip(StringUtils.substringBefore(
 						commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
 				

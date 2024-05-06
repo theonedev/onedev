@@ -18,7 +18,6 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
-import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -131,7 +130,7 @@ public class NewProjectPage extends LayoutPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getUser() != null;
+		return SecurityUtils.getAuthUser() != null;
 	}
 
 	@Override

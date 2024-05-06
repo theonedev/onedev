@@ -84,7 +84,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 	@Transactional
 	@Override
 	public void review(PullRequest request, boolean approved, String note) {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		PullRequestReview review = request.getReview(user);
 		Preconditions.checkState(review != null && review.getStatus() == PullRequestReview.Status.PENDING);
 		if (approved)

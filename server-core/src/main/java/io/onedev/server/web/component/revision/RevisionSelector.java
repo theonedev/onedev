@@ -256,7 +256,7 @@ public abstract class RevisionSelector extends Panel {
 			if (itemValues.size() < count && !found) {
 				Project project = projectModel.getObject();
 				try {
-					User user = SecurityUtils.getUser();
+					User user = SecurityUtils.getAuthUser();
 					if (getGitService().resolve(project, revInput, true) != null) {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {

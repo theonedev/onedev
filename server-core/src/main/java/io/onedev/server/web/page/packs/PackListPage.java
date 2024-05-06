@@ -220,7 +220,7 @@ public class PackListPage extends LayoutPage {
 
 	public static PageParameters paramsOf(int page) {
 		String query = null;
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null && !user.getPackQueryPersonalization().getQueries().isEmpty()) 
 			query = user.getPackQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getPackSetting().getNamedQueries().isEmpty())

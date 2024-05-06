@@ -3,18 +3,17 @@ package io.onedev.server.util.jackson.hibernate;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
-import com.fasterxml.jackson.databind.deser.SettableAnyProperty;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
-import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.rest.annotation.Immutable;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Stack;
 
 @SuppressWarnings("serial")
@@ -24,18 +23,14 @@ public class EntityDeserializer extends BeanDeserializer {
 	
 	private final Class<? extends AbstractEntity> entityClass;
 	
-	private final BeanDeserializer defaultDeserializer;
-	
 	private final Dao dao;
 	
 	public EntityDeserializer(
 			Class<? extends AbstractEntity> entityClass, 
-			BeanDeserializer defaultDeserializer, 
+			BeanDeserializer beanDeserializer, 
 			Dao dao) {
-		super(defaultDeserializer);
-		
+		super(beanDeserializer);
 		this.entityClass = entityClass;
-		this.defaultDeserializer = defaultDeserializer;
 		this.dao = dao;
 	}
 	
@@ -65,92 +60,63 @@ public class EntityDeserializer extends BeanDeserializer {
 				bean = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
 			else
 				bean = entity;
-			defaultDeserializer.deserialize(jp, ctxt, bean);
-			return entity;
+			return (AbstractEntity) deserialize(jp, ctxt, bean);
+		} else {
+			return (AbstractEntity) super.deserialize(jp, ctxt);
 		}
-		
-		PropertyValue buffer = null;
-        for (JsonToken t = jp.getCurrentToken(); t == JsonToken.FIELD_NAME; t = jp.nextToken()) {
-        	String propName = jp.getCurrentName();
-        	jp.nextToken();
-        	SettableBeanProperty property = _beanProperties.find(propName);
-        	if (property != null) {
-        		Object value = property.deserialize(jp, ctxt);
-            	if (property.getName().equals(AbstractEntity.PROP_ID) && value != null) {
-        			jp.nextToken();
-        			AbstractEntity entity = dao.load(entityClass, (Long)value);
-        			entity.setOldVersion(entity.getFacade());
-        			
-        			Object bean;
-        			if (entity instanceof HibernateProxy) 
-        				bean = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
-        			else 
-        				bean = entity;
-        	        for (PropertyValue pv = buffer; pv != null; pv = pv.next)
-        	            pv.assign(bean);
-        	        defaultDeserializer.deserialize(jp, ctxt, bean);
-        	        return entity;
-            	} else {
-            		buffer = new RegularPropertyValue(buffer, value, property);
-            	}
-            	continue;
-        	} 
-            if (_ignorableProps != null && _ignorableProps.contains(propName)) {
-                handleIgnoredProperty(jp, ctxt, handledType(), propName);
-                continue;
-            }
-            if (_anySetter != null) {
-                buffer = new AnyPropertyValue(buffer, _anySetter.deserialize(jp, ctxt), _anySetter, propName);
-                continue;
-            }
-        	
-        	ctxt.handleUnexpectedToken(entityClass, jp);
-        }
-
-        // reach end of object
-        AbstractEntity entity;
-    	try {
-			entity = entityClass.getDeclaredConstructor().newInstance();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
-				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
-        for (PropertyValue pv = buffer; pv != null; pv = pv.next)
-            pv.assign(entity);
-        
-        return entity;
 	}
 
-    private static class RegularPropertyValue extends PropertyValue {
-    
-    	private final SettableBeanProperty _property;
-    
-    	public RegularPropertyValue(PropertyValue next, Object value, SettableBeanProperty prop) {
-    		super(next, value);
-    		_property = prop;
-    	}
+	@Override
+	public Object deserialize(JsonParser p, DeserializationContext ctxt, Object bean) throws IOException {
+		// [databind#631]: Assign current value, to be accessible by custom serializers
+		p.setCurrentValue(bean);
+		if (_injectables != null) {
+			injectValues(ctxt, bean);
+		}
+		if (_unwrappedPropertyHandler != null) {
+			return deserializeWithUnwrapped(p, ctxt, bean);
+		}
+		if (_externalTypeIdHandler != null) {
+			return deserializeWithExternalTypeId(p, ctxt, bean);
+		}
+		String propName;
 
-	    @Override
-	    public void assign(Object bean) throws IOException, JsonProcessingException {
-	        _property.set(bean, value);
-	    }
+		// 23-Mar-2010, tatu: In some cases, we start with full JSON object too...
+		if (p.isExpectedStartObjectToken()) {
+			propName = p.nextFieldName();
+			if (propName == null) {
+				return bean;
+			}
+		} else {
+			if (p.hasTokenId(JsonTokenId.ID_FIELD_NAME)) {
+				propName = p.currentName();
+			} else {
+				return bean;
+			}
+		}
+		if (_needViewProcesing) {
+			Class<?> view = ctxt.getActiveView();
+			if (view != null) {
+				return deserializeWithView(p, ctxt, bean, view);
+			}
+		}
+		do {
+			p.nextToken();
+			SettableBeanProperty prop = _beanProperties.find(propName);
+
+			if (prop != null) { // normal case
+				try {
+					var propValue = prop.deserialize(p, ctxt);
+					if (prop.getAnnotation(Immutable.class) == null)
+						prop.set(bean, propValue);
+				} catch (Exception e) {
+					wrapAndThrow(e, bean, propName, ctxt);
+				}
+				continue;
+			}
+			handleUnknownVanilla(p, ctxt, bean, propName);
+		} while ((propName = p.nextFieldName()) != null);
+		return bean;
 	}
-
-    private static class AnyPropertyValue extends PropertyValue {
-    	
-    	private final SettableAnyProperty _property;
-    	
-    	private final String _propertyName;
-    
-    	public AnyPropertyValue(PropertyValue next, Object value, SettableAnyProperty prop, String propName) {
-    		super(next, value);
-    		_property = prop;
-    		_propertyName = propName;
-    	}
-
-	    @Override
-	    public void assign(Object bean) throws IOException, JsonProcessingException {
-	        _property.set(bean, _propertyName, value);
-	    }
-    }
+	
 }

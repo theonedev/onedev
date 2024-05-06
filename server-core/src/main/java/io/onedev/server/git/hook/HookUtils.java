@@ -31,7 +31,7 @@ public class HookUtils {
         }
 	}
 	
-	public static Map<String, String> getHookEnvs(Long projectId, Long userId) {
+	public static Map<String, String> getHookEnvs(Long projectId, String principal) {
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class);
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 		String hookUrl = "http://localhost:" + serverConfig.getHttpPort();
@@ -42,12 +42,12 @@ public class HookUtils {
         envs.put("ONEDEV_CURL", curl);
 		envs.put("ONEDEV_URL", hookUrl);
 		envs.put("ONEDEV_HOOK_TOKEN", HOOK_TOKEN);
-		envs.put("ONEDEV_USER_ID", userId.toString());
+		envs.put("ONEDEV_USER_ID", principal);
 		envs.put("ONEDEV_REPOSITORY_ID", projectId.toString());
 		
         envs.put("GITPLEX_CURL", curl);
 		envs.put("GITPLEX_URL", hookUrl);
-		envs.put("GITPLEX_USER_ID", userId.toString());
+		envs.put("GITPLEX_USER_ID", principal);
 		envs.put("GITPLEX_REPOSITORY_ID", projectId.toString());
 		
 		return envs;

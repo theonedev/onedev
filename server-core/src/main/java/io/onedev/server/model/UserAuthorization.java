@@ -21,7 +21,6 @@ public class UserAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static String PROP_POJRECT = "project";
 	
 	public static String PROP_USER = "user";
 	

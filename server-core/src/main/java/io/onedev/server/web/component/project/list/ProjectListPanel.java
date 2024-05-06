@@ -209,7 +209,7 @@ public class ProjectListPanel extends Panel {
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -246,7 +246,7 @@ public class ProjectListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -864,7 +864,7 @@ public class ProjectListPanel extends Panel {
 			
 			private List<Project> getTargetProjects() {
 				ProjectCache cache = getProjectManager().cloneCache();
-				List<Project> projects = new ArrayList<>(getProjectManager().getPermittedProjects(new CreateChildren()));
+				List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new CreateChildren()));
 				projects.sort(cache.comparingPath());
 				return projects;
 			}
@@ -872,7 +872,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 
 			@Override
@@ -1027,7 +1027,7 @@ public class ProjectListPanel extends Panel {
 		
 		List<IColumn<Project, Void>> columns = new ArrayList<>();
 		
-		if (SecurityUtils.getUser() != null)
+		if (SecurityUtils.getAuthUser() != null)
 			columns.add(selectionColumn = new SelectionColumn<Project, Void>());
 		
 		columns.add(new AbstractColumn<Project, Void>(Model.of("")) {

@@ -296,23 +296,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	public void setDefaultProjects(Collection<Project> defaultProjects) {
 		this.defaultProjects = defaultProjects;
 	}
-
-	public Collection<UserAuthorization> getUserAuthorizations() {
-		return userAuthorizations;
-	}
-
-	public void setUserAuthorizations(Collection<UserAuthorization> userAuthorizations) {
-		this.userAuthorizations = userAuthorizations;
-	}
-
-	public Collection<GroupAuthorization> getGroupAuthorizations() {
-		return groupAuthorizations;
-	}
-
-	public void setGroupAuthorizations(Collection<GroupAuthorization> groupAuthorizations) {
-		this.groupAuthorizations = groupAuthorizations;
-	}
-
+	
 	public Collection<LinkAuthorization> getLinkAuthorizations() {
 		return linkAuthorizations;
 	}

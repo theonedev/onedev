@@ -7,7 +7,9 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.model.*;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -16,8 +18,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.AccessBuildReports;
-import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.MetricIndicator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -219,57 +219,14 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		reportNames.put(key, reportNamesOfKey);
 	}
 	
-	private void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames, 
-			Map<String, Collection<String>> availableReportNames, Project project, Role role) {
-		for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet()) {
-			String jobName = entry.getKey();
-			for (String reportName: entry.getValue()) {
-				if (role.implies(new JobPermission(jobName, new AccessBuildReports(reportName)))) {
-					Collection<String> accessibleReportNamesOfJob = accessibleReportNames.get(jobName);
-					if (accessibleReportNamesOfJob == null) {
-						accessibleReportNamesOfJob = new HashSet<>();
-						accessibleReportNames.put(jobName, accessibleReportNamesOfJob);
-					}
-					accessibleReportNamesOfJob.add(reportName);
-				}
-			}
-		}
-	}
-	
 	@Override
 	public Map<String, Collection<String>> getAccessibleReportNames(Project project, Class<?> metricClass) {
-		Map<String, Collection<String>> accessibleReportNames = new HashMap<>();
 		Key key = new Key(project.getId(), metricClass);
 		Map<String, Collection<String>> availableReportNames = reportNames.get(key);
-		if (availableReportNames != null) {
-			if (SecurityUtils.isAdministrator()) {
-				for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet())
-					accessibleReportNames.put(entry.getKey(), new HashSet<>(entry.getValue()));
-			} else {
-				User user = SecurityUtils.getUser();
-				if (user != null) {
-					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-						if (project.equals(authorization.getProject())) {
-							populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-									project, authorization.getRole());
-						}
-					}
-					for (Group group: user.getGroups()) {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
-							if (project.equals(authorization.getProject())) {
-								populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-										project, authorization.getRole());
-							}
-						}
-					}
-				}
-				if (project.getDefaultRole() != null) {
-					populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-							project, project.getDefaultRole());
-				}
-			}				
-		}
-		return accessibleReportNames;
+		if (availableReportNames != null) 
+			return SecurityUtils.getAccessibleReportNames(project, metricClass, availableReportNames);
+		else
+			return new HashMap<>();
 	}
 	
 	private static class Key implements Serializable {

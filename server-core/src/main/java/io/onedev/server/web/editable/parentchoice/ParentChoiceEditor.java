@@ -1,10 +1,15 @@
 package io.onedev.server.web.editable.parentchoice;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -12,15 +17,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ParentChoiceEditor extends PropertyEditor<String> {
@@ -45,7 +45,7 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 				ProjectCache cache = projectManager.cloneCache();
-				for (Project project: projectManager.getPermittedProjects(new CreateChildren())) {
+				for (Project project: SecurityUtils.getAuthorizedProjects(new CreateChildren())) {
 					if (currentProject == null || !cache.isSelfOrAncestorOf(currentProject.getId(), project.getId())) {
 						String projectPath = cache.get(project.getId()).getPath();
 						listOfProjectPath.add(projectPath);

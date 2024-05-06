@@ -3,7 +3,7 @@ package io.onedev.server.plugin.authenticator.ldap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -92,7 +92,7 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=400, description="Specifies password of above manager DN")
-	@Password
+	@Secret
 	@ShowCondition("isAuthenticationRequiredEnabled")
 	@NotEmpty
 	public String getManagerPassword() {

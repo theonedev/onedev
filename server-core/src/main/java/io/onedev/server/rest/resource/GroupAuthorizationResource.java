@@ -34,7 +34,7 @@ public class GroupAuthorizationResource {
 		this.authorizationManager = authorizationManager;
 	}
 
-	@Api(order=100)
+	@Api(order=100, description = "Get group authorization of specified id")
 	@Path("/{authorizationId}")
 	@GET
 	public GroupAuthorization get(@PathParam("authorizationId") Long authorizationId) {
@@ -62,7 +62,7 @@ public class GroupAuthorizationResource {
 		return Response.ok().build();
 	}
 	
-	@Api(order=300)
+	@Api(order=300, description = "Delete group authorization of specified id")
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response delete(@PathParam("authorizationId") Long authorizationId) {

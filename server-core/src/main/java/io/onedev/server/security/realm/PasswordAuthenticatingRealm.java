@@ -15,6 +15,7 @@ import io.onedev.server.validation.validator.UserNameValidator;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.PasswordMatcher;
 import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.realm.AuthenticatingRealm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +25,11 @@ import javax.inject.Singleton;
 import java.util.Collection;
 
 @Singleton
-public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
+public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 
-	private static final Logger logger = LoggerFactory.getLogger(PasswordAuthorizingRealm.class);
+	private static final Logger logger = LoggerFactory.getLogger(PasswordAuthenticatingRealm.class);
+	
+	private final UserManager userManager;
 	
     private final TransactionManager transactionManager;
     
@@ -35,23 +38,24 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     private final SshKeyManager sshKeyManager;
     
     private final EmailAddressManager emailAddressManager;
+	
+	private final SettingManager settingManager;
     
 	@Inject
-    public PasswordAuthorizingRealm(UserManager userManager, SettingManager settingManager, 
-    		MembershipManager membershipManager, GroupManager groupManager, 
-    		ProjectManager projectManager, SessionManager sessionManager, 
-    		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
-    		PasswordService passwordService, EmailAddressManager emailAddressManager) {
-		super(userManager, groupManager, projectManager, sessionManager, settingManager);
-		
+    public PasswordAuthenticatingRealm(UserManager userManager, SettingManager settingManager,
+									   MembershipManager membershipManager, GroupManager groupManager,
+									   ProjectManager projectManager, SessionManager sessionManager,
+									   TransactionManager transactionManager, SshKeyManager sshKeyManager,
+									   PasswordService passwordService, EmailAddressManager emailAddressManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
 		setCredentialsMatcher(passwordMatcher);
-		
+		this.userManager = userManager;
     	this.transactionManager = transactionManager;
     	this.membershipManager = membershipManager;
     	this.sshKeyManager = sshKeyManager;
     	this.emailAddressManager = emailAddressManager;
+		this.settingManager = settingManager;
     }
 
 	@Override

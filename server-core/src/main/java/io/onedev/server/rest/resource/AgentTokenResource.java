@@ -60,7 +60,6 @@ public class AgentTokenResource {
     public List<AgentToken> queryBasicInfo(@QueryParam("value") String value, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
-		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		

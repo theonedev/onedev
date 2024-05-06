@@ -112,7 +112,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected String load() {
 				var comment = getComment();
-				if (!comment.getUser().equals(SecurityUtils.getUser()) && !comment.isVisitedAfter(getComment().getCreateDate()))
+				if (!comment.getUser().equals(SecurityUtils.getAuthUser()) && !comment.isVisitedAfter(getComment().getCreateDate()))
 					return "new";
 				else
 					return "";
@@ -286,7 +286,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 
 		});
@@ -327,7 +327,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 			
 		};
@@ -448,7 +448,7 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 				}
 
-				var user = SecurityUtils.getUser();
+				var user = SecurityUtils.getAuthUser();
 				for (CodeCommentActivity activity: newActivities) {
 					Component newActivityContainer = activity.render(activitiesView.newChildId());
 					if (user == null || !user.equals(activity.getUser()))
@@ -505,8 +505,8 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null)
-					OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+				if (SecurityUtils.getAuthUser() != null)
+					OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getAuthUser(), getComment());
 			}
 
 			@Override
@@ -641,7 +641,7 @@ public abstract class CodeCommentPanel extends Panel {
 						CodeCommentReply reply = new CodeCommentReply();
 						reply.setComment(getComment());
 						reply.setDate(new Date());
-						reply.setUser(SecurityUtils.getUser());
+						reply.setUser(SecurityUtils.getAuthUser());
 						reply.setContent(content);
 						
 						onSaveCommentReply(target, reply);
@@ -649,7 +649,7 @@ public abstract class CodeCommentPanel extends Panel {
 						CodeCommentStatusChange change = new CodeCommentStatusChange();
 						change.setComment(getComment());
 						change.setDate(new Date());
-						change.setUser(SecurityUtils.getUser());
+						change.setUser(SecurityUtils.getAuthUser());
 						change.setResolved(resolved);
 						
 						onSaveCommentStatusChange(target, change, contentInput.getModelObject());
@@ -955,7 +955,7 @@ public abstract class CodeCommentPanel extends Panel {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.getUser() != null);
+					setVisible(SecurityUtils.getAuthUser() != null);
 				}
 
 			});

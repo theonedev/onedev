@@ -34,7 +34,7 @@ public class UserAuthorizationResource {
 		this.authorizationManager = authorizationManager;
 	}
 
-	@Api(order=100)
+	@Api(order=100, description = "Get user authorization of specified id")
 	@Path("/{authorizationId}")
 	@GET
 	public UserAuthorization get(@PathParam("authorizationId") Long authorizationId) {
@@ -63,7 +63,7 @@ public class UserAuthorizationResource {
 		return Response.ok().build();
 	}
 	
-	@Api(order=300)
+	@Api(order=300, description = "Delete user authorization of specified id")
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response delete(@PathParam("authorizationId") Long authorizationId) {

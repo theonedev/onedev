@@ -58,7 +58,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 				
 				ObjectId newCommitId = OneDev.getInstance(GitService.class).commit(
 						project, blobEdits, GitUtils.branch2ref(branch), 
-						commitId, commitId, SecurityUtils.getUser().asPerson(), 
+						commitId, commitId, SecurityUtils.getAuthUser().asPerson(), 
 						commitMessage, false);
 				project.cacheObjectId(branch, newCommitId);
 				
@@ -66,7 +66,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 					CodeCommentStatusChange change = new CodeCommentStatusChange();
 					change.setComment(comment);
 					change.setResolved(true);
-					change.setUser(SecurityUtils.getUser());
+					change.setUser(SecurityUtils.getAuthUser());
 					CompareContext compareContext = new CompareContext();
 					compareContext.setPullRequest(request);
 					compareContext.setOldCommitHash(mark.getCommitHash());

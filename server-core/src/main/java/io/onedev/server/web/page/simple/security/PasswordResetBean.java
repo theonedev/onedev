@@ -2,7 +2,7 @@ package io.onedev.server.web.page.simple.security;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -16,7 +16,7 @@ public class PasswordResetBean implements Serializable {
 	
 	@Editable(order=200)
 	@OmitName
-	@Password(needConfirm=true)
+	@Secret(needConfirm=true)
 	@NotEmpty
 	public String getNewPassword() {
 		return newPassword;

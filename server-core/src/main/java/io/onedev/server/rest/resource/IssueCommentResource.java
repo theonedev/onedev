@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 
-import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
+import static io.onedev.server.security.SecurityUtils.*;
 
 @Api(order=2300)
 @Path("/issue-comments")
@@ -43,11 +43,11 @@ public class IssueCommentResource {
 	@Api(order=200, description="Create new issue comment")
 	@POST
 	public Long create(@NotNull IssueComment comment) {
-    	if (!SecurityUtils.canAccessProject(comment.getIssue().getProject()) || !canModifyOrDelete(comment))  
+		if (!canAccessIssue(comment.getIssue()) 
+				|| !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
-    	
+		}
 		commentManager.create(comment, new ArrayList<>());
-		
 		return comment.getId();
 	}
 
@@ -57,9 +57,7 @@ public class IssueCommentResource {
 	public Response update(@PathParam("commentId") Long commentId, @NotNull IssueComment comment) {
 		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-
 		commentManager.update(comment);
-
 		return Response.ok().build();
 	}
 	

@@ -29,7 +29,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
-import java.util.UUID;
 
 @Api(order=3500)
 @Path("/job-runs")
@@ -107,6 +106,8 @@ public class JobRunResource {
 		Build build = jobManager.submit(project, commitId, jobRun.getJobName(), 
 				jobRun.getParams(), refName, SecurityUtils.getUser(), request, 
 				null, jobRun.getReason());
+		if (build.isFinished())
+			jobManager.resubmit(build, "Rebuild via restful api");
 		return build.getId();
     }
 

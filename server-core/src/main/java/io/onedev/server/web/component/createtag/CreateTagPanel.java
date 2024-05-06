@@ -10,8 +10,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -60,7 +58,7 @@ public abstract class CreateTagPanel extends Panel {
 
 				Project project = projectModel.getObject();
 				String tagName = helperBean.getName();
-				User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+				User user = SecurityUtils.getAuthUser();
 				if (project.getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 
 							"Tag '" + helperBean.getName() + "' already exists, please choose a different name.");

@@ -7,7 +7,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
@@ -101,7 +101,7 @@ public class ImportServer implements Serializable, Validatable {
 	}
 
 	@Editable(order = 300, name = "YouTrack Password or Access Token", description = "Specify YouTrack password or access token for above user")
-	@Password
+	@Secret
 	@NotEmpty
 	public String getPassword() {
 		return password;
@@ -472,7 +472,7 @@ public class ImportServer implements Serializable, Validatable {
 								nonExistentLogins.add(login);
 							}
 						} else {
-							issue.setSubmitter(SecurityUtils.getUser());
+							issue.setSubmitter(SecurityUtils.getAuthUser());
 						}
 
 						LastActivity lastActivity = new LastActivity();
@@ -916,7 +916,7 @@ public class ImportServer implements Serializable, Validatable {
 										nonExistentLogins.add(login);
 									}
 								} else {
-									issue.setSubmitter(SecurityUtils.getUser());
+									issue.setSubmitter(SecurityUtils.getAuthUser());
 								}
 								issue.getComments().add(comment);
 							}

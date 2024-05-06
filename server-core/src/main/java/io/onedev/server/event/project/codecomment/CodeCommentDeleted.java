@@ -2,7 +2,6 @@ package io.onedev.server.event.project.codecomment;
 
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Issue;
 import io.onedev.server.security.SecurityUtils;
 
 import java.util.Date;

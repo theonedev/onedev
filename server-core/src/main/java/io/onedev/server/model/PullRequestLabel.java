@@ -10,6 +10,7 @@ import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
@@ -27,6 +28,7 @@ public class PullRequestLabel extends EntityLabel {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	@Api(description = "id of <a href='/~help/api/io.onedev.server.rest.PullRequestResource'>pull request</a>")
+	@Immutable
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

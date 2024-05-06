@@ -14,7 +14,7 @@ public class CodeCommentReplyEdited extends CodeCommentEvent {
 	private final Long replyId;
 	
 	public CodeCommentReplyEdited(CodeCommentReply reply) {
-		super(SecurityUtils.getUser(), new Date(), reply.getComment());
+		super(SecurityUtils.getAuthUser(), new Date(), reply.getComment());
 		this.replyId = reply.getId();
 	}
 	

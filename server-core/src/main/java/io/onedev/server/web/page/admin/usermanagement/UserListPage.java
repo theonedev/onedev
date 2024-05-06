@@ -206,7 +206,7 @@ public class UserListPage extends AdministrationPage {
 									if (user.isRoot()) {
 										Session.get().error("Can not set root as guest");
 										return;
-									} else if (user.equals(SecurityUtils.getUser())) {
+									} else if (user.equals(SecurityUtils.getAuthUser())) {
 										Session.get().error("Can not set yourself as guest");
 										return;
 									}
@@ -437,7 +437,7 @@ public class UserListPage extends AdministrationPage {
 									if (user.isRoot()) {
 										Session.get().error("Can not delete root account");
 										return;
-									} else if (user.equals(SecurityUtils.getUser())) {
+									} else if (user.equals(SecurityUtils.getAuthUser())) {
 										Session.get().error("Can not delete yourself");
 										return;
 									}
@@ -507,7 +507,7 @@ public class UserListPage extends AdministrationPage {
 									if (user.isRoot()) {
 										Session.get().error("Can not set root as guest");
 										return;
-									} else if (user.equals(SecurityUtils.getUser())) {
+									} else if (user.equals(SecurityUtils.getAuthUser())) {
 										Session.get().error("Can not set yourself as guest");
 										return;
 									}
@@ -753,7 +753,7 @@ public class UserListPage extends AdministrationPage {
 									if (user.isRoot()) {
 										Session.get().error("Can not delete root account");
 										return;
-									} else if (user.equals(SecurityUtils.getUser())) {
+									} else if (user.equals(SecurityUtils.getAuthUser())) {
 										Session.get().error("Can not delete yourself");
 										return;
 									}

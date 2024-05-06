@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 
 public class ValueInfo {
 	
-	public enum Origin {REQUEST_BODY, RESPONSE_BODY, PATH_PLACEHOLDER, QUERY_PARAM};
+	public enum Origin {CREATE_BODY, UPDATE_BODY, READ_BODY, PATH_PLACEHOLDER, QUERY_PARAM};
 	
 	private final Origin origin;
 	

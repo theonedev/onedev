@@ -1,18 +1,12 @@
 package io.onedev.server.buildspec.job.projectdependency;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
-
-import javax.validation.constraints.NotEmpty;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -20,12 +14,16 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Editable
 public class ProjectDependency implements Serializable {
@@ -61,7 +59,7 @@ public class ProjectDependency implements Serializable {
 		
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		ProjectCache cache = projectManager.cloneCache();
-		for (Project project: projectManager.getPermittedProjects(new AccessProject())) {
+		for (Project project: SecurityUtils.getAuthorizedProjects(new AccessProject())) {
 			if (!project.equals(currentProject))
 				choices.add(cache.get(project.getId()).getPath());
 		}

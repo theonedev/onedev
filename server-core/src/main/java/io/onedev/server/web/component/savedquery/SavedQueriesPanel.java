@@ -143,7 +143,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null && (getQueryPersonalization() != null || canEditCommonQueries()));
+				setVisible(SecurityUtils.getAuthUser() != null && (getQueryPersonalization() != null || canEditCommonQueries()));
 			}
 
 			private Component newPersonalQueriesEditor(String componentId, ModalPanel modal) {
@@ -347,7 +347,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null && getQueryPersonalization() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQueryPersonalization() != null);
 			}
 
 		});
@@ -392,7 +392,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getUser() != null 
+						setVisible(SecurityUtils.getAuthUser() != null 
 								&& getQueryPersonalization() != null 
 								&& getQueryPersonalization().getQueryWatchSupport() != null);
 					}
@@ -421,7 +421,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getUser() != null 
+						setVisible(SecurityUtils.getAuthUser() != null 
 								&& getQueryPersonalization() != null
 								&& getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}

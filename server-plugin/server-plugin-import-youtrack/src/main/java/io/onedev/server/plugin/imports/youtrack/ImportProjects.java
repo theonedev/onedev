@@ -48,8 +48,7 @@ public class ImportProjects implements Serializable, Validatable {
 	}
 
 	private static List<String> getParentOneDevProjectChoices() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		return projectManager.getPermittedProjects(new CreateChildren()).stream()
+		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
 	}
 

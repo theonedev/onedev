@@ -32,7 +32,7 @@ public abstract class GitProtocolPanel extends Panel {
 	public GitProtocolPanel(String id) {
 		super(id);
 	
-		if (SecurityUtils.getUser() != null) {
+		if (SecurityUtils.getAuthUser() != null) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_USE_SSH);
 			useSsh = cookie!=null && String.valueOf(true).equals(cookie.getValue());
@@ -76,14 +76,14 @@ public abstract class GitProtocolPanel extends Panel {
 			}
 			
 		}));
-		add(switchLink.setVisible(SecurityUtils.getUser() != null));
+		add(switchLink.setVisible(SecurityUtils.getAuthUser() != null));
 		
 		WebMarkupContainer noSshKeysWarning = new WebMarkupContainer("noSshKeysWarning") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(useSsh && SecurityUtils.getUser().getSshKeys().isEmpty());
+				setVisible(useSsh && SecurityUtils.getAuthUser().getSshKeys().isEmpty());
 			}
 			
 		};

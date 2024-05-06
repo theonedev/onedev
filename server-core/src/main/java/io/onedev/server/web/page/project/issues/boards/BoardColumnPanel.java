@@ -337,7 +337,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getQuery() != null 
-						&& SecurityUtils.getUser() != null
+						&& SecurityUtils.getAuthUser() != null
 						&& (!getBoard().getIdentifyField().equals(Issue.NAME_STATE) 
 								|| getColumn().equals(getIssueSetting().getInitialStateSpec().getName())));
 			}

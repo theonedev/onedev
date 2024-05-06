@@ -1,49 +1,12 @@
 package io.onedev.server.rest.resource;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import com.google.common.collect.Sets;
-import io.onedev.server.model.support.AccessToken;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.shiro.authz.UnauthorizedException;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.BuildQueryPersonalization;
-import io.onedev.server.model.CodeCommentQueryPersonalization;
-import io.onedev.server.model.CommitQueryPersonalization;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.IssueQueryPersonalization;
-import io.onedev.server.model.IssueVote;
-import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.Membership;
-import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestQueryPersonalization;
-import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.SshKey;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
@@ -51,9 +14,21 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.annotation.UserName;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.*;
 
 @Api(order=5000)
 @Path("/users")
@@ -84,7 +59,7 @@ public class UserResource {
     @GET
     public User getProfile(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		return user;
     }
@@ -93,18 +68,18 @@ public class UserResource {
 	@Path("/me")
     @GET
     public User getMyProfile() {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user == null)
-			throw new UnauthenticatedException();
+			throw new UnauthorizedException();
 		return user;
     }
 	
 	@Api(order=250)
 	@Path("/{userId}/access-tokens")
     @GET
-    public List<AccessToken> getAccessTokens(@PathParam("userId") Long userId) {
+    public Collection<AccessToken> getAccessTokens(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getAccessTokens();
     }
@@ -114,7 +89,7 @@ public class UserResource {
     @GET
     public Collection<EmailAddress> getEmailAddresses(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getEmailAddresses();
     }
@@ -142,7 +117,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestReview> getPullRequestReviews(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestReviews();
     }
@@ -152,7 +127,7 @@ public class UserResource {
     @GET
     public Collection<IssueVote> getIssueVotes(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueVotes();
     }
@@ -162,7 +137,7 @@ public class UserResource {
     @GET
     public Collection<IssueWatch> getIssueWatches(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueWatches();
     }
@@ -172,7 +147,7 @@ public class UserResource {
     @GET
     public Collection<BuildQueryPersonalization> getProjectBuildQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getBuildQueryPersonalizations();
     }
@@ -182,7 +157,7 @@ public class UserResource {
     @GET
     public Collection<CodeCommentQueryPersonalization> getProjectCodeCommentQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCodeCommentQueryPersonalizations();
     }
@@ -192,7 +167,7 @@ public class UserResource {
     @GET
     public Collection<CommitQueryPersonalization> getProjectCommitQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCommitQueryPersonalizations();
     }
@@ -202,7 +177,7 @@ public class UserResource {
     @GET
     public Collection<IssueQueryPersonalization> getProjecIssueQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueQueryPersonalizations();
     }
@@ -212,7 +187,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestQueryPersonalization> getProjecPullRequestQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestQueryPersonalizations();
     }
@@ -222,7 +197,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestAssignment> getPullRequestAssignments(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestAssignments();
     }
@@ -232,7 +207,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestWatch> getPullRequestWatches(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestWatches();
     }
@@ -242,7 +217,7 @@ public class UserResource {
     @GET
     public Collection<SshKey> getSshKeys(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getSshKeys();
     }
@@ -252,7 +227,7 @@ public class UserResource {
     @GET
     public QueriesAndWatches getQueriesAndWatches(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		QueriesAndWatches queriesAndWatches = new QueriesAndWatches();
 		queriesAndWatches.buildQuerySubscriptions = user.getBuildQuerySubscriptions();
@@ -306,30 +281,13 @@ public class UserResource {
 			throw new UnauthenticatedException();
 		}
     }
-
-	@Api(order=1910, description="Create access token. This operation returns value of created access token")
-	@Path("/{userId}/access-tokens")
-	@POST
-	public String createAccessToken(@PathParam("userId") Long userId, @NotNull @Valid AccessTokenData accessTokenData) {
-		User user = userManager.load(userId);
-		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) {
-			AccessToken accessToken = new AccessToken();
-			accessToken.setDescription(accessTokenData.getDescription());
-			accessToken.setExpireDate(accessTokenData.getExpireDate());
-			user.getAccessTokens().add(accessToken);
-			userManager.update(user, null);
-			return accessToken.getValue();
-		} else {
-			throw new UnauthenticatedException();
-		}
-	}
 	
 	@Api(order=1950, description="Update user profile")
 	@Path("/{userId}")
     @POST
     public Response updateProfile(@PathParam("userId") Long userId, @NotNull @Valid ProfileUpdateData data) {
 		User user = userManager.load(userId);
-		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) { 
+		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getAuthUser())) { 
 			User existingUser = userManager.findByName(data.getName());
 			if (existingUser != null && !existingUser.equals(user))
 				throw new ExplicitException("Login name is already used by another user");
@@ -349,7 +307,7 @@ public class UserResource {
     @POST
     public Response setPassword(@PathParam("userId") Long userId, @NotEmpty String password) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) { 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) { 
 			throw new UnauthorizedException();
     	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
 			if (user.getSsoConnector() != null) {
@@ -375,7 +333,7 @@ public class UserResource {
 			throw new UnauthorizedException();
 		} else if (user.isRoot()) {
 			throw new ExplicitException("Can not change guest status of root user");
-		} else if (user.equals(SecurityUtils.getUser())) {
+		} else if (user.equals(SecurityUtils.getAuthUser())) {
 			throw new ExplicitException("Can not change guest status of yourself");
 		} else {
 			userManager.setAsGuest(Sets.newHashSet(user), guest);
@@ -388,7 +346,7 @@ public class UserResource {
     @POST
     public Response setQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		user.setBuildQuerySubscriptions(queriesAndWatches.buildQuerySubscriptions);
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
@@ -406,7 +364,9 @@ public class UserResource {
 	@Path("/{userId}/ssh-keys")
 	@POST
 	public Long addSshKey(@PathParam("userId") Long userId, @NotNull String content) {
-		User user = SecurityUtils.getUser();
+		User user = userManager.load(userId);
+		if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser()))
+			throw new UnauthorizedException();
 		
 		SshKey sshKey = new SshKey();
 		sshKey.setContent(content);
@@ -427,36 +387,12 @@ public class UserResource {
     	User user = userManager.load(userId);
     	if (user.isRoot())
 			throw new ExplicitException("Root user can not be deleted");
-    	else if (user.equals(SecurityUtils.getUser()))
+    	else if (user.equals(SecurityUtils.getAuthUser()))
     		throw new ExplicitException("Can not delete yourself");
     	else
     		userManager.delete(user);
     	return Response.ok().build();
     }
-
-	@Api(order=2400, description="Delete access token by value")
-	@Path("/{userId}/access-tokens/{accessTokenValue}")
-	@DELETE
-	public Response deleteAccessToken(@PathParam("userId") Long userId, @PathParam("accessTokenValue") @NotEmpty String accessTokenValue) {
-		User user = userManager.load(userId);
-		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) {
-			var found = false;
-			for (var it = user.getAccessTokens().iterator(); it.hasNext();) {
-				if (it.next().getValue().equals(accessTokenValue)) {
-					it.remove();
-					found = true;
-				}
-			}
-			if (found) {
-				userManager.update(user, null);
-				return Response.ok().build();
-			} else {
-				return Response.status(NOT_FOUND.getStatusCode(), "No access token found with specified value").build();
-			}
-		} else {
-			throw new UnauthenticatedException();
-		}
-	}
 
 	@EntityCreate(User.class)
 	public static class UserCreateData implements Serializable {
@@ -552,35 +488,6 @@ public class UserResource {
 			this.fullName = fullName;
 		}
 
-	}
-	
-	public static class AccessTokenData implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
-
-		@Api(order=100, description = "Description of access token. Maybe null")
-		private String description;
-
-		@Api(order=200, description = "Expiration date of access token. Null to never expire")
-		private Date expireDate;
-
-		@Nullable
-		public String getDescription() {
-			return description;
-		}
-
-		public void setDescription(@Nullable String description) {
-			this.description = description;
-		}
-
-		@Nullable
-		public Date getExpireDate() {
-			return expireDate;
-		}
-
-		public void setExpireDate(@Nullable Date expireDate) {
-			this.expireDate = expireDate;
-		}
 	}
 	
 	public static class QueriesAndWatches implements Serializable {

@@ -1,17 +1,16 @@
 package io.onedev.server.git.hook;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.UrlManager;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.shiro.util.ThreadContext;
@@ -22,19 +21,19 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.security.SecurityUtils;
+import static io.onedev.server.security.SecurityUtils.asPrincipals;
+import static io.onedev.server.security.SecurityUtils.asSubject;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -72,10 +71,11 @@ public class GitPostReceiveCallback extends HttpServlet {
                     "Git hook callbacks can only be accessed by OneDev itself");
             return;
         }
-        Long userId = Long.valueOf(fields.get(1));
+		
+        var principal = fields.get(1);
         Long projectId = Long.valueOf(fields.get(0));
         
-        ThreadContext.bind(SecurityUtils.asSubject(userId));
+        ThreadContext.bind(asSubject(asPrincipals(principal)));
 
         String refUpdateInfo = null;
         Enumeration<String> paramNames = request.getParameterNames();
@@ -120,7 +120,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         	}
 
         	if (branch != null && defaultBranch != null && !branch.equals(defaultBranch) 
-        			&& !userId.equals(User.SYSTEM_ID)) {
+        			&& !SecurityUtils.isSystem(principal)) {
         		showPullRequestLink(output, projectId, branch, defaultBranch);
         	}
         	

@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.HashingInputStream;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.GitLfsLock;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
@@ -44,9 +41,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import static com.google.common.hash.Hashing.sha256;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.servlet.http.HttpServletResponse.*;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -132,7 +129,7 @@ public class GitLfsFilter implements Filter {
 		String uri = httpRequest.getRequestURI();
 		String pathInfo = uri.substring(httpRequest.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
-		boolean clusterAccess = User.SYSTEM_ID.equals(SecurityUtils.getUserId());
+		boolean clusterAccess = SecurityUtils.isSystem();
 		
 		if ("true".equals(httpRequest.getParameter("lfs-objects"))) {
 			String projectPath = getProjectPath(pathInfo);
@@ -290,12 +287,7 @@ public class GitLfsFilter implements Filter {
 					} else {
 						httpResponse.setContentType(CONTENT_TYPE);
 						if (pathInfo.endsWith("/batch")) {
-							String accessToken;
-							var user = SecurityUtils.getUser();
-							if (user != null)
-								accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(user.getId(), 300);
-							else 
-								accessToken = null;
+							String accessToken = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(300);
 							processBatch(httpRequest, httpResponse, project.getFacade(), 
 									() -> canReadCode(httpRequest, project), 
 									() -> SecurityUtils.canWriteCode(project), 

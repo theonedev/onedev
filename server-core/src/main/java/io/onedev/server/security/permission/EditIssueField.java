@@ -33,4 +33,5 @@ public class EditIssueField implements BasePermission {
 	public boolean isApplicable(@Nullable UserFacade user) {
 		return user != null;
 	}
+	
 }

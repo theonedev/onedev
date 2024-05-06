@@ -232,7 +232,7 @@ public class IssueListPage extends LayoutPage {
 	
 	public static PageParameters paramsOf(int page) {
 		String query = null;
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null && !user.getIssueQueryPersonalization().getQueries().isEmpty()) 
 			query = user.getIssueQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getIssueSetting().getNamedQueries().isEmpty())

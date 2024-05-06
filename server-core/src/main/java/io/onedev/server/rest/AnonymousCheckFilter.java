@@ -36,7 +36,7 @@ public class AnonymousCheckFilter implements ContainerRequestFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		Api api = resourceInfo.getResourceClass().getAnnotation(Api.class);
-		if ((api == null || !api.internal()) && SecurityUtils.getUser() == null 
+		if ((api == null || !api.internal()) && SecurityUtils.isAnonymous() 
 				&& resourceInfo.getResourceClass() != TriggerJobResource.class) { 
 			String method = request.getMethod();
 			if (method.equals("POST") || method.equals("DELETE") || method.equals("PUT") 

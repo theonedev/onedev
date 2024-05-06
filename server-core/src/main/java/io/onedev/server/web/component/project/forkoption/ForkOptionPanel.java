@@ -54,7 +54,7 @@ public abstract class ForkOptionPanel extends Panel {
 
 		ParentBean parentBean = new ParentBean();
 		
-		String userName = SecurityUtils.getUser().getName();
+		String userName = SecurityUtils.getAuthUser().getName();
 		Project parent = getProjectManager().findByPath(userName);
 		if (parent != null) {
 			if (SecurityUtils.canCreateChildren(parent))

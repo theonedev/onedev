@@ -273,13 +273,13 @@ public class ClusterResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
 	public Response gitPack(InputStream is, @QueryParam("projectId") Long projectId, 
-			@QueryParam("userId") Long userId, @QueryParam("protocol") String protocol, 
+			@QueryParam("principal") String principal, @QueryParam("protocol") String protocol, 
 			@QueryParam("upload") boolean upload) {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
 		StreamingOutput os = output -> {
-			Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, userId);
+			Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, principal);
 			
 			try {
 				File gitDir = projectManager.getGitDir(projectId);

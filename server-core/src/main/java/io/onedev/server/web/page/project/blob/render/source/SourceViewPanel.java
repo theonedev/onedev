@@ -456,11 +456,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							
 					String position = BlobRenderer.getSourcePosition(range);
 					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
-							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getUser()!=null);
+							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getAuthUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":
-					Preconditions.checkNotNull(SecurityUtils.getUser());
+					Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 					range = getRange(params, "param1", "param2", "param3", "param4");
 					var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 					var containTooLongLines = false;
@@ -563,7 +563,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								
 								comment.setMark(mark);
 								comment.setContent(content);
-								comment.setUser(SecurityUtils.getUser());
+								comment.setUser(SecurityUtils.getAuthUser());
 								comment.setProject(context.getProject());
 								comment.setCompareContext(getCompareContext());
 								

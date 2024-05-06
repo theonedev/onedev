@@ -20,7 +20,7 @@ public class UnauthorizedExceptionHandler extends AbstractExceptionHandler<Unaut
 		if (errorMessage == null)
 			errorMessage = "Not authorized";
 		
-		if (SecurityUtils.getUserId().equals(0L)) {
+		if (SecurityUtils.isAnonymous()) {
 			MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
 			headers.putSingle("WWW-Authenticate", HttpServletRequest.BASIC_AUTH + " realm=\"OneDev\"");
 			return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, new HttpResponseBody(false, errorMessage), headers);

@@ -6,12 +6,11 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.support.AccessToken;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
@@ -27,7 +26,6 @@ import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
@@ -40,6 +38,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.User.*;
+import static io.onedev.server.security.SecurityUtils.asPrincipals;
+import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
 
 @Entity
 @Table(
@@ -99,11 +99,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String ssoConnector;
 	
 	private boolean guest;
-
-	@JsonIgnore
-	@Lob
-	@Column(length=65535)
-	private ArrayList<AccessToken> accessTokens = new ArrayList<>();
 	
 	@JsonIgnore
 	@Lob
@@ -117,6 +112,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Dashboard> dashboards = new ArrayList<>();
+	
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<AccessToken> accessTokens = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -489,7 +488,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
     public PrincipalCollection getPrincipals() {
-        return new SimplePrincipalCollection(getId(), "");
+		return asPrincipals(asUserPrincipal(getId()));		
     }
     
     @Override
@@ -498,7 +497,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
 
     public Subject asSubject() {
-    	return SecurityUtils.asSubject(getId());
+    	return SecurityUtils.asSubject(getPrincipals());
     }
 
 	@Editable(name="Login Name", order=100)
@@ -513,7 +512,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
     
 	@Editable(order=150)
-	@Password(needConfirm=true, autoComplete="new-password")
+	@Secret(needConfirm=true, autoComplete="new-password")
 	@NotEmpty
 	public String getPassword() {
 		return password;
@@ -571,12 +570,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public boolean isEffectiveGuest() {
 		return guest && !isRoot() && !isSystem();
 	}
-	
-	public ArrayList<AccessToken> getAccessTokens() {
+
+	public Collection<AccessToken> getAccessTokens() {
 		return accessTokens;
 	}
 
-	public void setAccessTokens(ArrayList<AccessToken> accessTokens) {
+	public void setAccessTokens(Collection<AccessToken> accessTokens) {
 		this.accessTokens = accessTokens;
 	}
 
@@ -977,7 +976,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), isGuest(), getAccessTokens());
+		return new UserFacade(getId(), getName(), getFullName(), isGuest());
 	}
 	
 }

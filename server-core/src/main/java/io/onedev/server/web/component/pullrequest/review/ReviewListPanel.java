@@ -95,7 +95,7 @@ public abstract class ReviewListPanel extends Panel {
 						super.updateAjaxAttributes(attributes);
 
 						PullRequestReview review = item.getModelObject();
-						if (!review.getUser().equals(SecurityUtils.getUser())) {
+						if (!review.getUser().equals(SecurityUtils.getAuthUser())) {
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
 									+ "request another review from '" + review.getUser().getDisplayName() + "'?"));
 						}
@@ -104,7 +104,7 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						if (review.getUser().equals(SecurityUtils.getUser()))
+						if (review.getUser().equals(SecurityUtils.getAuthUser()))
 							tag.put("title", "Reset my review");
 					}
 
@@ -121,7 +121,7 @@ public abstract class ReviewListPanel extends Panel {
 						super.onConfigure();
 
 						PullRequestReview review = item.getModelObject();
-						User currentUser = SecurityUtils.getUser();
+						User currentUser = SecurityUtils.getAuthUser();
 						setVisible(!request.isNew()
 								&& !request.isMerged()
 								&& review.getStatus() != PullRequestReview.Status.PENDING

@@ -70,7 +70,7 @@ public abstract class BlobViewPanel extends Panel {
 
 		Project project = context.getProject();
 		if (SecurityUtils.canWriteCode(project) && context.isOnBranch()) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			String revision = context.getBlobIdent().revision;
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);

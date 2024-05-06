@@ -237,7 +237,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
 					assignment.setRequest(request);
-					assignment.setUser(SecurityUtils.getUser());
+					assignment.setUser(SecurityUtils.getAuthUser());
 					request.getAssignments().add(assignment);
 				} else {
 					for (UserAuthorization authorization: target.getProject().getUserAuthorizations()) {
@@ -260,7 +260,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					if (pullRequestRef.get() != null) {
 						pullRequestRef.get().setTarget(target);
 						pullRequestRef.get().setSource(source);
-						pullRequestRef.get().setSubmitter(SecurityUtils.getUser());
+						pullRequestRef.get().setSubmitter(SecurityUtils.getAuthUser());
 					}
 					return pullRequestRef.get();
 				}
@@ -1041,7 +1041,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	@Override
 	protected boolean isPermitted() {
-		return !SecurityUtils.getUser().isEffectiveGuest() 
+		return !SecurityUtils.getAuthUser().isEffectiveGuest() 
 				&& SecurityUtils.canReadCode(target.getProject()) 
 				&& SecurityUtils.canReadCode(source.getProject());
 	}

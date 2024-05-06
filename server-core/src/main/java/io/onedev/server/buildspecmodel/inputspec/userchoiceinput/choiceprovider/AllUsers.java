@@ -28,9 +28,9 @@ public class AllUsers implements ChoiceProvider {
 			List<User> users = new ArrayList<>(cache.getUsers());
 			users.sort(cache.comparingDisplayName(issueDetailPage.getIssue().getParticipants()));
 			return users;
-		} else if (SecurityUtils.getUser() != null) {
+		} else if (SecurityUtils.getAuthUser() != null) {
 			List<User> users = new ArrayList<>(cache.getUsers());
-			users.sort(cache.comparingDisplayName(Sets.newHashSet(SecurityUtils.getUser())));
+			users.sort(cache.comparingDisplayName(Sets.newHashSet(SecurityUtils.getAuthUser())));
 			return users;
 		} else {
 			List<User> users = new ArrayList<>(cache.getUsers());

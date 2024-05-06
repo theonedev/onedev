@@ -22,7 +22,7 @@ public abstract class UserDeleteLink extends Link<Void> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getUser().equals(SecurityUtils.getUser()))
+		if (getUser().equals(SecurityUtils.getAuthUser()))
 			add(new ConfirmClickModifier("Do you really want to remove your account?"));		
 		else
 			add(new ConfirmClickModifier("Do you really want to delete user '" + getUser().getDisplayName() + "'?"));
@@ -30,7 +30,7 @@ public abstract class UserDeleteLink extends Link<Void> {
 
 	@Override
 	public void onClick() {
-		if (getUser().equals(SecurityUtils.getUser())) {
+		if (getUser().equals(SecurityUtils.getAuthUser())) {
 			OneDev.getInstance(UserManager.class).delete(getUser());
 			WebSession.get().logout();
 			WebSession.get().warn("Your account is deleted");

@@ -1,21 +1,9 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
-import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.server.cluster.ClusterManager;
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
@@ -23,17 +11,28 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 @SuppressWarnings("serial")
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
@@ -115,7 +114,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 										if (!matchWith.contains("*")) {
 											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 											ProjectCache cache = projectManager.cloneCache();
-											Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject());
+											Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 											List<String> serviceDeskNames = projects.stream()
 													.map(it->cache.get(it.getId()).getServiceDeskName())
 													.filter(it-> it != null)

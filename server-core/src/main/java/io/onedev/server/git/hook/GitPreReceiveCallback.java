@@ -14,9 +14,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.ManageProject;
-import io.onedev.server.security.permission.ProjectPermission;
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -29,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+
+import static io.onedev.server.security.SecurityUtils.*;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -72,148 +72,144 @@ public class GitPreReceiveCallback extends HttpServlet {
             return;
         }
 
-        Long userId = Long.valueOf(fields.get(1));
-        if (!userId.equals(User.SYSTEM_ID)) { // not access with cluster credential
-            SecurityUtils.getSubject().runAs(SecurityUtils.asPrincipal(userId));
-            try {
-                Project project = projectManager.load(Long.valueOf(fields.get(0)));
-                
-                String refUpdateInfo = null;
-                
-                /*
-                 * Since git 2.11, pushed commits will be placed in to a QUARANTINE directory when pre-receive hook 
-                 * is fired. Current version of jgit does not pick up objects in this directory so we should call 
-                 * native git instead with various environments passed from pre-receive hook   
-                 */
-                Map<String, String> gitEnvs = new HashMap<>();
-                Enumeration<String> paramNames = request.getParameterNames();
-                while (paramNames.hasMoreElements()) {
-                	String paramName = paramNames.nextElement();
-                	if (paramName.contains(" ")) {
-                		refUpdateInfo = paramName;
-                	} else if (paramName.startsWith("ENV_")) {
-                		String paramValue = request.getParameter(paramName);
-                		if (StringUtils.isNotBlank(paramValue))
-                			gitEnvs.put(paramName.substring("ENV_".length()), paramValue);
-                	}
-                }
-                
-                Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
-                
-    	        Output output = new Output(response.getOutputStream());
-    	        
-    	        /*
-    	         * If multiple refs are updated, the hook stdin will put each ref update info into
-    	         * a separate line, however the line breaks is omitted when forward the hook stdin
-    	         * to curl via "@-", below logic is used to parse these info correctly even 
-    	         * without line breaks.  
-    	         */
-    	        refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
-    	        fields = StringUtils.splitAndTrim(refUpdateInfo, " ");
-    	        
-    	        int pos = 0;
-    	        while (true) {
-    	        	String refName = StringUtils.reverse(fields.get(pos));
-    	        	pos++;
-    	        	ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
-    	        	pos++;
-    	        	String field = fields.get(pos);
-    	        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
-    	        	
-    	    		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		var principal = fields.get(1);
+        if (!isSystem(principal)) { // not access with cluster credential
+			ThreadContext.bind(asSubject(asPrincipals(principal)));
+			Project project = projectManager.load(Long.valueOf(fields.get(0)));
+			
+			String refUpdateInfo = null;
+			
+			/*
+			 * Since git 2.11, pushed commits will be placed in to a QUARANTINE directory when pre-receive hook 
+			 * is fired. Current version of jgit does not pick up objects in this directory so we should call 
+			 * native git instead with various environments passed from pre-receive hook   
+			 */
+			Map<String, String> gitEnvs = new HashMap<>();
+			Enumeration<String> paramNames = request.getParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String paramName = paramNames.nextElement();
+				if (paramName.contains(" ")) {
+					refUpdateInfo = paramName;
+				} else if (paramName.startsWith("ENV_")) {
+					String paramValue = request.getParameter(paramName);
+					if (StringUtils.isNotBlank(paramValue))
+						gitEnvs.put(paramName.substring("ENV_".length()), paramValue);
+				}
+			}
+			
+			Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
+			
+			Output output = new Output(response.getOutputStream());
+			
+			/*
+			 * If multiple refs are updated, the hook stdin will put each ref update info into
+			 * a separate line, however the line breaks is omitted when forward the hook stdin
+			 * to curl via "@-", below logic is used to parse these info correctly even 
+			 * without line breaks.  
+			 */
+			refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
+			fields = StringUtils.splitAndTrim(refUpdateInfo, " ");
+			
+			int pos = 0;
+			while (true) {
+				String refName = StringUtils.reverse(fields.get(pos));
+				pos++;
+				ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
+				pos++;
+				String field = fields.get(pos);
+				ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
+				
+				User user = getUser();
 
-    	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
-    	    			if (!user.asSubject().isPermitted(new ProjectPermission(project, new ManageProject()))) {
-    	    				error(output, refName, Lists.newArrayList("Only project administrators can update onedev refs."));
-    	    				break;
-    	    			}
-    	    		} else if (refName.startsWith(Constants.R_HEADS)) {
-    	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
-    	    			List<String> errorMessages = new ArrayList<>();
-    	    			BranchProtection protection = project.getBranchProtection(branchName, user);
-    					if (oldObjectId.equals(ObjectId.zeroId())) {
-    						if (protection.isPreventCreation()) {
-    							errorMessages.add("Can not create this branch according to branch protection setting");
-    						} else if (protection.isCommitSignatureRequired() 
-    								&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
-    							errorMessages.add("Can not create this branch as branch protection setting "
-    									+ "requires valid signature on head commit");
-    						}
-    					} else if (newObjectId.equals(ObjectId.zeroId())) {
-    						if (protection.isPreventDeletion()) 
-    							errorMessages.add("Can not delete this branch according to branch protection setting");
-    					} else if (protection.isPreventForcedPush() 
-    							&& !GitUtils.isMergedInto(projectManager.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
-    						errorMessages.add("Can not force-push to this branch according to branch protection setting");
-    					} else if (protection.isCommitSignatureRequired() 
-    							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
-    						errorMessages.add("Can not push to this branch as branch protection rule requires "
-    								+ "valid signature for head commit");
-    					} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
-        					errorMessages.add("Review required for your change. Please submit pull request instead");
-    					}
-						if (errorMessages.isEmpty() && !newObjectId.equals(ObjectId.zeroId())) {
-							var commitMessageError = project.checkCommitMessages(branchName, user, oldObjectId, newObjectId, gitEnvs);
-							if (commitMessageError != null)
-								errorMessages.add(commitMessageError.toString());
+				if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
+					if (!canManageProject(project)) {
+						error(output, refName, Lists.newArrayList("Only project managers can update onedev refs."));
+						break;
+					}
+				} else if (refName.startsWith(Constants.R_HEADS)) {
+					String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
+					List<String> errorMessages = new ArrayList<>();
+					BranchProtection protection = project.getBranchProtection(branchName, user);
+					if (oldObjectId.equals(ObjectId.zeroId())) {
+						if (protection.isPreventCreation()) {
+							errorMessages.add("Can not create this branch according to branch protection setting");
+						} else if (protection.isCommitSignatureRequired() 
+								&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
+							errorMessages.add("Can not create this branch as branch protection setting "
+									+ "requires valid signature on head commit");
 						}
-    	    			if (errorMessages.isEmpty() 
-    	    					&& !oldObjectId.equals(ObjectId.zeroId()) 
-    	    					&& !newObjectId.equals(ObjectId.zeroId()) 
-    	    					&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
-    	    				errorMessages.add("Build required for your change. Please submit pull request instead");
-    	    			}
-    	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
-    	    				try {
-    	    					projectManager.onDeleteBranch(project, branchName);
-    	    				} catch (ExplicitException e) {
-    	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
-    	    				}
-    	    			}
-    					if (!errorMessages.isEmpty())
-    						error(output, refName, errorMessages);
-    	    		} else if (refName.startsWith(Constants.R_TAGS)) {
-    	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
-    	    			List<String> errorMessages = new ArrayList<>();
-    	    			TagProtection protection = project.getTagProtection(tagName, user);
-    					if (oldObjectId.equals(ObjectId.zeroId())) {
-    						if (protection.isPreventCreation()) {
-    							errorMessages.add("Can not create this tag according to tag protection setting");
-    						} else if (protection.isCommitSignatureRequired() 
-    								&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
-    							errorMessages.add("Can not create this tag as tag protection setting requires "
-    									+ "valid tag signature");
-    						}
-    					} else if (newObjectId.equals(ObjectId.zeroId())) {
-    						if (protection.isPreventDeletion())
-    							errorMessages.add("Can not delete this tag according to tag protection setting");
-    					} else if (protection.isPreventUpdate()) {
-    						errorMessages.add("Can not update this tag according to tag protection setting");
-    					} else if (protection.isCommitSignatureRequired() 
-    							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
-    						errorMessages.add("Can not update this tag as tag protection setting requires "
-    								+ "valid tag signature");
-    					}
-    	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
-    	    				try {
-    	    					projectManager.onDeleteTag(project, tagName);
-    	    				} catch (ExplicitException e) {
-    	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
-    	    				}
-    	    			}
-    					if (!errorMessages.isEmpty())
-    						error(output, refName, errorMessages);
-    	    		}
-    	    		
-    	        	field = field.substring(40);
-    	        	if (field.length() == 0)
-    	        		break;
-    	        	else
-    	        		fields.set(pos, field);
-    	        }
-            } finally {
-            	SecurityUtils.getSubject().releaseRunAs();
-            }		        	
+					} else if (newObjectId.equals(ObjectId.zeroId())) {
+						if (protection.isPreventDeletion()) 
+							errorMessages.add("Can not delete this branch according to branch protection setting");
+					} else if (protection.isPreventForcedPush() 
+							&& !GitUtils.isMergedInto(projectManager.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
+						errorMessages.add("Can not force-push to this branch according to branch protection setting");
+					} else if (protection.isCommitSignatureRequired() 
+							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
+						errorMessages.add("Can not push to this branch as branch protection rule requires "
+								+ "valid signature for head commit");
+					} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
+						errorMessages.add("Review required for your change. Please submit pull request instead");
+					}
+					if (errorMessages.isEmpty() && !newObjectId.equals(ObjectId.zeroId())) {
+						var commitMessageError = project.checkCommitMessages(branchName, user, oldObjectId, newObjectId, gitEnvs);
+						if (commitMessageError != null)
+							errorMessages.add(commitMessageError.toString());
+					}
+					if (errorMessages.isEmpty() 
+							&& !oldObjectId.equals(ObjectId.zeroId()) 
+							&& !newObjectId.equals(ObjectId.zeroId()) 
+							&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
+						errorMessages.add("Build required for your change. Please submit pull request instead");
+					}
+					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
+						try {
+							projectManager.onDeleteBranch(project, branchName);
+						} catch (ExplicitException e) {
+							errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
+						}
+					}
+					if (!errorMessages.isEmpty())
+						error(output, refName, errorMessages);
+				} else if (refName.startsWith(Constants.R_TAGS)) {
+					String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
+					List<String> errorMessages = new ArrayList<>();
+					TagProtection protection = project.getTagProtection(tagName, user);
+					if (oldObjectId.equals(ObjectId.zeroId())) {
+						if (protection.isPreventCreation()) {
+							errorMessages.add("Can not create this tag according to tag protection setting");
+						} else if (protection.isCommitSignatureRequired() 
+								&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
+							errorMessages.add("Can not create this tag as tag protection setting requires "
+									+ "valid tag signature");
+						}
+					} else if (newObjectId.equals(ObjectId.zeroId())) {
+						if (protection.isPreventDeletion())
+							errorMessages.add("Can not delete this tag according to tag protection setting");
+					} else if (protection.isPreventUpdate()) {
+						errorMessages.add("Can not update this tag according to tag protection setting");
+					} else if (protection.isCommitSignatureRequired() 
+							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
+						errorMessages.add("Can not update this tag as tag protection setting requires "
+								+ "valid tag signature");
+					}
+					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
+						try {
+							projectManager.onDeleteTag(project, tagName);
+						} catch (ExplicitException e) {
+							errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
+						}
+					}
+					if (!errorMessages.isEmpty())
+						error(output, refName, errorMessages);
+				}
+				
+				field = field.substring(40);
+				if (field.length() == 0)
+					break;
+				else
+					fields.set(pos, field);
+			}
         }
 	}	
 }

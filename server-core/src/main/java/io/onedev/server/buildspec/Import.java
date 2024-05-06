@@ -75,7 +75,7 @@ public class Import implements Serializable, Validatable {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
 		
-		Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject());
+		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 		projects.remove(project);
 		
 		ProjectCache cache = projectManager.cloneCache();

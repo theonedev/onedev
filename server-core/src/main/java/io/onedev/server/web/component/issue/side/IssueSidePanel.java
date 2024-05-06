@@ -139,7 +139,7 @@ public abstract class IssueSidePanel extends Panel {
 		
 		String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
 		if (SecurityUtils.canManageIssues(getProject()) 
-				|| getIssue().getState().equals(initialState) && getIssue().getSubmitter().equals(SecurityUtils.getUser())) {
+				|| getIssue().getState().equals(initialState) && getIssue().getSubmitter().equals(SecurityUtils.getAuthUser())) {
 			addOrReplace(newDeleteLink("delete"));		
 		} else {
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
@@ -763,12 +763,12 @@ public abstract class IssueSidePanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null) {
-					IssueVote vote = getVote(SecurityUtils.getUser());
+				if (SecurityUtils.getAuthUser() != null) {
+					IssueVote vote = getVote(SecurityUtils.getAuthUser());
 					if (vote == null) {
 						vote = new IssueVote();
 						vote.setIssue(getIssue());
-						vote.setUser(SecurityUtils.getUser());
+						vote.setUser(SecurityUtils.getAuthUser());
 						vote.setDate(new Date());
 						OneDev.getInstance(IssueVoteManager.class).create(vote);
 						getIssue().getVotes().add(vote);
@@ -790,8 +790,8 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected String load() {
-						if (SecurityUtils.getUser() != null) {
-							if (getVote(SecurityUtils.getUser()) != null)
+						if (SecurityUtils.getAuthUser() != null) {
+							if (getVote(SecurityUtils.getAuthUser()) != null)
 								return "Unvote";
 							else
 								return "Vote";

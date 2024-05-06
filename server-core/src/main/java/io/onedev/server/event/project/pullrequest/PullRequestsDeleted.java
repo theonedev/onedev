@@ -1,7 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
 import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;

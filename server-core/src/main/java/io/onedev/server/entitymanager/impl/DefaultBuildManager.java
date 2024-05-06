@@ -32,8 +32,6 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.AccessBuild;
-import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStats;
@@ -824,14 +822,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return jobNames;
 	}
 	
-	private void populateAccessibleJobNames(Collection<String> accessibleJobNames, 
-			Collection<String> availableJobNames, Role role) {
-		for (String jobName: availableJobNames) {
-			if (role.implies(new JobPermission(jobName, new AccessBuild())))
-				accessibleJobNames.add(jobName);
-		}
-	}
-
 	@Override
 	public Map<Project, Collection<String>> getAccessibleJobNames() {
 		Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
@@ -846,46 +836,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Override
 	public Collection<String> getAccessibleJobNames(Project project) {
-		Collection<String> accessibleJobNames = new HashSet<>();
 		Collection<String> availableJobNames = jobNames.get(project.getId());
-		if (availableJobNames != null) {
-			if (SecurityUtils.isAdministrator()) {
-				accessibleJobNames.addAll(availableJobNames);
-			} else {
-				User user = SecurityUtils.getUser();
-				if (user != null) {
-					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-						if (authorization.getProject().isSelfOrAncestorOf(project)) {
-							populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
-									authorization.getRole());
-						}
-					}
-					
-					Set<Group> groups = new HashSet<>(user.getGroups());
-					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-					if (defaultLoginGroup != null) 
-						groups.add(defaultLoginGroup);
-					
-					for (Group group: groups) {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
-							if (authorization.getProject().isSelfOrAncestorOf(project)) {
-								populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
-										authorization.getRole());
-							}
-						}
-					}
-				}
-				
-				Project current = project;
-				do {
-					Role defaultRole = current.getDefaultRole();
-					if (defaultRole != null)
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames, defaultRole);
-					current = current.getParent();
-				} while (current != null);
-			}
-		}
-		return accessibleJobNames;
+		if (availableJobNames != null) 
+			return SecurityUtils.getAccessibleJobNames(project, availableJobNames);
+		else 
+			return new HashSet<>();
 	}
 
 	@Override

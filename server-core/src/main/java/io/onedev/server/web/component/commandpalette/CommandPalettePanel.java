@@ -212,7 +212,7 @@ public abstract class CommandPalettePanel extends Panel {
 				boolean applicable = false;
 				if (SecurityUtils.isAdministrator()) {
 					applicable = true;
-				} else if (SecurityUtils.getUser() != null) {
+				} else if (SecurityUtils.getAuthUser() != null) {
 					if (!url[0].equals("~administration"))
 						applicable = true;
 				} else if (!url[0].equals("~administration") && !url[0].equals("~my")) {

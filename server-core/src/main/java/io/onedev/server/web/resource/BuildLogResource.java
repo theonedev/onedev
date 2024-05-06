@@ -8,7 +8,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -50,7 +49,7 @@ public class BuildLogResource extends AbstractResource {
 		if (buildNumber == null)
 			throw new IllegalArgumentException("build number has to be specified");
 
-		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
+		if (!SecurityUtils.isSystem()) {
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			
 			Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);

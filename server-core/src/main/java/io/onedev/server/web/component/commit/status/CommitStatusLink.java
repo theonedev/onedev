@@ -47,7 +47,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 		@Override
 		protected List<Job> load() {
 			List<Job> jobs = new ArrayList<>();
-			JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getUser(), getPullRequest()));
+			JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getAuthUser(), getPullRequest()));
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
 				if (buildSpec != null)

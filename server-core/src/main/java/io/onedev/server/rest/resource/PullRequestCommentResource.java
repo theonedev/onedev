@@ -41,10 +41,10 @@ public class PullRequestCommentResource {
 	@Api(order=200, description="Create new pull request comment")
 	@POST
 	public Long create(@NotNull PullRequestComment comment) {
-    	if (!SecurityUtils.canReadCode(comment.getProject()) || 
-    			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
+    	if (!SecurityUtils.canReadCode(comment.getProject()) 
+				|| !SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
-    	}
+		}
 
 		commentManager.create(comment, new ArrayList<>());
 		
@@ -55,10 +55,8 @@ public class PullRequestCommentResource {
 	@Path("/{commentId}")
 	@POST
 	public Response update(@PathParam("commentId") Long commentId, @NotNull PullRequestComment comment) {
-		if (!SecurityUtils.canReadCode(comment.getProject()) ||
-				!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
+		if (!SecurityUtils.canModifyOrDelete(comment))
 			throw new UnauthorizedException();
-		}
 
 		commentManager.update(comment);
 

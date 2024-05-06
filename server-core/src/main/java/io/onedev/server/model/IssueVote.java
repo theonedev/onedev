@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.onedev.server.rest.annotation.Immutable;
+
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -22,14 +25,17 @@ public class IssueVote extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 	
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	public Issue getIssue() {
 		return issue;

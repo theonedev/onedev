@@ -3,7 +3,7 @@ package io.onedev.server.web.editable.buildspec.param.instance;
 import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.ParamSpecProvider;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.VariableOption;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -140,7 +140,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 				
 				container.add(new Label("required", required).setEscapeModelStrings(false));
 				
-				boolean isSecret = property.getPropertyGetter().getAnnotation(Password.class) != null;
+				boolean isSecret = property.getPropertyGetter().getAnnotation(Secret.class) != null;
 
 				List<String> choices = new ArrayList<>();
 				if (isSecret) {
@@ -281,7 +281,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 			logger.error("Error setting property value", e);
 		}
 		
-		if (property.getPropertyGetter().getAnnotation(Password.class) == null) {
+		if (property.getPropertyGetter().getAnnotation(Secret.class) == null) {
 			PropertyEditor<?> propertyEditor = PropertyContext.edit("value", paramBean, property.getPropertyName());
 			item.add(propertyEditor);
 			if (propertyEditor instanceof StringPropertyEditor) {

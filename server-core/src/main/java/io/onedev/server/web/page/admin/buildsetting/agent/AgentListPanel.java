@@ -126,7 +126,7 @@ class AgentListPanel extends Panel {
 		target.add(body);
 		selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	

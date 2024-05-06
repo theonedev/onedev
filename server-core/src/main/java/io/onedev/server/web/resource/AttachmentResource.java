@@ -8,7 +8,6 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.IOUtils;
@@ -30,8 +29,8 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URLEncoder;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AttachmentResource extends AbstractResource {
@@ -58,7 +57,7 @@ public class AttachmentResource extends AbstractResource {
 		else if (attachmentGroup.contains(".."))
 			throw new IllegalArgumentException("Invalid parameter 'attachment-group'");
 
-		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
+		if (!SecurityUtils.isSystem()) {
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			
 			String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();

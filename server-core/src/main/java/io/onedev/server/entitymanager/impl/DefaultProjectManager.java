@@ -53,7 +53,6 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.IOUtils;
@@ -67,13 +66,12 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.shiro.authz.Permission;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
@@ -735,6 +733,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				FileUtils.deleteDir(projectDir);
 				continue;
 			}
+			if (!NumberUtils.isDigits(projectDir.getName())) 
+				continue;
 			var projectId = Long.valueOf(projectDir.getName());
 			var project = projects.get(projectId);
 			if (project != null) {
@@ -931,70 +931,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return count(true);
 	}
 
-	private void addSubTreeIds(Collection<Long> projectIds, Project project) {
-		projectIds.add(project.getId());
-		for (Project descendant : project.getDescendants())
-			projectIds.add(descendant.getId());
-	}
-
-	@Override
-	public Collection<Project> getPermittedProjects(BasePermission permission) {
-		User user = SecurityUtils.getUser();
-		if (permission.isApplicable(UserFacade.of(user))) {
-			ProjectCache cacheClone = cache.clone();
-			Collection<Long> permittedProjectIds;
-			if (user != null) {
-				if (user.isRoot() || user.isSystem()) {
-					return cacheClone.getProjects();
-				} else {
-					permittedProjectIds = new HashSet<>();
-					for (Group group : user.getGroups()) {
-						if (group.isAdministrator())
-							return cacheClone.getProjects();
-						for (GroupAuthorization authorization : group.getAuthorizations()) {
-							if (authorization.getRole().implies(permission))
-								addSubTreeIds(permittedProjectIds, authorization.getProject());
-						}
-					}
-					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-					if (defaultLoginGroup != null) {
-						if (defaultLoginGroup.isAdministrator())
-							return cacheClone.getProjects();
-						for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
-							if (authorization.getRole().implies(permission))
-								addSubTreeIds(permittedProjectIds, authorization.getProject());
-						}
-					}
-
-					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							addSubTreeIds(permittedProjectIds, authorization.getProject());
-					}
-					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
-				}
-			} else {
-				permittedProjectIds = new HashSet<>();
-				if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
-					addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
-			}
-
-			return permittedProjectIds.stream().map(it -> load(it)).collect(toSet());
-		} else {
-			return new ArrayList<>();
-		}
-	}
-
-	private void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,
-											  Permission permission) {
-		for (ProjectFacade project : cache.values()) {
-			if (project.getDefaultRoleId() != null) {
-				Role defaultRole = roleManager.load(project.getDefaultRoleId());
-				if (defaultRole.implies(permission))
-					projectIds.addAll(cache.getSubtreeIds(project.getId()));
-			}
-		}
-	}
-
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Project> query = builder.createQuery(Project.class);
@@ -1022,7 +958,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 									  From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = getPermittedProjects(new AccessProject());
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 			if (!projects.isEmpty()) {
 				predicates.add(forManyValues(builder, from.get(Project.PROP_ID),
 						projects.stream().map(it -> it.getId()).collect(toSet()), getIds()));

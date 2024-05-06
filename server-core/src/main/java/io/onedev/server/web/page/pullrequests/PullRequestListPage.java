@@ -229,7 +229,7 @@ public class PullRequestListPage extends LayoutPage {
 	
 	public static PageParameters paramsOf(int page) {
 		String query = null;
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null && !user.getPullRequestQueryPersonalization().getQueries().isEmpty())
 			query = user.getPullRequestQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getPullRequestSetting().getNamedQueries().isEmpty())

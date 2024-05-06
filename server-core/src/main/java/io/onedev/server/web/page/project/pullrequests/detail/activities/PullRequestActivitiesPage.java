@@ -250,7 +250,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						activitiesView.add(newSinceChangesRow(activitiesView.newChildId(), sinceDate));
 				}
 				
-				var user = SecurityUtils.getUser();
+				var user = SecurityUtils.getAuthUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component row = newActivityRow(activitiesView.newChildId(), activity);
 					if (user == null || !user.equals(activity.getUser()))
@@ -388,7 +388,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 							
 				Collection<ObjectId> commitIds = new HashSet<>();
 
-				var user = SecurityUtils.getUser();
+				var user = SecurityUtils.getAuthUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
 					if (user == null || !user.equals(activity.getUser()))

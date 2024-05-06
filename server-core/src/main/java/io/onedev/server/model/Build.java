@@ -16,8 +16,8 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
@@ -924,27 +924,27 @@ public class Build extends ProjectBelonging
 	public boolean canCreateBranch(String accessTokenSecret, String branchName) {
 		var project = getProject();
 		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
-				|| accessTokenSecret != null && SecurityUtils.canCreateBranch(getUser(accessTokenSecret), project, branchName);
+				|| accessTokenSecret != null && SecurityUtils.canCreateBranch(getAccessToken(accessTokenSecret).asSubject(), project, branchName);
 	}
 	
 	public boolean canCreateTag(@Nullable String accessTokenSecret, String tagName) {
 		var project = getProject();
 		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
-				|| accessTokenSecret != null && SecurityUtils.canCreateTag(getUser(accessTokenSecret), project, tagName);
+				|| accessTokenSecret != null && SecurityUtils.canCreateTag(getAccessToken(accessTokenSecret).asSubject(), project, tagName);
 	}
 	
-	public User getUser(String accessTokenSecret) {
-		String accessToken = getJobAuthorizationContext().getSecretValue(accessTokenSecret);
-		User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
-		if (user == null)
-			throw new ExplicitException("No user found with specified access token");
-		return user;
+	public AccessToken getAccessToken(String accessTokenSecret) {
+		String secretValue = getJobAuthorizationContext().getSecretValue(accessTokenSecret);
+		var accessToken = OneDev.getInstance(AccessTokenManager.class).findByValue(secretValue);
+		if (accessToken == null)
+			throw new ExplicitException("Invalid access token");
+		return accessToken;
 	}
 	
 	public boolean canCloseMilestone(@Nullable String accessTokenSecret) {
 		var project = getProject();
 		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
-				|| accessTokenSecret != null && SecurityUtils.canManageIssues(getUser(accessTokenSecret), project);
+				|| accessTokenSecret != null && SecurityUtils.canManageIssues(getAccessToken(accessTokenSecret).asSubject(), project);
 	}
 	
 	public boolean isValid() {

@@ -21,7 +21,7 @@ public class CurrentPasswordValidator implements ConstraintValidator<CurrentPass
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value != null) {
-			AuthenticationToken token = new UsernamePasswordToken(SecurityUtils.getUser().getName(), value);
+			AuthenticationToken token = new UsernamePasswordToken(SecurityUtils.getAuthUser().getName(), value);
 			try {
 				if (SecurityUtils.getSecurityManager().authenticate(token) != null)
 					return true;

@@ -622,7 +622,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 	
 	public boolean isVisitedAfter(Date date) {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getIssueVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();

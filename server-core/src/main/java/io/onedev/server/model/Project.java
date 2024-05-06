@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -79,6 +80,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
 
@@ -256,7 +258,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
-	@Api(readOnly=true)
+	@JsonProperty(access = READ_ONLY)
 	private Date createDate = new Date();
 	
 	@OneToMany(mappedBy="targetProject", cascade=CascadeType.REMOVE)
@@ -296,6 +298,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<AccessTokenAuthorization> accessTokenAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
@@ -1006,14 +1012,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return packManagement;
 	}
 
-	public void setPackManagement(boolean packManagement) {
-		this.packManagement = packManagement;
-	}
-
 	private static String getPackManagementDescription() {
 		return "Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project";
 	}
 
+	public void setPackManagement(boolean packManagement) {
+		this.packManagement = packManagement;
+	}
+	
 	public boolean isPendingDelete() {
 		return pendingDelete;
 	}
@@ -1371,7 +1377,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public IssueQueryPersonalization getIssueQueryPersonalizationOfCurrentUser() {
 		if (issueQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				IssueQueryPersonalization personalization = 
 						OneDev.getInstance(IssueQueryPersonalizationManager.class).find(this, user);
@@ -1390,7 +1396,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public CommitQueryPersonalization getCommitQueryPersonalizationOfCurrentUser() {
 		if (commitQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				CommitQueryPersonalization personalization = 
 						OneDev.getInstance(CommitQueryPersonalizationManager.class).find(this, user);
@@ -1410,7 +1416,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	public PullRequestQueryPersonalization getPullRequestQueryPersonalizationOfCurrentUser() {
 		if (pullRequestQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				PullRequestQueryPersonalization personalization = 
 						OneDev.getInstance(PullRequestQueryPersonalizationManager.class).find(this, user);
@@ -1430,7 +1436,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	public CodeCommentQueryPersonalization getCodeCommentQueryPersonalizationOfCurrentUser() {
 		if (codeCommentQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				CodeCommentQueryPersonalization personalization = 
 						OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).find(this, user);
@@ -1450,7 +1456,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	public BuildQueryPersonalization getBuildQueryPersonalizationOfCurrentUser() {
 		if (buildQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				BuildQueryPersonalization personalization = 
 						OneDev.getInstance(BuildQueryPersonalizationManager.class).find(this, user);
@@ -1470,7 +1476,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	public PackQueryPersonalization getPackQueryPersonalizationOfCurrentUser() {
 		if (packQueryPersonalizationOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
+			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				PackQueryPersonalization personalization =
 						OneDev.getInstance(PackQueryPersonalizationManager.class).find(this, user);

@@ -786,7 +786,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					fragment.add(deleteContainer);
 					
 					if (SecurityUtils.canWriteCode(getProject()) && isOnBranch()) {
-						User user = SecurityUtils.getUser();
+						User user = SecurityUtils.getAuthUser();
 						String revision = getBlobIdent().revision;
 						String path = getBlobIdent().path;
 						boolean reviewRequired = getProject().isReviewRequiredForModification(user, revision, path);
@@ -897,7 +897,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						User user = SecurityUtils.getUser();
+						User user = SecurityUtils.getAuthUser();
 						Project project = getProject();
 						String file = BuildSpec.BLOB_PATH;
 						if (user == null) {
@@ -1512,7 +1512,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				parentPath = directory;
 		}
 		
-		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		User user = Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 		BlobIdent blobIdent = getBlobIdent();
 		
 		boolean signRequired = false;
@@ -1619,7 +1619,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getUser(), null);
+		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getAuthUser(), null);
 	}
 
 	@Override

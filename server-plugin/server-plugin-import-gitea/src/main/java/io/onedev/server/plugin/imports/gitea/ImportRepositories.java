@@ -46,7 +46,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 
 	private static List<String> getParentOneDevProjectChoices() {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		return projectManager.getPermittedProjects(new CreateChildren()).stream()
+		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
 	}
 	

@@ -128,7 +128,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -166,7 +166,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -209,7 +209,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							change.setCompareContext(comment.getCompareContext());
 							change.setDate(new Date());
 							change.setResolved(resolved);
-							change.setUser(SecurityUtils.getUser());
+							change.setUser(SecurityUtils.getAuthUser());
 							changes.add(change);
 						}
 						
@@ -574,7 +574,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
 								for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitCodeComment(SecurityUtils.getUser(), it.next());
+									visitInfoManager.visitCodeComment(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -747,7 +747,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				keyUsers.add(review.getUser());
 			for (PullRequestAssignment assignment: getPullRequest().getAssignments())
 				keyUsers.add(assignment.getUser());
-			if (keyUsers.contains(SecurityUtils.getUser()))
+			if (keyUsers.contains(SecurityUtils.getAuthUser()))
 				columns.add(selectionColumn = new SelectionColumn<>());				
 		} 
 		

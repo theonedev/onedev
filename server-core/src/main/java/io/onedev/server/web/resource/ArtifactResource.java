@@ -11,7 +11,6 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.artifact.FileInfo;
@@ -35,9 +34,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getArtifactsLockName;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 public class ArtifactResource extends AbstractResource {
 
@@ -68,7 +67,7 @@ public class ArtifactResource extends AbstractResource {
 		String artifactPath = Joiner.on("/").join(pathSegments);
 		
 		FileInfo fileInfo = null;
-		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
+		if (!SecurityUtils.isSystem()) {
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			
 			Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);

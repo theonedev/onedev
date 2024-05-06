@@ -1,15 +1,13 @@
 package io.onedev.server.rest.resource;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
@@ -25,7 +23,6 @@ import javax.ws.rs.core.UriInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Api(order=3510, description="This resource provides an alternative way to run job by passing all parameters via url")
 @Path("/trigger-job")
@@ -44,6 +41,8 @@ public class TriggerJobResource {
 	
 	private static final String PARAM_ACCESS_TOKEN = "access-token";
 	
+	private static final String PARAM_REBUILD_IF_FINISHED = "rebuild-if-finished";
+	
 	private static final String DESCRIPTION = "Trigger specified job. Query parameters other than listed below "
 			+ "will be interpreted as job params";
 	
@@ -55,13 +54,13 @@ public class TriggerJobResource {
 	
 	private final ProjectManager projectManager;
 	
-	private final UserManager userManager;
+	private final AccessTokenManager accessTokenManager;
 	
 	@Inject
-	public TriggerJobResource(JobManager jobManager, ProjectManager projectManager, UserManager userManager) {
+	public TriggerJobResource(JobManager jobManager, ProjectManager projectManager, AccessTokenManager accessTokenManager) {
 		this.jobManager = jobManager;
 		this.projectManager = projectManager;
-		this.userManager = userManager;
+		this.accessTokenManager = accessTokenManager;
 	}
 
 	@Api(order=100, description=DESCRIPTION)
@@ -82,23 +81,23 @@ public class TriggerJobResource {
     		@Api(description="Path of the project") @QueryParam(PARAM_PROJECT) @NotEmpty String projectPath, 
     		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_BRANCH) String branch, 
     		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_TAG) String tag, 
-    		@QueryParam(PARAM_JOB) @NotEmpty String job, 
-    		@Api(description=ACCESS_TOKEN_DESCRIPTION) @QueryParam(PARAM_ACCESS_TOKEN) @NotEmpty String accessToken, 
+    		@QueryParam(PARAM_JOB) @NotEmpty String job,
+			@Api(description=ACCESS_TOKEN_DESCRIPTION) @QueryParam(PARAM_ACCESS_TOKEN) @NotEmpty String accessToken, 
     		@Context UriInfo uriInfo) {
 		return triggerJob(projectPath, branch, tag, job, accessToken, uriInfo);
     }
 
-    private Long triggerJob(String projectPath, String branch, String tag, String job, 
-    		String accessToken, UriInfo uriInfo) {
+    private Long triggerJob(String projectPath, String branch, String tag, String job,
+							String accessTokenValue, UriInfo uriInfo) {
 		Project project = projectManager.findByPath(projectPath);
 		if (project == null)
 			throw new InvalidParamException("Project not found: " + projectPath);
 
-		User user = userManager.findByAccessToken(accessToken);
-		if (user == null)
+		var accessToken = accessTokenManager.findByValue(accessTokenValue);
+		if (accessToken == null)
 			throw new InvalidParamException("Invalid access token");
 		
-		ThreadContext.bind(user.asSubject());
+		ThreadContext.bind(accessToken.asSubject());
 		try {
 			if (!SecurityUtils.canRunJob(project, job))		
 				throw new UnauthorizedException();
@@ -123,14 +122,17 @@ public class TriggerJobResource {
 			for (Map.Entry<String, List<String>> entry: uriInfo.getQueryParameters().entrySet()) {
 				if (!entry.getKey().equals(PARAM_PROJECT) && !entry.getKey().equals(PARAM_BRANCH)
 						&& !entry.getKey().equals(PARAM_TAG) && !entry.getKey().equals(PARAM_JOB) 
-						&& !entry.getKey().equals(PARAM_ACCESS_TOKEN)) {
+						&& !entry.getKey().equals(PARAM_ACCESS_TOKEN)
+						&& !entry.getKey().equals(PARAM_REBUILD_IF_FINISHED)) {
 					jobParams.put(entry.getKey(), entry.getValue());
 				}
 			}
 			
-			Build build = jobManager.submit(project, commit.copy(), job, 
+			var build = jobManager.submit(project, commit.copy(), job, 
 					jobParams, refName, SecurityUtils.getUser(), null, 
 					null, "Triggered via restful api");
+			if (build.isFinished())
+				jobManager.resubmit(build, "Rebuild via restful api");
 			return build.getId();
 		} finally {
 			ThreadContext.unbindSubject();

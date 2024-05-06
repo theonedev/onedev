@@ -230,7 +230,7 @@ public class BuildListPage extends LayoutPage {
 
 	public static PageParameters paramsOf(int page, int expectedCount) {
 		String query = null;
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null && !user.getBuildQueryPersonalization().getQueries().isEmpty()) 
 			query = user.getBuildQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getBuildSetting().getNamedQueries().isEmpty())

@@ -8,6 +8,7 @@ import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.page.help.ValueInfo.Origin;
@@ -21,6 +22,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public class ApiHelpUtils {
 
@@ -167,9 +170,10 @@ public class ApiHelpUtils {
 					|| field.getAnnotation(Transient.class) != null
 					|| field.getAnnotation(OneToOne.class) != null && field.getAnnotation(JoinColumn.class) == null
 					|| Modifier.isTransient(field.getModifiers())
-					|| origin == Origin.REQUEST_BODY 
-							&& field.getAnnotation(Api.class) != null 
-							&& field.getAnnotation(Api.class).readOnly()) {
+					|| (origin == Origin.CREATE_BODY || origin == Origin.UPDATE_BODY) 
+							&& field.getAnnotation(JsonProperty.class) != null 
+							&& field.getAnnotation(JsonProperty.class).access() == READ_ONLY
+					|| origin == Origin.UPDATE_BODY && field.getAnnotation(Immutable.class) != null) {
 				continue;
 			}
 			if (field.getAnnotation(JsonProperty.class) != null) {

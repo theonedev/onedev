@@ -1,18 +1,8 @@
 package io.onedev.server.util.jackson.hibernate;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.hibernate.proxy.HibernateProxy;
-
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.introspect.Annotated;
@@ -22,9 +12,12 @@ import com.fasterxml.jackson.databind.ser.std.CollectionSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
-
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.proxy.HibernateProxy;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @Singleton
 public class HibernateObjectMapperModule extends Module {
@@ -94,10 +87,9 @@ public class HibernateObjectMapperModule extends Module {
 					final JsonDeserializer<?> deserializer) {
 				if (AbstractEntity.class.isAssignableFrom(beanDesc.getBeanClass())) {
 					Class<? extends AbstractEntity> entityClass = (Class<? extends AbstractEntity>) beanDesc.getBeanClass();
-					BeanDeserializer defaultDeserializer = (BeanDeserializer) deserializer;
-					return new EntityDeserializer(entityClass, defaultDeserializer, dao);
+					return new EntityDeserializer(entityClass, (BeanDeserializer) deserializer, dao);
 				} else {
-					return super.modifyDeserializer(config, beanDesc, deserializer);
+					return deserializer;
 				}
 			}
 			

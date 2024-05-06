@@ -7,7 +7,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
@@ -177,7 +177,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 
 		@Editable(order=200)
-		@Password
+		@Secret
 		@NotEmpty
 		public String getPassword() {
 			return password;

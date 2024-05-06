@@ -191,7 +191,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestProjectPaths(String matchWith, BasePermission permission) {
-		Collection<Project> projects = getProjectManager().getPermittedProjects(permission);
+		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(permission);
 		ProjectCache cache = getProjectManager().cloneCache();
 		
 		List<String> projectPaths = projects.stream()
@@ -202,7 +202,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestProjectNames(String matchWith) {
-		Collection<Project> projects = getProjectManager().getPermittedProjects(new AccessProject());
+		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 		ProjectCache cache = getProjectManager().cloneCache();
 		
 		List<String> projectNames = projects.stream()
@@ -213,7 +213,7 @@ public class SuggestionUtils {
 	}
 
 	public static List<InputSuggestion> suggestProjectKeys(String matchWith) {
-		Collection<Project> projects = getProjectManager().getPermittedProjects(new AccessProject());
+		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 		ProjectCache cache = getProjectManager().cloneCache();
 
 		var projectKeys = new ArrayList<String>();

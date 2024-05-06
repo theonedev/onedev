@@ -16,6 +16,7 @@ import io.onedev.server.web.page.admin.usermanagement.membership.UserMemberships
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.util.UserAware;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public abstract class UserPage extends AdministrationPage {
+public abstract class UserPage extends AdministrationPage implements UserAware {
 	
 	public static final String PARAM_USER = "user";
 	
@@ -92,6 +93,7 @@ public abstract class UserPage extends AdministrationPage {
 		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
 	}
 	
+	@Override
 	public User getUser() {
 		return userModel.getObject();
 	}

@@ -202,7 +202,7 @@ public abstract class CommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null && getComment() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getComment() != null);
 			}
 			
 		});

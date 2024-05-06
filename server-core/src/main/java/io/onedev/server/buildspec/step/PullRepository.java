@@ -146,7 +146,7 @@ public class PullRepository extends SyncRepository {
 					&& project.isSelfOrAncestorOf(targetProject)) {
 				authorized = true;
 			} else if (getAccessTokenSecret() != null && 
-					SecurityUtils.canManageProject(build.getUser(getAccessTokenSecret()), targetProject)) {
+					SecurityUtils.canManageProject(build.getAccessToken(getAccessTokenSecret()).asSubject(), targetProject)) {
 				authorized = true;
 			}
 			if (!authorized) 

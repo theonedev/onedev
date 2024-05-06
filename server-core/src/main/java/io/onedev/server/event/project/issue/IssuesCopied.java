@@ -7,11 +7,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class IssuesCopied extends ProjectEvent {
 	

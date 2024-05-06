@@ -1,19 +1,18 @@
 package io.onedev.server.web.component.revision;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.web.component.project.ProjectPicker;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class AffinalRevisionPicker extends Panel {
@@ -68,7 +67,7 @@ public abstract class AffinalRevisionPicker extends Panel {
 				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
 				List<Project> affinals = project.getForkRoot().getForkDescendants();
 				affinals.add(0, project.getForkRoot());
-				affinals.retainAll(OneDev.getInstance(ProjectManager.class).getPermittedProjects(new ReadCode()));
+				affinals.retainAll(SecurityUtils.getAuthorizedProjects(new ReadCode()));
 				
 				return affinals;
 			}

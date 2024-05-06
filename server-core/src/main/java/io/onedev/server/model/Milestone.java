@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import io.onedev.server.rest.annotation.Immutable;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -36,6 +37,7 @@ public class Milestone extends AbstractEntity {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Project project;
 	
 	@Column(nullable=false)

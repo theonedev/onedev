@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.onedev.server.rest.annotation.Immutable;
+
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -30,15 +33,18 @@ public class PullRequestReview extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private PullRequest request;
 	
 	@Column(nullable=false)
 	private Status status = Status.PENDING;
 	
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	private Date statusDate = new Date();
 	
 	private transient boolean dirty;

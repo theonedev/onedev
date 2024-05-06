@@ -40,7 +40,7 @@ public class SshKeyResource {
 	@GET
 	public SshKey get(@PathParam("sshKeyId") Long sshKeyId) {
 		SshKey sshKey = sshKeyManager.load(sshKeyId);
-    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
     	return sshKey;
 	}
@@ -48,7 +48,7 @@ public class SshKeyResource {
 	@Api(order=150, description="Create new ssh key")
 	@POST
 	public Long create(SshKey sshKey) {
-    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		
 		sshKey.setCreatedAt(new Date());
@@ -63,7 +63,7 @@ public class SshKeyResource {
 	@DELETE
 	public Response delete(@PathParam("sshKeyId") Long sshKeyId) {
 		SshKey sshKey = sshKeyManager.load(sshKeyId);
-    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
 		sshKeyManager.delete(sshKey);
 		return Response.ok().build();

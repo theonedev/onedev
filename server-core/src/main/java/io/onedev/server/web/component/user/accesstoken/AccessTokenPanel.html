@@ -1,24 +1,11 @@
 <wicket:panel>
 	<div class="access-token border rounded">
-		<div class="border-bottom px-4 py-3">
-			<span wicket:id="value" class="text-monospace font-weight-bolder mr-2"></span>
-			<a wicket:id="copy" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Copy to clipboard"><wicket:svg href="copy" class="icon"></wicket:svg></a>
-			<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-			<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4" title="Delete this rule"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-		</div>
-		<div class="px-4 pb-4">
-			<div class="mt-4">
-				<label class="font-weight-bolder">Description</label>
-				<div wicket:id="description"></div>
-			</div>
-			<div class="mt-4">
-				<label class="font-weight-bolder">Created At</label>
-				<div wicket:id="createdAt"></div>
-			</div>
-			<div class="mt-4">
-				<label class="font-weight-bolder">Expires At</label>
-				<div wicket:id="expiresAt"></div>
-			</div>
-		</div>
+		<h6 class="border-bottom px-4 py-3">
+			<span wicket:id="name" class="mr-2"></span>
+			<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit this access token"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+			<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4" title="Delete this access token"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			<span wicket:id="expired" class="badge badge-light-danger">Expired</span>
+		</h6>
+		<div wicket:id="viewer" class="p-4"></div>
 	</div>
 </wicket:panel>

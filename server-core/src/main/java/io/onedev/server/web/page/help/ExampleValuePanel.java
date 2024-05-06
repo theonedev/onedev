@@ -30,7 +30,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -48,6 +47,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+
+import static io.onedev.server.web.page.help.ValueInfo.Origin.*;
 
 @SuppressWarnings("serial")
 public class ExampleValuePanel extends Panel {
@@ -235,7 +236,7 @@ public class ExampleValuePanel extends Panel {
 		} else if (getField() != null) {
 			fragment.add(new WebMarkupContainer("typeHint").setVisible(false));
 		} else if (getValue() instanceof Long 
-				&& getValueOrigin() == ValueInfo.Origin.RESPONSE_BODY 
+				&& getValueOrigin() == READ_BODY 
 				&& requestBodyClass != null) {
 			if (AbstractEntity.class.isAssignableFrom(requestBodyClass)) {
 				Class<?> resourceClass = resourceMap.get(requestBodyClass);
@@ -296,7 +297,8 @@ public class ExampleValuePanel extends Panel {
 	
 	private Fragment newScalarFragment(Serializable value) {
 		Fragment fragment = new Fragment("content", "scalarFrag", this);
-		if (getValueOrigin() == ValueInfo.Origin.REQUEST_BODY || getValueOrigin() == ValueInfo.Origin.RESPONSE_BODY)
+		var valueOrigin = getValueOrigin();
+		if (valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY || valueOrigin == READ_BODY)
 			fragment.add(new Label("value", toJson(value)));
 		else
 			fragment.add(new Label("value", String.valueOf(value)));
@@ -438,7 +440,8 @@ public class ExampleValuePanel extends Panel {
 				List<Field> fields = ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
 				for (var it = fields.iterator(); it.hasNext();) {
 					var field = it.next();
-					if (getValueInfo().getOrigin() == ValueInfo.Origin.REQUEST_BODY && field.getAnnotation(Id.class) != null) 
+					var valueOrigin = getValueOrigin();
+					if ((valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY) && field.getAnnotation(Id.class) != null) 
 						it.remove();
 				}
 				return fields;

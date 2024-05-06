@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.RefreshToken;
 import io.onedev.server.mail.*;
 import io.onedev.server.model.support.administration.mailservice.ImapImplicitSsl;
@@ -68,7 +68,7 @@ public class Office365MailService implements MailService {
 	}
 
 	@Editable(order=200, description="Specify client secret of the app registered in Entra ID")
-	@Password
+	@Secret
 	@NotEmpty
 	public String getClientSecret() {
 		return clientSecret;

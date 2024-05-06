@@ -34,7 +34,7 @@ public class IssueWatchResource {
 	@GET
 	public IssueWatch get(@PathParam("watchId") Long watchId) {
 		IssueWatch watch = watchManager.load(watchId);
-		if (!SecurityUtils.canAccessProject(watch.getIssue().getProject()))
+		if (!SecurityUtils.canAccessIssue(watch.getIssue()))
 			throw new UnauthorizedException();
 		return watch;
 	}
@@ -42,8 +42,10 @@ public class IssueWatchResource {
 	@Api(order=200, description="Create new issue watch")
 	@POST
 	public Long create(@NotNull IssueWatch watch) {
-		if (!SecurityUtils.canAccessProject(watch.getIssue().getProject()) || !canModifyOrDelete(watch)) 
+		if (!SecurityUtils.canAccessIssue(watch.getIssue())
+				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
+		}
 		watchManager.createOrUpdate(watch);
 		return watch.getId();
 	}
@@ -65,7 +67,6 @@ public class IssueWatchResource {
 		IssueWatch watch = watchManager.load(watchId);
 		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		
 		watchManager.delete(watch);
 		return Response.ok().build();
 	}

@@ -2,12 +2,12 @@ package io.onedev.server.security;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.util.WebUtils;
 
 import javax.inject.Inject;
@@ -20,11 +20,11 @@ import javax.ws.rs.core.HttpHeaders;
 @Singleton
 public class BasicAuthenticationFilter extends ExceptionHandleFilter {
 	
-	private final UserManager userManager;
+	private final AccessTokenManager accessTokenManager;
 	
 	@Inject
-	public BasicAuthenticationFilter(UserManager userManager) {
-		this.userManager = userManager;
+	public BasicAuthenticationFilter(AccessTokenManager accessTokenManager) {
+		this.accessTokenManager = accessTokenManager;
 	}
 	
 	@Sessional
@@ -43,15 +43,14 @@ public class BasicAuthenticationFilter extends ExceptionHandleFilter {
                 String userName = StringUtils.substringBefore(decoded, ":").trim();
                 String password = StringUtils.substringAfter(decoded, ":").trim();
 				if (userName.length() != 0 && password.length() != 0) {
-					User user = userManager.findByAccessToken(password);
-					if (user != null)
-						subject.login(new BearerAuthenticationToken(user));
-					else 
+					var accessToken = accessTokenManager.findByValue(password);
+					if (accessToken != null)
+						ThreadContext.bind(accessToken.asSubject());
+					else
 						subject.login(new UsernamePasswordToken(userName, password));
 				}
 	        }
-		} 
-		
+		}
 		return true;
 	}
 

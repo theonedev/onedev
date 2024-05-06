@@ -264,7 +264,7 @@ public abstract class CommitListPanel extends Panel {
 		target.add(foot);
 		querySubmitted = true;
 		target.appendJavaScript(renderCommitGraph());
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -302,7 +302,7 @@ public abstract class CommitListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override

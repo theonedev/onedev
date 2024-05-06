@@ -141,8 +141,8 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
+				if (SecurityUtils.getAuthUser() != null) 
+					OneDev.getInstance(VisitInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getAuthUser(), getPullRequest());
 			}
 			
 			@Override

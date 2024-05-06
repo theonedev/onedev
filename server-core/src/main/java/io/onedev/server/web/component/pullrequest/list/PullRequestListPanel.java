@@ -46,7 +46,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
-import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -178,7 +177,7 @@ public abstract class PullRequestListPanel extends Panel {
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -216,7 +215,7 @@ public abstract class PullRequestListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -271,7 +270,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 										var requests = selectionColumn.getSelections().stream()
 												.map(it->it.getObject()).collect(toList());
-										getWatchManager().setWatchStatus(SecurityUtils.getUser(), requests, watchStatus);
+										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 										selectionColumn.getSelections().clear();
 										target.add(body);
 										Session.get().success("Watch status changed");
@@ -465,7 +464,7 @@ public abstract class PullRequestListPanel extends Panel {
 										Collection<PullRequest> requests = new ArrayList<>();
 										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 											requests.add(it.next());
-										getWatchManager().setWatchStatus(SecurityUtils.getUser(), requests, watchStatus);
+										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 										Session.get().success("Watch status changed");
 									}
 
@@ -665,7 +664,7 @@ public abstract class PullRequestListPanel extends Panel {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
 								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitPullRequest(SecurityUtils.getUser(), it.next());
+									visitInfoManager.visitPullRequest(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -680,7 +679,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 			
 		});
@@ -781,7 +780,7 @@ public abstract class PullRequestListPanel extends Panel {
 						@Override
 						protected List<Project> load() {
 							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-							List<Project> projects = new ArrayList<>(projectManager.getPermittedProjects(new ReadCode()));
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new ReadCode()));
 							projects.sort(projectManager.cloneCache().comparingPath());
 							return projects;
 						}
@@ -805,7 +804,7 @@ public abstract class PullRequestListPanel extends Panel {
 			add(newPullRequestLink = new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
 					NewPullRequestPage.paramsOf(getProject())));		
 		}
-		var user = SecurityUtils.getUser();
+		var user = SecurityUtils.getAuthUser();
 		newPullRequestLink.setVisible(user == null || !user.isEffectiveGuest());
 		
 		body = new WebMarkupContainer("body");
@@ -829,7 +828,7 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.getUser() != null)
+		if (SecurityUtils.getAuthUser() != null)
 			columns.add(selectionColumn = new SelectionColumn<PullRequest, Void>());
 		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("")) {

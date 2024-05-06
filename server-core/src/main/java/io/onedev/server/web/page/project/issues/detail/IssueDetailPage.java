@@ -298,8 +298,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getUser(), getIssue());
+				if (SecurityUtils.getAuthUser() != null) 
+					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
 			
 			@Override

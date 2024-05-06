@@ -1,19 +1,18 @@
 package io.onedev.server.util.facade;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.util.MapProxy;
+import io.onedev.server.util.Similarities;
+
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.util.MapProxy;
-import io.onedev.server.util.Similarities;
 
 public class UserCache extends MapProxy<Long, UserFacade> implements Serializable {
 
@@ -38,17 +37,6 @@ public class UserCache extends MapProxy<Long, UserFacade> implements Serializabl
 		for (UserFacade facade: values()) {
 			if (fullName.equals(facade.getFullName()))
 				return facade;
-		}
-		return null;
-	}
-	
-	@Nullable
-	public UserFacade findByAccessToken(String accessTokenValue) {
-		for (UserFacade facade: values()) {
-			for (var accessToken: facade.getAccessTokens()) {
-				if (accessTokenValue.equals(accessToken.getValue()) && !accessToken.isExpired())
-					return facade;
-			}
 		}
 		return null;
 	}

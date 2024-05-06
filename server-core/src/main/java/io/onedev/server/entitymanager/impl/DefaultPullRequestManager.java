@@ -810,7 +810,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		if (targetProject != null) {
 			predicates.add(builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new ReadCode());
 			if (!projects.isEmpty()) {
 				Path<Long> projectIdPath = from.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID);
 				predicates.add(Criteria.forManyValues(builder, projectIdPath, 

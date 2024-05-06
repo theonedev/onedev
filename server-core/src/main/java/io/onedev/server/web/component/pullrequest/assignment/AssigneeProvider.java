@@ -1,12 +1,10 @@
 package io.onedev.server.web.component.pullrequest.assignment;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;
@@ -14,6 +12,9 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 
@@ -24,7 +25,7 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 		PullRequest request = getPullRequest();
 		UserManager userManager = OneDev.getInstance(UserManager.class);
 
-		List<User> users = new ArrayList<>(userManager.getAuthorizedUsers(request.getProject(), new WriteCode()));
+		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), new WriteCode()));
 		
 		users.removeAll(request.getAssignees());
 		

@@ -5,22 +5,19 @@ import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.Serializable;
+
+import static io.onedev.server.security.SecurityUtils.getAuthUser;
 
 @Api(order=5010)
 @Path("/email-addresses")
@@ -48,7 +45,7 @@ public class EmailAddressResource {
 	@GET
 	public EmailAddress get(@PathParam("emailAddressId") Long emailAddressId) {
 		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-    	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return emailAddress;
 	}
@@ -58,24 +55,20 @@ public class EmailAddressResource {
 	@GET
 	public boolean getVerified(@PathParam("emailAddressId") Long emailAddressId) {
 		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-    	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser())) 
+    	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return emailAddress.isVerified();
 	}
 	
 	@Api(order=200, description="Create new email address")
 	@POST
-	public Long create(@NotNull @Valid EmailAddressCreateData data) {
-		User user = userManager.load(data.getOwnerId());
-		if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser()))
+	public Long create(@NotNull @Valid EmailAddress emailAddress) {
+		var owner = emailAddress.getOwner();
+		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 
-		if (emailAddressManager.findByValue(data.getValue()) != null)
+		if (emailAddressManager.findByValue(emailAddress.getValue()) != null)
 			throw new ExplicitException("This email address is already used by another user");
-		
-		EmailAddress emailAddress = new EmailAddress();
-		emailAddress.setOwner(userManager.load(data.getOwnerId()));
-		emailAddress.setValue(data.getValue());
 		
 		if (SecurityUtils.isAdministrator()) 
 			emailAddress.setVerificationCode(null);
@@ -88,12 +81,12 @@ public class EmailAddressResource {
 	@Path("/primary")
 	@POST
 	public Long setAsPrimary(@NotNull Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-		
-		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser()))
+		var emailAddress = emailAddressManager.load(emailAddressId);
+		var owner = emailAddress.getOwner();
+		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
-		if (emailAddress.getOwner().isExternalManaged())
+		if (owner.isExternalManaged())
 			throw new ExplicitException("Can not set primary email address for externally authenticated user");
 		
 		emailAddressManager.setAsPrimary(emailAddress);
@@ -105,9 +98,8 @@ public class EmailAddressResource {
 	@Path("/git")
 	@POST
 	public Long useForGitOperations(@NotNull Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-		
-		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser()))
+		var emailAddress = emailAddressManager.load(emailAddressId);
+		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
 		emailAddressManager.useForGitOperations(emailAddress);
@@ -119,9 +111,8 @@ public class EmailAddressResource {
 	@Path("/resend-verification-email")
 	@POST
 	public Long resendVerificationEmail(@NotNull Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-		
-		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(SecurityUtils.getUser()))
+		var emailAddress = emailAddressManager.load(emailAddressId);
+		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser()))
 			throw new UnauthorizedException();
 
 		if (settingManager.getMailService() == null)
@@ -138,52 +129,18 @@ public class EmailAddressResource {
 	@Path("/{emailAddressId}")
 	@DELETE
 	public Response delete(@PathParam("emailAddressId") Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
-		if (SecurityUtils.isAdministrator() 
-				|| emailAddress.getOwner().equals(SecurityUtils.getUser())) {
-			if (emailAddress.isPrimary() && emailAddress.getOwner().isExternalManaged()) {
-				throw new ExplicitException("Can not delete primary email address of "
-						+ "externally authenticated user");
-			}
-			if (emailAddress.getOwner().getEmailAddresses().size() == 1)
-				throw new ExplicitException("At least one email address should be present for a user");
-			emailAddressManager.delete(emailAddress);
-			return Response.ok().build();
-		} else {
+		var emailAddress = emailAddressManager.load(emailAddressId);
+		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		}
-	}
-	
-	@EntityCreate(EmailAddress.class)
-	public static class EmailAddressCreateData implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		private Long ownerId;
 		
-		private String value;
-
-		@Api(order=100, description="Id of user owning this email address")
-		@NotNull
-		public Long getOwnerId() {
-			return ownerId;
+		if (emailAddress.isPrimary() && emailAddress.getOwner().isExternalManaged()) {
+			throw new ExplicitException("Can not delete primary email address of "
+					+ "externally authenticated user");
 		}
-
-		public void setOwnerId(Long ownerId) {
-			this.ownerId = ownerId;
-		}
-
-		@Api(order=200, description="The email address string")
-		@NotEmpty
-		@Email
-		public String getValue() {
-			return value;
-		}
-
-		public void setValue(String value) {
-			this.value = value;
-		}
-		
+		if (emailAddress.getOwner().getEmailAddresses().size() == 1)
+			throw new ExplicitException("At least one email address should be present for a user");
+		emailAddressManager.delete(emailAddress);
+		return Response.ok().build();
 	}
 	
 }

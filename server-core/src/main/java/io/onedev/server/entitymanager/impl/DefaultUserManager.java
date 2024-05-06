@@ -1,17 +1,17 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.map.IMap;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.model.*;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.IdManager;
@@ -21,8 +21,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.security.permission.BasePermission;
-import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -37,10 +35,8 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static io.onedev.server.model.User.*;
-import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
@@ -64,8 +60,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	private final PasswordService passwordService;
     
 	private volatile UserCache cache;
-	
-	private volatile IMap<String, Long> temporalAccessTokens;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
@@ -346,32 +340,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return find(criteria);
 	}
 	
-	@Sessional
-    @Override
-    public User findByAccessToken(String accessTokenValue) {
-		if (cache != null) {
-			UserFacade facade = cache.findByAccessToken(accessTokenValue);
-			if (facade != null) {
-				return load(facade.getId());
-			} else {
-				Long userId = temporalAccessTokens.get(accessTokenValue);
-				if (userId != null)
-					return load(userId);
-				else
-					return null;
-			}
-		} else {
-			throw new ServerNotReadyException();
-		}
-    }
-	
-	@Override
-	public String createTemporalAccessToken(Long userId, long secondsToExpire) {
-		var value = CryptoUtils.generateSecret();
-		temporalAccessTokens.put(value, userId, secondsToExpire, TimeUnit.SECONDS);
-		return value;
-	}
-	
 	@Override
 	public List<User> query() {
 		EntityCriteria<User> criteria = newCriteria();
@@ -389,7 +357,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Listen
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		temporalAccessTokens = hazelcastInstance.getMap("temporalAccessTokens");
 		
 		// Use replicated map, otherwise it will be slow to display many user avatars
 		// (in issue list for instance) which will call findFacadeById many times
@@ -483,54 +450,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public UserCache cloneCache() {
 		return cache.clone();
 	}
-
-	private Collection<User> filterApplicable(Collection<User> users, BasePermission permission) {
-		return users.stream().filter(it -> permission.isApplicable(it.getFacade())).collect(toList());
-	}
 	
-	@Override
-	public Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
-		UserCache cacheClone = cache.clone();
-
-		Collection<User> authorizedUsers = Sets.newHashSet(getRoot());
-
-		Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-   		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
-   			return filterApplicable(cacheClone.getUsers(), permission);
-   		
-		for (Group group: groupManager.queryAdminstrator()) 
-			authorizedUsers.addAll(group.getMembers());
-		
-		Project current = project;
-		do {
-			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission)) 
-	   			return filterApplicable(cacheClone.getUsers(), permission);
-			
-			for (UserAuthorization authorization: current.getUserAuthorizations()) {  
-				if (authorization.getRole().implies(permission))
-					authorizedUsers.add(authorization.getUser());
-			}
-			
-			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {  
-				if (authorization.getRole().implies(permission)) {
-					if (authorization.getGroup().equals(defaultLoginGroup))
-						return filterApplicable(cacheClone.getUsers(), permission);
-					for (User user: authorization.getGroup().getMembers())
-						authorizedUsers.add(user);
-				}
-			}
-			current = current.getParent();
-		} while (current != null);
-		
-		if (permission instanceof ConfidentialIssuePermission) {
-			ConfidentialIssuePermission confidentialIssuePermission = (ConfidentialIssuePermission) permission;
-			for (IssueAuthorization authorization: confidentialIssuePermission.getIssue().getAuthorizations()) 
-				authorizedUsers.add(authorization.getUser());
-		}
-
-        return filterApplicable(authorizedUsers, permission);	
-	}
-
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {

@@ -190,7 +190,7 @@ public abstract class BuildListPanel extends Panel {
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
 		querySubmitted = true;
-		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
 	
@@ -228,7 +228,7 @@ public abstract class BuildListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -880,7 +880,7 @@ public abstract class BuildListPanel extends Panel {
 						@Override
 						protected List<Project> load() {
 							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-							List<Project> projects = new ArrayList<>(projectManager.getPermittedProjects(new JobPermission(null, new RunJob())));
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new JobPermission(null, new RunJob())));
 							projects.sort(projectManager.cloneCache().comparingPath());
 							return projects;
 						}
@@ -903,7 +903,7 @@ public abstract class BuildListPanel extends Panel {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.getUser() != null && getPage() instanceof BuildListPage);
+					setVisible(SecurityUtils.getAuthUser() != null && getPage() instanceof BuildListPage);
 				}
 				
 			});
@@ -918,7 +918,7 @@ public abstract class BuildListPanel extends Panel {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.getUser() != null && getPage() instanceof ProjectBuildsPage);
+					setVisible(SecurityUtils.getAuthUser() != null && getPage() instanceof ProjectBuildsPage);
 				}
 				
 			});

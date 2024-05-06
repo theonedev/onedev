@@ -49,8 +49,10 @@ public class PullRequestAssignmentResource {
 	@POST
 	public Long create(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();
-		if (!SecurityUtils.canReadCode(pullRequest.getProject()) || !SecurityUtils.canModifyPullRequest(pullRequest)) 
+		if (!SecurityUtils.canReadCode(pullRequest.getProject()) 
+				|| !SecurityUtils.canModifyPullRequest(pullRequest)) {
 			throw new UnauthorizedException();
+		}
 		
 		if (pullRequest.isMerged())
 			throw new ExplicitException("Pull request is merged");

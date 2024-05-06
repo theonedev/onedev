@@ -851,7 +851,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getUser(), getPullRequest());
+		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getAuthUser(), getPullRequest());
 	}
 	
 }

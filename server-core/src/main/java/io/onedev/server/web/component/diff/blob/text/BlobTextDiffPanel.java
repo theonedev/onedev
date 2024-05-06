@@ -13,7 +13,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.codequality.RepoTarget;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -384,11 +383,11 @@ public class BlobTextDiffPanel extends Panel {
 					script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
 							getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
 							JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
-							SecurityUtils.getUser()!=null);
+							SecurityUtils.getAuthUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":
-					Preconditions.checkNotNull(SecurityUtils.getUser());
+					Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 					
 					commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
 					change.getAnnotationSupport().onAddComment(target, commentRange);

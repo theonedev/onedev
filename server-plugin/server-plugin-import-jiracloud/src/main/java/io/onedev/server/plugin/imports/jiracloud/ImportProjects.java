@@ -1,11 +1,9 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;
@@ -46,8 +44,7 @@ public class ImportProjects implements Serializable, Validatable {
 	}
 
 	private static List<String> getParentOneDevProjectChoices() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		return projectManager.getPermittedProjects(new CreateChildren()).stream()
+		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
 	}
 

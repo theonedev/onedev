@@ -238,7 +238,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	}
 
 	public boolean isVisitedAfter(Date date) {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getCodeCommentVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();

@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import io.onedev.server.model.support.EntityComment;
+import io.onedev.server.rest.annotation.Immutable;
 
 import javax.persistence.*;
 
@@ -15,6 +16,7 @@ public class IssueComment extends EntityComment {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Issue issue;
 
 	public Issue getIssue() {

@@ -11,6 +11,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
+import org.apache.shiro.realm.AuthenticatingRealm;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,8 +19,10 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 @Singleton
-public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
+public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 
+	private final UserManager userManager;
+	
     private final MembershipManager membershipManager;
     
     private final TransactionManager transactionManager;
@@ -29,13 +32,12 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
     private final EmailAddressManager emailAddressManager;
     
 	@Inject
-    public SsoAuthorizingRealm(UserManager userManager, MembershipManager membershipManager, 
-    		GroupManager groupManager, ProjectManager projectManager, SessionManager sessionManager, 
-    		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
-    		SettingManager settingManager, EmailAddressManager emailAddressManager) {
-		super(userManager, groupManager, projectManager, sessionManager, settingManager);
+    public SsoAuthenticatingRealm(UserManager userManager, MembershipManager membershipManager,
+								  GroupManager groupManager, ProjectManager projectManager, SessionManager sessionManager,
+								  TransactionManager transactionManager, SshKeyManager sshKeyManager,
+								  SettingManager settingManager, EmailAddressManager emailAddressManager) {
 		setCredentialsMatcher(new AllowAllCredentialsMatcher());
-		
+		this.userManager = userManager;
     	this.membershipManager = membershipManager;
     	this.transactionManager = transactionManager;
     	this.sshKeyManager = sshKeyManager;

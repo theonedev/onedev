@@ -8,9 +8,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.websocket.PageKey;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -59,15 +57,6 @@ public class WicketUtils {
 				return ((IPageRequestHandler) requestHandler);
 		}
 		return null;
-	}
-	
-	@Nullable
-	public static <T> T findOutermost(Component component, Class<T> clazz) {
-		List<T> parents = findParents(component, clazz);
-		if (!parents.isEmpty())
-			return parents.get(parents.size()-1);
-		else
-			return null;
 	}
 	
 	@Nullable
@@ -123,16 +112,6 @@ public class WicketUtils {
 				|| userAgent.indexOf("windows phone") != -1; 
 	}
 	
-	public static int getChildIndex(WebMarkupContainer parent, Component child) {
-		int index = 0;
-		for (Component each: parent) {
-			if (each == child)
-				return index;
-			index++;
-		}
-		return -1;
-	}
-	
 	public static LongRange getRequestContentRange(long contentLength) {
 		Long start = RequestCycle.get().getMetaData(AbstractResource.CONTENT_RANGE_STARTBYTE);
 		Long end = RequestCycle.get().getMetaData(AbstractResource.CONTENT_RANGE_ENDBYTE);
@@ -143,16 +122,6 @@ public class WicketUtils {
 			end = contentLength;
 		
 		return new LongRange(start, end);
-	}
-	
-	public static class LastVisibleAppender extends AttributeAppender {
-
-		private static final long serialVersionUID = 1L;
-
-		public LastVisibleAppender(String attribute, String value) {
-			super(attribute, value);
-		}
-		
 	}
 	
 }

@@ -107,7 +107,7 @@ abstract class TimingDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 		};
 	}
@@ -124,7 +124,7 @@ abstract class TimingDetailPanel extends Panel {
 					protected void onSave(AjaxRequestTarget target, IssueWorkBean bean) {
 						IssueWork work = new IssueWork();
 						work.setIssue(getIssue());
-						work.setUser(SecurityUtils.getUser());
+						work.setUser(SecurityUtils.getAuthUser());
 						work.setMinutes(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
 						work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
@@ -144,7 +144,7 @@ abstract class TimingDetailPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				var user = SecurityUtils.getUser();
+				var user = SecurityUtils.getAuthUser();
 				setVisible(user != null && !user.isEffectiveGuest() && getStopWatchManager().find(user, getIssue()) == null);
 			}
 		};
@@ -155,14 +155,14 @@ abstract class TimingDetailPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				closeDropdown();
-				var stopwatch = getStopWatchManager().startWork(SecurityUtils.getUser(), getIssue());
+				var stopwatch = getStopWatchManager().startWork(SecurityUtils.getAuthUser(), getIssue());
 				onWorkStarted(target, stopwatch);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				var user = SecurityUtils.getUser();
+				var user = SecurityUtils.getAuthUser();
 				setVisible(user != null && !user.isEffectiveGuest() && getStopWatchManager().find(user, getIssue()) == null);
 			}
 		};

@@ -8,9 +8,9 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.JobCacheManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
@@ -97,7 +97,7 @@ public class ServerCacheHelper extends CacheHelper {
 	protected boolean uploadCache(SetupCacheFacade cacheConfig, List<File> cacheDirs) {
 		var cacheKey = cacheConfig.getKey();
 		var projectPath = cacheConfig.getUploadProjectPath();
-		var accessToken = cacheConfig.getUploadAccessToken();
+		var accessTokenValue = cacheConfig.getUploadAccessToken();
 		var cachePaths = cacheConfig.getPaths();
 		var projectId = getSessionManager().call(() -> {
 			Project project;
@@ -110,13 +110,14 @@ public class ServerCacheHelper extends CacheHelper {
 			}
 			if (jobContext.canManageProject(project)) {
 				return project.getId();
-			} else if (accessToken != null) {
-				var user = getUserManager().findByAccessToken(accessToken);
-				if (user != null && SecurityUtils.canUploadCache(user.asSubject(), project))
+			} else if (accessTokenValue != null) {
+				var accessToken = getAccessTokenManager().findByValue(accessTokenValue);
+				if (accessToken != null && SecurityUtils.canUploadCache(accessToken.asSubject(), project))
 					return project.getId();
 			} 
 			return null;
 		});
+		
 		if (projectId != null) {
 			Long cacheId = getCacheManager().getCacheIdForUpload(projectId, cacheKey);
 			var activeServer = getProjectManager().getActiveServer(projectId, true);
@@ -161,8 +162,8 @@ public class ServerCacheHelper extends CacheHelper {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private AccessTokenManager getAccessTokenManager() {
+		return OneDev.getInstance(AccessTokenManager.class);
 	}
 	
 	private JobCacheManager getCacheManager() {

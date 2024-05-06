@@ -8,7 +8,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.shiro.authc.AuthenticationException;
@@ -24,9 +24,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
 
 @Editable(name="Microsoft Entra ID", order=125)
 public class EntraIdConnector extends OpenIdConnector {
@@ -62,7 +59,7 @@ public class EntraIdConnector extends OpenIdConnector {
 	}
 
 	@Editable(order=1100, description="Specify client secret of the app registered in Entra ID")
-	@Password
+	@Secret
 	@NotEmpty
 	public String getClientSecret() {
 		return super.getClientSecret();

@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import io.onedev.server.rest.annotation.Immutable;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -23,10 +25,12 @@ public class PullRequestAssignment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private PullRequest request;
 	
 	public User getUser() {

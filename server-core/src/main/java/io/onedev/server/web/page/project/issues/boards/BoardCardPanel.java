@@ -315,7 +315,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		
-		if (SecurityUtils.getUser() != null)
+		if (SecurityUtils.getAuthUser() != null)
 			add(AttributeAppender.append("style", "cursor:move;"));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
@@ -359,7 +359,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
 		String script = String.format("onedev.server.issueBoards.onCardDomReady('%s', %s);", 
-				getMarkupId(), SecurityUtils.getUser()!=null?callback:"undefined");
+				getMarkupId(), SecurityUtils.getAuthUser()!=null?callback:"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

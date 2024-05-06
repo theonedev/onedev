@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.Immutable;
 
 import javax.persistence.*;
 
@@ -21,6 +22,7 @@ public class PackLabel extends EntityLabel {
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	@Api(description = "id of <a href='/~help/api/io.onedev.server.rest.PackResource'>package</a>")
+	@Immutable
 	private Pack pack;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

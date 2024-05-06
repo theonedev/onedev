@@ -3,20 +3,17 @@ package io.onedev.server.pack;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.job.JobManager;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.security.BearerAuthenticationToken;
 import io.onedev.server.security.ExceptionHandleFilter;
-import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.codec.Base64;
-import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.apache.shiro.util.ThreadContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,10 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Set;
 
+import static org.apache.shiro.SecurityUtils.getSubject;
+
 @Singleton
 public class PackFilter extends ExceptionHandleFilter {
 	
-	private final UserManager userManager;
+	private final AccessTokenManager accessTokenManager;
 	
 	private final ProjectManager projectManager;
 	
@@ -42,10 +41,10 @@ public class PackFilter extends ExceptionHandleFilter {
 	private final Set<PackService> packServices;
 	
 	@Inject
-	public PackFilter(UserManager userManager, ProjectManager projectManager, 
+	public PackFilter(AccessTokenManager accessTokenManager, ProjectManager projectManager, 
 					  JobManager jobManager, SessionManager sessionManager, 
 					  Set<PackService> packServices) {
-		this.userManager = userManager;
+		this.accessTokenManager = accessTokenManager;
 		this.projectManager = projectManager;
 		this.jobManager = jobManager;
 		this.sessionManager = sessionManager;
@@ -78,23 +77,22 @@ public class PackFilter extends ExceptionHandleFilter {
 				if (apiKey != null) {
 					var colonIndex = apiKey.indexOf(':');
 					String jobToken;
-					String accessToken;
+					String accessTokenValue;
 					if (colonIndex != -1) {
 						jobToken = apiKey.substring(0, colonIndex);
-						accessToken = apiKey.substring(colonIndex +1);
+						accessTokenValue = apiKey.substring(colonIndex +1);
 					} else {
 						jobToken = null;
-						accessToken = apiKey;
+						accessTokenValue = apiKey;
 					}
 					if (jobToken != null) {
 						var jobContext = jobManager.getJobContext(jobToken, false);
 						if (jobContext != null)
 							buildId = jobContext.getBuildId();
 					}
-					var user = userManager.findByAccessToken(accessToken);
-					var subject = SecurityUtils.getSubject();
-					if (user != null)
-						subject.login(new BearerAuthenticationToken(user));
+					var accessToken = accessTokenManager.findByValue(accessTokenValue);
+					if (accessToken != null)
+						ThreadContext.bind(accessToken.asSubject());
 					else
 						throw new UnauthorizedException();
 				} else {
@@ -109,12 +107,11 @@ public class PackFilter extends ExceptionHandleFilter {
 							if (jobContext != null)
 								buildId = jobContext.getBuildId();
 							if (password.length() != 0) {
-								User user = userManager.findByAccessToken(password);
-								Subject subject = SecurityUtils.getSubject();
-								if (user != null)
-									subject.login(new BearerAuthenticationToken(user));
+								var accessToken = accessTokenManager.findByValue(password);
+								if (accessToken != null)
+									ThreadContext.bind(accessToken.asSubject());
 								else
-									subject.login(new UsernamePasswordToken(userName, password));
+									getSubject().login(new UsernamePasswordToken(userName, password));
 							}
 						}
 					}

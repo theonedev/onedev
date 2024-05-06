@@ -2,7 +2,6 @@ package io.onedev.server.event.project.codecomment;
 
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
@@ -17,7 +16,7 @@ public class CodeCommentsDeleted extends ProjectEvent {
 	private final Collection<Long> commentIds;
 	
 	public CodeCommentsDeleted(Project project, Collection<CodeComment> comments) {
-		super(SecurityUtils.getUser(), new Date(), project);
+		super(SecurityUtils.getAuthUser(), new Date(), project);
 		commentIds = comments.stream().map(CodeComment::getId).collect(Collectors.toSet());
 	}
 

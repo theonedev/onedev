@@ -393,7 +393,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setProject(getProject());
 		issue.setSubmitDate(new Date());
 		issue.setState(getIssueSetting().getInitialStateSpec().getName());
-		issue.setSubmitter(SecurityUtils.getUser());
+		issue.setSubmitter(SecurityUtils.getAuthUser());
 		
 		if (getTemplate() != null)
 			getTemplate().fill(issue);

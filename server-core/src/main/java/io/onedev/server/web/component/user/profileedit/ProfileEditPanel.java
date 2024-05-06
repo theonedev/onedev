@@ -1,9 +1,16 @@
 package io.onedev.server.web.component.user.profileedit;
 
-import java.io.Serializable;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.component.user.UserDeleteLink;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -11,16 +18,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.component.user.UserDeleteLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class ProfileEditPanel extends GenericPanel<User> {
@@ -91,10 +89,10 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		boolean canDelete;
 		if (getPage() instanceof MyProfilePage) {
 			canDelete = !getUser().isRoot()
-					&& SecurityUtils.getPrevUserId().equals(0L)
+					&& SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())
 					&& OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfDeregister();
 		} else {
-			canDelete = !getUser().isRoot() && !getUser().equals(SecurityUtils.getUser());
+			canDelete = !getUser().isRoot() && !getUser().equals(SecurityUtils.getAuthUser());
 		}
 		form.add(new UserDeleteLink("delete") {
 

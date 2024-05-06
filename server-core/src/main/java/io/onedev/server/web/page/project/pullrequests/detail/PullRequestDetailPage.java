@@ -750,8 +750,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitPullRequest(SecurityUtils.getUser(), getPullRequest());
+				if (SecurityUtils.getAuthUser() != null) 
+					OneDev.getInstance(VisitInfoManager.class).visitPullRequest(SecurityUtils.getAuthUser(), getPullRequest());
 			}
 			
 			@Override
@@ -1260,7 +1260,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		});
 		
-		var user = SecurityUtils.getUser();
+		var user = SecurityUtils.getAuthUser();
 		statusBarContainer.add(new BookmarkablePageLink<Void>(
 				"newPullRequest", 
 				NewPullRequestPage.class, 
@@ -1317,14 +1317,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		operationsContainer.setOutputMarkupPlaceholderTag(true);
 		
-		operationsContainer.setVisible(SecurityUtils.getUser() != null);
+		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null);
 		
 		operationsContainer.add(new ModalLink("approve") {
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
-					PullRequestReview review = request.getReview(SecurityUtils.getUser());
+					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
 					return review != null && review.getStatus() == Status.PENDING;
 				} else {
 					return false;
@@ -1367,7 +1367,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
-					PullRequestReview review = request.getReview(SecurityUtils.getUser());
+					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
 					return review != null && review.getStatus() == Status.PENDING;
 				} else {
 					return false;

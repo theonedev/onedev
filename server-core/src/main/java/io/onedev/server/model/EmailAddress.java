@@ -1,6 +1,8 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.annotation.Editable;
@@ -29,12 +31,16 @@ public class EmailAddress extends AbstractEntity {
     @JsonIgnore
     private String verificationCode = CryptoUtils.generateSecret();
     
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean primary;
-    
+
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean git;
     
+	
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
+	@Immutable
     private User owner;
 
     @Editable

@@ -19,7 +19,6 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.security.SecurityUtils;
@@ -147,7 +146,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 			String branch = page.getBlobIdent().revision;
 			if (branch == null)
 				branch = "main";
-			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, SecurityUtils.getUser(), jobName);
+			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, SecurityUtils.getAuthUser(), jobName);
 			for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
 				if (executor.isEnabled()) {
 					if (executor.getJobRequirement() == null) {

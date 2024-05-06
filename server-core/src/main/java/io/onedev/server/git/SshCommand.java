@@ -11,7 +11,6 @@ import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshAuthenticator;
@@ -37,6 +36,8 @@ import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import static io.onedev.server.security.SecurityUtils.*;
 
 class SshCommand implements Command, ServerSessionAware {
 	
@@ -73,9 +74,9 @@ class SshCommand implements Command, ServerSessionAware {
 		String protocol = environments.get("GIT_PROTOCOL");
 		
 		SshAuthenticator authenticator = OneDev.getInstance(SshAuthenticator.class);
-		ThreadContext.bind(SecurityUtils.asSubject(authenticator.getPublicKeyOwnerId(session)));
+		ThreadContext.bind(asSubject(asPrincipals(asUserPrincipal(authenticator.getPublicKeyOwnerId(session)))));
 		
-		boolean clusterAccess = SecurityUtils.getUserId().equals(User.SYSTEM_ID);		
+		boolean clusterAccess = SecurityUtils.isSystem();		
 		
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 
@@ -113,7 +114,8 @@ class SshCommand implements Command, ServerSessionAware {
 		String activeServerAddress = projectManager.getActiveServer(projectFacade.getId(), true);
 		if (clusterAccess || activeServerAddress.equals(clusterManager.getLocalServerAddress())) {
 	        File gitDir = OneDev.getInstance(ProjectManager.class).getGitDir(projectFacade.getId());
-	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), SecurityUtils.getUserId());
+			String principal = (String) SecurityUtils.getSubject().getPrincipal();
+	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), principal);
 
 	        if (!clusterAccess) {
 		        SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
@@ -135,8 +137,8 @@ class SshCommand implements Command, ServerSessionAware {
 		            sessionManager.closeSession();
 		        }
 	        }
-			
-	        String groupId = "git-over-ssh-" + projectFacade.getId() + "-" + SecurityUtils.getUserId();
+
+	        String groupId = "git-over-ssh-" + projectFacade.getId() + "-" + principal;
 	        
 	        WorkExecutor workExecutor = OneDev.getInstance(WorkExecutor.class);
 			future = workExecutor.submit(groupId, new PrioritizedRunnable(PRIORITY) {

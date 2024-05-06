@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import io.onedev.server.model.support.EntityComment;
+import io.onedev.server.rest.annotation.Immutable;
 
 import javax.persistence.*;
 
@@ -14,6 +15,7 @@ public class PullRequestComment extends EntityComment {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private PullRequest request;
 	
 	public PullRequest getRequest() {

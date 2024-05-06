@@ -19,8 +19,6 @@ public @interface Api {
 	
 	String description() default "";
 	
-	boolean readOnly() default false;
-	
 	int order() default 100;
 	
 }

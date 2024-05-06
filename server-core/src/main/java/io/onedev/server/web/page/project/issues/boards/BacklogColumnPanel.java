@@ -131,7 +131,7 @@ abstract class BacklogColumnPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getQuery() != null && SecurityUtils.getUser() != null);
+				setVisible(getQuery() != null && SecurityUtils.getAuthUser() != null);
 			}
 			
 		});

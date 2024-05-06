@@ -30,6 +30,7 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.*;
@@ -391,6 +392,8 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Listen
 	public void on(SystemStarted event) {
 		for (File file: projectManager.getProjectsDir().listFiles()) {
+			if (!NumberUtils.isDigits(file.getName())) 
+				continue;
 			Long projectId = Long.valueOf(file.getName());
 			File indexDir = projectManager.getIndexDir(projectId);
 			if (indexDir.exists()) {
@@ -400,7 +403,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 						} catch (IndexFormatTooOldException e) {
 							FileUtils.cleanDir(indexDir);
 						}
-					} 
+					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

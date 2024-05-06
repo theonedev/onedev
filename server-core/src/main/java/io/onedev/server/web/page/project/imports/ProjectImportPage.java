@@ -113,7 +113,7 @@ public class ProjectImportPage extends LayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getUser() != null;
+		return SecurityUtils.getAuthUser() != null;
 	}
 	
 	@Override

@@ -1,8 +1,6 @@
 package io.onedev.server.web.component.entity.watches;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -110,12 +108,12 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null);
 			}
 
 			@Override
 			protected WatchStatus getWatchStatus() {
-				EntityWatch watch = getEntity().getWatch(SecurityUtils.getUser(), false);
+				EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), false);
 				if (watch != null && !watch.isWatching())
 					return WatchStatus.DO_NOT_WATCH;
 				else if (watch != null && watch.isWatching())
@@ -127,15 +125,15 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 				if (watchStatus == WatchStatus.DO_NOT_WATCH) {
-					EntityWatch watch = getEntity().getWatch(SecurityUtils.getUser(), true);
+					EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), true);
 					watch.setWatching(false);
 					onSaveWatch(watch);
 				} else if (watchStatus == WatchStatus.WATCH) {
-					EntityWatch watch = getEntity().getWatch(SecurityUtils.getUser(), true);
+					EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), true);
 					watch.setWatching(true);
 					onSaveWatch(watch);
 				} else {
-					EntityWatch watch = getEntity().getWatch(SecurityUtils.getUser(), false);
+					EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), false);
 					if (watch != null) {
 						getEntity().getWatches().remove(watch);
 						onDeleteWatch(watch);

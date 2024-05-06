@@ -316,8 +316,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getUser(), getIssue());
+				if (SecurityUtils.getAuthUser() != null) 
+					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
 			
 			@Override

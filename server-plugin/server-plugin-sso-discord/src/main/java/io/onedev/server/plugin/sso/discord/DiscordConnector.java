@@ -27,7 +27,7 @@ import io.onedev.server.plugin.sso.discord.oauth2.Request;
 import io.onedev.server.plugin.sso.discord.oauth2.UserGuildsResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.UserInfoResponse;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 
 @Editable(name="Discord", order=150, description="Single sign on via discord.com")
@@ -55,7 +55,7 @@ public class DiscordConnector extends SsoConnector {
 	}
 
 	@Editable(order=1100, description="OAuth2 Client information | CLIENT SECRET")
-	@Password
+	@Secret
 	@NotEmpty
 	public String getClientSecret() {
 		return clientSecret;

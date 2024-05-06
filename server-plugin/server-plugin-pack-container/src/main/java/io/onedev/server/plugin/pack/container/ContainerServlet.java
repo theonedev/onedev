@@ -22,7 +22,6 @@ import org.eclipse.jetty.http.HttpStatus;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,7 +54,7 @@ public class ContainerServlet extends HttpServlet {
 	
 	private final SessionManager sessionManager;
 	
-	private final UserManager userManager;
+	private final AccessTokenManager accessTokenManager;
 
 	private final ProjectManager projectManager;
 	
@@ -70,11 +69,11 @@ public class ContainerServlet extends HttpServlet {
 	@Inject
 	public ContainerServlet(SettingManager settingManager, BuildManager buildManager, 
 							ObjectMapper objectMapper, SessionManager sessionManager, 
-							UserManager userManager, ProjectManager projectManager, 
+							AccessTokenManager accessTokenManager, ProjectManager projectManager, 
 							PackBlobManager packBlobManager, PackManager packManager) {
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
-		this.userManager = userManager;
+		this.accessTokenManager = accessTokenManager;
 		this.projectManager = projectManager;
 		this.packBlobManager = packBlobManager;
 		this.packManager = packManager;
@@ -97,7 +96,7 @@ public class ContainerServlet extends HttpServlet {
 		try {
 			Matcher matcher;
 			if (pathInfo.equals("")) {
-				if (SecurityUtils.getUserId().equals(0L)) {
+				if (SecurityUtils.isAnonymous()) {
 					response.setStatus(SC_UNAUTHORIZED);
 					response.setHeader("WWW-Authenticate", getChallenge());
 				} else {
@@ -106,17 +105,13 @@ public class ContainerServlet extends HttpServlet {
 			} else if (pathInfo.equals("token")) {
 				if (method.equals("GET")) {
 					var jsonObj = new HashMap<String, String>();
-					String accessToken;
-					var userId = SecurityUtils.getUserId();
-					if (!userId.equals(0L))
-						accessToken = userManager.createTemporalAccessToken(userId, 3600);
-					else
-						accessToken = CryptoUtils.generateSecret();
-
+					String accessTokenValue = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(3600);
+					if (accessTokenValue == null)
+						accessTokenValue = CryptoUtils.generateSecret();
 					var jobToken = HttpUtils.getAuthBasicUser(request);
 					if (jobToken == null)
 						jobToken = UUID.randomUUID().toString();
-					jsonObj.put("token", jobToken + ":" + accessToken);
+					jsonObj.put("token", jobToken + ":" + accessTokenValue);
 
 					response.setStatus(SC_OK);
 					try {
@@ -452,7 +447,7 @@ public class ContainerServlet extends HttpServlet {
 		} catch (ClientException e) {
 			throw e;
 		} catch (UnauthorizedException e) {
-			if (!SecurityUtils.getUserId().equals(0L)) {
+			if (!SecurityUtils.isAnonymous()) {
 				throw new ClientException(SC_FORBIDDEN, ErrorCode.UNAUTHORIZED, e.getMessage());
 			} else {
 				response.setStatus(SC_UNAUTHORIZED);

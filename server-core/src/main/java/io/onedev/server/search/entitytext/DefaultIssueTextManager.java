@@ -131,14 +131,14 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 					}
 				}
 			} else {
-				applicableProjectIds.addAll(projectManager.getPermittedProjects(new AccessProject())
+				applicableProjectIds.addAll(SecurityUtils.getAuthorizedProjects(new AccessProject())
 						.stream()
 						.map(AbstractEntity::getId)
 						.collect(toSet()));
 			}
 			
 			if (!SecurityUtils.isAdministrator()) {
-				var permittedProjectIds = projectManager.getPermittedProjects(new AccessConfidentialIssues())
+				var permittedProjectIds = SecurityUtils.getAuthorizedProjects(new AccessConfidentialIssues())
 						.stream()
 						.map(AbstractEntity::getId)
 						.collect(toSet());

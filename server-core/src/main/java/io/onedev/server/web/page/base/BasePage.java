@@ -360,7 +360,7 @@ public abstract class BasePage extends WebPage {
 
 	@Nullable
 	protected final User getLoginUser() {
-		return SecurityUtils.getUser();
+		return SecurityUtils.getAuthUser();
 	}
 
 	public void unauthorized() {

@@ -728,7 +728,7 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	public boolean isVisitedAfter(Date date) {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
@@ -738,7 +738,7 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	public boolean isCodeCommentsVisitedAfter(Date date) {
-		User user = SecurityUtils.getUser();
+		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();

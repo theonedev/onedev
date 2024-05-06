@@ -206,7 +206,7 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		if (project != null) {
 			predicates.add(builder.equal(root.get(Pack.PROP_PROJECT), project));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new ReadPack());
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new ReadPack());
 			if (!projects.isEmpty()) {
 				Path<Long> projectIdPath = root.get(Pack.PROP_PROJECT).get(Project.PROP_ID);
 				predicates.add(Criteria.forManyValues(builder, projectIdPath,

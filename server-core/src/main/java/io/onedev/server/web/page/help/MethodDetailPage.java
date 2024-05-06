@@ -5,9 +5,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.rest.resource.TriggerJobResource;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.ParamCheckFilter;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.resource.TriggerJobResource;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.TextUtils;
@@ -41,6 +41,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+
+import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
 
 @SuppressWarnings("serial")
 public class MethodDetailPage extends ApiHelpPage {
@@ -129,16 +132,14 @@ public class MethodDetailPage extends ApiHelpPage {
 			} else {
 				add(new Label("contentType", MediaType.APPLICATION_JSON));
 				Serializable exampleValue = new ExampleProvider(resourceClass, param.getAnnotation(Api.class)).getExample();
-				if (exampleValue == null)
-					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.REQUEST_BODY);
+				if (exampleValue == null) 
+					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), getPostValueOrigin(getResourceMethod()));
 				requestBodyClass = exampleValue.getClass();
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
-						Api api = getResourceMethod().getAnnotation(Api.class);
-						return new ValueInfo(ValueInfo.Origin.REQUEST_BODY,
-								getRequestBodyParam().getParameterizedType(), null);
+						return new ValueInfo(getPostValueOrigin(getResourceMethod()), getRequestBodyParam().getParameterizedType(), null);
 					}
 
 				};
@@ -306,13 +307,13 @@ public class MethodDetailPage extends ApiHelpPage {
 				
 				Serializable exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
 				if (exampleValue == null) 
-					exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.RESPONSE_BODY);
+					exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.READ_BODY);
 			
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
-						return new ValueInfo(ValueInfo.Origin.RESPONSE_BODY,
+						return new ValueInfo(ValueInfo.Origin.READ_BODY,
 								getResourceMethod().getGenericReturnType());
 					}
 
@@ -423,6 +424,14 @@ public class MethodDetailPage extends ApiHelpPage {
 		add(new Label("curlExample", curlExample));
 		
 		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.substring(1))));
+	}
+	
+	private ValueInfo.Origin getPostValueOrigin(Method method) {
+		var firstParam = getResourceMethod().getParameters()[0];
+		if (firstParam.getAnnotation(PathParam.class) != null && firstParam.getType() == Long.class)
+			return UPDATE_BODY;
+		else
+			return CREATE_BODY;
 	}
 	
 	private void appendParam(StringBuilder curlExample, String paramKey, String paramValue) {

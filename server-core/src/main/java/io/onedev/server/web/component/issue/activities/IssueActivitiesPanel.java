@@ -5,11 +5,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.model.support.issue.changedata.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
@@ -93,7 +91,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		addOrReplace(activitiesView);
 		Issue issue = getIssue();
 
-		var user = SecurityUtils.getUser();
+		var user = SecurityUtils.getAuthUser();
 		for (IssueActivity activity: getActivities()) {
 			if (issue.isVisitedAfter(activity.getDate())) {
 				activitiesView.add(newActivityRow(activitiesView.newChildId(), activity));
@@ -198,11 +196,11 @@ public abstract class IssueActivitiesPanel extends Panel {
 				IssueActivity lastActivity = (IssueActivity) prevActivityRow.getDefaultModelObject();
 				List<IssueActivity> newActivities = new ArrayList<>();
 				for (IssueActivity activity: getActivities()) {
-					if (activity.getDate().getTime() > lastActivity.getDate().getTime())
+					if (activity.getDate().getTime() > lastActivity.getDate().getTime()) 
 						newActivities.add(activity);
 				}
-
-				var user = SecurityUtils.getUser();
+				
+				var user = SecurityUtils.getAuthUser();
 				for (IssueActivity activity: newActivities) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
 					if (user == null || !user.equals(activity.getUser()))
@@ -224,7 +222,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.getUser() != null) {
+		if (SecurityUtils.getAuthUser() != null) {
 			Fragment fragment = new Fragment("addComment", "addCommentFrag", this);
 			fragment.setOutputMarkupId(true);
 			CommentInput input = new CommentInput("comment", Model.of(""), false) {
@@ -272,7 +270,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 					} else {
 						IssueComment comment = new IssueComment();
 						comment.setContent(content);
-						comment.setUser(SecurityUtils.getUser());
+						comment.setUser(SecurityUtils.getAuthUser());
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
 						OneDev.getInstance(IssueCommentManager.class).create(comment, new ArrayList<>());
@@ -414,10 +412,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 		});
 		
 		return fragment;
-	}
-
-	private TimeTrackingSetting getTimeTrackingSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 	}
 	
 }

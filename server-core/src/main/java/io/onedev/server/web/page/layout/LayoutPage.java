@@ -816,7 +816,7 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyTwoFactorAuthenticationPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (!SecurityUtils.getPrevUserId().equals(0L)) {
+		if (!SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {
 
 				@Override

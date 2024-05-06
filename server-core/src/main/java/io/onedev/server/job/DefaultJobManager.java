@@ -148,6 +148,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final LogManager logManager;
 
 	private final UserManager userManager;
+	
+	private final AccessTokenManager accessTokenManager;
 
 	private final SettingManager settingManager;
 
@@ -181,16 +183,18 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private volatile String branchSchedulesTaskId;
 
 	@Inject
-	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry,
-							 SettingManager settingManager, TransactionManager transactionManager, LogManager logManager,
-							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
-							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
-							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, PullRequestManager pullRequestManager, 
-							 IssueManager issueManager, GitService gitService, SSLFactory sslFactory, Dao dao) {
+	public DefaultJobManager(BuildManager buildManager, AccessTokenManager accessTokenManager, UserManager userManager, 
+							 ListenerRegistry listenerRegistry, SettingManager settingManager, TransactionManager transactionManager, 
+							 LogManager logManager, ExecutorService executorService, SessionManager sessionManager, 
+							 BuildParamManager buildParamManager, ProjectManager projectManager, Validator validator, 
+							 TaskScheduler taskScheduler, ClusterManager clusterManager, CodeIndexManager codeIndexManager, 
+							 PullRequestManager pullRequestManager, IssueManager issueManager, GitService gitService, 
+							 SSLFactory sslFactory, Dao dao) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
+		this.accessTokenManager = accessTokenManager;
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
 		this.logManager = logManager;
@@ -354,15 +358,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 				Subject subject;
 				if (dependency.getAccessTokenSecret() != null) {
-					String accessToken = build.getJobAuthorizationContext().getSecretValue(dependency.getAccessTokenSecret());
-					User user = userManager.findByAccessToken(accessToken);
-					if (user == null) {
+					String secretValue = build.getJobAuthorizationContext().getSecretValue(dependency.getAccessTokenSecret());
+					var accessToken = accessTokenManager.findByValue(secretValue);
+					if (accessToken == null) {
 						throw new ExplicitException("Unable to access dependency project '"
 								+ dependency.getProjectPath() + "': invalid access token");
 					}
-					subject = user.asSubject();
+					subject = accessToken.asSubject();
 				} else {
-					subject = SecurityUtils.asSubject(0L);
+					subject = SecurityUtils.asAnonymous();
 				}
 
 				Build dependencyBuild = dependency.getBuildProvider().getBuild(dependencyProject);

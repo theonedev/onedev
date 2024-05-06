@@ -32,7 +32,7 @@ public class MyProfilePage extends MyPage {
 		if (getLoginUser().isExternalManaged()) { 
 			add(BeanContext.view("content", getLoginUser(), Sets.newHashSet("password"), true));
 			boolean canRemoveSelf = !getLoginUser().isRoot()
-					&& SecurityUtils.getPrevUserId().equals(0L)
+					&& SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())
 					&& OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfDeregister();
 			add(new UserDeleteLink("delete") {
 

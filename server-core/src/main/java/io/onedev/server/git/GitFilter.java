@@ -11,7 +11,6 @@ import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
@@ -25,8 +24,6 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
 import org.eclipse.jgit.transport.PacketLineOut;
 import org.glassfish.jersey.client.ClientProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,8 +44,6 @@ import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 @Singleton
 public class GitFilter implements Filter {
 	
-	private static final Logger logger = LoggerFactory.getLogger(GitFilter.class);
-
 	public static final int PRIORITY = 2;
 	
 	private static final String INFO_REFS = "info/refs";
@@ -112,8 +107,8 @@ public class GitFilter implements Filter {
 	
 	protected void processPack(final HttpServletRequest request, final HttpServletResponse response) 
 			throws IOException, InterruptedException, ExecutionException {
-		Long userId = SecurityUtils.getUserId();
-		boolean clusterAccess = userId.equals(User.SYSTEM_ID);
+		String principal = (String) SecurityUtils.getSubject().getPrincipal();
+		boolean clusterAccess = SecurityUtils.isSystem(principal);
 		
 		boolean upload = GitSmartHttpTools.isUploadPack(request);
 		
@@ -127,7 +122,7 @@ public class GitFilter implements Filter {
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		var hookEnvs = HookUtils.getHookEnvs(projectId, userId);
+		var hookEnvs = HookUtils.getHookEnvs(projectId, principal);
 		
 		InputStream stdin = new FilterInputStream(ServletUtils.getInputStream(request)) {
 
@@ -190,7 +185,7 @@ public class GitFilter implements Filter {
 					WebTarget target = client.target(serverUrl)
 							.path("~api/cluster/git-pack")
 							.queryParam("projectId", projectId)
-							.queryParam("userId", userId)
+							.queryParam("principal", principal)
 							.queryParam("protocol", protocol)
 							.queryParam("upload", upload);
 					Invocation.Builder builder =  target.request();
@@ -266,8 +261,7 @@ public class GitFilter implements Filter {
 	}
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Long userId = SecurityUtils.getUserId();
-		boolean clusterAccess = userId.equals(User.SYSTEM_ID);
+		boolean clusterAccess = SecurityUtils.isSystem();
 		
 		String service = request.getParameter("service");
 		boolean upload = service.contains("upload");

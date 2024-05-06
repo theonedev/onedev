@@ -1,6 +1,8 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.onedev.server.rest.annotation.Immutable;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -32,14 +34,17 @@ public class IssueWork extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(nullable = false)
-	private Date date;
+	private Date date = new Date();
 	
 	@JsonIgnore
 	private long day;

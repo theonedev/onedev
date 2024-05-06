@@ -149,7 +149,7 @@ public class MailServicePage extends AdministrationPage {
 
 						return new TaskResult(true, new PlainMessage("Great, your mail service configuration is working"));
 					} else {
-						var emailAddress = SecurityUtils.getUser().getPrimaryEmailAddress();
+						var emailAddress = SecurityUtils.getAuthUser().getPrimaryEmailAddress();
 						if (emailAddress != null) {
 							String body = "Great, your mail service configuration is working!";
 							mailService.sendMail(Sets.newHashSet(emailAddress.getValue()),

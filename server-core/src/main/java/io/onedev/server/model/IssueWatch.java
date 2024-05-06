@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
@@ -27,10 +28,12 @@ public class IssueWatch extends EntityWatch {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private User user;
 	
 	private boolean watching;

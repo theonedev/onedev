@@ -213,7 +213,7 @@ public class IssueResource {
 	
 	private static List<Map<String, Object>> getIssuesExample() {
 		var issues = new ArrayList<Map<String, Object>>();
-		var issue = ApiHelpUtils.getExampleValue(Issue.class, ValueInfo.Origin.RESPONSE_BODY);
+		var issue = ApiHelpUtils.getExampleValue(Issue.class, ValueInfo.Origin.READ_BODY);
 		issues.add(OneDev.getInstance(ObjectMapper.class).convertValue(issue, new TypeReference<Map<String, Object>>() {}));
 		return issues;
 	}
@@ -331,7 +331,7 @@ public class IssueResource {
 		String initialState = issueSetting.getInitialStateSpec().getName();
 		
     	if (!SecurityUtils.canManageIssues(issue.getProject()) 
-				&& !(issue.getSubmitter().equals(SecurityUtils.getUser()) && issue.getState().equals(initialState))) {
+				&& !(issue.getSubmitter().equals(SecurityUtils.getAuthUser()) && issue.getState().equals(initialState))) {
 			throw new UnauthorizedException();
 		}
 
