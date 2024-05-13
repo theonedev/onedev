@@ -230,6 +230,9 @@
 	border: 2px solid #187DE4;
 }
 
+.markdown-rendered pre {
+	white-space: nowrap;
+}
 .dark-mode .markdown-rendered {
 	color: var(--muted);
 }

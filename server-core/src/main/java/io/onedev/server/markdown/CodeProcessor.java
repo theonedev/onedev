@@ -43,7 +43,9 @@ public class CodeProcessor implements MarkdownProcessor {
 					Element element = (Element) node;
 					if (element.tagName().equals("code") 
 							&& element.parent() != null 
-							&& element.parent().tagName().equals("pre")) {
+							&& element.parent().tagName().equals("pre")
+							&& (element.parent().parent() == null || !element.parent().parent().attr("class").equals("pre-outer"))) {
+						element.parent().wrap("<div class='pre-outer'></div>");
 						codeElements.add(element);
 					}
 				}

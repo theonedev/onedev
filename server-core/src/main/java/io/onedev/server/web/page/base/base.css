@@ -538,6 +538,12 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 	border-color: var(--dark-mode-lighter-dark);
 	color: var(--dark-mode-light-gray);
 }
+.pre-outer {
+	position: relative;
+}
+.pre-outer>pre {
+	position: static;
+}
 pre {
 	word-break: normal;
 	white-space: pre-wrap;
