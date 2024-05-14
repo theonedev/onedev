@@ -44,8 +44,6 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 					var accessToken = accessTokenManager.findByValue(bearerToken);
 					if (accessToken != null)
 						ThreadContext.bind(accessToken.asSubject());
-					else 
-						throw new IncorrectCredentialsException();
 				}
 	        } 
 		}
