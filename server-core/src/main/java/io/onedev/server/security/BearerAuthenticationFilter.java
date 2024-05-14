@@ -41,6 +41,8 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 				if (clusterManager.getCredential().equals(bearerToken)) {
 					ThreadContext.bind(userManager.getSystem().asSubject());
 				} else {
+					// Do not throw IncorrectCredentialException if no access token found 
+					// as the bearer token can be an agent token
 					var accessToken = accessTokenManager.findByValue(bearerToken);
 					if (accessToken != null)
 						ThreadContext.bind(accessToken.asSubject());
