@@ -591,6 +591,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
 			storageManager.initLfsDir(projectId);
 			new LfsFetchAllCommand(gitDir, repositoryUrl).run();
+			HookUtils.checkHooks(gitDir);
+			checkGitConfig(projectId, project.getGitPackConfig());
 			return null;
 		});
 		postBranchUpdatedEvents(projectId);
