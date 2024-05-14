@@ -1,18 +1,15 @@
 package io.onedev.server.web.component.user.accesstoken;
 
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.util.UserAware;
 import io.onedev.server.web.util.WicketUtils;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -46,7 +43,7 @@ public class AccessTokenEditBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Secret(copyable = true)
+	@Password(copyable = true)
 	@NotEmpty
 	public String getValue() {
 		return value;

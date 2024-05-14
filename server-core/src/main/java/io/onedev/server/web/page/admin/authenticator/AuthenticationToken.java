@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 
 @Editable
 public class AuthenticationToken implements Serializable {
@@ -27,7 +27,7 @@ public class AuthenticationToken implements Serializable {
 	}
 
 	@Editable(order=200, description="Specify password to authenticate with")
-	@Secret
+	@Password
 	@NotEmpty
 	public String getPassword() {
 		return password;

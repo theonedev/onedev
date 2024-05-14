@@ -9,7 +9,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
@@ -91,7 +91,7 @@ public class ImportServer implements Serializable, Validatable {
 	@Editable(order=100, name="GitLab Personal Access Token", description="GitLab personal access token should be generated with "
 			+ "scope <b>read_api</b>, <b>read_user</b> and <b>read_repository</b>. Note that only groups/projects owned by " +
 			"user of specified access token will be listed")
-	@Secret
+	@Password
 	@NotEmpty
 	public String getAccessToken() {
 		return accessToken;

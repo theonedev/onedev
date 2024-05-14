@@ -19,7 +19,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class JobSecretEditPanel extends Panel {
 	
-	private static final String MASK = "******";
+	private static final String MASK = "************";
 	
 	private final int index;
 	

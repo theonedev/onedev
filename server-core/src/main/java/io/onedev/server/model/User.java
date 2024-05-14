@@ -6,7 +6,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -512,7 +512,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
     
 	@Editable(order=150)
-	@Secret(needConfirm=true, autoComplete="new-password")
+	@Password(needConfirm=true, autoComplete="new-password")
 	@NotEmpty
 	public String getPassword() {
 		return password;

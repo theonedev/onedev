@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.agent.job.RegistryLoginFacade;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 
 @Editable
 public class RegistryLogin implements Serializable {
@@ -41,7 +41,7 @@ public class RegistryLogin implements Serializable {
 
 	@Editable(order=300)
 	@NotEmpty
-	@Secret
+	@Password
 	public String getPassword() {
 		return password;
 	}

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.RefreshToken;
 import io.onedev.server.mail.*;
 import io.onedev.server.model.support.administration.mailservice.ImapImplicitSsl;
@@ -60,7 +60,7 @@ public class GmailMailService implements MailService {
 	}
 
 	@Editable(order=200, description="Client secret of this OneDev instance registered in Google cloud")
-	@Secret
+	@Password
 	@NotEmpty
 	public String getClientSecret() {
 		return clientSecret;

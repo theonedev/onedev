@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.mailservice.smtpimap;
 
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.model.support.administration.mailservice.ImapImplicitSsl;
 import io.onedev.server.model.support.administration.mailservice.ImapSslSetting;
 
@@ -62,7 +62,7 @@ public class InboxPollSetting implements Serializable {
 	}
 
 	@Editable(order=400, name="IMAP Password")
-	@Secret(autoComplete="new-password")
+	@Password(autoComplete="new-password")
 	@NotEmpty
 	public String getImapPassword() {
 		return imapPassword;

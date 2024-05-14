@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.secret;
+package io.onedev.server.web.editable.password;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -11,14 +11,14 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 
 @SuppressWarnings("serial")
-public class SecretPropertyEditor extends PropertyEditor<String> {
+public class PasswordPropertyEditor extends PropertyEditor<String> {
 
 	private PasswordTextField input;
 	
-	public SecretPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public PasswordPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -32,7 +32,7 @@ public class SecretPropertyEditor extends PropertyEditor<String> {
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);
 
-		Secret password = getDescriptor().getPropertyGetter().getAnnotation(Secret.class);
+		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
 		String autoComplete = password.autoComplete();
 		if (StringUtils.isNotBlank(autoComplete))
 			input.add(AttributeAppender.append("autocomplete", autoComplete));

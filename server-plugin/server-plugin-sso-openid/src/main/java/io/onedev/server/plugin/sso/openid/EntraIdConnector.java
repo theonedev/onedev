@@ -8,7 +8,7 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
+import io.onedev.server.annotation.Password;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.shiro.authc.AuthenticationException;
@@ -59,7 +59,7 @@ public class EntraIdConnector extends OpenIdConnector {
 	}
 
 	@Editable(order=1100, description="Specify client secret of the app registered in Entra ID")
-	@Secret
+	@Password
 	@NotEmpty
 	public String getClientSecret() {
 		return super.getClientSecret();
