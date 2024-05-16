@@ -115,7 +115,7 @@ public class SetupCacheStep extends Step {
 		return UPLOAD_IF_CHANGED == EditContext.get().getInputValue("uploadStrategy");	
 	}
 	
-	@Editable(order=450, placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
+	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
 			"specifies target project for the upload. Leave empty for current project")
 	@ProjectChoice
 	public String getUploadProjectPath() {
