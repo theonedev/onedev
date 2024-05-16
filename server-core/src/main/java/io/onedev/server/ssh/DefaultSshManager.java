@@ -1,5 +1,6 @@
 package io.onedev.server.ssh;
 
+import com.google.crypto.tink.subtle.EngineWrapper;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.cluster.ClusterManager;
@@ -14,22 +15,26 @@ import io.onedev.server.persistence.TransactionManager;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.PropertyResolver;
+import org.apache.sshd.common.PropertyResolverUtils;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
+import org.apache.sshd.server.ServerBuilder;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.config.SshServerConfigFileReader;
 import org.apache.sshd.server.shell.UnknownCommand;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -85,7 +90,36 @@ public class DefaultSshManager implements SshManager, Serializable {
 
 		if (server == null) {
 			server = SshServer.setUpDefaultServer();
+			
+			var kexFactories = server.getKeyExchangeFactories();
+			for (var it = kexFactories.iterator(); it.hasNext();) {
+				var kexFactory = it.next();
+				if (kexFactory.getName().equals("ecdh-sha2-nistp521") 
+						|| kexFactory.getName().equals("ecdh-sha2-nistp384")
+						|| kexFactory.getName().equals("ecdh-sha2-nistp256")) {
+					it.remove();
+				}
+			}
+			server.setKeyExchangeFactories(kexFactories);
 
+			var sigFactories = server.getSignatureFactories();
+			for (var it = sigFactories.iterator(); it.hasNext();) {
+				var sigFactory = it.next();
+				if (sigFactory.getName().equals("ssh-rsa"))
+					it.remove();
+			}
+			server.setSignatureFactories(sigFactories);
+			
+			var macFactories = server.getMacFactories();
+			for (var it = macFactories.iterator(); it.hasNext();) {
+				var macFactory = it.next();
+				if (macFactory.getName().equals("hmac-sha1-etm@openssh.com") 
+						|| macFactory.getName().equals("hmac-sha1")) {
+					it.remove();
+				}
+			}
+			server.setMacFactories(macFactories);
+			
 			server.setPort(serverConfig.getSshPort());
 
 			server.setKeyPairProvider(session -> newArrayList(new KeyPair(publicKey, privateKey)));

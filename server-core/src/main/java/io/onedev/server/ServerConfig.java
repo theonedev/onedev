@@ -25,17 +25,17 @@ public class ServerConfig {
 	private static final String PROP_HTTP_PORT = "http_port";
 
 	private static final String PROP_SSH_PORT = "ssh_port";
-
+	
 	private static final String PROP_SERVER_NAME = "server_name";
 	
 	private static final String PROP_CLUSTER_IP = "cluster_ip";
 
 	private static final String PROP_CLUSTER_PORT = "cluster_port";
-
+	
 	private final int httpPort;
 
 	private final int sshPort;
-
+	
 	private final String serverName;
 	
 	private final String clusterIp;
