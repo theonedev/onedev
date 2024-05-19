@@ -1022,10 +1022,10 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 					List<CollectingWork> collectingWorks = new ArrayList<>();
 					for (Object work : works)
 						collectingWorks.add((CollectingWork) work);
-					Collections.sort(collectingWorks, new CommitTimeComparator());
+					collectingWorks.sort(new CommitTimeComparator());
 
 					for (CollectingWork work : collectingWorks)
-						doCollect(project, work.getCommit().copy(), work.getRefName());
+						doCollect(project, work.getCommitId(), work.getRefName());
 				});
 			}
 
@@ -1041,14 +1041,17 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 			for (Ref ref : refs) {
 				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
-				if (revObj instanceof RevCommit)
-					works.add(new CollectingWork(PRIORITY, (RevCommit) revObj, ref.getName()));
+				if (revObj instanceof RevCommit) {
+					RevCommit commit = (RevCommit) revObj;
+					works.add(new CollectingWork(PRIORITY, commit.copy(), 
+							commit.getCommitTime(), ref.getName()));
+				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 
-		Collections.sort(works, new CommitTimeComparator());
+		works.sort(new CommitTimeComparator());
 
 		for (CollectingWork work : works)
 			batchWorkManager.submit(getBatchWorker(projectId), work);
@@ -1082,7 +1085,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			try (RevWalk revWalk = new RevWalk(repository)) {
 				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewCommitId());
 				if (commit != null) {
-					CollectingWork work = new CollectingWork(PRIORITY, commit, event.getRefName());
+					CollectingWork work = new CollectingWork(PRIORITY, commit.copy(), 
+							commit.getCommitTime(), event.getRefName());
 					batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 				}
 			}
@@ -1138,16 +1142,23 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 		private final String refName;
 
-		private final RevCommit commit;
+		private final ObjectId commitId;
+		
+		private final int commitTime;
 
-		public CollectingWork(int priority, RevCommit commit, String refName) {
+		public CollectingWork(int priority, ObjectId commitId, int commitTime, String refName) {
 			super(priority);
-			this.commit = commit;
+			this.commitId = commitId;
+			this.commitTime = commitTime;
 			this.refName = refName;
 		}
 
-		public RevCommit getCommit() {
-			return commit;
+		public ObjectId getCommitId() {
+			return commitId;
+		}
+
+		public int getCommitTime() {
+			return commitTime;
 		}
 
 		public String getRefName() {
@@ -1160,7 +1171,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 		@Override
 		public int compare(CollectingWork o1, CollectingWork o2) {
-			return o1.getCommit().getCommitTime() - o2.getCommit().getCommitTime();
+			return o1.getCommitTime() - o2.getCommitTime();
 		}
 
 	}
