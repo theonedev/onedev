@@ -231,7 +231,7 @@
 }
 
 .markdown-rendered pre {
-	white-space: nowrap;
+	white-space: pre;
 }
 .dark-mode .markdown-rendered {
 	color: var(--muted);
