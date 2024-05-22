@@ -3,6 +3,8 @@ package io.onedev.server.search.commit;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Build;
@@ -96,18 +98,12 @@ public class CommitQuery implements Serializable {
 					else 
 						value = getValue(criteria.revisionCriteria().Value());
 					if (criteria.revisionCriteria().BUILD() != null) {
-						String numberStr = value;
-						if (numberStr.startsWith("#"))
-							numberStr = numberStr.substring(1);
-						if (NumberUtils.isDigits(numberStr)) {
-							Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(numberStr));
-							if (build == null)
-								throw new ExplicitException("Unable to find build: " + value);
-							else
-								value = build.getCommitHash();
-						} else {
-							throw new ExplicitException("Invalid build number: " + numberStr);
-						}
+						var buildReference = BuildReference.of(value, project);
+						Build build = OneDev.getInstance(BuildManager.class).find(buildReference.getProject(), buildReference.getNumber());
+						if (build == null)
+							throw new ExplicitException("Unable to find build: " + value);
+						else
+							value = build.getCommitHash();
 					}
 					if (criteria.revisionCriteria().SINCE() != null)
 						scope = Revision.Scope.SINCE;
