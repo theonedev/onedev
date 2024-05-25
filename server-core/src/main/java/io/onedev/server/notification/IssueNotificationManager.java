@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.asset.emoji.Emojis;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +39,9 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.commenttext.MarkdownText;
+import org.unbescape.html.HtmlEscape;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
 public class IssueNotificationManager extends AbstractNotificationManager {
@@ -56,12 +60,17 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final IssueQueryPersonalizationManager queryPersonalizationManager;
 	
+	private final IssueManager issueManager;
+	
+	private final UrlManager urlManager;
+	
 	@Inject
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
 									IssueWatchManager watchManager, VisitInfoManager userInfoManager, 
 									UserManager userManager, SettingManager settingManager, 
 									IssueAuthorizationManager authorizationManager, IssueMentionManager mentionManager, 
-									IssueQueryPersonalizationManager queryPersonalizationManager) {
+									IssueQueryPersonalizationManager queryPersonalizationManager, 
+									IssueManager issueManager, UrlManager urlManager) {
 		super(markdownManager, settingManager);
 		
 		this.mailManager = mailManager;
@@ -71,6 +80,66 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		this.authorizationManager = authorizationManager;
 		this.mentionManager = mentionManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
+		this.issueManager = issueManager;
+		this.urlManager = urlManager;
+	}
+	
+	private void setupWatches(Issue issue) {
+		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<Issue>() {
+
+			@Override
+			protected Issue getEntity() {
+				return issue;
+			}
+
+			@Override
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return queryPersonalizationManager.query(new ProjectScope(issue.getProject(), true, true));
+			}
+
+			@Override
+			protected EntityQuery<Issue> parse(String queryString) {
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+				return IssueQuery.parse(issue.getProject(), queryString, option, true);
+			}
+
+			@Override
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return issue.getProject().getNamedIssueQueries();
+			}
+
+		}.getWatches().entrySet()) {
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
+				watchManager.watch(issue, entry.getKey(), entry.getValue());
+		}
+
+		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<Issue>() {
+
+			@Override
+			protected Issue getEntity() {
+				return issue;
+			}
+
+			@Override
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return userManager.query().stream().map(it -> it.getIssueQueryPersonalization()).collect(Collectors.toList());
+			}
+
+			@Override
+			protected EntityQuery<Issue> parse(String queryString) {
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
+				return IssueQuery.parse(null, queryString, option, true);
+			}
+
+			@Override
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return settingManager.getIssueSetting().getNamedQueries();
+			}
+
+		}.getWatches().entrySet()) {
+			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
+				watchManager.watch(issue, entry.getKey(), entry.getValue());
+		}
 	}
 	
 	@Transactional
@@ -94,61 +163,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			summary = StringUtils.capitalize(event.getActivity());
 		}
 
-		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
-
-			@Override
-			protected Issue getEntity() {
-				return issue;
-			}
-
-			@Override
-			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return queryPersonalizationManager.query(new ProjectScope(issue.getProject(), true, true));
-			}
-
-			@Override
-			protected EntityQuery<Issue> parse(String queryString) {
-				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
-				return IssueQuery.parse(issue.getProject(), queryString, option, true);
-			}
-
-			@Override
-			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return issue.getProject().getNamedIssueQueries();
-			}
-			
-		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
-				watchManager.watch(issue, entry.getKey(), entry.getValue());
-		}
-		
-		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
-
-			@Override
-			protected Issue getEntity() {
-				return issue;
-			}
-
-			@Override
-			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return userManager.query().stream().map(it->it.getIssueQueryPersonalization()).collect(Collectors.toList());
-			}
-
-			@Override
-			protected EntityQuery<Issue> parse(String queryString) {
-				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
-				return IssueQuery.parse(null, queryString, option, true);
-			}
-
-			@Override
-			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return settingManager.getIssueSetting().getNamedQueries();
-			}
-			
-		}.getWatches().entrySet()) {
-			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
-				watchManager.watch(issue, entry.getKey(), entry.getValue());
-		}
+		setupWatches(issue);
 		
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
@@ -283,6 +298,72 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
 					replyAddress, senderName, threadingReferences);
+		}
+	}
+
+	@Transactional
+	@Listen
+	public void on(IssuesMoved event) {
+		User user = event.getUser();
+		for (var issueId: event.getIssueIds()) {
+			var issue = issueManager.load(issueId);
+
+			String senderName;
+			String summary;
+			if (user != null) {
+				senderName = user.getDisplayName();
+				summary = user.getDisplayName() + " " + event.getActivity();
+			} else {
+				senderName = null;
+				summary = StringUtils.capitalize(event.getActivity());
+			}
+			
+			setupWatches(issue);
+			
+			var emojis = Emojis.getInstance();
+			String replyAddress = mailManager.getReplyAddress(issue);
+			boolean replyable = replyAddress != null;
+
+			Collection<String> bccEmailAddresses = new HashSet<>();
+			for (IssueWatch watch : issue.getWatches()) {
+				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
+				if (watch.isWatching()
+						&& (visitDate == null || visitDate.before(event.getDate()))
+						&& !watch.getUser().equals(user)
+						&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
+					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified())
+						bccEmailAddresses.add(emailAddress.getValue());
+				}
+			}
+
+			if (!bccEmailAddresses.isEmpty()) {
+				String subject = String.format(
+						"[Issue %s] (%s) %s",
+						issue.getReference(),
+						"Moved",
+						emojis.apply(issue.getTitle()));
+				
+				var url = urlManager.urlFor(issue);
+				String textDetail = "" +
+						"Previous project: " + event.getSourceProject().getPath() + 
+						"\n" +
+						"Current project: " + event.getTargetProject().getPath() + 
+						"\n";
+				String htmlDetail = "" +
+						"Previous project: " + escapeHtml5(event.getSourceProject().getPath()) +
+						"<br>" +
+						"Current project: " + escapeHtml5(event.getTargetProject().getPath()) + 
+						"<br>";
+				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
+				String htmlBody = getEmailBody(true, event, summary, htmlDetail, url, replyable, unsubscribable);
+				String textBody = getEmailBody(false, event, summary, textDetail, url, replyable, unsubscribable);
+
+				String threadingReferences = issue.getThreadingReferences();
+				mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(),
+						bccEmailAddresses, subject, htmlBody, textBody,
+						replyAddress, senderName, threadingReferences);
+			}
 		}
 	}
 	

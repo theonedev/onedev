@@ -26,7 +26,7 @@ public class IssuesDeleted extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "issues deleted";
+		return "deleted";
 	}
 	
 }

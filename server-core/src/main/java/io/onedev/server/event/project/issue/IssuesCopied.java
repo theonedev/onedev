@@ -41,7 +41,7 @@ public class IssuesCopied extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "issues copied";
+		return "copied";
 	}
 	
 }

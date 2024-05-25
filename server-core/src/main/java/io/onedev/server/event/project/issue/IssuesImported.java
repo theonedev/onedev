@@ -26,7 +26,7 @@ public class IssuesImported extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "issues imported";
+		return "imported";
 	}
 	
 }

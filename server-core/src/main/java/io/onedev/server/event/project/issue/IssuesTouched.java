@@ -24,7 +24,7 @@ public class IssuesTouched extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "issues touched";
+		return "touched";
 	}
 	
 }

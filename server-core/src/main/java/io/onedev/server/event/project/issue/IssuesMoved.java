@@ -39,7 +39,7 @@ public class IssuesMoved extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "issues moved";
+		return "moved";
 	}
 	
 }
