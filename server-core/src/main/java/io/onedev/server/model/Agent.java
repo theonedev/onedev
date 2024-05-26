@@ -98,7 +98,7 @@ public class Agent extends AbstractEntity {
 	@Column(nullable=false)
 	private String osArch;
 	
-	private int cpus;
+	private int cpuCount;
 	
 	private boolean paused;
 	
@@ -165,12 +165,12 @@ public class Agent extends AbstractEntity {
 		this.paused = paused;
 	}
 
-	public int getCpus() {
-		return cpus;
+	public int getCpuCount() {
+		return cpuCount;
 	}
 
-	public void setCpus(int cpus) {
-		this.cpus = cpus;
+	public void setCpuCount(int cpuCount) {
+		this.cpuCount = cpuCount;
 	}
 
 	public Collection<AgentAttribute> getAttributes() {
@@ -209,7 +209,7 @@ public class Agent extends AbstractEntity {
 	
 	public AgentData getAgentData() {
 		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
-				name, ipAddress, cpus, getAttributeMap());
+				name, ipAddress, cpuCount, getAttributeMap());
 	}
 	
 }

@@ -187,7 +187,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			agent.setOsVersion(data.getOsInfo().getOsVersion());
 			agent.setOsArch(data.getOsInfo().getOsArch());
 			agent.setName(data.getName());
-			agent.setCpus(data.getCpus());
+			agent.setCpuCount(data.getCpus());
 			agent.setIpAddress(data.getIpAddress());
 
 			AgentLastUsedDate lastUsedDate = new AgentLastUsedDate();
@@ -212,7 +212,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			agent.setOsVersion(data.getOsInfo().getOsVersion());
 			agent.setOsArch(data.getOsInfo().getOsArch());
 			agent.setIpAddress(data.getIpAddress());
-			agent.setCpus(data.getCpus());
+			agent.setCpuCount(data.getCpus());
 			dao.persist(agent);
 			attributeManager.syncAttributes(agent, data.getAttributes());
 		}

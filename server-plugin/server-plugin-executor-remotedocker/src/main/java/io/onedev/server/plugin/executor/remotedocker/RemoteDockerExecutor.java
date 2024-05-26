@@ -200,7 +200,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					}
 				}
 			};
-			
+
 			getResourceAllocator().runAgentJob(
 					AgentQuery.parse(agentQuery, true), getName(), 
 					getConcurrencyNumber(), 1, runnable);

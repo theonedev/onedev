@@ -5,11 +5,11 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 
 public interface ResourceAllocator {
 
-	boolean runServerJob(String resourceType, int totalResources, int requiredResources, 
+	boolean runServerJob(String executorName, int totalConcurrency, int requiredConcurrency, 
 					  ClusterTask<Boolean> runnable);
 
-	boolean runAgentJob(AgentQuery agentQuery, String resourceType, int totalResources,
-								int requiredResources, AgentRunnable runnable);
+	boolean runAgentJob(AgentQuery agentQuery, String executorName, int totalConcurrency,
+								int requiredConcurrency, AgentRunnable runnable);
 	
 	void agentDisconnecting(Long agentId);
 

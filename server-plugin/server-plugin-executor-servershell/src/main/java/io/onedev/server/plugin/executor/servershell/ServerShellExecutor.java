@@ -286,7 +286,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 			
 		});
 		jobLogger.log("Pending resource allocation...");
-		return getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(), 1, runnable);
+		return getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(), 
+				1, runnable);
 	}
 
 	@Override

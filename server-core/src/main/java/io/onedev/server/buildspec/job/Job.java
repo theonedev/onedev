@@ -87,6 +87,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<PostBuildAction> postBuildActions = new ArrayList<>();
 	
+	private String sequentialGroup;
+	
 	private String retryCondition = "never";
 	
 	private int maxRetries = 3;
@@ -241,6 +243,19 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return choices;
 	}
 
+	@Editable(order=9300, group="More Settings", description = "Jobs with same sequential group and executor will be " +
+			"executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for " +
+			"jobs executing by same executor and deploying to prod environment of current project to avoid " +
+			"conflicting deployments")
+	@Interpolative(variableSuggester="suggestVariables")
+	public String getSequentialGroup() {
+		return sequentialGroup;
+	}
+
+	public void setSequentialGroup(String sequentialGroup) {
+		this.sequentialGroup = sequentialGroup;
+	}
+	
 	@Editable(order=9400, group="More Settings", description="Specify condition to retry build upon failure")
 	@NotEmpty
 	@RetryCondition

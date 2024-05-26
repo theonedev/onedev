@@ -55,19 +55,19 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	
 	private final TaskScheduler taskScheduler;
 
-	private volatile Map<String, Integer> nodeCpus;
+	private volatile Map<String, Integer> cpuCounts;
 
-	private final Map<String, Integer> resourceUsages = new HashMap<>();
+	private final Map<String, Integer> concurrencyUsages = new HashMap<>();
 	
-	private volatile Map<String, Integer> resourceUsagesCache;
-
+	private volatile Map<String, Integer> concurrencyUsagesCache;
+	
 	private volatile Map<Long, Long> disconnectingAgents;
 	
 	private volatile String taskId;
 	
 	@Inject
 	public DefaultResourceAllocator(AgentManager agentManager, TransactionManager transactionManager,
-									ClusterManager clusterManager, JobManager jobManager, 
+									ClusterManager clusterManager, JobManager jobManager,
 									TaskScheduler taskScheduler) {
 		this.agentManager = agentManager;
 		this.transactionManager = transactionManager;
@@ -84,25 +84,25 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 
-		nodeCpus = hazelcastInstance.getReplicatedMap("nodeCpus");
+		cpuCounts = hazelcastInstance.getReplicatedMap("cpuCounts");
 		var localServer = clusterManager.getLocalServerAddress();
 		try {
-			nodeCpus.put(
+			cpuCounts.put(
 					localServer,
 					new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
 		} catch (Exception e) {
 			logger.debug("Error calling oshi", e);
-			nodeCpus.put(localServer, 4);
+			cpuCounts.put(localServer, 4);
 		}
-		resourceUsagesCache = hazelcastInstance.getReplicatedMap("resourceUsagesCache");
+		concurrencyUsagesCache = hazelcastInstance.getReplicatedMap("concurrencyUsagesCache");
 		disconnectingAgents = hazelcastInstance.getReplicatedMap("disconnectingAgents");
-		removeNodeFromResourceUsagesCache(localServer);		
+		removeNodeFromConcurrencyUsagesCache(localServer);		
 	}
 
 	@Listen
 	public void on(SystemStopped event) {
-		if (nodeCpus != null)
-			nodeCpus.remove(clusterManager.getLocalServerAddress());
+		if (cpuCounts != null)
+			cpuCounts.remove(clusterManager.getLocalServerAddress());
 	}
 
 	@Listen
@@ -122,42 +122,42 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 			clusterManager.submitToServer(event.getServer(), () -> {
 				try {
 					while (true) {
-						synchronized (resourceUsages) {
-							if (resourceUsagesCache != null) {
-								resourceUsagesCache.putAll(resourceUsages);
+						synchronized (concurrencyUsages) {
+							if (concurrencyUsagesCache != null) {
+								concurrencyUsagesCache.putAll(concurrencyUsages);
 								break;
 							}
 						}
 						Thread.sleep(100);
 					}
 				} catch (Exception e) {
-					logger.error("Error syncing resource usages cache", e);
+					logger.error("Error syncing concurrency usages cache", e);
 				}
 				return null;
 			});
 		}
 	}
 
-	private void removeNodeFromResourceUsagesCache(String resourceNode) {
-		var keysToRemove = resourceUsagesCache.keySet().stream()
-				.filter(it -> it.startsWith(resourceNode + ":"))
+	private void removeNodeFromConcurrencyUsagesCache(String node) {
+		var keysToRemove = concurrencyUsagesCache.keySet().stream()
+				.filter(it -> it.startsWith(node + ":"))
 				.collect(toList());
 		for (var key: keysToRemove)
-			resourceUsagesCache.remove(key);
+			concurrencyUsagesCache.remove(key);
 	}
 
 	@Transactional
 	@Listen
 	public void on(AgentConnected event) {
 		var agentId = event.getAgent().getId();
-		var agentCpus = event.getAgent().getCpus();
+		var agentCpuCount = event.getAgent().getCpuCount();
 		transactionManager.runAfterCommit(() -> {
-			nodeCpus.put(String.valueOf(agentId), agentCpus);
-			removeNodeFromResourceUsagesCache(agentId.toString());
-			synchronized (resourceUsages) {
-				for (var entry : resourceUsages.entrySet()) {
+			cpuCounts.put(String.valueOf(agentId), agentCpuCount);
+			removeNodeFromConcurrencyUsagesCache(agentId.toString());
+			synchronized (concurrencyUsages) {
+				for (var entry : concurrencyUsages.entrySet()) {
 					if (entry.getKey().startsWith(agentId + ":"))
-						resourceUsagesCache.put(entry.getKey(), entry.getValue());
+						concurrencyUsagesCache.put(entry.getKey(), entry.getValue());
 				}
 			}
 			disconnectingAgents.remove(agentId);
@@ -169,13 +169,13 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	public void on(AgentDisconnected event) {
 		var agentId = event.getAgent().getId();
 		transactionManager.runAfterCommit(() -> {
-			nodeCpus.remove(String.valueOf(agentId));
+			cpuCounts.remove(String.valueOf(agentId));
 		});
 	}
 
-	private int getAllocationScore(int totalResources, int usedResources, int requiredResources) {
-		if (usedResources + requiredResources <= totalResources)
-			return totalResources * 100 / (usedResources + requiredResources);
+	private int getAllocationScore(int totalConcurrency, int usedConcurrency, int requiredConcurrency) {
+		if (usedConcurrency + requiredConcurrency <= totalConcurrency)
+			return totalConcurrency * 100 / (usedConcurrency + requiredConcurrency);
 		else
 			return 0;
 	}
@@ -190,8 +190,8 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 		disconnectingAgents.put(agentId, agentId);
 		while (true) {
 			boolean idle = true;
-			synchronized (resourceUsages) {
-				for (var entry : resourceUsages.entrySet()) {
+			synchronized (concurrencyUsages) {
+				for (var entry : concurrencyUsages.entrySet()) {
 					if (entry.getKey().startsWith(agentId + ":") && entry.getValue() > 0) {
 						idle = false;
 						break;
@@ -210,11 +210,11 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 		}
 	}
 
-	private int getEffectiveTotalResources(String resourceNode, int totalResources) {
-		if (totalResources != 0) {
-			return totalResources;
+	private int getEffectiveTotalConcurrency(String node, int totalConcurrency) {
+		if (totalConcurrency != 0) {
+			return totalConcurrency;
 		} else {
-			var cpu = nodeCpus.get(resourceNode);
+			var cpu = cpuCounts.get(node);
 			if (cpu != null)
 				return cpu;
 			else 
@@ -223,35 +223,35 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	}
 
 	@Nullable
-	private String allocateResource(Collection<String> resourceNodes, String resourceType, 
-									int totalResources, int requiredResources) {
-		String allocated = null;
+	private String allocateNode(Collection<String> nodes, String executorName,
+								int totalConcurrency, int requiredConcurrency) {
+		String allocatedNode = null;
 		var maxScore = 0;
-		for (var resourceNode: resourceNodes) {
-			var effectiveTotalResources = getEffectiveTotalResources(resourceNode, totalResources);
-			var usedResources = resourceUsagesCache.get(resourceNode + ":" + resourceType);
-			if (usedResources == null)
-				usedResources = 0;
-			var score = getAllocationScore(effectiveTotalResources, usedResources, requiredResources);
+		for (var node: nodes) {
+			var effectiveTotalConcurrency = getEffectiveTotalConcurrency(node, totalConcurrency);
+			var usedConcurrency = concurrencyUsagesCache.get(node + ":" + executorName);
+			if (usedConcurrency == null)
+				usedConcurrency = 0;
+			var score = getAllocationScore(effectiveTotalConcurrency, usedConcurrency, requiredConcurrency);
 
 			if (score > maxScore) {
-				allocated = resourceNode;
+				allocatedNode = node;
 				maxScore = score;
 			}
 		}
-		return allocated;
+		return allocatedNode;
 	}
 
-	private void acquireResource(String resourceKey, int totalResources, int acquireResources) {
+	private void acquireConcurrency(String concurrencyKey, int totalConcurrency, int acquireConcurrency) {
 		while (true) {
-			synchronized (resourceUsages) {	
-				var usedResources = resourceUsages.get(resourceKey);				
-				if (usedResources == null)
-					usedResources = 0;
-				usedResources += acquireResources;
-				if (usedResources <= totalResources) {
-					resourceUsages.put(resourceKey, usedResources);
-					resourceUsagesCache.put(resourceKey, usedResources);
+			synchronized (concurrencyUsages) {	
+				var usedCocurrency = concurrencyUsages.get(concurrencyKey);				
+				if (usedCocurrency == null)
+					usedCocurrency = 0;
+				usedCocurrency += acquireConcurrency;
+				if (usedCocurrency <= totalConcurrency) {
+					concurrencyUsages.put(concurrencyKey, usedCocurrency);
+					concurrencyUsagesCache.put(concurrencyKey, usedCocurrency);
 					break;
 				}
 			}
@@ -263,31 +263,31 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 		}
 	}
 
-	private void releaseResource(String resourceKey, int releaseResources) {
-		synchronized (resourceUsages) {	
-			var usedResources = resourceUsages.get(resourceKey);
-			usedResources -= releaseResources;
-			resourceUsages.put(resourceKey, usedResources);
-			resourceUsagesCache.put(resourceKey, usedResources);
+	private void releaseConcurrency(String concurrencyKey, int releaseConcurrency) {
+		synchronized (concurrencyUsages) {	
+			var usedResources = concurrencyUsages.get(concurrencyKey);
+			usedResources -= releaseConcurrency;
+			concurrencyUsages.put(concurrencyKey, usedResources);
+			concurrencyUsagesCache.put(concurrencyKey, usedResources);
 		}
 	}
 
 	@Override
-	public boolean runServerJob(String resourceType, int totalResources, 
-								int requiredResources, ClusterTask<Boolean> runnable) {
+	public boolean runServerJob(String executorName, int totalConcurrency, 
+								int requiredConcurrency, ClusterTask<Boolean> runnable) {
 		while (true) {
 			var servers = clusterManager.getServerAddresses();
 			servers.retainAll(clusterManager.getOnlineServers());
-			var server = allocateResource(servers, resourceType, totalResources, requiredResources);
+			var server = allocateNode(servers, executorName, totalConcurrency, requiredConcurrency);
 			if (server != null) {
 				return jobManager.runJob(server, () -> {
-					int effectiveTotalResources = getEffectiveTotalResources(server, totalResources);
-					var resourceKey = server + ":" + resourceType;
-					acquireResource(resourceKey, effectiveTotalResources, requiredResources);
+					int effectiveTotalConcurrency = getEffectiveTotalConcurrency(server, totalConcurrency);
+					var concurrencyKey = server + ":" + executorName;
+					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
 					try {
 						return jobManager.runJob(server, runnable);
 					} finally {
-						releaseResource(resourceKey, requiredResources);
+						releaseConcurrency(concurrencyKey, requiredConcurrency);
 					}
 				});
 			}
@@ -300,8 +300,8 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	}
 
 	@Override
-	public boolean runAgentJob(AgentQuery agentQuery, String resourceType,
-							int totalResources, int requiredResources, 
+	public boolean runAgentJob(AgentQuery agentQuery, String executorName,
+							int totalConcurrency, int requiredConcurrency, 
 							AgentRunnable runnable) {
 		while (true) {
 			var agentIds = agentManager.query(agentQuery, 0, MAX_VALUE)
@@ -309,9 +309,9 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 					.map(AbstractEntity::getId)
 					.collect(toSet());
 			agentIds.removeAll(disconnectingAgents.keySet());
-			var agentIdString = allocateResource(
+			var agentIdString = allocateNode(
 					agentIds.stream().map(Object::toString).collect(toList()),
-					resourceType, totalResources, requiredResources);
+					executorName, totalConcurrency, requiredConcurrency);
 			var agentId = agentIdString != null? Long.valueOf(agentIdString): null;
 			if (agentId != null) {
 				var server = agentManager.getAgentServer(agentId);
@@ -319,14 +319,14 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 					throw new ExplicitException("Can not find server managing allocated agent, please retry later");
 
 				return jobManager.runJob(server, () -> {
-					var effectiveTotalResources = getEffectiveTotalResources(agentIdString, totalResources);
-					var resourceKey = agentId + ":" + resourceType;
-					acquireResource(resourceKey, effectiveTotalResources, requiredResources);
+					var effectiveTotalConcurrency = getEffectiveTotalConcurrency(agentIdString, totalConcurrency);
+					var concurrencyKey = agentId + ":" + executorName;
+					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
 					try {
 						updateLastUsedDate(agentId);
 						return runnable.run(agentId);
 					} finally {
-						releaseResource(resourceKey, requiredResources);
+						releaseConcurrency(concurrencyKey, requiredConcurrency);
 					}
 				});
 			}
@@ -340,8 +340,8 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 
 	@Override
 	public void execute() {
-		synchronized (resourceUsages) {
-			resourceUsagesCache.putAll(resourceUsages);
+		synchronized (concurrencyUsages) {
+			concurrencyUsagesCache.putAll(concurrencyUsages);
 		}
 	}
 

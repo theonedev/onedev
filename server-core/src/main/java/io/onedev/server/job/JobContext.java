@@ -9,6 +9,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import org.eclipse.jgit.lib.ObjectId;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,7 +20,9 @@ public class JobContext implements Serializable {
 	private final String jobToken;
 	
 	private final JobExecutor jobExecutor;
-
+	
+	private final String sequentialGroup;
+	
 	private final Long projectId;
 	
 	private final String projectPath;
@@ -42,13 +45,13 @@ public class JobContext implements Serializable {
 	
 	private volatile int retried;
 	
-	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, 
-					  String projectPath, String projectGitDir, Long buildId, 
-					  Long buildNumber, List<Action> actions, String refName, 
-					  ObjectId commitId, List<ServiceFacade> services, 
-					  long timeout) {
+	public JobContext(String jobToken, JobExecutor jobExecutor, @Nullable String sequentialGroup, 
+					  Long projectId, String projectPath, String projectGitDir, Long buildId, 
+					  Long buildNumber, List<Action> actions, String refName, ObjectId commitId, 
+					  List<ServiceFacade> services, long timeout) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
+		this.sequentialGroup = sequentialGroup;
 		this.projectId = projectId;
 		this.projectPath = projectPath;
 		this.projectGitDir = projectGitDir;
@@ -67,6 +70,11 @@ public class JobContext implements Serializable {
 
 	public JobExecutor getJobExecutor() {
 		return jobExecutor;
+	}
+
+	@Nullable
+	public String getSequentialGroup() {
+		return sequentialGroup;
 	}
 
 	public Long getBuildId() {

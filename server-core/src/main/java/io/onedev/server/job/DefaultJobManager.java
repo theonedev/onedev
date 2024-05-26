@@ -76,6 +76,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
+import org.apache.wicket.util.collections.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 import org.quartz.CronExpression;
@@ -174,8 +175,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 
 	private volatile IMap<String, String> jobServers;
-
-
+	
+	private volatile IMap<String, Date> sequentialKeys;
+	
 	private volatile Map<String, List<JobSchedule>> branchSchedules;
 	
 	private volatile String maintenanceTaskId;
@@ -519,8 +521,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
 		TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask);
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
-
 		JobExecutor jobExecutor = getJobExecutor(build, jobExecutorName, jobLogger);
+		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
+		String sequentialKey;
+		if (sequentialGroup != null)
+			sequentialKey = jobExecutorName + ":" + sequentialGroup;
+		else
+			sequentialKey = null;
 		Long projectId = build.getProject().getId();
 		String projectPath = build.getProject().getPath();
 		String projectGitDir = projectManager.getGitDir(build.getProject().getId()).getAbsolutePath();
@@ -556,34 +563,45 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
-		JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
-				projectGitDir, buildId, buildNumber, actions, refName, commitId, services,
-				timeout);
+		JobContext jobContext = new JobContext(jobToken, jobExecutor, sequentialGroup, 
+				projectId, projectPath, projectGitDir, buildId, buildNumber, actions, 
+				refName, commitId, services, timeout);
 		
 		return new JobExecution(executorService.submit(() -> {
-			while (true) {
-				// Store original job actions as the copy in job context will be fetched from cluster and 
-				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
-				jobActions.put(jobToken, actions);
-				logManager.addJobLogger(jobToken, jobLogger);
-				serverStepThreads.put(jobToken, new ArrayList<>());
-				try {
-					if (jobExecutor.execute(jobContext, jobLogger))
-						return true;
-					if (!retryJob(job, jobContext, jobLogger, null))
-						return false;
-				} catch (Throwable e) {
-					if (!retryJob(job, jobContext, jobLogger, e))
-						throw e;
-				} finally {
-					Collection<Thread> threads = serverStepThreads.remove(jobToken);
-					synchronized (threads) {
-						for (Thread thread : threads)
-							thread.interrupt();
-					}
-					logManager.removeJobLogger(jobToken);
-					jobActions.remove(jobToken);
+			if (sequentialKey != null) {
+				jobLogger.log("Locking sequential group...");
+				while (sequentialKeys.putIfAbsent(sequentialKey, new Date(), timeout, TimeUnit.SECONDS) != null) {
+					Thread.sleep(1000);
 				}
+			}
+			try {
+				while (true) {
+					// Store original job actions as the copy in job context will be fetched from cluster and 
+					// some transient fields (such as step object in ServerSideFacade) will not be preserved 
+					jobActions.put(jobToken, actions);
+					logManager.addJobLogger(jobToken, jobLogger);
+					serverStepThreads.put(jobToken, new ArrayList<>());
+					try {
+						if (jobExecutor.execute(jobContext, jobLogger))
+							return true;
+						if (!retryJob(job, jobContext, jobLogger, null))
+							return false;
+					} catch (Throwable e) {
+						if (!retryJob(job, jobContext, jobLogger, e))
+							throw e;
+					} finally {
+						Collection<Thread> threads = serverStepThreads.remove(jobToken);
+						synchronized (threads) {
+							for (Thread thread : threads)
+								thread.interrupt();
+						}
+						logManager.removeJobLogger(jobToken);
+						jobActions.remove(jobToken);
+					}
+				}
+			} finally {
+				if (sequentialKey != null) 
+					sequentialKeys.remove(sequentialKey);
 			}
 		}), job.getTimeout() * 1000L);
 	}
@@ -974,7 +992,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(SystemStarting event) {
 		var hazelcastInstance = clusterManager.getHazelcastInstance();
 		jobServers = hazelcastInstance.getMap("jobServers");
-		branchSchedules = hazelcastInstance.getReplicatedMap("jobSchedules");
+		sequentialKeys = hazelcastInstance.getMap("seqentialKeys");
+		branchSchedules = hazelcastInstance.getReplicatedMap("branchSchedules");
 	}
 	
 	private void cacheBranchSchedules(Project project, String branch, ObjectId commitId) {
