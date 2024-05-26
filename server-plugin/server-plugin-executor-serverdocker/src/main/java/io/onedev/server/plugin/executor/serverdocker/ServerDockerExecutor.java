@@ -147,8 +147,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 		this.mountDockerSock = mountDockerSock;
 	}
 
-	@Editable(order=50010, group="More Settings", placeholder = "No limit", description = "" +
-			"Optionally specify cpu limit of jobs/services using this executor. This will be " +
+	@Editable(order=40, group="Resource Settings", placeholder = "No limit", description = "" +
+			"Optionally specify cpu limit of each job/service using this executor. This will be " +
 			"used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> " +
 			"of relevant containers")
 	public String getCpuLimit() {
@@ -159,8 +159,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 		this.cpuLimit = cpuLimit;
 	}
 
-	@Editable(order=50020, group="More Settings", placeholder = "No limit", description = "" +
-			"Optionally specify memory limit of jobs/services using this executor. This will be " +
+	@Editable(order=50, group="Resource Settings", placeholder = "No limit", description = "" +
+			"Optionally specify memory limit of each job/service using this executor. This will be " +
 			"used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> " +
 			"of relevant containers")
 	public String getMemoryLimit() {

@@ -189,7 +189,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.storageSize = storageSize;
 	}
 
-	@Editable(order=400, group = "Resource Settings", description = "Specify cpu request for jobs using this executor. " +
+	@Editable(order=400, group = "Resource Settings", description = "Specify cpu request for each job/service using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	@NotEmpty
 	public String getCpuRequest() {
@@ -200,7 +200,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.cpuRequest = cpuRequest;
 	}
 
-	@Editable(order=500, group="Resource Settings", description = "Specify memory request for jobs using this executor. " +
+	@Editable(order=500, group="Resource Settings", description = "Specify memory request for each job/service using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	@NotEmpty
 	public String getMemoryRequest() {
@@ -212,7 +212,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	}
 
 	@Editable(order=24990, group="Resource Settings", placeholder = "No limit", description = "" +
-			"Optionally specify cpu limit for jobs using this executor. " +
+			"Optionally specify cpu limit for each job/service using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	public String getCpuLimit() {
 		return cpuLimit;
@@ -223,7 +223,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	}
 
 	@Editable(order=24995, group="Resource Settings", placeholder = "No limit", description = "" +
-			"Optionally specify memory limit for jobs using this executor. " +
+			"Optionally specify memory limit for each job/service using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
 	public String getMemoryLimit() {
 		return memoryLimit;
