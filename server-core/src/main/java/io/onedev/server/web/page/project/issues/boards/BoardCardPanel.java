@@ -9,7 +9,6 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -28,6 +27,7 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -45,8 +45,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
-import javax.annotation.Nullable;
 import java.util.List;
+
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.security.SecurityUtils.getAuthUser;
 
 @SuppressWarnings("serial")
 public abstract class BoardCardPanel extends GenericPanel<Issue> {
@@ -58,7 +60,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	public BoardCardPanel(String id, Long issueId) {
 		super(id);
 		this.issueId = issueId;
-		setModel(new LoadableDetachableModel<Issue>() {
+		setModel(new LoadableDetachableModel<>() {
 			@Override
 			protected Issue load() {
 				return OneDev.getInstance(IssueManager.class).load(issueId);
@@ -74,7 +76,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		return getModelObject();
 	}
 	
-	private Component newContent(String componentId, IModel<Issue> issueModel, @Nullable Cursor cursor) {
+	private Component newContent(String componentId, IModel<Issue> issueModel) {
 		Issue issue = issueModel.getObject();
 		
 		Fragment fragment = new Fragment(componentId, "contentFrag", this);
@@ -233,7 +235,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), cursor);
+				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), getCursor());
 			}
 
 		});
@@ -252,7 +254,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected Cursor getCursor() {
-				return cursor;
+				return BoardCardPanel.this.getCursor();
 			}
 			
 		});
@@ -291,7 +293,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
-				item.add(newContent("content", item.getModel(), null));
+				item.add(newContent("content", item.getModel()));
 			}
 
 			@Override
@@ -311,35 +313,39 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newContent("content", getModel(), getCursor()));
+		add(newContent("content", getModel()));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		
-		if (SecurityUtils.getAuthUser() != null)
+		if (getAuthUser() != null)
 			add(AttributeAppender.append("style", "cursor:move;"));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				Long issueId = RequestCycle.get().getRequest().getPostParameters()
-						.getParameterValue("issue").toLong();
-				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
-				Hibernate.initialize(issue.getProject());
-				Project parent = issue.getProject().getParent();
-				while (parent != null) {
-					Hibernate.initialize(parent);
-					parent = parent.getParent();
+				if (canManageIssues(getProject())) {
+					Long issueId = RequestCycle.get().getRequest().getPostParameters()
+							.getParameterValue("issue").toLong();
+					Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
+					Hibernate.initialize(issue.getProject());
+					Project parent = issue.getProject().getParent();
+					while (parent != null) {
+						Hibernate.initialize(parent);
+						parent = parent.getParent();
+					}
+					Hibernate.initialize(issue.getFields());
+					Hibernate.initialize(issue.getSubmitter());
+					Hibernate.initialize(issue.getComments());
+					Hibernate.initialize(issue.getTargetLinks());
+					Hibernate.initialize(issue.getSourceLinks());
+					Hibernate.initialize(issue.getMentions());
+					for (Milestone milestone : issue.getMilestones())
+						Hibernate.initialize(milestone);
+					send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
+				} else {
+					Session.get().warn("Issue management permission required to move issues");
 				}
-				Hibernate.initialize(issue.getFields());
-				Hibernate.initialize(issue.getSubmitter());
-				Hibernate.initialize(issue.getComments());
-				Hibernate.initialize(issue.getTargetLinks());
-				Hibernate.initialize(issue.getSourceLinks());
-				Hibernate.initialize(issue.getMentions());
-				for (Milestone milestone: issue.getMilestones())
-					Hibernate.initialize(milestone);
-				send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 			}
 			
 		});
@@ -349,7 +355,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 	@Override
 	protected void onBeforeRender() {
-		replace(newContent("content", getModel(), getCursor()));
+		replace(newContent("content", getModel()));
 		super.onBeforeRender();
 	}
 
@@ -359,10 +365,10 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
 		String script = String.format("onedev.server.issueBoards.onCardDomReady('%s', %s);", 
-				getMarkupId(), SecurityUtils.getAuthUser()!=null?callback:"undefined");
+				getMarkupId(), getAuthUser() != null? callback: "undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-
+	
 	protected abstract Cursor getCursor();
 	
 	protected abstract Project getProject();

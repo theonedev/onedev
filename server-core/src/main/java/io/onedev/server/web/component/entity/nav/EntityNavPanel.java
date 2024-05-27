@@ -50,7 +50,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new AjaxLink<Void>("next") {
+		add(new AjaxLink<Void>("prev") {
 
 			@Override
 			protected void onConfigure() {
@@ -63,7 +63,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() <= 0)
 					tag.put("disabled", "disabled");
-				tag.put("title", "Next " + entityName);
+				tag.put("title", "Previous " + entityName);
 			}
 
 			@Override
@@ -85,7 +85,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			}
 			
 		});
-		add(new AjaxLink<Void>("prev") {
+		add(new AjaxLink<Void>("next") {
 
 			@Override
 			protected void onConfigure() {
@@ -98,7 +98,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() >= getCursor().getCount()-1)
 					tag.put("disabled", "disabled");
-				tag.put("title", "Previous " + entityName);
+				tag.put("title", "Next " + entityName);
 			}
 
 			@Override
@@ -128,7 +128,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			public String getObject() {
 				if (getCursor() != null)
-					return entityName + " " + (getCursor().getCount()-getCursor().getOffset()) + " of " + getCursor().getCount();				
+					return entityName + " " + (getCursor().getOffset() + 1) + " of " + getCursor().getCount();				
 				else
 					return entityName + " 1 of 1";
 			}

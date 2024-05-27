@@ -6411,5 +6411,17 @@ public class DataMigrator {
 		}
 		accessTokensDom.writeToFile(accessTokensFile, true);
 	}
-	
+
+	private void migrate165(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var number = Long.parseLong(element.elementText("number"));
+					element.addElement("boardPosition").setText(String.valueOf(number*-1));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

@@ -1,11 +1,16 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -13,17 +18,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 abstract class StateTransitionPanel extends Panel implements InputContext {
@@ -64,7 +62,6 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 						editor.newComponentContext(), fieldBean, editableFields);
 				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), 
 						getTransition().getToState(), fieldValues, getTransition().getRemoveFields(), null);
-				((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(true));
 				onSaved(target);
 			}
 

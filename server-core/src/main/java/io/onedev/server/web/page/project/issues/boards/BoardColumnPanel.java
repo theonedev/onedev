@@ -5,12 +5,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
@@ -22,7 +21,6 @@ import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger
 import io.onedev.server.search.entity.issue.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -36,7 +34,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
@@ -44,7 +41,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
@@ -53,7 +49,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
@@ -66,8 +61,13 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 @SuppressWarnings("serial")
-abstract class BoardColumnPanel extends Panel implements EditContext {
+abstract class BoardColumnPanel extends AbstractColumnPanel {
 
 	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<>() {
 
@@ -79,17 +79,17 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (boardQuery.getCriteria() != null)
 					criterias.add(boardQuery.getCriteria());
 				if (getMilestone() != null)
-					criterias.add(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is));
+					criterias.add(new MilestoneCriteria(getMilestone().getName(), Is));
 				else
-					criterias.add(new MilestoneEmptyCriteria(IssueQueryLexer.IsEmpty));
+					criterias.add(new MilestoneEmptyCriteria(IsEmpty));
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
-					criterias.add(new StateCriteria(getColumn(), IssueQueryLexer.Is));
+					criterias.add(new StateCriteria(getColumn(), Is));
 				} else if (getColumn() != null) {
 					criterias.add(new ChoiceFieldCriteria(identifyField,
-							getColumn(), -1, IssueQueryLexer.Is, false));
+							getColumn(), -1, Is, false));
 				} else {
-					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty, false));
+					criterias.add(new FieldOperatorCriteria(identifyField, IsEmpty, false));
 				}
 				return new IssueQuery(Criteria.andCriterias(criterias), boardQuery.getSorts());
 			} else {
@@ -99,24 +99,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 	};
 	
-	private final IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
-
-		@Override
-		protected Integer load() {
-			if (getQuery() != null) {
-				try {
-					return getIssueManager().count(getProjectScope(), getQuery().getCriteria());
-				} catch(ExplicitException e) {
-				}
-			} 
-			return 0;
-		}
-		
-	};
-	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	private Component countLabel;
+	
+	private CardListPanel cardListPanel;
 	
 	public BoardColumnPanel(String id) {
 		super(id);
@@ -125,16 +112,12 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	@Override
 	protected void onDetach() {
 		queryModel.detach();
-		countModel.detach();
 		super.onDetach();
 	}
 	
-	private IssueQuery getQuery() {
+	@Override
+	protected IssueQuery getQuery() {
 		return queryModel.getObject();
-	}
-
-	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
 	@Override
@@ -145,7 +128,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 			@Override
 			protected void onBeforeRender() {
-				addOrReplace(new CardListPanel("body") {
+				addOrReplace(cardListPanel = new CardListPanel("body") {
 
 					@Override
 					public void onEvent(IEvent<?> event) {
@@ -191,9 +174,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
-						CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
+						CharSequence callback = ajaxBehavior.getCallbackFunction(
+								explicit("issueId"), explicit("cardIndex"));
 						String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
-								getMarkupId(), getQuery()!=null?callback:"undefined");
+								getMarkupId(), (getQuery() != null && canManageIssues(getProject()))? callback:"undefined");
 						// Use OnLoad instead of OnDomReady as otherwise perfect scrollbar is not shown unless resized 
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
@@ -214,7 +198,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					}
 
 					@Override
-					protected void onUpdate(IPartialPageRequestHandler handler) {
+					protected void updateCardCount(IPartialPageRequestHandler handler) {
 						handler.add(countLabel);
 					}
 
@@ -310,8 +294,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, Issue issue) {
-						getIssueManager().open(issue);
-						notifyIssueChange(target, issue);
+						onCardAdded(target, issue);
 						modal.close();
 					}
 
@@ -347,161 +330,156 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		head.add(countLabel = new Label("count", countModel).setOutputMarkupId(true));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
-			
-			private void markAccepted(AjaxRequestTarget target, boolean accepted) {
-				target.appendJavaScript(String.format("$('.issue-boards').data('accepted', %b);", accepted));
-			}
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
+				if (!canManageIssues(getProject()))
+					throw new UnauthorizedException("Permission denied");
+				
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				Long issueId = params.getParameterValue("issue").toLong();
-				Issue issue = getIssueManager().load(issueId);
-				String fieldName = getBoard().getIdentifyField();
-				if (getMilestone() != null && !issue.getMilestones().contains(getMilestone())) { 
-					// move a backlog issue to board 
-					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
-						throw new UnauthorizedException("Permission denied");
-					getIssueChangeManager().addSchedule(issue, getMilestone());
-					notifyIssueChange(target, issue);
-					markAccepted(target, true);
-				} else if (fieldName.equals(Issue.NAME_STATE)) {
-					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
-					for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
-						if (transition.canTransitManually(issue, getColumn())) {
-							transitionRef.set(transition);
-							break;
-						}
-					}
-					if (transitionRef.get() == null) 
-						throw new UnauthorizedException("Permission denied");
-					
-					boolean hasPromptFields = false;
-					PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
-					for (String promptField: trigger.getPromptFields()) {
-						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
-						if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
-							Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
-							Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
-							if (FieldUtils.isFieldVisible(new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
-								hasPromptFields = true;
+				var issueId = params.getParameterValue("issueId").toLong();
+				var cardIndex = params.getParameterValue("cardIndex").toInt();
+				var card = cardListPanel.findCard(issueId);
+				if (card != null) { // Move in same column
+					cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+				} else {
+					Issue issue = getIssueManager().load(issueId);
+					String fieldName = getBoard().getIdentifyField();
+					if (getMilestone() != null && !issue.getMilestones().contains(getMilestone())) {
+						getIssueChangeManager().addSchedule(issue, getMilestone());
+						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+					} else if (fieldName.equals(Issue.NAME_STATE)) {
+						AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
+						for (TransitionSpec transition : getIssueSetting().getTransitionSpecs()) {
+							if (transition.canTransitManually(issue, getColumn())) {
+								transitionRef.set(transition);
 								break;
 							}
 						}
-					}
-					if (hasPromptFields) {
-						new ModalPanel(target) {
+						if (transitionRef.get() == null)
+							throw new IllegalStateException();
 
-							@Override
-							protected Component newContent(String id) {
-								return new StateTransitionPanel(id) {
-									
-									@Override
-									protected void onSaved(AjaxRequestTarget target) {
-										markAccepted(target, true);
-										close();
-									}
-									
-									@Override
-									protected void onCancelled(AjaxRequestTarget target) {
-										markAccepted(target, false);
-										close();
-									}
-									
-									@Override
-									protected Issue getIssue() {
-										return getIssueManager().load(issueId);
-									}
-
-									@Override
-									protected TransitionSpec getTransition() {
-										return transitionRef.get();
-									}
-									
-								};
+						boolean hasPromptFields = false;
+						PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
+						for (String promptField : trigger.getPromptFields()) {
+							FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
+							if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
+								Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+								Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
+								if (FieldUtils.isFieldVisible(new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
+									hasPromptFields = true;
+									break;
+								}
 							}
-							
-						};
-					} else {
-						getIssueChangeManager().changeState(issue, getColumn(), 
-								new HashMap<>(), transitionRef.get().getRemoveFields(), null);
-						notifyIssueChange(target, issue);
-						markAccepted(target, true);
-					}
-				} else {
-					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
-					if (fieldSpec == null)
-						throw new ExplicitException("Undefined custom field: " + fieldName);
-					
-					if (!SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName()))
-						throw new UnauthorizedException("Permission denied");
-					
-					Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(), true);
-					BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-					beanDescriptor.getProperty(fieldName).setPropertyValue(fieldBean, getColumn());
-					
-					Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
-					boolean hasVisibleEditableDependents = dependentFields.stream()
-							.anyMatch(it->SecurityUtils.canEditIssueField(issue.getProject(), it) 
-									&& FieldUtils.isFieldVisible(beanDescriptor, fieldBean, it));
-					
-					Map<String, Object> fieldValues = new HashMap<>();
-					fieldValues.put(fieldName, getColumn());
-					
-					if (hasVisibleEditableDependents) {
-						Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
-								issue.getProject(), fieldBean.getClass(), dependentFields);
-						class DependentFieldsEditor extends BeanEditModalPanel<Serializable> 
-								implements ProjectAware, InputContext {
-
-							public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
-									Collection<String> propertyNames, boolean exclude, String title) {
-								super(handler, bean, propertyNames, exclude, title);
-							}
-
-							@Override
-							public Project getProject() {
-								return BoardColumnPanel.this.getProject();
-							}
-
-							@Override
-							public List<String> getInputNames() {
-								throw new UnsupportedOperationException();
-							}
-
-							@Override
-							public InputSpec getInputSpec(String inputName) {
-								return getIssueSetting().getFieldSpec(inputName);
-							}
-
-							@Override
-							protected boolean isDirtyAware() {
-								return false;
-							}
-
-							@Override
-							protected void onSave(AjaxRequestTarget target, Serializable bean) {
-								fieldValues.putAll(FieldUtils.getFieldValues(
-										FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
-										bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
-								close();
-								Issue issue = getIssueManager().load(issueId);
-								getIssueChangeManager().changeFields(issue, fieldValues);
-								notifyIssueChange(target, issue);
-								markAccepted(target, true);
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								markAccepted(target, false);
-							}
-							
 						}
-						new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
+						if (hasPromptFields) {
+							new ModalPanel(target) {
+
+								@Override
+								protected Component newContent(String id) {
+									return new StateTransitionPanel(id) {
+
+										@Override
+										protected void onSaved(AjaxRequestTarget target) {
+											cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+											close();
+										}
+
+										@Override
+										protected void onCancelled(AjaxRequestTarget target) {
+											cardListPanel.onCardDropped(target, issueId, cardIndex, false);
+											close();
+										}
+
+										@Override
+										protected Issue getIssue() {
+											return getIssueManager().load(issueId);
+										}
+
+										@Override
+										protected TransitionSpec getTransition() {
+											return transitionRef.get();
+										}
+
+									};
+								}
+
+							};
+						} else {
+							getIssueChangeManager().changeState(issue, getColumn(),
+									new HashMap<>(), transitionRef.get().getRemoveFields(), null);
+							cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+						}
 					} else {
-						getIssueChangeManager().changeFields(issue, fieldValues);
-						notifyIssueChange(target, issue);
-						markAccepted(target, true);
+						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+						if (fieldSpec == null)
+							throw new ExplicitException("Undefined custom field: " + fieldName);
+
+						Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(), true);
+						BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+						beanDescriptor.getProperty(fieldName).setPropertyValue(fieldBean, getColumn());
+
+						Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
+						boolean hasVisibleEditableDependents = dependentFields.stream()
+								.anyMatch(it -> SecurityUtils.canEditIssueField(issue.getProject(), it)
+										&& FieldUtils.isFieldVisible(beanDescriptor, fieldBean, it));
+
+						Map<String, Object> fieldValues = new HashMap<>();
+						fieldValues.put(fieldName, getColumn());
+
+						if (hasVisibleEditableDependents) {
+							Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
+									issue.getProject(), fieldBean.getClass(), dependentFields);
+							class DependentFieldsEditor extends BeanEditModalPanel<Serializable>
+									implements ProjectAware, InputContext {
+
+								public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
+															 Collection<String> propertyNames, boolean exclude, String title) {
+									super(handler, bean, propertyNames, exclude, title);
+								}
+
+								@Override
+								public Project getProject() {
+									return BoardColumnPanel.this.getProject();
+								}
+
+								@Override
+								public List<String> getInputNames() {
+									throw new UnsupportedOperationException();
+								}
+
+								@Override
+								public InputSpec getInputSpec(String inputName) {
+									return getIssueSetting().getFieldSpec(inputName);
+								}
+
+								@Override
+								protected boolean isDirtyAware() {
+									return false;
+								}
+
+								@Override
+								protected void onSave(AjaxRequestTarget target, Serializable bean) {
+									fieldValues.putAll(FieldUtils.getFieldValues(
+											FieldUtils.newBeanComponentContext(beanDescriptor, bean),
+											bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
+									close();
+									Issue issue = getIssueManager().load(issueId);
+									getIssueChangeManager().changeFields(issue, fieldValues);
+									cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+								}
+
+								@Override
+								protected void onCancel(AjaxRequestTarget target) {
+									cardListPanel.onCardDropped(target, issueId, cardIndex, false);
+								}
+
+							}
+							new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
+						} else {
+							getIssueChangeManager().changeFields(issue, fieldValues);
+							cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+						}
 					}
 				}
 			}
@@ -510,38 +488,18 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		
 		setOutputMarkupId(true);
 	}
-	
-	private IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
-	}
-	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
-	}
-	
+
 	@Override
-	public Object getInputValue(String name) {
-		return null;
+	protected CardListPanel getCardListPanel() {
+		return cardListPanel;
 	}
 
-	private Project getProject() {
-		return getProjectScope().getProject();
-	}
-	
-	protected abstract ProjectScope getProjectScope();
-
-	protected abstract BoardSpec getBoard();
-
-	@Nullable
-	protected abstract Milestone getMilestone();
-	
 	@Nullable
 	protected abstract String getColumn();
 	
+	protected abstract BoardSpec getBoard();
+
 	@Nullable
 	protected abstract IssueQuery getBoardQuery();
-
-	private void notifyIssueChange(AjaxRequestTarget target, Issue issue) {
-		((BasePage)getPage()).notifyObservablesChange(target, issue.getChangeObservables(true));
-	}
+	
 }
