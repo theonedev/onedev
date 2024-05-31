@@ -401,6 +401,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public EntityReference getReference() {
 		return new IssueReference(getProject(), getNumber());
 	}
+
+	/*
+	 * Do not remove this method. Used in email notification templates
+	 * @return
+	 */
+	public String getFQN() {
+		return getReference().toString();
+	}
 	
 	public long getNumber() {
 		return number;

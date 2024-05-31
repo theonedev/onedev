@@ -497,6 +497,10 @@ public class Build extends ProjectBelonging
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
+	public String getFQN() {
+		return getReference().toString();
+	}
+	
 	public EntityReference getReference() {
 		return new BuildReference(getProject(), getNumber());
 	}

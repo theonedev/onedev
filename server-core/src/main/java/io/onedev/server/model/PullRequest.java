@@ -839,6 +839,14 @@ public class PullRequest extends ProjectBelonging
 		}
 		return missingCommits;
 	}
+
+	/*
+	 * Do not remove this method. Used in email notification templates
+	 * @return
+	 */
+	public String getFQN() {
+		return getReference().toString();
+	}
 	
 	private GitService getGitService() {
 		return OneDev.getInstance(GitService.class);
