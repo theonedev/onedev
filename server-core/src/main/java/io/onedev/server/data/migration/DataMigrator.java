@@ -6411,5 +6411,18 @@ public class DataMigrator {
 		}
 		accessTokensDom.writeToFile(accessTokensFile, true);
 	}
-	
+
+	private void migrate165(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Agents.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var cpusElement = element.element("cpus");			
+					if (cpusElement != null) 
+						cpusElement.setName("cpuCount");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }
