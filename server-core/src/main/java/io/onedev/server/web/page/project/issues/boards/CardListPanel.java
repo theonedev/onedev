@@ -6,17 +6,20 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.util.Cursor;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.util.visit.IVisitor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.lang.Long.parseLong;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 @SuppressWarnings("serial")
@@ -45,36 +49,10 @@ abstract class CardListPanel extends Panel {
 		add(new FencedFeedbackPanel("feedback", this));
 		
 		cardsView = new RepeatingView("cards");
-		int index = 0;
 		try {
 			List<Issue> issues = queryIssues(0, WebConstants.PAGE_SIZE);
-			for (Issue issue: issues) {
-				int cardOffset = index;
-				var issueId = issue.getId();
-				cardsView.add(new BoardCardPanel(cardsView.newChildId(), issueId) {
-	
-					@Override
-					protected Cursor getCursor() {
-						IssueQuery query = getQuery();
-						if (query != null)
-							return new Cursor(query.toString(), getCardCount(), cardOffset, getProjectScope());
-						else
-							return null;
-					}
-	
-					@Override
-					protected Project getProject() {
-						return CardListPanel.this.getProject();
-					}
-
-					@Override
-					protected void onDeleteIssue(AjaxRequestTarget target) {
-						removeCard(target, issueId);
-					}
-
-				});
-				index++;
-			}
+			for (Issue issue: issues) 
+				cardsView.add(newCard(issue.getId()));
 		} catch (ExplicitException e) {
 			error(e.getMessage());
 		}
@@ -89,38 +67,13 @@ abstract class CardListPanel extends Panel {
 
 			@Override
 			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
-				int index = offset;
 				for (Issue issue: queryIssues(offset, count)) {
-					int cardOffset = index;
-					var issueId = issue.getId();
-					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), issueId) {
-
-						@Override
-						protected Cursor getCursor() {
-							IssueQuery query = getQuery();
-							if (query != null)
-								return new Cursor(query.toString(), getCardCount(), cardOffset, getProjectScope());
-							else
-								return null;
-						}
-
-						@Override
-						protected Project getProject() {
-							return CardListPanel.this.getProject();
-						}
-
-						@Override
-						protected void onDeleteIssue(AjaxRequestTarget target) {
-							removeCard(target, issueId);
-						}
-
-					};
+					var card = newCard(issue.getId());
 					cardsView.add(card);
-					String script = String.format("$('#%s').append('<div id=\"%s\"></div>');", 
+					String script = format("$('#%s').append('<div id=\"%s\"></div>');", 
 							getMarkupId(), card.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(card);
-					index++;
 				}
 			}
 			
@@ -130,30 +83,33 @@ abstract class CardListPanel extends Panel {
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				Project.push(getProject());
-				try {
-					for (var observable : changedObservables) {
-						var issueId = parseLong(substringAfterLast(observable, ":"));
-						var issue = getIssueManager().load(issueId);
-						if (getQuery() == null || getQuery().matches(issue)) {
-							boolean found = false;
-							for (var card : cardsView) {
-								if (((BoardCardPanel) card).getIssueId().equals(issueId)) {
+				if (getQuery() != null) {
+					Project.push(getProject());
+					try {
+						for (var observable : changedObservables) {
+							var issueId = parseLong(substringAfterLast(observable, ":"));
+							Component card = findCard(issueId);
+							if (getQuery().matches(getIssueManager().load(issueId))) {
+								if (card != null) 
 									handler.add(card);
-									found = true;
-									break;
+								else 
+									behavior.refresh(handler);
+							} else {
+								if (card != null) {
+									cardsView.remove(card);
+									behavior.check(handler);
+									handler.appendJavaScript(format("" +
+											"$('#%s').remove();" +
+											"onedev.server.issueBoards.changeCardCount('%s', -1);", 
+											card.getMarkupId(), getMarkupId()));
 								}
 							}
-							if (!found) {
-								behavior.refresh(handler);
-								onUpdate(handler);
-							}
-						} else {
-							removeCard(handler, issueId);
+							if (card == null)
+								updateCardCount(handler);
 						}
+					} finally {
+						Project.pop();
 					}
-				} finally {
-					Project.pop();
 				}
 			}
 			
@@ -169,6 +125,34 @@ abstract class CardListPanel extends Panel {
 			
 		});
 		
+	}
+	
+	private BoardCardPanel newCard(Long issueId) {
+		return new BoardCardPanel(String.valueOf(issueId), issueId) {
+
+			@Override
+			protected Cursor getCursor() {
+				IssueQuery query = getQuery();
+				if (query != null) {
+					for (var i = 0; i < cardsView.size(); i++) {
+						if (cardsView.get(i) == this)
+							return new Cursor(query.toString(), getCardCount(), i, getProjectScope());
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected Project getProject() {
+				return CardListPanel.this.getProject();
+			}
+
+			@Override
+			protected void onDeleteIssue(AjaxRequestTarget target) {
+				onCardRemoved(target, issueId);
+			}
+
+		};
 	}
 	
 	private ProjectManager getProjectManager() {
@@ -198,17 +182,95 @@ abstract class CardListPanel extends Panel {
 
 	protected abstract int getCardCount();
 	
-	protected abstract void onUpdate(IPartialPageRequestHandler handler);
+	protected abstract void updateCardCount(IPartialPageRequestHandler handler);
 	
-	private void removeCard(IPartialPageRequestHandler handler, Long issueId) {
+	private void onCardRemoved(IPartialPageRequestHandler handler, Long issueId) {
 		for (var card: cardsView) {
 			if (((BoardCardPanel)card).getIssueId().equals(issueId)) {
 				cardsView.remove(card);
-				handler.appendJavaScript(String.format("$('#%s').remove();", card.getMarkupId()));
+				handler.appendJavaScript(format("$('#%s').remove();", card.getMarkupId()));
 				behavior.check(handler);
-				onUpdate(handler);
 				break;
 			}
 		}
+		handler.appendJavaScript(format("onedev.server.issueBoards.changeCardCount('%s', -1);", getMarkupId()));
+	}
+
+	void onCardAdded(AjaxRequestTarget target, Long issueId) {
+		var card = newCard(issueId);		
+		cardsView.add(card);
+		target.add(card);
+		var script = format("" +
+				"$(\"<div id='%s'></div>\").insertAfter($('#%s').children().eq(0));" +
+				"onedev.server.issueBoards.changeCardCount('%s', 1);", 
+				card.getMarkupId(), getMarkupId(), getMarkupId());
+		target.prependJavaScript(script);		
+	}
+
+	@Nullable
+	BoardCardPanel findCard(@Nullable Long issueId) {
+		return visitChildren(BoardCardPanel.class, (IVisitor<BoardCardPanel, BoardCardPanel>) (object, visit) -> {
+			if (issueId == null || issueId.equals(object.getIssueId()))
+				visit.stop(object);
+		});
+	}
+	
+	void onCardDropped(AjaxRequestTarget target, Long issueId, int cardIndex, boolean accepted) {
+		findParent(RepeatingView.class).visitChildren(CardListPanel.class, (IVisitor<CardListPanel, Void>) (cardListPanel, visit) -> {
+			for (int i=0; i<cardListPanel.cardsView.size(); i++) {
+				var card = (BoardCardPanel) cardListPanel.cardsView.get(i);
+				if (card.getIssueId().equals(issueId)) {
+					if (accepted) {
+						if (cardListPanel == CardListPanel.this) {
+							if (i != cardIndex) {
+								moveCard(i, cardIndex);
+								updateCardPositions(cardIndex);
+							}
+						} else {
+							cardListPanel.cardsView.remove(card);
+							cardListPanel.behavior.check(target);
+							cardsView.add(card);
+							moveCard(cardsView.size() - 1, cardIndex);
+							updateCardPositions(cardIndex);
+						}
+						target.add(card);
+					}
+					target.appendJavaScript(format(
+							"onedev.server.issueBoards.onCardDropped('%s', %d, '%s', %d, %b);", 
+							cardListPanel.getMarkupId(), i, 
+							CardListPanel.this.getMarkupId(), cardIndex, 
+							accepted));
+					visit.stop();
+				}
+			}
+		});
+	}
+	
+	private void moveCard(int fromIndex, int toIndex) {
+		if (fromIndex < toIndex) {
+			for (int i=0; i<toIndex-fromIndex; i++)
+				cardsView.swap(fromIndex+i, fromIndex+i+1);
+		} else {
+			for (int i=0; i<fromIndex-toIndex; i++)
+				cardsView.swap(fromIndex-i, fromIndex-i-1);
+		}
+	}
+	
+	private Issue getIssue(int cardIndex) {
+		return getIssueManager().load(((BoardCardPanel) cardsView.get(cardIndex)).getIssueId());
+	}
+	
+	private void updateCardPositions(int index) {
+		int basePosition;
+		int baseIndex;
+		if (index < cardsView.size() - 1) 
+			baseIndex = index + 1;
+		else 
+			baseIndex = index;
+		basePosition = getIssue(baseIndex).getBoardPosition();
+		OneDev.getInstance(TransactionManager.class).run(() -> {
+			for (var i=0; i<baseIndex; i++)
+				getIssue(i).setBoardPosition(basePosition-baseIndex+i);
+		});
 	}
 }

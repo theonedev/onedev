@@ -13,7 +13,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -37,35 +36,23 @@ public abstract class IssueTitlePanel extends Panel {
 		
 		var label = "(" + issue.getReference().toString(getCurrentProject()) + ")";
 		WebMarkupContainer numberLink;
-		if (getCursor() != null) {
-			add(numberLink = new ActionablePageLink("number", 
-					IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+		add(numberLink = new ActionablePageLink("number", 
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
 
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(label);
-				}
+			@Override
+			public IModel<?> getBody() {
+				return Model.of(label);
+			}
 
-				@Override
-				protected void doBeforeNav(AjaxRequestTarget target) {
-					WebSession.get().setIssueCursor(getCursor());
-					String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-							getPage().getClass(), getPage().getPageParameters()).toString();
-					WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
-				}
-				
-			});
-		} else {
-			add(numberLink = new BookmarkablePageLink<Void>("number", 
-					IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
-				
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(label);
-				}
-				
-			});
-		}
+			@Override
+			protected void doBeforeNav(AjaxRequestTarget target) {
+				WebSession.get().setIssueCursor(getCursor());
+				String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+						getPage().getClass(), getPage().getPageParameters()).toString();
+				WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
+			}
+			
+		});
 		
 		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 				IssueActivitiesPage.paramsOf(issue)).toString();
@@ -80,14 +67,11 @@ public abstract class IssueTitlePanel extends Panel {
 				String script = String.format(""
 						+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
 						+ "  if (!e.ctrlKey && !e.metaKey) {"
-						+ "    if (%b)\n"
 						+ "      $('#%s').click();\n"
-						+ "    else\n"
-						+ "      window.location.href=$(this).attr('href');"
 						+ "    return false;\n"
 						+ "  }\n"
 						+ "});", 
-						getMarkupId(), getCursor()!=null, numberLink.getMarkupId());
+						getMarkupId(), numberLink.getMarkupId());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			

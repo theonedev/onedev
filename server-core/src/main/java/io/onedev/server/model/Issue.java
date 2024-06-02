@@ -60,7 +60,7 @@ import static java.util.Comparator.comparingInt;
 @Table(
 		indexes={
 				@Index(columnList="o_project_id"), @Index(columnList=PROP_STATE), 
-				@Index(columnList=PROP_UUID),
+				@Index(columnList=PROP_UUID), @Index(columnList = PROP_BOARD_POSITION),
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
@@ -97,10 +97,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String PROP_DESCRIPTION = "description";
 	
 	public static final String NAME_COMMENT = "Comment";
-	
-	public static final String PROP_COMMENTS = "comments";
-	
-	public static final String PROP_CHANGES = "changes";
 	
 	public static final String NAME_SUBMITTER = "Submitter";
 	
@@ -149,6 +145,10 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String NAME_PROGRESS = "Progress";
 	
 	public static final String PROP_PROGRESS = "progress";
+
+	public static final String NAME_BOARD_POSITION = "Board Position";
+
+	public static final String PROP_BOARD_POSITION = "boardPosition";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
@@ -183,6 +183,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		ORDER_FIELDS.put(NAME_ESTIMATED_TIME, new SortField<>(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
 		ORDER_FIELDS.put(NAME_SPENT_TIME, new SortField<>(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
 		ORDER_FIELDS.put(NAME_PROGRESS, new SortField<>(PROP_PROGRESS, comparingInt(Issue::getProgress)));
+		ORDER_FIELDS.put(NAME_BOARD_POSITION, new SortField<>(PROP_BOARD_POSITION, comparingInt(Issue::getBoardPosition)));
 	}
 	
 	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {
@@ -260,6 +261,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private boolean confidential;
 	
 	private Date pinDate;
+	
+	private int boardPosition;
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
@@ -596,6 +599,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public int getProgress() {
 		return progress;
+	}
+
+	public int getBoardPosition() {
+		return boardPosition;
+	}
+
+	public void setBoardPosition(int boardPosition) {
+		this.boardPosition = boardPosition;
 	}
 
 	public Collection<IssueField> getFields() {

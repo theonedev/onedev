@@ -4,14 +4,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.field.spec.DateField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -31,7 +26,6 @@ import io.onedev.server.web.component.milestone.MilestoneDateLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
@@ -66,10 +60,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
@@ -111,13 +106,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		
 	};
 	
-	private final IModel<IssueQuery> backlogQueryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> backlogQueryModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected IssueQuery load() {
 			return parse(true, getBoard().getBacklogBaseQuery(), backlogQueryString);
 		}
-		
+
 	};
 	
 	private IFeedbackMessageFilter newFeedbackMessageFilter(boolean backlog) {
@@ -153,7 +148,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query"));
 			return null;
 		}
-		return IssueQuery.merge(baseQuery, query);
+		query = IssueQuery.merge(baseQuery, query);
+		query.getSorts().clear();
+		var sort = new EntitySort();
+		sort.setDirection(EntitySort.Direction.ASCENDING);
+		sort.setField(NAME_BOARD_POSITION);
+		query.getSorts().add(sort);
+		return query;
 	}
 	
 	public IssueBoardsPage(PageParameters params) {
@@ -687,7 +688,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			IssueQueryParseOption option = new IssueQueryParseOption()
-					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true);
+					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true).withOrder(false);
 			queryInput.add(new IssueQueryBehavior(projectModel, option, true));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
@@ -700,77 +701,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter/order backlog issues. Hit space to show syntax helper"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues. Hit space to show syntax helper"));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter/order issues. Hit space to show syntax helper"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter issues. Hit space to show syntax helper"));
 				
 			form.add(queryInput);
-
-			form.add(new DropdownLink("orderBy") {
-
-				@Override
-				protected Component newContent(String id, FloatingPanel dropdown) {
-					List<String> orderFields = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
-					orderFields.remove(Issue.NAME_PROJECT);
-					for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-						if (field instanceof IntegerField || field instanceof ChoiceField || field instanceof DateField) 
-							orderFields.add(field.getName());
-					}
-					
-					return new OrderEditPanel<Issue>(id, orderFields, new IModel<List<EntitySort>> () {
-
-						@Override
-						public void detach() {
-						}
-
-						@Override
-						public List<EntitySort> getObject() {
-							IssueQuery query;
-							
-							if (backlog) 
-								query = parse(true, null, backlogQueryString);
-							else 
-								query = parse(false, null, queryString);
-							
-							contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
-							if (query != null) 
-								return query.getSorts();
-							else
-								return new ArrayList<>();
-						}
-
-						@Override
-						public void setObject(List<EntitySort> object) {
-							IssueQuery query;
-							
-							if (backlog) 
-								query = parse(true, null, backlogQueryString);
-							else 
-								query = parse(false, null, queryString);
-							
-							contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
-							
-							if (query == null)
-								query = new IssueQuery();
-							query.getSorts().clear();
-							query.getSorts().addAll(object);
-							
-							if (backlog) {
-								backlogQueryString = query.toString();
-							} else {
-								queryString = query.toString();
-							}
-							
-							AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
-							target.add(queryInput);
-							
-							doQuery(target);
-						}
-						
-					});
-				}
-				
-			});	
 			
 			form.add(new AjaxButton("submit") {
 
@@ -838,7 +773,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					protected IssueQuery getBoardQuery() {
 						return queryModel.getObject();
 					}
-
+					
 				});
 			}
 			body.add(columnsView);
