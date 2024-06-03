@@ -38,9 +38,12 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	private final ProjectManager projectManager;
 	
+	private final Set<GitPreReceiveChecker> preReceiveCheckers;
+	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager, Set<GitPreReceiveChecker> preReceiveCheckers) {
 		this.projectManager = projectManager;
+		this.preReceiveCheckers = preReceiveCheckers;
 	}
 	
 	private void error(Output output, @Nullable String refName, List<String> messages) {
@@ -162,6 +165,13 @@ public class GitPreReceiveCallback extends HttpServlet {
 							&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
 						errorMessages.add("Build required for your change. Please submit pull request instead");
 					}
+					if (errorMessages.isEmpty()) {
+						for (var preReceiveChecker : preReceiveCheckers) {
+							var errorMessage = preReceiveChecker.check(user, refName, oldObjectId, newObjectId);
+							if (errorMessage != null)
+								errorMessages.add(errorMessage);
+						}
+					}
 					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 						try {
 							projectManager.onDeleteBranch(project, branchName);
@@ -192,6 +202,13 @@ public class GitPreReceiveCallback extends HttpServlet {
 							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
 						errorMessages.add("Can not update this tag as tag protection setting requires "
 								+ "valid tag signature");
+					}
+					if (errorMessages.isEmpty()) {
+						for (var preReceiveChecker : preReceiveCheckers) {
+							var errorMessage = preReceiveChecker.check(user, refName, oldObjectId, newObjectId);
+							if (errorMessage != null)
+								errorMessages.add(errorMessage);
+						}
 					}
 					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 						try {

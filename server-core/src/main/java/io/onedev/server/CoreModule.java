@@ -39,6 +39,7 @@ import io.onedev.server.exception.handler.ExceptionHandler;
 import io.onedev.server.git.*;
 import io.onedev.server.git.hook.GitPostReceiveCallback;
 import io.onedev.server.git.hook.GitPreReceiveCallback;
+import io.onedev.server.git.hook.GitPreReceiveChecker;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.service.DefaultGitService;
 import io.onedev.server.git.service.GitService;
@@ -328,7 +329,8 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
-		
+		contribute(GitPreReceiveChecker.class, (submitter, refName, oldObjectId, newObjectId) -> null);
+
 		bind(PackFilter.class);
 	}
 	

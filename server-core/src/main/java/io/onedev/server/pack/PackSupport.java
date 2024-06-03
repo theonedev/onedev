@@ -1,11 +1,13 @@
 package io.onedev.server.pack;
 
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import org.apache.wicket.Component;
 
 import java.io.Serializable;
 
+@ExtensionPoint
 public interface PackSupport extends Serializable {
 	
 	int getOrder();

@@ -31,6 +31,7 @@ public class ProductModule extends AbstractPluginModule {
 				reserved.add(file.getName());
 			return reserved;
 		});
+		
 	}
 
 }

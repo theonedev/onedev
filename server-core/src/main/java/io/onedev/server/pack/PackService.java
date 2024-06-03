@@ -1,10 +1,13 @@
 package io.onedev.server.pack;
 
+import io.onedev.commons.loader.ExtensionPoint;
+
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@ExtensionPoint
 public interface PackService {
 
 	String getServiceId();
