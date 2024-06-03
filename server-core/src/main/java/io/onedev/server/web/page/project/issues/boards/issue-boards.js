@@ -145,7 +145,7 @@ onedev.server.issueBoards = {
 								$addAnimationHelper.insertBefore($card);
 								addAnimationHelper = $addAnimationHelper[0];
 
-								var animationDuration = 200;
+								var animationDuration = 100;
 
 								$deleteAnimationHelper.animate({
 									height: 0,
