@@ -329,7 +329,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
-		contribute(GitPreReceiveChecker.class, (submitter, refName, oldObjectId, newObjectId) -> null);
+		contribute(GitPreReceiveChecker.class, (project, submitter, refName, oldObjectId, newObjectId) -> null);
 
 		bind(PackFilter.class);
 	}

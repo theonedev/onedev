@@ -167,7 +167,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 					}
 					if (errorMessages.isEmpty()) {
 						for (var preReceiveChecker : preReceiveCheckers) {
-							var errorMessage = preReceiveChecker.check(user, refName, oldObjectId, newObjectId);
+							var errorMessage = preReceiveChecker.check(project, user, refName, oldObjectId, newObjectId);
 							if (errorMessage != null)
 								errorMessages.add(errorMessage);
 						}
@@ -205,7 +205,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 					}
 					if (errorMessages.isEmpty()) {
 						for (var preReceiveChecker : preReceiveCheckers) {
-							var errorMessage = preReceiveChecker.check(user, refName, oldObjectId, newObjectId);
+							var errorMessage = preReceiveChecker.check(project, user, refName, oldObjectId, newObjectId);
 							if (errorMessage != null)
 								errorMessages.add(errorMessage);
 						}
