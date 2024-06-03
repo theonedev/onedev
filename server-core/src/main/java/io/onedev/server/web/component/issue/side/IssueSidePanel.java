@@ -297,8 +297,7 @@ public abstract class IssueSidePanel extends Panel {
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
 				for (Issue linkedIssue: getIssue().findLinkedIssues(spec, opposite)) {
 					LinkDeleteListener deleteListener;
-					if (canEditIssueLink 
-							&& (linkedIssue.getProject().equals(getProject()) || SecurityUtils.canEditIssueLink(linkedIssue.getProject(), spec))) { 
+					if (canEditIssueLink) { 
 						deleteListener = new LinkDeleteListener() {
 	
 							@Override
@@ -342,9 +341,6 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Can not link to self");
 						} else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) { 
 							getSession().warn("Issue already added");
-						} else if (!selection.getProject().equals(getProject()) 
-								&& !SecurityUtils.canEditIssueLink(selection.getProject(), spec)) {
-							getSession().warn("Not authorized to link issue in project '" + selection.getProject() + "'");
 						} else {
 							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
 							notifyIssueChange(target, getIssue());
@@ -412,11 +408,7 @@ public abstract class IssueSidePanel extends Panel {
 				
 				Long prevLinkedIssueId = bean.getIssueId();
 				
-				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.getSpec()) 
-						&& (prevLinkedIssue == null 
-								|| prevLinkedIssue.getProject().equals(getProject()) 
-								|| SecurityUtils.canEditIssueLink(prevLinkedIssue.getProject(), side.getSpec()));
-				
+				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.getSpec());
 				fragment.add(new InplacePropertyEditLink("edit", new AlignPlacement(100, 0, 100, 0)) {
 
 					@Override
@@ -453,10 +445,6 @@ public abstract class IssueSidePanel extends Panel {
 							linkedIssue = getIssueManager().load(singleLinkBean.getIssueId());
 						if (getIssue().equals(linkedIssue)) {
 							getSession().warn("Can not link to self");
-							singleLinkBean.setIssueId(prevLinkedIssueId);
-						} else if (linkedIssue != null && !linkedIssue.getProject().equals(getProject()) 
-								&& !SecurityUtils.canEditIssueLink(linkedIssue.getProject(), side.getSpec())) {
-							getSession().warn("Not authorized to link issue in project '" + linkedIssue.getProject() + "'");
 							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else {
 							Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());

@@ -151,6 +151,16 @@ public class IssueResource {
 			throw new UnauthorizedException();
     	return issue.getWatches();
     }
+
+	@Api(order=650)
+	@Path("/{issueId}/links")
+	@GET
+	public Collection<IssueLink> getLinks(@PathParam("issueId") Long issueId) {
+		Issue issue = issueManager.load(issueId);
+		if (!SecurityUtils.canAccessIssue(issue))
+			throw new UnauthorizedException();
+		return issue.getLinks();
+	}
 	
 	@Api(order=700)
 	@Path("/{issueId}/pulls")
