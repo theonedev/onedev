@@ -3,10 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
-import io.onedev.server.entitymanager.PackBlobReferenceManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
 import io.onedev.server.model.*;
@@ -45,18 +42,25 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	
 	private final PackBlobReferenceManager blobReferenceManager;
 	
+	private final PackBlobManager blobManager;
+	
 	private final ProjectManager projectManager;
+	
+	private final PackLabelManager labelManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public DefaultPackManager(Dao dao, PackBlobAuthorizationManager blobAuthorizationManager,
-							  PackBlobReferenceManager blobReferenceManager, 
-							  ProjectManager projectManager, ListenerRegistry listenerRegistry) {
+							  PackBlobReferenceManager blobReferenceManager,
+							  PackBlobManager blobManager, ProjectManager projectManager, 
+							  PackLabelManager labelManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.blobAuthorizationManager = blobAuthorizationManager;
 		this.blobReferenceManager = blobReferenceManager;
+		this.blobManager = blobManager;
 		this.projectManager = projectManager;
+		this.labelManager = labelManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -91,29 +95,17 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	
 	@Sessional
 	@Override
-	public List<Pack> query(Project project, EntityQuery<Pack> packQuery, boolean loadBlobs, 
-							int firstResult, int maxResults) {
+	public List<Pack> query(Project project, EntityQuery<Pack> packQuery, 
+							boolean loadLabelsAndBlobs, int firstResult, int maxResults) {
 		CriteriaQuery<Pack> criteriaQuery = buildCriteriaQuery(project, getSession(), packQuery);
 		Query<Pack> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
-		List<Pack> packs = query.getResultList();
-
-		var builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Object[]> referenceAndBlobQuery = builder.createQuery(Object[].class);
-		Root<PackBlobReference> referenceRoot = referenceAndBlobQuery.from(PackBlobReference.class);
-		Join<PackBlob, PackBlob> blobJoin = referenceRoot.join(PackBlobReference.PROP_PACK_BLOB, JoinType.INNER);
-		referenceAndBlobQuery.multiselect(referenceRoot, blobJoin);
-		referenceAndBlobQuery.where(referenceRoot.get(PackBlobReference.PROP_PACK).in(packs));
+		var packs = query.getResultList();
 		
-		for (var pack: packs)
-			pack.setBlobReferences(new ArrayList<>());
-		
-		for (Object[] referenceAndBlob: getSession().createQuery(referenceAndBlobQuery).getResultList()) {
-			PackBlobReference reference = (PackBlobReference) referenceAndBlob[0];
-			PackBlob blob = (PackBlob) referenceAndBlob[1];
-			reference.setPackBlob(blob);
-			reference.getPack().getBlobReferences().add(reference);
+		if (!packs.isEmpty() && loadLabelsAndBlobs) {
+			labelManager.populateLabels(packs);
+			blobManager.populateBlobs(packs);
 		}
 		return packs;
 	}

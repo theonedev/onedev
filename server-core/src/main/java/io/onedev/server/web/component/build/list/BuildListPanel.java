@@ -924,13 +924,13 @@ public abstract class BuildListPanel extends Panel {
 			});
 		}
 		
-		dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
 				try {
-					return getBuildManager().query(getProject(), queryModel.getObject(), 
-							(int)first, (int)count).iterator();
+					return getBuildManager().query(getProject(), queryModel.getObject(),
+							true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Build>().iterator();
@@ -946,7 +946,7 @@ public abstract class BuildListPanel extends Panel {
 					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
-				} 
+				}
 				return 0;
 			}
 
@@ -959,10 +959,10 @@ public abstract class BuildListPanel extends Panel {
 					protected Build load() {
 						return getBuildManager().load(buildId);
 					}
-					
+
 				};
 			}
-			
+
 		};
 		
 		if (expectedCount != 0 && expectedCount != dataProvider.size())

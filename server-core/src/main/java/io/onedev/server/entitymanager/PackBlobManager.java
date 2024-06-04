@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager;
 
+import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
@@ -8,6 +9,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 
 public interface PackBlobManager extends EntityManager<PackBlob> {
 	
@@ -53,5 +55,7 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	void syncPacks(Long projectId, String activeServer);
 
 	File getPackBlobFile(Long projectId, String sha256Hash);
+
+    void populateBlobs(Collection<Pack> packs);
 	
 }

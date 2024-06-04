@@ -95,7 +95,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final TransactionManager transactionManager;
 	
-	private final SettingManager settingManager;
+	private final BuildLabelManager labelManager;
 	
 	private final ClusterManager clusterManager;
 	
@@ -115,7 +115,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 							   TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager, 
 							   ProjectManager projectManager, SessionManager sessionManager, 
-							   TransactionManager transactionManager, SettingManager settingManager, 
+							   TransactionManager transactionManager, BuildLabelManager labelManager, 
 							   ClusterManager clusterManager, StorageManager storageManager, 
 							   Set<BuildStorageSyncer> storageSyncers) {
 		super(dao);
@@ -125,7 +125,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
-		this.settingManager = settingManager;
+		this.labelManager = labelManager;
 		this.clusterManager = clusterManager;
 		this.storageManager = storageManager;
 		this.storageSyncers = storageSyncers;
@@ -508,12 +508,15 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Sessional
 	@Override
 	public List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, 
-			int firstResult, int maxResults) {
+			boolean loadLabels, int firstResult, int maxResults) {
 		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(project, getSession(), buildQuery);
 		Query<Build> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
-		return query.getResultList();
+		var builds = query.getResultList();
+		if (!builds.isEmpty() && loadLabels) 
+			labelManager.populateLabels(builds);
+		return builds;		
 	}
 
 	private void applyOrders(From<Build, Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 

@@ -29,7 +29,7 @@ public class ProjectParam extends ParamSegment {
 		else
 			query = new ProjectQuery(new PathCriteria("**/*" + matchWith + "*/**", ProjectQueryLexer.Is));
 		Map<String, String> suggestions = new LinkedHashMap<>();
-		for (Project project: projectManager.query(query, 0, count))
+		for (Project project: projectManager.query(query, false, 0, count))
 			suggestions.put(project.getPath(), String.valueOf(project.getPath()));
 		return suggestions;
 	}

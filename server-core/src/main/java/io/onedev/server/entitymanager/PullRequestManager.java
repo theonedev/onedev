@@ -54,7 +54,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void checkReviews(PullRequest request, boolean sourceUpdated);
 	
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			boolean loadReviewsAndBuilds, int firstResult, int maxResults);
+			boolean loadLabelsAndReviewsAndBuilds, int firstResult, int maxResults);
 	
 	int count(@Nullable Project targetProject, Criteria<PullRequest> requestCriteria);
 	

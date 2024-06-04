@@ -40,7 +40,7 @@ public class BuildParam extends ParamSegment {
 			}
 			query = new BuildQuery(criteria);
 		}
-		List<Build> builds = buildManager.query(project, query, 0, count);
+		List<Build> builds = buildManager.query(project, query, false, 0, count);
 		
 		for (Build build: builds) 
 			suggestions.put(build.getSummary(project), String.valueOf(build.getNumber()));

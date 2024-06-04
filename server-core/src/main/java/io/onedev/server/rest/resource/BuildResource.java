@@ -133,7 +133,7 @@ public class BuildResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return buildManager.query(null, parsedQuery, offset, count);
+    	return buildManager.query(null, parsedQuery, false, offset, count);
     }
 	
 	@Api(order=700)

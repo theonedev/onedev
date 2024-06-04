@@ -14,6 +14,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
 import io.onedev.server.model.Project;
@@ -35,12 +36,18 @@ import org.quartz.ScheduleBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
@@ -232,6 +239,27 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	public File getPackBlobFile(Long projectId, String sha256Hash) {
 		var packsDir = storageManager.initPacksDir(projectId);
 		return new File(packsDir, getPacksRelativeDirPath(sha256Hash));
+	}
+
+	@Sessional
+	@Override
+	public void populateBlobs(Collection<Pack> packs) {
+		var builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> referenceAndBlobQuery = builder.createQuery(Object[].class);
+		Root<PackBlobReference> referenceRoot = referenceAndBlobQuery.from(PackBlobReference.class);
+		Join<PackBlob, PackBlob> blobJoin = referenceRoot.join(PackBlobReference.PROP_PACK_BLOB, JoinType.INNER);
+		referenceAndBlobQuery.multiselect(referenceRoot, blobJoin);
+		referenceAndBlobQuery.where(referenceRoot.get(PackBlobReference.PROP_PACK).in(packs));
+
+		for (var pack : packs)
+			pack.setBlobReferences(new ArrayList<>());
+
+		for (Object[] referenceAndBlob : getSession().createQuery(referenceAndBlobQuery).getResultList()) {
+			PackBlobReference reference = (PackBlobReference) referenceAndBlob[0];
+			PackBlob blob = (PackBlob) referenceAndBlob[1];
+			reference.setPackBlob(blob);
+			reference.getPack().getBlobReferences().add(reference);
+		}
 	}
 
 	@Override

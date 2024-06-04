@@ -182,7 +182,7 @@ public class ProjectResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return projectManager.query(parsedQuery, offset, count);
+    	return projectManager.query(parsedQuery, false, offset, count);
     }
 	
 	@Api(order=750)

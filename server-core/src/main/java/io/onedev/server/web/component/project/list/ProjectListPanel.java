@@ -976,14 +976,14 @@ public class ProjectListPanel extends Panel {
 					.setVisible(canCreateProjects));
 		}
 		
-		dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
 				try {
 					ProjectQuery query = queryModel.getObject();
-					if (query != null) 
-						return getProjectManager().query(query, (int)first, (int)count).iterator();
+					if (query != null)
+						return getProjectManager().query(query, true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -994,7 +994,7 @@ public class ProjectListPanel extends Panel {
 			public long calcSize() {
 				try {
 					ProjectQuery query = queryModel.getObject();
-					if (query != null) 
+					if (query != null)
 						return getProjectManager().count(query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
@@ -1011,10 +1011,10 @@ public class ProjectListPanel extends Panel {
 					protected Project load() {
 						return getProjectManager().load(projectId);
 					}
-					
+
 				};
 			}
-			
+
 		};
 		
 		if (expectedCount != 0 && expectedCount != dataProvider.size())

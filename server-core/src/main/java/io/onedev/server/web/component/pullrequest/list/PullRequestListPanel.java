@@ -958,10 +958,8 @@ public abstract class PullRequestListPanel extends Panel {
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				try {
 					var query = queryModel.getObject();
-					if (query != null) {
-						return getPullRequestManager().query(getProject(), query,
-								true, (int) first, (int) count).iterator();
-					}
+					if (query != null) 
+						return getPullRequestManager().query(getProject(), query, true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}

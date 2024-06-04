@@ -177,6 +177,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final PackBlobManager packBlobManager;
 	
+	private final ProjectLabelManager labelManager;
+	
 	private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml", "sitemap.txt",
 			"favicon.ico", "favicon.png", "logo.png", "wicket", "projects");
 
@@ -201,7 +203,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 ProjectLastEventDateManager lastEventDateManager, PullRequestManager pullRequestManager,
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
 								 VisitInfoManager visitInfoManager, StorageManager storageManager,
-								 PackBlobManager packBlobManager, Set<ProjectNameReservation> nameReservations) {
+								 PackBlobManager packBlobManager, ProjectLabelManager labelManager, 
+								 Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -225,6 +228,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.visitInfoManager = visitInfoManager;
 		this.storageManager = storageManager;
 		this.packBlobManager = packBlobManager;
+		this.labelManager = labelManager;
 
 		for (ProjectNameReservation reservation : nameReservations)
 			reservedNames.addAll(reservation.getReserved());
@@ -975,12 +979,17 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Sessional
 	@Override
-	public List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults) {
+	public List<Project> query(EntityQuery<Project> query, boolean loadLabels, int firstResult, int maxResults) {
 		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), query);
 		Query<Project> projectQuery = getSession().createQuery(criteriaQuery);
 		projectQuery.setFirstResult(firstResult);
 		projectQuery.setMaxResults(maxResults);
-		return projectQuery.getResultList();
+		var projects = projectQuery.getResultList();
+
+		if (!projects.isEmpty() && loadLabels) 
+			labelManager.populateLabels(projects);
+		
+		return projects;
 	}
 
 	@Sessional

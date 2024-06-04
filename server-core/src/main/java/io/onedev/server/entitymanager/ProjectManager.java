@@ -68,7 +68,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Repository getRepository(Long projectId);
 	
-	List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults);
+	List<Project> query(EntityQuery<Project> query, boolean loadLabels, int firstResult, int maxResults);
 	
 	int count(Criteria<Project> criteria);
 

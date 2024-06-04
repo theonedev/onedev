@@ -405,7 +405,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				
 				String queryString = getProjectManager().getFavoriteQuery();
 				ProjectQuery query = ProjectQuery.parse(queryString);
-				for (Project project: getProjectManager().query(query, 0, WebConstants.PAGE_SIZE)) 
+				for (Project project: getProjectManager().query(query, false, 0, WebConstants.PAGE_SIZE)) 
 					projectsView.add(newItem(projectsView.newChildId(), project));
 				
 				fragment.add(projectsView);
@@ -414,7 +414,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					
 					@Override
 					protected void appendMore(AjaxRequestTarget target, int offset, int count) {
-						for (Project project: getProjectManager().query(query, offset, count)) {
+						for (Project project: getProjectManager().query(query, false, offset, count)) {
 							Component item = newItem(projectsView.newChildId(), project);
 							projectsView.add(item);
 							String script = String.format("$('#%s ul').append('<li id=\"%s\"></li>');", 

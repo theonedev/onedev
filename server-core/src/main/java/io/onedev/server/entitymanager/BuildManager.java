@@ -54,7 +54,8 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	List<Build> query(Project project, String fuzzyQuery, int count);
 
-	List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
+	List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, 
+					  boolean loadLabels, int firstResult, int maxResults);
 
 	int count(@Nullable Project project, Criteria<Build> buildCriteria);
 

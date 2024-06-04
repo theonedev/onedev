@@ -92,6 +92,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	private final BuildManager buildManager;
 	
+	private final PullRequestLabelManager labelManager;
+	
 	private final CommitInfoManager commitInfoManager;
 
 	private final PullRequestChangeManager changeManager;
@@ -109,10 +111,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager updateManager, 
 									 PullRequestReviewManager reviewManager, ListenerRegistry listenerRegistry, 
-									 PullRequestChangeManager changeManager, BuildManager buildManager, 
-									 TransactionManager transactionManager, ProjectManager projectManager, 
-									 CommitInfoManager commitInfoManager, ClusterManager clusterManager, 
-									 UserManager userManager, GitService gitService, 
+									 PullRequestChangeManager changeManager, BuildManager buildManager,
+									 PullRequestLabelManager labelManager, TransactionManager transactionManager, 
+									 ProjectManager projectManager, CommitInfoManager commitInfoManager, 
+									 ClusterManager clusterManager, UserManager userManager, GitService gitService, 
 									 PendingSuggestionApplyManager pendingSuggestionApplyManager, 
 									 PullRequestInfoManager pullRequestInfoManager) {
 		super(dao);
@@ -123,6 +125,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		this.listenerRegistry = listenerRegistry;
 		this.changeManager = changeManager;
 		this.buildManager = buildManager;
+		this.labelManager = labelManager;
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
 		this.pendingSuggestionApplyManager = pendingSuggestionApplyManager;
@@ -856,16 +859,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Sessional
 	@Override
 	public List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			boolean loadReviewsAndBuilds, int firstResult, int maxResults) {
+			boolean loadLabelsAndReviewsAndBuilds, int firstResult, int maxResults) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 
 		List<PullRequest> requests = query.getResultList();
-		if (!requests.isEmpty() && loadReviewsAndBuilds) {
+		if (!requests.isEmpty() && loadLabelsAndReviewsAndBuilds) {
 			reviewManager.populateReviews(requests);
 			buildManager.populateBuilds(requests);
+			labelManager.populateLabels(requests);
 		}
 		
 		return requests;

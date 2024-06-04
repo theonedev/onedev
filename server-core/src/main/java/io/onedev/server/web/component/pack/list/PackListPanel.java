@@ -458,8 +458,8 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public Iterator<? extends Pack> iterator(long first, long count) {
 				try {
-					return getPackManager().query(getProject(), queryModel.getObject(), true,
-							(int) first, (int) count).iterator();
+					return getPackManager().query(getProject(), queryModel.getObject(), 
+							true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Pack>().iterator();

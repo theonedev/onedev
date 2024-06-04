@@ -591,7 +591,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected List<Build> query(EntityQuery<Build> query, int offset, int count, ProjectScope projectScope) {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						return buildManager.query(projectScope!=null?projectScope.getProject():null, query, offset, count);
+						return buildManager.query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override
