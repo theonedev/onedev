@@ -81,15 +81,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.parse;
+import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
 	
+	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
+		@Override
+		protected List<LinkSpec> load() {
+			return getLinkSpecManager().queryAndSort();
+		}
+
+	};
+	
 	private boolean confidential;
 	
 	private Component watchesContainer;
+	
+	private boolean showAllLinks;
 	
 	public IssueSidePanel(String id) {
 		super(id);
@@ -151,7 +162,57 @@ public abstract class IssueSidePanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
+		add(new AjaxLink<Void>("showAllLinks") {
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						var hasVisibleLinks = false;
+						for (LinkSpec spec : linkSpecsModel.getObject()) {
+							if (canEditIssueLink(getProject(), spec) && spec.isShowAlways()
+									|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec))) {
+								hasVisibleLinks = true;
+								break;
+							}
+						}
+						if (hasVisibleLinks)
+							return "More Links";
+						else
+							return "Show Links";
+					}
+					
+				}));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showAllLinks = true;
+				target.add(IssueSidePanel.this);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				if (showAllLinks) {
+					setVisible(false);
+				} else {
+					var hasLinksToShow = false;
+					for (LinkSpec spec : linkSpecsModel.getObject()) {
+						if (canEditIssueLink(getProject(), spec) && !spec.isShowAlways()
+								&& getIssue().getLinks().stream().noneMatch(it -> it.getSpec().equals(spec))) {
+							hasLinksToShow = true;
+							break;
+						}
+					}
+					setVisible(hasLinksToShow);
+				}
+			}
+		});
+
 		add(new ChangeObserver() {
 			
 			@Override
@@ -162,6 +223,12 @@ public abstract class IssueSidePanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	protected void onDetach() {
+		linkSpecsModel.detach();
+		super.onDetach();
 	}
 
 	private Component newFieldsContainer() {
@@ -242,16 +309,14 @@ public abstract class IssueSidePanel extends Panel {
 	}
 	
 	private Component newLinksContainer() {
-		return new ListView<LinkSide>("links", new LoadableDetachableModel<List<LinkSide>>() {
+		return new ListView<LinkSide>("links", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<LinkSide> load() {
 				List<LinkSide> links = new ArrayList<>();
-				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).queryAndSort());
-				
-				for (LinkSpec spec: specs) {
-					if (SecurityUtils.canEditIssueLink(getProject(), spec) 
-							|| getIssue().getLinks().stream().anyMatch(it->it.getSpec().equals(spec))) {
+				for (LinkSpec spec : linkSpecsModel.getObject()) {
+					if (canEditIssueLink(getProject(), spec) && (spec.isShowAlways() || showAllLinks)
+							|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec))) {
 						if (spec.getOpposite() != null) {
 							IssueQuery query = spec.getOpposite().getParsedIssueQuery(getProject());
 							if (query.matches(getIssue()))
@@ -268,7 +333,7 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				return links;
 			}
-			
+
 		}) {
 
 			@Override
@@ -289,7 +354,7 @@ public abstract class IssueSidePanel extends Panel {
 				LinkSpec spec = side.getSpec();
 				boolean opposite = side.isOpposite();
 				
-				boolean canEditIssueLink = SecurityUtils.canEditIssueLink(getProject(), spec);
+				boolean canEditIssueLink = canEditIssueLink(getProject(), spec);
 				
 				String name = spec.getName(opposite);
 				fragment.add(new Label("name", name));
@@ -408,7 +473,7 @@ public abstract class IssueSidePanel extends Panel {
 				
 				Long prevLinkedIssueId = bean.getIssueId();
 				
-				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.getSpec());
+				boolean authorized = canEditIssueLink(getProject(), side.getSpec());
 				fragment.add(new InplacePropertyEditLink("edit", new AlignPlacement(100, 0, 100, 0)) {
 
 					@Override
@@ -807,6 +872,10 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
+	}
+	
+	private LinkSpecManager getLinkSpecManager() {
+		return OneDev.getInstance(LinkSpecManager.class);
 	}
 	
 	@Override

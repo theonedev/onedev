@@ -41,6 +41,9 @@
 		<div wicket:id="links" class="links">
 			<wicket:container wicket:id="content"></wicket:container>
 		</div>
+		<wicket:enclosure child="showAllLinks">
+		<div><a wicket:id="showAllLinks"><span wicket:id="label"></span> <wicket:svg href="arrow" class="rotate-90 icon icon-sm"/></a></div>
+		</wicket:enclosure>
 		<div wicket:id="votes" class="votes">
 			<div class="head">
 				Issue Votes (<span wicket:id="count"></span>) 

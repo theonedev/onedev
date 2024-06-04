@@ -31,8 +31,6 @@ public class LinkSpec extends AbstractEntity {
 
 	public static final String PROP_NAME = "name";
 	
-	public static final String PROP_OPPOSITE = "opposite";
-	
 	@Column(nullable=false, unique=true)
 	private String name;
 	
@@ -43,6 +41,8 @@ public class LinkSpec extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private LinkSpecOpposite opposite;
+	
+	private boolean showAlways;
 	
 	private int order;
 	
@@ -96,6 +96,15 @@ public class LinkSpec extends AbstractEntity {
 	
 	public String getName(boolean opposite) {
 		return opposite?getOpposite().getName():getName();
+	}
+
+	@Editable(order=200, description = "Whether or not to show this link always even if no issues are linked")
+	public boolean isShowAlways() {
+		return showAlways;
+	}
+
+	public void setShowAlways(boolean showAlways) {
+		this.showAlways = showAlways;
 	}
 
 	public int getOrder() {

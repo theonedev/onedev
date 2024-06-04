@@ -6435,6 +6435,11 @@ public class DataMigrator {
 					element.addElement("boardPosition").setText(String.valueOf(number*-1));
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("LinkSpecs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.addElement("showAlways").setText("false");
+				dom.writeToFile(file, false);
 			}
 		}
 	}
