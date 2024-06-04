@@ -37,6 +37,7 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -457,7 +458,7 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public Iterator<? extends Pack> iterator(long first, long count) {
 				try {
-					return getPackManager().query(getProject(), queryModel.getObject(),
+					return getPackManager().query(getProject(), queryModel.getObject(), true,
 							(int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
@@ -571,8 +572,22 @@ public abstract class PackListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
 				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getPublishDate())));
 			}
-		});		
-		
+		});
+
+		columns.add(new AbstractColumn<>(Model.of("Total Size")) {
+
+			@Override
+			public String getCssClass() {
+				return "size d-none d-lg-table-cell";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
+				cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(rowModel.getObject().getSize())));
+			}
+			
+		});
+
 		body.add(packsTable = new DefaultDataTable<>("packs", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 			@Override

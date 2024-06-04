@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Pack.*;
 
@@ -201,6 +202,10 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 					.filter(it -> it.getPackType().equals(type)).findFirst().get();
 		}
 		return support;
+	}
+	
+	public long getSize() {
+		return getBlobReferences().stream().map(it -> it.getPackBlob().getSize()).mapToLong(it -> it).sum();
 	}
 	
 }

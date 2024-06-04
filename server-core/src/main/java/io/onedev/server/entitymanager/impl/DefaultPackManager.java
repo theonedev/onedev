@@ -91,12 +91,31 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	
 	@Sessional
 	@Override
-	public List<Pack> query(Project project, EntityQuery<Pack> packQuery, int firstResult, int maxResults) {
+	public List<Pack> query(Project project, EntityQuery<Pack> packQuery, boolean loadBlobs, 
+							int firstResult, int maxResults) {
 		CriteriaQuery<Pack> criteriaQuery = buildCriteriaQuery(project, getSession(), packQuery);
 		Query<Pack> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
-		return query.getResultList();
+		List<Pack> packs = query.getResultList();
+
+		var builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> referenceAndBlobQuery = builder.createQuery(Object[].class);
+		Root<PackBlobReference> referenceRoot = referenceAndBlobQuery.from(PackBlobReference.class);
+		Join<PackBlob, PackBlob> blobJoin = referenceRoot.join(PackBlobReference.PROP_PACK_BLOB, JoinType.INNER);
+		referenceAndBlobQuery.multiselect(referenceRoot, blobJoin);
+		referenceAndBlobQuery.where(referenceRoot.get(PackBlobReference.PROP_PACK).in(packs));
+		
+		for (var pack: packs)
+			pack.setBlobReferences(new ArrayList<>());
+		
+		for (Object[] referenceAndBlob: getSession().createQuery(referenceAndBlobQuery).getResultList()) {
+			PackBlobReference reference = (PackBlobReference) referenceAndBlob[0];
+			PackBlob blob = (PackBlob) referenceAndBlob[1];
+			reference.setPackBlob(blob);
+			reference.getPack().getBlobReferences().add(reference);
+		}
+		return packs;
 	}
 
 	@Sessional

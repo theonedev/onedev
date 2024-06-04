@@ -83,7 +83,7 @@ public class PackResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return packManager.query(null, parsedQuery, offset, count);
+    	return packManager.query(null, parsedQuery, false, offset, count);
     }
 	
 	@Api(order=700)

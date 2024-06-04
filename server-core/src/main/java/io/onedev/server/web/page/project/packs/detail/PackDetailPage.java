@@ -137,7 +137,7 @@ public class PackDetailPage extends ProjectPage {
 
 					@Override
 					protected List<Pack> query(EntityQuery<Pack> query, int offset, int count, ProjectScope projectScope) {
-						return getPackManager().query(projectScope!=null?projectScope.getProject():null, query, offset, count);
+						return getPackManager().query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override

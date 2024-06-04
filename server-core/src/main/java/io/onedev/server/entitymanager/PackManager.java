@@ -16,7 +16,8 @@ import java.util.Map;
 
 public interface PackManager extends EntityManager<Pack> {
 
-	List<Pack> query(@Nullable Project project, EntityQuery<Pack> packQuery, int firstResult, int maxResults);
+	List<Pack> query(@Nullable Project project, EntityQuery<Pack> packQuery, 
+					 boolean loadBlobs, int firstResult, int maxResults);
 
 	int count(@Nullable Project project, Criteria<Pack> packCriteria);
 

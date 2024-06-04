@@ -29,6 +29,7 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.editbean.LabelsBean;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -95,6 +96,13 @@ public abstract class PackSidePanel extends Panel {
 				return DateUtils.formatAge(getPack().getPublishDate());
 			}
 
+		}));
+		
+		add(new Label("totalSize", new LoadableDetachableModel<String>() {
+			@Override
+			protected String load() {
+				return FileUtils.byteCountToDisplaySize(getPack().getSize());
+			}
 		}));
 		
 		if (build != null) {
