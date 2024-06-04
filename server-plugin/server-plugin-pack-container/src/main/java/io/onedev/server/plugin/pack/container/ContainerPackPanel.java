@@ -10,6 +10,7 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -179,8 +180,16 @@ public class ContainerPackPanel extends Panel {
 			fragment.add(new WebMarkupContainer("copyPullArchCommand").setVisible(false));
 		}
 
+		var imageSize = 0;
+		for (var layerNode: manifest.get("layers")) {
+			var sizeNode = layerNode.get("size");
+			if (sizeNode != null)
+				imageSize += sizeNode.asLong();
+		}
+		fragment.add(new Label("imageSize", FileUtils.byteCountToDisplaySize(imageSize)));
+		
 		fragment.add(new Label("manifest", formatJson(manifest)));
-
+		
 		var labels = new ArrayList<Pair<String, String>>();
 		var labelsNode = config.get("config").get("Labels");
 		if (labelsNode != null) {
