@@ -82,14 +82,14 @@ public abstract class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Nullable
-	protected TriggerMatch triggerMatches(PullRequest request) {
+	protected TriggerMatch triggerMatches(PullRequest request, String submitReason) {
 		String targetBranch = request.getTargetBranch();
 		Matcher matcher = new PathMatcher();
 		if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 				&& touchedFile(request)) {
 			
 			return new TriggerMatch(request.getMergeRef(), request, null, getParamMatrix(), 
-					getExcludeParamMaps(), "Pull request is opened/updated");
+					getExcludeParamMaps(), submitReason);
 		}
 		return null;
 	}

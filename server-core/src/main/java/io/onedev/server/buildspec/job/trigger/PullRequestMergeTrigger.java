@@ -17,7 +17,7 @@ public class PullRequestMergeTrigger extends PullRequestTrigger {
 		if (event instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChangeEvent = (PullRequestChanged) event;
 			if (pullRequestChangeEvent.getChange().getData() instanceof PullRequestMergeData)
-				return triggerMatches(pullRequestChangeEvent.getRequest());
+				return triggerMatches(pullRequestChangeEvent.getRequest(), "Pull request is merged");
 		}
 		return null;
 	}

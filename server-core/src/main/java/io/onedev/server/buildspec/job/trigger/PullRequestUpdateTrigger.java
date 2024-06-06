@@ -21,7 +21,7 @@ public class PullRequestUpdateTrigger extends PullRequestTrigger {
 			PullRequestBuildCommitUpdated pullRequestBuildCommitUpdated = (PullRequestBuildCommitUpdated) event;
 			var request = pullRequestBuildCommitUpdated.getRequest();
 			if (request.getBuildRequirement().getRequiredJobs().contains(job.getName()) || !SKIP_COMMIT.apply(request.getLatestUpdate().getHeadCommit()))
-				return triggerMatches(request);
+				return triggerMatches(request, "Pull request is opened/updated");
 		}
 		return null;
 	}

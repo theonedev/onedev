@@ -17,7 +17,7 @@ public class PullRequestDiscardTrigger extends PullRequestTrigger {
 		if (event instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChangeEvent = (PullRequestChanged) event;
 			if (pullRequestChangeEvent.getChange().getData() instanceof PullRequestDiscardData)
-				return triggerMatches(pullRequestChangeEvent.getRequest());
+				return triggerMatches(pullRequestChangeEvent.getRequest(), "Pull request is discarded");
 		}
 		return null;
 	}
