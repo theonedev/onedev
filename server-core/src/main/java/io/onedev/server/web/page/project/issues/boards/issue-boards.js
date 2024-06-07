@@ -121,7 +121,7 @@ onedev.server.issueBoards = {
 							function beforeMoveCard() {
 								finishAnimation();
 								var $deleteAnimationHelper = $("<div></div>");
-								$deleteAnimationHelper.outerHeight($card.outerHeight(true));
+								$deleteAnimationHelper.css("padding-bottom", $card.outerHeight(true) + "px");
 								var $moveAnimationHelper = $card.clone();
 								$moveAnimationHelper.css("position", "absolute");
 								$moveAnimationHelper.css("z-index", "0");
@@ -129,8 +129,8 @@ onedev.server.issueBoards = {
 								$moveAnimationHelper.outerHeight($card.outerHeight());
 								$moveAnimationHelper.css($card.offset());
 								$card.addClass("invisible");
-								$deleteAnimationHelper.insertBefore($card);
 								$deleteAnimationHelper.hide();
+								$deleteAnimationHelper.insertBefore($card);
 								$("body").append($moveAnimationHelper);
 								deleteAnimationHelper = $deleteAnimationHelper[0];
 								moveAnimationHelper = $moveAnimationHelper[0];
@@ -141,14 +141,15 @@ onedev.server.issueBoards = {
 								var $moveAnimationHelper = $(moveAnimationHelper);
 								$deleteAnimationHelper.show();
 								var $addAnimationHelper = $("<div></div>");
-								$addAnimationHelper.outerHeight(0);
 								$addAnimationHelper.insertBefore($card);
 								addAnimationHelper = $addAnimationHelper[0];
 
 								var animationDuration = 100;
 
+								var paddingBottom = $deleteAnimationHelper.css("padding-bottom");
+								
 								$deleteAnimationHelper.animate({
-									height: 0,
+									"padding-bottom": "0",
 								}, animationDuration, finishAnimation);
 
 								$moveAnimationHelper.animate({
@@ -157,7 +158,7 @@ onedev.server.issueBoards = {
 								}, animationDuration, finishAnimation);
 
 								$addAnimationHelper.animate({
-									height: $moveAnimationHelper.outerHeight(true),
+									"padding-bottom": paddingBottom,
 								}, animationDuration, finishAnimation);
 							}
 
