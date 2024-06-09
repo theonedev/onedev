@@ -82,7 +82,7 @@ public class ResetAdminPassword extends CommandHandler {
 					throw new RuntimeException(e);
 				}
 
-				logger.info("Password of user '" + root.getName() + "' has been reset to: " + password);
+				logger.info("Password of user '" + root.getName() + "' has been reset");
 				return null;
 			});
 			System.exit(0);

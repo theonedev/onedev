@@ -37,6 +37,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
@@ -183,6 +184,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
 						issue.removeSchedule(getMilestone());
+						issue.getLastActivity().setDate(new Date());
 					}
 					if (getQuery().matches(issue)) {
 						String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());

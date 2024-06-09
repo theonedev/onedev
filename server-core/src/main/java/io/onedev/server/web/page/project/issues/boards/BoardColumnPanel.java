@@ -144,6 +144,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 										if (transition.canTransitManually(issue, getColumn())) {
 											issue = SerializationUtils.clone(issue);
 											issue.setState(getColumn());
+											issue.getLastActivity().setDate(new Date());
 											break;
 										}
 									}
@@ -152,6 +153,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 									if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 										issue = SerializationUtils.clone(issue);
 										issue.setFieldValue(identifyField, getColumn());
+										issue.getLastActivity().setDate(new Date());
 									}
 								}
 							} else if (SecurityUtils.canScheduleIssues(issue.getProject())) { 
@@ -162,6 +164,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								schedule.setIssue(issue);
 								schedule.setMilestone(getMilestone());
 								issue.getSchedules().add(schedule);
+								issue.getLastActivity().setDate(new Date());
 							}
 							if (getQuery().matches(issue)) {
 								String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
