@@ -104,78 +104,82 @@ onedev.server.issueBoards = {
 								$droppable.scrollTop(droppableContentHeight - droppableHeight);
 						}
 						
-						if (moveTimeout)
-							clearTimeout(moveTimeout);
-						moveTimeout = setTimeout(function() {
-							var uiHelperCenter = uiHelperTop + uiHelperHeight / 2;
-							var $cards = $droppable.children(".board-card");
-							var insertBeforeCard;
-							$cards.each(function() {
-								var $card = $(this);
-								var cardCenter = $card.offset().top + $card.outerHeight() / 2;
-								if (uiHelperCenter < cardCenter) {
-									insertBeforeCard = this;
-									return false;
-								}
-							});
-							function beforeMoveCard() {
-								finishAnimation();
-								var $deleteAnimationHelper = $("<div></div>");
-								$deleteAnimationHelper.css("padding-bottom", $card.outerHeight(true) + "px");
-								var $moveAnimationHelper = $card.clone();
-								$moveAnimationHelper.css("position", "absolute");
-								$moveAnimationHelper.css("z-index", "0");
-								$moveAnimationHelper.outerWidth($card.outerWidth());
-								$moveAnimationHelper.outerHeight($card.outerHeight());
-								$moveAnimationHelper.css($card.offset());
-								$card.addClass("invisible");
-								$deleteAnimationHelper.hide();
-								$deleteAnimationHelper.insertBefore($card);
-								$("body").append($moveAnimationHelper);
-								deleteAnimationHelper = $deleteAnimationHelper[0];
-								moveAnimationHelper = $moveAnimationHelper[0];
+						var uiHelperCenter = uiHelperTop + uiHelperHeight / 2;
+						var $cards = $droppable.children(".board-card");
+						var insertBeforeCard;
+						$cards.each(function() {
+							var $card = $(this);
+							var cardCenter = $card.offset().top + $card.outerHeight() / 2;
+							if (uiHelperCenter < cardCenter) {
+								insertBeforeCard = this;
+								return false;
 							}
-							function afterMoveCard() {
-								var offset = $card.offset();
-								var $deleteAnimationHelper = $(deleteAnimationHelper);
-								var $moveAnimationHelper = $(moveAnimationHelper);
-								$deleteAnimationHelper.show();
-								var $addAnimationHelper = $("<div></div>");
-								$addAnimationHelper.insertBefore($card);
-								addAnimationHelper = $addAnimationHelper[0];
+						});
+						function beforeMoveCard() {
+							finishAnimation();
+							var $deleteAnimationHelper = $("<div></div>");
+							$deleteAnimationHelper.css("padding-bottom", $card.outerHeight(true) + "px");
+							var $moveAnimationHelper = $card.clone();
+							$moveAnimationHelper.css("position", "absolute");
+							$moveAnimationHelper.css("z-index", "0");
+							$moveAnimationHelper.outerWidth($card.outerWidth());
+							$moveAnimationHelper.outerHeight($card.outerHeight());
+							$moveAnimationHelper.css($card.offset());
+							$card.addClass("invisible");
+							$deleteAnimationHelper.hide();
+							$deleteAnimationHelper.insertBefore($card);
+							$("body").append($moveAnimationHelper);
+							deleteAnimationHelper = $deleteAnimationHelper[0];
+							moveAnimationHelper = $moveAnimationHelper[0];
+						}
+						function afterMoveCard() {
+							var offset = $card.offset();
+							var $deleteAnimationHelper = $(deleteAnimationHelper);
+							var $moveAnimationHelper = $(moveAnimationHelper);
+							$deleteAnimationHelper.show();
+							var $addAnimationHelper = $("<div></div>");
+							$addAnimationHelper.insertBefore($card);
+							addAnimationHelper = $addAnimationHelper[0];
 
-								var animationDuration = 100;
+							var animationDuration = 100;
 
-								var paddingBottom = $deleteAnimationHelper.css("padding-bottom");
-								
-								$deleteAnimationHelper.animate({
-									"padding-bottom": "0",
-								}, animationDuration, finishAnimation);
+							var paddingBottom = $deleteAnimationHelper.css("padding-bottom");
+							
+							$deleteAnimationHelper.animate({
+								"padding-bottom": "0",
+							}, animationDuration, finishAnimation);
 
-								$moveAnimationHelper.animate({
-									left: offset.left,
-									top: offset.top
-								}, animationDuration, finishAnimation);
+							$moveAnimationHelper.animate({
+								left: offset.left,
+								top: offset.top
+							}, animationDuration, finishAnimation);
 
-								$addAnimationHelper.animate({
-									"padding-bottom": paddingBottom,
-								}, animationDuration, finishAnimation);
-							}
+							$addAnimationHelper.animate({
+								"padding-bottom": paddingBottom,
+							}, animationDuration, finishAnimation);
+						}
 
-							if (insertBeforeCard) {
-								if (insertBeforeCard !== $card[0] && insertBeforeCard !== $card.next()[0]) {
+						if (insertBeforeCard) {
+							if (insertBeforeCard !== $card[0] && insertBeforeCard !== $card.next()[0]) {
+								if ($card.hasClass("invisible")) {
+									$card.insertBefore(insertBeforeCard);
+								} else {
 									beforeMoveCard();
 									$card.insertBefore(insertBeforeCard);
 									afterMoveCard();
 								}
-							} else {
-								if ($droppable.children().last()[0] !== $card[0]) {
+							}
+						} else {
+							if ($droppable.children().last()[0] !== $card[0]) {
+								if ($card.hasClass("invisible")) {
+									$droppable.append($card);
+								} else {
 									beforeMoveCard();
 									$droppable.append($card);
 									afterMoveCard();
 								}
 							}
-						}, 25);
+						}
 					}
 				},
 				stop: function(event, ui) {
