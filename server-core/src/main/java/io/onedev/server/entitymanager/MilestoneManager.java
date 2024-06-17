@@ -15,9 +15,6 @@ public interface MilestoneManager extends EntityManager<Milestone> {
 
 	Milestone findInHierarchy(String milestoneFQN);
 
-	@Nullable
-	Milestone findNextOpen(Project project);
-
     void createOrUpdate(Milestone milestone);
 	
 }

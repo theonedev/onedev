@@ -29,7 +29,7 @@ public class NewMilestonePage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var bean = new MilestoneEditBean();
+		var bean = MilestoneEditBean.ofNew(getProject(), "");
 		BeanEditor editor = BeanContext.edit("editor", bean);
 		Form<?> form = new Form<Void>("form") {
 
@@ -39,7 +39,7 @@ public class NewMilestonePage extends ProjectPage {
 
 				var milestone = new Milestone();
 				milestone.setProject(getProject());
-				bean.writeTo(milestone);
+				bean.update(milestone);
 				OneDev.getInstance(MilestoneManager.class).createOrUpdate(milestone);
 				Session.get().success("New milestone created");
 				setResponsePage(MilestoneIssuesPage.class, MilestoneIssuesPage.paramsOf(getProject(), milestone, null));

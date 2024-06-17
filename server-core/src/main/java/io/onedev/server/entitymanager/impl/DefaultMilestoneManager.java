@@ -10,7 +10,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import javax.inject.Inject;
@@ -63,16 +62,6 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 	@Override
 	public int count() {
 		return count(true);
-	}
-
-	@Sessional
-	@Override
-	public Milestone findNextOpen(Project project) {
-		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-		criteria.add(Restrictions.in("project", project.getSelfAndAncestors()));
-		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, false));
-		criteria.addOrder(Order.asc(Milestone.PROP_DUE_DATE));
-		return find(criteria);
 	}
 
 	@Transactional

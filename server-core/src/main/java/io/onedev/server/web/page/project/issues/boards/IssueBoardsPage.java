@@ -62,9 +62,9 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
@@ -176,21 +176,21 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		Milestone milestone;
 		String milestoneName = params.get(PARAM_MILESTONE).toString();
 		if (milestoneName != null) {
-			if (milestoneName.equals(Milestone.NONE)) {
+			if (milestoneName.equals(Milestone.NONE) || getBoard().getMilestonePrefix() != null && !milestoneName.startsWith(getBoard().getMilestonePrefix())) {
 				milestone = null;
 			} else {
 				milestone = getProject().getHierarchyMilestone(milestoneName);
 				if (milestone == null)
 					throw new ExplicitException("Can not find milestone: " + milestoneName);
 			}
-		} else if (!getProject().getSortedHierarchyMilestones().isEmpty()) {
-			milestone = getProject().getSortedHierarchyMilestones().iterator().next();
+		} else if (!getMilestones().isEmpty()) {
+			milestone = getMilestones().iterator().next();
 		} else {
 			milestone = null;
 		}
 
 		Long milestoneId = Milestone.idOf(milestone);
-		milestoneModel = new LoadableDetachableModel<Milestone>() {
+		milestoneModel = new LoadableDetachableModel<>() {
 
 			@Override
 			protected Milestone load() {
@@ -199,7 +199,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				else
 					return null;
 			}
-			
+
 		};
 		
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
@@ -449,24 +449,24 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					if (SecurityUtils.canManageProject(getProject()))
 						menuFragment.add(AttributeAppender.append("class", "administrative"));
 
-					menuFragment.add(new ListView<Milestone>("milestones", new LoadableDetachableModel<List<Milestone>>() {
+					menuFragment.add(new ListView<Milestone>("milestones", new LoadableDetachableModel<>() {
 
 						@Override
 						protected List<Milestone> load() {
-							List<Milestone> milestones = getProject().getSortedHierarchyMilestones()
+							List<Milestone> milestones = getMilestones()
 									.stream()
-									.filter(it->!it.isClosed())
-									.collect(Collectors.toList());
+									.filter(it -> !it.isClosed())
+									.collect(toList());
 							if (getMilestone() != null && getMilestone().isClosed() || showClosed) {
-								List<Milestone> closedMilestones = getProject().getSortedHierarchyMilestones()
+								List<Milestone> closedMilestones = getMilestones()
 										.stream()
-										.filter(it->it.isClosed())
-										.collect(Collectors.toList());
+										.filter(it -> it.isClosed())
+										.collect(toList());
 								milestones.addAll(closedMilestones);
 							}
 							return milestones;
 						}
-						
+
 					}) {
 
 						private void toggleClose(Milestone milestone) {
@@ -539,8 +539,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									
 								});
 								
-								var bean = new MilestoneEditBean();
-								bean.readFrom(item.getModelObject());
+								var bean = MilestoneEditBean.of(item.getModelObject(), getBoard().getMilestonePrefix());
 								fragment.add(new AjaxLink<Void>("edit") {
 
 									@Override
@@ -552,7 +551,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 											@Override
 											protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
 												var milestone = item.getModelObject();
-												bean.writeTo(milestone);
+												bean.update(milestone);
 												getMilestoneManager().createOrUpdate(milestone);
 												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 														getProject(), getBoard(), milestone, backlog, queryString,
@@ -615,7 +614,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						protected void onConfigure() {
 							super.onConfigure();
 							setVisible(!showClosed && (getMilestone() == null || !getMilestone().isClosed()) 
-									&& getProject().getHierarchyMilestones().stream().anyMatch(it->it.isClosed()));
+									&& getMilestones().stream().anyMatch(Milestone::isClosed));
 						}
 						
 					});
@@ -637,14 +636,14 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							dropdown.close();
-							var bean = new MilestoneEditBean();
+							var bean = MilestoneEditBean.ofNew(getProject(), getBoard().getMilestonePrefix());
 							new BeanEditModalPanel<>(target, bean, "Create Milestone") {
 
 								@Override
 								protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
 									var milestone = new Milestone();
 									milestone.setProject(getProject());
-									bean.writeTo(milestone);
+									bean.update(milestone);
 									getMilestoneManager().createOrUpdate(milestone);
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 											getProject(), getBoard(), milestone, backlog, queryString,
@@ -666,7 +665,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 			});		
 			
-			queryInput = new TextField<String>("input", new IModel<String>() {
+			queryInput = new TextField<String>("input", new IModel<>() {
 
 				@Override
 				public void detach() {
@@ -674,7 +673,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				public String getObject() {
-					return backlog?backlogQueryString:queryString;
+					return backlog ? backlogQueryString : queryString;
 				}
 
 				@Override
@@ -684,7 +683,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					else
 						queryString = object;
 				}
-				
+
 			});
 			
 			IssueQueryParseOption option = new IssueQueryParseOption()
@@ -831,6 +830,12 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 		
 		target.add(contentFrag);
+	}
+	
+	private List<Milestone> getMilestones() {
+		return getProject().getSortedHierarchyMilestones().stream()
+				.filter(it -> getBoard().getMilestonePrefix() == null || it.getName().startsWith(getBoard().getMilestonePrefix()))
+				.collect(toList());		
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 

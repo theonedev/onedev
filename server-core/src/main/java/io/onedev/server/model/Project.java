@@ -411,7 +411,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
-	private transient List<Milestone> sortedMilestones;
+	private transient List<Milestone> sortedHierarchyMilestones;
 	
 	private transient Optional<String> activeServer;
 
@@ -1299,11 +1299,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public List<Milestone> getSortedHierarchyMilestones() {
-		if (sortedMilestones == null) {
-			sortedMilestones = new ArrayList<>(getHierarchyMilestones());
-			Collections.sort(sortedMilestones, new Milestone.DatesAndStatusComparator());
+		if (sortedHierarchyMilestones == null) {
+			sortedHierarchyMilestones = new ArrayList<>(getHierarchyMilestones());
+			sortedHierarchyMilestones.sort(new Milestone.DatesAndStatusComparator());
 		}
-		return sortedMilestones;
+		return sortedHierarchyMilestones;
 	}
 	
 	@Editable

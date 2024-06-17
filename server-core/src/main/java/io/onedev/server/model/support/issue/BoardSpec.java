@@ -61,6 +61,8 @@ public class BoardSpec implements Serializable {
 	
 	private List<String> columns = new ArrayList<>();
 	
+	private String milestonePrefix;
+	
 	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE, IssueSchedule.NAME_MILESTONE);
 	
 	private List<String> displayLinks = new ArrayList<>();
@@ -148,6 +150,17 @@ public class BoardSpec implements Serializable {
 			}
 		}
 		return displayColumns;
+	}
+
+	@Editable(order=450, description = "" +
+			"If specified, OneDev will only display milestones with this prefix, and the prefix will be stripped " +
+			"for brevity. Also milestones created from this board will get this prefix automatically")
+	public String getMilestonePrefix() {
+		return milestonePrefix;
+	}
+
+	public void setMilestonePrefix(String milestonePrefix) {
+		this.milestonePrefix = milestonePrefix;
 	}
 
 	@Editable(order=500, placeholder="Not displaying any fields", description="Specify fields to display in board card")

@@ -8,22 +8,32 @@ import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.validation.Validatable;
+import org.joda.time.DateTime;
 
+import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.regex.Pattern;
+
+import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.toList;
 
 @Editable
 @ClassValidating
-public class MilestoneEditBean implements Serializable, Validatable {
+public class MilestoneEditBean implements Validatable, Serializable {
 
+	private static final Pattern ENDS_WITH_DIGITS = Pattern.compile("(.*)(\\d+)");
+	
 	public String oldName;
+
+	public String namePrefix;
 	
 	private String name;
 	
 	private String description;
-	
+
 	private Date startDate;
 	
 	private Date dueDate;
@@ -35,6 +45,15 @@ public class MilestoneEditBean implements Serializable, Validatable {
 
 	public void setOldName(String oldName) {
 		this.oldName = oldName;
+	}
+
+	@Editable(hidden = true)
+	public String getNamePrefix() {
+		return namePrefix;
+	}
+
+	public void setNamePrefix(String namePrefix) {
+		this.namePrefix = namePrefix;
 	}
 
 	@Editable(order=100)
@@ -74,35 +93,64 @@ public class MilestoneEditBean implements Serializable, Validatable {
 	public void setDueDate(Date dueDate) {
 		this.dueDate = dueDate;
 	}
-	
-	public void readFrom(Milestone milestone) {
-		oldName = milestone.getName();
-		setName(milestone.getName());
-		setDescription(milestone.getDescription());
-		setDueDate(milestone.getDueDate());
-		setStartDate(milestone.getStartDate());
-	}
-	
-	public void writeTo(Milestone milestone) {
+
+	public void update(Milestone milestone) {
 		milestone.setName(getName());
 		milestone.setDescription(getDescription());
-		milestone.setDueDate(getDueDate());
 		milestone.setStartDate(getStartDate());
+		milestone.setDueDate(getDueDate());
+	}
+	
+	public static MilestoneEditBean ofNew(Project project, @Nullable String namePrefix) {
+		var bean = new MilestoneEditBean();
+		bean.namePrefix = namePrefix;
+		var milestones = project.getSortedHierarchyMilestones().stream()
+				.filter(it -> (namePrefix == null || it.getName().startsWith(namePrefix)) && it.getStartDate() != null && it.getDueDate() != null)
+				.collect(toList());
+		if (!milestones.isEmpty()) {
+			var lastMilestone = milestones.get(milestones.size()-1);
+			var matcher = ENDS_WITH_DIGITS.matcher(lastMilestone.getName());
+			if (matcher.matches())
+				bean.setName(matcher.group(1) + (parseInt(matcher.group(2)) + 1));
+			if (lastMilestone.getStartDate() != null && lastMilestone.getDueDate() != null) {
+				bean.setStartDate(new DateTime(lastMilestone.getDueDate()).plusDays(1).toDate());
+				var duration = lastMilestone.getDueDate().getTime() - lastMilestone.getStartDate().getTime();
+				bean.setDueDate(new DateTime(bean.getStartDate()).plusMillis((int) duration).toDate());
+			}
+		}
+		return bean;
+	}
+	
+	public static MilestoneEditBean of(Milestone milestone, @Nullable String namePrefix) {
+		var bean = new MilestoneEditBean();
+		bean.oldName = milestone.getName();
+		bean.namePrefix = namePrefix;
+		bean.setName(milestone.getName());
+		bean.setDescription(milestone.getDescription());
+		bean.setStartDate(milestone.getStartDate());
+		bean.setDueDate(milestone.getDueDate());
+		return bean;
 	}
 
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
+		if (namePrefix != null && !name.startsWith(namePrefix)) {
+			context.disableDefaultConstraintViolation();
+			context.buildConstraintViolationWithTemplate("Name must prefix with: " + namePrefix)
+					.addPropertyNode("name").addConstraintViolation();
+			return false;
+		}
 		MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
 		Milestone milestoneWithSameName = milestoneManager.findInHierarchy(Project.get(), name);
 		if (milestoneWithSameName != null && (oldName == null || !oldName.equals(name))) {
 			context.disableDefaultConstraintViolation();
-			var message = "This name has already been used by another milestone in the project hierarchy";
+			var message = "Name has already been used by another milestone in the project hierarchy";
 			context.buildConstraintViolationWithTemplate(message)
 					.addPropertyNode("name")
 					.addConstraintViolation();
 			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
+	
 }
