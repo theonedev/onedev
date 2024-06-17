@@ -105,7 +105,7 @@ public class MilestoneEditBean implements Validatable, Serializable {
 		var bean = new MilestoneEditBean();
 		bean.namePrefix = namePrefix;
 		var milestones = project.getSortedHierarchyMilestones().stream()
-				.filter(it -> (namePrefix == null || it.getName().startsWith(namePrefix)) && it.getStartDate() != null && it.getDueDate() != null)
+				.filter(it -> (namePrefix == null || it.getName().startsWith(namePrefix)))
 				.collect(toList());
 		if (!milestones.isEmpty()) {
 			var lastMilestone = milestones.get(milestones.size()-1);

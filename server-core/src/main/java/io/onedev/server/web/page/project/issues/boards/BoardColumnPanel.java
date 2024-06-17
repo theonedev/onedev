@@ -61,8 +61,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -78,10 +77,14 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (boardQuery.getCriteria() != null)
 					criterias.add(boardQuery.getCriteria());
-				if (getMilestone() != null)
-					criterias.add(new MilestoneCriteria(getMilestone().getName(), Is));
-				else
-					criterias.add(new MilestoneEmptyCriteria(IsEmpty));
+				if (getMilestoneSelection().getMilestone() != null) {
+					criterias.add(new MilestoneCriteria(getMilestoneSelection().getMilestone().getName(), Is));
+				} else if (getMilestoneSelection() instanceof MilestoneSelection.Unscheduled) {
+					if (getMilestonePrefix() != null)	
+						criterias.add(new MilestoneCriteria(getMilestonePrefix()+ "*", IsNot));
+					else
+						criterias.add(new MilestoneEmptyCriteria(IsEmpty));
+				}
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
 					criterias.add(new StateCriteria(getColumn(), Is));
@@ -136,7 +139,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						if (event.getPayload() instanceof IssueDragging && getQuery() != null) {
 							IssueDragging issueDragging = (IssueDragging) event.getPayload();
 							Issue issue = issueDragging.getIssue();
-							if (getMilestone() == null || issue.getMilestones().contains(getMilestone())) { 
+							var milestone = getMilestoneSelection().getMilestone();
+							if (milestone == null || issue.getMilestones().contains(milestone)) { 
 								// move issue between board columns
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
@@ -162,7 +166,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								issue.setProject(getProjectScope().getProject());
 								IssueSchedule schedule = new IssueSchedule();
 								schedule.setIssue(issue);
-								schedule.setMilestone(getMilestone());
+								schedule.setMilestone(milestone);
 								issue.getSchedules().add(schedule);
 								issue.getLastActivity().setDate(new Date());
 							}
@@ -348,8 +352,9 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				} else {
 					Issue issue = getIssueManager().load(issueId);
 					String fieldName = getBoard().getIdentifyField();
-					if (getMilestone() != null && !issue.getMilestones().contains(getMilestone())) {
-						getIssueChangeManager().addSchedule(issue, getMilestone());
+					var milestone = getMilestoneSelection().getMilestone();
+					if (milestone != null && !issue.getMilestones().contains(milestone)) {
+						getIssueChangeManager().addSchedule(issue, milestone);
 						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 					} else if (fieldName.equals(Issue.NAME_STATE)) {
 						AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);

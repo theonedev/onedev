@@ -31,8 +31,6 @@ public class Milestone extends AbstractEntity {
 	
 	public static final String PROP_CLOSED = "closed";
 	
-	public static final String NONE = "[none]";
-	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	@Immutable

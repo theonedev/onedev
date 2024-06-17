@@ -6,13 +6,11 @@ import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -91,7 +89,9 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 	
 	protected abstract ProjectScope getProjectScope();
 
+	protected abstract MilestoneSelection getMilestoneSelection();
+	
 	@Nullable
-	protected abstract Milestone getMilestone();
+	protected abstract String getMilestonePrefix();
 	
 }

@@ -3,12 +3,11 @@ package io.onedev.server.web.page.project.issues.boards;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.MilestoneEmptyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
@@ -40,7 +39,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -56,7 +56,10 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new NotCriteria<>(new MilestoneCriteria(getMilestone().getName(), Is)));
+				if (getMilestonePrefix() != null)
+					criterias.add(new MilestoneCriteria(getMilestonePrefix() + "*", IsNot));
+				else
+					criterias.add(new MilestoneEmptyCriteria(IsEmpty));					
 				return new IssueQuery(Criteria.andCriterias(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
@@ -161,7 +164,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				var card = cardListPanel.findCard(issueId);
 				if (card == null) { // moved from other columns
 					var issue = getIssueManager().load(issueId);					
-					getIssueChangeManager().removeSchedule(issue, getMilestone());
+					getIssueChangeManager().removeSchedule(issue, getMilestoneSelection().getMilestone());
 				}
 				cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 			}
@@ -183,7 +186,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
-						issue.removeSchedule(getMilestone());
+						issue.removeSchedule(getMilestoneSelection().getMilestone());
 						issue.getLastActivity().setDate(new Date());
 					}
 					if (getQuery().matches(issue)) {
