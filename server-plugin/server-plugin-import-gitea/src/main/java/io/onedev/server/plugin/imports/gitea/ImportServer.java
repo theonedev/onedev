@@ -217,12 +217,12 @@ public class ImportServer implements Serializable, Validatable {
 		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
-			Set<String> nonExistentMilestones = new HashSet<>();
+			Set<String> nonExistentIterations = new HashSet<>();
 			Set<String> nonExistentLogins = new HashSet<>();
 			Set<String> unmappedIssueLabels = new HashSet<>();
 			
 			Map<String, Pair<FieldSpec, String>> labelMappings = new HashMap<>();
-			Map<String, Milestone> milestoneMappings = new HashMap<>();
+			Map<String, Iteration> iterationMappings = new HashMap<>();
 			
 			for (IssueLabelMapping mapping: option.getIssueLabelMappings()) {
 				String oneDevFieldName = StringUtils.substringBefore(mapping.getOneDevIssueField(), "::");
@@ -233,8 +233,8 @@ public class ImportServer implements Serializable, Validatable {
 				labelMappings.put(mapping.getGiteaIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
 			}
 			
-			for (Milestone milestone: oneDevProject.getMilestones())
-				milestoneMappings.put(milestone.getName(), milestone);
+			for (Iteration iteration: oneDevProject.getIterations())
+				iterationMappings.put(iteration.getName(), iteration);
 			
 			String initialIssueState = getIssueSetting().getInitialStateSpec().getName();
 				
@@ -286,15 +286,15 @@ public class ImportServer implements Serializable, Validatable {
 						
 						if (issueNode.hasNonNull("milestone")) {
 							String milestoneName = issueNode.get("milestone").get("title").asText();
-							Milestone milestone = milestoneMappings.get(milestoneName);
-							if (milestone != null) {
+							Iteration iteration = iterationMappings.get(milestoneName);
+							if (iteration != null) {
 								IssueSchedule schedule = new IssueSchedule();
 								schedule.setIssue(issue);
-								schedule.setMilestone(milestone);
+								schedule.setIteration(iteration);
 								issue.getSchedules().add(schedule);
 							} else {
 								extraIssueInfo.put("Milestone", milestoneName);
-								nonExistentMilestones.add(milestoneName);
+								nonExistentIterations.add(milestoneName);
 							}
 						}
 						
@@ -459,7 +459,7 @@ public class ImportServer implements Serializable, Validatable {
 			
 			ImportResult result = new ImportResult();
 			result.nonExistentLogins.addAll(nonExistentLogins);
-			result.nonExistentMilestones.addAll(nonExistentMilestones);
+			result.nonExistentIterations.addAll(nonExistentIterations);
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
 			result.issuesImported = !issues.isEmpty();
 			
@@ -536,22 +536,22 @@ public class ImportServer implements Serializable, Validatable {
 							apiEndpoint = getApiEndpoint("/repos/" + giteaRepository + "/milestones?state=all");
 							for (JsonNode milestoneNode : list(client, apiEndpoint, logger)) {
 								String milestoneName = milestoneNode.get("title").asText();
-								Milestone milestone = project.getMilestone(milestoneName);
-								if (milestone == null) {
-									milestone = new Milestone();
-									milestone.setName(milestoneName);
-									milestone.setDescription(milestoneNode.get("description").asText(null));
-									milestone.setProject(project);
+								Iteration iteration = project.getIteration(milestoneName);
+								if (iteration == null) {
+									iteration = new Iteration();
+									iteration.setName(milestoneName);
+									iteration.setDescription(milestoneNode.get("description").asText(null));
+									iteration.setProject(project);
 									String dueDateString = milestoneNode.get("due_on").asText(null);
 									if (dueDateString != null)
-										milestone.setDueDate(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(dueDateString).toDate());
+										iteration.setDueDate(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(dueDateString).toDate());
 									if (milestoneNode.get("state").asText().equals("closed"))
-										milestone.setClosed(true);
+										iteration.setClosed(true);
 
-									project.getMilestones().add(milestone);
+									project.getIterations().add(iteration);
 
 									if (!dryRun)
-										OneDev.getInstance(MilestoneManager.class).createOrUpdate(milestone);
+										OneDev.getInstance(IterationManager.class).createOrUpdate(iteration);
 								}
 							}
 
@@ -559,7 +559,7 @@ public class ImportServer implements Serializable, Validatable {
 							ImportResult currentResult = importIssues(giteaRepository,
 									project, option.getIssueImportOption(), userIds, dryRun, logger);
 							result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-							result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
+							result.nonExistentIterations.addAll(currentResult.nonExistentIterations);
 							result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);
 							result.issuesImported = result.issuesImported || currentResult.issuesImported;
 						}

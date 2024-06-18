@@ -3,8 +3,8 @@ package io.onedev.server.web.page.project.issues.boards;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.MilestoneCriteria;
-import io.onedev.server.search.entity.issue.MilestoneEmptyCriteria;
+import io.onedev.server.search.entity.issue.IterationCriteria;
+import io.onedev.server.search.entity.issue.IterationEmptyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -56,10 +56,10 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				if (getMilestonePrefix() != null)
-					criterias.add(new MilestoneCriteria(getMilestonePrefix() + "*", IsNot));
+				if (getIterationPrefix() != null)
+					criterias.add(new IterationCriteria(getIterationPrefix() + "*", IsNot));
 				else
-					criterias.add(new MilestoneEmptyCriteria(IsEmpty));					
+					criterias.add(new IterationEmptyCriteria(IsEmpty));					
 				return new IssueQuery(Criteria.andCriterias(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
@@ -164,7 +164,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				var card = cardListPanel.findCard(issueId);
 				if (card == null) { // moved from other columns
 					var issue = getIssueManager().load(issueId);					
-					getIssueChangeManager().removeSchedule(issue, getMilestoneSelection().getMilestone());
+					getIssueChangeManager().removeSchedule(issue, getIterationSelection().getIteration());
 				}
 				cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 			}
@@ -186,7 +186,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
-						issue.removeSchedule(getMilestoneSelection().getMilestone());
+						issue.removeSchedule(getIterationSelection().getIteration());
 						issue.getLastActivity().setDate(new Date());
 					}
 					if (getQuery().matches(issue)) {

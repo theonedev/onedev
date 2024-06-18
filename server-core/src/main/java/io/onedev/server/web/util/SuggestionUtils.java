@@ -475,13 +475,13 @@ public class SuggestionUtils {
 		return sortAndTruncate(suggestions, matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestMilestones(Project project, String matchWith) {
-		List<String> milestoneNames = project.getHierarchyMilestones()
+	public static List<InputSuggestion> suggestIterations(Project project, String matchWith) {
+		List<String> iterationNames = project.getHierarchyIterations()
 				.stream()
 				.map(it->it.getName())
 				.sorted()
 				.collect(toList());
-		return suggest(milestoneNames, matchWith);
+		return suggest(iterationNames, matchWith);
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {

@@ -9,9 +9,9 @@
 						<span wicket:id="label"></span>
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
 					</a>
-					<a wicket:id="backlog" title="Show issues not scheduled into current milestone" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
-					<a wicket:id="milestone" title="Milestone" class="milestone-selector btn text-nowrap bg-white">
-						<wicket:svg href="milestone" class="icon mr-2"></wicket:svg>
+					<a wicket:id="backlog" title="Show issues not scheduled into current iteration" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
+					<a wicket:id="iteration" title="Iteration" class="iteration-selector btn text-nowrap bg-white">
+						<wicket:svg href="iteration" class="icon mr-2"></wicket:svg>
 						<span wicket:id="label"></span>
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
 					</a>
@@ -60,11 +60,11 @@
 			<a wicket:id="useDefault" class="btn btn-light btn-hover-primary btn-sm btn-block use-global"><wicket:svg href="undo" class="icon mr-2"></wicket:svg> Use Default Boards</a>
 		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="milestoneMenuFrag">
-		<div class="milestone-menu p-4">
-			<wicket:enclosure child="milestones">
-			<table class="milestones table">
-				<tr wicket:id="milestones" class="milestone">
+	<wicket:fragment wicket:id="iterationMenuFrag">
+		<div class="iteration-menu p-4">
+			<wicket:enclosure child="iterations">
+			<table class="iterations table">
+				<tr wicket:id="iterations" class="iteration">
 					<td class="name">
 						<a wicket:id="select"><span wicket:id="name"></span></a> <span wicket:id="inherited" class="ml-2 badge badge-info badge-sm">Inherited</span>
 					</td>
@@ -81,12 +81,12 @@
 			</table>
 			</wicket:enclosure>
 			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
-			<a wicket:id="unscheduled" class="no-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Unscheduled Issues</a>
+			<a wicket:id="unscheduled" class="no-iteration btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Unscheduled Issues</a>
 			<a wicket:id="all" class="all btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="all" class="icon mr-2"></wicket:svg> All Issues</a>
-			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Create Milestone</a>
+			<a wicket:id="newIteration" class="new-iterations btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Create Iteration</a>
 		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="milestoneActionsFrag">
+	<wicket:fragment wicket:id="iterationActionsFrag">
 		<a wicket:id="close" class="action">Close</a>
 		<a wicket:id="reopen" class="action">Reopen</a>
 		<span class="dot mx-2"></span>

@@ -15,8 +15,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_milestone_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_milestone_id"})
+		indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_iteration_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_iteration_id"})
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class IssueSchedule extends AbstractEntity {
@@ -25,9 +25,9 @@ public class IssueSchedule extends AbstractEntity {
 	
 	public static String PROP_ISSUE = "issue";
 	
-	public static String NAME_MILESTONE = "Milestone";
+	public static String NAME_ITERATION = "Iteration";
 	
-	public static String PROP_MILESTONE = "milestone";
+	public static String PROP_ITERATION = "iteration";
 	
 	public static String PROP_DATE = "date";
 
@@ -37,7 +37,7 @@ public class IssueSchedule extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Milestone milestone;
+	private Iteration iteration;
 
 	private Date date = new Date();
 
@@ -49,12 +49,12 @@ public class IssueSchedule extends AbstractEntity {
 		this.issue = issue;
 	}
 
-	public Milestone getMilestone() {
-		return milestone;
+	public Iteration getIteration() {
+		return iteration;
 	}
 
-	public void setMilestone(Milestone milestone) {
-		this.milestone = milestone;
+	public void setIteration(Iteration iteration) {
+		this.iteration = iteration;
 	}
 
 	public Date getDate() {

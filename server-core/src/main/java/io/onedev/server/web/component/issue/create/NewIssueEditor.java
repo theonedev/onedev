@@ -9,7 +9,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.IssueTemplate;
@@ -27,7 +27,7 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
+import io.onedev.server.web.component.iteration.choice.IterationMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -76,7 +76,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	
 	private CheckBox confidentialInput;
 	
-	private MilestoneMultiChoice milestoneChoice;
+	private IterationMultiChoice iterationChoice;
 	
 	private BeanEditor fieldEditor;
 	
@@ -211,20 +211,20 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		add(confidentialInput = new CheckBox("confidential", Model.of(false))); 
 		
-		Collection<Milestone> milestones = issue.getMilestones();
-		milestoneChoice = new MilestoneMultiChoice("milestones", Model.of(milestones), 
-				new LoadableDetachableModel<Collection<Milestone>>() {
+		Collection<Iteration> iterations = issue.getIterations();
+		iterationChoice = new IterationMultiChoice("iterations", Model.of(iterations), 
+				new LoadableDetachableModel<Collection<Iteration>>() {
 
 			@Override
-			protected Collection<Milestone> load() {
-				return getProject().getSortedHierarchyMilestones();
+			protected Collection<Iteration> load() {
+				return getProject().getSortedHierarchyIterations();
 			}
 			
 		});
-		milestoneChoice.setVisible(SecurityUtils.canScheduleIssues(getProject()));
-		milestoneChoice.setRequired(false);
+		iterationChoice.setVisible(SecurityUtils.canScheduleIssues(getProject()));
+		iterationChoice.setRequired(false);
 		
-		add(milestoneChoice);
+		add(iterationChoice);
 		
 		Collection<String> properties = FieldUtils.getEditablePropertyNames(getProject(), 
 				fieldBeanClass, fieldNames);
@@ -411,12 +411,12 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
 				fieldEditor.getConvertedInput(), fieldNames));
 		
-		milestoneChoice.convertInput();
+		iterationChoice.convertInput();
 		issue.getSchedules().clear();
-		for (Milestone milestone: milestoneChoice.getConvertedInput()) {
+		for (Iteration iteration: iterationChoice.getConvertedInput()) {
 			IssueSchedule schedule = new IssueSchedule();
 			schedule.setIssue(issue);
-			schedule.setMilestone(milestone);
+			schedule.setIteration(iteration);
 			issue.getSchedules().add(schedule);
 		}
 		

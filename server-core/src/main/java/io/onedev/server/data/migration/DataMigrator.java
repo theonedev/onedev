@@ -6443,6 +6443,107 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate167(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Milestones.xml")) {
+				File renamedFile = new File(dataDir, file.getName().replace("Milestones.xml", "Iterations.xml"));
+				try {
+					FileUtils.moveFile(file, renamedFile);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Iterations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.setName("io.onedev.server.model.Iteration");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						for (var fieldSpecElement: element.element("value").element("fieldSpecs").elements()) {
+							if (fieldSpecElement.getName().contains("MilestoneChoiceField"))
+								fieldSpecElement.setName("io.onedev.server.model.support.issue.field.spec.IterationChoiceField");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueSchedules.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.element("milestone").setName("iteration");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Dashboards.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Node node : dom.selectNodes("//io.onedev.server.ee.dashboard.widgets.MilestoneListWidget")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.ee.dashboard.widgets.IterationListWidget");
+					}
+				}
+				for (Node node : dom.selectNodes("//io.onedev.server.ee.dashboard.widgets.BurnDownChartWidget")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						var milestoneNameElement = element.element("milestoneName");
+						if (milestoneNameElement != null)
+							milestoneNameElement.setName("iterationName");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueFields.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var typeElement = element.element("type");
+					if (typeElement.getTextTrim().equals("Milestone"))
+						typeElement.setText("Iteration");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var dataElement = element.element("data");
+					if (dataElement.attributeValue("class").contains("IssueMilestoneAddData"))
+						dataElement.addAttribute("class", "io.onedev.server.model.support.issue.changedata.IssueIterationAddData");
+					else if (dataElement.attributeValue("class").contains("IssueMilestoneRemoveData"))
+						dataElement.addAttribute("class", "io.onedev.server.model.support.issue.changedata.IssueIterationRemoveData");
+					else if (dataElement.attributeValue("class").contains("IssueMilestoneChangeData"))
+						dataElement.addAttribute("class", "io.onedev.server.model.support.issue.changedata.IssueIterationChangeData");
+					var milestoneElement = dataElement.element("milestone");
+					if (milestoneElement != null)
+						milestoneElement.setName("iteration");
+					var oldMilestonesElement = dataElement.element("oldMilestones");
+					if (oldMilestonesElement != null)
+						oldMilestonesElement.setName("oldIterations");
+					var newMilestonesElement = dataElement.element("newMilestones");
+					if (newMilestonesElement != null)
+						newMilestonesElement.setName("newIterations");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, UTF_8);
+				content = StringUtils.replace(content, 
+						"\"Milestone\" is", "\"Iteration\" is");
+				content = StringUtils.replace(content,
+						"\"Milestone\"  is", "\"Iteration\" is");
+				content = StringUtils.replace(content,
+						"\"Milestone\"   is", "\"Iteration\" is");
+				content = StringUtils.replace(content,
+						"\"Milestone\"    is", "\"Iteration\" is");
+				FileUtils.writeStringToFile(file, content, UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
 	
 }
 	

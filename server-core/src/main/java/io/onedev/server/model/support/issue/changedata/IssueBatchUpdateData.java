@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.util.Input;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
@@ -21,21 +21,21 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	
 	private final boolean newConfidential;
 	
-	private final List<String> oldMilestones;
+	private final List<String> oldIterations;
 	
-	private final List<String> newMilestones;
+	private final List<String> newIterations;
 	
-	public IssueBatchUpdateData(String oldState, String newState, 
-			boolean oldConfidential, boolean newConfidential,
-			List<Milestone> oldMilestones, List<Milestone> newMilestones, 
-			Map<String, Input> oldFields, Map<String, Input> newFields) {
+	public IssueBatchUpdateData(String oldState, String newState,
+								boolean oldConfidential, boolean newConfidential,
+								List<Iteration> oldIterations, List<Iteration> newIterations,
+								Map<String, Input> oldFields, Map<String, Input> newFields) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
 		this.oldConfidential = oldConfidential;
 		this.newConfidential = newConfidential;
-		this.oldMilestones = oldMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
-		this.newMilestones = newMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
+		this.oldIterations = oldIterations.stream().map(it->it.getName()).collect(Collectors.toList());
+		this.newIterations = newIterations.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 
 	@Override
@@ -43,8 +43,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 		Map<String, String> oldFieldValues = new LinkedHashMap<>();
 		oldFieldValues.put("State", oldState);
 		oldFieldValues.put("Confidential", String.valueOf(oldConfidential));
-		if (!oldMilestones.isEmpty())
-			oldFieldValues.put("Milestones", StringUtils.join(oldMilestones));
+		if (!oldIterations.isEmpty())
+			oldFieldValues.put("Iterations", StringUtils.join(oldIterations));
 		oldFieldValues.putAll(super.getOldFieldValues());
 		return oldFieldValues;
 	}
@@ -54,8 +54,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 		Map<String, String> newFieldValues = new LinkedHashMap<>();
 		newFieldValues.put("State", newState);
 		newFieldValues.put("Confidential", String.valueOf(newConfidential));
-		if (!newMilestones.isEmpty())
-			newFieldValues.put("Milestones", StringUtils.join(newMilestones));
+		if (!newIterations.isEmpty())
+			newFieldValues.put("Iterations", StringUtils.join(newIterations));
 		newFieldValues.putAll(super.getNewFieldValues());
 		return newFieldValues;
 	}
@@ -76,12 +76,12 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 		return newConfidential;
 	}
 
-	public List<String> getOldMilestones() {
-		return oldMilestones;
+	public List<String> getOldIterations() {
+		return oldIterations;
 	}
 
-	public List<String> getNewMilestones() {
-		return newMilestones;
+	public List<String> getNewIterations() {
+		return newIterations;
 	}
 
 	@Override

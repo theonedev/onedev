@@ -150,7 +150,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (listFields != null) {
 			for (String fieldName: listFields) {
 				if (!fieldName.equals(Issue.NAME_STATE) 
-						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
+						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)
 						&& getGlobalSetting().getFieldSpec(fieldName) == null) {
 					undefinedFields.add(fieldName);
 				}

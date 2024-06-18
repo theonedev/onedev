@@ -58,7 +58,7 @@
 .issue-side>.fields .field-values.editable {
 	border-color: transparent;
 }
-.issue-side>.milestones li+li, .issue-side>.links li+li {
+.issue-side>.iterations li+li, .issue-side>.links li+li {
 	margin-top: 1.2rem; 
 }
 

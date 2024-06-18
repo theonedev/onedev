@@ -41,16 +41,16 @@
 	margin-left: 0.5rem;
 	min-width: 256px;
 }
-.issue-boards>.head .milestone-selector.btn-danger {
+.issue-boards>.head .iteration-selector.btn-danger {
 	background-color: var(--danger) !important;
 	border-color: var(--danger) !important;
 }
-.issue-boards>.head .milestone-selector.btn-danger:hover, 
-.issue-boards>.head .milestone-selector.btn-danger:focus {
+.issue-boards>.head .iteration-selector.btn-danger:hover, 
+.issue-boards>.head .iteration-selector.btn-danger:focus {
 	background-color: #EE2D41 !important;
     border-color: #EE2D41 !important;
 }
-.floating>.content>.milestone-menu>table>tbody>tr:first-child>td {
+.floating>.content>.iteration-menu>table>tbody>tr:first-child>td {
 	border-top: none;
 }
 

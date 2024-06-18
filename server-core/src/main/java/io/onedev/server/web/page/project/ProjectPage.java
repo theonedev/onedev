@@ -41,10 +41,10 @@ import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
-import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.issues.iteration.IterationDetailPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
+import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -218,9 +218,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "Boards", 
 					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));
-			issueMenuItems.add(new SidebarMenuItem.Page(null, "Milestones", 
-					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
-					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "Iterations", 
+					IterationListPage.class, IterationListPage.paramsOf(getProject(), false, null), 
+					Lists.newArrayList(NewIterationPage.class, IterationDetailPage.class, IterationEditPage.class)));
 			if (getProject().isTimeTracking() && isSubscriptionActive()) 
 				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));

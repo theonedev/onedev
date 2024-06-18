@@ -253,7 +253,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueChangeManager.class).to(DefaultIssueChangeManager.class);
 		bind(IssueVoteManager.class).to(DefaultIssueVoteManager.class);
 		bind(IssueWorkManager.class).to(DefaultIssueWorkManager.class);
-		bind(MilestoneManager.class).to(DefaultMilestoneManager.class);
+		bind(IterationManager.class).to(DefaultIterationManager.class);
 		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
 		bind(IssueQueryPersonalizationManager.class).to(DefaultIssueQueryPersonalizationManager.class);
 		bind(PullRequestQueryPersonalizationManager.class).to(DefaultPullRequestQueryPersonalizationManager.class);

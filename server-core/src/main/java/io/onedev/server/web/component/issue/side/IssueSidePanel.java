@@ -31,9 +31,9 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.milestone.choice.AbstractMilestoneChoiceProvider;
-import io.onedev.server.web.component.milestone.choice.MilestoneChoiceResourceReference;
+import io.onedev.server.web.component.iteration.IterationStatusLabel;
+import io.onedev.server.web.component.iteration.choice.AbstractIterationChoiceProvider;
+import io.onedev.server.web.component.iteration.choice.IterationChoiceResourceReference;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.select2.Response;
@@ -45,7 +45,7 @@ import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -111,7 +111,7 @@ public abstract class IssueSidePanel extends Panel {
 	protected void onBeforeRender() {
 		addOrReplace(newFieldsContainer());
 		addOrReplace(newConfidentialContainer());
-		addOrReplace(newMilestonesContainer());
+		addOrReplace(newIterationsContainer());
 		addOrReplace(newLinksContainer());
 		addOrReplace(newVotesContainer());
 		
@@ -593,8 +593,8 @@ public abstract class IssueSidePanel extends Panel {
 		}
 	}
 	
-	private Component newMilestonesContainer() {
-		WebMarkupContainer container = new WebMarkupContainer("milestones") {
+	private Component newIterationsContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("iterations") {
 
 			@Override
 			protected void onConfigure() {
@@ -604,24 +604,24 @@ public abstract class IssueSidePanel extends Panel {
 			
 		};
 		
-		container.add(new ListView<Milestone>("milestones", new AbstractReadOnlyModel<List<Milestone>>() {
+		container.add(new ListView<Iteration>("iterations", new AbstractReadOnlyModel<List<Iteration>>() {
 
 			@Override
-			public List<Milestone> getObject() {
-				return getIssue().getMilestones().stream()
-						.sorted(new Milestone.DatesAndStatusComparator())
+			public List<Iteration> getObject() {
+				return getIssue().getIterations().stream()
+						.sorted(new Iteration.DatesAndStatusComparator())
 						.collect(Collectors.toList()); 
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<Milestone> item) {
-				Milestone milestone = item.getModelObject();
+			protected void populateItem(ListItem<Iteration> item) {
+				Iteration iteration = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
-						MilestoneIssuesPage.paramsOf(getIssue().getProject(), milestone, null));
-				link.add(new Label("label", milestone.getName()));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IterationIssuesPage.class, 
+						IterationIssuesPage.paramsOf(getIssue().getProject(), iteration, null));
+				link.add(new Label("label", iteration.getName()));
 				item.add(link);
 				
 				item.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
@@ -636,16 +636,16 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected Link<Void> newStateLink(String componentId, String state) {
 						String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
-						PageParameters params = MilestoneIssuesPage.paramsOf(getIssue().getProject(), 
+						PageParameters params = IterationIssuesPage.paramsOf(getIssue().getProject(), 
 								item.getModelObject(), query);
-						return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
+						return new ViewStateAwarePageLink<Void>(componentId, IterationIssuesPage.class, params);
 					}
 					
 				});
-				item.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
+				item.add(new IterationStatusLabel("status", new AbstractReadOnlyModel<Iteration>() {
 
 					@Override
-					public Milestone getObject() {
+					public Iteration getObject() {
 						return item.getModelObject();
 					}
 					
@@ -658,7 +658,7 @@ public abstract class IssueSidePanel extends Panel {
 						super.updateAjaxAttributes(attributes);
 						if (!getIssue().isNew()) {
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
-									+ "remove the issue from milestone '" + item.getModelObject().getName() + "'?"));
+									+ "remove the issue from iteration '" + item.getModelObject().getName() + "'?"));
 						}
 					}
 					
@@ -679,22 +679,22 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		container.add(new SelectToActChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
+		container.add(new SelectToActChoice<Iteration>("add", new AbstractIterationChoiceProvider() {
 			
 			@Override
-			public void query(String term, int page, Response<Milestone> response) {
-				List<Milestone> milestones = getProject().getSortedHierarchyMilestones();
-				milestones.removeAll(getIssue().getMilestones());
+			public void query(String term, int page, Response<Iteration> response) {
+				List<Iteration> iterations = getProject().getSortedHierarchyIterations();
+				iterations.removeAll(getIssue().getIterations());
 				
-				milestones = new Similarities<Milestone>(milestones) {
+				iterations = new Similarities<Iteration>(iterations) {
 
 					@Override
-					public double getSimilarScore(Milestone object) {
+					public double getSimilarScore(Iteration object) {
 						return Similarities.getSimilarScore(object.getName(), term);
 					}
 					
 				};
-				new ResponseFiller<>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(iterations, page, WebConstants.PAGE_SIZE);
 			}
 			
 		}) {
@@ -703,10 +703,10 @@ public abstract class IssueSidePanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add to milestone...");
-				getSettings().setFormatResult("onedev.server.milestoneChoiceFormatter.formatResult");
-				getSettings().setFormatSelection("onedev.server.milestoneChoiceFormatter.formatSelection");
-				getSettings().setEscapeMarkup("onedev.server.milestoneChoiceFormatter.escapeMarkup");
+				getSettings().setPlaceholder("Add to iteration...");
+				getSettings().setFormatResult("onedev.server.iterationChoiceFormatter.formatResult");
+				getSettings().setFormatSelection("onedev.server.iterationChoiceFormatter.formatSelection");
+				getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");
 			}
 			
 			@Override
@@ -718,12 +718,12 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(JavaScriptHeaderItem.forReference(new MilestoneChoiceResourceReference()));
+				response.render(JavaScriptHeaderItem.forReference(new IterationChoiceResourceReference()));
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Milestone milestone) {
-				getIssueChangeManager().addSchedule(getIssue(), milestone);
+			protected void onSelect(AjaxRequestTarget target, Iteration iteration) {
+				getIssueChangeManager().addSchedule(getIssue(), iteration);
 				notifyIssueChange(target, getIssue());
 			}
 

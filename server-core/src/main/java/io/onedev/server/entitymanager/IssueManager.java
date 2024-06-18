@@ -1,13 +1,13 @@
 package io.onedev.server.entitymanager;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.util.IssueTimes;
-import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.IterationAndIssueState;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -81,13 +81,13 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void delete(Collection<Issue> issues, Project project);
 	
-	Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones);
+	Collection<IterationAndIssueState> queryIterationAndIssueStates(Project project, Collection<Iteration> iterations);
 	
 	List<ProjectIssueStats> queryStats(Collection<Project> projects);
 	
-	Collection<Milestone> queryUsedMilestones(Project project);
+	Collection<Iteration> queryUsedIterations(Project project);
 
-	void clearSchedules(Project project, Collection<Milestone> milestones);
+	void clearSchedules(Project project, Collection<Iteration> iterations);
 	
 	List<Issue> queryAfter(Long projectId, Long afterIssueId, int count);
 

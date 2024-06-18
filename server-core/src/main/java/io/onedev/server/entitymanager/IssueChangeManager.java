@@ -3,7 +3,7 @@ package io.onedev.server.entitymanager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.persistence.dao.EntityManager;
 
 import javax.annotation.Nullable;
@@ -36,19 +36,19 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeFields(Issue issue, Map<String, Object> fieldValues);
 
-	void changeMilestones(Issue issue, Collection<Milestone> milestones);
+	void changeIterations(Issue issue, Collection<Iteration> iterations);
 	
 	void create(IssueChange change, @Nullable String note);
 	
-	void addSchedule(Issue issue, Milestone milestone);
+	void addSchedule(Issue issue, Iteration iteration);
 	
-	void removeSchedule(Issue issue, Milestone milestone);
+	void removeSchedule(Issue issue, Iteration iteration);
 	
 	void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
 			Collection<String> removeFields, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
-			@Nullable Collection<Milestone> milestone, Map<String, Object> fieldValues, @Nullable String comment);
+                     @Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, @Nullable String comment);
 	
 	List<IssueChange> queryAfter(Long projectId, Long afterChangeId, int count);
 

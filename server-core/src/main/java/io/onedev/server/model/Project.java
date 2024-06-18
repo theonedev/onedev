@@ -326,7 +326,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<Milestone> milestones = new ArrayList<>();
+	private Collection<Iteration> iterations = new ArrayList<>();
 	
 	private boolean codeManagement = true;
 	
@@ -411,7 +411,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
-	private transient List<Milestone> sortedHierarchyMilestones;
+	private transient List<Iteration> sortedHierarchyIterations;
 	
 	private transient Optional<String> activeServer;
 
@@ -1283,27 +1283,27 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return getGitService().getMode(this, getObjectId(revision, true), path);
 	}
 
-	public Collection<Milestone> getMilestones() {
-		return milestones;
+	public Collection<Iteration> getIterations() {
+		return iterations;
 	}
 	
-	public Collection<Milestone> getHierarchyMilestones() {
-		Collection<Milestone> milestones = new ArrayList<>(getMilestones());
+	public Collection<Iteration> getHierarchyIterations() {
+		Collection<Iteration> iterations = new ArrayList<>(getIterations());
 		if (getParent() != null)
-			milestones.addAll(getParent().getHierarchyMilestones());
-		return milestones;
+			iterations.addAll(getParent().getHierarchyIterations());
+		return iterations;
 	}
 
-	public void setMilestones(Collection<Milestone> milestones) {
-		this.milestones = milestones;
+	public void setIterations(Collection<Iteration> iterations) {
+		this.iterations = iterations;
 	}
 
-	public List<Milestone> getSortedHierarchyMilestones() {
-		if (sortedHierarchyMilestones == null) {
-			sortedHierarchyMilestones = new ArrayList<>(getHierarchyMilestones());
-			sortedHierarchyMilestones.sort(new Milestone.DatesAndStatusComparator());
+	public List<Iteration> getSortedHierarchyIterations() {
+		if (sortedHierarchyIterations == null) {
+			sortedHierarchyIterations = new ArrayList<>(getHierarchyIterations());
+			sortedHierarchyIterations.sort(new Iteration.DatesAndStatusComparator());
 		}
-		return sortedHierarchyMilestones;
+		return sortedHierarchyIterations;
 	}
 	
 	@Editable
@@ -1494,19 +1494,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	@Nullable
-	public Milestone getHierarchyMilestone(@Nullable String milestoneName) {
-		for (Milestone milestone: getHierarchyMilestones()) {
-			if (milestone.getName().equals(milestoneName))
-				return milestone;
+	public Iteration getHierarchyIteration(@Nullable String iterationName) {
+		for (Iteration iteration: getHierarchyIterations()) {
+			if (iteration.getName().equals(iterationName))
+				return iteration;
 		}
 		return null;
 	}
 	
 	@Nullable
-	public Milestone getMilestone(String milestoneName) {
-		for (Milestone milestone: getMilestones()) {
-			if (milestone.getName().equals(milestoneName))
-				return milestone;
+	public Iteration getIteration(String iterationName) {
+		for (Iteration iteration: getIterations()) {
+			if (iteration.getName().equals(iterationName))
+				return iteration;
 		}
 		return null;
 	}

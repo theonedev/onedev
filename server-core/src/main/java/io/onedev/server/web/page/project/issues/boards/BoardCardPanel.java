@@ -5,7 +5,7 @@ import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -17,7 +17,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
-import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
+import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -100,8 +100,8 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 				transitLink.add(new IssueStateBadge("state", issueModel));
 				stateFragment.add(transitLink);
 				fieldsView.add(stateFragment.setOutputMarkupId(true));
-			} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-				fieldsView.add(new MilestoneCrumbPanel(fieldsView.newChildId()) {
+			} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
+				fieldsView.add(new IterationCrumbPanel(fieldsView.newChildId()) {
 					@Override
 					protected Issue getIssue() {
 						return issueModel.getObject();
@@ -340,8 +340,8 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 					Hibernate.initialize(issue.getTargetLinks());
 					Hibernate.initialize(issue.getSourceLinks());
 					Hibernate.initialize(issue.getMentions());
-					for (Milestone milestone : issue.getMilestones())
-						Hibernate.initialize(milestone);
+					for (Iteration iteration : issue.getIterations())
+						Hibernate.initialize(iteration);
 					send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 				} else {
 					Session.get().warn("Issue management permission required to move issues");

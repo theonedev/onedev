@@ -77,13 +77,13 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (boardQuery.getCriteria() != null)
 					criterias.add(boardQuery.getCriteria());
-				if (getMilestoneSelection().getMilestone() != null) {
-					criterias.add(new MilestoneCriteria(getMilestoneSelection().getMilestone().getName(), Is));
-				} else if (getMilestoneSelection() instanceof MilestoneSelection.Unscheduled) {
-					if (getMilestonePrefix() != null)	
-						criterias.add(new MilestoneCriteria(getMilestonePrefix()+ "*", IsNot));
+				if (getIterationSelection().getIteration() != null) {
+					criterias.add(new IterationCriteria(getIterationSelection().getIteration().getName(), Is));
+				} else if (getIterationSelection() instanceof IterationSelection.Unscheduled) {
+					if (getIterationPrefix() != null)	
+						criterias.add(new IterationCriteria(getIterationPrefix()+ "*", IsNot));
 					else
-						criterias.add(new MilestoneEmptyCriteria(IsEmpty));
+						criterias.add(new IterationEmptyCriteria(IsEmpty));
 				}
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
@@ -139,8 +139,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						if (event.getPayload() instanceof IssueDragging && getQuery() != null) {
 							IssueDragging issueDragging = (IssueDragging) event.getPayload();
 							Issue issue = issueDragging.getIssue();
-							var milestone = getMilestoneSelection().getMilestone();
-							if (milestone == null || issue.getMilestones().contains(milestone)) { 
+							var iteration = getIterationSelection().getIteration();
+							if (iteration == null || issue.getIterations().contains(iteration)) { 
 								// move issue between board columns
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
@@ -166,7 +166,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								issue.setProject(getProjectScope().getProject());
 								IssueSchedule schedule = new IssueSchedule();
 								schedule.setIssue(issue);
-								schedule.setMilestone(milestone);
+								schedule.setIteration(iteration);
 								issue.getSchedules().add(schedule);
 								issue.getLastActivity().setDate(new Date());
 							}
@@ -352,9 +352,9 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				} else {
 					Issue issue = getIssueManager().load(issueId);
 					String fieldName = getBoard().getIdentifyField();
-					var milestone = getMilestoneSelection().getMilestone();
-					if (milestone != null && !issue.getMilestones().contains(milestone)) {
-						getIssueChangeManager().addSchedule(issue, milestone);
+					var iteration = getIterationSelection().getIteration();
+					if (iteration != null && !issue.getIterations().contains(iteration)) {
+						getIssueChangeManager().addSchedule(issue, iteration);
 						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 					} else if (fieldName.equals(Issue.NAME_STATE)) {
 						AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);

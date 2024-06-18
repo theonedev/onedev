@@ -212,7 +212,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_MILESTONE));
+		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_ITERATION));
 		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
 		
@@ -220,7 +220,7 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add("Type");
 		listFields.add("Priority");
 		listFields.add("Assignees");
-		listFields.add(IssueSchedule.NAME_MILESTONE);
+		listFields.add(IssueSchedule.NAME_ITERATION);
 		
 		listLinks.add("Child Issue");
 		listLinks.add("Blocked By");
@@ -236,7 +236,7 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
-		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Milestone\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Iteration\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 		
@@ -354,7 +354,7 @@ public class GlobalIssueSetting implements Serializable {
 		Collection<String> undefinedFields = new HashSet<>();
 		for (String fieldName: getListFields()) {
 			if (!fieldName.equals(Issue.NAME_STATE) 
-					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE) 
+					&& !fieldName.equals(IssueSchedule.NAME_ITERATION) 
 					&& getFieldSpec(fieldName) == null) {
 				undefinedFields.add(fieldName);
 			}

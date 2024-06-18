@@ -222,34 +222,34 @@ public class ImportServer implements Serializable, Validatable {
 		return userIdOpt.orElse(null);
 	}
 	
-	private List<Milestone> getMilestones(String groupId, TaskLogger logger) {
+	private List<Iteration> getIterations(String groupId, TaskLogger logger) {
 		Client client = newClient();
 		try {
-			List<Milestone> milestones = new ArrayList<>();
+			List<Iteration> iterations = new ArrayList<>();
 			String apiEndpoint = getApiEndpoint("/groups/" + groupId + "/milestones");
 			for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) 
-				milestones.add(getMilestone(milestoneNode));
+				iterations.add(getIteration(milestoneNode));
 			apiEndpoint = getApiEndpoint("/groups/" + groupId);
 			JsonNode groupNode = JerseyUtils.get(client, apiEndpoint, logger);
 			JsonNode parentIdNode = groupNode.get("parent_id");
 			if (parentIdNode != null && parentIdNode.asText(null) != null) 
-				milestones.addAll(getMilestones(parentIdNode.asText(), logger));
-			return milestones;
+				iterations.addAll(getIterations(parentIdNode.asText(), logger));
+			return iterations;
 		} finally {
 			client.close();
 		}
 	}
 	
-	private Milestone getMilestone(JsonNode milestoneNode) {
-		Milestone milestone = new Milestone();
-		milestone.setName(milestoneNode.get("title").asText());
-		milestone.setDescription(milestoneNode.get("description").asText(null));
+	private Iteration getIteration(JsonNode milestoneNode) {
+		Iteration iteration = new Iteration();
+		iteration.setName(milestoneNode.get("title").asText());
+		iteration.setDescription(milestoneNode.get("description").asText(null));
 		String dueDateString = milestoneNode.get("due_date").asText(null);
 		if (dueDateString != null) 
-			milestone.setDueDate(ISODateTimeFormat.date().parseDateTime(dueDateString).toDate());
+			iteration.setDueDate(ISODateTimeFormat.date().parseDateTime(dueDateString).toDate());
 		if (milestoneNode.get("state").asText().equals("closed"))
-			milestone.setClosed(true);
-		return milestone;
+			iteration.setClosed(true);
+		return iteration;
 	}
 	
 	TaskResult importProjects(ImportProjects projects, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
@@ -315,24 +315,24 @@ public class ImportServer implements Serializable, Validatable {
 						}
 
 						if (option.getIssueImportOption() != null) {
-							List<Milestone> milestones = new ArrayList<>();
+							List<Iteration> iterations = new ArrayList<>();
 							logger.log("Importing milestones...");
 							apiEndpoint = getApiEndpoint("/projects/"
 									+ gitLabProject.replace("/", "%2F") + "/milestones");
 							for (JsonNode milestoneNode : list(client, apiEndpoint, logger))
-								milestones.add(getMilestone(milestoneNode));
+								iterations.add(getIteration(milestoneNode));
 							JsonNode namespaceNode = projectNode.get("namespace");
 							if (namespaceNode.get("kind").asText().equals("group")) {
 								String groupId = namespaceNode.get("id").asText();
-								milestones.addAll(getMilestones(groupId, logger));
+								iterations.addAll(getIterations(groupId, logger));
 							}
 
-							for (Milestone milestone : milestones) {
-								if (project.getMilestone(milestone.getName()) == null) {
-									milestone.setProject(project);
-									project.getMilestones().add(milestone);
+							for (Iteration iteration : iterations) {
+								if (project.getIteration(iteration.getName()) == null) {
+									iteration.setProject(project);
+									project.getIterations().add(iteration);
 									if (!dryRun)
-										OneDev.getInstance(MilestoneManager.class).createOrUpdate(milestone);
+										OneDev.getInstance(IterationManager.class).createOrUpdate(iteration);
 								}
 							}
 
@@ -340,7 +340,7 @@ public class ImportServer implements Serializable, Validatable {
 							ImportResult currentResult = importIssues(gitLabProject, project, option.getIssueImportOption(),
 									userIds, dryRun, logger);
 							result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-							result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
+							result.nonExistentIterations.addAll(currentResult.nonExistentIterations);
 							result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);
 							result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
 							result.errorAttachments.addAll(currentResult.errorAttachments);
@@ -361,14 +361,14 @@ public class ImportServer implements Serializable, Validatable {
 		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
-			Set<String> nonExistentMilestones = new HashSet<>();
+			Set<String> nonExistentIterations = new HashSet<>();
 			Set<String> nonExistentLogins = new HashSet<>();
 			Set<String> unmappedIssueLabels = new HashSet<>();
 			Set<String> tooLargeAttachments = new LinkedHashSet<>();
 			Set<String> errorAttachments = new HashSet<>();
 			
 			Map<String, Pair<FieldSpec, String>> labelMappings = new HashMap<>();
-			Map<String, Milestone> milestoneMappings = new HashMap<>();
+			Map<String, Iteration> iterationMappings = new HashMap<>();
 			
 			for (IssueLabelMapping mapping: option.getIssueLabelMappings()) {
 				String oneDevFieldName = StringUtils.substringBefore(mapping.getOneDevIssueField(), "::");
@@ -379,8 +379,8 @@ public class ImportServer implements Serializable, Validatable {
 				labelMappings.put(mapping.getGitLabIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
 			}
 			
-			for (Milestone milestone: oneDevProject.getMilestones())
-				milestoneMappings.put(milestone.getName(), milestone);
+			for (Iteration iteration: oneDevProject.getIterations())
+				iterationMappings.put(iteration.getName(), iteration);
 			
 			String initialIssueState = getIssueSetting().getInitialStateSpec().getName();
 			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
@@ -470,15 +470,15 @@ public class ImportServer implements Serializable, Validatable {
 						
 						if (issueNode.hasNonNull("milestone")) {
 							String milestoneName = issueNode.get("milestone").get("title").asText();
-							Milestone milestone = milestoneMappings.get(milestoneName);
-							if (milestone != null) {
+							Iteration iteration = iterationMappings.get(milestoneName);
+							if (iteration != null) {
 								IssueSchedule schedule = new IssueSchedule();
 								schedule.setIssue(issue);
-								schedule.setMilestone(milestone);
+								schedule.setIteration(iteration);
 								issue.getSchedules().add(schedule);
 							} else {
 								extraIssueInfo.put("Milestone", milestoneName);
-								nonExistentMilestones.add(milestoneName);
+								nonExistentIterations.add(milestoneName);
 							}
 						}
 						
@@ -699,7 +699,7 @@ public class ImportServer implements Serializable, Validatable {
 			
 			ImportResult result = new ImportResult();
 			result.nonExistentLogins.addAll(nonExistentLogins);
-			result.nonExistentMilestones.addAll(nonExistentMilestones);
+			result.nonExistentIterations.addAll(nonExistentIterations);
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
 			result.tooLargeAttachments.addAll(tooLargeAttachments);
 			result.errorAttachments.addAll(errorAttachments);

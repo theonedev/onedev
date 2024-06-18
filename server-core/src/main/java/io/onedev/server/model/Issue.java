@@ -29,7 +29,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.component.milestone.burndown.BurndownIndicators;
+import io.onedev.server.web.component.iteration.burndown.BurndownIndicators;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.IssueAware;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.*;
-import static io.onedev.server.model.IssueSchedule.NAME_MILESTONE;
+import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 
@@ -153,7 +153,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
-			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE,
+			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_ITERATION,
 			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			BurndownIndicators.ISSUE_COUNT, BurndownIndicators.REMAINING_TIME);
 	
@@ -161,7 +161,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION,
 			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
-			NAME_COMMENT_COUNT, NAME_MILESTONE);
+			NAME_COMMENT_COUNT, NAME_ITERATION);
 
 	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
 	
@@ -924,23 +924,23 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return OneDev.getInstance(UrlManager.class).urlFor(this);
 	}
 	
-	public Collection<Milestone> getMilestones() {
-		return getSchedules().stream().map(it->it.getMilestone()).collect(Collectors.toList());
+	public Collection<Iteration> getIterations() {
+		return getSchedules().stream().map(it->it.getIteration()).collect(Collectors.toList());
 	}
 	
-	public IssueSchedule addSchedule(Milestone milestone) {
+	public IssueSchedule addSchedule(Iteration iteration) {
 		IssueSchedule schedule = new IssueSchedule();
 		schedule.setIssue(this);
-		schedule.setMilestone(milestone);
+		schedule.setIteration(iteration);
 		getSchedules().add(schedule);
 		return schedule;
 	}
 	
 	@Nullable
-	public IssueSchedule removeSchedule(Milestone milestone) {
+	public IssueSchedule removeSchedule(Iteration iteration) {
 		for (Iterator<IssueSchedule> it = getSchedules().iterator(); it.hasNext();) {
 			IssueSchedule schedule = it.next();
-			if (schedule.getMilestone().equals(milestone)) {
+			if (schedule.getIteration().equals(iteration)) {
 				it.remove();
 				return schedule;
 			}

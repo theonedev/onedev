@@ -39,7 +39,7 @@ public class FieldsAndLinksBean implements Serializable {
 		choices.add(Issue.NAME_STATE);
 		for (String fieldName: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames())
 			choices.add(fieldName);
-		choices.add(IssueSchedule.NAME_MILESTONE);
+		choices.add(IssueSchedule.NAME_ITERATION);
 		return choices;
 	}
 	

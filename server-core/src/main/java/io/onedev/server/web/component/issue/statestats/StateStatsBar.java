@@ -56,7 +56,7 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 				
 			}.setEscapeModelStrings(false));
 			
-			add(AttributeAppender.append("title", "No issues in milestone"));
+			add(AttributeAppender.append("title", "No issues in iteration"));
 		}
 		
 		setOutputMarkupId(true);

@@ -33,7 +33,7 @@ import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 
 public abstract class ParsedUrl implements Serializable {
@@ -88,8 +88,8 @@ public abstract class ParsedUrl implements Serializable {
 					case AgentDetailPage.PARAM_AGENT:
 						parsedSegments.add(new AgentParam(optional));
 						break;
-					case MilestoneDetailPage.PARAM_MILESTONE:
-						parsedSegments.add(new MilestoneParam(optional));
+					case IterationDetailPage.PARAM_ITERATION:
+						parsedSegments.add(new IterationParam(optional));
 						break;
 					case ServerDetailPage.PARAM_SERVER:
 						if (getServers().size() > 1)
@@ -147,7 +147,7 @@ public abstract class ParsedUrl implements Serializable {
 		case "~boards":
 		case "~issues":
 			return project.isIssueManagement();
-		case "~milestones":
+		case "~iterations":
 			if (project.isIssueManagement()) {
 				if (segment2.equals("new"))
 					return SecurityUtils.canManageIssues(project);

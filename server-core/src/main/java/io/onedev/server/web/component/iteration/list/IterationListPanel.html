@@ -1,0 +1,24 @@
+<wicket:panel>
+	<div class="card iteration-list">
+		<div class="card-body">
+			<div class="d-flex align-items-center flex-wrap">
+				<span wicket:id="states" class="btn-group mr-4 mb-4">
+					<a wicket:id="open" class="btn btn-outline-secondary">Open</a>
+					<a wicket:id="closed" class="btn btn-outline-secondary">Closed</a>
+				</span>
+				<div class="mr-4 mb-4">
+					<a wicket:id="sort" class="btn btn-outline-secondary">Sort <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
+				</div>
+				<a wicket:id="newIteration" class="btn btn-primary btn-icon mb-4"><wicket:svg href="plus" class="icon mr-1"></wicket:svg></a>
+			</div>
+			<table wicket:id="iterations" class="table"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="issueStatsFrag">
+		<div wicket:id="content"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a> 
+		<span wicket:id="inherited" class="badge badge-info badge-sm ml-2">Inherited</span>
+	</wicket:fragment>
+</wicket:panel>

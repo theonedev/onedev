@@ -141,7 +141,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
 										|| field instanceof DateField || field instanceof DateTimeField 
-										|| field instanceof MilestoneChoiceField) { 
+										|| field instanceof IterationChoiceField) { 
 									candidates.put(field.getName(), null);
 								}
 							}
@@ -227,9 +227,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											}			
 										} else if (fieldName.equals(NAME_NUMBER)) {
 											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-										} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+										} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
 											if (project != null && !matchWith.contains("*"))
-												return SuggestionUtils.suggestMilestones(project, matchWith);
+												return SuggestionUtils.suggestIterations(project, matchWith);
 											else
 												return null;
 										} else if (fieldName.equals(NAME_ESTIMATED_TIME) || fieldName.equals(NAME_SPENT_TIME)) {
@@ -328,7 +328,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					} else if (fieldName.equals(Issue.NAME_TITLE)
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
-							|| fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+							|| fieldName.equals(IssueSchedule.NAME_ITERATION)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

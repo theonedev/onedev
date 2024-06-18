@@ -243,25 +243,25 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Transactional
 	@Override
-	public void addSchedule(Issue issue, Milestone milestone) {
-		issueScheduleManager.create(issue.addSchedule(milestone));
+	public void addSchedule(Issue issue, Iteration iteration) {
+		issueScheduleManager.create(issue.addSchedule(iteration));
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setData(new IssueMilestoneAddData(milestone.getName()));
+		change.setData(new IssueIterationAddData(iteration.getName()));
 		change.setUser(SecurityUtils.getUser());
 		create(change, null);
 	}
 	
 	@Transactional
 	@Override
-	public void removeSchedule(Issue issue, Milestone milestone) {
-		IssueSchedule schedule = issue.removeSchedule(milestone);
+	public void removeSchedule(Issue issue, Iteration iteration) {
+		IssueSchedule schedule = issue.removeSchedule(iteration);
 		if (schedule != null) {
 			issueScheduleManager.delete(schedule);
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
-			change.setData(new IssueMilestoneRemoveData(milestone.getName()));
+			change.setData(new IssueIterationRemoveData(iteration.getName()));
 			change.setUser(SecurityUtils.getUser());
 			create(change, null);
 		}
@@ -307,12 +307,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
-			@Nullable Collection<Milestone> milestones, Map<String, Object> fieldValues, @Nullable String comment) {
+							@Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, @Nullable String comment) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
 			boolean prevConfidential = issue.isConfidential();
-			Collection<Milestone> prevMilestones = issue.getMilestones();
+			Collection<Iteration> prevIterations = issue.getIterations();
 			Map<String, Input> prevFields = issue.getFieldInputs();
 			if (state != null)
 				issue.setState(state);
@@ -320,8 +320,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			if (confidential != null)
 				issue.setConfidential(confidential);
 			
-			if (milestones != null) 
-				issueScheduleManager.syncMilestones(issue, milestones);
+			if (iterations != null) 
+				issueScheduleManager.syncIterations(issue, iterations);
 			
 			issue.setFieldValues(fieldValues);
 			issueFieldManager.saveFields(issue);
@@ -329,18 +329,18 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			if (!prevState.equals(issue.getState()) 
 					|| prevConfidential != issue.isConfidential()
 					|| !prevFields.equals(issue.getFieldInputs()) 
-					|| !new HashSet<>(prevMilestones).equals(new HashSet<>(issue.getMilestones()))) {
+					|| !new HashSet<>(prevIterations).equals(new HashSet<>(issue.getIterations()))) {
 				IssueChange change = new IssueChange();
 				change.setIssue(issue);
 				change.setUser(SecurityUtils.getUser());
 				
-				List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
-				prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
-				List<Milestone> currentMilestoneList = new ArrayList<>(issue.getMilestones());
-				currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
+				List<Iteration> prevIterationList = new ArrayList<>(prevIterations);
+				prevIterationList.sort(new Iteration.DatesAndStatusComparator());
+				List<Iteration> currentIterationList = new ArrayList<>(issue.getIterations());
+				currentIterationList.sort(new Iteration.DatesAndStatusComparator());
 				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), 
-						prevConfidential, issue.isConfidential(), prevMilestoneList, 
-						currentMilestoneList, prevFields, issue.getFieldInputs()));
+						prevConfidential, issue.isConfidential(), prevIterationList, 
+						currentIterationList, prevFields, issue.getFieldInputs()));
 				create(change, comment);
 			}
 		}
@@ -660,19 +660,19 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
-	public void changeMilestones(Issue issue, Collection<Milestone> milestones) {
-		Collection<Milestone> prevMilestones = new HashSet<>(issue.getMilestones());
-		if (!prevMilestones.equals(new HashSet<>(milestones))) {
-			issueScheduleManager.syncMilestones(issue, milestones);
+	public void changeIterations(Issue issue, Collection<Iteration> iterations) {
+		Collection<Iteration> prevIterations = new HashSet<>(issue.getIterations());
+		if (!prevIterations.equals(new HashSet<>(iterations))) {
+			issueScheduleManager.syncIterations(issue, iterations);
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
 			change.setUser(SecurityUtils.getUser());
 			
-			List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
-			prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
-			List<Milestone> currentMilestoneList = new ArrayList<>(milestones);
-			currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
-			change.setData(new IssueMilestoneChangeData(prevMilestoneList, currentMilestoneList));
+			List<Iteration> prevIterationList = new ArrayList<>(prevIterations);
+			prevIterationList.sort(new Iteration.DatesAndStatusComparator());
+			List<Iteration> currentIterationList = new ArrayList<>(iterations);
+			currentIterationList.sort(new Iteration.DatesAndStatusComparator());
+			change.setData(new IssueIterationChangeData(prevIterationList, currentIterationList));
 			create(change, null);
 		}
 		

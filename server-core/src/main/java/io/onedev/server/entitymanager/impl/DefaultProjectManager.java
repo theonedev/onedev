@@ -268,14 +268,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 		dao.persist(project);
 		if (oldPath != null && !oldPath.equals(project.getPath())) {
-			Collection<Milestone> milestones = new ArrayList<>();
-			for (Milestone milestone : issueManager.queryUsedMilestones(project)) {
-				if (!project.isSelfOrAncestorOf(milestone.getProject())
-						&& !milestone.getProject().isSelfOrAncestorOf(project)) {
-					milestones.add(milestone);
+			Collection<Iteration> iterations = new ArrayList<>();
+			for (Iteration iteration : issueManager.queryUsedIterations(project)) {
+				if (!project.isSelfOrAncestorOf(iteration.getProject())
+						&& !iteration.getProject().isSelfOrAncestorOf(project)) {
+					iterations.add(iteration);
 				}
 			}
-			issueManager.clearSchedules(project, milestones);
+			issueManager.clearSchedules(project, iterations);
 			settingManager.onMoveProject(oldPath, project.getPath());
 
 			for (LinkSpec link : linkSpecManager.query()) {

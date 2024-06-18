@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.onedev.server.model.Issue;
 import org.unbescape.html.HtmlEscape;
 
 public class ImportResult {
@@ -17,7 +16,7 @@ public class ImportResult {
 	
 	Set<String> unmappedIssueLabels = new HashSet<>();
 	
-	Set<String> nonExistentMilestones = new HashSet<>();
+	Set<String> nonExistentIterations = new HashSet<>();
 
 	boolean issuesImported;
 	
@@ -35,7 +34,7 @@ public class ImportResult {
 		
 		boolean hasNotice = false;
 		
-		if (!nonExistentMilestones.isEmpty() || !unmappedIssueLabels.isEmpty() 
+		if (!nonExistentIterations.isEmpty() || !unmappedIssueLabels.isEmpty() 
 				|| !nonExistentLogins.isEmpty() || issuesImported) { 
 			hasNotice = true;
 		}
@@ -43,8 +42,8 @@ public class ImportResult {
 		if (hasNotice)
 			feedback.append("<br><br><b>NOTE:</b><ul>");
 		
-		if (!nonExistentMilestones.isEmpty()) 
-			feedback.append(getEntryFeedback("Non existent milestones", nonExistentMilestones));
+		if (!nonExistentIterations.isEmpty()) 
+			feedback.append(getEntryFeedback("Non existent iterations", nonExistentIterations));
 		if (!unmappedIssueLabels.isEmpty()) 
 			feedback.append(getEntryFeedback("Gitea issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {

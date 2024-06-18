@@ -2,9 +2,9 @@ package io.onedev.server.web.page.project.issues.boards;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.search.entity.EntitySort;
@@ -22,14 +22,14 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.milestone.MilestoneDateLabel;
-import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.iteration.IterationDateLabel;
+import io.onedev.server.web.component.iteration.IterationStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
-import io.onedev.server.web.util.editbean.MilestoneEditBean;
+import io.onedev.server.web.util.editbean.IterationEditBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.wicket.Component;
@@ -72,7 +72,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 	public static final String PARAM_BOARD = "board";
 	
-	private static final String PARAM_MILESTONE = "milestone";
+	private static final String PARAM_ITERATION = "iteration";
 	
 	private static final String PARAM_BACKLOG = "backlog";
 	
@@ -80,15 +80,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 
-	private static final String MILESTONE_ALL = "all";
+	private static final String ITERATION_ALL = "all";
 
-	public static final String MILESTONE_UNSCHEDULED = "unscheduled";
+	public static final String ITERATION_UNSCHEDULED = "unscheduled";
 
 	private List<BoardSpec> boards;
 	
 	private final int boardIndex;
 	
-	private final IModel<MilestoneSelection> milestoneSelectionModel;
+	private final IModel<IterationSelection> iterationSelectionModel;
 	
 	private final boolean backlog;
 	
@@ -178,50 +178,50 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			boardIndex = -1;
 		}
 
-		var milestoneParam = params.get(PARAM_MILESTONE).toString();
-		milestoneSelectionModel = new LoadableDetachableModel<>() {
+		var iterationParam = params.get(PARAM_ITERATION).toString();
+		iterationSelectionModel = new LoadableDetachableModel<>() {
 			
-			private MilestoneSelection getCurrentMilestone() {
-				if (!getMilestones().isEmpty()) {
-					var milestone = getMilestones().iterator().next();
-					if (!milestone.isClosed())
-						return new MilestoneSelection.Specified(milestone);
+			private IterationSelection getCurrentIteration() {
+				if (!getIterations().isEmpty()) {
+					var iteration = getIterations().iterator().next();
+					if (!iteration.isClosed())
+						return new IterationSelection.Specified(iteration);
 				}
-				return new MilestoneSelection.Unscheduled();
+				return new IterationSelection.Unscheduled();
 			}
 			
 			@Override
-			protected MilestoneSelection load() {
-				if (MILESTONE_UNSCHEDULED.equals(milestoneParam)) {
-					return new MilestoneSelection.Unscheduled();
-				} else if (MILESTONE_ALL.equals(milestoneParam)) {
-					return new MilestoneSelection.All();
-				} else if (NumberUtils.isDigits(milestoneParam)) {
-					var milestone = getMilestoneManager().load(Long.valueOf(milestoneParam));
-					if (getBoard().getMilestonePrefix() != null && !milestone.getName().startsWith(getBoard().getMilestonePrefix()) 
-							|| !milestone.getProject().isSelfOrAncestorOf(getProject())) {
-						return getCurrentMilestone();
+			protected IterationSelection load() {
+				if (ITERATION_UNSCHEDULED.equals(iterationParam)) {
+					return new IterationSelection.Unscheduled();
+				} else if (ITERATION_ALL.equals(iterationParam)) {
+					return new IterationSelection.All();
+				} else if (NumberUtils.isDigits(iterationParam)) {
+					var iteration = getIterationManager().load(Long.valueOf(iterationParam));
+					if (getBoard().getIterationPrefix() != null && !iteration.getName().startsWith(getBoard().getIterationPrefix()) 
+							|| !iteration.getProject().isSelfOrAncestorOf(getProject())) {
+						return getCurrentIteration();
 					} else {
-						return new MilestoneSelection.Specified(milestone);
+						return new IterationSelection.Specified(iteration);
 					}
 				} else {
-					return getCurrentMilestone();
+					return getCurrentIteration();
 				}
 			}
 		};
 		
-		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestoneSelection().getMilestone() != null;
+		backlog = params.get(PARAM_BACKLOG).toBoolean() && getIterationSelection().getIteration() != null;
 		queryString = params.get(PARAM_QUERY).toString();
 		backlogQueryString = params.get(PARAM_BACKLOG_QUERY).toString();
 	}
 	
-	private MilestoneManager getMilestoneManager() {
-		return OneDev.getInstance(MilestoneManager.class);
+	private IterationManager getIterationManager() {
+		return OneDev.getInstance(IterationManager.class);
 	}
 	
 	@Override
 	protected void onDetach() {
-		milestoneSelectionModel.detach();
+		iterationSelectionModel.detach();
 		queryModel.detach();
 		backlogQueryModel.detach();
 		super.onDetach();
@@ -235,8 +235,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return null;
 	}
 	
-	public MilestoneSelection getMilestoneSelection() {
-		return milestoneSelectionModel.getObject();
+	public IterationSelection getIterationSelection() {
+		return iterationSelectionModel.getObject();
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -249,7 +249,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 
 		PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-				getMilestoneSelection(), backlog, queryString, backlogQueryString);
+				getIterationSelection(), backlog, queryString, backlogQueryString);
 			
 		CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
 		pushState(target, url.toString(), queryInput.getModelObject());
@@ -305,7 +305,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canManageIssues(getProject())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
-										getProject(), item.getModelObject(), getMilestoneSelection(), backlog, 
+										getProject(), item.getModelObject(), getIterationSelection(), backlog, 
 										backlogQueryString, queryString);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
@@ -349,7 +349,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									else
 										nextBoard = currentBoard;
 									PageParameters params = IssueBoardsPage.paramsOf(getProject(), 
-											nextBoard, getMilestoneSelection(), backlog, queryString, 
+											nextBoard, getIterationSelection(), backlog, queryString, 
 											backlogQueryString);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
@@ -406,7 +406,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					PageParameters params = paramsOf(getProject(), getBoard(), getMilestoneSelection(), 
+					PageParameters params = paramsOf(getProject(), getBoard(), getIterationSelection(), 
 							!backlog, queryString, backlogQueryString);
 					setResponsePage(IssueBoardsPage.class, params);
 				}
@@ -414,12 +414,12 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(getMilestoneSelection().getMilestone() != null);
+					setVisible(getIterationSelection().getIteration() != null);
 				}
 				
 			});
 			
-			form.add(new DropdownLink("milestone") {
+			form.add(new DropdownLink("iteration") {
 
 				private boolean showClosed;
 				
@@ -427,20 +427,20 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onInitialize() {
 					super.onInitialize();
 					
-					if (getMilestoneSelection() instanceof MilestoneSelection.All) {
+					if (getIterationSelection() instanceof IterationSelection.All) {
 						add(new Label("label", "<i>All</i>").setEscapeModelStrings(false));
 						add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
-					} else if (getMilestoneSelection() instanceof MilestoneSelection.Unscheduled) {
+					} else if (getIterationSelection() instanceof IterationSelection.Unscheduled) {
 						add(new Label("label", "<i>Unscheduled</i>").setEscapeModelStrings(false));
 						add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
 					} else {
-						var milestone = getMilestoneSelection().getMilestone();
-						add(new Label("label", milestone.getName()));
-						if (milestone.getDueDate() != null
-								&& milestone.getDueDate().before(new Date())
-								&& !milestone.isClosed()) {
+						var iteration = getIterationSelection().getIteration();
+						add(new Label("label", iteration.getName()));
+						if (iteration.getDueDate() != null
+								&& iteration.getDueDate().before(new Date())
+								&& !iteration.isClosed()) {
 							add(AttributeAppender.append("class", "btn-danger"));
-							add(AttributeAppender.replace("title", "Milestone is due"));
+							add(AttributeAppender.replace("title", "Iteration is due"));
 						} else {
 							add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
 						}
@@ -449,53 +449,53 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					Fragment menuFragment = new Fragment(id, "milestoneMenuFrag", IssueBoardsPage.this);
+					Fragment menuFragment = new Fragment(id, "iterationMenuFrag", IssueBoardsPage.this);
 					if (SecurityUtils.canManageProject(getProject()))
 						menuFragment.add(AttributeAppender.append("class", "administrative"));
 
-					menuFragment.add(new ListView<Milestone>("milestones", new LoadableDetachableModel<>() {
+					menuFragment.add(new ListView<Iteration>("iterations", new LoadableDetachableModel<>() {
 
 						@Override
-						protected List<Milestone> load() {
-							List<Milestone> milestones = getMilestones()
+						protected List<Iteration> load() {
+							List<Iteration> iterationss = getIterations()
 									.stream()
 									.filter(it -> !it.isClosed())
 									.collect(toList());
-							if (getMilestoneSelection().getMilestone() != null && getMilestoneSelection().getMilestone().isClosed() || showClosed) {
-								List<Milestone> closedMilestones = getMilestones()
+							if (getIterationSelection().getIteration() != null && getIterationSelection().getIteration().isClosed() || showClosed) {
+								List<Iteration> closedIterations = getIterations()
 										.stream()
 										.filter(it -> it.isClosed())
 										.collect(toList());
-								milestones.addAll(closedMilestones);
+								iterationss.addAll(closedIterations);
 							}
-							return milestones;
+							return iterationss;
 						}
 
 					}) {
 
-						private void toggleClose(Milestone milestone) {
-							milestone.setClosed(!milestone.isClosed());
-							if (milestone.equals(getMilestoneSelection().getMilestone())) {
-								getMilestoneManager().createOrUpdate(milestone);
+						private void toggleClose(Iteration iteration) {
+							iteration.setClosed(!iteration.isClosed());
+							if (iteration.equals(getIterationSelection().getIteration())) {
+								getIterationManager().createOrUpdate(iteration);
 								setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-										getMilestoneSelection(), backlog, queryString, backlogQueryString));
+										getIterationSelection(), backlog, queryString, backlogQueryString));
 							} else {
-								getMilestoneManager().createOrUpdate(milestone);
+								getIterationManager().createOrUpdate(iteration);
 							}
 							dropdown.close();
-							if (milestone.isClosed())
-								Session.get().success("Milestone '" + milestone.getName() + "' is closed");
+							if (iteration.isClosed())
+								Session.get().success("Iteration '" + iteration.getName() + "' is closed");
 							else
-								Session.get().success("Milestone '" + milestone.getName() + "' is reopened");
+								Session.get().success("Iteration '" + iteration.getName() + "' is reopened");
 						}
 						
 						@Override
-						protected void populateItem(ListItem<Milestone> item) {
-							Milestone milestone = item.getModelObject();
+						protected void populateItem(ListItem<Iteration> item) {
+							Iteration iteration = item.getModelObject();
 							PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-									new MilestoneSelection.Specified(milestone), backlog, queryString, backlogQueryString);
+									new IterationSelection.Specified(iteration), backlog, queryString, backlogQueryString);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
-							link.add(new Label("name", milestone.getName()));
+							link.add(new Label("name", iteration.getName()));
 							item.add(link);
 							item.add(new WebMarkupContainer("inherited") {
 								
@@ -507,12 +507,12 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								
 							});
 							
-							item.add(new MilestoneStatusLabel("status", item.getModel()));
-							item.add(new MilestoneDateLabel("dueDate", item.getModel()));
+							item.add(new IterationStatusLabel("status", item.getModel()));
+							item.add(new IterationDateLabel("dueDate", item.getModel()));
 
 							if (SecurityUtils.canManageIssues(getProject()) 
 									&& item.getModelObject().getProject().equals(getProject())) {
-								Fragment fragment = new Fragment("actions", "milestoneActionsFrag", IssueBoardsPage.this);
+								Fragment fragment = new Fragment("actions", "iterationActionsFrag", IssueBoardsPage.this);
 								
 								fragment.add(new AjaxLink<Void>("close") {
 
@@ -543,22 +543,22 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									
 								});
 								
-								var bean = MilestoneEditBean.of(item.getModelObject(), getBoard().getMilestonePrefix());
+								var bean = IterationEditBean.of(item.getModelObject(), getBoard().getIterationPrefix());
 								fragment.add(new AjaxLink<Void>("edit") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										dropdown.close();
 										
-										new BeanEditModalPanel<>(target, bean, "Edit Milestone") {
+										new BeanEditModalPanel<>(target, bean, "Edit Iteration") {
 
 											@Override
-											protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
-												var milestone = item.getModelObject();
-												bean.update(milestone);
-												getMilestoneManager().createOrUpdate(milestone);
+											protected void onSave(AjaxRequestTarget target, IterationEditBean bean) {
+												var iteration = item.getModelObject();
+												bean.update(iteration);
+												getIterationManager().createOrUpdate(iteration);
 												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-														getProject(), getBoard(), new MilestoneSelection.Specified(milestone), 
+														getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 														backlog, queryString, backlogQueryString));
 											}
 										};
@@ -571,23 +571,23 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 										super.updateAjaxAttributes(attributes);
 										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-												"Do you really want to delete milestone '" + item.getModelObject().getName() + "'?"));
+												"Do you really want to delete iteration '" + item.getModelObject().getName() + "'?"));
 									}
 									
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										dropdown.close();
-										Milestone milestone = item.getModelObject();
-										if (milestone.equals(getMilestoneSelection().getMilestone())) {
-											getMilestoneManager().delete(milestone);
+										Iteration iteration = item.getModelObject();
+										if (iteration.equals(getIterationSelection().getIteration())) {
+											getIterationManager().delete(iteration);
 											PageParameters params = IssueBoardsPage.paramsOf(
-													getProject(), getBoard(), new MilestoneSelection.Unscheduled(), 
+													getProject(), getBoard(), new IterationSelection.Unscheduled(), 
 													backlog, queryString, backlogQueryString);
 											setResponsePage(IssueBoardsPage.class, params);
 										} else {
-											getMilestoneManager().delete(milestone);
+											getIterationManager().delete(iteration);
 										}
-										Session.get().success("Milestone '" + milestone.getName() + "' deleted");
+										Session.get().success("Iteration '" + iteration.getName() + "' deleted");
 									}
 
 								});
@@ -618,42 +618,42 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						protected void onConfigure() {
 							super.onConfigure();
 							setVisible(!showClosed 
-									&& (getMilestoneSelection().getMilestone() == null || !getMilestoneSelection().getMilestone().isClosed()) 
-									&& getMilestones().stream().anyMatch(Milestone::isClosed));
+									&& (getIterationSelection().getIteration() == null || !getIterationSelection().getIteration().isClosed()) 
+									&& getIterations().stream().anyMatch(Iteration::isClosed));
 						}
 						
 					});
 					
-					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), new MilestoneSelection.Unscheduled(),  
+					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), new IterationSelection.Unscheduled(),  
 							backlog, queryString, backlogQueryString);
 					menuFragment.add(new BookmarkablePageLink<Void>("unscheduled", IssueBoardsPage.class, params));
 
-					params = IssueBoardsPage.paramsOf(getProject(), getBoard(), new MilestoneSelection.All(), 
+					params = IssueBoardsPage.paramsOf(getProject(), getBoard(), new IterationSelection.All(), 
 							backlog, queryString, backlogQueryString);
 					menuFragment.add(new BookmarkablePageLink<Void>("all", IssueBoardsPage.class, params) {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(!getMilestones().isEmpty());
+							setVisible(!getIterations().isEmpty());
 						}
 					});
 					
-					menuFragment.add(new AjaxLink<Void>("newMilestone") {
+					menuFragment.add(new AjaxLink<Void>("newIteration") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							dropdown.close();
-							var bean = MilestoneEditBean.ofNew(getProject(), getBoard().getMilestonePrefix());
-							new BeanEditModalPanel<>(target, bean, "Create Milestone") {
+							var bean = IterationEditBean.ofNew(getProject(), getBoard().getIterationPrefix());
+							new BeanEditModalPanel<>(target, bean, "Create Iteration") {
 
 								@Override
-								protected void onSave(AjaxRequestTarget target, MilestoneEditBean bean) {
-									var milestone = new Milestone();
-									milestone.setProject(getProject());
-									bean.update(milestone);
-									getMilestoneManager().createOrUpdate(milestone);
+								protected void onSave(AjaxRequestTarget target, IterationEditBean bean) {
+									var iteration = new Iteration();
+									iteration.setProject(getProject());
+									bean.update(iteration);
+									getIterationManager().createOrUpdate(iteration);
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-											getProject(), getBoard(), new MilestoneSelection.Specified(milestone), 
+											getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 											backlog, queryString, backlogQueryString));
 								}
 
@@ -750,13 +750,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					}
 
 					@Override
-					protected MilestoneSelection getMilestoneSelection() {
-						return IssueBoardsPage.this.getMilestoneSelection();
+					protected IterationSelection getIterationSelection() {
+						return IssueBoardsPage.this.getIterationSelection();
 					}
 
 					@Override
-					protected String getMilestonePrefix() {
-						return getBoard().getMilestonePrefix();
+					protected String getIterationPrefix() {
+						return getBoard().getIterationPrefix();
 					}
 
 				});
@@ -776,13 +776,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					}
 
 					@Override
-					protected MilestoneSelection getMilestoneSelection() {
-						return IssueBoardsPage.this.getMilestoneSelection();
+					protected IterationSelection getIterationSelection() {
+						return IssueBoardsPage.this.getIterationSelection();
 					}
 
 					@Override
-					protected String getMilestonePrefix() {
-						return getBoard().getMilestonePrefix();
+					protected String getIterationPrefix() {
+						return getBoard().getIterationPrefix();
 					}
 
 					@Override
@@ -854,24 +854,24 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		target.add(contentFrag);
 	}
 	
-	private List<Milestone> getMilestones() {
-		return getProject().getSortedHierarchyMilestones().stream()
-				.filter(it -> getBoard().getMilestonePrefix() == null || it.getName().startsWith(getBoard().getMilestonePrefix()))
+	private List<Iteration> getIterations() {
+		return getProject().getSortedHierarchyIterations().stream()
+				.filter(it -> getBoard().getIterationPrefix() == null || it.getName().startsWith(getBoard().getIterationPrefix()))
 				.collect(toList());		
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board,
-										  MilestoneSelection milestoneSelection, boolean backlog, 
+										  IterationSelection iterationSelectionSelection, boolean backlog,
 										  @Nullable String query, @Nullable String backlogQuery) {
 		PageParameters params = paramsOf(project);
 		if (board != null)
 			params.add(PARAM_BOARD, board.getName());
-		if (milestoneSelection instanceof MilestoneSelection.All)
-			params.add(PARAM_MILESTONE, MILESTONE_ALL);
-		else if (milestoneSelection instanceof MilestoneSelection.Unscheduled)
-			params.add(PARAM_MILESTONE, MILESTONE_UNSCHEDULED);
+		if (iterationSelectionSelection instanceof IterationSelection.All)
+			params.add(PARAM_ITERATION, ITERATION_ALL);
+		else if (iterationSelectionSelection instanceof IterationSelection.Unscheduled)
+			params.add(PARAM_ITERATION, ITERATION_UNSCHEDULED);
 		else
-			params.add(PARAM_MILESTONE, milestoneSelection.getMilestone().getId());
+			params.add(PARAM_ITERATION, iterationSelectionSelection.getIteration().getId());
 		params.add(PARAM_BACKLOG, backlog);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
@@ -898,7 +898,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onBoardCreated(AjaxRequestTarget target, BoardSpec board) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestoneSelection(), backlog, queryString, 
+							getProject(), board, getIterationSelection(), backlog, queryString, 
 							backlogQueryString));
 					modal.close();
 				}
@@ -931,7 +931,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).update(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestoneSelection(), backlog, queryString, 
+							getProject(), board, getIterationSelection(), backlog, queryString, 
 							backlogQueryString));
 				}
 

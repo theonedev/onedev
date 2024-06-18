@@ -2075,5 +2075,53 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		});
-	}	
+	}
+
+	private void migrateParamSpecs(VersionedYamlDoc doc, Stack<Integer> versions,
+							  Consumer<SequenceNode> paramSpecMigrator) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("paramSpecs"))
+							paramSpecMigrator.accept((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("paramSpecs"))
+							paramSpecMigrator.accept((SequenceNode)stepTemplateTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
+
+	private void migrate34(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				var stepType = stepNode.getTag().getValue();
+				if (stepType.equals("!CloseMilestoneStep")) 
+					stepNode.setTag(new Tag("!CloseIterationStep"));
+			}
+		});
+		migrateParamSpecs(doc, versions, paramSpecsNode -> {
+			for (var itParamSpecNode = paramSpecsNode.getValue().iterator(); itParamSpecNode.hasNext();) {
+				MappingNode paramSpecNode = (MappingNode) itParamSpecNode.next();
+				var paramSpecType = paramSpecNode.getTag().getValue();
+				if (paramSpecType.equals("!MilestoneChoiceParam")) 
+					paramSpecNode.setTag(new Tag("!IterationChoiceParam"));
+			}
+		});
+	}
+	
 }

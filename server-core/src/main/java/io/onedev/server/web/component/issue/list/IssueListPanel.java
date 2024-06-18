@@ -39,7 +39,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
-import io.onedev.server.web.component.issue.milestone.MilestoneCrumbPanel;
+import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
@@ -1668,8 +1668,8 @@ public abstract class IssueListPanel extends Panel {
 						stateFragment.add(transitLink);
 
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
-					} else if (field.equals(IssueSchedule.NAME_MILESTONE)) {
-						fieldsView.add(new MilestoneCrumbPanel(fieldsView.newChildId()) {
+					} else if (field.equals(IssueSchedule.NAME_ITERATION)) {
+						fieldsView.add(new IterationCrumbPanel(fieldsView.newChildId()) {
 							@Override
 							protected Issue getIssue() {
 								return (Issue) fragment.getDefaultModelObject();

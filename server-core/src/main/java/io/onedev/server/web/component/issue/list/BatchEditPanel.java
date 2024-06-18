@@ -36,7 +36,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
@@ -145,7 +145,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		form.add(new CheckBox("milestoneCheck", new IModel<Boolean>() {
+		form.add(new CheckBox("iterationCheck", new IModel<Boolean>() {
 
 			@Override
 			public void detach() {
@@ -153,15 +153,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(NAME_MILESTONES);
+				return selectedFields.contains(NAME_ITERATION);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(NAME_MILESTONES);
+					selectedFields.add(NAME_ITERATION);
 				else
-					selectedFields.remove(NAME_MILESTONES);
+					selectedFields.remove(NAME_ITERATION);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -207,7 +207,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
 			getIssueQuery().getCriteria().fill(issue);
-			builtInFieldsBean.setMilestones(issue.getMilestones().stream()
+			builtInFieldsBean.setIterations(issue.getIterations().stream()
 					.map(it->it.getName()).collect(Collectors.toList()));
 			customFieldsBean = issue.getFieldBean(fieldBeanClass, false);
 		} else {
@@ -225,8 +225,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			excludedProperties.add(PROP_STATE);
 		if (!selectedFields.contains(NAME_CONFIDENTIAL))
 			excludedProperties.add(PROP_CONFIDENTIAL);
-		if (!selectedFields.contains(NAME_MILESTONES))
-			excludedProperties.add(PROP_MILESTONES);
+		if (!selectedFields.contains(NAME_ITERATION))
+			excludedProperties.add(PROP_ITERATIONS);
 		
 		builtInFieldsEditor = BeanContext.edit("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
 		form.add(builtInFieldsEditor);
@@ -284,22 +284,22 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						else
 							confidential = null;
 						
-						Collection<Milestone> milestones;
-						if (selectedFields.contains(NAME_MILESTONES)) {
-							milestones = new ArrayList<>();
-							for (String each: builtInFieldsBean.getMilestones()) {
-								Milestone milestone = getProject().getHierarchyMilestone(each);
-								if (milestone != null)
-									milestones.add(milestone);
+						Collection<Iteration> iterations;
+						if (selectedFields.contains(NAME_ITERATION)) {
+							iterations = new ArrayList<>();
+							for (String each: builtInFieldsBean.getIterations()) {
+								Iteration iteration = getProject().getHierarchyIteration(each);
+								if (iteration != null)
+									iterations.add(iteration);
 							}
 						} else {
-							milestones = null;
+							iterations = null;
 						}
 						
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, confidential, milestones, fieldValues, comment);
+								getIssueIterator(), state, confidential, iterations, fieldValues, comment);
 						onUpdated(target);
 					}
 					

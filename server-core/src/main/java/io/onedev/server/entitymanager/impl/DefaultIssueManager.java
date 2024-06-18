@@ -39,7 +39,7 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.IssueTimes;
-import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.IterationAndIssueState;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -885,33 +885,33 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Sessional
 	@Override
-	public Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones) {
+	public Collection<IterationAndIssueState> queryIterationAndIssueStates(Project project, Collection<Iteration> iterations) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<MilestoneAndIssueState> criteriaQuery = builder.createQuery(MilestoneAndIssueState.class);
+		CriteriaQuery<IterationAndIssueState> criteriaQuery = builder.createQuery(IterationAndIssueState.class);
 		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
 		Join<Issue, Issue> issueJoin = root.join(IssueSchedule.PROP_ISSUE, JoinType.INNER);
 		criteriaQuery.multiselect(
-				root.get(IssueSchedule.PROP_MILESTONE).get(Milestone.PROP_ID), 
+				root.get(IssueSchedule.PROP_ITERATION).get(Iteration.PROP_ID), 
 				issueJoin.get(Issue.PROP_STATE));
 		
-		List<Predicate> milestonePredicates = new ArrayList<>();
-		for (Milestone milestone: milestones) 
-			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
+		List<Predicate> iterationPredicates = new ArrayList<>();
+		for (Iteration iteration: iterations) 
+			iterationPredicates.add(builder.equal(root.get(IssueSchedule.PROP_ITERATION), iteration));
 		
 		criteriaQuery.where(builder.and(
 				buildSubtreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
-				builder.or(milestonePredicates.toArray(new Predicate[0]))));
+				builder.or(iterationPredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Milestone> queryUsedMilestones(Project project) {
+	public Collection<Iteration> queryUsedIterations(Project project) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Milestone> criteriaQuery = builder.createQuery(Milestone.class);
+		CriteriaQuery<Iteration> criteriaQuery = builder.createQuery(Iteration.class);
 		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
-		criteriaQuery.select(root.get(IssueSchedule.PROP_MILESTONE));
+		criteriaQuery.select(root.get(IssueSchedule.PROP_ITERATION));
 		
 		Path<Project> projectPath = root
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
@@ -1044,8 +1044,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			numberMapping.put(oldNumber, nextNumber);
 			
 			for (IssueSchedule schedule: issue.getSchedules()) {
-				if (schedule.getMilestone() != null 
-						&& !schedule.getMilestone().getProject().isSelfOrAncestorOf(targetProject)) {
+				if (schedule.getIteration() != null 
+						&& !schedule.getIteration().getProject().isSelfOrAncestorOf(targetProject)) {
 					dao.remove(schedule);
 				}
 			}
@@ -1086,21 +1086,21 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Transactional
 	@Override
-	public void clearSchedules(Project project, Collection<Milestone> milestones) {
+	public void clearSchedules(Project project, Collection<Iteration> iterations) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<IssueSchedule> criteriaQuery = builder.createQuery(IssueSchedule.class);
 		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
 
-		List<Predicate> milestonePredicates = new ArrayList<>();
-		for (Milestone milestone: milestones) 
-			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
+		List<Predicate> iterationPredicates = new ArrayList<>();
+		for (Iteration iteration: iterations) 
+			iterationPredicates.add(builder.equal(root.get(IssueSchedule.PROP_ITERATION), iteration));
 		
 		Path<Project> projectPath = root
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
 				.get(Issue.PROP_PROJECT);
 		criteriaQuery.where(builder.and(
 				buildSubtreePredicate(builder, projectPath, project),
-				builder.or(milestonePredicates.toArray(new Predicate[0]))));
+				builder.or(iterationPredicates.toArray(new Predicate[0]))));
 		
 		for (IssueSchedule schedule: getSession().createQuery(criteriaQuery).getResultList()) 
 			dao.remove(schedule);

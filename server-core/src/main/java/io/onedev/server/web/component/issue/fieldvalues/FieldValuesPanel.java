@@ -34,7 +34,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ProjectAware;
 import org.apache.wicket.Component;
@@ -280,14 +280,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					} else {
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
-				} else if (getField().getType().equals(FieldSpec.MILESTONE)) {
-					Milestone milestone = OneDev.getInstance(MilestoneManager.class).findInHierarchy(getIssue().getProject(), value);
-					if (milestone != null) {
+				} else if (getField().getType().equals(FieldSpec.ITERATION)) {
+					Iteration iteration = OneDev.getInstance(IterationManager.class).findInHierarchy(getIssue().getProject(), value);
+					if (iteration != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-						Link<Void> milestoneLink = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
-								MilestoneIssuesPage.paramsOf(getIssue().getProject(), milestone));
-						milestoneLink.add(new Label("label", milestone.getName()));
-						linkFrag.add(milestoneLink);
+						Link<Void> iterationLink = new BookmarkablePageLink<Void>("link", IterationIssuesPage.class, 
+								IterationIssuesPage.paramsOf(getIssue().getProject(), iteration));
+						iterationLink.add(new Label("label", iteration.getName()));
+						linkFrag.add(iterationLink);
 						valueContainer.add(linkFrag);
 					} else {
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));

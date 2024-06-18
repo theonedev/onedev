@@ -61,9 +61,9 @@ public class BoardSpec implements Serializable {
 	
 	private List<String> columns = new ArrayList<>();
 	
-	private String milestonePrefix;
+	private String iterationPrefix;
 	
-	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE, IssueSchedule.NAME_MILESTONE);
+	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE, IssueSchedule.NAME_ITERATION);
 	
 	private List<String> displayLinks = new ArrayList<>();
 	
@@ -92,7 +92,7 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
-			+ "Backlog issues are those not associating with current milestone")
+			+ "Backlog issues are those not associating with current iteration")
 	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true, withOrder = false)
 	@Nullable
 	public String getBacklogBaseQuery() {
@@ -152,15 +152,13 @@ public class BoardSpec implements Serializable {
 		return displayColumns;
 	}
 
-	@Editable(order=450, description = "" +
-			"If specified, OneDev will only display milestones with this prefix, and the prefix will be stripped " +
-			"for brevity. Also milestones created from this board will get this prefix automatically")
-	public String getMilestonePrefix() {
-		return milestonePrefix;
+	@Editable(order=450, description = "If specified, OneDev will only display iterations with this prefix")
+	public String getIterationPrefix() {
+		return iterationPrefix;
 	}
 
-	public void setMilestonePrefix(String milestonePrefix) {
-		this.milestonePrefix = milestonePrefix;
+	public void setIterationPrefix(String iterationPrefix) {
+		this.iterationPrefix = iterationPrefix;
 	}
 
 	@Editable(order=500, placeholder="Not displaying any fields", description="Specify fields to display in board card")
@@ -213,7 +211,7 @@ public class BoardSpec implements Serializable {
 		for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			choices.add(fieldSpec.getName());
 		}
-		choices.add(IssueSchedule.NAME_MILESTONE);
+		choices.add(IssueSchedule.NAME_ITERATION);
 		return choices;
 	}
 	
@@ -282,7 +280,7 @@ public class BoardSpec implements Serializable {
 				undefinedFields.add(getIdentifyField());
 		}
 		for (String displayField: getDisplayFields()) {
-			if (!Issue.NAME_STATE.equals(displayField) && !IssueSchedule.NAME_MILESTONE.equals(displayField)) { 
+			if (!Issue.NAME_STATE.equals(displayField) && !IssueSchedule.NAME_ITERATION.equals(displayField)) { 
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(displayField);
 				if (fieldSpec == null)
 					undefinedFields.add(displayField);

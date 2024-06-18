@@ -44,7 +44,7 @@ public class IssueResource {
 	
 	private final IssueChangeManager issueChangeManager;
 	
-	private final MilestoneManager milestoneManager;
+	private final IterationManager iterationManager;
 	
 	private final ProjectManager projectManager;
 	
@@ -52,12 +52,12 @@ public class IssueResource {
 	
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
-						 IssueChangeManager issueChangeManager, MilestoneManager milestoneManager, 
+						 IssueChangeManager issueChangeManager, IterationManager iterationManager, 
 						 ProjectManager projectManager, ObjectMapper objectMapper) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
-		this.milestoneManager = milestoneManager;
+		this.iterationManager = iterationManager;
 		this.projectManager = projectManager;
 		this.objectMapper = objectMapper;
 	}
@@ -123,13 +123,13 @@ public class IssueResource {
 	}
 	
 	@Api(order=450)
-	@Path("/{issueId}/milestones")
+	@Path("/{issueId}/iterations")
     @GET
-    public Collection<Milestone> getMilestones(@PathParam("issueId") Long issueId) {
+    public Collection<Iteration> getIterations(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
-    	return issue.getMilestones();
+    	return issue.getIterations();
     }
 	
 	@Api(order=500)
@@ -237,7 +237,7 @@ public class IssueResource {
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
 
-		if (!data.getMilestoneIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
+		if (!data.getIterationIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
 			throw new UnauthorizedException("No permission to schedule issue");
 
 		var issueSetting = settingManager.getIssueSetting();
@@ -252,13 +252,13 @@ public class IssueResource {
 		issue.setState(issueSetting.getInitialStateSpec().getName());
 		issue.setOwnEstimatedTime(data.getOwnEstimatedTime());
 
-		for (Long milestoneId : data.getMilestoneIds()) {
-			Milestone milestone = milestoneManager.load(milestoneId);
-			if (!milestone.getProject().isSelfOrAncestorOf(project))
-				throw new BadRequestException("Milestone is not defined in project hierarchy of the issue");
+		for (Long iterationId : data.getIterationIds()) {
+			Iteration iteration = iterationManager.load(iterationId);
+			if (!iteration.getProject().isSelfOrAncestorOf(project))
+				throw new BadRequestException("Iteration is not defined in project hierarchy of the issue");
 			IssueSchedule schedule = new IssueSchedule();
 			schedule.setIssue(issue);
-			schedule.setMilestone(milestone);
+			schedule.setIteration(iteration);
 			issue.getSchedules().add(schedule);
 		}
 
@@ -311,23 +311,23 @@ public class IssueResource {
 		return Response.ok().build();
 	}
 	
-	@Api(order=1300, description="Schedule issue into specified milestones with list of milestone id")
-	@Path("/{issueId}/milestones")
+	@Api(order=1300, description="Schedule issue into specified iterations with list of iteration id")
+	@Path("/{issueId}/iterations")
     @POST
-    public Response setMilestones(@PathParam("issueId") Long issueId, List<Long> milestoneIds) {
+    public Response setIterations(@PathParam("issueId") Long issueId, List<Long> iterationIds) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canScheduleIssues(issue.getProject()))
 			throw new UnauthorizedException("No permission to schedule issue");
 		
-    	Collection<Milestone> milestones = new HashSet<>();
-    	for (Long milestoneId: milestoneIds) {
-    		Milestone milestone = milestoneManager.load(milestoneId);
-	    	if (!milestone.getProject().isSelfOrAncestorOf(issue.getProject()))
-	    		throw new InvalidParamException("Milestone is not defined in project hierarchy of the issue");
-	    	milestones.add(milestone);
+    	Collection<Iteration> iterations = new HashSet<>();
+    	for (Long iterationId: iterationIds) {
+    		Iteration iteration = iterationManager.load(iterationId);
+	    	if (!iteration.getProject().isSelfOrAncestorOf(issue.getProject()))
+	    		throw new InvalidParamException("Iteration is not defined in project hierarchy of the issue");
+	    	iterations.add(iteration);
     	}
     	
-    	issueChangeManager.changeMilestones(issue, milestones);
+    	issueChangeManager.changeIterations(issue, iterations);
     	
 		return Response.ok().build();
     }
@@ -434,7 +434,7 @@ public class IssueResource {
 		private int ownEstimatedTime;
 		
 		@Api(order=500)
-		private List<Long> milestoneIds = new ArrayList<>();
+		private List<Long> iterationIds = new ArrayList<>();
 		
 		@Api(order=600, exampleProvider = "getFieldsExample")
 		private Map<String, Serializable> fields = new HashMap<>();
@@ -481,12 +481,12 @@ public class IssueResource {
 			this.ownEstimatedTime = ownEstimatedTime;
 		}
 		
-		public List<Long> getMilestoneIds() {
-			return milestoneIds;
+		public List<Long> getIterationIds() {
+			return iterationIds;
 		}
 
-		public void setMilestoneIds(List<Long> milestoneIds) {
-			this.milestoneIds = milestoneIds;
+		public void setIterationIds(List<Long> iterationIds) {
+			this.iterationIds = iterationIds;
 		}
 
 		@NotNull

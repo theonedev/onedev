@@ -97,7 +97,7 @@ import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.project.issues.milestones.*;
+import io.onedev.server.web.page.project.issues.iteration.*;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -344,11 +344,11 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~issues/${issue}/authorizations", IssueAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~issues/new", NewIssuePage.class));
 		add(new ProjectPageMapper("${project}/~issues/import/${importer}", IssueImportPage.class));
-		add(new ProjectPageMapper("${project}/~milestones", MilestoneListPage.class));
-		add(new ProjectPageMapper("${project}/~milestones/${milestone}", MilestoneIssuesPage.class));
-		add(new ProjectPageMapper("${project}/~milestones/${milestone}/burndown", MilestoneBurndownPage.class));
-		add(new ProjectPageMapper("${project}/~milestones/${milestone}/edit", MilestoneEditPage.class));
-		add(new ProjectPageMapper("${project}/~milestones/new", NewMilestonePage.class));
+		add(new ProjectPageMapper("${project}/~iterations", IterationListPage.class));
+		add(new ProjectPageMapper("${project}/~iterations/${iteration}", IterationIssuesPage.class));
+		add(new ProjectPageMapper("${project}/~iterations/${iteration}/burndown", IterationBurndownPage.class));
+		add(new ProjectPageMapper("${project}/~iterations/${iteration}/edit", IterationEditPage.class));
+		add(new ProjectPageMapper("${project}/~iterations/new", NewIterationPage.class));
 		
 		add(new ProjectPageMapper("${project}/~builds", ProjectBuildsPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}", BuildDashboardPage.class));

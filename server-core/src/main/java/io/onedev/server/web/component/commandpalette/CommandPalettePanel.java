@@ -59,7 +59,7 @@ public abstract class CommandPalettePanel extends Panel {
 			"~test/** ~errors/** ~sso/** ~oauth/** ~verify-email-address/** ~create-user-from-invitation/** " +
 			"~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** **/invalid " +
 			"**/${issue}/** -**/${issue} **/${request}/** -**/${request} **/${build}/** -**/${build} " +
-			"**/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} **/${group}/** -**/${group} " +
+			"**/${iteration}/** -**/${iteration} **/${agent}/** -**/${agent} **/${group}/** -**/${group} " +
 			"projects/**");
 
 	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +

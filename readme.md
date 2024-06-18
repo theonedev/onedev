@@ -60,7 +60,7 @@ files in certain branches.
 
 Move tasks manually in Kanban, or define rules to move them automatically
 when related work is committed/tested/released/deployed.
-[**See It In Action**](https://code.onedev.io/onedev/server/~boards/State?milestone=4.2.0&backlog=true)
+[**See It In Action**](https://code.onedev.io/onedev/server/~boards/State?iteration=4.2.0&backlog=true)
 
 ![issue board](./doc/images/issue-board.png)
 

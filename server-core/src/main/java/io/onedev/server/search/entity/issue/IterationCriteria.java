@@ -1,0 +1,75 @@
+package io.onedev.server.search.entity.issue;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.commons.utils.match.WildcardUtils;
+
+public class IterationCriteria extends Criteria<Issue> {
+
+	private static final long serialVersionUID = 1L;
+	
+	private final String iterationName;
+	
+	private final int operator;
+
+	public IterationCriteria(String iterationName, int operator) {
+		this.iterationName = iterationName;
+		this.operator = operator;
+	}
+
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+		Subquery<IssueSchedule> scheduleQuery = query.subquery(IssueSchedule.class);
+		Root<IssueSchedule> schedule = scheduleQuery.from(IssueSchedule.class);
+		scheduleQuery.select(schedule);
+		Join<?, ?> iterationJoin = schedule.join(IssueSchedule.PROP_ITERATION, JoinType.INNER);
+		scheduleQuery.where(builder.and(
+				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), from), 
+				builder.like(iterationJoin.get(Iteration.PROP_NAME), iterationName.replace("*", "%"))));
+		var predicate =  builder.exists(scheduleQuery);
+		if (operator == IssueQueryLexer.IsNot)
+			predicate = builder.not(predicate);
+		return predicate;
+	}
+
+	@Override
+	public boolean matches(Issue issue) {
+		var matches = issue.getSchedules().stream()
+				.anyMatch(it->WildcardUtils.matchString(iterationName, it.getIteration().getName()));
+		if (operator == IssueQueryLexer.IsNot)
+			matches = !matches;
+		return matches;
+	}
+
+	@Override
+	public String toStringWithoutParens() {
+		return quote(IssueSchedule.NAME_ITERATION) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
+				+ quote(iterationName);
+	}
+
+	@Override
+	public void fill(Issue issue) {
+		if (operator == IssueQueryLexer.Is) {
+			Iteration iteration = issue.getProject().getHierarchyIteration(iterationName);
+			if (iteration != null) {
+				IssueSchedule schedule = new IssueSchedule();
+				schedule.setIssue(issue);
+				schedule.setIteration(iteration);
+				issue.getSchedules().add(schedule);
+			}
+		}
+	}
+
+}

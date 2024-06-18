@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -26,19 +26,19 @@ public class DefaultIssueScheduleManager extends BaseEntityManager<IssueSchedule
 
  	@Transactional
  	@Override
- 	public void syncMilestones(Issue issue, Collection<Milestone> milestones) {
+ 	public void syncIterations(Issue issue, Collection<Iteration> iterations) {
     	for (Iterator<IssueSchedule> it = issue.getSchedules().iterator(); it.hasNext();) {
     		IssueSchedule schedule = it.next();
-    		if (!milestones.contains(schedule.getMilestone())) {
+    		if (!iterations.contains(schedule.getIteration())) {
     			dao.remove(schedule);
     			it.remove();
     		}
     	}
-    	for (Milestone milestone: milestones) {
-    		if (!issue.getMilestones().contains(milestone)) {
+    	for (Iteration iteration: iterations) {
+    		if (!issue.getIterations().contains(iteration)) {
     	    	IssueSchedule schedule = new IssueSchedule();
     	    	schedule.setIssue(issue);
-    	    	schedule.setMilestone(milestone);
+    	    	schedule.setIteration(iteration);
     	    	issue.getSchedules().add(schedule);
     	    	dao.persist(schedule);
     		}

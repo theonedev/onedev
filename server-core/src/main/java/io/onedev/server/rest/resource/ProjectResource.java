@@ -2,7 +2,7 @@ package io.onedev.server.rest.resource;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.web.UrlManager;
@@ -53,17 +53,17 @@ public class ProjectResource {
 
 	private final ProjectManager projectManager;
 	
-	private final MilestoneManager milestoneManager;
+	private final IterationManager iterationManager;
 	
 	private final CommitInfoManager commitInfoManager;
 	
 	private final UrlManager urlManager;
 	
 	@Inject
-	public ProjectResource(ProjectManager projectManager, MilestoneManager milestoneManager, 
+	public ProjectResource(ProjectManager projectManager, IterationManager iterationManager, 
 			CommitInfoManager commitInfoManager, UrlManager urlManager) {
 		this.projectManager = projectManager;
-		this.milestoneManager = milestoneManager;
+		this.iterationManager = iterationManager;
 		this.commitInfoManager = commitInfoManager;
 		this.urlManager = urlManager;
 	}
@@ -186,15 +186,15 @@ public class ProjectResource {
     }
 	
 	@Api(order=750)
-	@Path("/{projectId}/milestones")
+	@Path("/{projectId}/iterations")
     @GET
-    public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
-    		@QueryParam("startBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startBefore, 
-    		@QueryParam("startAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startAfter, 
-    		@QueryParam("dueBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueBefore, 
-    		@QueryParam("dueAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueAfter, 
-    		@QueryParam("closed") Boolean closed, @QueryParam("offset") @Api(example="0") int offset, 
-    		@QueryParam("count") @Api(example="100") int count) {
+    public List<Iteration> queryIterations(@PathParam("projectId") Long projectId, @QueryParam("name") String name,
+										   @QueryParam("startBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startBefore,
+										   @QueryParam("startAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startAfter,
+										   @QueryParam("dueBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueBefore,
+										   @QueryParam("dueAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueAfter,
+										   @QueryParam("closed") Boolean closed, @QueryParam("offset") @Api(example="0") int offset,
+										   @QueryParam("count") @Api(example="100") int count) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccessProject(project)) 
 			throw new UnauthorizedException();
@@ -202,22 +202,22 @@ public class ProjectResource {
     	if (count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
-    	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-    	criteria.add(Restrictions.in(Milestone.PROP_PROJECT, project.getSelfAndAncestors()));
+    	EntityCriteria<Iteration> criteria = EntityCriteria.of(Iteration.class);
+    	criteria.add(Restrictions.in(Iteration.PROP_PROJECT, project.getSelfAndAncestors()));
     	if (name != null)
-    		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
+    		criteria.add(Restrictions.ilike(Iteration.PROP_NAME, name.replace('%', '*')));
     	if (startBefore != null)
-    		criteria.add(Restrictions.le(Milestone.PROP_START_DATE, DateUtils.parseISO8601Date(startBefore)));
+    		criteria.add(Restrictions.le(Iteration.PROP_START_DATE, DateUtils.parseISO8601Date(startBefore)));
     	if (startAfter != null)
-    		criteria.add(Restrictions.ge(Milestone.PROP_START_DATE, DateUtils.parseISO8601Date(startAfter)));
+    		criteria.add(Restrictions.ge(Iteration.PROP_START_DATE, DateUtils.parseISO8601Date(startAfter)));
     	if (dueBefore != null)
-    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueBefore)));
+    		criteria.add(Restrictions.le(Iteration.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueBefore)));
     	if (dueAfter != null)
-    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueAfter)));
+    		criteria.add(Restrictions.ge(Iteration.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueAfter)));
     	if (closed != null)
-    		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, closed));
+    		criteria.add(Restrictions.eq(Iteration.PROP_CLOSED, closed));
     	
-    	return milestoneManager.query(criteria, offset, count);
+    	return iterationManager.query(criteria, offset, count);
     }
 	
 	@Api(order=760, description="Get top contributors on default branch")

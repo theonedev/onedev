@@ -54,7 +54,7 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String ISSUE = "Issue";
 	
-	public static final String MILESTONE = "Milestone";
+	public static final String ITERATION = "Iteration";
 	
 	public static final String BUILD = "Build";
 

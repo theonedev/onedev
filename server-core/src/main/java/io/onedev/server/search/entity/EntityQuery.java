@@ -156,14 +156,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new ExplicitException("Unable to find build: " + value);
 	}
 	
-	public static Milestone getMilestone(@Nullable Project project, String value) {
+	public static Iteration getIteration(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":")) 
 			value = project.getPath() + ":" + value;
-		Milestone milestone = OneDev.getInstance(MilestoneManager.class).findInHierarchy(value);
-		if (milestone != null)
-			return milestone;
+		Iteration iteration = OneDev.getInstance(IterationManager.class).findInHierarchy(value);
+		if (iteration != null)
+			return iteration;
 		else
-			throw new ExplicitException("Unable to find milestone: " + value);
+			throw new ExplicitException("Unable to find iteration: " + value);
 	}
 	
 	public boolean matches(T entity) {

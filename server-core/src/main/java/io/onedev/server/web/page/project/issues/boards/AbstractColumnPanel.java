@@ -89,9 +89,9 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 	
 	protected abstract ProjectScope getProjectScope();
 
-	protected abstract MilestoneSelection getMilestoneSelection();
+	protected abstract IterationSelection getIterationSelection();
 	
 	@Nullable
-	protected abstract String getMilestonePrefix();
+	protected abstract String getIterationPrefix();
 	
 }

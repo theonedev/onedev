@@ -154,8 +154,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							checkField(fieldName, operator, option);
 						if (fieldName.equals(NAME_PROJECT)) {
 							return new ProjectIsCurrentCriteria();
-						} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-							return new MilestoneEmptyCriteria(operator);
+						} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
+							return new IterationEmptyCriteria(operator);
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 							if (fieldSpec != null)
@@ -246,8 +246,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							case IssueQueryLexer.IsNot:
 								if (fieldName.equals(NAME_PROJECT)) {
 									return new ProjectCriteria(value, operator);
-								} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-									return new MilestoneCriteria(value, operator);
+								} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
+									return new IterationCriteria(value, operator);
 								} else if (fieldName.equals(NAME_STATE)) {
 									return new StateCriteria(value, operator);
 								} else if (fieldName.equals(NAME_VOTE_COUNT)) {
@@ -357,7 +357,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField)
 							&& !(fieldSpec instanceof DateTimeField) && !(fieldSpec instanceof IntegerField)
-							&& !(fieldSpec instanceof MilestoneChoiceField)) {
+							&& !(fieldSpec instanceof IterationChoiceField)) {
 						throw new ExplicitException("Can not order by field: " + fieldName);
 					}
 				}
@@ -396,7 +396,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			case IssueQueryLexer.IsEmpty:
 			case IssueQueryLexer.IsNotEmpty:
 				if (Issue.QUERY_FIELDS.contains(fieldName)
-						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
@@ -442,7 +442,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						&& !fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
-						&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
+						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)
 						&& !(fieldSpec instanceof IssueChoiceField)
 						&& !(fieldSpec instanceof PullRequestChoiceField)
 						&& !(fieldSpec instanceof BuildChoiceField)

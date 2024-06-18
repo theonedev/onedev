@@ -11,7 +11,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.MilestoneChoice;
+import io.onedev.server.annotation.IterationChoice;
 
 @Editable
 public class BuiltInFieldsBean implements Serializable {
@@ -22,19 +22,19 @@ public class BuiltInFieldsBean implements Serializable {
 	
 	public static final String NAME_CONFIDENTIAL = "Confidential";
 	
-	public static final String NAME_MILESTONES = "Milestones";
+	public static final String NAME_ITERATION = "Iterations";
 	
 	public static final String PROP_STATE = "state";
 	
 	public static final String PROP_CONFIDENTIAL = "confidential";
 	
-	public static final String PROP_MILESTONES = "milestones";
+	public static final String PROP_ITERATIONS = "iterations";
 	
 	private String state;
 	
 	private boolean confidential;
 	
-	private List<String> milestones;
+	private List<String> iterations;
 
 	@Editable(order=100)
 	@ChoiceProvider("getStateChoices")
@@ -57,13 +57,13 @@ public class BuiltInFieldsBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@MilestoneChoice
-	public List<String> getMilestones() {
-		return milestones;
+	@IterationChoice
+	public List<String> getIterations() {
+		return iterations;
 	}
 
-	public void setMilestones(List<String> milestones) {
-		this.milestones = milestones;
+	public void setIterations(List<String> iterations) {
+		this.iterations = iterations;
 	}
 	
 	@SuppressWarnings("unused")

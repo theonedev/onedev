@@ -945,7 +945,7 @@ public class Build extends ProjectBelonging
 		return accessToken;
 	}
 	
-	public boolean canCloseMilestone(@Nullable String accessTokenSecret) {
+	public boolean canCloseIteration(@Nullable String accessTokenSecret) {
 		var project = getProject();
 		return project.isCommitOnBranch(getCommitId(), project.getDefaultBranch())
 				|| accessTokenSecret != null && SecurityUtils.canManageIssues(getAccessToken(accessTokenSecret).asSubject(), project);
