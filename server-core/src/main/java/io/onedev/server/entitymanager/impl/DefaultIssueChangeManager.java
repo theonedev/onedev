@@ -252,6 +252,13 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		create(change, null);
 	}
+
+	@Transactional
+	@Override
+	public void addSchedule(List<Issue> issues, Iteration iteration) {
+		for (var issue: issues) 
+			addSchedule(issue, iteration);
+	}
 	
 	@Transactional
 	@Override

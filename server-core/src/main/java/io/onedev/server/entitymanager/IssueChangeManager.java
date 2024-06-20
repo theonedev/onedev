@@ -2,8 +2,8 @@ package io.onedev.server.entitymanager;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.persistence.dao.EntityManager;
 
 import javax.annotation.Nullable;
@@ -41,6 +41,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void create(IssueChange change, @Nullable String note);
 	
 	void addSchedule(Issue issue, Iteration iteration);
+
+	void addSchedule(List<Issue> issues, Iteration iteration);
 	
 	void removeSchedule(Issue issue, Iteration iteration);
 	

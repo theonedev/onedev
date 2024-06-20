@@ -293,6 +293,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 			head.add(new WebMarkupContainer("viewAsList").setVisible(false));
 		}
 		
+		head.add(newAddToIterationLink("addToIteration"));
 		head.add(new ModalLink("addCard") {
 
 			@Override
@@ -509,5 +510,10 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 
 	@Nullable
 	protected abstract IssueQuery getBoardQuery();
+
+	@Override
+	protected boolean isBacklog() {
+		return false;
+	}
 	
 }

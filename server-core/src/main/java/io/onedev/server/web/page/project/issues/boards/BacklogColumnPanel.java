@@ -119,6 +119,8 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 			}
 			
 		});
+		
+		add(newAddToIterationLink("addToIteration"));
 
 		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 			add(new DropdownLink("showProgress") {
@@ -163,8 +165,11 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				
 				var card = cardListPanel.findCard(issueId);
 				if (card == null) { // moved from other columns
-					var issue = getIssueManager().load(issueId);					
-					getIssueChangeManager().removeSchedule(issue, getIterationSelection().getIteration());
+					var issue = getIssueManager().load(issueId);
+					for (var iteration: getProject().getHierarchyIterations()) {
+						if (getIterationPrefix() == null || iteration.getName().startsWith(getIterationPrefix()))
+							getIssueChangeManager().removeSchedule(issue, iteration);
+					}
 				}
 				cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 			}
@@ -186,7 +191,10 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
-						issue.removeSchedule(getIterationSelection().getIteration());
+						for (var iteration: getProject().getHierarchyIterations()) {
+							if (getIterationPrefix() == null || iteration.getName().startsWith(getIterationPrefix()))
+								issue.removeSchedule(iteration);
+						}
 						issue.getLastActivity().setDate(new Date());
 					}
 					if (getQuery().matches(issue)) {
@@ -251,5 +259,9 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 	
 	@Nullable
 	protected abstract IssueQuery getBacklogQuery();
-	
+
+	@Override
+	protected boolean isBacklog() {
+		return true;
+	}
 }

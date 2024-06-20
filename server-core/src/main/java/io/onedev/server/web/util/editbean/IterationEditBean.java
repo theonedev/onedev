@@ -104,11 +104,14 @@ public class IterationEditBean implements Validatable, Serializable {
 	public static IterationEditBean ofNew(Project project, @Nullable String namePrefix) {
 		var bean = new IterationEditBean();
 		bean.namePrefix = namePrefix;
-		var iterations = project.getSortedHierarchyIterations().stream()
-				.filter(it -> (namePrefix == null || it.getName().startsWith(namePrefix)))
-				.collect(toList());
-		if (!iterations.isEmpty()) {
-			var lastIteration = iterations.get(iterations.size()-1);
+		var iterations = project.getHierarchyIterations().stream()
+				.filter(it -> namePrefix == null || it.getName().startsWith(namePrefix)).collect(toList());
+		var datesComparator = new Iteration.DatesComparator();
+		var lastIterationOpt = iterations.stream().filter(it->!it.isClosed()).max(datesComparator);
+		if (!lastIterationOpt.isPresent())
+			lastIterationOpt = iterations.stream().filter(it->it.isClosed()).max(datesComparator);
+		if (lastIterationOpt.isPresent()) {
+			var lastIteration = lastIterationOpt.get();
 			var matcher = ENDS_WITH_DIGITS.matcher(lastIteration.getName());
 			if (matcher.matches())
 				bean.setName(matcher.group(1) + (parseInt(matcher.group(2)) + 1));
