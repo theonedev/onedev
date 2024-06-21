@@ -2,7 +2,6 @@ package io.onedev.server.event.project;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
@@ -10,6 +9,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.web.UrlManager;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -33,7 +33,7 @@ public abstract class ProjectEvent extends Event implements Serializable {
 		this.date = date;
 		projectId = project.getId();
 	}
-
+	
 	public Project getProject() {
 		return OneDev.getInstance(ProjectManager.class).load(projectId);
 	}

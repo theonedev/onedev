@@ -110,6 +110,11 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
+		create(change, note, true);
+	}
+
+	@Transactional
+	protected void create(IssueChange change, @Nullable String note, boolean sendNotifications) {
 		Preconditions.checkState(change.isNew());
 		change.getIssue().getChanges().add(change);
 		dao.persist(change);
@@ -123,7 +128,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}
 
-		listenerRegistry.post(new IssueChanged(change, note));
+		listenerRegistry.post(new IssueChanged(change, note, sendNotifications));
 	}
 	
 	@Transactional
@@ -244,20 +249,24 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void addSchedule(Issue issue, Iteration iteration) {
+		addSchedule(issue, iteration, true);
+	}
+
+	protected void addSchedule(Issue issue, Iteration iteration, boolean sendNotifications) {
 		issueScheduleManager.create(issue.addSchedule(iteration));
-		
+
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setData(new IssueIterationAddData(iteration.getName()));
 		change.setUser(SecurityUtils.getUser());
-		create(change, null);
+		create(change, null, sendNotifications);
 	}
-
+	
 	@Transactional
 	@Override
-	public void addSchedule(List<Issue> issues, Iteration iteration) {
+	public void addSchedule(List<Issue> issues, Iteration iteration, boolean sendNotifications) {
 		for (var issue: issues) 
-			addSchedule(issue, iteration);
+			addSchedule(issue, iteration, sendNotifications);
 	}
 	
 	@Transactional
@@ -314,7 +323,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
-							@Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, @Nullable String comment) {
+							@Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, 
+							@Nullable String comment, boolean sendNotifications) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
@@ -348,7 +358,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), 
 						prevConfidential, issue.isConfidential(), prevIterationList, 
 						currentIterationList, prevFields, issue.getFieldInputs()));
-				create(change, comment);
+				create(change, comment, sendNotifications);
 			}
 		}
 	}

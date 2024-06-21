@@ -72,6 +72,8 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 	
 	private Component countLabel;
 	
+	private Component addToIterationLink;
+	
 	private CardListPanel cardListPanel;
 	
 	public BacklogColumnPanel(String id) {
@@ -120,7 +122,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 			
 		});
 		
-		add(newAddToIterationLink("addToIteration"));
+		add(addToIterationLink = newAddToIterationLink("addToIteration"));
 
 		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
 			add(new DropdownLink("showProgress") {
@@ -234,6 +236,8 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 			@Override
 			protected void updateCardCount(IPartialPageRequestHandler handler) {
 				handler.add(countLabel);
+				if (addToIterationLink.getOutputMarkupId())
+					handler.add(addToIterationLink);
 			}
 
 		});
@@ -264,4 +268,5 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 	protected boolean isBacklog() {
 		return true;
 	}
+	
 }

@@ -13,12 +13,12 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -28,7 +28,6 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class AbstractColumnPanel extends Panel implements EditContext {
@@ -108,57 +107,54 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 	@Nullable
 	protected abstract String getIterationPrefix();
 	
-	protected MenuLink newAddToIterationLink(String componentId) {
-		return new MenuLink(componentId) {
+	protected Component newAddToIterationLink(String componentId) {
+		if (getQuery() != null && SecurityUtils.canScheduleIssues(getProject())) {
 
-			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				var menuItems = new ArrayList<MenuItem>();
-				for (var iteration: getProject().getSortedHierarchyIterations()) {
-					if ((getIterationPrefix() == null || iteration.getName().startsWith(getIterationPrefix()))
-							&& (isBacklog() || !iteration.equals(getIterationSelection().getIteration()))) {
-						var iterationId = iteration.getId();
-						menuItems.add(new MenuItem() {
-							@Override
-							public String getLabel() {
-								return iteration.getName();
+			return new AjaxLink<Void>(componentId) {
+				
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					var bean = new AddToIterationBean();
+					bean.setProjectId(getProject().getId());
+					bean.setBacklog(isBacklog());
+					bean.setIterationPrefix(getIterationPrefix());
+					if (getIterationSelection().getIteration() != null)
+						bean.setBoardIteration(getIterationSelection().getIteration().getName());
+					new BeanEditModalPanel<>(target, bean) {
+
+						@Override
+						protected void onSave(AjaxRequestTarget target, AddToIterationBean bean) {
+							BasePage page = (BasePage) getPage();
+							close();
+							var iteration = getIterationManager().findInHierarchy(getProject(), bean.getIteration());
+							var issues = new ArrayList<Issue>();
+							for (var issue : getIssueManager().query(getProjectScope(), getQuery(),
+									false, 0, Integer.MAX_VALUE)) {
+								if (issue.getSchedules().stream().noneMatch(it -> it.getIteration().equals(iteration)))
+									issues.add(issue);
 							}
-	
-							@Override
-							public WebMarkupContainer newLink(String id) {
-								return new AjaxLink<Void>(id) {
-	
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										BasePage page = (BasePage) getPage();
-										dropdown.close();
-										var iteration = getIterationManager().load(iterationId);
-										var issues = new ArrayList<Issue>();
-										for (var issue: getIssueManager().query(getProjectScope(), getQuery(),
-												false, 0, Integer.MAX_VALUE)) {
-											if (issue.getSchedules().stream().noneMatch(it->it.getIteration().equals(iteration)))
-												issues.add(issue);
-										}
-										getIssueChangeManager().addSchedule(issues, iteration);
-										for (var issue: issues)
-											page.notifyObservablesChange(target, issue.getChangeObservables(true));
-									}
-	
-								};
-							}
-						});
-					}
+							getIssueChangeManager().addSchedule(issues, iteration, bean.isSendNotifications());
+							for (var issue : issues)
+								page.notifyObservablesChange(target, issue.getChangeObservables(true));
+						}
+
+					};
 				}
-				return menuItems;
-			}
-	
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getQuery() != null && SecurityUtils.canScheduleIssues(getProject()));
-			}
-	
-		};
+
+			}.add(AttributeAppender.append("style", new LoadableDetachableModel<String>() {
+				@Override
+				protected String load() {
+					// We may also toggle this link in javascript when card is moved between columns, 
+					// so simply hide it instead of calling setVisible(false) 
+					if (countModel.getObject() == 0)
+						return "display: none;";
+					else
+						return "";
+				}
+			}));
+		} else {
+			return new WebMarkupContainer(componentId);
+		}
 	}
 	
 	protected abstract boolean isBacklog();

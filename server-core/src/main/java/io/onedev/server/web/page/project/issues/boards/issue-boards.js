@@ -204,8 +204,10 @@ onedev.server.issueBoards = {
 		if (accepted) {
 			var $cardCount = $fromDroppable.parent().find(".card-count");
 			$cardCount.text(parseInt($cardCount.text()) - 1);
+			onedev.server.issueBoards.updateAddToIteration(fromDroppableId);
 			$cardCount = $toDroppable.parent().find(".card-count");
 			$cardCount.text(parseInt($cardCount.text()) + 1);
+			onedev.server.issueBoards.updateAddToIteration(toDroppableId);
 		} else {
 			var $card = $toDroppable.children().eq(toIndex+1);
 			var $insertBeforeCard = $fromDroppable.children().eq(fromIndex + 1);
@@ -218,5 +220,15 @@ onedev.server.issueBoards = {
 	changeCardCount: function(droppableId, change) {
 		var $cardCount = $("#" + droppableId).parent().find(".card-count");
 		$cardCount.text(parseInt($cardCount.text()) + change);
+		onedev.server.issueBoards.updateAddToIteration(droppableId);
+	},
+	updateAddToIteration: function(droppableId) {
+		var $droppable = $("#" + droppableId);
+		var $addToIteration = $droppable.parent().find(".add-to-iteration");
+		var cardCount = parseInt($droppable.parent().find(".card-count").text());
+		if (cardCount > 0)
+			$addToIteration.show();
+		else
+			$addToIteration.hide();
 	}
 }

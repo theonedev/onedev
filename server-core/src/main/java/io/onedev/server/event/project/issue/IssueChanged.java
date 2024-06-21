@@ -1,13 +1,7 @@
 package io.onedev.server.event.project.issue;
 
-import java.util.Collection;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
@@ -17,6 +11,11 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
+import io.onedev.server.web.UrlManager;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Map;
 
 public class IssueChanged extends IssueEvent implements CommitAware {
 
@@ -27,11 +26,15 @@ public class IssueChanged extends IssueEvent implements CommitAware {
 	private final String comment;
 	
 	public IssueChanged(IssueChange change, @Nullable String comment) {
-		super(change.getUser(), change.getDate(), change.getIssue());
+		this(change, comment, true);
+	}
+
+	public IssueChanged(IssueChange change, @Nullable String comment, boolean sendNotifications) {
+		super(change.getUser(), change.getDate(), change.getIssue(), sendNotifications);
 		changeId = change.getId();
 		this.comment = comment;
 	}
-
+	
 	public IssueChange getChange() {
 		return OneDev.getInstance(IssueChangeManager.class).load(changeId);
 	}

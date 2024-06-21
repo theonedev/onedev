@@ -145,7 +145,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		if (event.isMinor())
+		if (event.isMinor() || !event.isSendNotifications())
 			return;
 		
 		Issue issue = event.getIssue();

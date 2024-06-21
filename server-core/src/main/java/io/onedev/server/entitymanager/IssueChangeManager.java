@@ -42,7 +42,7 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void addSchedule(Issue issue, Iteration iteration);
 
-	void addSchedule(List<Issue> issues, Iteration iteration);
+	void addSchedule(List<Issue> issues, Iteration iteration, boolean sendNotifications);
 	
 	void removeSchedule(Issue issue, Iteration iteration);
 	
@@ -50,7 +50,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 			Collection<String> removeFields, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
-                     @Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, @Nullable String comment);
+                     @Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, 
+					 @Nullable String comment, boolean sendNotifications);
 	
 	List<IssueChange> queryAfter(Long projectId, Long afterChangeId, int count);
 

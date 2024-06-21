@@ -2,11 +2,11 @@ package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+import io.onedev.server.web.UrlManager;
 
 import java.util.Collection;
 import java.util.Date;
@@ -19,11 +19,18 @@ public abstract class IssueEvent extends ProjectEvent {
 	
 	private final Long issueId;
 	
+	private final boolean sendNotifications;
+
 	public IssueEvent(User user, Date date, Issue issue) {
+		this(user, date, issue, true);
+	}
+	
+	public IssueEvent(User user, Date date, Issue issue, boolean sendNotifications) {
 		super(user, date, issue.getProject());
 		issueId = issue.getId();
+		this.sendNotifications = sendNotifications;
 	}
-
+	
 	public Issue getIssue() {
 		return OneDev.getInstance(IssueManager.class).load(issueId);
 	}
@@ -48,4 +55,7 @@ public abstract class IssueEvent extends ProjectEvent {
 		return OneDev.getInstance(UrlManager.class).urlFor(getIssue());
 	}
 
+	public boolean isSendNotifications() {
+		return sendNotifications;
+	}
 }

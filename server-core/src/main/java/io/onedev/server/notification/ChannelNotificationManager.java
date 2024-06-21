@@ -54,7 +54,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(IssueEvent event) {
-		if (!event.isMinor()) {
+		if (!event.isMinor() && event.isSendNotifications()) {
 			Issue issue = event.getIssue();
 			User user = event.getUser();
 

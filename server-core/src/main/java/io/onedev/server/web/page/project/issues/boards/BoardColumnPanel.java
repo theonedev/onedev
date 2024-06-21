@@ -106,6 +106,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 	
 	private Component countLabel;
 	
+	private Component addToIterationLink;
+	
 	private CardListPanel cardListPanel;
 	
 	public BoardColumnPanel(String id) {
@@ -207,6 +209,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 					@Override
 					protected void updateCardCount(IPartialPageRequestHandler handler) {
 						handler.add(countLabel);
+						if (addToIterationLink.getOutputMarkupId())
+							handler.add(addToIterationLink);
 					}
 
 				});
@@ -293,7 +297,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 			head.add(new WebMarkupContainer("viewAsList").setVisible(false));
 		}
 		
-		head.add(newAddToIterationLink("addToIteration"));
+		head.add(addToIterationLink = newAddToIterationLink("addToIteration"));
 		head.add(new ModalLink("addCard") {
 
 			@Override

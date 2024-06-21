@@ -28,6 +28,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.collect.Lists;
@@ -68,6 +69,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 	private BeanEditor customFieldsEditor;
 	
 	private String comment;
+	
+	private boolean sendNotifications;
 	
 	public BatchEditPanel(String id) {
 		super(id);
@@ -255,6 +258,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			}
 			
 		});
+		
+		form.add(new CheckBox("sendNotifications", new PropertyModel<>(this, "sendNotifications")));
+		
 		form.add(new AjaxButton("save") {
 
 			private RunTaskBehavior runTaskBehavior;
@@ -299,7 +305,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, confidential, iterations, fieldValues, comment);
+								getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
 						onUpdated(target);
 					}
 					
