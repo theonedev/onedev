@@ -6504,6 +6504,10 @@ public class DataMigrator {
 							milestoneNameElement.setName("iterationName");
 					}
 				}
+				for (Node node : dom.selectNodes("//io.onedev.server.ee.dashboard.widgets.BuildListWidget")) {
+					if (node instanceof Element) 
+						((Element) node).addElement("showDuration").setText("false");
+				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueFields.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);

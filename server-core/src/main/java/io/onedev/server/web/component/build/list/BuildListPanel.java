@@ -104,6 +104,8 @@ public abstract class BuildListPanel extends Panel {
 	
 	private final boolean showRef;
 	
+	private final boolean showDuration;
+	
 	private final int expectedCount;
 	
 	private final IModel<BuildQuery> queryModel = new LoadableDetachableModel<BuildQuery>() {
@@ -131,10 +133,12 @@ public abstract class BuildListPanel extends Panel {
 	
 	private boolean querySubmitted = true;
 	
-	public BuildListPanel(String id, IModel<String> queryModel, boolean showRef, int expectedCount) {
+	public BuildListPanel(String id, IModel<String> queryModel, boolean showRef,
+						  boolean showDuration, int expectedCount) {
 		super(id);
 		this.queryStringModel = queryModel;
 		this.showRef = showRef;
+		this.showDuration = showDuration;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -1116,9 +1120,36 @@ public abstract class BuildListPanel extends Panel {
 				}
 
 			});
-		}	
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Last Update")) {
+		}
+
+		if (showDuration) {
+			columns.add(new AbstractColumn<>(Model.of("Duration")) {
+
+				@Override
+				public String getCssClass() {
+					return "d-none d-xl-table-cell";
+				}
+
+				@Override
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
+					Build build = rowModel.getObject();
+					if (build.getRunningDate() != null) {
+						long duration;
+						if (build.getFinishDate() != null)
+							duration = build.getFinishDate().getTime() - build.getRunningDate().getTime();
+						else
+							duration = System.currentTimeMillis() - build.getRunningDate().getTime();
+						if (duration < 0)
+							duration = 0;
+						cellItem.add(new Label(componentId, DateUtils.formatDuration(duration)));
+					} else {
+						cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+					}
+				}
+			});
+		}
+
+		columns.add(new AbstractColumn<>(Model.of("Last Update")) {
 
 			@Override
 			public String getCssClass() {
@@ -1137,7 +1168,7 @@ public abstract class BuildListPanel extends Panel {
 					public String getObject() {
 						return rowModel.getObject().getStatus().toString();
 					}
-					
+
 				}) {
 
 					@Override
@@ -1146,7 +1177,7 @@ public abstract class BuildListPanel extends Panel {
 						add(newBuildObserver(buildId));
 						setOutputMarkupId(true);
 					}
-					
+
 				});
 				fragment.add(new Label("date", new LoadableDetachableModel<String>() {
 
@@ -1154,7 +1185,7 @@ public abstract class BuildListPanel extends Panel {
 					protected String load() {
 						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
 					}
-					
+
 				}));
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);
@@ -1162,7 +1193,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});		
 		
-		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
+		body.add(buildsTable = new DefaultDataTable<>("builds", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);
