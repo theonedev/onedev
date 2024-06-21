@@ -1,8 +1,8 @@
 grammar InterpolativePatternSet;
 
 interpolative: segment* EOF;
-segment: literal|Variable;
-literal: WS* pattern (WS+ pattern)* WS*;
+segment: literal|Variable|WS+;
+literal: pattern (WS+ pattern)*;
 pattern: Excluded? (Quoted|NQuoted);
 
 Variable: '@' (~[@])+? '@';
