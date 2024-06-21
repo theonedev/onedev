@@ -1,3 +1,10 @@
+# 10.9.0
+
+### RESTful api
+
+Milestone is now renamed as iteration. All other settings are migrated automatically. For programs using milestone api, 
+they need to be updated to use iteration api instead
+
 # 10.5.0
 
 ### CI/CD
