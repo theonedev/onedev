@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -173,17 +172,14 @@ public class PullRequest extends ProjectBelonging
 	
 	@Api(order=100)
 	@Column(nullable=false, length=MAX_TITLE_LEN)
-	@OptimisticLock(excluded=true)
 	private String title;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
-	@OptimisticLock(excluded=true)
 	@Api(description = "May be null")
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	@OptimisticLock(excluded=true)
 	private User submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -213,7 +209,6 @@ public class PullRequest extends ProjectBelonging
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonIgnore
-	@OptimisticLock(excluded=true)
 	private String noSpaceTitle;
 	
 	@JsonIgnore
@@ -221,7 +216,6 @@ public class PullRequest extends ProjectBelonging
 	private MergePreview mergePreview;
 	
 	@Column(nullable=false)
-	@OptimisticLock(excluded=true)
 	private Date submitDate = new Date();
 	
 	@Column(nullable=false)
@@ -232,7 +226,6 @@ public class PullRequest extends ProjectBelonging
 	
 	private long number;
 	
-	@OptimisticLock(excluded=true)
 	private int commentCount;
 	
 	@Embedded
@@ -242,16 +235,7 @@ public class PullRequest extends ProjectBelonging
 	private Date codeCommentsUpdateDate;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
-	@OptimisticLock(excluded=true)
 	private String checkError;
-	
-	/*
-	 * Add version check in order to prevent sending MergePreviewCalculated event 
-	 * after pull request is discarded 
-	 */
-	@Version
-	@JsonIgnore
-	private int revision;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestLabel> labels = new ArrayList<>();

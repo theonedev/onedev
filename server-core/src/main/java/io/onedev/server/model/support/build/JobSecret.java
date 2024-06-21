@@ -4,6 +4,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.SecretName;
+import io.onedev.server.job.match.OnBranchCriteria;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -17,7 +18,7 @@ public class JobSecret implements Serializable {
 
 	private String value;
 	
-	private String authorization;
+	private String authorization = new OnBranchCriteria("**").toString();
 	
 	private boolean archived;
 	
@@ -43,8 +44,9 @@ public class JobSecret implements Serializable {
 		this.value = value;
 	}
 
-	@Editable(order=300, placeholder="Non-pull-request commits", description=
-			"Optionally specify branches/users/groups allowed to access this secret")
+	@Editable(order=300, placeholder="Any job", description= "" +
+			"Optionally specify branches/users/groups allowed to access this secret. If left empty, " +
+			"any job can access this secret, including those triggered via external pull requests")
 	@JobMatch
     public String getAuthorization() {
 		return authorization;

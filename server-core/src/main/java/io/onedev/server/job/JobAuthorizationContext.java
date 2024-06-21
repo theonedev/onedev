@@ -6,7 +6,7 @@ import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
-import io.onedev.server.job.match.NonPullRequestCommitsCriteria;
+import io.onedev.server.job.match.OnBranchCriteria;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -82,24 +82,26 @@ public class JobAuthorizationContext {
 			for (JobSecret secret: project.getHierarchyJobSecrets()) {
 				if (secret.getName().equals(secretName)) {
 					String authorization = secret.getAuthorization();
-					if (authorization == null)
-						authorization = new NonPullRequestCommitsCriteria().toString();
-					JobMatch jobMatch = JobMatch.parse(authorization, false, false);
-					if (request != null) {
-						if (project.equals(request.getSourceProject())) {
-							JobMatchContext sourceMatchContext = new JobMatchContext(project, request.getSourceBranch(), null, request.getSubmitter(), null);
-							JobMatchContext targetMatchContext = new JobMatchContext(project, request.getTargetBranch(), null, request.getSubmitter(), null);
-							if (jobMatch.matches(sourceMatchContext) && jobMatch.matches(targetMatchContext))
-								return normalizeSecretValue(secret.getValue());
+					if (authorization == null) {
+						return normalizeSecretValue(secret.getValue());
+					} else {
+						JobMatch jobMatch = JobMatch.parse(authorization, false, false);
+						if (request != null) {
+							if (project.equals(request.getSourceProject())) {
+								JobMatchContext sourceMatchContext = new JobMatchContext(project, request.getSourceBranch(), null, request.getSubmitter(), null);
+								JobMatchContext targetMatchContext = new JobMatchContext(project, request.getTargetBranch(), null, request.getSubmitter(), null);
+								if (jobMatch.matches(sourceMatchContext) && jobMatch.matches(targetMatchContext))
+									return normalizeSecretValue(secret.getValue());
+							} else {
+								JobMatchContext matchContext = new JobMatchContext(project, null, commitId, request.getSubmitter(), null);
+								if (jobMatch.matches(matchContext))
+									return normalizeSecretValue(secret.getValue());
+							}
 						} else {
-							JobMatchContext matchContext = new JobMatchContext(project, null, null, request.getSubmitter(), null);
+							JobMatchContext matchContext = new JobMatchContext(project, null, commitId, user, null);
 							if (jobMatch.matches(matchContext))
 								return normalizeSecretValue(secret.getValue());
 						}
-					} else {
-						JobMatchContext matchContext = new JobMatchContext(project, null, commitId, user, null);
-						if (jobMatch.matches(matchContext)) 
-							return normalizeSecretValue(secret.getValue());
 					}
 				}
 			}

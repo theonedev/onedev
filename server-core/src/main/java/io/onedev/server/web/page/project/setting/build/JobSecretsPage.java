@@ -173,7 +173,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				if (rowModel.getObject().getAuthorization() != null)
 					cellItem.add(new Label(componentId, rowModel.getObject().getAuthorization()));
 				else
-					cellItem.add(new Label(componentId, "<i>non-pull-request commits</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>Any job</i>").setEscapeModelStrings(false));
 			}
 
 		});

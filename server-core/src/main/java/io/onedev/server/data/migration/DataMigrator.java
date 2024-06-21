@@ -6456,7 +6456,17 @@ public class DataMigrator {
 			}
 		}
 		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("Iterations.xml")) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var buildSettingElement = element.element("buildSetting");
+					for (var secretElement : buildSettingElement.element("jobSecrets").elements()) {
+						if (secretElement.element("authorization") == null)
+							secretElement.addElement("authorization").setText("on branch(\"**\")");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Iterations.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
 					element.setName("io.onedev.server.model.Iteration");
@@ -6538,6 +6548,8 @@ public class DataMigrator {
 						"\"Milestone\"   is", "\"Iteration\" is");
 				content = StringUtils.replace(content,
 						"\"Milestone\"    is", "\"Iteration\" is");
+				content = StringUtils.replace(content,
+						"non-pull-request commits", "on branch(\"**\")");
 				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);

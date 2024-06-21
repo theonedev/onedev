@@ -76,7 +76,6 @@ import io.onedev.server.web.editable.EditableUtils;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
-import org.apache.wicket.util.collections.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 import org.quartz.CronExpression;
@@ -106,6 +105,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
@@ -314,7 +314,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 		if (builds.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
-				ParamSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
+				ParamSpec paramSpec = checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
 				if (!entry.getValue().isEmpty()) {
 					for (String string : entry.getValue()) {
 						BuildParam param = new BuildParam();
@@ -795,7 +795,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				buildParamManager.deleteParams(build);
 				for (Map.Entry<String, List<String>> entry : build.getParamMap().entrySet()) {
 					ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
-					Preconditions.checkNotNull(paramSpec);
+					checkNotNull(paramSpec);
 					String type = paramSpec.getType();
 					List<String> values = entry.getValue();
 					if (!values.isEmpty()) {

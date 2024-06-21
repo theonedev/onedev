@@ -69,6 +69,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.onedev.server.model.PullRequest.getSerialLockName;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 
@@ -252,9 +253,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Transactional
 	@Override
 	public void merge(PullRequest request, String commitMessage) {
-		MergePreview mergePreview = Preconditions.checkNotNull(request.checkMergePreview());
-		ObjectId mergeCommitId = ObjectId.fromString(
-				Preconditions.checkNotNull(mergePreview.getMergeCommitHash()));
+		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
+		ObjectId mergeCommitId = ObjectId.fromString(checkNotNull(mergePreview.getMergeCommitHash()));
 		User user = SecurityUtils.getUser();
         PersonIdent person = user.asPerson();
         

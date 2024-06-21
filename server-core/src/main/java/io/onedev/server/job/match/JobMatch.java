@@ -97,11 +97,6 @@ public class JobMatch extends Criteria<JobMatchContext> {
 						throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 				}
 			}
-
-			@Override
-			public Criteria<io.onedev.server.job.match.JobMatchContext> visitOperatorCriteria(JobMatchParser.OperatorCriteriaContext ctx) {
-				return new NonPullRequestCommitsCriteria();
-			}
 			
 			@Override
 			public Criteria<io.onedev.server.job.match.JobMatchContext> visitOrCriteria(JobMatchParser.OrCriteriaContext ctx) {
