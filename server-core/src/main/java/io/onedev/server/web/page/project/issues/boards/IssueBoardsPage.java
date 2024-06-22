@@ -20,16 +20,17 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.iteration.IterationDateLabel;
 import io.onedev.server.web.component.iteration.IterationStatusLabel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.editbean.IterationEditBean;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.wicket.Component;
@@ -332,6 +333,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								}
 
 							});
+							actions.add(new CreateBoardLink("copy", SerializationUtils.clone(item.getModelObject())) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									super.onClick(target);
+									dropdown.close();
+								}
+
+							});
 							
 							actions.add(new Link<Void>("delete") {
 
@@ -373,7 +383,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						}.items(".board"));
 					}
 					
-					menuFragment.add(new CreateBoardLink("newBoard") {
+					menuFragment.add(new CreateBoardLink("newBoard", new BoardSpec()) {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -800,7 +810,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			body.add(columnsView);
 		} else {
 			contentFrag = new Fragment("content", "noBoardsFrag", this);
-			contentFrag.add(new CreateBoardLink("newBoard") {
+			contentFrag.add(new CreateBoardLink("newBoard", new BoardSpec()) {
 
 				@Override
 				protected void onConfigure() {
@@ -882,13 +892,16 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private class CreateBoardLink extends ModalLink {
 
-		public CreateBoardLink(String id) {
+		private final BoardSpec newBoard;
+		
+		public CreateBoardLink(String id, BoardSpec newBoard) {
 			super(id);
+			this.newBoard = newBoard;
 		}
 
 		@Override
 		protected Component newContent(String id, ModalPanel modal) {
-			return new NewBoardPanel(id, boards) {
+			return new NewBoardPanel(id, boards, newBoard) {
 
 				@Override
 				protected Project getProject() {

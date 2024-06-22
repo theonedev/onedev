@@ -1,15 +1,5 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.List;
-
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -19,24 +9,35 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
+
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class NewBoardPanel extends Panel {
 
 	private final List<BoardSpec> boards;
 	
-	public NewBoardPanel(String id, List<BoardSpec> boards) {
+	private final BoardSpec newBoard;
+	
+	public NewBoardPanel(String id, List<BoardSpec> boards, BoardSpec newBoard) {
 		super(id);
 		this.boards = boards;
+		this.newBoard = newBoard;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		BoardSpec board = new BoardSpec();
-		
-		BeanEditor editor = BeanContext.edit("editor", board);
+
+		newBoard.populateEditColumns();
+		BeanEditor editor = BeanContext.edit("editor", newBoard);
 		Form<?> form = new Form<Void>("form");
 		form.add(editor);
 		form.add(new AjaxButton("create") {
@@ -44,19 +45,19 @@ abstract class NewBoardPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				int indexWithSameName = BoardSpec.getBoardIndex(boards, board.getName());
+				int indexWithSameName = BoardSpec.getBoardIndex(boards, newBoard.getName());
 				if (indexWithSameName != -1) {
 					editor.error(new Path(new PathNode.Named("name")),
 							"This name has already been used by another issue board in the project");
 				} 
 				if (editor.isValid()){
-					board.populateColumns();
+					newBoard.populateColumns();
 					
-					boards.add(board);
+					boards.add(newBoard);
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).update(getProject());
 					Session.get().success("New issue board created");
-					onBoardCreated(target, board);
+					onBoardCreated(target, newBoard);
 				} else {
 					target.add(NewBoardPanel.this);
 				}
