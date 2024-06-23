@@ -6560,6 +6560,20 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate168(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			try {
+				var content = StringUtils.replace(
+						FileUtils.readFileToString(file, UTF_8), 
+						"on branch(\"**\")", 
+						"on branch \"**\"");
+				FileUtils.writeStringToFile(file, content, UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 }
 	
