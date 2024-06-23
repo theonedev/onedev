@@ -67,7 +67,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 	public BuildSpecBlobViewPanel(String id, BlobRenderContext context) {
 		super(id, context);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

@@ -24,6 +24,8 @@ import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -43,6 +45,8 @@ import java.util.stream.Collectors;
 public class Import implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(Import.class);
 
 	private String projectPath;
 	
@@ -220,8 +224,10 @@ public class Import implements Serializable, Validatable {
 		} catch (Exception e) {
 			context.disableDefaultConstraintViolation();
 			String message = e.getMessage();
-			if (message == null)
-				message = Throwables.getStackTraceAsString(e);
+			if (message == null) {
+				logger.error("Error validating build spec import", e);
+				message = "Failed to validate build spec import. Check server log for details";
+			}
 			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		}
