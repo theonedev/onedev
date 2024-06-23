@@ -73,7 +73,8 @@ public class IssueQueryEditSupport implements EditSupport {
         					.withCurrentPullRequestCriteria(issueQuery.withCurrentPullRequestCriteria())
         					.withCurrentUserCriteria(issueQuery.withCurrentUserCriteria())
 							.withStateCriteria(issueQuery.withStateCriteria())
-        					.withOrder(issueQuery.withOrder());
+        					.withOrder(issueQuery.withOrder())
+							.forBoard(issueQuery.forBoard());
 		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
 		        		new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 

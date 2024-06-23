@@ -32,6 +32,8 @@ public @interface IssueQuery {
 	
 	boolean withOrder() default true;
 	
+	boolean forBoard() default false;
+	
     String message() default "";
 
     Class<?>[] groups() default {};

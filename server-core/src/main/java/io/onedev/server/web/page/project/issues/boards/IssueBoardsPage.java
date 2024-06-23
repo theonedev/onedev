@@ -85,7 +85,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 	public static final String ITERATION_UNSCHEDULED = "unscheduled";
 
-	private List<BoardSpec> boards;
+	private final List<BoardSpec> boards;
 	
 	private final int boardIndex;
 	
@@ -103,13 +103,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private TextField<String> queryInput;
 	
-	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected IssueQuery load() {
 			return parse(false, getBoard().getBaseQuery(), queryString);
 		}
-		
+
 	};
 	
 	private final IModel<IssueQuery> backlogQueryModel = new LoadableDetachableModel<>() {
@@ -155,7 +155,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return null;
 		}
 		query = IssueQuery.merge(baseQuery, query);
-		query.getSorts().clear();
 		var sort = new EntitySort();
 		sort.setDirection(EntitySort.Direction.ASCENDING);
 		sort.setField(NAME_BOARD_POSITION);
@@ -709,7 +708,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			IssueQueryParseOption option = new IssueQueryParseOption()
-					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true).withOrder(false);
+					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true).forBoard(true);
 			queryInput.add(new IssueQueryBehavior(projectModel, option, true));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {

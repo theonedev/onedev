@@ -1,48 +1,33 @@
 package io.onedev.server.model.support.issue;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.Size;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.server.annotation.IssueQuery;
-import io.onedev.server.model.IssueSchedule;
-import org.unbescape.html.HtmlEscape;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.*;
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
+import org.unbescape.html.HtmlEscape;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.*;
 
 @Editable
 public class BoardSpec implements Serializable {
@@ -81,7 +66,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=200, placeholder="Not specified", description="Optionally specify a base query to "
 			+ "filter/order issues of the board")
-	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true, withOrder = false)
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true, forBoard = true)
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -93,7 +78,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with current iteration")
-	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true, withOrder = false)
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true, forBoard = true)
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;

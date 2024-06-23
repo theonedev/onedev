@@ -24,6 +24,8 @@ public class IssueQueryParseOption implements Serializable {
 	
 	private boolean withOrder = true;
 	
+	private boolean forBoard;
+	
 	public boolean withProjectCriteria() {
 		return withProjectCriteria;
 	}
@@ -105,6 +107,15 @@ public class IssueQueryParseOption implements Serializable {
 		return this;
 	}
 
+	public boolean forBoard() {
+		return forBoard;
+	}
+
+	public IssueQueryParseOption forBoard(boolean forBoard) {
+		this.forBoard = forBoard;
+		return this;
+	}
+	
 	public IssueQueryParseOption enableAll(boolean enabled) {
 		withCurrentProjectCriteria = enabled;
 		withCurrentBuildCriteria = enabled;

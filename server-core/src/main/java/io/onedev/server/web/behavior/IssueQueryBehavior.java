@@ -29,6 +29,7 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -131,6 +132,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							Map<String, String> candidates = getFieldCandidates(ORDER_FIELDS.keySet());
+							if (option.forBoard())
+								candidates.remove(NAME_BOARD_POSITION);
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
 							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
