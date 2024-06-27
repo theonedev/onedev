@@ -350,7 +350,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getComment().isResolved());
+				setVisible(!getComment().isResolved() && SecurityUtils.canWriteCode(getComment().getProject()));
 			}
 			
 		});
@@ -364,7 +364,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getComment().isResolved());
+				setVisible(getComment().isResolved() && SecurityUtils.canWriteCode(getComment().getProject()));
 			}
 			
 		});
