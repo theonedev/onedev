@@ -87,6 +87,8 @@ public abstract class PackListPanel extends Panel {
 
 	};
 	
+	private Component countLabel;
+	
 	private DataTable<Pack, Void> packsTable;
 	
 	private SelectionColumn<Pack, Void> selectionColumn;
@@ -159,6 +161,7 @@ public abstract class PackListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		packsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -252,6 +255,7 @@ public abstract class PackListPanel extends Panel {
 										for (IModel<Pack> each: selectionColumn.getSelections())
 											packs.add(each.getObject());
 										OneDev.getInstance(PackManager.class).delete(packs);
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -317,6 +321,7 @@ public abstract class PackListPanel extends Panel {
 										}
 										OneDev.getInstance(PackManager.class).delete(packs);
 										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -453,6 +458,22 @@ public abstract class PackListPanel extends Panel {
 		});
 		add(queryForm);
 
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " packages";
+				else
+					return "found 1 package";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override

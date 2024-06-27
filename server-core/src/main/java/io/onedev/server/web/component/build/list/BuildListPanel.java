@@ -117,6 +117,8 @@ public abstract class BuildListPanel extends Panel {
 		
 	};
 	
+	private Component countLabel;
+	
 	private DataTable<Build, Void> buildsTable;
 	
 	private SelectionColumn<Build, Void> selectionColumn;
@@ -190,6 +192,7 @@ public abstract class BuildListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		buildsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -429,6 +432,7 @@ public abstract class BuildListPanel extends Panel {
 										for (IModel<Build> each: selectionColumn.getSelections())
 											builds.add(each.getObject());
 										OneDev.getInstance(BuildManager.class).delete(builds);
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -640,6 +644,7 @@ public abstract class BuildListPanel extends Panel {
 										}
 										OneDev.getInstance(BuildManager.class).delete(builds);
 										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -927,6 +932,22 @@ public abstract class BuildListPanel extends Panel {
 				
 			});
 		}
+
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " builds";
+				else
+					return "found 1 build";					
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 

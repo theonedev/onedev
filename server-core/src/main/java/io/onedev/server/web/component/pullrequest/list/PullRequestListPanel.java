@@ -110,6 +110,8 @@ public abstract class PullRequestListPanel extends Panel {
 
 	};
 	
+	private Component countLabel;
+	
 	private DataTable<PullRequest, Void> requestsTable;
 	
 	private SelectionColumn<PullRequest, Void> selectionColumn;
@@ -173,6 +175,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		requestsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -272,7 +275,6 @@ public abstract class PullRequestListPanel extends Panel {
 												.map(it->it.getObject()).collect(toList());
 										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 										selectionColumn.getSelections().clear();
-										target.add(body);
 										Session.get().success("Watch status changed");
 									}
 								};
@@ -333,6 +335,7 @@ public abstract class PullRequestListPanel extends Panel {
 											protected void onConfirm(AjaxRequestTarget target) {
 												for (IModel<PullRequest> each : selectionColumn.getSelections())
 													OneDev.getInstance(PullRequestManager.class).discard(each.getObject(), null);
+												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
 											}
@@ -396,6 +399,7 @@ public abstract class PullRequestListPanel extends Panel {
 											for (IModel<PullRequest> each : selectionColumn.getSelections())
 												requests.add(each.getObject());
 											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
+											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -527,6 +531,7 @@ public abstract class PullRequestListPanel extends Panel {
 												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 													OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
 												dataProvider.detach();
+												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
 											}
@@ -592,6 +597,7 @@ public abstract class PullRequestListPanel extends Panel {
 												requests.add(it.next());
 											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
 											dataProvider.detach();
+											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -951,6 +957,22 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
+
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " pull requests";
+				else
+					return "found 1 pull request";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 

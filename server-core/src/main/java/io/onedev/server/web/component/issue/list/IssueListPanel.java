@@ -129,6 +129,8 @@ public abstract class IssueListPanel extends Panel {
 		
 	};
 	
+	private Component countLabel;
+	
 	private DataTable<Issue, Void> issuesTable;
 	
 	private SelectionColumn<Issue, Void> selectionColumn;
@@ -199,6 +201,7 @@ public abstract class IssueListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		issuesTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -630,6 +633,7 @@ public abstract class IssueListPanel extends Panel {
 										protected void onUpdated(AjaxRequestTarget target) {
 											modal.close();
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											onBatchUpdated(target);
 										}
@@ -866,6 +870,7 @@ public abstract class IssueListPanel extends Panel {
 												issues.add(each.getObject());
 											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											onBatchDeleted(target);
 										}
@@ -1038,6 +1043,7 @@ public abstract class IssueListPanel extends Panel {
 										protected void onUpdated(AjaxRequestTarget target) {
 											modal.close();
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											onBatchUpdated(target);
 										}
@@ -1278,6 +1284,7 @@ public abstract class IssueListPanel extends Panel {
 											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											onBatchDeleted(target);
 										}
@@ -1466,6 +1473,22 @@ public abstract class IssueListPanel extends Panel {
 		} else {
 			add(new WebMarkupContainer("showProgress").setVisible(false));			
 		}
+		
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " issues";
+				else
+					return "found 1 issue";
+			} 
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 

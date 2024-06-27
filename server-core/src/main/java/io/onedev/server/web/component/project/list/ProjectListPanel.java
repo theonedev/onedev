@@ -79,6 +79,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -159,6 +160,8 @@ public class ProjectListPanel extends Panel {
 
 			}; 
 	
+	private Component countLabel;
+	
 	private DataTable<Project, Void> projectsTable;	
 	
 	private SelectionColumn<Project, Void> selectionColumn;
@@ -205,6 +208,7 @@ public class ProjectListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		projectsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -380,6 +384,7 @@ public class ProjectListPanel extends Panel {
 													for (IModel<Project> each: selectionColumn.getSelections()) 
 														projects.add(each.getObject());
 													getProjectManager().move(projects, getTargetProject());
+													target.add(countLabel);
 													target.add(body);
 													selectionColumn.getSelections().clear();
 													Session.get().success("Projects moved");
@@ -465,6 +470,7 @@ public class ProjectListPanel extends Panel {
 												for (IModel<Project> each: selectionColumn.getSelections()) 
 													projects.add(each.getObject());
 												getProjectManager().move(projects, null);
+												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
 												Session.get().success("Projects modified");
@@ -544,6 +550,7 @@ public class ProjectListPanel extends Panel {
 											}
 											getProjectManager().requestToDelete(projects);
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											Session.get().success("Requested to delete projects");
 											var page = (BasePage) getPage();
@@ -648,6 +655,7 @@ public class ProjectListPanel extends Panel {
 														projects.add(it.next());
 													getProjectManager().move(projects, getTargetProject());
 													dataProvider.detach();
+													target.add(countLabel);
 													target.add(body);
 													selectionColumn.getSelections().clear();
 													Session.get().success("Projects moved");
@@ -734,6 +742,7 @@ public class ProjectListPanel extends Panel {
 													projects.add(it.next());
 												getProjectManager().move(projects, null);
 												dataProvider.detach();
+												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
 												Session.get().success("Projects modified");
@@ -817,6 +826,7 @@ public class ProjectListPanel extends Panel {
 											getProjectManager().requestToDelete(projects);
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 											Session.get().success("Requested to delete projects");
 											var page = (BasePage) getPage();
@@ -975,6 +985,22 @@ public class ProjectListPanel extends Panel {
 			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class)
 					.setVisible(canCreateProjects));
 		}
+
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " projects";
+				else
+					return "found 1 project";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 

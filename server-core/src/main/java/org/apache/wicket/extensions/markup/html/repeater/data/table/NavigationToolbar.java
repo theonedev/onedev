@@ -49,7 +49,6 @@ public class NavigationToolbar extends AbstractToolbar
 			@Override
 			protected void onBeforeRender() {
 				addOrReplace(newPagingNavigator("navigator", table));
-				addOrReplace(newNavigatorLabel("navigatorLabel", table));
 				super.onBeforeRender();
 			}
 			

@@ -99,6 +99,8 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 	};
 	
+	private Component countLabel;
+	
 	private DataTable<CodeComment, Void> commentsTable;
 	
 	private SortableDataProvider<CodeComment, Void> dataProvider;
@@ -124,6 +126,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		commentsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -218,6 +221,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						OneDev.getInstance(CodeCommentStatusChangeManager.class).create(changes, note);
 						selectionColumn.getSelections().clear();
 						dataProvider.detach();
+						target.add(countLabel);
 						target.add(body);
 						
 						close();
@@ -350,6 +354,7 @@ public abstract class CodeCommentListPanel extends Panel {
 												comments.add(each.getObject());
 											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 										}
 										
@@ -504,6 +509,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
+											target.add(countLabel);
 											target.add(body);
 										}
 										
@@ -697,6 +703,22 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " comments";
+				else
+					return "found 1 comment";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override

@@ -44,6 +44,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -91,6 +92,8 @@ public class UserListPage extends AdministrationPage {
 	};
 	
 	private TextField<String> searchField;
+
+	private Component countLabel;
 	
 	private DataTable<User, Void> usersTable;
 
@@ -114,6 +117,7 @@ public class UserListPage extends AdministrationPage {
 		query = (String) data;
 		getPageParameters().set(PARAM_QUERY, query);
 		target.add(searchField);
+		target.add(countLabel);
 		target.add(usersTable);
 		selectionColumn.getSelections().clear();
 	}
@@ -154,6 +158,8 @@ public class UserListPage extends AdministrationPage {
 				else
 					pushState(target, url, query);
 
+				target.add(countLabel);
+				
 				usersTable.setCurrentPage(0);
 				target.add(usersTable);
 				selectionColumn.getSelections().clear();
@@ -448,6 +454,7 @@ public class UserListPage extends AdministrationPage {
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
 										getUserManager().delete(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
+										target.add(countLabel);
 										target.add(usersTable);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Users deleted successfully");
@@ -916,6 +923,22 @@ public class UserListPage extends AdministrationPage {
 			}
 			
 		});
+
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " users";
+				else
+					return "found 1 user";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 

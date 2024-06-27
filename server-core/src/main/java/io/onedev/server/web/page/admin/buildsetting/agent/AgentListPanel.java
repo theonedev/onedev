@@ -48,6 +48,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -80,6 +81,8 @@ class AgentListPanel extends Panel {
 		}
 		
 	};
+
+	private Component countLabel;
 	
 	private DataTable<Agent, Void> agentsTable;
 	
@@ -123,6 +126,7 @@ class AgentListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		agentsTable.setCurrentPage(0);
+		target.add(countLabel);
 		target.add(body);
 		selectionColumn.getSelections().clear();
 		querySubmitted = true;
@@ -257,6 +261,7 @@ class AgentListPanel extends Panel {
 								dropdown.close();
 								for (var model: selectionColumn.getSelections())
 									getAgentManager().pause(model.getObject());
+								target.add(countLabel);
 								target.add(body);
 								selectionColumn.getSelections().clear();
 								Session.get().success("Paused selected agents");
@@ -299,6 +304,7 @@ class AgentListPanel extends Panel {
 								dropdown.close();
 								for (var model: selectionColumn.getSelections())
 									getAgentManager().resume(model.getObject());
+								target.add(countLabel);
 								target.add(body);
 								selectionColumn.getSelections().clear();
 								Session.get().success("Resumed selected agents");
@@ -346,6 +352,7 @@ class AgentListPanel extends Panel {
 									protected void onConfirm(AjaxRequestTarget target) {
 										for (IModel<Agent> each: selectionColumn.getSelections()) 
 											getAgentManager().restart(each.getObject());
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to selected agents");
@@ -407,13 +414,13 @@ class AgentListPanel extends Panel {
 										for (var model: selectionColumn.getSelections()) 
 											getAgentManager().delete(model.getObject());
 										selectionColumn.getSelections().clear();
+										target.add(countLabel);
 										target.add(body);
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Removed selected agents. Please note that other agents sharing tokens with these "
-												+ "agents will also be removed. Type <code>yes</code> below to confirm";
+										return "Removed selected agents. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -469,6 +476,8 @@ class AgentListPanel extends Panel {
 										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
 											getAgentManager().pause(it.next());
 										selectionColumn.getSelections().clear();
+										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										Session.get().success("Paused all queried agents");
 									}
@@ -530,6 +539,8 @@ class AgentListPanel extends Panel {
 									protected void onConfirm(AjaxRequestTarget target) {
 										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
 											getAgentManager().resume(it.next());
+										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Resumed all queried agents");
@@ -592,6 +603,8 @@ class AgentListPanel extends Panel {
 									protected void onConfirm(AjaxRequestTarget target) {
 										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
 											getAgentManager().restart(it.next());
+										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to all queried agents");
@@ -654,14 +667,15 @@ class AgentListPanel extends Panel {
 									protected void onConfirm(AjaxRequestTarget target) {
 										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
 											getAgentManager().delete(it.next());
+										dataProvider.detach();
+										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Removed all queried agents. Please note that other agents sharing tokens with "
-												+ "these agents will also be removed. Type <code>yes</code> below to confirm";
+										return "Removed all queried agents. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -743,6 +757,22 @@ class AgentListPanel extends Panel {
 			}
 
 		});
+
+		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				if (dataProvider.size() > 1)
+					return "found " + dataProvider.size() + " agents";
+				else
+					return "found 1 agent";
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(dataProvider.size() != 0);
+			}
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<Agent, Void>() {
 
