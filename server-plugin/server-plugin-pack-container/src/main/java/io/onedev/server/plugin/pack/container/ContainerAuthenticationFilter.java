@@ -69,12 +69,10 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 					request.setAttribute(ATTR_BUILD_ID, jobContext.getBuildId());
 				var bearerToken = substringAfter(authValue, ":");
 				var accessToken = accessTokenManager.findByValue(bearerToken);
-				if (accessToken != null) {
+				// Do not throw IncorrectCredentialException if no access token found 
+				// as the bearer token can be a faked token for anonymous access
+				if (accessToken != null) 
 					ThreadContext.bind(accessToken.asSubject());
-				} else {
-					throw new ClientException(SC_UNAUTHORIZED, ErrorCode.UNAUTHORIZED,
-							"Unknown user name or incorrect credentials");
-				}
 			} else {
 				throw new ClientException(SC_UNAUTHORIZED, ErrorCode.UNAUTHORIZED, 
 						"Unsupported authorization: " + substringBefore(authHeader, " "));

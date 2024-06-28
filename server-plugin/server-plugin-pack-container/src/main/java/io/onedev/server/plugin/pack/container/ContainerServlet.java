@@ -54,8 +54,6 @@ public class ContainerServlet extends HttpServlet {
 	
 	private final SessionManager sessionManager;
 	
-	private final AccessTokenManager accessTokenManager;
-
 	private final ProjectManager projectManager;
 	
 	private final PackBlobManager packBlobManager;
@@ -69,11 +67,10 @@ public class ContainerServlet extends HttpServlet {
 	@Inject
 	public ContainerServlet(SettingManager settingManager, BuildManager buildManager, 
 							ObjectMapper objectMapper, SessionManager sessionManager, 
-							AccessTokenManager accessTokenManager, ProjectManager projectManager, 
-							PackBlobManager packBlobManager, PackManager packManager) {
+							ProjectManager projectManager, PackBlobManager packBlobManager, 
+							PackManager packManager) {
 		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
-		this.accessTokenManager = accessTokenManager;
 		this.projectManager = projectManager;
 		this.packBlobManager = packBlobManager;
 		this.packManager = packManager;
