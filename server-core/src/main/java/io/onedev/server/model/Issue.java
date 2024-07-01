@@ -928,7 +928,12 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return getSchedules().stream().map(it->it.getIteration()).collect(Collectors.toList());
 	}
 	
+	@Nullable
 	public IssueSchedule addSchedule(Iteration iteration) {
+		for (var schedule: getSchedules()) {
+			if (schedule.getIteration().equals(iteration))
+				return null;
+		}
 		IssueSchedule schedule = new IssueSchedule();
 		schedule.setIssue(this);
 		schedule.setIteration(iteration);

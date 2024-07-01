@@ -42,7 +42,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void addSchedule(Issue issue, Iteration iteration);
 
-	void addSchedule(List<Issue> issues, Iteration iteration, boolean sendNotifications);
+	void changeSchedule(List<Issue> issues, @Nullable Iteration addIteration, 
+						@Nullable Iteration removeIteration, boolean sendNotifications);
 	
 	void removeSchedule(Issue issue, Iteration iteration);
 	

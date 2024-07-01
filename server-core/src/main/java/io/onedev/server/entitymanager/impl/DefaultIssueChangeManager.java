@@ -253,25 +253,38 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	}
 
 	protected void addSchedule(Issue issue, Iteration iteration, boolean sendNotifications) {
-		issueScheduleManager.create(issue.addSchedule(iteration));
+		var schedule = issue.addSchedule(iteration);
+		if (schedule != null) {
+			issueScheduleManager.create(schedule);
 
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setData(new IssueIterationAddData(iteration.getName()));
-		change.setUser(SecurityUtils.getUser());
-		create(change, null, sendNotifications);
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setData(new IssueIterationAddData(iteration.getName()));
+			change.setUser(SecurityUtils.getUser());
+			create(change, null, sendNotifications);
+		}
 	}
 	
 	@Transactional
 	@Override
-	public void addSchedule(List<Issue> issues, Iteration iteration, boolean sendNotifications) {
-		for (var issue: issues) 
-			addSchedule(issue, iteration, sendNotifications);
+	public void changeSchedule(List<Issue> issues, Iteration addIteration, 
+							   Iteration removeIteration, boolean sendNotifications) {
+		for (var issue: issues) {
+			if (addIteration != null)
+				addSchedule(issue, addIteration, sendNotifications);
+			if (removeIteration != null)
+				removeSchedule(issue, removeIteration, sendNotifications);
+		}
 	}
 	
 	@Transactional
 	@Override
 	public void removeSchedule(Issue issue, Iteration iteration) {
+		removeSchedule(issue, iteration, true);
+	}
+
+	@Transactional
+	protected void removeSchedule(Issue issue, Iteration iteration, boolean sendNotifications) {
 		IssueSchedule schedule = issue.removeSchedule(iteration);
 		if (schedule != null) {
 			issueScheduleManager.delete(schedule);
@@ -279,7 +292,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setData(new IssueIterationRemoveData(iteration.getName()));
 			change.setUser(SecurityUtils.getUser());
-			create(change, null);
+			create(change, null, sendNotifications);
 		}
 	}
 	

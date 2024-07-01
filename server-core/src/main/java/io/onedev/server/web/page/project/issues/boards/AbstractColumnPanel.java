@@ -7,6 +7,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -27,7 +28,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.visit.IVisitor;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 abstract class AbstractColumnPanel extends Panel implements EditContext {
@@ -119,21 +119,22 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 					bean.setBacklog(isBacklog());
 					bean.setIterationPrefix(getIterationPrefix());
 					if (getIterationSelection().getIteration() != null)
-						bean.setBoardIteration(getIterationSelection().getIteration().getName());
+						bean.setCurrentIteration(getIterationSelection().getIteration().getName());
 					new BeanEditModalPanel<>(target, bean) {
 
 						@Override
 						protected void onSave(AjaxRequestTarget target, AddToIterationBean bean) {
 							BasePage page = (BasePage) getPage();
 							close();
-							var iteration = getIterationManager().findInHierarchy(getProject(), bean.getIteration());
-							var issues = new ArrayList<Issue>();
-							for (var issue : getIssueManager().query(getProjectScope(), getQuery(),
-									false, 0, Integer.MAX_VALUE)) {
-								if (issue.getSchedules().stream().noneMatch(it -> it.getIteration().equals(iteration)))
-									issues.add(issue);
-							}
-							getIssueChangeManager().addSchedule(issues, iteration, bean.isSendNotifications());
+							var issues = getIssueManager().query(getProjectScope(), getQuery(),
+									false, 0, Integer.MAX_VALUE);
+							var addIteration = getIterationManager().findInHierarchy(getProject(), bean.getIteration());
+							Iteration removeIteration;
+							if (!isBacklog() && bean.isRemoveFromCurrentIteration())
+								removeIteration = getIterationSelection().getIteration();
+							else 
+								removeIteration = null;
+							getIssueChangeManager().changeSchedule(issues, addIteration, removeIteration, bean.isSendNotifications());
 							for (var issue : issues)
 								page.notifyObservablesChange(target, issue.getChangeObservables(true));
 						}

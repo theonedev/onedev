@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.boards;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.util.EditContext;
 
@@ -18,11 +19,13 @@ public class AddToIterationBean implements Serializable {
 	
 	private String iterationPrefix;
 	
-	private String boardIteration;
+	private String currentIteration;
 	
 	private boolean backlog;
 	
 	private String iteration;
+	
+	private boolean removeFromCurrentIteration;
 	
 	private boolean sendNotifications;
 
@@ -45,12 +48,12 @@ public class AddToIterationBean implements Serializable {
 	}
 
 	@Editable(hidden = true)
-	public String getBoardIteration() {
-		return boardIteration;
+	public String getCurrentIteration() {
+		return currentIteration;
 	}
 
-	public void setBoardIteration(String boardIteration) {
-		this.boardIteration = boardIteration;
+	public void setCurrentIteration(String currentIteration) {
+		this.currentIteration = currentIteration;
 	}
 
 	@Editable(hidden = true)
@@ -72,18 +75,34 @@ public class AddToIterationBean implements Serializable {
 	public void setIteration(String iteration) {
 		this.iteration = iteration;
 	}
+
+	@Editable(order=150)
+	@ShowCondition("isRemoveFromCurrentIterationVisible")
+	public boolean isRemoveFromCurrentIteration() {
+		return removeFromCurrentIteration;
+	}
+
+	public void setRemoveFromCurrentIteration(boolean removeFromCurrentIteration) {
+		this.removeFromCurrentIteration = removeFromCurrentIteration;
+	}
+
+	private static boolean isRemoveFromCurrentIterationVisible() {
+		var editContext = EditContext.get();
+		return !(Boolean)editContext.getInputValue("backlog") 
+				&& editContext.getInputValue("currentIteration") != null;
+	}
 	
 	private static List<String> getIterationChoices() {
 		var projectId = (Long) EditContext.get().getInputValue("projectId");
 		var iterationPrefix = (String) EditContext.get().getInputValue("iterationPrefix");
-		var boardIteration = (String) EditContext.get().getInputValue("boardIteration");
+		var currentIteration = (String) EditContext.get().getInputValue("currentIteration");
 		var backlog = (boolean) EditContext.get().getInputValue("backlog");
 		var project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		
 		var iterations = new ArrayList<String>();
 		for (var iteration: project.getSortedHierarchyIterations()) {
 			if ((iterationPrefix == null || iteration.getName().startsWith(iterationPrefix))
-					&& (backlog || !iteration.getName().equals(boardIteration))) {
+					&& (backlog || !iteration.getName().equals(currentIteration))) {
 				iterations.add(iteration.getName());
 			}
 		}
