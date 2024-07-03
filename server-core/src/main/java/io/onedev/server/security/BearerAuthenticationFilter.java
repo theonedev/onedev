@@ -4,6 +4,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.subject.Subject;
@@ -24,13 +25,16 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	
 	private final AgentTokenManager agentTokenManager;
 	
+	private final JobManager jobManager;
+	
 	private final ClusterManager clusterManager;
 	
 	@Inject
 	public BearerAuthenticationFilter(AccessTokenManager accessTokenManager, AgentTokenManager agentTokenManager, 
-									  UserManager userManager, ClusterManager clusterManager) {
+									  JobManager jobManager, UserManager userManager, ClusterManager clusterManager) {
 		this.accessTokenManager = accessTokenManager;
 		this.agentTokenManager = agentTokenManager;
+		this.jobManager = jobManager;
 		this.userManager = userManager;
 		this.clusterManager = clusterManager;
 	}
@@ -46,10 +50,12 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 					ThreadContext.bind(userManager.getSystem().asSubject());
 				} else {
 					var accessToken = accessTokenManager.findByValue(bearerToken);
-					if (accessToken != null)
+					if (accessToken != null) {
 						ThreadContext.bind(accessToken.asSubject());
-					else if (agentTokenManager.find(bearerToken) == null)
+					} else if (agentTokenManager.find(bearerToken) == null 
+							&& jobManager.getJobContext(bearerToken, false) == null) {
 						throw new IncorrectCredentialsException("Invalid or expired access token");
+					}
 				}
 	        } 
 		}
