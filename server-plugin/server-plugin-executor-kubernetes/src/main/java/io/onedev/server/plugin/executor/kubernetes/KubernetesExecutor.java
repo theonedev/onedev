@@ -110,6 +110,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private String memoryLimit;
 	
+	private boolean alwaysPullImage = true;
+	
 	private List<ImageMapping> imageMappings = new ArrayList<>();
 	
 	private transient volatile OsInfo osInfo;
@@ -232,7 +234,18 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	public void setMemoryLimit(String memoryLimit) {
 		this.memoryLimit = memoryLimit;
 	}
-	
+
+	@Editable(order=600, group="Privilege Settings", description = "Whether or not to always pull image when " +
+			"run container or build images. This option should be enabled to avoid images being replaced by " +
+			"malicious jobs running on same node")
+	public boolean isAlwaysPullImage() {
+		return alwaysPullImage;
+	}
+
+	public void setAlwaysPullImage(boolean alwaysPullImage) {
+		this.alwaysPullImage = alwaysPullImage;
+	}
+
 	@Editable(order=25000, group="More Settings", description="Optionally specify where to run service pods "
 			+ "specified in job. The first matching locator will be used. If no any locators are found, "
 			+ "node selector of the executor will be used")
@@ -742,8 +755,9 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		Map<String, Object> podSpec = new LinkedHashMap<>();
 		Map<Object, Object> containerSpec = newLinkedHashMap(
 				"name", "default", 
-				"image", mapImage(jobService.getImage()), 
-				"imagePullPolicy", "Always");
+				"image", mapImage(jobService.getImage()));
+		if (isAlwaysPullImage())
+			containerSpec.put("imagePullPolicy", "Always");
 		Map<Object, Object> resourcesSpec = newLinkedHashMap(
 				"requests", newLinkedHashMap(
 						"cpu", getCpuRequest(),
@@ -1066,6 +1080,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", mapImage(execution.getImage()));
+						if (isAlwaysPullImage())
+							stepContainerSpec.put("imagePullPolicy", "Always");
 						if (commandFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);
 						var volumeMounts = buildVolumeMounts(cachePaths);
@@ -1086,6 +1102,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);
+						if (isAlwaysPullImage())
+							stepContainerSpec.put("imagePullPolicy", "Always");
 						var volumeMounts = buildVolumeMounts(cachePaths);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
@@ -1150,6 +1168,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"args", initArgs,
 						"env", SerializationUtils.clone(commonEnvs),
 						"volumeMounts", SerializationUtils.clone(volumeMounts));
+				if (isAlwaysPullImage())
+					initContainerSpec.put("imagePullPolicy", "Always");
 				
 				Map<Object, Object> sidecarContainerSpec = newLinkedHashMap(
 						"name", "sidecar", 
@@ -1158,6 +1178,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						"args", sidecarArgs, 
 						"env", SerializationUtils.clone(commonEnvs), 
 						"volumeMounts", SerializationUtils.clone(volumeMounts));
+				if (isAlwaysPullImage())
+					sidecarContainerSpec.put("imagePullPolicy", "Always");
 				
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 

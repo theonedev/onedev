@@ -112,7 +112,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
 							jobContext.getServices(), registryLogins, builtInRegistryUrl, imageMappings, 
 							isMountDockerSock(), getDockerSockPath(), getDockerBuilder(), getCpuLimit(), 
-							getMemoryLimit(), getRunOptions(), getNetworkOptions());
+							getMemoryLimit(), getRunOptions(), getNetworkOptions(), isAlwaysPullImage());
 
 					try {
 						return call(agentSession, jobData, jobContext.getTimeout()*1000L);

@@ -61,6 +61,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 	private String runOptions;
 	
+	private boolean alwaysPullImage = true;
+	
 	private String dockerExecutable;
 	
 	private boolean mountDockerSock;
@@ -133,7 +135,18 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	public void setDockerBuilder(String dockerBuilder) {
 		this.dockerBuilder = dockerBuilder;
 	}
+	
+	@Editable(order=600, group="Privilege Settings", description = "Whether or not to always pull image when " +
+			"run container or build images. This option should be enabled to avoid images being replaced by " +
+			"malicious jobs running on same machine")
+	public boolean isAlwaysPullImage() {
+		return alwaysPullImage;
+	}
 
+	public void setAlwaysPullImage(boolean alwaysPullImage) {
+		this.alwaysPullImage = alwaysPullImage;
+	}
+	
 	@Editable(order=520, group="Privilege Settings", description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
@@ -333,7 +346,9 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
 										docker.clearArgs();
 							
-										docker.addArgs("run", "--pull=always", "--name=" + containerName, "--network=" + network);
+										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+										if (isAlwaysPullImage())
+											docker.addArgs("--pull=always");
 										if (runAs != null)
 											docker.addArgs("--user", runAs);
 										else if (!SystemUtils.IS_OS_WINDOWS)
@@ -452,7 +467,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 										var builtInRegistryLogin = new BuiltInRegistryLogin(serverUrl,
 												jobContext.getJobToken(), buildImageFacade.getBuiltInRegistryAccessToken());
 										callWithDockerConfig(docker, getRegistryLoginFacades(), builtInRegistryLogin, () -> {
-											buildImage(docker, getDockerBuilder(), buildImageFacade, hostBuildHome, jobLogger);
+											buildImage(docker, getDockerBuilder(), buildImageFacade, hostBuildHome, 
+													isAlwaysPullImage(), jobLogger);
 											return null;
 										});
 									} else if (facade instanceof RunImagetoolsFacade) {
