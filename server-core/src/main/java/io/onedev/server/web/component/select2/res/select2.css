@@ -615,6 +615,7 @@ disabled look for disabled choices in the results dropdown
     padding: 0;
     position: absolute;
     width: 1px;
+	top: 0;
 }
 
 /* Retina-ize icons */

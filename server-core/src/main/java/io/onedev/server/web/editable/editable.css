@@ -177,6 +177,8 @@
 
 .inplace-property-edit {
 	width: 300px !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
 }
 .select2-drop.string-list .select2-no-results,
 .select2-drop.string-list .select2-searching {
