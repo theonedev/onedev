@@ -6598,6 +6598,52 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate170(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var issueSettingElement = element.element("issueSetting");
+					var boardSpecsElement = issueSettingElement.element("boardSpecs");
+					if (boardSpecsElement != null) {
+						for (var boardSpecElement : boardSpecsElement.elements()) {
+							for (var displayFieldElement : boardSpecElement.element("displayFields").elements()) {
+								if (displayFieldElement.getTextTrim().equals("Milestone"))
+									displayFieldElement.setText("Iteration");
+							}
+						}
+					}
+					var listFieldsElement = issueSettingElement.element("listFields");
+					if (listFieldsElement != null) {
+						for (var listFieldElement : listFieldsElement.elements()){
+							if (listFieldElement.getTextTrim().equals("Milestone"))
+								listFieldElement.setText("Iteration");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						for (var boardSpecElement: element.element("value").element("boardSpecs").elements()) {
+							for (var displayFieldElement: boardSpecElement.element("displayFields").elements()) {
+								if (displayFieldElement.getTextTrim().equals("Milestone"))
+									displayFieldElement.setText("Iteration");
+							}
+						}
+						for (var listFieldElement: element.element("value").element("listFields").elements()) {
+							if (listFieldElement.getTextTrim().equals("Milestone"))
+								listFieldElement.setText("Iteration");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
 	
