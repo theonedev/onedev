@@ -152,7 +152,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	@Transactional
 	public void setupDefaults() {
-		boolean hasAssigneesField = settingManager.getIssueSetting().getFieldSpec("Assignees") != null;
+		boolean hasAssigneeField = settingManager.getIssueSetting().getFieldSpec("Assignee") != null;
 		
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
@@ -174,9 +174,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		codeReader.setCodePrivilege(CodePrivilege.READ);
 		codeReader.setPackPrivilege(PackPrivilege.READ);
 		
-		if (hasAssigneesField) {
+		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignees");
+			allfieldsExcept.getExcludeFields().add("Assignee");
 			codeReader.setEditableIssueFields(allfieldsExcept);
 		}
 
@@ -205,9 +205,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		packReader.setName("Package Reader");
 		packReader.setPackPrivilege(PackPrivilege.READ);
 		
-		if (hasAssigneesField) {
+		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignees");
+			allfieldsExcept.getExcludeFields().add("Assignee");
 			packReader.setEditableIssueFields(allfieldsExcept);
 		}
 		
@@ -221,9 +221,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		issueReporter.setName("Issue Reporter");
 		issueReporter.setCodePrivilege(CodePrivilege.NONE);
 		
-		if (hasAssigneesField) {
+		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignees");
+			allfieldsExcept.getExcludeFields().add("Assignee");
 			issueReporter.setEditableIssueFields(allfieldsExcept);
 		}
 		

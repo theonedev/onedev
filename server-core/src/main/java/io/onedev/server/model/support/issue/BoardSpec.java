@@ -221,10 +221,10 @@ public class BoardSpec implements Serializable {
 		} else if (fieldName != null) {
 			FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 			if (fieldSpec != null) {
-				for (String each: fieldSpec.getPossibleValues())
-					choices.put(each, each);
 				if (fieldSpec.isAllowEmpty())
 					choices.put(NULL_COLUMN, fieldSpec.getNameOfEmptyValue());
+				for (String each: fieldSpec.getPossibleValues())
+					choices.put(each, each);
 			}
 		} 
 		return choices;

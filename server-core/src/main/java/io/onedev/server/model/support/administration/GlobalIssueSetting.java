@@ -138,13 +138,12 @@ public class GlobalIssueSetting implements Serializable {
 		
 		fieldSpecs.add(priority);
 
-		UserChoiceField assignees = new UserChoiceField();
-		assignees.setAllowMultiple(true);
-		assignees.setAllowEmpty(true);
-		assignees.setNameOfEmptyValue("Not assigned");
-		assignees.setName("Assignees");
+		UserChoiceField assignee = new UserChoiceField();
+		assignee.setAllowEmpty(true);
+		assignee.setNameOfEmptyValue("Not assigned");
+		assignee.setName("Assignee");
 		
-		fieldSpecs.add(assignees);
+		fieldSpecs.add(assignee);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
@@ -163,7 +162,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", PressButtonTrigger.ROLE_SUBMITTER, "{Assignees}"));
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", PressButtonTrigger.ROLE_SUBMITTER, "{Assignee}"));
 		pressButton.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
 		transition.setTrigger(pressButton);
 		
@@ -212,30 +211,30 @@ public class GlobalIssueSetting implements Serializable {
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_ITERATION));
+		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignee", IssueSchedule.NAME_ITERATION));
 		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
 		
 		listFields.add(Issue.NAME_STATE);
 		listFields.add("Type");
 		listFields.add("Priority");
-		listFields.add("Assignees");
+		listFields.add("Assignee");
 		listFields.add(IssueSchedule.NAME_ITERATION);
 		
 		listLinks.add("Child Issue");
 		listLinks.add("Blocked By");
 		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignee\" is me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
+		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
 		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
-		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignee\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Iteration\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
