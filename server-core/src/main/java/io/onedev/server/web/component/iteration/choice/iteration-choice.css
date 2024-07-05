@@ -1,3 +1,6 @@
 .select2-results .iteration .label {
 	margin-left: 6px;
 }
+.select2-results .iteration .badge {
+	width: 48px;
+}

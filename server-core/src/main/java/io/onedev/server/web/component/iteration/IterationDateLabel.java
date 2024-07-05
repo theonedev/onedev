@@ -33,7 +33,7 @@ public class IterationDateLabel extends Label {
 				} else if (iteration.getDueDate() != null) {
 					return arrow + " <span title='Due date'>" + DateUtils.formatDate(iteration.getDueDate()) + "</span>";
 				} else {
-					return "<i> No Start/Due Date</i>";
+					return "<i> No start/due date</i>";
 				}
 			}
 			
@@ -60,19 +60,19 @@ public class IterationDateLabel extends Label {
 					Date now = new Date();
 					if (iteration.getStartDate() != null && iteration.getDueDate() != null) {
 						if (now.before(iteration.getStartDate()))
-							return "text-info";
+							return "";
 						else if (now.after(iteration.getStartDate()) && now.before(iteration.getDueDate()))
 							return "text-warning";
 						else
 							return "text-danger";
 					} else if (iteration.getStartDate() != null) {
 						if (now.before(iteration.getStartDate()))
-							return "text-info";
+							return "";
 						else 
 							return "text-warning";
 					} else if (iteration.getDueDate() != null) {
 						if (now.before(iteration.getDueDate()))
-							return "text-info";
+							return "";
 						else 
 							return "text-danger";
 					} else {

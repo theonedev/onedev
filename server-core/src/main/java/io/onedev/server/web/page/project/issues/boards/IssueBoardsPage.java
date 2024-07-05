@@ -28,6 +28,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationBurndownPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.editbean.IterationEditBean;
 import org.apache.commons.lang3.SerializationUtils;
@@ -514,6 +515,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									setVisible(!item.getModelObject().getProject().equals(getProject()));
 								}
 								
+							});
+							item.add(new BookmarkablePageLink<Void>("burndown", IterationBurndownPage.class, 
+									IterationBurndownPage.paramsOf(getProject(), iteration)) {
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									var iteration = item.getModelObject();
+									setVisible(iteration.getStartDate() != null && iteration.getDueDate() != null);
+								}
 							});
 							
 							item.add(new IterationStatusLabel("status", item.getModel()));

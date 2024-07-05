@@ -4,7 +4,7 @@ onedev.server.iterationChoiceFormatter = {
 	},
 	
 	formatResult: function(iteration) {
-		return "<span class='iteration'>" + iteration.name + " <span class='ml-2 badge " + iteration.statusClass + "'>" + iteration.statusName + "</span></span>";
+		return "<span class='iteration d-flex justify-content-between'><span>" + iteration.name + "</span><span class='badge badge-sm " + iteration.statusClass + "'>" + iteration.statusName + "</span></span>";
 	},
 	
 	escapeMarkup: function(m) {

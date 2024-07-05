@@ -38,7 +38,7 @@ public class IterationStatusLabel extends Label {
 
 			@Override
 			public String getObject() {
-				return "badge badge-" + (iterationModel.getObject().isClosed()? "success": "warning");
+				return "badge badge-sm badge-" + (iterationModel.getObject().isClosed()? "success": "warning");
 			}
 			
 		}));		
