@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.agent.AgentData;
@@ -196,6 +197,7 @@ public class Agent extends AbstractEntity {
 		return attributeMap;
 	}
 	
+	@JsonProperty
 	public boolean isOnline() {
 		if (online == null) {
 			var agentManager = OneDev.getInstance(AgentManager.class);
