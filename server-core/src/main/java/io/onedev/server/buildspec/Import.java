@@ -127,7 +127,7 @@ public class Import implements Serializable, Validatable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=500, description="Specify a secret to be used as access token to import build spec " +
+	@Editable(order=500, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token to import build spec " +
 			"from above project if its code is not publicly accessible")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable

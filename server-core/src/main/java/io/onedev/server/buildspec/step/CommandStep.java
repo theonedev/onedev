@@ -115,7 +115,7 @@ public class CommandStep extends Step {
 	private static String getBuiltInRegistryAccessTokenSecretDescription() {
 		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		var server = UrlUtils.getServer(serverUrl);
-		return "Optionally specify a secret to be used as access token for built-in registry server " +
+		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
 	}
 	
