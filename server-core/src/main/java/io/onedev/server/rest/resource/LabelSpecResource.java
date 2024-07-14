@@ -4,8 +4,6 @@ import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.InvalidParamException;
-import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
@@ -49,9 +47,6 @@ public class LabelSpecResource {
 								 @QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		
-    	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<LabelSpec> criteria = EntityCriteria.of(LabelSpec.class);
 		if (name != null) 
