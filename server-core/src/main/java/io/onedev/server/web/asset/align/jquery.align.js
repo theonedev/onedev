@@ -46,6 +46,8 @@
         	var thisWidth = Math.max($this[0].offsetWidth, $this.outerWidth());
         	var thisHeight = Math.max($this[0].offsetHeight, $this.outerHeight());
 			
+        	$autosuit.css("overflow", "auto");
+
         	var borderTop = jQuery(window).scrollTop() + pageMargin;
         	var borderBottom = borderTop + jQuery(window).height() - 2*pageMargin;
         	var borderLeft = jQuery(window).scrollLeft() + pageMargin;
