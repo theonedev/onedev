@@ -19,8 +19,8 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
@@ -84,6 +84,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -835,6 +836,11 @@ public abstract class BuildListPanel extends Panel {
 			}
 			
 		});	
+		
+		var extraActionsView = new RepeatingView("extraActions");
+		add(extraActionsView);
+		for (var renderer: OneDev.getExtensions(BuildListActionRenderer.class)) 
+			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {

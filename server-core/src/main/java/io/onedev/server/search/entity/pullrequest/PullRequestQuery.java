@@ -216,6 +216,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								switch (fieldName) {
 									case PullRequest.NAME_SUBMIT_DATE:
 										return new SubmitDateCriteria(value, operator);
+									case PullRequest.NAME_CLOSE_DATE:
+										return new CloseDateCriteria(value, operator);
 									case PullRequest.NAME_LAST_ACTIVITY_DATE:
 										return new LastActivityDateCriteria(value, operator);
 									default:

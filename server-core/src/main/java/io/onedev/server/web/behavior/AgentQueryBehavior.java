@@ -17,7 +17,7 @@ import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.AgentQueryLexer;
 import io.onedev.server.search.entity.agent.AgentQueryParser;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;

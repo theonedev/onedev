@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import io.onedev.server.model.PullRequest.Status;
 
-public class ProjectPullRequestStats implements Serializable {
+public class ProjectPullRequestStatusStat implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,7 +14,7 @@ public class ProjectPullRequestStats implements Serializable {
 	
 	private final long statusCount;
 	
-	public ProjectPullRequestStats(Long projectId, Status pullRequestStatus, long statusCount) {
+	public ProjectPullRequestStatusStat(Long projectId, Status pullRequestStatus, long statusCount) {
 		this.projectId = projectId;
 		this.pullRequestStatus = pullRequestStatus;
 		this.statusCount = statusCount;

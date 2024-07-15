@@ -15,7 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;

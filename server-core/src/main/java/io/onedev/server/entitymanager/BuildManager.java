@@ -3,10 +3,12 @@ package io.onedev.server.entitymanager;
 import io.onedev.server.model.*;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.ProjectBuildStats;
+import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.util.StatsGroup;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
@@ -69,6 +71,16 @@ public interface BuildManager extends EntityManager<Build> {
 
 	List<String> queryVersions(Project project, String matchWith, int count);
 
+	Map<Integer, Pair<Integer, Integer>> queryDurationStats(Project project,
+															@Nullable
+															Criteria<Build> criteria, 
+															StatsGroup group);
+
+	Map<Integer, Integer> queryFrequencyStats(Project project,
+															@Nullable
+															Criteria<Build> criteria,
+															StatsGroup group);
+	
 	Collection<String> getAccessibleJobNames(Project project);
 
 	Map<Project, Collection<String>> getAccessibleJobNames();
@@ -79,7 +91,7 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Build> query(Agent agent, @Nullable Build.Status status);
 	
-	List<ProjectBuildStats> queryStats(Collection<Project> projects);
+	List<ProjectBuildStatusStat> queryStatusStats(Collection<Project> projects);
 	
 	@Nullable
 	ArtifactInfo getArtifactInfo(Build build, @Nullable String artifactPath);

@@ -1,9 +1,10 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
-
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.util.MetricIndicator;
+import io.onedev.server.web.component.chart.line.LineSeries;
+
+import javax.persistence.*;
 
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 
@@ -52,7 +53,7 @@ public class UnitTestMetric extends AbstractEntity implements BuildMetric {
 	}
 
 	@MetricIndicator(order=100, group="Success Rate", name="Test Suite", color="#1BC5BD",
-			valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100, minValue=0)
+			valueFormatter=LineSeries.PERCENTAGE_FORMATTER, maxValue=100, minValue=0)
 	public int getTestSuiteSuccessRate() {
 		return testSuiteSuccessRate;
 	}
@@ -62,7 +63,7 @@ public class UnitTestMetric extends AbstractEntity implements BuildMetric {
 	}
 
 	@MetricIndicator(order=200, group="Success Rate", name="Test Case", color="#F64E60",
-			valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100, minValue=0)
+			valueFormatter=LineSeries.PERCENTAGE_FORMATTER, maxValue=100, minValue=0)
 	public int getTestCaseSuccessRate() {
 		return testCaseSuccessRate;
 	}
@@ -89,7 +90,7 @@ public class UnitTestMetric extends AbstractEntity implements BuildMetric {
 		this.numOfTestCases = numOfTestCases;
 	}
 	
-	@MetricIndicator(order=600, valueFormatter=BuildMetric.FORMAT_DURATION)
+	@MetricIndicator(order=600, group = "Total Test Duration", valueFormatter= LineSeries.SECONDS_FORMATTER)
 	public int getTotalTestDuration() {
 		return totalTestDuration;
 	}

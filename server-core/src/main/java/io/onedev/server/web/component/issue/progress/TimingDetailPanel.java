@@ -11,7 +11,7 @@ import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.timetracking.TimeTrackingManager;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.editbean.IssueWorkBean;

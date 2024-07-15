@@ -19,7 +19,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.comment.CommentPanel;

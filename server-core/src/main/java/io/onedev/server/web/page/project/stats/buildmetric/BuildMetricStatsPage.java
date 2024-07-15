@@ -8,7 +8,10 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
 import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
-import io.onedev.server.util.*;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.MetricIndicator;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.BuildMetricQueryBehavior;
 import io.onedev.server.web.component.chart.line.Line;
@@ -37,8 +40,13 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import static io.onedev.server.web.util.StatsGroup.BY_DAY;
 import static java.util.Comparator.comparingInt;
 
 @SuppressWarnings("serial")
@@ -197,7 +205,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 						if (valueFormatter.length() == 0)
 							valueFormatter = null;
 
-						Map<Integer, List<Integer>> discreteValues = new HashMap<>();
+						Map<Integer, List<Integer>> data = new HashMap<>();
 						for (Map.Entry<Integer, T> entry : stats.entrySet()) {
 							List<Integer> lineValues = new ArrayList<>();
 							for (Method getter : group) {
@@ -208,30 +216,13 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 									throw new RuntimeException(e);
 								}
 							}
-							discreteValues.put(entry.getKey(), lineValues);
+							data.put(entry.getKey(), lineValues);
 						}
 
-						Map<String, List<Integer>> completeValues = new LinkedHashMap<>();
-						if (!discreteValues.isEmpty()) {
-							int minDayValue = Collections.min(discreteValues.keySet());
-							int maxDayValue = Collections.max(discreteValues.keySet());
-							List<Integer> lastValues = null;
-							int currentDayValue = minDayValue;
-							while (currentDayValue <= maxDayValue) {
-								List<Integer> currentValues = discreteValues.get(currentDayValue);
-								if (currentValues == null)
-									currentValues = lastValues;
-								else
-									lastValues = currentValues;
-								Day currentDay = new Day(currentDayValue);
-								String currentDayLabel = String.format("%02d-%02d-%02d",
-										currentDay.getYear() % 100, currentDay.getMonthOfYear() + 1, currentDay.getDayOfMonth());
-								completeValues.put(currentDayLabel, currentValues);
-								currentDayValue = new Day(currentDay.getDate().plusDays(1)).getValue();
-							}
-						}
-
-						List<String> xAxisValues = new ArrayList<>(completeValues.keySet());
+						var normalizedData = BY_DAY.normalizeData(data, null);
+						List<String> xAxisValues = normalizedData.stream()
+								.map(org.apache.commons.lang3.tuple.Pair::getLeft)
+								.collect(Collectors.toList());
 						List<Line> lines = new ArrayList<>();
 
 						int lineIndex = 0;
@@ -240,9 +231,10 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							String name = indicator.name();
 							if (name.length() == 0)
 								name = BeanUtils.getDisplayName(getter);
-							Map<String, Integer> yAxisValues = new HashMap<>();
-							for (String xAxisValue : xAxisValues)
-								yAxisValues.put(xAxisValue, completeValues.get(xAxisValue).get(lineIndex));
+							var finalLineIndex = lineIndex;
+							var yAxisValues = normalizedData.stream()
+									.map(it->it.getRight().get(finalLineIndex))
+									.collect(Collectors.toList());
 							lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
 							lineIndex++;
 						}

@@ -64,7 +64,8 @@ public abstract class CommandPalettePanel extends Panel {
 
 	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +
 			"~dashboards/** ~code-search/** ~administration/settings/storage-setting " +
-			"~administration/cluster ~administration/settings/time-tracking ${project}/~timesheets");
+			"~administration/cluster ~administration/settings/time-tracking ${project}/~timesheets " +
+			"${project}/~stats/pull-request-duration ${project}/~stats/build-duration ${project}/~stats/build-frequency");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())

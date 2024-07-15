@@ -18,7 +18,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -731,7 +731,12 @@ public abstract class PullRequestListPanel extends Panel {
 				});
 			}
 			
-		});	
+		});
+
+		var extraActionsView = new RepeatingView("extraActions");
+		add(extraActionsView);
+		for (var renderer: OneDev.getExtensions(PullRequestListActionRenderer.class))
+			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {

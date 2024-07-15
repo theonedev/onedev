@@ -14,10 +14,10 @@ import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ProjectBuildStats;
-import io.onedev.server.util.ProjectIssueStats;
-import io.onedev.server.util.ProjectPackStats;
-import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.ProjectBuildStatusStat;
+import io.onedev.server.util.ProjectIssueStateStat;
+import io.onedev.server.util.ProjectPackTypeStat;
+import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
@@ -108,54 +108,54 @@ public class ProjectListPanel extends Panel {
 
 	};
 	
-	private final IModel<List<ProjectIssueStats>> issueStatsModel =
+	private final IModel<List<ProjectIssueStateStat>> issueStatsModel =
 			new LoadableDetachableModel<>() {
 
 				@Override
-				protected List<ProjectIssueStats> load() {
+				protected List<ProjectIssueStateStat> load() {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(IssueManager.class).queryStats(projects);
+					return OneDev.getInstance(IssueManager.class).queryStateStats(projects);
 				}
 
 			}; 
 	
-	private final IModel<List<ProjectBuildStats>> buildStatsModel =
+	private final IModel<List<ProjectBuildStatusStat>> buildStatsModel =
 			new LoadableDetachableModel<>() {
 
 				@Override
-				protected List<ProjectBuildStats> load() {
+				protected List<ProjectBuildStatusStat> load() {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(BuildManager.class).queryStats(projects);
+					return OneDev.getInstance(BuildManager.class).queryStatusStats(projects);
 				}
 
 			};
 
-	private final IModel<List<ProjectPackStats>> packStatsModel =
+	private final IModel<List<ProjectPackTypeStat>> packStatsModel =
 			new LoadableDetachableModel<>() {
 
 				@Override
-				protected List<ProjectPackStats> load() {
+				protected List<ProjectPackTypeStat> load() {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(PackManager.class).queryStats(projects);
+					return OneDev.getInstance(PackManager.class).queryTypeStats(projects);
 				}
 
 			};
 
-	private final IModel<List<ProjectPullRequestStats>> pullRequestStatsModel =
+	private final IModel<List<ProjectPullRequestStatusStat>> pullRequestStatsModel =
 			new LoadableDetachableModel<>() {
 
 				@Override
-				protected List<ProjectPullRequestStats> load() {
+				protected List<ProjectPullRequestStatusStat> load() {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(PullRequestManager.class).queryStats(projects);
+					return OneDev.getInstance(PullRequestManager.class).queryStatusStats(projects);
 				}
 
 			}; 
@@ -1096,7 +1096,7 @@ public class ProjectListPanel extends Panel {
 							@Override
 							protected Map<PullRequest.Status, Long> load() {
 								Map<PullRequest.Status, Long> statusCounts = new LinkedHashMap<>();
-								for (ProjectPullRequestStats stats: pullRequestStatsModel.getObject()) {
+								for (ProjectPullRequestStatusStat stats: pullRequestStatsModel.getObject()) {
 									if (stats.getProjectId().equals(projectId)) 
 										statusCounts.put(stats.getPullRequestStatus(), stats.getStatusCount());
 								}
@@ -1116,7 +1116,7 @@ public class ProjectListPanel extends Panel {
 							protected Map<Integer, Long> load() {
 								Map<Integer, Long> stateCounts = new LinkedHashMap<>();
 								GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-								for (ProjectIssueStats stats : issueStatsModel.getObject()) {
+								for (ProjectIssueStateStat stats : issueStatsModel.getObject()) {
 									if (stats.getProjectId().equals(projectId)
 											&& stats.getStateOrdinal() >= 0
 											&& stats.getStateOrdinal() < issueSetting.getStateSpecs().size()) {
@@ -1137,7 +1137,7 @@ public class ProjectListPanel extends Panel {
 							@Override
 							protected Map<Build.Status, Long> load() {
 								Map<Build.Status, Long> statusCounts = new LinkedHashMap<>();
-								for (ProjectBuildStats stats : buildStatsModel.getObject()) {
+								for (ProjectBuildStatusStat stats : buildStatsModel.getObject()) {
 									if (stats.getProjectId().equals(projectId))
 										statusCounts.put(stats.getBuildStatus(), stats.getStatusCount());
 								}
@@ -1154,7 +1154,7 @@ public class ProjectListPanel extends Panel {
 						@Override
 						protected Map<String, Long> load() {
 							Map<String, Long> statusCounts = new LinkedHashMap<>();
-							for (ProjectPackStats stats : packStatsModel.getObject()) {
+							for (ProjectPackTypeStat stats : packStatsModel.getObject()) {
 								if (stats.getProjectId().equals(projectId))
 									statusCounts.put(stats.getType(), stats.getTypeCount());
 							}

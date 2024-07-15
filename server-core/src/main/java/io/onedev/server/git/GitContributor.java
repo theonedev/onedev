@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.server.util.Day;
+import io.onedev.server.util.date.Day;
 
 public class GitContributor implements Serializable {
 

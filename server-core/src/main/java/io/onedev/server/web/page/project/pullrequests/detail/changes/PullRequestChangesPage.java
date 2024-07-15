@@ -762,7 +762,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Override
 	protected Collection<String> getCssClasses() {
-		return Sets.newHashSet("hide-side-info");
+		var cssClasses = super.getCssClasses();
+		cssClasses.add("hide-side-info");
+		return cssClasses;
 	}
 
 	@Override

@@ -20,7 +20,7 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import org.hibernate.criterion.Restrictions;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;

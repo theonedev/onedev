@@ -39,14 +39,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.onedev.server.util.DateUtils.toLocalDate;
+import static io.onedev.server.util.date.DateUtils.toLocalDate;
 import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
 		implements IssueInfoManager, Serializable {
 
-	private static final int INFO_VERSION = 2;
+	private static final int INFO_VERSION = 3;
 	
 	private static final int BATCH_SIZE = 5000;
 	

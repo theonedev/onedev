@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.util.Day;
+import io.onedev.server.util.date.Day;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.facade.EmailAddressFacade;
 

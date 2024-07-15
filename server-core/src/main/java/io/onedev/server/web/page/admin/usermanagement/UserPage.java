@@ -28,6 +28,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.ArrayList;
@@ -66,16 +67,17 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		
-		tabs.add(new UserTab("Profile", "profile", UserProfilePage.class));
-		tabs.add(new UserTab("Email Addresses", "mail", UserEmailAddressesPage.class));
-		tabs.add(new UserTab("Edit Avatar", "avatar", UserAvatarPage.class));
+		var params = paramsOf(getUser());
+		tabs.add(new PageTab(Model.of("Profile"), Model.of("profile"), UserProfilePage.class, params));
+		tabs.add(new PageTab(Model.of("Email Addresses"), Model.of("mail"), UserEmailAddressesPage.class, params));
+		tabs.add(new PageTab(Model.of("Edit Avatar"), Model.of("avatar"), UserAvatarPage.class, params));
 			
-		tabs.add(new UserTab("Change Password", "password", UserPasswordPage.class));
-		tabs.add(new UserTab("Belonging Groups", "group", UserMembershipsPage.class));
-		tabs.add(new UserTab("Authorized Projects", "project", UserAuthorizationsPage.class));
-		tabs.add(new UserTab("SSH Keys", "key", UserSshKeysPage.class));
-		tabs.add(new UserTab("GPG Keys", "key", UserGpgKeysPage.class));
-		tabs.add(new UserTab("Access Tokens", "token", UserAccessTokensPage.class));
+		tabs.add(new PageTab(Model.of("Change Password"), Model.of("password"), UserPasswordPage.class, params));
+		tabs.add(new PageTab(Model.of("Belonging Groups"), Model.of("group"), UserMembershipsPage.class, params));
+		tabs.add(new PageTab(Model.of("Authorized Projects"), Model.of("project"), UserAuthorizationsPage.class, params));
+		tabs.add(new PageTab(Model.of("SSH Keys"), Model.of("key"), UserSshKeysPage.class, params));
+		tabs.add(new PageTab(Model.of("GPG Keys"), Model.of("key"), UserGpgKeysPage.class, params));
+		tabs.add(new PageTab(Model.of("Access Tokens"), Model.of("token"), UserAccessTokensPage.class, params));
 		
 		add(new Tabbable("userTabs", tabs));
 	}

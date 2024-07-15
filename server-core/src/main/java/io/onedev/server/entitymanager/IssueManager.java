@@ -8,7 +8,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.IterationAndIssueState;
-import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -83,7 +83,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Collection<IterationAndIssueState> queryIterationAndIssueStates(Project project, Collection<Iteration> iterations);
 	
-	List<ProjectIssueStats> queryStats(Collection<Project> projects);
+	List<ProjectIssueStateStat> queryStateStats(Collection<Project> projects);
 	
 	Collection<Iteration> queryUsedIterations(Project project);
 

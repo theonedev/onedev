@@ -39,10 +39,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.ExceptionUtils.unchecked;
-import static io.onedev.server.model.Build.PROP_JOB_NAME;
-import static io.onedev.server.model.Build.PROP_PROJECT;
+import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.support.BuildMetric.PROP_BUILD;
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
+import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
 
 @Singleton
 public class DefaultBuildMetricManager implements BuildMetricManager {
@@ -120,7 +120,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 			predicates.add(query.getCriteria().getPredicate(metricRoot, buildJoin, builder));
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
-		criteriaQuery.groupBy(buildJoin.get(Build.PROP_FINISH_DAY));
+		criteriaQuery.groupBy(buildJoin.get(PROP_FINISH_TIME_GROUPS).get(PROP_DAY));
 		
 		List<Method> setters = new ArrayList<>();
 		List<Selection<?>> selections = new ArrayList<>();
@@ -131,7 +131,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 			}
 		}
 		
-		selections.add(buildJoin.get(Build.PROP_FINISH_DAY));
+		selections.add(buildJoin.get(PROP_FINISH_TIME_GROUPS).get(PROP_DAY));
 		
 		criteriaQuery.multiselect(selections);
 		

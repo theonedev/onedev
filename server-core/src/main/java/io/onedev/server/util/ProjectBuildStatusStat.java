@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import io.onedev.server.model.Build;
 
-public class ProjectBuildStats implements Serializable {
+public class ProjectBuildStatusStat implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,7 +14,7 @@ public class ProjectBuildStats implements Serializable {
 	
 	private final long statusCount;
 	
-	public ProjectBuildStats(Long projectId, Build.Status buildStatus, long statusCount) {
+	public ProjectBuildStatusStat(Long projectId, Build.Status buildStatus, long statusCount) {
 		this.projectId = projectId;
 		this.buildStatus = buildStatus;
 		this.statusCount = statusCount;

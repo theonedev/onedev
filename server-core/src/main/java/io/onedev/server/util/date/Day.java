@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.util.date;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ public class Day implements Serializable, Comparable<Day> {
 	}
 	
 	public Day(DateTime dateTime) {
-		this(dateTime.getYear(), dateTime.getMonthOfYear()-1, dateTime.getDayOfMonth());
+		this(dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth());
 	}
 	
 	public Day(int year, int monthOfYear, int dayOfMonth) {
@@ -36,7 +36,7 @@ public class Day implements Serializable, Comparable<Day> {
 	}
 	
 	public Day(LocalDate date) {
-		this(date.getYear(), date.getMonthValue()-1, date.getDayOfMonth());
+		this(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
 	}
 	
 	public Day(int value) {
@@ -48,7 +48,7 @@ public class Day implements Serializable, Comparable<Day> {
 	}
 	
 	public DateTime getDate() {
-		return new DateTime(year, monthOfYear+1, dayOfMonth, 0, 0);
+		return new DateTime(year, monthOfYear, dayOfMonth, 0, 0);
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class Day implements Serializable, Comparable<Day> {
 
 	@Override
 	public String toString() {
-		return String.format("%04d-%02d-%02d", year, monthOfYear+1, dayOfMonth);
+		return String.format("%02d-%02d", monthOfYear, dayOfMonth);
 	}
 	
 }

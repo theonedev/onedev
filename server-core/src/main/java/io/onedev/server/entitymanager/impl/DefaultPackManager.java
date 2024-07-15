@@ -16,7 +16,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadPack;
-import io.onedev.server.util.ProjectPackStats;
+import io.onedev.server.util.ProjectPackTypeStat;
 import io.onedev.server.util.criteria.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -185,12 +185,12 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 
 	@Sessional
 	@Override
-	public List<ProjectPackStats> queryStats(Collection<Project> projects) {
+	public List<ProjectPackTypeStat> queryTypeStats(Collection<Project> projects) {
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
-			CriteriaQuery<ProjectPackStats> criteriaQuery = builder.createQuery(ProjectPackStats.class);
+			CriteriaQuery<ProjectPackTypeStat> criteriaQuery = builder.createQuery(ProjectPackTypeStat.class);
 			Root<Pack> root = criteriaQuery.from(Pack.class);
 			criteriaQuery.multiselect(
 					root.get(Pack.PROP_PROJECT).get(Project.PROP_ID),

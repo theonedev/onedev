@@ -40,11 +40,11 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationDetailPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -67,8 +67,8 @@ import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPa
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
-import io.onedev.server.web.page.project.stats.ProjectContribsPage;
-import io.onedev.server.web.page.project.stats.SourceLinesPage;
+import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
+import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.util.ProjectAware;
 import org.apache.commons.lang3.StringUtils;
@@ -241,10 +241,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
-			statsMenuItems.add(new SidebarMenuItem.Page(null, "Contributions", 
-					ProjectContribsPage.class, ProjectContribsPage.paramsOf(getProject())));
-			statsMenuItems.add(new SidebarMenuItem.Page(null, "Source Lines", 
-					SourceLinesPage.class, SourceLinesPage.paramsOf(getProject())));
+			statsMenuItems.add(new SidebarMenuItem.Page(null, "Code", 
+					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject()), 
+					Lists.newArrayList(SourceLinesPage.class)));
 		}
 		
 		List<StatisticsMenuContribution> contributions = new ArrayList<>(OneDev.getExtensions(StatisticsMenuContribution.class));
@@ -254,7 +253,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			statsMenuItems.addAll(contribution.getMenuItems(getProject()));
 		
 		if (!statsMenuItems.isEmpty())
-			menuItems.add(new SidebarMenuItem.SubMenu("statistics", "Statistics", statsMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("stats", "Statistics", statsMenuItems));
 		
 		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));

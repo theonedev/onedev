@@ -26,9 +26,13 @@ import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.*;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;
@@ -55,16 +59,18 @@ import java.util.*;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.Project.BUILDS_DIR;
+import static io.onedev.server.model.support.TimeGroups.*;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
-				@Index(columnList="o_request_id"),  
+		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), 
+				@Index(columnList="o_canceller_id"), @Index(columnList="o_request_id"),  
 				@Index(columnList= PROP_COMMIT_HASH), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList= PROP_JOB_NAME), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
+				@Index(columnList=PROP_FINISH_MONTH), @Index(columnList=PROP_FINISH_WEEK),
 				@Index(columnList=PROP_FINISH_DAY), @Index(columnList=PROP_VERSION), 
 				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT_HASH)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
@@ -125,7 +131,17 @@ public class Build extends ProjectBelonging
 	
 	public static final String PROP_FINISH_DATE = "finishDate";
 	
+	public static final String PROP_FINISH_TIME_GROUPS = "finishTimeGroups";
+	
+	public static final String PROP_FINISH_MONTH = "finishMonth";
+
+	public static final String PROP_FINISH_WEEK = "finishWeek";
+
 	public static final String PROP_FINISH_DAY = "finishDay";
+	
+	public static final String PROP_PENDING_DURATION = "pendingDuration";
+	
+	public static final String PROP_RUNNING_DURATION = "runningDuration";
 	
 	public static final String NAME_COMMIT = "Commit";
 	
@@ -350,10 +366,18 @@ public class Build extends ProjectBelonging
 	
 	private Date finishDate;
 	
-	private Date retryDate;
+	private Long pendingDuration;
 	
-	@JsonIgnore
-	private Integer finishDay;
+	private Long runningDuration;
+	
+	private Date retryDate;
+
+	@Embedded
+	@AttributeOverrides({
+			@AttributeOverride(name= PROP_MONTH, column=@Column(name=PROP_FINISH_MONTH)),
+			@AttributeOverride(name= PROP_WEEK, column=@Column(name=PROP_FINISH_WEEK)),
+			@AttributeOverride(name= PROP_DAY, column=@Column(name=PROP_FINISH_DAY))})
+	private TimeGroups finishTimeGroups;
 	
 	@Column(nullable=false, length=1000)
 	private String submitReason;
@@ -592,46 +616,81 @@ public class Build extends ProjectBelonging
 		this.submitReason = submitReason;
 	}
 
+	@Nullable
 	public Date getPendingDate() {
 		return pendingDate;
 	}
 
-	public void setPendingDate(Date pendingDate) {
+	public void setPendingDate(@Nullable Date pendingDate) {
 		this.pendingDate = pendingDate;
 	}
 
+	@Nullable
 	public Date getRunningDate() {
 		return runningDate;
 	}
 
-	public void setRunningDate(Date runningDate) {
+	public void setRunningDate(@Nullable Date runningDate) {
 		this.runningDate = runningDate;
+		if (runningDate != null && pendingDate != null) 
+			pendingDuration = runningDate.getTime() - pendingDate.getTime();
+		else 
+			pendingDuration = null;
 	}
 
+	@Nullable
 	public Date getFinishDate() {
 		return finishDate;
 	}
 
-	public void setFinishDate(Date finishDate) {
+	public void setFinishDate(@Nullable Date finishDate) {
 		this.finishDate = finishDate;
 		if (finishDate != null) {
-			finishDay = new Day(finishDate).getValue();
+			if (runningDate != null)
+				runningDuration = finishDate.getTime() - runningDate.getTime();
+			else 
+				runningDuration = null;
+			finishTimeGroups = TimeGroups.of(finishDate);
 		} else {
-			finishDay = null;
+			runningDuration = null;
+			finishTimeGroups = null;
 		}
 	}
 
+	@Nullable
+	public Long getPendingDuration() {
+		return pendingDuration;
+	}
+
+	public void setPendingDuration(@Nullable Long pendingDuration) {
+		this.pendingDuration = pendingDuration;
+	}
+
+	@Nullable
+	public Long getRunningDuration() {
+		return runningDuration;
+	}
+
+	public void setRunningDuration(@Nullable Long runningDuration) {
+		this.runningDuration = runningDuration;
+	}
+	
+	@Nullable
 	public Date getRetryDate() {
 		return retryDate;
 	}
 
-	public void setRetryDate(Date retryDate) {
+	public void setRetryDate(@Nullable Date retryDate) {
 		this.retryDate = retryDate;
 	}
 
 	@Nullable
-	public Integer getFinishDay() {
-		return finishDay;
+	public TimeGroups getFinishTimeGroups() {
+		return finishTimeGroups;
+	}
+
+	public void setFinishTimeGroups(@Nullable TimeGroups finishTimeGroups) {
+		this.finishTimeGroups = finishTimeGroups;
 	}
 
 	public Collection<BuildParam> getParams() {

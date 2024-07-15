@@ -1,14 +1,19 @@
 package io.onedev.server.web.component.chart.line;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class LineSeries implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PERCENTAGE_FORMATTER = "function(value) {return value+'%';}";
+
+	public static final String SECONDS_FORMATTER = "function(seconds) {return onedev.server.formatBriefDuration(seconds);}";
+
+	public static final String MINUTES_FORMATTER = "function(minutes) {return onedev.server.formatBriefDuration(minutes*60);}";
+	
 	private final String seriesName;
 	
 	private final List<String> xAxisValues;
@@ -59,5 +64,5 @@ public class LineSeries implements Serializable {
 	public Integer getMaxYAxisValue() {
 		return maxYAxisValue;
 	}
-
+	
 }

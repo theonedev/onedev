@@ -7,19 +7,17 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.iteration.IterationDateLabel;
 import io.onedev.server.web.component.iteration.IterationStatusLabel;
 import io.onedev.server.web.component.iteration.actions.IterationActionsPanel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -27,7 +25,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -120,8 +117,9 @@ public abstract class IterationDetailPage extends ProjectPage {
 		});
 
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IterationTab("Issues", IterationIssuesPage.class));
-		tabs.add(new IterationTab("Burndown", IterationBurndownPage.class));
+		var params = paramsOf(getProject(), getIteration());
+		tabs.add(new PageTab(Model.of("Issues"), IterationIssuesPage.class, params));
+		tabs.add(new PageTab(Model.of("Burndown"), IterationBurndownPage.class, params));
 		
 		add(new Tabbable("iterationTabs", tabs).setOutputMarkupId(true));
 	}
@@ -156,26 +154,6 @@ public abstract class IterationDetailPage extends ProjectPage {
 	@Override
 	protected String getPageTitle() {
 		return "Iteration " +  getIteration().getName() + " - " + getProject().getPath();
-	}
-	
-	private class IterationTab extends PageTab {
-
-		public IterationTab(String title, Class<? extends Page> pageClass) {
-			super(Model.of(title), pageClass);
-		}
-		
-		@Override
-		public Component render(String componentId) {
-			return new PageTabHead(componentId, this) {
-
-				@Override
-				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getProject(), getIteration()));
-				}
-				
-			};
-		}
-		
 	}
 	
 	@Override

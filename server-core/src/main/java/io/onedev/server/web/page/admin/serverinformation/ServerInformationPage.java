@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.serverinformation;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.page.admin.ServerDetailPage;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;

@@ -269,6 +269,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueScheduleManager.class).to(DefaultIssueScheduleManager.class);
 		bind(LinkSpecManager.class).to(DefaultLinkSpecManager.class);
 		bind(IssueLinkManager.class).to(DefaultIssueLinkManager.class);
+		bind(IssueStateHistoryManager.class).to(DefaultIssueStateHistoryManager.class);
 		bind(LinkAuthorizationManager.class).to(DefaultLinkAuthorizationManager.class);
 		bind(EmailAddressManager.class).to(DefaultEmailAddressManager.class);
 		bind(GpgKeyManager.class).to(DefaultGpgKeyManager.class);

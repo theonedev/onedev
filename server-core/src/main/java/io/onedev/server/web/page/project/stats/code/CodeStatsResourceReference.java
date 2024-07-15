@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.stats;
+package io.onedev.server.web.page.project.stats.code;
 
 import java.util.List;
 
@@ -13,12 +13,12 @@ import io.onedev.server.web.asset.echarts.EChartsResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class ProjectStatsResourceReference extends BaseDependentResourceReference {
+public class CodeStatsResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public ProjectStatsResourceReference() {
-		super(ProjectStatsResourceReference.class, "project-stats.js");
+	public CodeStatsResourceReference() {
+		super(CodeStatsResourceReference.class, "code-stats.js");
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class ProjectStatsResourceReference extends BaseDependentResourceReferenc
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DayResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
-				new CssResourceReference(ProjectStatsResourceReference.class, "project-stats.css")));
+				new CssResourceReference(CodeStatsResourceReference.class, "code-stats.css")));
 		return dependencies;
 	}
 	

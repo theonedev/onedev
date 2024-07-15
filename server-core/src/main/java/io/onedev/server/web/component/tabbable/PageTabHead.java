@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class PageTabHead extends Panel {
 
@@ -23,7 +24,7 @@ public class PageTabHead extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Link<?> link = newLink("link", tab.getMainPageClass());
+		Link<?> link = newLink("link", tab.getMainPageClass(), tab.getMainPageParams());
 		add(link);
 		if (tab.getIconModel() != null)
 			link.add(new SpriteImage("icon", tab.getIconModel()));
@@ -32,8 +33,8 @@ public class PageTabHead extends Panel {
 		link.add(new Label("label", tab.getTitleModel()));
 	}
 
-	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-		return new ViewStateAwarePageLink<Void>(linkId, pageClass);
+	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass, PageParameters pageParams) {
+		return new ViewStateAwarePageLink<Void>(linkId, pageClass, pageParams);
 	}
 
 }

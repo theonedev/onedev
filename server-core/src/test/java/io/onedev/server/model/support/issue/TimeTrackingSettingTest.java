@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue;
 
-import io.onedev.server.util.DateUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

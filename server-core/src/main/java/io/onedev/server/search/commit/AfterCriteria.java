@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 
 public class AfterCriteria extends CommitCriteria {
 

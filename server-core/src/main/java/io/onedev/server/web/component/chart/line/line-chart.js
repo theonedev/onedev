@@ -61,10 +61,8 @@ onedev.server.lineChart = {
 					}
 					option.legend.top = 30;
 				} 
-			} else {
-				let title = lineSeries.lines[0].name;
-				if (lineSeries.seriesName) 
-					title = lineSeries.seriesName + " / " + title;
+			} else if (lineSeries.seriesName) {
+				let title = lineSeries.seriesName;
 				option.title = {
 					text: title,
 					left: 'center',
@@ -103,7 +101,7 @@ onedev.server.lineChart = {
 				let xAxisValue = lineSeries.xAxisValues[i];
 				option.xAxis.data.push(xAxisValue);
 				for (const j in lineSeries.lines) {
-					option.series[j].data.push(lineSeries.lines[j].yAxisValues[xAxisValue]);
+					option.series[j].data.push(lineSeries.lines[j].yAxisValues[i]);
 				}
 			};
 			if (yAxisValueFormatter) {
@@ -127,7 +125,9 @@ onedev.server.lineChart = {
 			chart.setOption(option);
 			
 			$chart.on("resized", function() {
-				chart.resize();
+				setTimeout(function(){
+					chart.resize();
+				});
 			});	
 		} else {
 			$chart.append("No Data").addClass("d-flex align-items-center h1 text-muted justify-content-center");

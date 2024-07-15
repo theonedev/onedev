@@ -36,6 +36,7 @@ import io.onedev.server.util.*;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.date.Day;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
@@ -81,7 +82,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 
-	private static final int INFO_VERSION = 15;
+	private static final int INFO_VERSION = 16;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 

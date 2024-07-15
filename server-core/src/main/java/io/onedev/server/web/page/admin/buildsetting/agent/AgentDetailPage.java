@@ -1,29 +1,24 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.model.Agent;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.admin.AdministrationPage;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.model.Agent;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabHead;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class AgentDetailPage extends AdministrationPage {
@@ -63,9 +58,9 @@ public abstract class AgentDetailPage extends AdministrationPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new AgentTab("Overview", AgentOverviewPage.class));
-		tabs.add(new AgentTab("Builds", AgentBuildsPage.class));
-		tabs.add(new AgentTab("Log", AgentLogPage.class));
+		tabs.add(new PageTab(Model.of("Overview"), AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of("Builds"), AgentBuildsPage.class, AgentBuildsPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of("Log"), AgentLogPage.class, AgentLogPage.paramsOf(getAgent())));
 		
 		add(new Tabbable("agentTabs", tabs).setOutputMarkupId(true));
 	}
@@ -97,24 +92,4 @@ public abstract class AgentDetailPage extends AdministrationPage {
 		return params;
 	}
 	
-	private class AgentTab extends PageTab {
-
-		public AgentTab(String title, Class<? extends Page> pageClass) {
-			super(Model.of(title), pageClass);
-		}
-		
-		@Override
-		public Component render(String componentId) {
-			return new PageTabHead(componentId, this) {
-
-				@Override
-				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getAgent()));
-				}
-				
-			};
-		}
-		
-	}
-
 }

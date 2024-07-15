@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.stats;
+package io.onedev.server.web.page.project.stats.code;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,10 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.util.Day;
+import io.onedev.server.util.date.Day;
 
 @SuppressWarnings("serial")
-public class SourceLinesPage extends ProjectStatsPage {
+public class SourceLinesPage extends CodeStatsPage {
 
 	public SourceLinesPage(PageParameters params) {
 		super(params);
@@ -36,7 +36,7 @@ public class SourceLinesPage extends ProjectStatsPage {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String jsonOfData = mapper.writeValueAsString(data);
 			String jsonOfDefaultBranch = mapper.writeValueAsString(getProject().getDefaultBranch());
-			String script = String.format("onedev.server.stats.sourceLines.onDomReady(%s, %s, %b);", 
+			String script = String.format("onedev.server.codeStats.sourceLines.onDomReady(%s, %s, %b);", 
 					jsonOfData, jsonOfDefaultBranch, isDarkMode());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
@@ -46,7 +46,7 @@ public class SourceLinesPage extends ProjectStatsPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Line Statistics");
+		return new Label(componentId, "Code Line Statistics");
 	}
 
 }

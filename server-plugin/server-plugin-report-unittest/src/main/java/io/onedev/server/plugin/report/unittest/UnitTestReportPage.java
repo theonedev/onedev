@@ -21,6 +21,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
@@ -84,7 +85,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 	private class UnitReportTab extends BuildTab {
 
 		public UnitReportTab(String title, Class<? extends UnitTestReportPage> pageClass) {
-			super(title, pageClass);
+			super(Model.of(title), pageClass, new PageParameters());
 		}
 
 		@Override
@@ -92,10 +93,9 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 			return new PageTabHead(componentId, this) {
 
 				@Override
-				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass, PageParameters pageParams) {
 					BuildDetailPage page = (BuildDetailPage) getPage();
-					PageParameters params = UnitTestReportPage.paramsOf(
-							page.getBuild(), getReportName());
+					PageParameters params = UnitTestReportPage.paramsOf(page.getBuild(), getReportName());
 					return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
 				}
 				

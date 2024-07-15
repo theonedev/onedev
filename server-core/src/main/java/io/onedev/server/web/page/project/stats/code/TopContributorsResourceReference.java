@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.stats;
+package io.onedev.server.web.page.project.stats.code;
 
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;

@@ -1,9 +1,8 @@
 package io.onedev.server.web.component.chart.line;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.List;
 
 public class Line implements Serializable {
 
@@ -11,7 +10,7 @@ public class Line implements Serializable {
 
 	private final String name;
 	
-	private final Map<String, Integer> yAxisValues;
+	private final List<Integer> yAxisValues;
 
 	private final String color;
 	
@@ -19,7 +18,7 @@ public class Line implements Serializable {
 	
 	private final String style;
 	
-	public Line(String name, Map<String, Integer> yAxisValues, String color, @Nullable String stack, @Nullable String style) {
+	public Line(String name, List<Integer> yAxisValues, String color, @Nullable String stack, @Nullable String style) {
 		this.name = name;
 		this.yAxisValues = yAxisValues;
 		this.color = color;
@@ -31,7 +30,7 @@ public class Line implements Serializable {
 		return name;
 	}
 
-	public Map<String, Integer> getYAxisValues() {
+	public List<Integer> getYAxisValues() {
 		return yAxisValues;
 	}
 

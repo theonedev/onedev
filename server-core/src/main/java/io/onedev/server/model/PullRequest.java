@@ -13,10 +13,7 @@ import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.LabelSupport;
-import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -41,7 +38,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.PullRequest.*;
+import static io.onedev.server.model.PullRequest.PROP_STATUS;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.support.TimeGroups.*;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static java.lang.ThreadLocal.withInitial;
 
@@ -52,7 +53,10 @@ import static java.lang.ThreadLocal.withInitial;
 				@Index(columnList=PROP_NO_SPACE_TITLE), @Index(columnList=PROP_NUMBER), 
 				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), 
+				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH),
+				@Index(columnList=PROP_SUBMIT_MONTH), @Index(columnList=PROP_SUBMIT_WEEK),
+				@Index(columnList=PROP_SUBMIT_DAY), @Index(columnList=PROP_CLOSE_MONTH), 
+				@Index(columnList=PROP_CLOSE_WEEK), @Index(columnList=PROP_CLOSE_DAY),
 				@Index(columnList=PROP_STATUS), @Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -116,6 +120,8 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final String NAME_CLOSE_DATE = "Close Date";
 	
+	public static final String PROP_CLOSE_DATE = "closeDate";
+	
 	public static final String NAME_MERGE_STRATEGY = "Merge Strategy";
 	
 	public static final String PROP_MERGE_STRATEGY = "mergeStrategy";
@@ -133,7 +139,25 @@ public class PullRequest extends ProjectBelonging
 	public static final String PROP_UUID = "uuid";
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
+	
+	public static final String PROP_DURATION = "duration";
 
+	public static final String PROP_SUBMIT_TIME_GROUPS = "submitTimeGroups";
+	
+	public static final String PROP_CLOSE_TIME_GROUPS = "closeTimeGroups";
+	
+	public static final String PROP_SUBMIT_MONTH = "submitMonth";
+
+	public static final String PROP_SUBMIT_WEEK = "submitWeek";
+
+	public static final String PROP_SUBMIT_DAY = "submitDay";
+	
+	public static final String PROP_CLOSE_MONTH = "closeMonth";
+
+	public static final String PROP_CLOSE_WEEK = "closeWeek";
+
+	public static final String PROP_CLOSE_DAY = "closeDay";
+	
 	public static final String REFS_PREFIX = "refs/pulls/";
 
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
@@ -146,6 +170,7 @@ public class PullRequest extends ProjectBelonging
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			NAME_CLOSE_DATE, PROP_CLOSE_DATE,
 			NAME_LAST_ACTIVITY_DATE, PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE,
 			NAME_NUMBER, PROP_NUMBER,
 			NAME_STATUS, PROP_STATUS,
@@ -217,6 +242,24 @@ public class PullRequest extends ProjectBelonging
 	
 	@Column(nullable=false)
 	private Date submitDate = new Date();
+	
+	private Date closeDate;
+	
+	private Long duration;
+
+	@Embedded
+	@AttributeOverrides({
+			@AttributeOverride(name= PROP_MONTH, column=@Column(name= PROP_SUBMIT_MONTH)),
+			@AttributeOverride(name= PROP_WEEK, column=@Column(name= PROP_SUBMIT_WEEK)),
+			@AttributeOverride(name= PROP_DAY, column=@Column(name= PROP_SUBMIT_DAY))})
+	private TimeGroups submitTimeGroups;
+	
+	@Embedded
+	@AttributeOverrides({
+			@AttributeOverride(name= PROP_MONTH, column=@Column(name= PROP_CLOSE_MONTH)),
+			@AttributeOverride(name= PROP_WEEK, column=@Column(name= PROP_CLOSE_WEEK)),
+			@AttributeOverride(name= PROP_DAY, column=@Column(name= PROP_CLOSE_DAY))})
+	private TimeGroups closeTimeGroups;
 	
 	@Column(nullable=false)
 	private MergeStrategy mergeStrategy;
@@ -618,6 +661,25 @@ public class PullRequest extends ProjectBelonging
 
 	public void setSubmitDate(Date submitDate) {
 		this.submitDate = submitDate;
+		submitTimeGroups = TimeGroups.of(submitDate);
+	}
+
+	public Date getCloseDate() {
+		return closeDate;
+	}
+
+	public void setCloseDate(Date closeDate) {
+		this.closeDate = closeDate;
+		closeTimeGroups = TimeGroups.of(closeDate);
+		duration = closeDate.getTime() - submitDate.getTime();
+	}
+
+	public Long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Long duration) {
+		this.duration = duration;
 	}
 
 	public Collection<PullRequestReview> getReviews() {

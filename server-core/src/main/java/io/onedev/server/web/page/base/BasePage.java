@@ -379,7 +379,12 @@ public abstract class BasePage extends WebPage {
 	}
 
 	protected Collection<String> getCssClasses() {
-		return Sets.newHashSet();
+		var cssClasses = new HashSet<String>();
+		if (WicketUtils.isSubscriptionActive())
+			cssClasses.add("enterprise-edition");
+		else
+			cssClasses.add("community-edition");
+		return cssClasses;
 	}
 
 	public void resizeWindow(IPartialPageRequestHandler handler) {

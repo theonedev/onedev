@@ -59,7 +59,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 				Map<String, String> choices = new LinkedHashMap<>();
 				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
 					Enum<?> value = (Enum<?>) it.next();
-					choices.put(value.name(), TextUtils.getDisplayValue(value));
+						choices.put(value.name(), TextUtils.getDisplayValue(value));
 				}
 				return choices;
 			}

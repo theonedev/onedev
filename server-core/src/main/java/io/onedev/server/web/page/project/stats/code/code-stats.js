@@ -1,4 +1,4 @@
-onedev.server.stats = {
+onedev.server.codeStats = {
 	formatYAxisLabel: function(value, index, useKilo) {
 		if (index == 0)
 			useKilo = false;
@@ -12,7 +12,7 @@ onedev.server.stats = {
 	
 	contribs: {
 		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback, darkMode) {
-			var $contribs = $(".project-contribs");
+			var $contribs = $(".code-contribs");
 			var $overall = $contribs.find(".overall");
 			if (Object.keys(overallContributions).length === 0) {
 				$overall.html("<div class='no-data'>No data</div>");
@@ -102,7 +102,7 @@ onedev.server.stats = {
 			    	},	
 			    	axisLabel: {
 			    		formatter: function(value, index) {
-			    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKiloForOverallChart);
+			    			var result = onedev.server.codeStats.formatYAxisLabel(value, index, useKiloForOverallChart);
 			    			useKiloForOverallChart = result.useKilo;
 			    			return result.value;
 			    		},
@@ -192,10 +192,10 @@ onedev.server.stats = {
 							}
 							
 							function renderContributor($container, contributor, index) {
-								var $contrib = $("<div class='card contrib mb-5'><div class='card-body'></div></div>");
+								var $contrib = $("<div class='contrib border rounded p-3 mb-5'></div>");
 								$container.append($contrib);
 								var $head = $("<div class='head d-flex align-items-center'></div>");
-								$contrib.children().append($head);
+								$contrib.append($head);
 								var $left = $("<div class='mr-3 d-flex align-items-center'></div>");
 								$head.append($left);
 								$left.append("<a class='user mr-3'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
@@ -223,7 +223,7 @@ onedev.server.stats = {
 								$head.append("<div class='ml-auto font-size-h6 font-weight-bold'>#" + (index + 1) + "</div>");
 								
 								var $body = $("<div class='body chart'></div>");
-								$contrib.children().append($body);
+								$contrib.append($body);
 								
 								var chart = echarts.init($body[0]);
 								$body.data("chart", chart);
@@ -267,7 +267,7 @@ onedev.server.stats = {
 								    	boundaryGap: [0, (maxValue-maxValueOfContributor)/maxValueOfContributor],
 								    	axisLabel: {
 								    		formatter: function(value, index) {
-								    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKilo);
+								    			var result = onedev.server.codeStats.formatYAxisLabel(value, index, useKilo);
 								    			useKilo = result.useKilo;
 								    			return result.value;
 								    		},
@@ -338,7 +338,7 @@ onedev.server.stats = {
 		onDomReady: function(lineIncrements, defaultBranch, darkMode) {
 			var numOfTopLanguages = 10;
 			
-			var $chart = $(".source-lines>div>.chart");
+			var $chart = $(".source-lines>.chart");
 			if (lineIncrements.length == 0) {
 				$chart.append("<div class='no-data'>No data</div>");
 				return;
@@ -442,7 +442,7 @@ onedev.server.stats = {
 			    	boundaryGap: [0, 0],
 			    	axisLabel: {
 			    		formatter: function(value, index) {
-			    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKilo);
+			    			var result = onedev.server.codeStats.formatYAxisLabel(value, index, useKilo);
 			    			useKilo = result.useKilo;
 			    			return result.value;
 			    		},

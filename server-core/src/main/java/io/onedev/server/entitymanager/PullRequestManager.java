@@ -5,8 +5,10 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.util.StatsGroup;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
@@ -62,7 +64,16 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	void delete(Collection<PullRequest> requests, Project project);
 	
-	List<ProjectPullRequestStats> queryStats(Collection<Project> projects);
+	List<ProjectPullRequestStatusStat> queryStatusStats(Collection<Project> projects);
+
+	Map<Integer, Integer> queryDurationStats(Project project,
+															@Nullable
+															Criteria<PullRequest> criteria,
+															StatsGroup group);
+	Map<Integer, Pair<Integer, Integer>> queryOpenAndMergeFrequencyStats(Project project,
+																		 @Nullable
+											 Criteria<PullRequest> criteria,
+																		 StatsGroup group);
 	
 	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 	

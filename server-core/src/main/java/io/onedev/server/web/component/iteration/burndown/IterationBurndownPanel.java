@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.iteration.burndown;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.xodus.IssueInfoManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -12,6 +11,7 @@ import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
+import io.onedev.server.xodus.IssueInfoManager;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.*;
 
-import static io.onedev.server.util.DateUtils.toLocalDate;
+import static io.onedev.server.util.date.DateUtils.toLocalDate;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.*;
 
 public class IterationBurndownPanel extends GenericPanel<Iteration> {
@@ -66,10 +66,6 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 			var fragment = new Fragment("content", "chartFrag", this);
 			fragment.add(new LineChartPanel("chart", new LoadableDetachableModel<>() {
 
-				private String getXAxisValue(LocalDate date) {
-					return String.format("%02d-%02d", date.getMonthValue(), date.getDayOfMonth());
-				}
-
 				@Override
 				protected LineSeries load() {
 					long startDay = toLocalDate(getIteration().getStartDate()).toEpochDay();					
@@ -106,33 +102,40 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 					}
 
 					List<String> xAxisValues = new ArrayList<>();
-					for (Long day : dailyStateMetrics.keySet())
-						xAxisValues.add(getXAxisValue(LocalDate.ofEpochDay(day)));
+					for (Long day : dailyStateMetrics.keySet()) {
+						var date = LocalDate.ofEpochDay(day);
+						xAxisValues.add(String.format("%02d-%02d", date.getMonthValue(), date.getDayOfMonth()));
+					}
 
 					List<Line> lines = new ArrayList<>();
 
 					int initialIssueMetric = 0;
 					long today = LocalDate.now().toEpochDay();
 					for (StateSpec spec : OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
-						Map<String, Integer> yAxisValues = new HashMap<>();
+						List<Integer> yAxisValues = new ArrayList<>();
 						for (Map.Entry<Long, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
 							if (entry.getKey() <= today) {
-								var date = LocalDate.ofEpochDay(entry.getKey());
 								int metric = entry.getValue().getOrDefault(spec.getName(), 0);
-								yAxisValues.put(getXAxisValue(date), metric);
+								yAxisValues.add(metric);
+							} else {
+								yAxisValues.add(null);
 							}
 						}
-						Integer stateMetric = yAxisValues.get(getXAxisValue(LocalDate.ofEpochDay(startDay)));
+						Integer stateMetric = yAxisValues.get(0);
 						if (stateMetric == null)
 							stateMetric = 0;
 						initialIssueMetric += stateMetric;
 						lines.add(new Line(spec.getName(), yAxisValues, spec.getColor(), "States", null));
 					}
 
-					Map<String, Integer> guidelineYAxisValues = new HashMap<>();
-					if (!xAxisValues.isEmpty()) {
-						guidelineYAxisValues.put(xAxisValues.get(0), initialIssueMetric);
-						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size() - 1), 0);
+					List<Integer> guidelineYAxisValues = new ArrayList<>();
+					if (xAxisValues.size() > 1) {
+						guidelineYAxisValues.add(initialIssueMetric);
+						for (var i=2; i<xAxisValues.size(); i++)
+							guidelineYAxisValues.add(null);
+						guidelineYAxisValues.add(0);
+					} else if (xAxisValues.size() == 1) {
+						guidelineYAxisValues.add(initialIssueMetric);
 					}
 
 					lines.add(new Line("Guide Line", guidelineYAxisValues, "#7E8299", null, "dashed"));

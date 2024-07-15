@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.util.MetricIndicator;
+import io.onedev.server.web.component.chart.line.LineSeries;
 
 import javax.persistence.*;
 
@@ -45,7 +46,7 @@ public class CoverageMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(group="Code Coverage", order=200, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+	@MetricIndicator(group="Code Coverage", order=200, valueFormatter= LineSeries.PERCENTAGE_FORMATTER, 
 			maxValue=100, minValue=0, name="Branch", color="#1BC5BD")
 	public int getBranchCoverage() {
 		return branchCoverage;
@@ -55,7 +56,7 @@ public class CoverageMetric extends AbstractEntity implements BuildMetric {
 		this.branchCoverage = branchCoverage;
 	}
 
-	@MetricIndicator(group="Code Coverage", order=400, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+	@MetricIndicator(group="Code Coverage", order=400, valueFormatter=LineSeries.PERCENTAGE_FORMATTER, 
 			maxValue=100, minValue=0, name="Line", color="#FFA800")
 	public int getLineCoverage() {
 		return lineCoverage;

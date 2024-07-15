@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.stats;
+package io.onedev.server.web.page.project.stats.code;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,18 +22,18 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Day;
+import io.onedev.server.util.date.Day;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 
 @SuppressWarnings("serial")
-public class ProjectContribsPage extends ProjectStatsPage {
+public class CodeContribsPage extends CodeStatsPage {
 
 	private static final String USER_CARD_ID = "userCard";
 	
 	private AbstractDefaultAjaxBehavior userCardBehavior;
 	
-	public ProjectContribsPage(PageParameters params) {
+	public CodeContribsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -63,7 +63,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 				userCard.setOutputMarkupId(true);
 				replace(userCard);
 				target.add(userCard);
-				target.appendJavaScript("onedev.server.stats.contribs.onUserCardAvailable();");
+				target.appendJavaScript("onedev.server.codeStats.contribs.onUserCardAvailable();");
 			}
 			
 		});
@@ -94,14 +94,14 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		
 		CharSequence callback = userCardBehavior.getCallbackFunction(
 				CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
-		String script = String.format("onedev.server.stats.contribs.onDomReady(%s, '%s', %s, %b);", 
+		String script = String.format("onedev.server.codeStats.contribs.onDomReady(%s, '%s', %s, %b);", 
 				jsonOfData, topContributorsUrl, callback, isDarkMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Contribution Statistics");
+		return new Label(componentId, "Code Contribution Statistics");
 	}
 
 }

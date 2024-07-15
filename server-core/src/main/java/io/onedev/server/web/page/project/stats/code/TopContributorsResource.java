@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.stats;
+package io.onedev.server.web.page.project.stats.code;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Day;
+import io.onedev.server.util.date.Day;
 import io.onedev.server.web.avatar.AvatarManager;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.joda.time.format.DateTimeFormat;

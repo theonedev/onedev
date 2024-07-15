@@ -24,7 +24,7 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;

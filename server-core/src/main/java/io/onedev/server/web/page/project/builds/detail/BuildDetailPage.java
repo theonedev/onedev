@@ -39,7 +39,6 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
-import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.base.BasePage;
@@ -76,6 +75,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -445,7 +445,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				List<Tab> tabs = new ArrayList<>();
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
-					tabs.add(new BuildTab("Log", BuildLogPage.class) {
+					tabs.add(new BuildTab(Model.of("Log"), BuildLogPage.class, BuildLogPage.paramsOf(getBuild())) {
 
 						@Override
 						protected Component renderOptions(String componentId) {
@@ -457,10 +457,10 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 
 				if (SecurityUtils.canAccessPipeline(getBuild())) 
-					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
+					tabs.add(new BuildTab(Model.of("Pipeline"), BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild())));
 				
 				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
-					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+					tabs.add(new BuildTab(Model.of("Artifacts"), BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild())));
 				}
 
 				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
@@ -468,7 +468,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				for (var packSupport: packSupports) {
 					var packType = packSupport.getPackType();
 					if (getBuild().getPacks().stream().anyMatch(it -> it.getType().equals(packType) && SecurityUtils.canReadPack(it.getProject()))) {
-						tabs.add(new BuildTab(packSupport.getPackType(), packSupport.getPackIcon(), BuildPacksPage.class) {
+						tabs.add(new BuildTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon()), BuildPacksPage.class, BuildPacksPage.paramsOf(getBuild(), packType)) {
 							@Override
 							public boolean isActive(Page currentPage) {
 								if (super.isActive(currentPage)) {
@@ -482,43 +482,15 @@ public abstract class BuildDetailPage extends ProjectPage
 									return false;
 								}
 							}
-
-							@Override
-							public Component render(String componentId) {
-								return new PageTabHead(componentId, this) {
-
-									@Override
-									protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-										return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
-												BuildPacksPage.paramsOf(getBuild(), packType));
-									}
-
-								};
-							}
 						});
 					}
 				}
 				
-				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
-
-					@Override
-					public Component render(String componentId) {
-						return new PageTabHead(componentId, this) {
-
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new ViewStateAwarePageLink<Void>(
-										linkId, pageClass, FixedIssuesPage.paramsOf(getBuild(),
-										getProject().getHierarchyDefaultFixedIssueQuery(getBuild().getJobName())));
-							}
-
-						};
-					}
-
-				});
+				var params = FixedIssuesPage.paramsOf(getBuild(), getProject().getHierarchyDefaultFixedIssueQuery(getBuild().getJobName()));
+				tabs.add(new BuildTab(Model.of("Fixed Issues"), FixedIssuesPage.class, params));
 
 				if (SecurityUtils.canReadCode(getProject()))
-					tabs.add(new BuildTab("Changes", BuildChangesPage.class));
+					tabs.add(new BuildTab(Model.of("Changes"), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
 
 				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
 				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));

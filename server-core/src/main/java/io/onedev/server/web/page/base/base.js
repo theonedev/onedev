@@ -857,9 +857,11 @@ onedev.server = {
 		seconds = seconds%60;
 		if (seconds != 0)
 			intervals.push(seconds + "s");
-		return intervals.join(" ");
+		if (intervals.length != 0)
+			return intervals.join(" ");
+		else
+			return "0s";
 	},
-	
 	onDomReady: function(bootTimestamp, icons, popStateCallback) {
 		onedev.server.bootTimestamp = bootTimestamp;
 		onedev.server.icons = icons;

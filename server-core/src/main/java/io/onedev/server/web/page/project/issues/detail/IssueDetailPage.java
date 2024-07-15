@@ -24,7 +24,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -37,7 +36,6 @@ import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -147,7 +145,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			protected List<? extends Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
-				tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
+				tabs.add(new PageTab(Model.of("Activities"), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
 
 					@Override
 					protected Component renderOptions(String componentId) {
@@ -159,16 +157,16 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 				if (!getIssue().getCommits().isEmpty()) {
 					if (SecurityUtils.canReadCode(getProject())) {
-						tabs.add(new IssueTab("Fixing Commits", IssueCommitsPage.class));
+						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())));
 						if (!getIssue().getPullRequests().isEmpty())
-							tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
+							tabs.add(new PageTab(Model.of("Pull Requests"), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())));
 					}
 					// Do not calculate fix builds now as it might be slow
-					tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
+					tabs.add(new PageTab(Model.of("Fixing Builds"), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())));
 				}
 
 				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue()))
-					tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
+					tabs.add(new PageTab(Model.of("Authorizations"), IssueAuthorizationsPage.class, IssueAuthorizationsPage.paramsOf(getIssue())));
 
 				return tabs;
 			}
@@ -338,26 +336,6 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	@Override
 	public FieldSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
-	}
-
-	private class IssueTab extends PageTab {
-
-		public IssueTab(String title, Class<? extends Page> pageClass) {
-			super(Model.of(title), pageClass);
-		}
-		
-		@Override
-		public Component render(String componentId) {
-			return new PageTabHead(componentId, this) {
-
-				@Override
-				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue()));
-				}
-				
-			};
-		}
-		
 	}
 	
 	private IssueManager getIssueManager() {

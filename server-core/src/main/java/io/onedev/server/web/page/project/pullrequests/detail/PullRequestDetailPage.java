@@ -44,7 +44,6 @@ import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -70,7 +69,6 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -707,7 +705,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new PullRequestTab("Activities", PullRequestActivitiesPage.class) {
+		tabs.add(new PageTab(Model.of("Activities"), PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest())) {
 
 			@Override
 			protected Component renderOptions(String componentId) {
@@ -716,8 +714,42 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 			
 		});
-		tabs.add(new PullRequestTab("File Changes", PullRequestChangesPage.class));
-		tabs.add(new PullRequestTab("Code Comments", PullRequestCodeCommentsPage.class));
+		tabs.add(new PageTab(Model.of("File Changes"), PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(getPullRequest())));
+		tabs.add(new PageTab(Model.of("Code Comments"), PullRequestCodeCommentsPage.class, PullRequestCodeCommentsPage.paramsOf(getPullRequest())) {
+			@Override
+			public Component render(String componentId) {
+				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
+
+				// Do not show unresolved only by default as new indicator for 
+				// code comments tab may also be caused by new activities in 
+				// resolved issues
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link",
+						PullRequestCodeCommentsPage.class,
+						PullRequestCodeCommentsPage.paramsOf(getPullRequest()));
+				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+					@Override
+					protected String load() {
+						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
+						if (updateDate != null && !getPullRequest().isCodeCommentsVisitedAfter(updateDate))
+							return "new";
+						else
+							return "";
+					}
+
+				}));
+				link.add(new ChangeObserver() {
+
+					@Override
+					public Collection<String> findObservables() {
+						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
+					}
+
+				});
+				link.setOutputMarkupId(true);
+				fragment.add(link);
+				return fragment;
+			}
+		});
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
@@ -1632,59 +1664,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());
-	}
-	
-	private class PullRequestTab extends PageTab {
-
-		public PullRequestTab(String title, Class<? extends Page> pageClass) {
-			super(Model.of(title), pageClass);
-		}
-		
-		@Override
-		public Component render(String componentId) {
-			if (getMainPageClass() == PullRequestCodeCommentsPage.class) {
-				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
-				
-				// Do not show unresolved only by default as new indicator for 
-				// code comments tab may also be caused by new activities in 
-				// resolved issues
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-						PullRequestCodeCommentsPage.class, 
-						PullRequestCodeCommentsPage.paramsOf(getPullRequest()));
-				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-					@Override
-					protected String load() {
-						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
-						if (updateDate != null && !getPullRequest().isCodeCommentsVisitedAfter(updateDate))
-							return "new";
-						else
-							return "";
-					}
-					
-				}));
-				link.add(new ChangeObserver() {
-
-					@Override
-					public Collection<String> findObservables() {
-						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
-					}
-					
-				});
-				link.setOutputMarkupId(true);
-				fragment.add(link);
-				return fragment;
-			} else {
-				return new PageTabHead(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest()));
-					}
-					
-				};
-			}
-		}
-		
 	}
 	
 	@Override

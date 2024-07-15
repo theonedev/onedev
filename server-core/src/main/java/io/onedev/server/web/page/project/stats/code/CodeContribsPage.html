@@ -1,0 +1,20 @@
+<wicket:extend>
+	<div class="code-contribs">
+		<wicket:enclosure child="note">
+		<div class="alert alert-light alert-notice mb-5">
+			<wicket:svg href="bulb" class="icon mr-2"/><span wicket:id="note"></span>
+		</div>
+		</wicket:enclosure>
+		<div class="d-flex align-items-center mb-4">
+			<span class="date-range mr-3 font-size-h5"></span>
+			<select class="contrib-type custom-select form-control ml-auto">
+				<option>Commits</option>
+				<option>Additions</option>
+				<option>Deletions</option>
+			</select>
+		</div>
+		<div class="overall chart border p-4 rounded mb-4"></div>
+		<div class="top-contributors"></div>
+	</div>
+	<div wicket:id="userCard" class="user-card-content"></div>
+</wicket:extend>

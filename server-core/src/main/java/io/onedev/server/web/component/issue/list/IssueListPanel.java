@@ -22,10 +22,10 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.timetracking.TimeTrackingManager;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
@@ -38,8 +38,8 @@ import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
+import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
@@ -358,6 +358,11 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
+
+		var extraActionsView = new RepeatingView("extraActions");
+		add(extraActionsView);
+		for (var renderer: OneDev.getExtensions(IssueListActionRenderer.class))
+			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		

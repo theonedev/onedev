@@ -11,7 +11,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LastActivityDateCriteria extends Criteria<Issue> {

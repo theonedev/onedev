@@ -830,3 +830,22 @@ span.keycap {
 .d-first-child-none:first-child {
 	display: none !important;
 }
+
+.ee-feature {
+	position: relative;
+}
+.community-edition .ee-feature {
+	margin-right: 24px !important;
+}
+.community-edition .ee-feature::after {
+	content: "ee";
+	position: absolute;
+	top: -3px;
+	right: -18px;
+	font-size: 8px;
+	padding: 0 3px 1px 3px;
+	line-height: 10px;
+	border-radius: 2px;
+	background: #C9F7F5;
+	color: #1BC5BD;
+}

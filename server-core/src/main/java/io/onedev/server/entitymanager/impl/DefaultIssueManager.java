@@ -40,7 +40,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.IterationAndIssueState;
-import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -186,7 +186,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.setLastActivity(lastActivity);
 		
 		dao.persist(issue);
-
+		
 		fieldManager.saveFields(issue);
 		for (IssueSchedule schedule: issue.getSchedules())
 			dao.persist(schedule);
@@ -424,12 +424,17 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Collection<String> undefinedStates = getIssueSetting().getUndefinedStates();
 		
 		Query<String> query = getSession().createQuery("select distinct state from Issue");
-		
 		for (String state: query.getResultList()) {
 			if (getIssueSetting().getStateSpec(state) == null)
 				undefinedStates.add(state);
 		}
 
+		query = getSession().createQuery("select distinct state from IssueStateHistory");
+		for (String state: query.getResultList()) {
+			if (getIssueSetting().getStateSpec(state) == null)
+				undefinedStates.add(state);
+		}
+		
 		for (Project project: projectManager.query()) {
 			undefinedStates.addAll(project.getIssueSetting().getUndefinedStates());
 			undefinedStates.addAll(project.getBuildSetting().getUndefinedStates());
@@ -565,6 +570,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				query.setParameter("newState", entry.getValue().getNewState());
 				query.setParameter("newStateOrdinal", getIssueSetting().getStateOrdinal(entry.getValue().getNewState()));
 				query.executeUpdate();
+
+				query = getSession().createQuery("update IssueStateHistory set state=:newState where state=:oldState");
+				query.setParameter("oldState", entry.getKey());
+				query.setParameter("newState", entry.getValue().getNewState());
+				query.executeUpdate();
 			} else {
 				Query<?> query = getSession().createQuery("delete from IssueField where issue in (select issue from Issue issue where issue.state=:state)");
 				query.setParameter("state", entry.getKey());
@@ -589,8 +599,16 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				query = getSession().createQuery("delete from IssueAuthorization where issue in (select issue from Issue issue where issue.state=:state)");
 				query.setParameter("state", entry.getKey());
 				query.executeUpdate();
+
+				query = getSession().createQuery("delete from IssueStateHistory where issue in (select issue from Issue issue where issue.state=:state)");
+				query.setParameter("state", entry.getKey());
+				query.executeUpdate();
 				
 				query = getSession().createQuery("delete from Issue where state=:state");
+				query.setParameter("state", entry.getKey());
+				query.executeUpdate();
+
+				query = getSession().createQuery("delete from IssueStateHistory where state=:state");
 				query.setParameter("state", entry.getKey());
 				query.executeUpdate();
 			}
@@ -1118,12 +1136,12 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<ProjectIssueStats> queryStats(Collection<Project> projects) {
+	public List<ProjectIssueStateStat> queryStateStats(Collection<Project> projects) {
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
-			CriteriaQuery<ProjectIssueStats> criteriaQuery = builder.createQuery(ProjectIssueStats.class);
+			CriteriaQuery<ProjectIssueStateStat> criteriaQuery = builder.createQuery(ProjectIssueStateStat.class);
 			Root<Issue> root = criteriaQuery.from(Issue.class);
 			
 			criteriaQuery.multiselect(

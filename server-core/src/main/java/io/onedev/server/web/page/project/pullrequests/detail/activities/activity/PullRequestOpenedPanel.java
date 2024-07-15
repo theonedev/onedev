@@ -9,7 +9,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;

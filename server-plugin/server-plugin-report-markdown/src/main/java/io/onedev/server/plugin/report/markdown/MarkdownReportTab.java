@@ -14,6 +14,7 @@ import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.io.File;
@@ -24,15 +25,15 @@ import java.util.concurrent.Callable;
 public class MarkdownReportTab extends BuildTab {
 
 	public MarkdownReportTab(String reportName) {
-		super(reportName, MarkdownReportPage.class);
+		super(Model.of(reportName), MarkdownReportPage.class, new PageParameters());
 	}
-
+	
 	@Override
 	public Component render(String componentId) {
 		return new PageTabHead(componentId, this) {
 
 			@Override
-			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass, PageParameters pageParams) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
 				Build build = page.getBuild();
 				Long projectId = build.getProject().getId();

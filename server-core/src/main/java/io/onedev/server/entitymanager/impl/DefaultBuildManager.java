@@ -34,13 +34,16 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.ProjectBuildStats;
+import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
+import io.onedev.server.web.util.StatsGroup;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -66,9 +69,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static edu.emory.mathcs.backport.java.util.Collections.sort;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.*;
+import static io.onedev.server.model.Build.Status.SUCCESSFUL;
 import static io.onedev.server.model.Project.BUILDS_DIR;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
@@ -416,6 +421,59 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		query.setMaxResults(count);
 		
 		return query.getResultList();
+	}
+
+	@Sessional
+	@Override
+	public Map<Integer, Pair<Integer, Integer>> queryDurationStats(Project project, 
+																   Criteria<Build> criteria, 
+																   StatsGroup group) {
+		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+		
+		var predicates = new ArrayList<Predicate>();
+		predicates.addAll(Arrays.asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		predicates.add(builder.equal(root.get(PROP_STATUS), SUCCESSFUL));
+		predicates.add(builder.isNotNull(root.get(PROP_PENDING_DURATION)));
+		predicates.add(builder.isNotNull(root.get(PROP_RUNNING_DURATION)));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
+		criteriaQuery.groupBy(groupPath);
+
+		criteriaQuery.multiselect(newArrayList(
+				groupPath,
+				builder.avg(root.get(PROP_PENDING_DURATION)),
+				builder.avg(root.get(PROP_RUNNING_DURATION))));
+
+		Map<Integer, Pair<Integer, Integer>> stats = new HashMap<>();
+		for (var result: getSession().createQuery(criteriaQuery).getResultList()) {
+			var pendingDuration = ((Double)result[1])/60000;
+			var runningDuration = ((Double)result[2])/60000;
+			stats.put((int)result[0], new ImmutablePair<>((int)pendingDuration, (int)runningDuration));
+		}
+		return stats;
+	}
+
+	@Sessional
+	@Override
+	public Map<Integer, Integer> queryFrequencyStats(Project project,
+																   Criteria<Build> criteria,
+																   StatsGroup group) {
+		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+
+		criteriaQuery.where(getPredicates(project, criteria, criteriaQuery, root, builder));
+		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
+		criteriaQuery.groupBy(groupPath);
+
+		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+		
+		Map<Integer, Integer> stats = new HashMap<>();
+		for (var result: getSession().createQuery(criteriaQuery).getResultList()) 
+			stats.put((int)result[0], ((Long)result[1]).intValue());
+		return stats;
 	}
 	
 	@Transactional
@@ -883,12 +941,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Sessional
 	@Override
-	public List<ProjectBuildStats> queryStats(Collection<Project> projects) {
+	public List<ProjectBuildStatusStat> queryStatusStats(Collection<Project> projects) {
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
-			CriteriaQuery<ProjectBuildStats> criteriaQuery = builder.createQuery(ProjectBuildStats.class);
+			CriteriaQuery<ProjectBuildStatusStat> criteriaQuery = builder.createQuery(ProjectBuildStatusStat.class);
 			Root<Build> root = criteriaQuery.from(Build.class);
 			criteriaQuery.multiselect(
 					root.get(Build.PROP_PROJECT).get(Project.PROP_ID), 

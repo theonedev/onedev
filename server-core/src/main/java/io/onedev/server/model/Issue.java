@@ -266,6 +266,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueStateHistory> stateHistories = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueComment> comments = new ArrayList<>();
@@ -616,7 +619,15 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public void setFields(Collection<IssueField> fields) {
 		this.fields = fields;
 	}
-	
+
+	public Collection<IssueStateHistory> getStateHistories() {
+		return stateHistories;
+	}
+
+	public void setStateHistories(Collection<IssueStateHistory> stateHistories) {
+		this.stateHistories = stateHistories;
+	}
+
 	public Collection<IssueLink> getSourceLinks() {
 		return sourceLinks;
 	}

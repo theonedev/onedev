@@ -65,10 +65,6 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	
 	public static final String PROP_USER = "user";
 	
-	public static final String PROP_REPLIES = "replies";
-	
-	public static final String PROP_CHANGES = "changes";
-	
 	public static final String PROP_UUID = "uuid";
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(

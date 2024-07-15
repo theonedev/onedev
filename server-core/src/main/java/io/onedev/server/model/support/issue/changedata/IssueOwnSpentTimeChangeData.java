@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.DateUtils;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -20,7 +20,6 @@ import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
-import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.code.BranchProtection;
@@ -42,12 +41,15 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.web.util.StatsGroup;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.PullRequestInfoManager;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Session;
@@ -70,8 +72,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.onedev.server.model.PullRequest.getSerialLockName;
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.model.PullRequest.*;
+import static io.onedev.server.model.PullRequest.Status.MERGED;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
+import static java.util.Arrays.asList;
 
 @Singleton
 public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> 
@@ -238,6 +243,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Override
  	public void discard(PullRequest request, String note) {
 		request.setStatus(Status.DISCARDED);
+		request.setCloseDate(new Date());
 		
 		User user = SecurityUtils.getUser();
 		
@@ -341,7 +347,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	}
 	
 	private void closeAsMerged(PullRequest request, boolean dueToMerged) {
-		request.setStatus(Status.MERGED);
+		request.setStatus(MERGED);
+		request.setCloseDate(new Date());
 		
 		Date date = new DateTime().plusMillis(1).toDate();
 		
@@ -536,7 +543,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		Criterion merged = Restrictions.and(
-				Restrictions.eq(PullRequest.PROP_STATUS, Status.MERGED), 
+				Restrictions.eq(PROP_STATUS, MERGED), 
 				Restrictions.eq(PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH, source.getObjectName()));
 		
 		criteria.add(ofTarget(target)).add(ofSource(source)).add(Restrictions.or(ofOpen(), merged));
@@ -551,7 +558,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		Collection<Criterion> criterions = new ArrayList<>();
 		for (ProjectAndBranch source: sources) {
 			Criterion merged = Restrictions.and(
-					Restrictions.eq(PullRequest.PROP_STATUS, Status.MERGED), 
+					Restrictions.eq(PROP_STATUS, MERGED), 
 					Restrictions.eq(PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH, source.getObjectName()));
 			criterions.add(Restrictions.and(ofTarget(target), ofSource(source), Restrictions.or(ofOpen(), merged)));
 		}
@@ -950,26 +957,99 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Sessional
 	@Override
-	public List<ProjectPullRequestStats> queryStats(Collection<Project> projects) {
+	public List<ProjectPullRequestStatusStat> queryStatusStats(Collection<Project> projects) {
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
-			CriteriaQuery<ProjectPullRequestStats> criteriaQuery = builder.createQuery(ProjectPullRequestStats.class);
+			CriteriaQuery<ProjectPullRequestStatusStat> criteriaQuery = builder.createQuery(ProjectPullRequestStatusStat.class);
 			Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 			criteriaQuery.multiselect(
 					root.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID), 
-					root.get(PullRequest.PROP_STATUS), builder.count(root));
-			criteriaQuery.groupBy(root.get(PullRequest.PROP_TARGET_PROJECT), root.get(PullRequest.PROP_STATUS));
+					root.get(PROP_STATUS), builder.count(root));
+			criteriaQuery.groupBy(root.get(PullRequest.PROP_TARGET_PROJECT), root.get(PROP_STATUS));
 			
 			criteriaQuery.where(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
-			criteriaQuery.orderBy(builder.asc(root.get(PullRequest.PROP_STATUS)));
+			criteriaQuery.orderBy(builder.asc(root.get(PROP_STATUS)));
 			return getSession().createQuery(criteriaQuery).getResultList();
 		}
 	}
 
+	@Sessional
+	@Override
+	public Map<Integer, Integer> queryDurationStats(Project project,
+																   Criteria<PullRequest> criteria,
+																   StatsGroup group) {
+		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
+		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
+
+		var predicates = new ArrayList<Predicate>();
+		predicates.addAll(asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		predicates.add(builder.equal(root.get(PROP_STATUS), MERGED));
+		predicates.add(builder.isNotNull(root.get(PROP_DURATION)));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		var groupPath = group.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
+		criteriaQuery.groupBy(groupPath);
+
+		criteriaQuery.multiselect(newArrayList(
+				groupPath,
+				builder.avg(root.get(PROP_DURATION))));
+
+		Map<Integer, Integer> stats = new HashMap<>();
+		for (var result: getSession().createQuery(criteriaQuery).getResultList()) {
+			var duration = ((Double)result[1])/60000;
+			stats.put((int)result[0], (int)duration);
+		}
+		return stats;
+	}
+
+	@Sessional
+	@Override
+	public Map<Integer, Pair<Integer, Integer>> queryOpenAndMergeFrequencyStats(Project project,
+																				Criteria<PullRequest> criteria,
+																				StatsGroup group) {
+		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
+		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
+
+		criteriaQuery.where(getPredicates(project, criteria, criteriaQuery, root, builder));
+		var groupPath = group.getPath(root.get(PROP_SUBMIT_TIME_GROUPS));
+		criteriaQuery.groupBy(groupPath);
+
+		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+
+		Map<Integer, Integer> openStats = new HashMap<>();
+		for (var result: getSession().createQuery(criteriaQuery).getResultList()) 
+			openStats.put((int)result[0], ((Long)result[1]).intValue());
+		
+		var predicates = new ArrayList<>(asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		predicates.add(builder.equal(root.get(PROP_STATUS), MERGED));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		groupPath = group.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
+		criteriaQuery.groupBy(groupPath);
+
+		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+
+		Map<Integer, Integer> mergeStats = new HashMap<>();
+		for (var result: getSession().createQuery(criteriaQuery).getResultList())
+			mergeStats.put((int)result[0], ((Long)result[1]).intValue());
+		
+		Map<Integer, Pair<Integer, Integer>> stats = new HashMap<>();
+		for (var entry: openStats.entrySet()) 
+			stats.put(entry.getKey(), new ImmutablePair<>(entry.getValue(), 0));
+		for (var entry: mergeStats.entrySet()) {
+			var value = stats.get(entry.getKey());
+			if (value != null)
+				stats.put(entry.getKey(), new ImmutablePair<>(value.getLeft(), entry.getValue()));
+			else 
+				stats.put(entry.getKey(), new ImmutablePair<>(0, entry.getValue()));
+		}
+		return stats;
+	}
+	
 	private Criterion ofOpen() {
-		return Restrictions.eq(PullRequest.PROP_STATUS, Status.OPEN);
+		return Restrictions.eq(PROP_STATUS, Status.OPEN);
 	}
 	
 	private Criterion ofTarget(ProjectAndBranch target) {

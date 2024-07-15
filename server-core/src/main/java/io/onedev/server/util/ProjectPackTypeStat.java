@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import java.io.Serializable;
 
-public class ProjectPackStats implements Serializable {
+public class ProjectPackTypeStat implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class ProjectPackStats implements Serializable {
 	
 	private final long typeCount;
 	
-	public ProjectPackStats(Long projectId, String type, long typeCount) {
+	public ProjectPackTypeStat(Long projectId, String type, long typeCount) {
 		this.projectId = projectId;
 		this.type = type;
 		this.typeCount = typeCount;

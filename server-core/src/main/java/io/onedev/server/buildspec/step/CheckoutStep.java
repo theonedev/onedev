@@ -1,21 +1,20 @@
 package io.onedev.server.buildspec.step;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
 import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.annotation.SubPath;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {
@@ -32,9 +31,9 @@ public class CheckoutStep extends Step {
 	
 	private String checkoutPath;
 	
-	@Editable(order=100, description="By default code is cloned via an auto-generated credential, "
-			+ "which only has read permission over current project. In case the job needs to <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, or want "
-			+ "to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules-ssh/' target='_blank'>clone private submodules</a>, you should supply custom credential with appropriate permissions here")
+	@Editable(order=100, description="By default code is cloned via an auto-generated credential, " +
+			"which only has read permission over current project. In case the job needs to <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, " +
+			"you should supply custom credential with appropriate permissions here")
 	@NotNull
 	public GitCredential getCloneCredential() {
 		return cloneCredential;
@@ -53,7 +52,9 @@ public class CheckoutStep extends Step {
 		this.withLfs = withLfs;
 	}
 
-	@Editable(order=180, name="Retrieve Submodules", description="Check this to retrieve submodules")
+	@Editable(order=180, name="Retrieve Submodules", description="Whether or not to retrieve submodules. Refer to " +
+			"<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on " +
+			"how to set up clone credential above to retrieve submodules")
 	public boolean isWithSubmodules() {
 		return withSubmodules;
 	}

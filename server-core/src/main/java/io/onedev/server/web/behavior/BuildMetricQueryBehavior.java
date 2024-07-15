@@ -27,7 +27,7 @@ import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 

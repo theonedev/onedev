@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import java.io.Serializable;
 
-public class ProjectIssueStats implements Serializable {
+public class ProjectIssueStateStat implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class ProjectIssueStats implements Serializable {
 	
 	private final long stateCount;
 	
-	public ProjectIssueStats(Long projectId, int stateOrdinal, long stateCount) {
+	public ProjectIssueStateStat(Long projectId, int stateOrdinal, long stateCount) {
 		this.projectId = projectId;
 		this.stateOrdinal = stateOrdinal;
 		this.stateCount = stateCount;

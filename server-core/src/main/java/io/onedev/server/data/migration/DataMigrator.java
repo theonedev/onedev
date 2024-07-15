@@ -10,9 +10,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
+import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Pair;
+import io.onedev.server.util.date.Day;
+import io.onedev.server.util.date.Month;
+import io.onedev.server.util.date.Week;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -37,11 +41,17 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 
 
@@ -51,6 +61,8 @@ public class DataMigrator {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataMigrator.class);
 
+	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'");
+	
 	private void migrate5(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Configs.xml")) {
@@ -6064,7 +6076,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("Packs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					var prerelease = element.elementTextTrim("type").equals("NuGet") 
+					var prerelease = element.elementTextTrim("type").equals("NuGet")
 							&& element.elementText("version").contains("-");
 					element.addElement("prerelease").setText(String.valueOf(prerelease));
 				}
@@ -6085,9 +6097,9 @@ public class DataMigrator {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-			}			
+			}
 		}
-		
+
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Packs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -6102,7 +6114,7 @@ public class DataMigrator {
 							groupIdElement.detach();
 							artifactIdElement.detach();
 						} else {
-							element.addElement("name").setText(groupId + ":<$NONE$>");							
+							element.addElement("name").setText(groupId + ":<$NONE$>");
 							element.addElement("version").setText("<$NONE$>");
 							groupIdElement.detach();
 						}
@@ -6130,9 +6142,9 @@ public class DataMigrator {
 						widgetElement.detach();
 						if (widgetElement.getName().contains("CompositeWidget"))
 							continue;
-						
+
 						var newWidgetElement = widgetsElement.addElement("io.onedev.server.model.support.widget.Widget");
-						
+
 						var leftElement = widgetElement.element("left");
 						leftElement.detach();
 						newWidgetElement.add(leftElement);
@@ -6152,7 +6164,7 @@ public class DataMigrator {
 						var autoHeightElement = widgetElement.element("autoHeight");
 						autoHeightElement.detach();
 						newWidgetElement.add(autoHeightElement);
-						
+
 						var tabsElement = newWidgetElement.addElement("tabs");
 						widgetElement.addAttribute("class", widgetElement.getName());
 						widgetElement.setName("tab");
@@ -6168,7 +6180,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("uploadCache").setText("false");
 				dom.writeToFile(file, false);
 			}
@@ -6187,13 +6199,13 @@ public class DataMigrator {
 						if (valueElement != null) {
 							for (Element executorElement : valueElement.elements()) {
 								executorElement.element("cacheTTL").detach();
-								if (executorElement.getName().contains("KubernetesExecutor")) 
+								if (executorElement.getName().contains("KubernetesExecutor"))
 									executorElement.addElement("buildWithPV").setText("false");
 							}
 						}
 					} else if (key.equals("BRANDING")) {
 						Element valueElement = element.element("value");
-						if (valueElement != null) 
+						if (valueElement != null)
 							valueElement.addElement("url").setText("https://onedev.io");
 					} else if (key.equals("SECURITY")) {
 						Element valueElement = element.element("value");
@@ -6225,10 +6237,10 @@ public class DataMigrator {
 					} else if (key.equals("SSO_CONNECTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (var connectorElement: valueElement.elements()) {
+							for (var connectorElement : valueElement.elements()) {
 								if (connectorElement.getName().contains("OpenIdConnector")) {
 									var requestScopes = "openid email profile";
-									var groupsClaim = connectorElement.elementText("groupsClaim");									
+									var groupsClaim = connectorElement.elementText("groupsClaim");
 									if (groupsClaim != null)
 										requestScopes += " " + groupsClaim;
 									connectorElement.addElement("requestScopes").setText(requestScopes);
@@ -6251,7 +6263,7 @@ public class DataMigrator {
 					if (key.equals("SSO_CONNECTORS")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							for (var connectorElement: valueElement.elements()) {
+							for (var connectorElement : valueElement.elements()) {
 								if (connectorElement.getName().contains("EntraIdConnector"))
 									connectorElement.addElement("retrieveGroups").setText("false");
 							}
@@ -6268,7 +6280,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("Roles.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					for (var jobPrivilegeElement: element.element("jobPrivileges").elements()) {
+					for (var jobPrivilegeElement : element.element("jobPrivileges").elements()) {
 						if (jobPrivilegeElement.elementTextTrim("accessLog").equals("true")) {
 							jobPrivilegeElement.addElement("accessPipeline").setText("true");
 							var accessibleReportsElement = jobPrivilegeElement.element("accessibleReports");
@@ -6289,7 +6301,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ProblemMetrics.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("criticalSeverities").setText("0");
 				dom.writeToFile(file, false);
 			}
@@ -6306,7 +6318,7 @@ public class DataMigrator {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							for (Element executorElement : valueElement.elements()) {
-								if (executorElement.getName().contains("ServerDockerExecutor") 
+								if (executorElement.getName().contains("ServerDockerExecutor")
 										|| executorElement.getName().contains("RemoteDockerExecutor")) {
 									executorElement.addElement("dockerBuilder").setText("onedev");
 								}
@@ -6346,7 +6358,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (var whitespaceOptionNode: dom.selectNodes(".//whitespaceOption")) {
+				for (var whitespaceOptionNode : dom.selectNodes(".//whitespaceOption")) {
 					Element whitespaceOptionElement = (Element) whitespaceOptionNode;
 					if (whitespaceOptionElement.getText().equals("DEFAULT"))
 						whitespaceOptionElement.setText("IGNORE_TRAILING");
@@ -6371,7 +6383,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Dashboards.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (var showJobNode: dom.selectNodes(".//showJob")) 
+				for (var showJobNode : dom.selectNodes(".//showJob"))
 					showJobNode.detach();
 				dom.writeToFile(file, false);
 			}
@@ -6391,7 +6403,7 @@ public class DataMigrator {
 					var ownerId = element.elementTextTrim("id");
 					var nameIndex = 1;
 					var accessTokensElement = element.element("accessTokens");
-					for (var accessTokenElement: accessTokensElement.elements()) {
+					for (var accessTokenElement : accessTokensElement.elements()) {
 						var newAccessTokenElement = listElement.addElement("io.onedev.server.model.AccessToken");
 						newAccessTokenElement.addAttribute("revision", "0.0");
 						newAccessTokenElement.addElement("id").setText(String.valueOf(accessTokenId++));
@@ -6417,8 +6429,8 @@ public class DataMigrator {
 			if (file.getName().startsWith("Agents.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					var cpusElement = element.element("cpus");			
-					if (cpusElement != null) 
+					var cpusElement = element.element("cpus");
+					if (cpusElement != null)
 						cpusElement.setName("cpuCount");
 				}
 				dom.writeToFile(file, false);
@@ -6432,12 +6444,12 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					var number = Long.parseLong(element.elementText("number"));
-					element.addElement("boardPosition").setText(String.valueOf(number*-1));
+					element.addElement("boardPosition").setText(String.valueOf(number * -1));
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("LinkSpecs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.addElement("showAlways").setText("false");
 				dom.writeToFile(file, false);
 			}
@@ -6476,7 +6488,7 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("ISSUE")) {
-						for (var fieldSpecElement: element.element("value").element("fieldSpecs").elements()) {
+						for (var fieldSpecElement : element.element("value").element("fieldSpecs").elements()) {
 							if (fieldSpecElement.getName().contains("MilestoneChoiceField"))
 								fieldSpecElement.setName("io.onedev.server.model.support.issue.field.spec.IterationChoiceField");
 						}
@@ -6485,7 +6497,7 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueSchedules.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) 
+				for (Element element : dom.getRootElement().elements())
 					element.element("milestone").setName("iteration");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Dashboards.xml")) {
@@ -6505,7 +6517,7 @@ public class DataMigrator {
 					}
 				}
 				for (Node node : dom.selectNodes("//io.onedev.server.ee.dashboard.widgets.BuildListWidget")) {
-					if (node instanceof Element) 
+					if (node instanceof Element)
 						((Element) node).addElement("showDuration").setText("false");
 				}
 				dom.writeToFile(file, false);
@@ -6544,7 +6556,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content, 
+				content = StringUtils.replace(content,
 						"\"Milestone\" is", "\"Iteration\" is");
 				content = StringUtils.replace(content,
 						"\"Milestone\"  is", "\"Iteration\" is");
@@ -6565,8 +6577,8 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				var content = StringUtils.replace(
-						FileUtils.readFileToString(file, UTF_8), 
-						"on branch(\"**\")", 
+						FileUtils.readFileToString(file, UTF_8),
+						"on branch(\"**\")",
 						"on branch \"**\"");
 				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
@@ -6616,7 +6628,7 @@ public class DataMigrator {
 					}
 					var listFieldsElement = issueSettingElement.element("listFields");
 					if (listFieldsElement != null) {
-						for (var listFieldElement : listFieldsElement.elements()){
+						for (var listFieldElement : listFieldsElement.elements()) {
 							if (listFieldElement.getTextTrim().equals("Milestone"))
 								listFieldElement.setText("Iteration");
 						}
@@ -6628,13 +6640,13 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
 					if (key.equals("ISSUE")) {
-						for (var boardSpecElement: element.element("value").element("boardSpecs").elements()) {
-							for (var displayFieldElement: boardSpecElement.element("displayFields").elements()) {
+						for (var boardSpecElement : element.element("value").element("boardSpecs").elements()) {
+							for (var displayFieldElement : boardSpecElement.element("displayFields").elements()) {
 								if (displayFieldElement.getTextTrim().equals("Milestone"))
 									displayFieldElement.setText("Iteration");
 							}
 						}
-						for (var listFieldElement: element.element("value").element("listFields").elements()) {
+						for (var listFieldElement : element.element("value").element("listFields").elements()) {
 							if (listFieldElement.getTextTrim().equals("Milestone"))
 								listFieldElement.setText("Iteration");
 						}
@@ -6644,6 +6656,166 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate171(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			try {
+				var content = StringUtils.replace(
+						FileUtils.readFileToString(file, UTF_8),
+						"io.onedev.server.ee.dashboard.widgets.BuildListWidget",
+						"io.onedev.server.ee.dashboard.widgets.build.BuildListWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.BurnDownChartWidget",
+						"io.onedev.server.ee.dashboard.widgets.iteration.BurnDownChartWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.IssueListWidget",
+						"io.onedev.server.ee.dashboard.widgets.issue.IssueListWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.IterationListWidget",
+						"io.onedev.server.ee.dashboard.widgets.iteration.IterationListWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.MarkdownBlobWidget",
+						"io.onedev.server.ee.dashboard.widgets.markdown.MarkdownBlobWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.MarkdownWidget",
+						"io.onedev.server.ee.dashboard.widgets.markdown.MarkdownWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.ProjectListWidget",
+						"io.onedev.server.ee.dashboard.widgets.project.ProjectListWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.PullRequestListWidget",
+						"io.onedev.server.ee.dashboard.widgets.pullrequest.PullRequestListWidget");
+				content = StringUtils.replace(
+						content,
+						"io.onedev.server.ee.dashboard.widgets.projectoverview.ProjectOverviewWidget",
+						"io.onedev.server.ee.dashboard.widgets.project.ProjectOverviewWidget");
+				FileUtils.writeStringToFile(file, content, UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		Map<Long, List<IssueStateHistory>> histories = new HashMap<>();
+		var id = 1L;
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					var className = dataElement.attributeValue("class");
+					if (className.contains("IssueStateChangeData") 
+							|| className.contains("IssueBatchUpdateData")) {
+						var oldState = dataElement.elementText("oldState").trim();
+						var newState = dataElement.elementText("newState").trim();
+						if (!oldState.equals(newState)) {
+							var history = new IssueStateHistory();
+							history.setId(Long.parseLong(element.elementText("id")));
+							history.setState(newState);
+							history.setDate(parseDate(element.elementText("date")));
+							history.setTimeGroups(TimeGroups.of(history.getDate()));
+							history.setIssue(new Issue());
+							history.getIssue().setId(Long.parseLong(element.elementText("issue").trim()));
+							histories.computeIfAbsent(history.getIssue().getId(), it->new ArrayList<>()).add(history);
+						}
+					}
+				}
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var pendingDateElement = element.element("pendingDate");
+					var runningDateElement = element.element("runningDate");
+					var finishDateElement = element.element("finishDate");
+					if (finishDateElement != null) {
+						var finishDate = parseDate(finishDateElement.getText().trim());
+						var finishTimeGroupsElement = element.addElement("finishTimeGroups");
+						finishTimeGroupsElement.addElement("day").setText(String.valueOf(new Day(finishDate).getValue()));
+						finishTimeGroupsElement.addElement("week").setText(String.valueOf(new Week(finishDate).getValue()));
+						finishTimeGroupsElement.addElement("month").setText(String.valueOf(new Month(finishDate).getValue()));
+						if (runningDateElement != null)
+							element.addElement("runningDuration").setText(String.valueOf(finishDate.getTime() - parseDate(runningDateElement.getText().trim()).getTime()));
+					}
+					if (pendingDateElement != null && runningDateElement != null)
+						element.addElement("pendingDuration").setText(String.valueOf(parseDate(runningDateElement.getText().trim()).getTime() - parseDate(pendingDateElement.getText().trim()).getTime()));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var submitDate = parseDate(element.elementText("submitDate").trim());
+					var submitTimeGroupsElement = element.addElement("submitTimeGroups");
+					submitTimeGroupsElement.addElement("day").setText(String.valueOf(new Day(submitDate).getValue()));
+					submitTimeGroupsElement.addElement("week").setText(String.valueOf(new Week(submitDate).getValue()));
+					submitTimeGroupsElement.addElement("month").setText(String.valueOf(new Month(submitDate).getValue()));
+					
+					if (!element.element("status").equals("OPEN")) {
+						var closeDate = parseDate(element.element("lastActivity").elementText("date").trim());
+						element.addElement("closeDate").addAttribute("class", "sql-timestamp").setText(formatDate(closeDate));
+						element.addElement("duration").setText(String.valueOf(closeDate.getTime() - submitDate.getTime()));
+						var closeTimeGroupsElement = element.addElement("closeTimeGroups");
+						closeTimeGroupsElement.addElement("day").setText(String.valueOf(new Day(closeDate).getValue()));
+						closeTimeGroupsElement.addElement("week").setText(String.valueOf(new Week(closeDate).getValue()));
+						closeTimeGroupsElement.addElement("month").setText(String.valueOf(new Month(closeDate).getValue()));
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		
+		VersionedXmlDoc historiesDom;
+		File historiesDomFile = new File(dataDir, "IssueStateHistorys.xml");
+		historiesDom = new VersionedXmlDoc();
+		Element listElement = historiesDom.addElement("list");
+		
+		for (var value: histories.values()) {
+			value.sort(comparing(IssueStateHistory::getDate));
+			for(int i=0; i<value.size()-1; i++) {
+				var history = value.get(i);
+				var nextHistory = value.get(i+1);
+				history.setDuration(nextHistory.getDate().getTime() - history.getDate().getTime());
+				migrate171_createHistoryElement(listElement, history);
+			}
+			if (!value.isEmpty())
+				migrate171_createHistoryElement(listElement, value.get(value.size()-1));
+		}
+		historiesDom.writeToFile(historiesDomFile, true);
+	}
 	
-}
+	private static Date parseDate(String dateString) {
+		if (dateString.endsWith("Z")) {
+			Instant instant = Instant.parse(dateString);
+			return Date.from(instant);
+		} else {
+			OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateString);
+			return Date.from(offsetDateTime.toInstant());
+		}
+	}
 	
+	private static String formatDate(Date date) {
+		ZonedDateTime zdt = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
+		return zdt.format(dateTimeFormatter);
+	}
+	
+	private Element migrate171_createHistoryElement(Element parentElement, IssueStateHistory history) {
+		var historyElement = parentElement.addElement("io.onedev.server.model.IssueStateHistory");
+		historyElement.addAttribute("revision", "0.0");
+		historyElement.addElement("id").setText(history.getId().toString());
+		historyElement.addElement("issue").setText(history.getIssue().getId().toString());
+		historyElement.addElement("state").setText(history.getState());
+		historyElement.addElement("date").addAttribute("class", "sql-timestamp").setText(formatDate(history.getDate()));
+		var timeGroupsElement = historyElement.addElement("timeGroups");
+		timeGroupsElement.addElement("day").setText(String.valueOf(new Day(history.getDate()).getValue()));
+		timeGroupsElement.addElement("week").setText(String.valueOf(new Week(history.getDate()).getValue()));
+		timeGroupsElement.addElement("month").setText(String.valueOf(new Month(history.getDate()).getValue()));
+		if (history.getDuration() != null)
+			historyElement.addElement("duration").setText(history.getDuration().toString());
+		return historyElement;		
+	}
+	
+}	

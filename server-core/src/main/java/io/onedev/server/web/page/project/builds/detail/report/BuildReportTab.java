@@ -1,16 +1,17 @@
 package io.onedev.server.web.page.project.builds.detail.report;
 
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
-import org.apache.wicket.markup.html.link.Link;
-
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.stats.buildmetric.BuildMetricStatsPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
 
 public class BuildReportTab extends BuildTab {
 
@@ -20,14 +21,14 @@ public class BuildReportTab extends BuildTab {
 	
 	public BuildReportTab(String title, Class<? extends BuildReportPage> mainPageClass, 
 			@Nullable Class<? extends BuildMetricStatsPage<?>> statsPageClass) {
-		super(title, mainPageClass);
+		super(Model.of(title), mainPageClass, new PageParameters());
 		this.statsPageClass = statsPageClass;
 	}
 	
 	public BuildReportTab(String title, Class<? extends BuildReportPage> mainPageClass, 
 			Class<? extends BuildReportPage> additionalPageClass1, 
 			@Nullable Class<? extends BuildMetricStatsPage<?>> statsPageClass) {
-		super(title, mainPageClass, additionalPageClass1);
+		super(Model.of(title), mainPageClass, new PageParameters(), additionalPageClass1);
 		this.statsPageClass = statsPageClass;
 	}
 	
@@ -35,7 +36,7 @@ public class BuildReportTab extends BuildTab {
 			Class<? extends BuildReportPage> additionalPageClass1, 
 			Class<? extends BuildReportPage> additionalPageClass2, 
 			@Nullable Class<? extends BuildMetricStatsPage<?>> statsPageClass) {
-		super(title, mainPageClass, additionalPageClass1, additionalPageClass2);
+		super(Model.of(title), mainPageClass, new PageParameters(), additionalPageClass1, additionalPageClass2);
 		this.statsPageClass = statsPageClass;
 	}
 	
@@ -44,7 +45,7 @@ public class BuildReportTab extends BuildTab {
 			Class<? extends BuildReportPage> additionalPageClass2, 
 			Class<? extends BuildReportPage> additionalPageClass3, 
 			@Nullable Class<? extends BuildMetricStatsPage<?>> statsPageClass) {
-		super(title, mainPageClass, additionalPageClass1, additionalPageClass2, additionalPageClass3);
+		super(Model.of(title), mainPageClass, new PageParameters(), additionalPageClass1, additionalPageClass2, additionalPageClass3);
 		this.statsPageClass = statsPageClass;
 	}
 
@@ -55,7 +56,7 @@ public class BuildReportTab extends BuildTab {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass, PageParameters pageParams) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
 				return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
 						BuildReportPage.paramsOf(page.getBuild(), getTitle()));
