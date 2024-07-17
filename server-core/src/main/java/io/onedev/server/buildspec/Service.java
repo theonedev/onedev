@@ -115,7 +115,7 @@ public class Service implements NamedElement, Serializable {
 		this.runAs = runAs;
 	}
 
-	@Editable(order=500, name="Built-in Registry Access Token", group="More Settings", description = "Specify access token for built-in docker registry if necessary")
+	@Editable(order=500, name="Built-in Registry Access Token", group="More Settings", description = "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in docker registry")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getBuiltInRegistryAccessTokenSecret() {
 		return builtInRegistryAccessTokenSecret;

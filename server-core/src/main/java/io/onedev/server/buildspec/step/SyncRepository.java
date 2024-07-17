@@ -63,7 +63,7 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 
 	@Editable(order=400, name="Password or Access Token for Remote Repository", 
-			description="Specify a secret to be used as password or access token to access remote repository")
+			description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token to access remote repository")
 	@ChoiceProvider("getSecretChoices")
 	public String getPasswordSecret() {
 		return passwordSecret;

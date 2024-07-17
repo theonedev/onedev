@@ -115,7 +115,7 @@ public class RunContainerStep extends Step {
 	}
 
 	@Editable(order=600, name="Built-in Registry Access Token Secret", group = "More Settings", description="Optionally specify a " +
-			"access token secret to access built-in container registry if necessary. If this step needs to " +
+			"<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in container registry. If this step needs to " +
 			"access external container registry, login information should be configured in corresponding " +
 			"executor then")
 	@ChoiceProvider("getAccessTokenSecretChoices")

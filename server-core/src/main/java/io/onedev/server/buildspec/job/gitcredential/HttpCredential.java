@@ -26,7 +26,7 @@ public class HttpCredential implements GitCredential, Validatable {
 
 	private String accessTokenSecret;
 
-	@Editable(order=200, description="Specify a secret to be used as access token")
+	@Editable(order=200, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@NotEmpty
 	public String getAccessTokenSecret() {

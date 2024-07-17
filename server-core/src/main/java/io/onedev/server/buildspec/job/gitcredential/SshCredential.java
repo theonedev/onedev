@@ -33,7 +33,7 @@ public class SshCredential implements GitCredential, Validatable {
 
 	private String keySecret;
 
-	@Editable(order=100, description="Specify a secret to be used as SSH private key")
+	@Editable(order=100, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as SSH private key")
 	@ChoiceProvider("getKeySecretChoices")
 	@NotEmpty
 	public String getKeySecret() {
