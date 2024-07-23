@@ -79,15 +79,19 @@ public class IssueResource {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
-		
+
+		var issueSetting = settingManager.getIssueSetting();
 		Map<String, Serializable> fields = new HashMap<>();
 		for (var field: issue.getFieldInputs().values()) {
-			if (field.getValues().isEmpty())
-				fields.put(field.getName(), null);
-			else if (field.getValues().size() == 1)
-				fields.put(field.getName(), field.getValues().iterator().next());
-			else
-				fields.put(field.getName(), (Serializable) field.getValues());
+			var fieldSpec = issueSetting.getFieldSpec(field.getName());
+			if (fieldSpec != null) {
+				if (field.getValues().isEmpty())
+					fields.put(field.getName(), null);
+				else if (fieldSpec.isAllowMultiple())
+					fields.put(field.getName(), (Serializable) field.getValues());
+				else
+					fields.put(field.getName(), field.getValues().iterator().next());
+			}
 		}
 		return fields;
     }
