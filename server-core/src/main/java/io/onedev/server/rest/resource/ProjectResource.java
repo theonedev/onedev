@@ -1,5 +1,7 @@
 package io.onedev.server.rest.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.IterationManager;
@@ -59,13 +61,16 @@ public class ProjectResource {
 	
 	private final UrlManager urlManager;
 	
+	private final ObjectMapper objectMapper;
+	
 	@Inject
 	public ProjectResource(ProjectManager projectManager, IterationManager iterationManager, 
-			CommitInfoManager commitInfoManager, UrlManager urlManager) {
+			CommitInfoManager commitInfoManager, UrlManager urlManager, ObjectMapper objectMapper) {
 		this.projectManager = projectManager;
 		this.iterationManager = iterationManager;
 		this.commitInfoManager = commitInfoManager;
 		this.urlManager = urlManager;
+		this.objectMapper = objectMapper;
 	}
 	
 	@Api(order=100)
@@ -100,9 +105,12 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
-
-    	return project.getPath();
-    }
+		try {
+			return objectMapper.writeValueAsString(project.getPath());
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	@Api(order=200)
 	@Path("/{projectId}/setting")
