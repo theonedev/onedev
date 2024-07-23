@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.LabelSupport;
@@ -80,6 +81,7 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 	
 	private boolean prerelease;
 
+	@JsonIgnore
 	@Lob
 	@Column(length=65535)
 	private Serializable data;
