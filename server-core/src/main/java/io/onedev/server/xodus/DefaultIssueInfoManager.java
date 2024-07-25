@@ -46,7 +46,7 @@ import static java.lang.Long.valueOf;
 public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
 		implements IssueInfoManager, Serializable {
 
-	private static final int INFO_VERSION = 3;
+	private static final int INFO_VERSION = 4;
 	
 	private static final int BATCH_SIZE = 5000;
 	
