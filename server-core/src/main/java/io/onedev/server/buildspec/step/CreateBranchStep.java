@@ -74,7 +74,7 @@ public class CreateBranchStep extends ServerSideStep {
 	}
 
 	@Editable(order=1060, description="For build commit not reachable from default branch, " +
-			"an access token with create branch permission is required")
+			"a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with create branch permission")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;

@@ -130,7 +130,7 @@ public class SetupCacheStep extends Step {
 		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 	
-	@Editable(order=500, description = "Specify a secret whose value is an access token with upload cache permission " +
+	@Editable(order=500, description = "Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with upload cache permission " +
 			"for above project. Note that this property is not required if upload cache to current or child project " +
 			"and build commit is reachable from default branch")
 	@ChoiceProvider("getAccessTokenSecretChoices")
