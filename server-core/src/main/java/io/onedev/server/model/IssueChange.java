@@ -24,7 +24,7 @@ public class IssueChange extends AbstractEntity {
 	private Date date = new Date();
 	
 	@Lob
-	@Column(length=65535, nullable=false)
+	@Column(length=1048576, nullable=false)
 	private IssueChangeData data;
 
 	public Issue getIssue() {

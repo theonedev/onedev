@@ -6729,6 +6729,9 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
+					var finishDayElement = element.element("finishDay");
+					if (finishDayElement != null)
+						finishDayElement.detach();
 					var pendingDateElement = element.element("pendingDate");
 					var runningDateElement = element.element("runningDate");
 					var finishDateElement = element.element("finishDate");
