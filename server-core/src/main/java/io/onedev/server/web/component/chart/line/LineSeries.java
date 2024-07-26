@@ -64,5 +64,5 @@ public class LineSeries implements Serializable {
 	public Integer getMaxYAxisValue() {
 		return maxYAxisValue;
 	}
-	
+
 }

@@ -18,12 +18,21 @@ public class Line implements Serializable {
 	
 	private final String style;
 	
-	public Line(String name, List<Integer> yAxisValues, String color, @Nullable String stack, @Nullable String style) {
+	private final boolean selected;
+
+	public Line(String name, List<Integer> yAxisValues, String color, @Nullable String stack,
+				@Nullable String style) {
+		this(name, yAxisValues, color, stack, style, true);
+	}
+	
+	public Line(String name, List<Integer> yAxisValues, String color, @Nullable String stack, 
+				@Nullable String style, boolean selected) {
 		this.name = name;
 		this.yAxisValues = yAxisValues;
 		this.color = color;
 		this.stack = stack;
 		this.style = style;
+		this.selected = selected;
 	}
 	
 	public String getName() {
@@ -46,6 +55,10 @@ public class Line implements Serializable {
 	@Nullable
 	public String getStyle() {
 		return style;
+	}
+
+	public boolean isSelected() {
+		return selected;
 	}
 	
 }

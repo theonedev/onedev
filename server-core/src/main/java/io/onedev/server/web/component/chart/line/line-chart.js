@@ -38,8 +38,14 @@ onedev.server.lineChart = {
 				series: []
 			};
 			if (lineSeries.lines.length > 1) {
+				var lineSelections = {};
+
+				for (var i in lineSeries.lines) 
+					lineSelections[lineSeries.lines[i].name] = lineSeries.lines[i].selected;
+
 				option.legend = {
 					show: true, 
+					selected: lineSelections,
 					x: "center",
 					data: [],
 					textStyle: {
