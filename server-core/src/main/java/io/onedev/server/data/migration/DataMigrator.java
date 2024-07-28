@@ -6781,8 +6781,6 @@ public class DataMigrator {
 			for(int i=0; i<value.size()-1; i++) {
 				var history = value.get(i);
 				var nextHistory = value.get(i+1);
-				if (history.getState().equals("Released"))
-					System.out.println(history.getIssue().getId());
 				history.setDuration(nextHistory.getDate().getTime() - history.getDate().getTime());
 				migrate171_createHistoryElement(listElement, history);
 			}
