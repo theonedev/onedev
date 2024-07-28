@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.comment;
 
-import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -28,21 +27,33 @@ public abstract class CommentInput extends MarkdownEditor {
 	@Override
 	protected final UserMentionSupport getUserMentionSupport() {
 		return (query, count) -> {
-			List<User> mentionables = getMentionables();
-			UserCache cache = getUserManager().cloneCache();
+			var cache = getUserManager().cloneCache();
+			var participants = getParticipants();
+			var otherUsers = new ArrayList<>(cache.getUsers());
+			otherUsers.removeAll(participants);
 			
-			List<User> similarities = new Similarities<User>(mentionables) {
+			var similarities = new Similarities<>(participants) {
 
 				@Override
 				public double getSimilarScore(User object) {
 					return cache.getSimilarScore(object, query);
 				}
-				
+
 			};
+			if (similarities.size() < count) {
+				similarities.addAll(new Similarities<>(otherUsers) {
+
+					@Override
+					public double getSimilarScore(User object) {
+						return cache.getSimilarScore(object, query);
+					}
+
+				});
+			}
 			
 			if (similarities.size() > count)
 				return similarities.subList(0, count);
-			else
+			else 
 				return similarities;
 		};
 	}
@@ -51,13 +62,10 @@ public abstract class CommentInput extends MarkdownEditor {
 		return OneDev.getInstance(UserManager.class);
 	}
 	
-	protected List<User> getMentionables() {
-		UserCache cache = getUserManager().cloneCache();
-		List<User> users = new ArrayList<>(cache.getUsers());
-		users.sort(cache.comparingDisplayName(Sets.newHashSet()));
-		return users;
+	protected List<User> getParticipants() {
+		return new ArrayList<>();
 	}
-
+	
 	@Override
 	protected final AtWhoReferenceSupport getReferenceSupport() {
 		return new AtWhoReferenceSupport() {

@@ -38,10 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.PullRequest.*;
-import static io.onedev.server.model.PullRequest.PROP_STATUS;
-import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.support.TimeGroups.*;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static java.lang.ThreadLocal.withInitial;
@@ -851,7 +848,7 @@ public class PullRequest extends ProjectBelonging
 		return pendingCommits;
 	}
 
-	public Collection<User> getParticipants() {
+	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
 			if (getSubmitter() != null)
@@ -866,7 +863,7 @@ public class PullRequest extends ProjectBelonging
 			}
 			participants.remove(OneDev.getInstance(UserManager.class).getSystem());
 		}
-		return participants;
+		return new ArrayList<>(participants);
 	}
 	
 	public boolean isValid() {

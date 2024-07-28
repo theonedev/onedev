@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.comment;
 
-import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -127,8 +126,8 @@ public abstract class CommentPanel extends Panel {
 					}
 
 					@Override
-					protected List<User> getMentionables() {
-						return CommentPanel.this.getMentionables();
+					protected List<User> getParticipants() {
+						return CommentPanel.this.getParticipants();
 					}
 					
 				};
@@ -262,10 +261,14 @@ public abstract class CommentPanel extends Panel {
 	@Nullable
 	protected abstract DeleteCallback getDeleteCallback();
 	
+	protected List<User> getParticipants() {
+		return new ArrayList<>();
+	}
+	
 	protected List<User> getMentionables() {
 		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
 		List<User> users = new ArrayList<>(cache.getUsers());
-		users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+		users.sort(cache.comparingDisplayName(getParticipants()));
 		return users;
 	}	
 	

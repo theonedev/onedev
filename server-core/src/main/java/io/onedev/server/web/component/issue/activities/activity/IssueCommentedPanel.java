@@ -78,11 +78,8 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			}
 
 			@Override
-			protected List<User> getMentionables() {
-				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
-				List<User> users = new ArrayList<>(cache.getUsers());
-				users.sort(cache.comparingDisplayName(IssueCommentedPanel.this.getComment().getIssue().getParticipants()));
-				return users;
+			protected List<User> getParticipants() {
+				return IssueCommentedPanel.this.getComment().getIssue().getParticipants();
 			}
 			
 			@Override

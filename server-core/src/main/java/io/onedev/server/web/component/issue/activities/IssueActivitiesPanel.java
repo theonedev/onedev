@@ -5,13 +5,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.changedata.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -239,11 +237,8 @@ public abstract class IssueActivitiesPanel extends Panel {
 				}
 				
 				@Override
-				protected List<User> getMentionables() {
-					UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
-					List<User> users = new ArrayList<>(cache.getUsers());
-					users.sort(cache.comparingDisplayName(getIssue().getParticipants()));
-					return users;
+				protected List<User> getParticipants() {
+					return getIssue().getParticipants();
 				}
 				
 				@Override

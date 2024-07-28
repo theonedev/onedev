@@ -7,14 +7,12 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -285,11 +283,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 				
 				@Override
-				protected List<User> getMentionables() {
-					UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
-					List<User> users = new ArrayList<>(cache.getUsers());
-					users.sort(cache.comparingDisplayName(getPullRequest().getParticipants()));
-					return users;
+				protected List<User> getParticipants() {
+					return getPullRequest().getParticipants();
 				}
 				
 				@Override

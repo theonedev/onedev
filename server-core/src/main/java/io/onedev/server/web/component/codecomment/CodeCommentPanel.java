@@ -1,16 +1,31 @@
 package io.onedev.server.web.component.codecomment;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.markdown.ContentQuoted;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -40,38 +55,15 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
-
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.xodus.VisitInfoManager;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
-import io.onedev.server.util.UrlUtils;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -197,8 +189,8 @@ public abstract class CodeCommentPanel extends Panel {
 					}
 
 					@Override
-					protected List<User> getMentionables() {
-						return CodeCommentPanel.this.getMentionables();
+					protected List<User> getParticipants() {
+						return getComment().getParticipants();
 					}
 					
 				};
@@ -579,8 +571,8 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 
 			@Override
-			protected List<User> getMentionables() {
-				return CodeCommentPanel.this.getMentionables();
+			protected List<User> getParticipants() {
+				return getComment().getParticipants();
 			}
 			
 		};
@@ -763,13 +755,6 @@ public abstract class CodeCommentPanel extends Panel {
 
 	}
 	
-	private List<User> getMentionables() {
-		UserCache cache = getUserManager().cloneCache();		
-		List<User> users = new ArrayList<>(cache.getUsers());
-		users.sort(cache.comparingDisplayName(getComment().getParticipants()));
-		return users;
-	}
-	
 	public class CodeCommentReplyActivity implements CodeCommentActivity {
 
 		private final Long replyId;
@@ -871,8 +856,8 @@ public abstract class CodeCommentPanel extends Panel {
 						}
 
 						@Override
-						protected List<User> getMentionables() {
-							return CodeCommentPanel.this.getMentionables();
+						protected List<User> getParticipants() {
+							return getComment().getParticipants();
 						}
 
 					};

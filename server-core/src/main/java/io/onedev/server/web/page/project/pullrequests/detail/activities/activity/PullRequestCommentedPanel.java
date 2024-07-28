@@ -5,14 +5,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.date.DateUtils;
-import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.page.base.BasePage;
@@ -27,7 +25,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -97,11 +94,8 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 			}
 
 			@Override
-			protected List<User> getMentionables() {
-				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
-				List<User> users = new ArrayList<>(cache.getUsers());
-				users.sort(cache.comparingDisplayName(PullRequestCommentedPanel.this.getComment().getRequest().getParticipants()));
-				return users;
+			protected List<User> getParticipants() {
+				return PullRequestCommentedPanel.this.getComment().getRequest().getParticipants();
 			}
 			
 			@Override

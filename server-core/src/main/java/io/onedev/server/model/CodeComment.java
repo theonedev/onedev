@@ -276,7 +276,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 		return uuid;
 	}
 
-	public Collection<User> getParticipants() {
+	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
 			if (getUser() != null)
@@ -286,7 +286,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 					participants.add(reply.getUser());
 			}
 		}
-		return participants;
+		return new ArrayList<>(participants);
 	}
 	
 }

@@ -1,26 +1,19 @@
 package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.modal.ModalPanel;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.model.PropertyModel;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.comment.CommentInput;
+import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class CommentableOperationConfirmPanel extends OperationConfirmPanel {
@@ -49,11 +42,8 @@ public abstract class CommentableOperationConfirmPanel extends OperationConfirmP
 			}
 
 			@Override
-			protected List<User> getMentionables() {
-				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
-				List<User> users = new ArrayList<>(cache.getUsers());
-				users.sort(cache.comparingDisplayName(getLatestUpdate().getRequest().getParticipants()));
-				return users;
+			protected List<User> getParticipants() {
+				return getLatestUpdate().getRequest().getParticipants();
 			}
 			
 			@Override

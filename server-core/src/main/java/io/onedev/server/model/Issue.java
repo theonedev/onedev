@@ -812,7 +812,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return isFieldVisible(fieldName, Sets.newHashSet());
 	}
 	
-	public Collection<User> getParticipants() {
+	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
 			if (getSubmitter() != null)
@@ -843,7 +843,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			}
 			participants.remove(userManager.getSystem());
 		}
-		return participants;
+		return new ArrayList<>(participants);
 	}
 	
 	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {
