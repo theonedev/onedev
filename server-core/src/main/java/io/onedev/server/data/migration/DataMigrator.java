@@ -6823,7 +6823,14 @@ public class DataMigrator {
 
 	private void migrate172(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("Users.xml")) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var path = element.elementText("path").trim();
+					element.addElement("pathLen").setText(String.valueOf(path.length()));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
 					element.addElement("notifyOwnEvents").setText("false");

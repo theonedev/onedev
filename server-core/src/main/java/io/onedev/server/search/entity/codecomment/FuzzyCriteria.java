@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.codecomment;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
@@ -9,8 +10,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 
-import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.Is;
 
 public class FuzzyCriteria extends Criteria<CodeComment> {
 
@@ -33,11 +35,16 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 	}
 	
 	private Criteria<CodeComment> parse(String value) {
-		var normalizedValue = normalizeFuzzyQuery(value);		
-		return new OrCriteria<>(
-				new ContentCriteria(normalizedValue), 
-				new ReplyCriteria(normalizedValue), 
-				new PathCriteria("*" + value + "*", Is));
+		var terms = normalizeFuzzyQuery(value);
+		var contentCriteria = new ArrayList<Criteria<CodeComment>>();
+		var replyCriteria = new ArrayList<Criteria<CodeComment>>();
+		var pathCriterias = new ArrayList<Criteria<CodeComment>>();
+		for (var term: terms) {
+			contentCriteria.add(new ContentCriteria(term));
+			replyCriteria.add(new ReplyCriteria(term));
+			pathCriterias.add(new PathCriteria("*" + term + "*", Is));
+		}
+		return new OrCriteria<>(new AndCriteria<>(contentCriteria), new AndCriteria<>(replyCriteria), new AndCriteria<>(pathCriterias));
 	}
 
 	@Override

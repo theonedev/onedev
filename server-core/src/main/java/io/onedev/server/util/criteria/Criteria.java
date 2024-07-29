@@ -222,13 +222,13 @@ public abstract class Criteria<T> implements Serializable {
 			return null;
 	}
 	
-	protected String normalizeFuzzyQuery(String query) {
-		return Joiner.on("*").join(Splitter.on(new CharMatcher() {
+	public static List<String> normalizeFuzzyQuery(String query) {
+		return Splitter.on(new CharMatcher() {
 			@Override
 			public boolean matches(char c) {
 				return !Character.isLetterOrDigit(c);
 			}
-		}).omitEmptyStrings().trimResults().splitToList(query));		
+		}).omitEmptyStrings().trimResults().splitToList(query);		
 	}
 	
 }

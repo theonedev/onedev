@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.pullrequest;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
@@ -9,6 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 
 public class FuzzyCriteria extends Criteria<PullRequest> {
 
@@ -31,11 +33,16 @@ public class FuzzyCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> parse(String value) {
-		var normalizedValue = normalizeFuzzyQuery(value);
-		return new OrCriteria<>(
-				new TitleCriteria(normalizedValue),
-				new DescriptionCriteria(normalizedValue),
-				new CommentCriteria(normalizedValue));
+		var terms = normalizeFuzzyQuery(value);
+		var titleCriterias = new ArrayList<Criteria<PullRequest>>();
+		var descriptionCriterias = new ArrayList<Criteria<PullRequest>>();
+		var commentCriterias = new ArrayList<Criteria<PullRequest>>();
+		for (var term: terms) {
+			titleCriterias.add(new TitleCriteria(term));
+			descriptionCriterias.add(new DescriptionCriteria(term));
+			commentCriterias.add(new CommentCriteria(term));
+		}
+		return new OrCriteria<>(new AndCriteria<>(titleCriterias), new AndCriteria<>(descriptionCriterias), new AndCriteria<>(commentCriterias));
 	}
 
 	@Override

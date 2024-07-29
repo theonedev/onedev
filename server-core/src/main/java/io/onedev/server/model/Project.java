@@ -137,6 +137,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NAME_LABEL = "Label";
 	
 	public static final String PROP_PARENT = "parent";
+
+	public static final String PROP_PATH_LEN = "pathLen";
 	
 	public static final String PROP_USER_AUTHORIZATIONS = "userAuthorizations";
 	
@@ -216,6 +218,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@JsonIgnore
 	@Column(nullable=false)
 	private String path;
+	
+	@JsonIgnore
+	private int pathLen;
 
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
@@ -456,6 +461,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setPath(String path) {
 		this.path = path;
+		pathLen = path.length();
+	}
+
+	public int getPathLen() {
+		return pathLen;
+	}
+
+	public void setPathLen(int pathLen) {
+		this.pathLen = pathLen;
 	}
 
 	@Editable(order=200)
