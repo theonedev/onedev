@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import com.google.common.collect.Sets;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -26,6 +27,8 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+
 @SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {
 
@@ -41,7 +44,7 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor editor = BeanContext.edit("editor", newUserBean);
+		var editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

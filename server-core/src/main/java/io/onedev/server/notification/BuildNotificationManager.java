@@ -131,6 +131,11 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 
 			Build build = event.getBuild();
 			Collection<String> notifyEmails = new HashSet<>();
+			if (event.getUser() != null && event.getUser().isNotifyOwnEvents() 
+					&& event.getUser().getPrimaryEmailAddress() != null 
+					&& event.getUser().getPrimaryEmailAddress().isVerified()) {
+				notifyEmails.add(event.getUser().getPrimaryEmailAddress().getValue());
+			}
 			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 				User user = entry.getKey();
 				Permission permission = new ProjectPermission(build.getProject(), 

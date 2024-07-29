@@ -17,8 +17,8 @@ public abstract class PackEvent extends ProjectEvent {
 	
 	private final Long packId;
 	
-	public PackEvent(User user, Date date, Pack pack) {
-		super(user, date, pack.getProject());
+	public PackEvent(Date date, Pack pack) {
+		super(null, date, pack.getProject());
 		packId = pack.getId();
 	}
 

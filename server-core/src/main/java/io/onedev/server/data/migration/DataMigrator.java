@@ -6820,5 +6820,16 @@ public class DataMigrator {
 			historyElement.addElement("duration").setText(history.getDuration().toString());
 		return historyElement;		
 	}
+
+	private void migrate172(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("notifyOwnEvents").setText("false");
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }	

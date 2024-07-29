@@ -77,6 +77,7 @@ import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
+import io.onedev.server.web.page.my.preferences.MyPreferencesPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
@@ -814,6 +815,10 @@ public abstract class LayoutPage extends BasePage {
 			}
 		});
 		if (getPage() instanceof MyTwoFactorAuthenticationPage)
+			item.add(AttributeAppender.append("class", "active"));
+
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myPreferences", MyPreferencesPage.class));
+		if (getPage() instanceof MyPreferencesPage)
 			item.add(AttributeAppender.append("class", "active"));
 
 		if (!SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())) {

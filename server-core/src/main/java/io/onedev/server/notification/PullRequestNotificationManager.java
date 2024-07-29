@@ -126,7 +126,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
-			notifiedUsers.add(user); // no need to notify the user generating the event
+			if (!user.isNotifyOwnEvents())
+				notifiedUsers.add(user); 
 			if (!user.isSystem())
 				watchManager.watch(request, user, true);
 		}
@@ -288,6 +289,11 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 
 		if (!event.isMinor()) {
 			Collection<String> bccEmailAddresses = new HashSet<>();
+			if (user != null && user.isNotifyOwnEvents() 
+					&& user.getPrimaryEmailAddress() != null 
+					&& user.getPrimaryEmailAddress().isVerified()) {
+				bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());
+			}
 
 			for (PullRequestWatch watch : request.getWatches()) {
 				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);

@@ -13,13 +13,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
+import javax.annotation.Nullable;
+
 public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 
 	private static final long serialVersionUID = 1L;
 	
 	private Long buildId;
 	
-	public BuildEvent(User user, Date date, Build build) {
+	public BuildEvent(@Nullable User user, Date date, Build build) {
 		super(user, date, build.getProject());
 		buildId = build.getId();
 	}

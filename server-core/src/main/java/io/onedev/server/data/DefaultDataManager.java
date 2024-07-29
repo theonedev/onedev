@@ -78,6 +78,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.onedev.server.model.User.PROP_GUEST;
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -643,7 +645,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(User.PROP_GUEST)) {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_GUEST, PROP_NOTIFY_OWN_EVENTS)) {
 	
 					@Override
 					public void complete() {

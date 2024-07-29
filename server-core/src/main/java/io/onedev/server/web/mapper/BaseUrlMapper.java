@@ -53,6 +53,7 @@ import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAd
 import io.onedev.server.web.page.admin.usermanagement.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.admin.usermanagement.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
+import io.onedev.server.web.page.admin.usermanagement.preferences.UserPreferencesPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
@@ -66,6 +67,7 @@ import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
+import io.onedev.server.web.page.my.preferences.MyPreferencesPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
@@ -96,8 +98,8 @@ import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.iteration.*;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -172,6 +174,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/gpg-keys", MyGpgKeysPage.class));
 		add(new BasePageMapper("~my/access-tokens", MyAccessTokensPage.class));
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
+		add(new BasePageMapper("~my/preferences", MyPreferencesPage.class));
 	}
 
 	private void addResources() {
@@ -230,6 +233,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/access-tokens", UserAccessTokensPage.class));
+		add(new BasePageMapper("~administration/users/${user}/preferences", UserPreferencesPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));
 		add(new BasePageMapper("~administration/invitations/new", NewInvitationPage.class));
 		

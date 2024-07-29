@@ -55,6 +55,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 
 			Collection<User> notifyUsers = new HashSet<>();
 
+			notifyUsers.add(event.getUser());
 			notifyUsers.add(comment.getUser());
 			notifyUsers.addAll(comment.getReplies().stream().map(EntityComment::getUser).collect(toSet()));
 			notifyUsers.addAll(comment.getChanges().stream().map(CodeCommentStatusChange::getUser).collect(toSet()));
@@ -71,7 +72,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 
 			Set<String> emailAddresses = notifyUsers.stream()
 					.filter(it -> it.isOrdinary()
-							&& !it.equals(event.getUser())
+							&& (!it.equals(event.getUser()) || it.isNotifyOwnEvents())
 							&& it.getPrimaryEmailAddress() != null
 							&& it.getPrimaryEmailAddress().isVerified())
 					.map(it -> it.getPrimaryEmailAddress().getValue())
