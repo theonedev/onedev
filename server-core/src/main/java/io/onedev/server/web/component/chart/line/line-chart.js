@@ -83,7 +83,7 @@ onedev.server.lineChart = {
 					name: lineSeries.lines[i].name,
 					data: [],
 					type: 'line',
-					smooth: false, 
+					smooth: true, 
 					animation: false,
 					connectNulls: true,
 					lineStyle: {
