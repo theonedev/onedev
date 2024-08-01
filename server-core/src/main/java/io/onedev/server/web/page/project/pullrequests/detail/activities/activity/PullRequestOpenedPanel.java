@@ -18,6 +18,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -49,6 +50,12 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
 				((BasePage)getPage()).notifyObservableChange(target,
 						PullRequest.getChangeObservable(getPullRequest().getId()));
+			}
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "pull-request:" + getPullRequest().getId() + ":description"; 
 			}
 
 			@Override

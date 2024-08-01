@@ -26,6 +26,9 @@
 	padding-bottom: 0.6rem;
 	display: none;
 }
+.markdown-editor>.head>.warning .close .icon {
+	vertical-align: middle;
+}
 .markdown-editor>.head>.warning, .markdown-editor>.head>.help, .markdown-editor>.head>.emojis {
 	margin: 0.3rem;
 }

@@ -18,6 +18,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 		
 		add(new CommentPanel("body") {
-
+			
 			@Override
 			protected String getComment() {
 				return getIssue().getDescription();
@@ -83,19 +84,18 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected ContentVersionSupport getContentVersionSupport() {
-				return new ContentVersionSupport() {
-
-					@Override
-					public long getVersion() {
-						return 0;
-					}
-					
-				};
+				return () -> 0;
 			}
 
 			@Override
 			protected DeleteCallback getDeleteCallback() {
 				return null;
+			}
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "issue:" + getIssue().getId() + ":description";
 			}
 			
 		});

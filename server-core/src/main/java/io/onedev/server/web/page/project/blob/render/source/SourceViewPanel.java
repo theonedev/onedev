@@ -499,7 +499,12 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					mark.setRange(range);
 					
 					form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {
-
+						
+						@Override
+						protected String getAutosaveKey() {
+								return "project:" + context.getProject().getId() + ":new-code-comment";
+						}
+						
 						@Override
 						protected ProjectAttachmentSupport getAttachmentSupport() {
 							return new ProjectAttachmentSupport(context.getProject(), uuid, 

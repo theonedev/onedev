@@ -742,6 +742,11 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			protected Project getProject() {
 				return target.getProject();
 			}
+
+			@Override
+			protected String getAutosaveKey() {
+				return "project:" + getProject().getId() + ":new-pull-request";
+			}
 			
 		};
 		descriptionInput.add(validatable -> {

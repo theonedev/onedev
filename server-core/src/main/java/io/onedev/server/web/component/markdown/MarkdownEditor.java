@@ -35,6 +35,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -73,6 +74,7 @@ import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import org.unbescape.javascript.JavaScriptEscape;
 
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
@@ -126,6 +128,10 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected void onModelChanged() {
 		super.onModelChanged();
 		input.setModelObject(getModelObject());
+		var target = RequestCycle.get().find(AjaxRequestTarget.class);
+		var form = findParent(Form.class);
+		if (target != null && form != null)
+			target.prependJavaScript(String.format("onedev.server.form.clearAutosavings($('#%s'));", form.getMarkupId()));
 	}
 	
 	public void clearMarkdown() {
@@ -606,8 +612,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4")).toString();
 		String attachmentUploadUrl = attachmentUploadBehavior.getCallbackUrl().toString();
+
+		String escapedAutosaveKey = getAutosaveKey();
+		if (escapedAutosaveKey != null)
+			escapedAutosaveKey = "'" + JavaScriptEscape.escapeJavaScript(escapedAutosaveKey) + "'";
+		else
+			escapedAutosaveKey = "undefined";
 		
-		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', '%s');", 
+		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', '%s', %s);", 
 				container.getMarkupId(), 
 				actionCallback, 
 				ATWHO_LIMIT, 
@@ -616,7 +628,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getUserMentionSupport() != null,
 				getReferenceSupport() != null, 
 				escapeJavaScript(ProjectPathValidator.PATTERN.pattern()),
-				escapeJavaScript(ProjectKeyValidator.PATTERN.pattern()));
+				escapeJavaScript(ProjectKeyValidator.PATTERN.pattern()), 
+				escapedAutosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("onedev.server.markdown.onLoad('%s');", container.getMarkupId());
@@ -642,6 +655,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		fileName = fileName.toLowerCase();
 		return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") 
 				|| fileName.endsWith(".gif") || fileName.endsWith(".png");
+	}
+	
+	@Nullable
+	protected String getAutosaveKey() {
+		return null;
 	}
 	
 	@Nullable

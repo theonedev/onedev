@@ -129,6 +129,11 @@ public abstract class CommentPanel extends Panel {
 					protected List<User> getParticipants() {
 						return CommentPanel.this.getParticipants();
 					}
+
+					@Override
+					protected String getAutosaveKey() {
+						return CommentPanel.this.getAutosaveKey();
+					}
 					
 				};
 				input.setRequired(getRequiredLabel() != null).setLabel(Model.of(getRequiredLabel()));
@@ -264,12 +269,10 @@ public abstract class CommentPanel extends Panel {
 	protected List<User> getParticipants() {
 		return new ArrayList<>();
 	}
-	
-	protected List<User> getMentionables() {
-		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
-		List<User> users = new ArrayList<>(cache.getUsers());
-		users.sort(cache.comparingDisplayName(getParticipants()));
-		return users;
-	}	
+
+	@Nullable
+	protected String getAutosaveKey() {
+		return null;
+	}
 	
 }

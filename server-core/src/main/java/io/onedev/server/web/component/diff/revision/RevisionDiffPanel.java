@@ -938,7 +938,12 @@ public abstract class RevisionDiffPanel extends Panel {
 								}
 								
 								form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {
-	
+
+									@Override
+									protected String getAutosaveKey() {
+										return "project:" + getProject().getId() + ":new-code-comment";
+									}
+									
 									@Override
 									protected ProjectAttachmentSupport getAttachmentSupport() {
 										return new ProjectAttachmentSupport(getProject(), uuid, 

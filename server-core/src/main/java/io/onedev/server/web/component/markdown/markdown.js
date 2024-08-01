@@ -64,7 +64,7 @@ onedev.server.markdown = {
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
-			projectPathPattern, projectKeyPattern) {
+			projectPathPattern, projectKeyPattern, autosaveKey) {
 		var $container = $("#" + containerId);
 		var useFixedWidthFontCookieName = "markdownEditor.useFixedWidthFont";
 		var useFixedWidthFont = Cookies.get(useFixedWidthFontCookieName);
@@ -72,6 +72,7 @@ onedev.server.markdown = {
 			$container.addClass("fixed-width");
 		
 		$container.data("callback", callback);
+		$container.data("autosaveKey", autosaveKey);
 		
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -164,6 +165,12 @@ onedev.server.markdown = {
 		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
 			function render() {
+				if (autosaveKey) {
+					var content = $input.val();
+					if (content.trim().length != 0)
+						localStorage.setItem(autosaveKey, content);
+				}
+				
 				/* 
 				 * in case an ajax call is ongoing we postpone the render 
 				 * as the ongoing call may alter the component layout
@@ -953,7 +960,18 @@ onedev.server.markdown = {
 				else
 					$preview.height(defaultHeight);
 			}
-		} 
+		}
+		var autosaveKey = $container.data("autosaveKey");
+		if (autosaveKey) {
+			onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
+			var autosaveValue = localStorage.getItem(autosaveKey);
+			if (autosaveValue && $input.val() != autosaveValue) {
+				$input.val(autosaveValue);
+				$warning.show();
+				onedev.server.markdown.fireInputEvent($input);
+			}
+		}
+		
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");

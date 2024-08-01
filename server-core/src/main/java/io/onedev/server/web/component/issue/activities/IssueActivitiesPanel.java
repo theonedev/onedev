@@ -245,7 +245,11 @@ public abstract class IssueActivitiesPanel extends Panel {
 				protected List<Behavior> getInputBehaviors() {
 					return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 				}
-				
+
+				@Override
+				protected String getAutosaveKey() {
+					return "issue:" + getIssue().getId() + ":new-comment";
+				}
 			};
 			input.setOutputMarkupId(true);
 			input.setRequired(true).setLabel(Model.of("Comment"));
@@ -272,7 +276,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 						((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 						
 						input.clearMarkdown();
-						
 						target.add(fragment);
 					}
 				}

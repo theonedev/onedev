@@ -305,24 +305,16 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			protected Project getProject() {
 				return NewIssueEditor.this.getProject();
 			}
-			
-		};
-		descriptionInput.add(new IValidator<String>() {
 
 			@Override
-			public void validate(IValidatable<String> validatable) {
-				if (validatable.getValue().length() > Issue.MAX_DESCRIPTION_LEN) {
-					validatable.error(new IValidationError() {
-						
-						@Override
-						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-							return "Description too long";
-						}
-						
-					});
-				}
+			protected String getAutosaveKey() {
+				return "project:" + getProject().getId() + ":new-issue";
 			}
-			
+		};
+		descriptionInput.add((IValidator<String>) validatable -> {
+			if (validatable.getValue().length() > Issue.MAX_DESCRIPTION_LEN) {
+				validatable.error((IValidationError) messageSource -> "Description too long");
+			}
 		});
 		descriptionInput.setOutputMarkupId(true);
 		return descriptionInput;

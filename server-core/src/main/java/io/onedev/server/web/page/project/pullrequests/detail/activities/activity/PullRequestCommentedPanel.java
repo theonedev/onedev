@@ -24,6 +24,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -84,6 +85,12 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 			@Override
 			protected Project getProject() {
 				return PullRequestCommentedPanel.this.getComment().getProject();
+			}
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "pull-request-comment:" + PullRequestCommentedPanel.this.getComment().getId();
 			}
 
 			@Override

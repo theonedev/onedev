@@ -23,6 +23,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +58,12 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 				return manager.process(manager.render(markdown), context.getProject(), context, null, false);
 			}
 
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "project:" + getBlobRenderContext().getProject().getId() + ":markdown-file"; 
+			}
+			
 			@Override
 			protected boolean shouldTrimInput() {
 				return false;

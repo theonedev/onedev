@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +112,12 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 					deleteCallback.onDelete(target);
 				};
 			}
-			
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "issue-comment:" + IssueCommentedPanel.this.getComment().getId();
+			}
 		});
 
 		setOutputMarkupId(true);

@@ -7,7 +7,6 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
@@ -91,10 +90,6 @@ public abstract class CodeCommentPanel extends Panel {
 		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
-	}
-
 	private WebMarkupContainer newCommentOrReplyContainer() {
 		WebMarkupContainer viewFragment = new Fragment("comment", "commentOrReplyViewFrag", this);
 		viewFragment.setOutputMarkupId(true);
@@ -176,6 +171,11 @@ public abstract class CodeCommentPanel extends Panel {
 					protected AttachmentSupport getAttachmentSupport() {
 						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID(), 
 								SecurityUtils.canManageCodeComments(getProject()));
+					}
+
+					@Override
+					protected String getAutosaveKey() {
+						return "code-comment:" + getComment().getId() + ":content";
 					}
 
 					@Override
@@ -553,6 +553,11 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 
 			@Override
+			protected String getAutosaveKey() {
+				return "code-comment:" + getComment().getId() + ":new-reply";
+			}
+
+			@Override
 			protected SuggestionSupport getSuggestionSupport() {
 				return CodeCommentPanel.this.getSuggestionSupport();
 			}
@@ -843,7 +848,12 @@ public abstract class CodeCommentPanel extends Panel {
 						protected SuggestionSupport getSuggestionSupport() {
 							return CodeCommentPanel.this.getSuggestionSupport();
 						}
-						
+
+						@Override
+						protected String getAutosaveKey() {
+							return "code-comment-reply:" + getReply().getId();
+						}
+
 						@Override
 						protected AttachmentSupport getAttachmentSupport() {
 							return new ProjectAttachmentSupport(getProject(), getComment().getUUID(), 

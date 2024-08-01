@@ -53,6 +53,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
 import javax.servlet.http.Cookie;
@@ -281,7 +282,13 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				protected Project getProject() {
 					return PullRequestActivitiesPage.this.getProject();
 				}
-				
+
+				@Nullable
+				@Override
+				protected String getAutosaveKey() {
+					return "pull-request:" + getPullRequest().getId() + ":new-comment";
+				}
+
 				@Override
 				protected List<User> getParticipants() {
 					return getPullRequest().getParticipants();
@@ -317,7 +324,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						((BasePage)getPage()).notifyObservableChange(target,
 								PullRequest.getChangeObservable(getPullRequest().getId()));
 						input.clearMarkdown();
-
 						target.add(fragment);
 					}
 				}
