@@ -6,7 +6,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pack.PackEvent;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -26,10 +25,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
-public class PackNotificationManager extends AbstractNotificationManager {
+public class PackNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PackNotificationManager.class);
 	
@@ -39,14 +39,15 @@ public class PackNotificationManager extends AbstractNotificationManager {
 	
 	private final UserManager userManager;
 	
+	private final SettingManager settingManager;
+	
 	@Inject
 	public PackNotificationManager(MailManager mailManager, UrlManager urlManager,
-                                   UserManager userManager, SettingManager settingManager, 
-								   MarkdownManager markdownManager) {
-		super(markdownManager, settingManager);
+                                   UserManager userManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
+		this.settingManager = settingManager;
 	}
 
 	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 

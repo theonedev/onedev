@@ -8,10 +8,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.*;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
@@ -28,6 +25,8 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.commenttext.MarkdownText;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.shiro.authz.Permission;
@@ -37,8 +36,11 @@ import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+import static io.onedev.server.notification.NotificationUtils.isNotified;
+
 @Singleton
-public class PullRequestNotificationManager extends AbstractNotificationManager {
+public class PullRequestNotificationManager {
 
 	private final MailManager mailManager;
 
@@ -49,19 +51,19 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 	private final UserManager userManager;
 
 	private final PullRequestMentionManager mentionManager;
+	
+	private final SettingManager settingManager;
 
 	@Inject
-	public PullRequestNotificationManager(MailManager mailManager, MarkdownManager markdownManager,
-										  PullRequestWatchManager watchManager,
-										  VisitInfoManager userInfoManager,
-										  UserManager userManager, SettingManager settingManager,
-										  PullRequestMentionManager mentionManager) {
-		super(markdownManager, settingManager);
+	public PullRequestNotificationManager(MailManager mailManager, PullRequestWatchManager watchManager,
+										  VisitInfoManager userInfoManager, UserManager userManager, 
+										  PullRequestMentionManager mentionManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.watchManager = watchManager;
 		this.userInfoManager = userInfoManager;
 		this.userManager = userManager;
 		this.mentionManager = mentionManager;
+		this.settingManager = settingManager;
 	}
 
 	@Transactional

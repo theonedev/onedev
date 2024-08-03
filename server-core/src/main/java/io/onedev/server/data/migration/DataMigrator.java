@@ -6838,5 +6838,33 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate173(File dataDir, Stack<Integer> versions) {
+		String template;
+		try (InputStream is = getClass().getResourceAsStream("migrate173_default_notification.tpl")) {
+			Preconditions.checkNotNull(is);
+			template = IOUtils.toString(is, UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("EMAIL_TEMPLATES")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("buildNotification").setText(template);
+							valueElement.addElement("packNotification").setText(template);
+							valueElement.addElement("commitNotification").setText(template);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }	

@@ -265,10 +265,18 @@ public abstract class LayoutPage extends BasePage {
 					}
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification",
 							PullRequestNotificationTemplatePage.class, new PageParameters()));
-
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification Unsubscribed",
 							PullRequestNotificationUnsubscribedTemplatePage.class, new PageParameters()));
+					
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Build Notification",
+							BuildNotificationTemplatePage.class, new PageParameters()));
 
+ 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Package Notification",
+							PackNotificationTemplatePage.class, new PageParameters()));
+
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Commit Notification",
+							CommitNotificationTemplatePage.class, new PageParameters()));
+					 
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "User Invitation",
 							UserInvitationTemplatePage.class, new PageParameters()));
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Email Verification",

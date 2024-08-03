@@ -3,13 +3,11 @@ package io.onedev.server.notification;
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.CodeCommentMentionManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -23,12 +21,12 @@ import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static java.util.stream.Collectors.toSet;
 
 @Singleton
-public class CodeCommentNotificationManager extends AbstractNotificationManager {
+public class CodeCommentNotificationManager {
 
 	private final MailManager mailManager;
 
@@ -37,10 +35,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	private final CodeCommentMentionManager mentionManager;
 	
 	@Inject
-	public CodeCommentNotificationManager(MailManager mailManager, MarkdownManager markdownManager,
-										  UserManager userManager, SettingManager settingManager,
+	public CodeCommentNotificationManager(MailManager mailManager, UserManager userManager, 
 										  CodeCommentMentionManager mentionManager) {
-		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.userManager = userManager;
 		this.mentionManager = mentionManager;

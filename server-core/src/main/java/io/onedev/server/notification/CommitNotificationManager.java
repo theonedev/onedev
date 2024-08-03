@@ -2,12 +2,10 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -31,8 +29,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+
 @Singleton
-public class CommitNotificationManager extends AbstractNotificationManager {
+public class CommitNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(CommitNotificationManager.class);
 	
@@ -41,9 +41,7 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 	private final UrlManager urlManager;
 	
 	@Inject
-	public CommitNotificationManager(MarkdownManager markdownManager, MailManager mailManager, UrlManager urlManager, 
-			SettingManager settingManager) {
-		super(markdownManager, settingManager);
+	public CommitNotificationManager(MailManager mailManager, UrlManager urlManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 	}

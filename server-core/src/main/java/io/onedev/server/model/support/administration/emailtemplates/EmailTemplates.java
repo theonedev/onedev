@@ -19,6 +19,8 @@ public class EmailTemplates implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String DEFAULT_SIMPLE_NOTIFICATION;
+	
 	public static final String DEFAULT_NOTIFICATION;
 
 	public static final String DEFAULT_ISSUE_NOTIFICATION_UNSUBSCRIBED;
@@ -42,7 +44,13 @@ public class EmailTemplates implements Serializable {
 	public static final String PROP_ISSUE_NOTIFICATION = "issueNotification";
 	
 	public static final String PROP_PULL_REQUEST_NOTIFICATION = "pullRequestNotification";
+	
+	public static final String PROP_BUILD_NOTIFICATION = "buildNotification";
 
+	public static final String PROP_PACK_NOTIFICATION = "packNotification";
+
+	public static final String PROP_COMMIT_NOTIFICATION = "commitNotification";
+	
 	public static final String PROP_ISSUE_NOTIFICATION_UNSUBSCRIBED = "issueNotificationUnsubscribed";
 	
 	public static final String PROP_PULL_REQUEST_NOTIFICATION_UNSUBSCRIBED = "pullRequestNotificationUnsubscribed";
@@ -63,7 +71,10 @@ public class EmailTemplates implements Serializable {
 	
 	static {
 		try {
-			URL url = Resources.getResource(EmailTemplates.class, "default-notification.tpl");
+			URL url = Resources.getResource(EmailTemplates.class, "default-simple-notification.tpl");
+			DEFAULT_SIMPLE_NOTIFICATION = Resources.toString(url, StandardCharsets.UTF_8);
+			
+			url = Resources.getResource(EmailTemplates.class, "default-notification.tpl");
 			DEFAULT_NOTIFICATION = Resources.toString(url, StandardCharsets.UTF_8);
 
 			url = Resources.getResource(EmailTemplates.class, "default-service-desk-issue-opened.tpl");
@@ -101,6 +112,12 @@ public class EmailTemplates implements Serializable {
 
 	private String pullRequestNotification = DEFAULT_NOTIFICATION;
 	
+	private String buildNotification = DEFAULT_SIMPLE_NOTIFICATION;
+	
+	private String packNotification = DEFAULT_SIMPLE_NOTIFICATION;
+
+	private String commitNotification = DEFAULT_SIMPLE_NOTIFICATION;
+	
 	private String issueNotificationUnsubscribed = DEFAULT_ISSUE_NOTIFICATION_UNSUBSCRIBED;
 	
 	private String pullRequestNotificationUnsubscribed = DEFAULT_PULL_REQUEST_NOTIFICATION_UNSUBSCRIBED;
@@ -116,6 +133,7 @@ public class EmailTemplates implements Serializable {
 	private String passwordReset = DEFAULT_PASSWORD_RESET;
 	
 	private String stopwatchOverdue = DEFAULT_STOPWATCH_OVERDUE;
+	
 	private String alert = DEFAULT_ALERT;
 	
 	@Editable(order=200)
@@ -165,7 +183,7 @@ public class EmailTemplates implements Serializable {
 	public void setPullRequestNotificationUnsubscribed(String pullRequestNotificationUnsubscribed) {
 		this.pullRequestNotificationUnsubscribed = pullRequestNotificationUnsubscribed;
 	}
-	
+
 	@Editable(order=400)
 	@Code(language=Code.GROOVY_TEMPLATE)
 	@OmitName
@@ -188,6 +206,42 @@ public class EmailTemplates implements Serializable {
 
 	public void setServiceDeskIssueOpenFailed(String serviceDeskIssueOpenFailed) {
 		this.serviceDeskIssueOpenFailed = serviceDeskIssueOpenFailed;
+	}
+
+	@Editable(order=550)
+	@Code(language=Code.GROOVY_TEMPLATE)
+	@OmitName
+	@NotEmpty
+	public String getBuildNotification() {
+		return buildNotification;
+	}
+
+	public void setBuildNotification(String buildNotification) {
+		this.buildNotification = buildNotification;
+	}
+
+	@Editable(order=560)
+	@Code(language=Code.GROOVY_TEMPLATE)
+	@OmitName
+	@NotEmpty
+	public String getPackNotification() {
+		return packNotification;
+	}
+
+	public void setPackNotification(String packNotification) {
+		this.packNotification = packNotification;
+	}
+
+	@Editable(order=570)
+	@Code(language=Code.GROOVY_TEMPLATE)
+	@OmitName
+	@NotEmpty
+	public String getCommitNotification() {
+		return commitNotification;
+	}
+
+	public void setCommitNotification(String commitNotification) {
+		this.commitNotification = commitNotification;
 	}
 
 	@Editable(order=600)

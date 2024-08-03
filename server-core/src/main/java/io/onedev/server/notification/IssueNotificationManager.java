@@ -39,12 +39,13 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.commenttext.MarkdownText;
-import org.unbescape.html.HtmlEscape;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+import static io.onedev.server.notification.NotificationUtils.isNotified;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
-public class IssueNotificationManager extends AbstractNotificationManager {
+public class IssueNotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -64,15 +65,14 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final UrlManager urlManager;
 	
+	private final SettingManager settingManager;
+	
 	@Inject
-	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
-									IssueWatchManager watchManager, VisitInfoManager userInfoManager, 
-									UserManager userManager, SettingManager settingManager, 
+	public IssueNotificationManager(MailManager mailManager, IssueWatchManager watchManager, 
+									VisitInfoManager userInfoManager, UserManager userManager, 
 									IssueAuthorizationManager authorizationManager, IssueMentionManager mentionManager, 
 									IssueQueryPersonalizationManager queryPersonalizationManager, 
-									IssueManager issueManager, UrlManager urlManager) {
-		super(markdownManager, settingManager);
-		
+									IssueManager issueManager, UrlManager urlManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.watchManager = watchManager;
 		this.userInfoManager = userInfoManager;
@@ -82,6 +82,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		this.queryPersonalizationManager = queryPersonalizationManager;
 		this.issueManager = issueManager;
 		this.urlManager = urlManager;
+		this.settingManager = settingManager;
 	}
 	
 	private void setupWatches(Issue issue) {

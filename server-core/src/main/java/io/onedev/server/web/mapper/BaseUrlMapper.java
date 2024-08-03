@@ -254,6 +254,12 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				IssueNotificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification", 
 				PullRequestNotificationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/build-notification",
+				BuildNotificationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/pack-notification",
+				PackNotificationTemplatePage.class));
+		add(new BasePageMapper("~administration/settings/email-templates/commit-notification",
+				CommitNotificationTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/issue-notification-unsubscribed",
 				IssueNotificationUnsubscribedTemplatePage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/pull-request-notification-unsubscribed",
