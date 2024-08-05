@@ -6866,5 +6866,88 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate174(File dataDir, Stack<Integer> versions) {
+		String initialState = null;
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var stateSpecElement: valueElement.element("stateSpecs").elements()) {
+								initialState = stateSpecElement.elementText("name").trim();
+								break;
+							}
+						}
+					}
+				}
+			} else if (file.getName().startsWith("IssueStateHistorys.xml")) {
+				FileUtils.deleteFile(file);
+			}			
+		}
+		
+		Map<Long, List<IssueStateHistory>> histories = new HashMap<>();
+		var id = 1L;
+		
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				if (initialState != null) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						var history = new IssueStateHistory();
+						history.setId(id++);
+						history.setState(initialState);
+						history.setDate(parseDate(element.elementText("submitDate")));
+						history.setTimeGroups(TimeGroups.of(history.getDate()));
+						history.setIssue(new Issue());
+						history.getIssue().setId(Long.parseLong(element.elementText("id").trim()));
+						histories.computeIfAbsent(history.getIssue().getId(), it -> new ArrayList<>()).add(history);
+					}
+				}
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					var className = dataElement.attributeValue("class");
+					if (className.contains("IssueStateChangeData")
+							|| className.contains("IssueBatchUpdateData")) {
+						var oldState = dataElement.elementText("oldState").trim();
+						var newState = dataElement.elementText("newState").trim();
+						if (!oldState.equals(newState)) {
+							var history = new IssueStateHistory();
+							history.setId(id++);
+							history.setState(newState);
+							history.setDate(parseDate(element.elementText("date")));
+							history.setTimeGroups(TimeGroups.of(history.getDate()));
+							history.setIssue(new Issue());
+							history.getIssue().setId(Long.parseLong(element.elementText("issue").trim()));
+							histories.computeIfAbsent(history.getIssue().getId(), it->new ArrayList<>()).add(history);
+						}
+					}
+				}
+			}
+		}
+
+		VersionedXmlDoc historiesDom;
+		File historiesDomFile = new File(dataDir, "IssueStateHistorys.xml");
+		historiesDom = new VersionedXmlDoc();
+		Element listElement = historiesDom.addElement("list");
+
+		for (var value: histories.values()) {
+			value.sort(comparing(IssueStateHistory::getDate));
+			for(int i=0; i<value.size()-1; i++) {
+				var history = value.get(i);
+				var nextHistory = value.get(i+1);
+				history.setDuration(nextHistory.getDate().getTime() - history.getDate().getTime());
+				migrate171_createHistoryElement(listElement, history);
+			}
+			if (!value.isEmpty())
+				migrate171_createHistoryElement(listElement, value.get(value.size()-1));
+		}
+		historiesDom.writeToFile(historiesDomFile, true);
+	}
 	
 }	
