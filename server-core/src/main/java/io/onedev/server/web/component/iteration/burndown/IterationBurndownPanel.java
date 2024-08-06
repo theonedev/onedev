@@ -121,10 +121,12 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 								yAxisValues.add(null);
 							}
 						}
-						Integer stateMetric = yAxisValues.get(0);
-						if (stateMetric == null)
-							stateMetric = 0;
-						initialIssueMetric += stateMetric;
+						if (!yAxisValues.isEmpty()) {
+							Integer stateMetric = yAxisValues.get(0);
+							if (stateMetric == null)
+								stateMetric = 0;
+							initialIssueMetric += stateMetric;
+						}
 						lines.add(new Line(spec.getName(), yAxisValues, spec.getColor(), "States", null));
 					}
 
