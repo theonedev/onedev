@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.agent.BuiltInRegistryLogin;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.OneDev;
@@ -202,8 +203,11 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		@Override
 		public String getOptions() {
 			var options = new ArrayList<String>();
-			for (var destination: StringUtils.splitAndTrim(getDestinations(), " "))
+			for (var destination: StringUtils.splitAndTrim(getDestinations(), " ")) {
+				if (destination.contains("localhost") || destination.contains("127.0.0.1"))
+					throw new ExplicitException("Loopback address not allowed for destination of Kaniko image build step, please use ip address or host name instead");
 				options.add("--destination=" + destination);
+			}
 			return StringUtils.join(options, " ");
 		}
 		

@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 
@@ -66,6 +67,8 @@ public class PushImageStep extends CraneStep {
 		var builder = new StringBuilder("crane push");
 		if (getMoreOptions() != null)
 			builder.append(" ").append(getMoreOptions());			
+		if (getDestImage().contains("localhost") || getDestImage().contains("127.0.0.1"))
+			throw new ExplicitException("Loopback address not allowed for target docker image of push image step, please use ip address or host name instead");
 		builder.append(" /onedev-build/workspace/").append(getSrcPath()).append(" ").append(getDestImage());
 		return builder.toString();
 	}

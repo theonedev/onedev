@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 
@@ -83,6 +84,9 @@ public class PullImageStep extends CraneStep {
 			builder.append("--platform ").append(getPlatform()).append(" ");
 		if (getMoreOptions() != null)
 			builder.append(getMoreOptions()).append(" ");
+		
+		if (getSrcImage().contains("localhost") || getSrcImage().contains("127.0.0.1"))
+			throw new ExplicitException("Loopback address not allowed for source docker image of push image step, please use ip address or host name instead");
 		builder.append(getSrcImage()).append(" /onedev-build/workspace/").append(getDestPath());
 		return builder.toString();
 	}
