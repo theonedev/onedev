@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -259,12 +260,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-nowrap'>Pull Requests</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-nowrap'>"+Translation.get("pull_request")+"</span>").setEscapeModelStrings(false);
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Pull Requests - " + getProject().getPath();
+		return Translation.get("pull_request") + " - " + getProject().getPath();
 	}
 	
 	@Override

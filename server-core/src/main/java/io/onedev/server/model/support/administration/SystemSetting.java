@@ -47,7 +47,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private boolean gravatarEnabled;
 	
-	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
+	@Editable(name="server_url", order=90, description="server_url_desc")
 	@NotEmpty
 	public String getServerUrl() {
 		return serverUrl;
@@ -92,9 +92,7 @@ public class SystemSetting implements Serializable, Validatable {
 		return null;
 	}
 
-	@Editable(order=200, name="Git Command Line", description="OneDev requires git command line to manage repositories. The minimum "
-			+ "required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve "
-			+ "LFS files in build job")
+	@Editable(order=200, name="git_location", description="git_location_desc")
 	@Valid
 	@NotNull(message="may not be empty")
 	public GitLocation getGitLocation() {
@@ -105,7 +103,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.gitLocation = gitLocation;
 	}
 
-	@Editable(order=250, name="curl Command Line", description="OneDev configures git hooks to communicate with itself via curl")
+	@Editable(order=250, name="curl_location", description="curl_location_desc")
 	@Valid
 	@NotNull(message="may not be empty")
 	public CurlLocation getCurlLocation() {

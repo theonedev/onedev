@@ -25,6 +25,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
@@ -117,7 +118,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		}
 		thread = new Thread(this);
 
-		initStage = new InitStage("Server is Starting...");
+		initStage = new InitStage(Translation.get("server_starting"));
 	}
 	
 	@Override
@@ -166,7 +167,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				logger.warn("Please set up the server at " + getIngressUrl());
 			else
 				logger.warn("Please set up the server at " + guessServerUrl());
-			initStage = new InitStage("Server Setup", manualConfigs);
+			initStage = new InitStage(Translation.get("server_setup"), manualConfigs);
 			var localServer = clusterManager.getLocalServerAddress();
 			while (true) {
 				if (maintenanceFile.exists()) {
@@ -195,10 +196,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				
 				manualConfigs = checkData();
 				if (manualConfigs.isEmpty()) {
-					initStage = new InitStage("Please wait...");
+					initStage = new InitStage(Translation.get("please_wait"));
 					break;
 				} else {
-					initStage = new InitStage("Server Setup", manualConfigs);
+					initStage = new InitStage(Translation.get("server_setup"), manualConfigs);
 				}
 			}
 		}

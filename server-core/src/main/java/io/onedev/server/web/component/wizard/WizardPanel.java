@@ -10,6 +10,7 @@ package io.onedev.server.web.component.wizard;
 
 import java.util.List;
 
+import io.onedev.server.util.Translation;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -52,7 +53,7 @@ public abstract class WizardPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				String template = "Step %s of %s: %s";
+				String template = Translation.get("step_indicator");
 				return String.format(template, activeStepIndex+1, steps.size(), getActiveStep().getTitle());
 			}
 			

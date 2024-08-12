@@ -5,6 +5,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.util.Translation;
 import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -137,7 +138,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					
 				});
 				if (!getIssue().getPullRequests().isEmpty()) {
-					tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
+					tabs.add(new AjaxActionTab(Model.of(Translation.get("pull_request"))) {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {

@@ -35,6 +35,7 @@ import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.util.editbean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -645,7 +646,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_GUEST, PROP_NOTIFY_OWN_EVENTS)) {
+				manualConfigs.add(new ManualConfig(Translation.get("create_admin_account"), null, bean, Sets.newHashSet(PROP_GUEST, PROP_NOTIFY_OWN_EVENTS)) {
 	
 					@Override
 					public void complete() {
@@ -695,7 +696,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (ingressUrl != null)
 				excludedProps.add("serverUrl");
 
-			manualConfigs.add(new ManualConfig("Specify System Setting", null, 
+			manualConfigs.add(new ManualConfig(Translation.get("specify_system_setting"), null, 
 					systemSetting, excludedProps) {
 	
 				@Override

@@ -56,10 +56,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Singleton
 public class WebApplication extends org.apache.wicket.protocol.http.WebApplication {
@@ -268,7 +265,12 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 
 	@Override
 	public Session newSession(Request request, Response response) {
-		return new WebSession(request);
+		WebSession webSession = new WebSession(request);
+		Locale forcedLocale = new Locale("zh", "CN");
+		if (forcedLocale != null) {
+			webSession.setLocale(forcedLocale);
+		}
+		return webSession;
 	}
 
 	@Override

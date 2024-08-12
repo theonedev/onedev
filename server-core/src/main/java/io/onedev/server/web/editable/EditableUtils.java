@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 
 import javax.annotation.Nullable;
@@ -30,7 +31,7 @@ public class EditableUtils {
 	public static String getDisplayName(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.name().trim().length() != 0)
-			return editable.name();
+			return Translation.get(editable.name());
 		else 
 			return BeanUtils.getDisplayName(element);
 	}
@@ -119,7 +120,7 @@ public class EditableUtils {
 	private static String getDescription(AnnotatedElement element, Editable editable) {
 		String description = editable.description();
 		if (description.length() != 0) {
-			return description;
+			return Translation.get(description);
 		} else if (editable.descriptionProvider().length() != 0) {
 			Class<?> clazz;
 			if (element instanceof Class) 

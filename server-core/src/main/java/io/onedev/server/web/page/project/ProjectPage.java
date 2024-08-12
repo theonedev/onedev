@@ -9,6 +9,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
@@ -206,7 +207,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			menuItems.add(new SidebarMenuItem.SubMenu("git", "Code", codeMenuItems));
 		}
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
-			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests",
+			menuItems.add(new SidebarMenuItem.Page("pull-request", Translation.get("pull_request"),
 					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
 		}
