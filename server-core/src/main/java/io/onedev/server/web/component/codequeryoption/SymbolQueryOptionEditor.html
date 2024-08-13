@@ -1,15 +1,15 @@
 <wicket:panel>
 	<div wicket:id="term" class="form-group">
-		<label class="control-label">Symbol Name <span class="text-danger">*</span></label>
+		<label class="control-label"><wicket:message key="Symbol_Name" /> <span class="text-danger">*</span></label>
 		<input wicket:id="term" name="searchFor" class="form-control" type="text">
 		<p class="form-text text-muted">(* = any string, ? = any character)</p>
 		<div wicket:id="feedback" class="mt-2"></div>
 	</div>
 	<div class="form-group">
-		<label class="checkbox"><input wicket:id="caseSensitive" type="checkbox"> Case Sensitive</label>
+		<label class="checkbox"><input wicket:id="caseSensitive" type="checkbox"> <wicket:message key="Case_Sensitive" /></label>
 	</div>
 	<div class="form-group">
-		<label class="control-label">File Name Patterns (separated by comma)</label>
-		<input wicket:id="fileNames" class="form-control" type="text" placeholder="File name patterns such as *.java, *.c">
+		<label class="control-label"><wicket:message key="File_Name_Patterns" /></label>
+		<input wicket:id="fileNames" class="form-control" type="text" wicket:message="placeholder:File_Name_Patterns_Desc">
 	</div>
 </wicket:panel>

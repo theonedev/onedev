@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.issue.creation;
 
 import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -117,7 +118,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 				if (setting.getApplicableProjects() != null)
 					cellItem.add(new Label(componentId, setting.getApplicableProjects()));
 				else
-					cellItem.add(new Label(componentId, "<i>Any project</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + Translation.get("any_project") + "</i>").setEscapeModelStrings(false));
 			}
 		});		
 		

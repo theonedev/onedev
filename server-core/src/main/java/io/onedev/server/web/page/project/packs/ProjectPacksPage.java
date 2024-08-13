@@ -12,6 +12,7 @@ import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pack.list.PackListPanel;
@@ -261,12 +262,12 @@ public class ProjectPacksPage extends ProjectPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Packages");
+		return new Label(componentId, Translation.get("Packages"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Packages - " + getProject().getPath();
+		return Translation.get("Packages") + " - " + getProject().getPath();
 	}
 	
 }

@@ -10,6 +10,7 @@ import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pack.list.PackListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -230,12 +231,12 @@ public class PackListPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Packages");
+		return new Label(componentId, Translation.get("Packages"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Packages - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return Translation.get("Packages") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 }

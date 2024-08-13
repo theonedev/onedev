@@ -15,6 +15,7 @@ import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.updatecheck.UpdateCheckManager;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -182,123 +183,123 @@ public abstract class LayoutPage extends BasePage {
 				List<SidebarMenuItem> menuItems = new ArrayList<>(customization.getMainMenuItems());
 				if (SecurityUtils.isAdministrator()) {
 					List<SidebarMenuItem> administrationMenuItems = new ArrayList<>();
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Settings",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("System_Settings"),
 							SystemSettingPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Settings",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Security_Settings"),
 							SecuritySettingPage.class, new PageParameters()));
 					List<SidebarMenuItem> userManagementMenuItems = new ArrayList<>();
-					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Users", UserListPage.class,
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Users"), UserListPage.class,
 							new PageParameters(), Lists.newArrayList(NewUserPage.class, UserPage.class)));
-					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Invitations", InvitationListPage.class,
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Invitations"), InvitationListPage.class,
 							new PageParameters(), Lists.newArrayList(NewInvitationPage.class)));
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "User Management", userManagementMenuItems));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Role Management", RoleListPage.class,
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("User_Management"), userManagementMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Role_Management"), RoleListPage.class,
 							new PageParameters(), Lists.newArrayList(NewRolePage.class, RoleDetailPage.class)));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Group Management", GroupListPage.class,
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Group_Management"), GroupListPage.class,
 							new PageParameters(), Lists.newArrayList(NewGroupPage.class, GroupPage.class)));
 
 					List<SidebarMenuItem> authenticationMenuItems = new ArrayList<>();
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication",
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("External_Authentication"),
 							AuthenticatorPage.class, new PageParameters()));
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On",
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Single_Sign_On"),
 							SsoConnectorListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authentication Source", authenticationMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Authentication_Source"), authenticationMenuItems));
 
 					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key",
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("SSH_Server_Key"),
 							SshServerKeyPage.class, new PageParameters()));
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key",
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("GPG_Signing_Key"),
 							GpgSigningKeyPage.class, new PageParameters()));
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys",
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("GPG_Trusted_Keys"),
 							GpgTrustedKeysPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "SSH & GPG Keys", keyManagementMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("SSH_GPG_Keys"), keyManagementMenuItems));
 
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Custom_Fields"),
 							IssueFieldListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "States",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("States"),
 							IssueStateListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "State Transitions",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("State_Transitions"),
 							StateTransitionListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Boards",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Default_Boards"),
 							DefaultBoardListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Links"),
 							LinkSpecListPage.class, new PageParameters()));
 					if (isSubscriptionActive()) {
-						issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Time Tracking",
+						issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Time_Tracking"),
 								TimeTrackingSettingPage.class, new PageParameters()));
 					}
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Description_Templates"),
 							IssueTemplateListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Commit_Message_Fix_Patterns"),
 							CommitMessageFixPatternsPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Check Workflow Integrity",
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Check_Workflow_Integrity"),
 							CheckIssueIntegrityPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Settings", issueSettingMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Issue_Settings"), issueSettingMenuItems));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Job_Executors"),
 							JobExecutorsPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Agents"),
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Service",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Mail_Service"),
 							MailServicePage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Service_Desk_Settings"),
 							ServiceDeskSettingPage.class, new PageParameters()));
 
 					List<SidebarMenuItem> emailTemplatesMenuItems = new ArrayList<>();
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Issue_Notification"),
 							IssueNotificationTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Notification Unsubscribed",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Issue_Notification_Unsubscribed"),
 							IssueNotificationUnsubscribedTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Opened",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Service_Desk_Issue_Opened"),
 							ServiceDeskIssueOpenedTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Issue Open Failed",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Service_Desk_Issue_Open_Failed"),
 							ServiceDeskIssueOpenFailedTemplatePage.class, new PageParameters()));
 					if (isSubscriptionActive()) {
-						emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Issue Stopwatch Overdue",
+						emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Issue_Stopwatch_Overdue"),
 								StopwatchOverdueTemplatePage.class, new PageParameters()));
 					}
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Pull_Request_Notification"),
 							PullRequestNotificationTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request Notification Unsubscribed",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Pull_Request_Notification_Unsubscribed"),
 							PullRequestNotificationUnsubscribedTemplatePage.class, new PageParameters()));
 					
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Build Notification",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Build_Notification"),
 							BuildNotificationTemplatePage.class, new PageParameters()));
 
- 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Package Notification",
+ 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Package_Notification"),
 							PackNotificationTemplatePage.class, new PageParameters()));
 
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Commit Notification",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Commit_Notification"),
 							CommitNotificationTemplatePage.class, new PageParameters()));
 					 
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "User Invitation",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("User_Invitation"),
 							UserInvitationTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Email Verification",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Email_Verification"),
 							EmailVerificationTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "Password Reset",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Password_Reset"),
 							PasswordResetTemplatePage.class, new PageParameters()));
-					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, "System Alert",
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("System_Alert"),
 							AlertTemplatePage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Email Templates",
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Email_Templates"),
 							emailTemplatesMenuItems));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Alert Settings",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Alert_Settings"),
 							AlertSettingPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Label_Management"),
 							LabelManagementPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Settings",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Performance_Settings"),
 							PerformanceSettingPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Groovy_Scripts"),
 							GroovyScriptListPage.class, new PageParameters()));
 
 					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
@@ -332,11 +333,11 @@ public abstract class LayoutPage extends BasePage {
 						}
 					}
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Branding",
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Branding"),
 							BrandingSettingPage.class, new PageParameters()));
 
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
-					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup",
+					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Database_Backup"),
 							DatabaseBackupPage.class, new PageParameters()));
 					var servers = getClusterManager().getServerAddresses();
 					if (servers.size() > 1) {
@@ -348,20 +349,20 @@ public abstract class LayoutPage extends BasePage {
 							serverInformationMenuItems.add(new SidebarMenuItem.Page(null, server,
 									ServerInformationPage.class, ServerInformationPage.paramsOf(server)));
 						}
-						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, "Server Log", serverLogMenuItems));
-						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, "Server Information", serverInformationMenuItems));
+						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Server_Log"), serverLogMenuItems));
+						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Server_Information"), serverInformationMenuItems));
 					} else {
-						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Log",
+						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Server_Log"),
 								ServerLogPage.class, new PageParameters()));
-						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Information",
+						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Server_Information"),
 								ServerInformationPage.class, new PageParameters()));
 					}
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "System Maintenance", maintenanceMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("System_Maintenance"), maintenanceMenuItems));
 					for (var contribution: OneDev.getExtensions(AdministrationMenuContribution.class))
 						administrationMenuItems.addAll(contribution.getAdministrationMenuItems());
 
-					menuItems.add(new SidebarMenuItem.SubMenu("gear", "Administration", administrationMenuItems));
+					menuItems.add(new SidebarMenuItem.SubMenu("gear", Translation.get("Administration"), administrationMenuItems));
 				}
 				menus.add(new SidebarMenu(null, menuItems));
 				menus.addAll(getSidebarMenus());
@@ -502,9 +503,9 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected String load() {
 				if (isSubscriptionActive() && SecurityUtils.isAdministrator())
-					return "Bug Report";
+					return Translation.get("Bug_Report");
 				else
-					return "Support & Bug Report";
+					return Translation.get("Support_Bug_Report");
 			}
 
 		}));
@@ -541,7 +542,7 @@ public abstract class LayoutPage extends BasePage {
 
 				List<IColumn<Alert, Void>> columns = new ArrayList<>();
 
-				columns.add(new AbstractColumn<>(Model.of("When")) {
+				columns.add(new AbstractColumn<>(Model.of(Translation.get("When"))) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
@@ -553,7 +554,7 @@ public abstract class LayoutPage extends BasePage {
 						return "text-nowrap";
 					}
 				});
-				columns.add(new AbstractColumn<>(Model.of("Message")) {
+				columns.add(new AbstractColumn<>(Model.of(Translation.get("Message"))) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Alert>> cellItem, String componentId, IModel<Alert> rowModel) {
@@ -835,16 +836,16 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
-					Session.get().warn("Exited impersonation");
+					Session.get().warn(Translation.get("Exited_impersonation"));
 					throw new RestartResponseException(HomePage.class);
 				}
 
 			};
-			signOutLink.add(new Label("label", "Exit Impersonation"));
+			signOutLink.add(new Label("label", Translation.get("Exit_Impersonation")));
 			userInfo.add(signOutLink);
 		} else {
 			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class);
-			signOutLink.add(new Label("label", "Sign Out"));
+			signOutLink.add(new Label("label", Translation.get("Sign_Out")));
 			userInfo.add(signOutLink);
 		}
 

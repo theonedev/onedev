@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -106,12 +107,12 @@ public class ProjectChildrenPage extends ProjectPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Child Projects");
+		return new Label(componentId, Translation.get("D"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Child Projects - " + getProject().getPath();
+		return Translation.get("child_project") + " - " + getProject().getPath();
 	}
 
 	@Override

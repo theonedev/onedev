@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.Translation;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -229,12 +230,12 @@ public class ProjectListPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Projects - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return Translation.get("project") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Projects");
+		return new Label(componentId, Translation.get("project"));
 	}
 
 }

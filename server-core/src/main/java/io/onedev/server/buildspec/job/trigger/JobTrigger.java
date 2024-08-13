@@ -44,7 +44,7 @@ public abstract class JobTrigger implements Serializable {
 	
 	private List<ParamMap> excludeParamMaps = new ArrayList<>();
 	
-	@Editable(name="Applicable Projects", order=900, placeholder="Any project", description=""
+	@Editable(name="applicable_projects", order=900, placeholder="any_project", description=""
 			+ "Optionally specify space-separated projects applicable for this trigger. "
 			+ "This is useful for instance when you want to prevent the job from being "
 			+ "triggered in forked projects. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "

@@ -6,7 +6,7 @@
 					<div class="input-group">
 						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query/order projects. Hit space to show syntax helper">
 						<span class="input-group-append">
-							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" wicket:message="title:Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 						</span>
 					</div>
 				</form>
@@ -14,19 +14,19 @@
 			</div>
 			<div class="operations mb-4">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mb-2 mr-4">
-					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
+					<wicket:svg href="eye" class="icon"></wicket:svg> <wicket:message key="Show_Saved_Queries" />
 				</a>
 				<a wicket:id="saveQuery" class="save-query text-gray d-inline-block mb-2 mr-4">
-					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
+					<wicket:svg href="save" class="icon"></wicket:svg> <wicket:message key="Save_Query" />
 				</a>
 				<a wicket:id="operations" class="operations d-inline-block mb-2 mr-4 text-gray">
-					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> Operations
+					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> <wicket:message key="Operations" />
 				</a>
 				<a wicket:id="importProjects" class="import-projects d-inline-block mb-2 mr-4 text-gray">
 					<wicket:svg href="import" class="icon"></wicket:svg> Import
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray d-inline-block mb-2 mr-4">
-					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:message key="Order_By" />
 				</a>
 				<span wicket:id="count" class="float-right text-gray"></span>
 			</div>

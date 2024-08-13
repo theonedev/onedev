@@ -11,6 +11,7 @@ import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -236,7 +237,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Packages";
+						return Translation.get("Delete_Selected_Package");
 					}
 					
 					@Override
@@ -299,7 +300,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Packages";
+						return Translation.get("Delete_All_Package");
 					}
 					
 					@Override

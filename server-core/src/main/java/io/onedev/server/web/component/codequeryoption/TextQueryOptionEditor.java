@@ -3,6 +3,7 @@ package io.onedev.server.web.component.codequeryoption;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.search.code.query.TextQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.util.Translation;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -41,7 +42,7 @@ public class TextQueryOptionEditor extends FormComponentPanel<TextQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("Search for"));
+		term.setRequired(true).setLabel(Model.of(Translation.get("Search_for")));
 		term.add(validatable -> {
 			boolean regex = this.regex.getInput() != null;
 			try {

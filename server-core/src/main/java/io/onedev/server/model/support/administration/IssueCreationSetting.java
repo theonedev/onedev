@@ -53,7 +53,7 @@ public class IssueCreationSetting implements Serializable {
 		this.senderEmails = senderEmails;
 	}
 
-	@Editable(order=150, placeholder="Any project", description="Specify space-separated projects applicable for this entry. "
+	@Editable(order=150, placeholder="any_project", description="Specify space-separated projects applicable for this entry. "
 			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to "
 			+ "match all projects")
 	@Patterns(suggester="suggestProjects")
