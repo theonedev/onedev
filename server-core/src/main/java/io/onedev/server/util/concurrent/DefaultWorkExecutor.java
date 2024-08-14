@@ -90,11 +90,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 			return call(groupId, callable);
 		} else {
 			WorkFuture<T> future = new WorkFuture<T>(groupId, callable);
-			Collection<WorkFuture<?>> waitingsOfGroup = waitings.get(groupId);
-			if (waitingsOfGroup == null) {
-				waitingsOfGroup = new ArrayList<>();
-				waitings.put(groupId, waitingsOfGroup);
-			}
+			var waitingsOfGroup = waitings.computeIfAbsent(groupId, k -> new ArrayList<>());
 			waitingsOfGroup.add(future);
 			check();
 			return future;
@@ -121,10 +117,14 @@ public class DefaultWorkExecutor implements WorkExecutor {
 					return runningFuture.cancel(mayInterruptIfRunning);
 				} else {
 					Collection<WorkFuture<?>> waitingsOfGroup = waitings.get(groupId);
-					if (waitingsOfGroup != null)
-						return waitingsOfGroup.remove(this);
-					else 
+					if (waitingsOfGroup != null) {
+						var cancelled = waitingsOfGroup.remove(this);
+						if (waitingsOfGroup.isEmpty())
+							waitings.remove(groupId);
+						return cancelled;
+					} else {
 						return false;
+					}
 				}
 			}
 		}
