@@ -262,9 +262,10 @@ jobs:
   steps:
   - !CheckoutStep
     name: checkout
-    cloneCredential: !DefaultCredential {}
+    cloneCredential: !HttpCredential
+      accessTokenSecret: onedev-token
     withLfs: false
-    withSubmodules: false
+    withSubmodules: true
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
