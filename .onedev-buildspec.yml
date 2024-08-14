@@ -1,4 +1,4 @@
-version: 32
+version: 35
 imports:
 - projectPath: onedev
   revision: main
@@ -148,9 +148,9 @@ jobs:
         fi
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CloseMilestoneStep
+  - !CloseIterationStep
     name: close milestone
-    milestoneName: '@build_version@'
+    iterationName: '@build_version@'
     accessTokenSecret: onedev-token
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   jobDependencies:
@@ -267,11 +267,24 @@ jobs:
     withSubmodules: false
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !OsvVulnerScannerStep
+  - !CommandStep
+    name: build
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands: |
+        mvn compile
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !TrivyCacheStep
+    name: cache
+    key: trivy
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !RootFSScannerStep
     name: scan
-    recursive: true
+    detectVulnerabilities: true
     failThreshold: HIGH
-    reportName: Dependency Vulnerabilities
+    reportName: Vulnerabilities
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
