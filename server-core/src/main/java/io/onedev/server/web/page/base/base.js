@@ -108,7 +108,7 @@ onedev.server = {
 			$form.submit(function(e) {
 				$form.removeClass("dirty");				
 				setTimeout(function() {
-					$form.removeClass("dirty");				
+					$form.removeClass("dirty");	
 				}, 0);
 			});
 		},
@@ -169,26 +169,10 @@ onedev.server = {
 				$container = $(document);
 			var selector = "form.leave-confirm.dirty";
 			var $dirtyForms = $container.find(selector).addBack(selector);
-			if ($dirtyForms.length != 0) {
-				if (confirm("There are unsaved changes, do you want to discard and continue?")) {
-					onedev.server.form.clearAutosavings($dirtyForms);
-					return true;
-				} else {
-					return false;
-				}
-			} else {
+			if ($dirtyForms.length != 0) 
+				return confirm("There are unsaved changes, do you want to discard and continue?");
+			else 
 				return true;
-			}
-		},
-		clearAutosavings: function($dirtyForms) {
-			$dirtyForms.each(function() {
-				var autosaveKey = $(this).data("autosaveKey");
-				if (autosaveKey)
-					localStorage.removeItem(autosaveKey);
-			});
-		},
-		registerAutosaveKey: function($form, autosaveKey) {
-			$form.data("autosaveKey", autosaveKey);
 		}
 	},
 	isDarkMode: function() {
@@ -873,9 +857,12 @@ onedev.server = {
 		else
 			return "0s";
 	},
-	onDomReady: function(bootTimestamp, icons, popStateCallback) {
+	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys) {
 		onedev.server.bootTimestamp = bootTimestamp;
 		onedev.server.icons = icons;
+
+		for (var i in removeAutosaveKeys) 
+			localStorage.removeItem(removeAutosaveKeys[i]);
 		
 		// fix issue #1640
 		if (onedev.server.util.isMac() && onedev.server.util.isSafari()) {

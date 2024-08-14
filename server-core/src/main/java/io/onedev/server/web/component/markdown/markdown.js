@@ -169,6 +169,8 @@ onedev.server.markdown = {
 					var content = $input.val();
 					if (content.trim().length != 0)
 						localStorage.setItem(autosaveKey, content);
+					else
+						localStorage.removeItem(autosaveKey);
 				}
 				
 				/* 
@@ -963,7 +965,6 @@ onedev.server.markdown = {
 		}
 		var autosaveKey = $container.data("autosaveKey");
 		if (autosaveKey) {
-			onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
 			var autosaveValue = localStorage.getItem(autosaveKey);
 			if (autosaveValue && $input.val() != autosaveValue) {
 				$input.val(autosaveValue);
