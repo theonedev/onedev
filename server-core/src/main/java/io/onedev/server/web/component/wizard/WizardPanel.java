@@ -53,7 +53,7 @@ public abstract class WizardPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				String template = Translation.get("step_indicator");
+				String template = Translation.get("Step_Indicator");
 				return String.format(template, activeStepIndex+1, steps.size(), getActiveStep().getTitle());
 			}
 			

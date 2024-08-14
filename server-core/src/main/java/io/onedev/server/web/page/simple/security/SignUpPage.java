@@ -2,6 +2,7 @@ package io.onedev.server.web.page.simple.security;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.util.Translation;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
@@ -116,12 +117,12 @@ public class SignUpPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Sign Up";
+		return Translation.get("Sign_Up");
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "Enter your details to create your account";
+		return Translation.get("Enter_your_details_to_create_your_account");
 	}
 
 }

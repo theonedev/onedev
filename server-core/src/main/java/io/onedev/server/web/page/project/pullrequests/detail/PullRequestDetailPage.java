@@ -19,6 +19,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -1387,7 +1388,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Approve";
+						return Translation.get("Confirm_Approve");
 					}
 				};
 			}
@@ -1430,7 +1431,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Request For Changes";
+						return Translation.get("Confirm_Request_For_Changes");
 					}
 				};
 			}
@@ -1507,7 +1508,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Discard";
+						return Translation.get("Confirm_Discard");
 					}
 				};
 			}
@@ -1544,7 +1545,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Reopen";
+						return Translation.get("Confirm_Reopen");
 					}
 				};
 			}
@@ -1584,7 +1585,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Delete Source Branch";
+						return Translation.get("Confirm_Delete_Source_Branch");
 					}
 				};
 			}
@@ -1624,7 +1625,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 					@Override
 					protected String getTitle() {
-						return "Confirm Restore Source Branch";
+						return Translation.get("Confirm_Restore_Source_Branch");
 					}
 				};
 			}

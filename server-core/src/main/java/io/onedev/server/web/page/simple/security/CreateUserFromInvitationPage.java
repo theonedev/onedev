@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
 import com.google.common.collect.Sets;
+import io.onedev.server.util.Translation;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
@@ -121,7 +122,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Set Up Your Account";
+		return Translation.get("Set_Up_Your_Account");
 	}
 
 	@Override

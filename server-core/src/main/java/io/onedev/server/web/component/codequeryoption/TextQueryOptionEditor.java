@@ -42,7 +42,7 @@ public class TextQueryOptionEditor extends FormComponentPanel<TextQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of(Translation.get("Search_for")));
+		term.setRequired(true).setLabel(Model.of(Translation.get("Search_For")));
 		term.add(validatable -> {
 			boolean regex = this.regex.getInput() != null;
 			try {

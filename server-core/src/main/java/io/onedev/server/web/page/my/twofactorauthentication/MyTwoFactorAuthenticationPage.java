@@ -2,6 +2,7 @@ package io.onedev.server.web.page.my.twofactorauthentication;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.User;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
 import io.onedev.server.web.page.my.MyPage;
 import org.apache.wicket.Component;
@@ -62,7 +63,7 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Two Factor Authentication");
+		return new Label(componentId, Translation.get("Two_Factor_Authentication"));
 	}
 
 }

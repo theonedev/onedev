@@ -9,6 +9,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticated
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.security.TrustCertsSSLSocketFactory;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.Translation;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
@@ -239,7 +240,7 @@ public class LdapAuthenticator extends Authenticator {
 			if (results == null)
 				throw new ExplicitException("No user search base specified");
 			if (!results.hasMore())
-				throw new UnknownAccountException("Invalid credentials");
+				throw new UnknownAccountException(Translation.get("Invalid_Credentials"));
             
             SearchResult searchResult = results.next();
             String userDN = searchResult.getNameInNamespace();
@@ -266,7 +267,7 @@ public class LdapAuthenticator extends Authenticator {
                 userCtx = new InitialDirContext(ldapEnv);
             } catch (AuthenticationException e) {
                 logger.error("Unable to bind as '" + userDN + "'", e);
-            	throw new org.apache.shiro.authc.AuthenticationException("Invalid credentials");
+            	throw new org.apache.shiro.authc.AuthenticationException(Translation.get("Invalid_Credentials"));
             } finally {
                 if (userCtx != null) {
                     try {

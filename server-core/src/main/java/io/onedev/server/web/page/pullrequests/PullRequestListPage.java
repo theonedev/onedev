@@ -225,7 +225,7 @@ public class PullRequestListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return Translation.get("pull_request") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return Translation.get("Pull_Requests") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 	public static PageParameters paramsOf(int page) {
@@ -240,7 +240,7 @@ public class PullRequestListPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, Translation.get("pull_request"));
+		return new Label(componentId, Translation.get("Pull_Requests"));
 	}
 	
 }

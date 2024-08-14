@@ -18,6 +18,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
@@ -250,7 +251,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Watch/Unwatch Selected Pull Requests";
+						return Translation.get("Watch/Unwatch_Selected_Pull_Requests");
 					}
 
 					@Override
@@ -306,7 +307,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Discard Selected Pull Requests";
+							return Translation.get("Discard_Selected_Pull_Requests");
 						}
 
 						@Override
@@ -380,7 +381,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete Selected Pull Requests";
+							return Translation.get("Delete_Selected_Pull_Requests");
 						}
 
 						@Override
@@ -444,7 +445,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Watch/Unwatch All Queried Pull Requests";
+						return Translation.get("Watch/Unwatch_All_Queried_Pull_Requests");
 					}
 
 					@Override
@@ -500,7 +501,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Discard All Queried Pull Requests";
+							return Translation.get("Discard_All_Queried_Pull_Requests");
 						}
 
 						@Override
@@ -576,7 +577,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Pull Requests";
+							return Translation.get("Delete_All_Queried_Pull_Requests");
 						}
 
 						@Override
@@ -642,7 +643,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Pull Requests as Read";
+						return Translation.get("Set_All_Queried_Pull_Requests_as_Read");
 					}
 
 					@Override
@@ -799,7 +800,7 @@ public abstract class PullRequestListPanel extends Panel {
 					}) {
 						@Override
 						protected String getTitle() {
-							return "Select Project";
+							return Translation.get("Select_Project");
 						}
 						
 						@Override

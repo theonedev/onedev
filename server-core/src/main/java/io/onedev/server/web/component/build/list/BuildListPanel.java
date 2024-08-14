@@ -20,6 +20,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -268,7 +269,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Cancel Selected Builds";
+						return Translation.get("Cancel_Selected_Builds");
 					}
 					
 					@Override
@@ -340,7 +341,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Re-run Selected Builds";
+						return Translation.get("Re-run_Selected_Builds");
 					}
 					
 					@Override
@@ -414,7 +415,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Builds";
+						return Translation.get("Delete_Selected_Builds");
 					}
 					
 					@Override
@@ -477,7 +478,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					public String getLabel() {
-						return "Cancel All Queried Builds";
+						return Translation.get("Cancel_All_Queried_Builds");
 					}
 					
 					@Override
@@ -550,7 +551,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					public String getLabel() {
-						return "Re-run All Queried Builds";
+						return Translation.get("Re-run_All_Queried_Builds");
 					}
 					
 					@Override
@@ -623,7 +624,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Builds";
+						return Translation.get("Delete_All_Queried_Builds");
 					}
 					
 					@Override
@@ -903,7 +904,7 @@ public abstract class BuildListPanel extends Panel {
 					}) {
 						@Override
 						protected String getTitle() {
-							return "Select Project";
+							return Translation.get("Select_Project");
 						}
 
 						@Override
@@ -1248,7 +1249,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					protected String getTitle() {
-						return "Select Branch/Tag";
+						return Translation.get("Select_Branch/Tag");
 					}
 
 					@Override

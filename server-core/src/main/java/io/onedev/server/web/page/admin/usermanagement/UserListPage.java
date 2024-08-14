@@ -8,6 +8,7 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -196,7 +197,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Users as Guest";
+						return Translation.get("Set_Selected_Users_as_Guest");
 					}
 
 					@Override
@@ -267,7 +268,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Users as non-Guest";
+						return Translation.get("Set_Selected_Users_as_non-Guest");
 					}
 
 					@Override
@@ -309,7 +310,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Users to Use Internal Authentication";
+						return Translation.get("Set_Selected_Users_to_Use_Internal_Authentication");
 					}
 
 					@Override
@@ -369,7 +370,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Users to Use External Authentication";
+						return Translation.get("Set_Selected_Users_to_Use_External_Authentication");
 					}
 
 					@Override
@@ -427,7 +428,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Users";
+						return Translation.get("Delete_Selected_Users");
 					}
 
 					@Override
@@ -498,7 +499,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Users as Guest";
+						return Translation.get("Set_All_Queried_Users_as_Guest");
 					}
 
 					@Override
@@ -571,7 +572,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Users as non-Guest";
+						return Translation.get("Set_All_Queried_Users_as_non-Guest");
 					}
 
 					@Override
@@ -618,7 +619,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Users to Use Internal Authentication";
+						return Translation.get("Set_All_Queried_Users_to_Use_Internal_Authentication");
 					}
 
 					@Override
@@ -681,7 +682,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Users to Use External Authentication";
+						return Translation.get("Set_All_Queried_Users_to_Use_External_Authentication");
 					}
 
 					@Override
@@ -744,7 +745,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Users";
+						return Translation.get("Delete_All_Queried_Users");
 					}
 
 					@Override

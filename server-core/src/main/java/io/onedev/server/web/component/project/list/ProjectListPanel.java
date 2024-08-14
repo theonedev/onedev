@@ -14,10 +14,7 @@ import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ProjectBuildStatusStat;
-import io.onedev.server.util.ProjectIssueStateStat;
-import io.onedev.server.util.ProjectPackTypeStat;
-import io.onedev.server.util.ProjectPullRequestStatusStat;
+import io.onedev.server.util.*;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
@@ -327,7 +324,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Move Selected Projects To...";
+						return Translation.get("Move_Selected_Projects_To");
 					}
 
 					@Override
@@ -433,7 +430,7 @@ public class ProjectListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Set Selected As Root Projects";
+							return Translation.get("Set_Selected_As_Root_Projects");
 						}
 	
 						@Override
@@ -515,7 +512,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Projects";
+						return Translation.get("Delete_Selected_Projects");
 					}
 					
 					@Override
@@ -596,7 +593,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Move All Queried Projects To...";
+						return Translation.get("Move_All_Queried_Projects_To");
 					}
 					
 					@Override
@@ -704,7 +701,7 @@ public class ProjectListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Set All Queried As Root Projects";
+							return Translation.get("Set_All_Queried_As_Root_Projects");
 						}
 						
 						@Override
@@ -788,7 +785,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Projects";
+						return Translation.get("Delete_All_Queried_Projects");
 					}
 					
 					@Override
@@ -921,7 +918,7 @@ public class ProjectListPanel extends Panel {
 	
 							@Override
 							public String getLabel() {
-								return "From " + importer.getName();
+								return Translation.get("From") + " " + importer.getName();
 							}
 	
 							@Override

@@ -16,20 +16,20 @@
 		</div>
 		<div class="sidebar-footer">
 			<a wicket:id="productVersion" target="_blank" class="sidebar-version"></a>
-			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm" wicket:message="title:tryEE">Try EE</a>
+			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm" wicket:message="title:Try_EE">Try EE</a>
 			<div class="dropdown sidebar-help">
 				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
 					<wicket:svg href="question-o" class="icon"></wicket:svg>
 				</a>
 				<div class="dropdown-menu">
-					<a href="https://docs.onedev.io" class="dropdown-item" target="_blank"><wicket:message key="documentation"/></a>
-					<a wicket:id="supportRequest" class="dropdown-item"><wicket:message key="supportRequest"/></a>
+					<a href="https://docs.onedev.io" class="dropdown-item" target="_blank"><wicket:message key="Documentation"/></a>
+					<a wicket:id="supportRequest" class="dropdown-item"><wicket:message key="Support_Request"/></a>
 					<a wicket:id="bugReport" href="https://code.onedev.io/onedev/server/~issues?query=%22State%22+is+%22Open%22" class="dropdown-item" target="_blank">Support & Bug Report</a>
-					<a href="/~help/api" class="dropdown-item" target="_blank"><wicket:message key="restfulAPI" /></a>
-					<a wicket:id="incompatibilities" class="dropdown-item"><wicket:message key="incompatibilities"/></a>
-					<a class="dropdown-item" href="https://onedev.io/license-agreement" target="_blank"><wicket:message key="licenseAgreement" /></a>
-					<a wicket:id="checkUpdate" class="dropdown-item"><wicket:message key="checkUpdate"/></a>
-					<a wicket:id="tryEEMenuItem" href="https://onedev.io/pricing" class="try-ee dropdown-item d-none"><wicket:message key="tryEE" /></a>
+					<a href="/~help/api" class="dropdown-item" target="_blank"><wicket:message key="Restful_API" /></a>
+					<a wicket:id="incompatibilities" class="dropdown-item"><wicket:message key="Incompatibilities"/></a>
+					<a class="dropdown-item" href="https://onedev.io/license-agreement" target="_blank"><wicket:message key="License_Agreement" /></a>
+					<a wicket:id="checkUpdate" class="dropdown-item"><wicket:message key="Check_Update"/></a>
+					<a wicket:id="tryEEMenuItem" href="https://onedev.io/pricing" class="try-ee dropdown-item d-none"><wicket:message key="Try_EE" /></a>
 				</div>
 			</div>
 		</div>
@@ -45,11 +45,11 @@
 			<div wicket:id="title" class="topbar-title"></div>
 		</div>
 		<div class="topbar-right text-nowrap">
-			<a wicket:id="alerts" class="text-warning topbar-link" wicket:message="title:alert"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
-			<a wicket:id="newVersionStatus" class="new-version-status topbar-link" wicket:message="title:newVersionStatus"><img wicket:id="icon"/></a>
-			<a wicket:id="darkMode" class="topbar-link" wicket:message="title:darkMode"><svg wicket:id="icon" class="icon"/></a>
+			<a wicket:id="alerts" class="text-warning topbar-link" wicket:message="title:Alerts_Title"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
+			<a wicket:id="newVersionStatus" class="new-version-status topbar-link" wicket:message="title:New_Version_Status"><img wicket:id="icon"/></a>
+			<a wicket:id="darkMode" class="topbar-link" wicket:message="title:Dark_Mode"><svg wicket:id="icon" class="icon"/></a>
 			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
-			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:message key="signIn"/></span></a>
+			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:message key="Sign_In"/></span></a>
 			<div wicket:id="userInfo" class="dropdown user-info">
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
 					<img wicket:id="avatar">
@@ -58,49 +58,49 @@
 				<div class="dropdown-menu">
 					<wicket:enclosure child="hasUnverifiedLink">
 						<div class="mx-3 my-2 alert alert-light-warning">
-							<wicket:message key="youHaveUnverified"/> <a wicket:id="hasUnverifiedLink"><wicket:message key="emailAddresses"/></a>
+							<wicket:message key="You_Have_Unverified"/> <a wicket:id="hasUnverifiedLink"><wicket:message key="Email_Address"/></a>
 						</div>
 					</wicket:enclosure>
 					<wicket:enclosure child="noPrimaryAddressLink">
 						<div class="mx-3 my-2 alert alert-light-warning">
-							<wicket:message key="primary"/> <a wicket:id="noPrimaryAddressLink"><wicket:message key="emailAddress"/></a> <wicket:message key="notSpecified"/>
+							<wicket:message key="Primary"/> <a wicket:id="noPrimaryAddressLink"><wicket:message key="Email_Address"/></a> <wicket:message key="Not_Specified"/>
 						</div>
 					</wicket:enclosure>
 					<a wicket:id="myProfile" class="dropdown-item">
 						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
-						<wicket:message key="profile"/>
+						<wicket:message key="Profile"/>
 					</a>
 					<a wicket:id="myEmailSetting" class="dropdown-item">
 						<wicket:svg href="mail" class="icon mr-2"></wicket:svg>
-						<wicket:message key="emailAddresses"/>
+						<wicket:message key="Email_Address"/>
 					</a>
 					<a wicket:id="myAvatar" class="dropdown-item">
 						<wicket:svg href="avatar" class="icon mr-2"></wicket:svg>
-						<wicket:message key="editAvatar"/>
+						<wicket:message key="Edit_Avatar"/>
 					</a>
 					<a wicket:id="myPassword" class="dropdown-item">
 						<wicket:svg href="password" class="icon mr-2"></wicket:svg>
-						<wicket:message key="changePassword"/>
+						<wicket:message key="Change_Password"/>
 					</a>
 					<a wicket:id="mySshKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						<wicket:message key="sshKeys"/>
+						<wicket:message key="SSH_Keys"/>
 					</a>
 					<a wicket:id="myGpgKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						<wicket:message key="gpgKeys"/>
+						<wicket:message key="GPG_Keys"/>
 					</a>
 					<a wicket:id="myAccessTokens" class="dropdown-item">
 						<wicket:svg href="token" class="icon mr-2"></wicket:svg>
-						<wicket:message key="accessTokens"/>
+						<wicket:message key="Access_Tokens"/>
 					</a>
 					<a wicket:id="myTwoFactorAuthentication" class="dropdown-item">
 						<wicket:svg href="shield" class="icon mr-2"></wicket:svg>
-						<wicket:message key="twoFactorAuthentication"/>
+						<wicket:message key="Two_Factor_Authentication"/>
 					</a>
 					<a wicket:id="myPreferences" class="dropdown-item">
 						<wicket:svg href="sliders" class="icon mr-2"></wicket:svg>
-						<wicket:message key="preferences"/>
+						<wicket:message key="Preferences"/>
 					</a>
 					<a wicket:id="signOut" class="dropdown-item">
 						<wicket:svg href="logout" class="icon mr-2"></wicket:svg>
@@ -117,7 +117,7 @@
 	<wicket:fragment wicket:id="menuHeaderFrag">
 		<img wicket:id="icon" class="menu-header-icon avatar"></img>
 		<span wicket:id="label" class="menu-header-text"></span>
-		<a wicket:id="moreInfo" class="mehu-header-ellipsis" wicket:message="title:moreInfo"><wicket:svg href="ellipsis" class="icon"/></a>
+		<a wicket:id="moreInfo" class="mehu-header-ellipsis" wicket:message="title:More_Info"><wicket:svg href="ellipsis" class="icon"/></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="menuBodyFrag">
 		<div wicket:id="items" class="menu-item">
@@ -132,10 +132,10 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertsFrag">
 		<div class="alerts">
-			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2"><wicket:message key="alerts"/></div>
+			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2"><wicket:message key="Alerts_Title"/></div>
 			<table wicket:id="alerts" class="table"></table>
 			<div class="px-2 pb-2">
-				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary"><wicket:message key="deleteAll"/></a>
+				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary"><wicket:message key="Delete_All"/></a>
 			</div>
 		</div>
 	</wicket:fragment>
@@ -145,6 +145,6 @@
 		<pre wicket:id="detail" class="mt-2 font-size-sm"></pre>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertActionFrag">
-		<a wicket:id="delete" wicket:message="title:delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" wicket:message="title:Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

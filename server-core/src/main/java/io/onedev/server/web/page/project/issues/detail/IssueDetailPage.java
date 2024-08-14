@@ -160,7 +160,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					if (SecurityUtils.canReadCode(getProject())) {
 						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())));
 						if (!getIssue().getPullRequests().isEmpty())
-							tabs.add(new PageTab(Model.of(Translation.get("pull_request")), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())));
+							tabs.add(new PageTab(Model.of(Translation.get("Pull_Requests")), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())));
 					}
 					// Do not calculate fix builds now as it might be slow
 					tabs.add(new PageTab(Model.of("Fixing Builds"), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())));

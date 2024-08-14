@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import io.onedev.server.util.Translation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -169,7 +170,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Memberships";
+						return Translation.get("Delete_Selected_Memberships");
 					}
 
 					@Override
@@ -231,7 +232,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Memberships";
+						return Translation.get("Delete_All_Queried_Memberships");
 					}
 					
 					@Override

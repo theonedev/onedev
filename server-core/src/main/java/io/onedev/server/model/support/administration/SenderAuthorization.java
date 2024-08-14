@@ -43,7 +43,7 @@ public class SenderAuthorization implements Serializable {
 		this.senderEmails = senderEmails;
 	}
 
-	@Editable(order=150, placeholder="any_project", description="Specify space-separated projects "
+	@Editable(order=150, placeholder="Any_Project", description="Specify space-separated projects "
 			+ "authorized to senders above. Use '**' or '*' or '?' for "
 			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to authorize all projects")

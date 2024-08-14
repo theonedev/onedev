@@ -190,51 +190,51 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
 			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
 
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("files"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Files"),
 					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("commits"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Commits"),
 					ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject(), null),
 					Lists.newArrayList(CommitDetailPage.class)));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("branches"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Branches"),
 					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("tags"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Tags"),
 					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("code_comments"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Code_Comments"),
 					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("code_compare"),
+			codeMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Code_Compare"),
 					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
 
-			menuItems.add(new SidebarMenuItem.SubMenu("git", Translation.get("code"), codeMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("git", Translation.get("Code"), codeMenuItems));
 		}
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
-			menuItems.add(new SidebarMenuItem.Page("pull-request", Translation.get("pull_request"),
+			menuItems.add(new SidebarMenuItem.Page("pull-request", Translation.get("Pull_Requests"),
 					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
 		}
 		if (getProject().isIssueManagement()) {
 			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
 
-			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("list"),
+			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("List"),
 					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
-			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("boards"),
+			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Boards"),
 					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));
-			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("iterations"),
+			issueMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Iterations"),
 					IterationListPage.class, IterationListPage.paramsOf(getProject(), false, null),
 					Lists.newArrayList(NewIterationPage.class, IterationDetailPage.class, IterationEditPage.class)));
 			if (getProject().isTimeTracking() && isSubscriptionActive())
 				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
-			menuItems.add(new SidebarMenuItem.SubMenu("bug", Translation.get("issues"), issueMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("bug", Translation.get("Issues"), issueMenuItems));
 		}
 
 		if (getProject().isCodeManagement()) {
-			menuItems.add(new SidebarMenuItem.Page("play-circle", Translation.get("builds"),
+			menuItems.add(new SidebarMenuItem.Page("play-circle", Translation.get("Builds"),
 					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		}
 
 		if (getProject().isPackManagement() && SecurityUtils.canReadPack(getProject())) {
-			menuItems.add(new SidebarMenuItem.Page("package", Translation.get("packages"),
+			menuItems.add(new SidebarMenuItem.Page("package", Translation.get("Packages"),
 					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(PackDetailPage.class)));
 		}
@@ -242,7 +242,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
-			statsMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("code"),
+			statsMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Code"),
 					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject()),
 					Lists.newArrayList(SourceLinesPage.class)));
 		}
@@ -254,58 +254,58 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			statsMenuItems.addAll(contribution.getMenuItems(getProject()));
 
 		if (!statsMenuItems.isEmpty())
-			menuItems.add(new SidebarMenuItem.SubMenu("stats", Translation.get("statistics"), statsMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("stats", Translation.get("Statistics"), statsMenuItems));
 
-		menuItems.add(new SidebarMenuItem.Page("tree", Translation.get("child_projects"),
+		menuItems.add(new SidebarMenuItem.Page("tree", Translation.get("Child_Projects"),
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 
 		if (SecurityUtils.canManageProject(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
-			settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("general_settings"),
+			settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("General_Settings"),
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
-			settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("edit_avatar"),
+			settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Edit_Avatar"),
 					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));
 
 			List<SidebarMenuItem> authorizationMenuItems = new ArrayList<>();
-			authorizationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("by_user"),
+			authorizationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("By_User"),
 					UserAuthorizationsPage.class, UserAuthorizationsPage.paramsOf(getProject())));
-			authorizationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("by_group"),
+			authorizationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("By_Group"),
 					GroupAuthorizationsPage.class, GroupAuthorizationsPage.paramsOf(getProject())));
-			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("authorization"), authorizationMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Authorization"), authorizationMenuItems));
 
 			List<SidebarMenuItem> codeSettingMenuItems = new ArrayList<>();
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("branch_protection"),
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Branch_Protection"),
 					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("tag_protection"),
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Tag_Protection"),
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("code_analysis"),
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Code_Analysis"),
 					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
 			if (getProject().isCodeManagement()) {
-				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("git_pack_config"),
+				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Git_Pack_Config"),
 						GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
 			}
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("pull_request"),
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Pull_Requests"),
 					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
 
-			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("code"), codeSettingMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Code"), codeSettingMenuItems));
 
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("job_secrets"),
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Job_Secrets"),
 					JobSecretsPage.class, JobSecretsPage.paramsOf(getProject())));
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("job_properties"),
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Job_Properties"),
 					JobPropertiesPage.class, JobPropertiesPage.paramsOf(getProject())));
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("build_preserve_rules"),
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Build_Preserve_Rules"),
 					BuildPreservationsPage.class, BuildPreservationsPage.paramsOf(getProject())));
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("default_fixed_issue_filters"),
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Default_Fixed_Issue_Filters"),
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("cache_management"),
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Cache_Management"),
 					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
 
-			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("build"), buildSettingMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, Translation.get("Build"), buildSettingMenuItems));
 
 			if (getSettingManager().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
-				settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("service_desk"),
+				settingMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("Service_Desk"),
 						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));
 			}
 
@@ -334,7 +334,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						ContributedProjectSettingPage.paramsOf(getProject(), contributedSettingClass)));
 			}
 
-			SidebarMenuItem webHooksItem = new SidebarMenuItem.Page(null, Translation.get("web_hooks"),
+			SidebarMenuItem webHooksItem = new SidebarMenuItem.Page(null, Translation.get("Web_Hooks"),
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject()));
 			var notificationItems = contributedSettingMenuItems.get("Notification");
 			if (notificationItems == null)
@@ -350,7 +350,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				}
 			}
 
-			menuItems.add(new SidebarMenuItem.SubMenu("sliders", Translation.get("settings"), settingMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("sliders", Translation.get("Settings"), settingMenuItems));
 		}
 
 		String avatarUrl = OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(getProject().getId());

@@ -8,6 +8,7 @@ import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
 import io.onedev.server.web.page.simple.SimpleCssResourceReference;
@@ -51,7 +52,7 @@ public class LoginPage extends SimplePage {
 	
 	private String errorMessage;
 	
-	private String subTitle = "Enter your details to login to your account";
+	private String subTitle = Translation.get("Login_Sub_Title");
 	
 	public LoginPage(PageParameters params) {
 		super(params);
@@ -81,19 +82,17 @@ public class LoginPage extends SimplePage {
 					var user = (User) OneDev.getInstance(PasswordAuthenticatingRealm.class).getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
 						if (user.getTwoFactorAuthentication() != null) {
-							subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
-									+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
-									+ "authenticator is in sync";
+							subTitle = Translation.get("Two_Factor_Auth_Enabled");
 							newPasscodeVerifyFrag(user.getId());
 						} else {
-							subTitle = "Set up two-factor authentication";
+							subTitle = Translation.get("Setup_Two_Factor_Auth");
 							newTwoFactorAuthenticationSetup(user.getId());
 						}
 					} else {
 						afterLogin(user);
 					}
 				} catch (IncorrectCredentialsException|UnknownAccountException e) {
-					error("Invalid credentials");
+					error(Translation.get("Invalid_Credentials"));
 				} catch (AuthenticationException ae) {
 					error(ae.getMessage());
 				}
@@ -122,7 +121,7 @@ public class LoginPage extends SimplePage {
 				userName = object;
 			}
 
-		}).setLabel(Model.of("User name")).setRequired(true));
+		}).setLabel(Model.of(Translation.get("User_Name"))).setRequired(true));
 		
 		form.add(new PasswordTextField("password", new IModel<String>() {
 
@@ -140,7 +139,7 @@ public class LoginPage extends SimplePage {
 				password = object;
 			}
 			
-		}).setLabel(Model.of("Password")).setRequired(true));
+		}).setLabel(Model.of(Translation.get("Password"))).setRequired(true));
 		
 		form.add(new CheckBox("rememberMe", new IModel<Boolean>() {
 
@@ -246,7 +245,7 @@ public class LoginPage extends SimplePage {
 				if (user.getTwoFactorAuthentication().getTOTPCode().equals(passcode)) 
 					afterLogin(user);
 				else 
-					error("Passcode verification failed");
+					error(Translation.get("Passcode_Verification_Failed"));
 			}
 			
 		};
@@ -274,7 +273,7 @@ public class LoginPage extends SimplePage {
 
 			@Override
 			public void onClick() {
-				subTitle = "Please input one of your recovery codes saved when enable two-factor authentication";
+				subTitle = Translation.get("Input_Recovery_Code");
 				newRecoveryCodeVerifyFrag(userId);
 			}
 			
@@ -295,7 +294,7 @@ public class LoginPage extends SimplePage {
 					getUserManager().update(user, null);
 					afterLogin(user);
 				} else {
-					error("Recovery code verification failed");
+					error(Translation.get("Recovery_Code_Verification_Failed"));
 				}
 			}
 			
@@ -331,7 +330,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Sign In To " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return Translation.get("Sign_In_Indicator") + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 
 	@Override

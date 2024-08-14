@@ -17,7 +17,7 @@ public class ProjectAuthorizationBean implements Serializable {
 	
 	private String roleName;
 
-	@Editable(order=100, name="Project")
+	@Editable(order=100, name="Projects")
 	@ProjectChoice
 	@NotEmpty
 	public String getProjectPath() {

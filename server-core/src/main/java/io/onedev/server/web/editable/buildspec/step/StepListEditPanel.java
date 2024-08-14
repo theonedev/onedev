@@ -6,6 +6,7 @@ import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -161,7 +162,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Add before";
+								return Translation.get("Add_before");
 							}
 
 							@Override
@@ -178,7 +179,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Add after";
+								return Translation.get("Add_after");
 							}
 
 							@Override
@@ -195,7 +196,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Copy";
+								return Translation.get("Copy");
 							}
 
 							@Override
@@ -236,7 +237,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Delete";
+								return Translation.get("Delete");
 							}
 
 							@Override

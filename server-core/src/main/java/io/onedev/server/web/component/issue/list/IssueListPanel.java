@@ -25,6 +25,7 @@ import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
@@ -332,7 +333,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "From " + importer.getName();
+							return Translation.get("From") + " " + importer.getName();
 						}
 
 						@Override
@@ -440,7 +441,7 @@ public abstract class IssueListPanel extends Panel {
 						
 						@Override
 						protected String getTitle() {
-							return "Select Project";
+							return Translation.get("Select_Project");
 						}
 
 						@Override
@@ -567,7 +568,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Sync Timing of Selected Issues";
+							return Translation.get("Sync_Timing_of_Selected_Issues");
 						}
 
 						@Override
@@ -611,7 +612,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Batch Edit Selected Issues";
+							return Translation.get("Batch_Edit_Selected_Issues");
 						}
 
 						@Override
@@ -692,7 +693,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Move Selected Issues To...";
+							return Translation.get("Move_Selected_Issues_To");
 						}
 
 						@Override
@@ -774,7 +775,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Copy Selected Issues To...";
+							return Translation.get("Copy_Selected_Issues_To");
 						}
 
 						@Override
@@ -856,7 +857,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete Selected Issues";
+							return Translation.get("Delete_Selected_Issues");
 						}
 
 						@Override
@@ -919,7 +920,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Watch/Unwatch Selected Issues";
+						return Translation.get("Watch/Unwatch_Selected_Issues");
 					}
 
 					@Override
@@ -977,7 +978,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Sync Timing of All Queried Issues";
+							return Translation.get("Sync_Timing_of_All_Queried_Issues");
 						}
 
 						@Override
@@ -1021,7 +1022,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Batch Edit All Queried Issues";
+							return Translation.get("Batch_Edit_All_Queried_Issues");
 						}
 
 						@Override
@@ -1099,7 +1100,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Move All Queried Issues To...";
+							return Translation.get("Move_All_Queried_Issues_To");
 						}
 
 						@Override
@@ -1183,7 +1184,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Copy All Queried Issues To...";
+							return Translation.get("Copy_All_Queried_Issues_To");
 						}
 
 						@Override
@@ -1267,7 +1268,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Issues";
+							return Translation.get("Delete_All_Queried_Issues");
 						}
 
 						@Override
@@ -1333,7 +1334,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Watch/Unwatch All Queried Issues";
+						return Translation.get("Watch/Unwatch_All_Queried_Issues");
 					}
 
 					@Override
@@ -1388,7 +1389,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Issues as Read";
+						return Translation.get("Set_All_Queried_Issues_as_Read");
 					}
 
 					@Override

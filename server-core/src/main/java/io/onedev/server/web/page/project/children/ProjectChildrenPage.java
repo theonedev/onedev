@@ -112,7 +112,7 @@ public class ProjectChildrenPage extends ProjectPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return Translation.get("child_project") + " - " + getProject().getPath();
+		return Translation.get("Child_Projects") + " - " + getProject().getPath();
 	}
 
 	@Override

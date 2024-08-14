@@ -27,6 +27,7 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.diff.DiffUtils;
@@ -1196,7 +1197,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				public String getLabel() {
-					return "Outline Search";
+					return Translation.get("Outline_Search");
 				}
 
 				@Override

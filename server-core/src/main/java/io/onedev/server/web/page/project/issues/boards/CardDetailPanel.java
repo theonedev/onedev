@@ -138,7 +138,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					
 				});
 				if (!getIssue().getPullRequests().isEmpty()) {
-					tabs.add(new AjaxActionTab(Model.of(Translation.get("pull_request"))) {
+					tabs.add(new AjaxActionTab(Model.of(Translation.get("Pull_Requests"))) {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {

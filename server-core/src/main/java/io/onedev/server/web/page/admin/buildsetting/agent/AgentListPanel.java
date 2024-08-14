@@ -7,6 +7,7 @@ import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AgentQueryBehavior;
 import io.onedev.server.web.component.AgentStatusBadge;
@@ -249,7 +250,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Pause Selected Agents";
+						return Translation.get("Pause_Selected_Agents");
 					}
 					
 					@Override
@@ -292,7 +293,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Resume Selected Agents";
+						return Translation.get("Resume_Selected_Agents");
 					}
 					
 					@Override
@@ -335,7 +336,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Restart Selected Agents";
+						return Translation.get("Restart_Selected_Agents");
 					}
 					
 					@Override
@@ -396,7 +397,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove Selected Agents";
+						return Translation.get("Remove_Selected_Agents");
 					}
 					
 					@Override
@@ -457,7 +458,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Pause All Queried Agents";
+						return Translation.get("Pause_All_Queried_Agents");
 					}
 					
 					@Override
@@ -521,7 +522,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Resume All Queried Agents";
+						return Translation.get("Resume_All_Queried_Agents");
 					}
 					
 					@Override
@@ -585,7 +586,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Restart All Queried Agents";
+						return Translation.get("Restart_All_Queried_Agents");
 					}
 					
 					@Override
@@ -649,7 +650,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove All Queried Agents";
+						return Translation.get("Remove_All_Queried_Agents");
 					}
 					
 					@Override

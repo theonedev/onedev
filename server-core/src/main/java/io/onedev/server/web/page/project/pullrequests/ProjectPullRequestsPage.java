@@ -260,12 +260,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-nowrap'>"+Translation.get("pull_request")+"</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-nowrap'>"+Translation.get("Pull_Requests")+"</span>").setEscapeModelStrings(false);
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return Translation.get("pull_request") + " - " + getProject().getPath();
+		return Translation.get("Pull_Requests") + " - " + getProject().getPath();
 	}
 	
 	@Override

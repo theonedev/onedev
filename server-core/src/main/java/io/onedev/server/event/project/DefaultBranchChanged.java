@@ -5,6 +5,7 @@ import java.util.Date;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.Translation;
 
 public class DefaultBranchChanged extends ProjectEvent implements CommitAware {
 	
@@ -23,7 +24,7 @@ public class DefaultBranchChanged extends ProjectEvent implements CommitAware {
 
 	@Override
 	public String getActivity() {
-		return "Default branch changed";
+		return Translation.get("Default_Branch_Changed");
 	}
 
 	@Override

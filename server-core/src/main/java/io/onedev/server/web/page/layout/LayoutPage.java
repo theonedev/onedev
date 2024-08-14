@@ -181,6 +181,10 @@ public abstract class LayoutPage extends BasePage {
 			protected List<SidebarMenu> load() {
 				List<SidebarMenu> menus = new ArrayList<>();
 				List<SidebarMenuItem> menuItems = new ArrayList<>(customization.getMainMenuItems());
+				menuItems.forEach(sidebarMenuItem -> {
+					sidebarMenuItem.setLabel(Translation.get(sidebarMenuItem.getLabel().replaceAll(" ", "_")));
+				});
+				
 				if (SecurityUtils.isAdministrator()) {
 					List<SidebarMenuItem> administrationMenuItems = new ArrayList<>();
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, Translation.get("System_Settings"),
@@ -836,7 +840,7 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
-					Session.get().warn(Translation.get("Exited_impersonation"));
+					Session.get().warn(Translation.get("Exited_Impersonation"));
 					throw new RestartResponseException(HomePage.class);
 				}
 

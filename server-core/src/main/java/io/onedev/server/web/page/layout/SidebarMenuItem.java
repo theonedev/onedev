@@ -16,7 +16,7 @@ public abstract class SidebarMenuItem implements Serializable {
 
 	private final String iconHref;
 	
-	private final String label;
+	private String label;
 	
 	public SidebarMenuItem(@Nullable String iconHref, String label) {
 		this.iconHref = iconHref;
@@ -30,6 +30,10 @@ public abstract class SidebarMenuItem implements Serializable {
 	
 	public String getLabel() {
 		return label;
+	}
+	
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public abstract boolean isActive();

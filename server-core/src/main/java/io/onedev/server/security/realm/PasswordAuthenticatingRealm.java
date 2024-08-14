@@ -11,6 +11,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.Translation;
 import io.onedev.server.validation.validator.UserNameValidator;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.PasswordMatcher;
@@ -187,7 +188,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 									authenticator.isCreateUserAsGuest(), authenticator.getDefaultGroup());
 						}
 					} else {
-						throw new UnknownAccountException("Invalid credentials");
+						throw new UnknownAccountException(Translation.get("Invalid_Credentials"));
 					}
 				}
 			} catch (Exception e) {

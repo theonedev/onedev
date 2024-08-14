@@ -504,7 +504,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	return SecurityUtils.asSubject(getPrincipals());
     }
 
-	@Editable(name="login_name", order=100)
+	@Editable(name="Login_Name", order=100)
 	@UserName
 	@NotEmpty
 	public String getName() {
@@ -515,7 +515,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	this.name = name;
     }
     
-	@Editable(name="password", order=150)
+	@Editable(name="Password", order=150)
 	@Password(needConfirm=true, autoComplete="new-password")
 	@NotEmpty
 	public String getPassword() {
@@ -544,7 +544,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	return getPassword().equals(EXTERNAL_MANAGED);
     }
     
-	@Editable(name="full_name", order=200)
+	@Editable(name="Full_Name", order=200)
 	public String getFullName() {
 		return fullName;
 	}

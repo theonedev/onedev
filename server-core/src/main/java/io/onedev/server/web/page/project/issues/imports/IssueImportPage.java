@@ -11,6 +11,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
@@ -88,7 +89,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 					
 					@Override
 					protected String getTitle() {
-						return "Importing from " + importer.getName();
+						return Translation.get("Importing_from") + " " + importer.getName();
 					}
 
 					@Override
@@ -108,7 +109,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 					
 					@Override
 					protected String getTitle() {
-						return "Test importing from " + importer.getName();
+						return Translation.get("Test_importing_from") + " " + importer.getName();
 					}
 
 					@Override

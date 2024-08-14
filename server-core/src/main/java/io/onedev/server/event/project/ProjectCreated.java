@@ -4,6 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 
 public class ProjectCreated extends ProjectEvent {
 	
@@ -13,7 +14,7 @@ public class ProjectCreated extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "created";
+		return Translation.get("Created");
 	}
 
 }

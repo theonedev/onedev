@@ -118,7 +118,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 				if (setting.getApplicableProjects() != null)
 					cellItem.add(new Label(componentId, setting.getApplicableProjects()));
 				else
-					cellItem.add(new Label(componentId, "<i>" + Translation.get("any_project") + "</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + Translation.get("Any_Project") + "</i>").setEscapeModelStrings(false));
 			}
 		});		
 		

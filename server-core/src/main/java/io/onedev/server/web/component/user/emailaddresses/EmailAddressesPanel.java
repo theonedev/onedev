@@ -6,6 +6,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -86,7 +87,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Set As Primary";
+									return Translation.get("Set_As_Primary");
 								}
 
 								@Override
@@ -108,7 +109,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Use For Git Operations";
+									return Translation.get("Use_For_Git_Operations");
 								}
 
 								@Override
@@ -130,7 +131,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Resend Verification Email";
+									return Translation.get("Resend_Verification_Email");
 								}
 
 								@Override
@@ -159,7 +160,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Delete";
+									return Translation.get("Delete");
 								}
 
 								@Override

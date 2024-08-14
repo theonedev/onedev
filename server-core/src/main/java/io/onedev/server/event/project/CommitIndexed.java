@@ -2,6 +2,7 @@ package io.onedev.server.event.project;
 
 import java.util.Date;
 
+import io.onedev.server.util.Translation;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
@@ -27,7 +28,7 @@ public class CommitIndexed extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "commit indexed";
+		return Translation.get("Commit_Indexed");
 	}
 	
 }

@@ -6,6 +6,7 @@ import io.onedev.server.cluster.ServerNotFoundException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -120,7 +121,7 @@ public class GeneralErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "OOPS! There Is An Error";
+		return Translation.get("OOPS_There_Is_An_Error");
 	}
 
 	@Override

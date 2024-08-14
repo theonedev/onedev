@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.blob.render.nocommits;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.onedev.server.util.Translation;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -57,7 +58,7 @@ public class NoCommitsPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Create New File";
+							return Translation.get("Create_New_File");
 						}
 
 						@Override
@@ -79,7 +80,7 @@ public class NoCommitsPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Upload Files";
+							return Translation.get("Upload_Files");
 						}
 
 						@Override

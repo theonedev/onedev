@@ -118,7 +118,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		}
 		thread = new Thread(this);
 
-		initStage = new InitStage(Translation.get("server_starting"));
+		initStage = new InitStage(Translation.get("Server_Starting"));
 	}
 	
 	@Override
@@ -167,7 +167,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				logger.warn("Please set up the server at " + getIngressUrl());
 			else
 				logger.warn("Please set up the server at " + guessServerUrl());
-			initStage = new InitStage(Translation.get("server_setup"), manualConfigs);
+			initStage = new InitStage(Translation.get("Server_Setup"), manualConfigs);
 			var localServer = clusterManager.getLocalServerAddress();
 			while (true) {
 				if (maintenanceFile.exists()) {
@@ -196,10 +196,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				
 				manualConfigs = checkData();
 				if (manualConfigs.isEmpty()) {
-					initStage = new InitStage(Translation.get("please_wait"));
+					initStage = new InitStage(Translation.get("Please_Wait"));
 					break;
 				} else {
-					initStage = new InitStage(Translation.get("server_setup"), manualConfigs);
+					initStage = new InitStage(Translation.get("Server_Setup"), manualConfigs);
 				}
 			}
 		}

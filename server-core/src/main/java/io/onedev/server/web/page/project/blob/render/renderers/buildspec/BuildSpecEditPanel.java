@@ -11,12 +11,9 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
+import io.onedev.server.util.*;
 import io.onedev.server.util.PathNode.Indexed;
 import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
@@ -250,7 +247,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											menuItems.add(new MenuItem() {
 												@Override
 												public String getLabel() {
-													return "Copy";
+													return Translation.get("Copy");
 												}
 
 												@Override
@@ -278,7 +275,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											menuItems.add(new MenuItem() {
 												@Override
 												public String getLabel() {
-													return "Delete";
+													return Translation.get("Delete");
 												}
 
 												@Override
@@ -1053,7 +1050,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 								
 								@Override
 								public String getLabel() {
-									return "Copy";
+									return Translation.get("Copy");
 								}
 
 								@Override
@@ -1082,7 +1079,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 								
 								@Override
 								public String getLabel() {
-									return "Delete";
+									return Translation.get("Delete");
 								}
 
 								@Override

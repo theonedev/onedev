@@ -12,6 +12,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
@@ -193,15 +194,15 @@ public class PasswordResetPage extends SimplePage {
 	@Override
 	protected String getTitle() {
 		if (passwordResetCode == null)
-			return "Forgotten Password?";
+			return Translation.get("Forgotten_Password");
 		else 
-			return "Enter New Password";
+			return Translation.get("Enter_New_Password");
 	}
 
 	@Override
 	protected String getSubTitle() {
 		if (passwordResetCode == null)
-			return "Enter your user name or email to reset password";
+			return Translation.get("Enter_your_user_name_or_email_to_reset_password");
 		else 
 			return null;
 	}

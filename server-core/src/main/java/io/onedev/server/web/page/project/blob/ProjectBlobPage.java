@@ -32,6 +32,7 @@ import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -399,7 +400,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Create New File";
+						return Translation.get("Create_New_File");
 					}
 
 					@Override
@@ -421,7 +422,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Upload Files";
+						return Translation.get("Upload_Files");
 					}
 
 					@Override
@@ -508,7 +509,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Quick Search";
+						return Translation.get("Quick_Search");
 					}
 
 					@Override
@@ -539,7 +540,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Advanced Search";
+						return Translation.get("Advanced_Search");
 					}
 
 					@Override

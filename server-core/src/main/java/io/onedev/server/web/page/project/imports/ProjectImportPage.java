@@ -6,6 +6,7 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
@@ -74,7 +75,7 @@ public class ProjectImportPage extends LayoutPage {
 					
 					@Override
 					protected String getTitle() {
-						return "Importing from " + importer.getName();
+						return Translation.get("Importing_from") + " " + importer.getName();
 					}
 
 					@Override
@@ -94,7 +95,7 @@ public class ProjectImportPage extends LayoutPage {
 					
 					@Override
 					protected String getTitle() {
-						return "Test importing from " + importer.getName();
+						return Translation.get("Test_importing_from") + " " + importer.getName();
 					}
 
 					@Override

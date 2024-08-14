@@ -32,6 +32,7 @@ import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
@@ -427,7 +428,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 							@Override
 							public String getLabel() {
-								return "Commit";
+								return Translation.get("Commit");
 							}
 
 							@Override
@@ -480,7 +481,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 							@Override
 							public String getLabel() {
-								return "Discard";
+								return Translation.get("Discard");
 							}
 
 							@Override

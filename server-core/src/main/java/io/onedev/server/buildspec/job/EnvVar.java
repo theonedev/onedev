@@ -10,6 +10,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.annotation.EnvironmentName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.util.Translation;
 
 @Editable
 public class EnvVar implements Serializable {
@@ -20,7 +21,7 @@ public class EnvVar implements Serializable {
 	
 	private String value;
 
-	@Editable(order=100, description="Specify name of the environment variable")
+	@Editable(order=100, description="Specify_Value_Of_The_Environment_Variable")
 	@Interpolative(variableSuggester="suggestVariables")
 	@EnvironmentName
 	@NotEmpty
@@ -32,7 +33,7 @@ public class EnvVar implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify value of the environment variable")
+	@Editable(order=200, description="Specify_Name_Of_The_Environment_Variable")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getValue() {

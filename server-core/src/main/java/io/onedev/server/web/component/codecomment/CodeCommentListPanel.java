@@ -11,6 +11,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Translation;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
@@ -238,7 +239,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Comments as Resolved";
+						return Translation.get("Set_Selected_Comments_as_Resolved");
 					}
 					
 					@Override
@@ -286,7 +287,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Comments as Unresolved";
+						return Translation.get("Set_Selected_Comments_as_Unresolved");
 					}
 					
 					@Override
@@ -335,7 +336,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Delete Selected Comments";
+							return Translation.get("Delete_Selected_Comments");
 						}
 						
 						@Override
@@ -398,7 +399,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Resolved";
+						return Translation.get("Set_All_Queried_Comments_as_Resolved");
 					}
 					
 					@Override
@@ -442,7 +443,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Unresolved";
+						return Translation.get("Set_All_Queried_Comments_as_Unresolved");
 					}
 					
 					@Override
@@ -487,7 +488,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Comments";
+							return Translation.get("Delete_All_Queried_Comments");
 						}
 						
 						@Override
@@ -552,7 +553,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Read";
+						return Translation.get("Set_All_Queried_Comments_as_Read");
 					}
 
 					@Override

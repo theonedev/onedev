@@ -47,7 +47,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private boolean gravatarEnabled;
 	
-	@Editable(name="server_url", order=90, description="server_url_desc")
+	@Editable(name="Server_Url", order=90, description="Server_Url_Desc")
 	@NotEmpty
 	public String getServerUrl() {
 		return serverUrl;
@@ -57,7 +57,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.serverUrl = serverUrl;
 	}
 
-	@Editable(name="SSH Root URL", order=150, placeholderProvider="getSshRootUrlPlaceholder", description=""
+	@Editable(name="SSH_Root_URL", order=150, placeholderProvider="getSshRootUrlPlaceholder", description=""
 			+ "Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. "
 			+ "Leave empty to derive from server url")
 	public String getSshRootUrl() {
@@ -92,7 +92,7 @@ public class SystemSetting implements Serializable, Validatable {
 		return null;
 	}
 
-	@Editable(order=200, name="git_location", description="git_location_desc")
+	@Editable(order=200, name="Git_Location", description="Git_Location_Desc")
 	@Valid
 	@NotNull(message="may not be empty")
 	public GitLocation getGitLocation() {
@@ -103,7 +103,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.gitLocation = gitLocation;
 	}
 
-	@Editable(order=250, name="curl_location", description="curl_location_desc")
+	@Editable(order=250, name="Curl_Location", description="Curl_Location_Desc")
 	@Valid
 	@NotNull(message="may not be empty")
 	public CurlLocation getCurlLocation() {

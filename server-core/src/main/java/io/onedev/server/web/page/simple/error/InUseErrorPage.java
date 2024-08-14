@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.util.Translation;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.basic.Label;
@@ -45,12 +46,12 @@ public class InUseErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Unable To Delete Right Now";
+		return Translation.get("Unable_To_Delete_Right_Now");
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "The object you are deleting is still being used";
+		return Translation.get("The_object_you_are_deleting_is_still_being_used");
 	}
 
 	@Override

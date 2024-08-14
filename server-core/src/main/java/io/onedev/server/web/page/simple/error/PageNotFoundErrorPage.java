@@ -2,6 +2,7 @@ package io.onedev.server.web.page.simple.error;
 
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.util.Translation;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.http.WebResponse;
@@ -30,7 +31,7 @@ public class PageNotFoundErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Page Not Found";
+		return Translation.get("Page_Not_Found");
 	}
 
 	@Override
@@ -40,7 +41,7 @@ public class PageNotFoundErrorPage extends SimplePage {
 	
 	@Override
 	protected String getSubTitle() {
-		return "I didn't eat it. I swear!";
+		return Translation.get("Page_Not_Found_Desc");
 	}
 
 }
