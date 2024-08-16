@@ -278,7 +278,7 @@ jobs:
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands: |
-        mvn compile
+        mvn clean package
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !TrivyCacheStep
