@@ -286,7 +286,7 @@ jobs:
     detectVulnerabilities: true
     failThreshold: HIGH
     reportName: Vulnerabilities
-    condition: NEVER
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
     cronExpression: 0 0 1 * * ?
