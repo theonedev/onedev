@@ -268,6 +268,10 @@ jobs:
     withSubmodules: true
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: set up maven cache
+    templateName: set up cache
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: build
     runInContainer: true
@@ -278,7 +282,7 @@ jobs:
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !TrivyCacheStep
-    name: cache
+    name: set up trivy cache
     key: trivy
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !RootFSScannerStep
