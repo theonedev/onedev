@@ -290,7 +290,7 @@ jobs:
       secret: false
       valuesProvider: !SpecifiedValues
         values:
-        - - .
+        - - server-product/target/sandbox
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
@@ -338,7 +338,7 @@ jobs:
       secret: false
       valuesProvider: !SpecifiedValues
         values:
-        - - .
+        - - server-product/target/sandbox
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
