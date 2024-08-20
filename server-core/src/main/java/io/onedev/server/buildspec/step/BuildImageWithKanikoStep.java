@@ -8,6 +8,7 @@ import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.entitymanager.SettingManager;
@@ -15,11 +16,13 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.util.UrlUtils;
+import org.apache.shiro.crypto.hash.Hash;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
@@ -37,6 +40,8 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	private Output output = new RegistryOutput();
 	
 	private String trustCertificates;
+
+	private List<EnvVar> envVars = new ArrayList<>();
 	
 	private String moreOptions;
 
@@ -116,6 +121,16 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
 	}
+
+	@Editable(order=1150, name="Environment Variables", group="More Settings", description="Optionally specify environment "
+			+ "variables for this step")
+	public List<EnvVar> getEnvVars() {
+		return envVars;
+	}
+
+	public void setEnvVars(List<EnvVar> envVars) {
+		this.envVars = envVars;
+	}
 	
 	@Editable(order=1200, group="More Settings", description="Optionally specify <a href='https://github.com/GoogleContainerTools/kaniko?tab=readme-ov-file#additional-flags' target='_blank'>additional options</a> of kaniko")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -163,7 +178,12 @@ public class BuildImageWithKanikoStep extends CommandStep {
 					commandsBuilder.append(" ").append(getMoreOptions());
 				
 				commandsBuilder.append("\n");
-				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), useTTY);
+				
+				var envMap = new HashMap<String, String>();
+				for (var envVar: getEnvVars())
+					envMap.put(envVar.getName(), envVar.getValue());
+				
+				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), envMap, useTTY);
 			}
 			
 		};

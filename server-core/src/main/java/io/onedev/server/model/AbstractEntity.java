@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.facade.EntityFacade;
@@ -16,6 +17,8 @@ import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -36,7 +39,8 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	@Api(order=1)
 	@Id
 	@GenericGenerator(name="entity_id", strategy="io.onedev.server.persistence.IdGenerator")
-	@GeneratedValue(generator="entity_id") 	
+	@GeneratedValue(generator="entity_id")
+	@JsonProperty(access = READ_ONLY)
 	private Long id;
 	
 	public Long getId() {

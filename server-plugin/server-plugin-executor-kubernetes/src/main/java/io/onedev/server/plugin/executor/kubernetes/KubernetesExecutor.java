@@ -33,11 +33,9 @@ import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.util.Testable;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -113,8 +111,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	private boolean alwaysPullImage = true;
 	
 	private List<ImageMapping> imageMappings = new ArrayList<>();
-	
-	private transient volatile OsInfo osInfo;
 	
 	private transient volatile String containerName;
 	
@@ -282,8 +278,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 	@Editable(order=28000, group="More Settings", description = "Optionally maps a docker image to a different " +
 			"image. The first matching entry will take effect, or image will remain unchanged if no matching entries " +
-			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper-linux:(.*)</code>, " +
-			"and <code>To</code> specified as <code>my-local-registry/k8s-helper-linux:$1</code> will map the " +
+			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper:(.*)</code>, " +
+			"and <code>To</code> specified as <code>my-local-registry/k8s-helper:$1</code> will map the " +
 			"k8s helper image from official docker registry to local registry, with repository and tag unchanged")
 	public List<ImageMapping> getImageMappings() {
 		return imageMappings;
@@ -309,35 +305,30 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 			@Override
 			public void resume(JobContext jobContext) {
-				if (osInfo != null) {
-					Commandline kubectl = newKubeCtl();
-					kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", getNamespace(jobContext), "--");
-					if (osInfo.isLinux())
-						kubectl.addArgs("touch", "/onedev-build/continue");
-					else
-						kubectl.addArgs("cmd", "-c", "copy", "NUL", "C:\\onedev-build\\continue");
-					kubectl.execute(new LineConsumer() {
+				Commandline kubectl = newKubeCtl();
+				kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", getNamespace(jobContext), "--");
+				kubectl.addArgs("touch", "/onedev-build/continue");
+				kubectl.execute(new LineConsumer() {
 
-						@Override
-						public void consume(String line) {
-							logger.debug(line);
-						}
+					@Override
+					public void consume(String line) {
+						logger.debug(line);
+					}
 
-					}, new LineConsumer() {
+				}, new LineConsumer() {
 
-						@Override
-						public void consume(String line) {
-							logger.error("Kubernetes: " + line);
-						}
+					@Override
+					public void consume(String line) {
+						logger.error("Kubernetes: " + line);
+					}
 
-					}).checkReturnCode();
-				}
+				}).checkReturnCode();
 			}
 
 			@Override
 			public Shell openShell(JobContext jobContext, Terminal terminal) {
 				String containerNameCopy = containerName;
-				if (osInfo != null && containerNameCopy != null) {
+				if (containerNameCopy != null) {
 					Commandline kubectl = newKubeCtl();
 					kubectl.addArgs("exec", "-it", POD_NAME, "-c", containerNameCopy,
 							"--namespace", getNamespace(jobContext), "--");
@@ -347,15 +338,11 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
 						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
 						if (step instanceof RunContainerFacade)
-							workingDir = ((RunContainerFacade)step).getContainer(osInfo).getWorkingDir();
-						else if (osInfo.isLinux())
+							workingDir = ((RunContainerFacade)step).getWorkingDir();
+						else 
 							workingDir = "/onedev-build/workspace";
-						else
-							workingDir = "C:\\onedev-build\\workspace";
-					} else if (osInfo.isLinux()) {
-						workingDir = "/onedev-build/workspace";
 					} else {
-						workingDir = "C:\\onedev-build\\workspace";
+						workingDir = "/onedev-build/workspace";
 					}
 
 					String[] shell = null;
@@ -363,19 +350,13 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
 						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
 						if (step instanceof CommandFacade)
-							shell = ((CommandFacade)step).getShell(osInfo.isWindows(), workingDir);
+							shell = ((CommandFacade)step).getShell(false, workingDir);
 					}
 					if (shell == null) {
-						if (workingDir != null) {
-							if (osInfo.isLinux())
-								shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
-							else
-								shell = new String[]{"cmd", "/c", String.format("cd %s && cmd", workingDir)};
-						} else if (osInfo.isLinux()) {
+						if (workingDir != null) 
+							shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
+						else 
 							shell = new String[]{"sh"};
-						} else {
-							shell = new String[]{"cmd"};
-						}
 					}
 					kubectl.addArgs(shell);
 					return new CommandlineShell(terminal, kubectl);
@@ -557,44 +538,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			}
 			
 		}).checkReturnCode();
-	}
-	
-	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, TaskLogger jobLogger) {
-		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.status.nodeInfo.architecture} {.spec.unschedulable}{'|'}{end}");
-		for (NodeSelectorEntry entry: nodeSelector) 
-			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
-		
-		Collection<OsInfo> osInfos = new ArrayList<>();
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		kubectl.execute(baos, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logKubernetesError(jobLogger, line);
-			}
-			
-		}).checkReturnCode();
-		
-		for (String osInfoString: Splitter.on('|').trimResults().omitEmptyStrings().splitToList(baos.toString())) {
-			osInfoString = osInfoString.replace('\n', ' ').replace('\r', ' ');
-			List<String> fields = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(osInfoString);
-			if (fields.size() == 3 || fields.get(3).equals("false")) {
-				String osName = WordUtils.capitalize(fields.get(0));
-				String osVersion = fields.get(1);
-				if (osName.equals("Windows"))
-					osVersion = StringUtils.substringBeforeLast(osVersion, ".");
-				osInfos.add(new OsInfo(osName, osVersion, fields.get(2)));
-			}
-		}
-
-		if (!osInfos.isEmpty()) {
-			return OsInfo.getBaseline(osInfos);
-		} else {
-			jobLogger.warning("No matching nodes found, assuming baseline os as amd64 linux");
-			return new OsInfo("Linux", "", "amd64");
-		}
 	}
 	
 	private String getServerUrl() {
@@ -820,7 +763,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		
 		jobLogger.log("Waiting for service to be ready...");
 		
-		OsInfo baselineOsInfo = getBaselineOsInfo(nodeSelector, jobLogger);
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 		while (true) {
 			Commandline kubectl = newKubeCtl();
@@ -869,11 +811,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		
 			if (!getStartedContainers(containerStatusNodes).isEmpty()) {
 				kubectl = newKubeCtl();
-				kubectl.addArgs("exec", podName, "-n", namespace, "--");
-				if (baselineOsInfo.isLinux())
-					kubectl.addArgs("sh", "-c");
-				else 
-					kubectl.addArgs("cmd.exe", "/c");
+				kubectl.addArgs("exec", podName, "-n", namespace, "--", "sh", "-c");
 				kubectl.addArgs(jobService.getReadinessCheckCommand());
 				var result = kubectl.execute(new LineConsumer() {
 
@@ -989,27 +927,14 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					createResource(pvcDef, Sets.newHashSet(), jobLogger);
 				}
 				
-				osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
-				
 				Map<String, Object> podSpec = new LinkedHashMap<>();
 
 				List<Map<Object, Object>> containerSpecs = new ArrayList<>();
 				
-				String containerBuildHome;
-				String containerCommandDir;
-				String containerTrustCertsDir;
-				String containerWorkspace;
-				if (osInfo.isWindows()) {
-					containerBuildHome = "C:\\onedev-build";
-					containerWorkspace = containerBuildHome + "\\workspace";
-					containerCommandDir = containerBuildHome + "\\command";
-					containerTrustCertsDir = containerBuildHome + "\\trust-certs";
-				} else {
-					containerBuildHome = "/onedev-build";
-					containerWorkspace = containerBuildHome +"/workspace";
-					containerCommandDir = containerBuildHome + "/command";
-					containerTrustCertsDir = containerBuildHome + "/trust-certs";
-				}
+				var containerBuildHome = "/onedev-build";
+				var containerWorkspace = containerBuildHome +"/workspace";
+				var containerCommandDir = containerBuildHome + "/command";
+				var containerTrustCertsDir = containerBuildHome + "/trust-certs";
 
 				Map<String, String> buildHomeMount = newLinkedHashMap(
 						"name", "build-home", 
@@ -1028,25 +953,14 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				} else {
 					List<Action> actions = new ArrayList<>();
 					CommandFacade facade = new CommandFacade((String) executionContext, null, null,
-							"this does not matter", false);
+							"this does not matter", new HashMap<>(), false);
 					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
 					entryFacade = new CompositeFacade(actions);
 				}
 				
 				List<String> containerNames = newArrayList("init");
 				
-				String helperImageSuffix;
-				if (osInfo.isWindows()) {  
-					String windowsVersion = OsInfo.WINDOWS_VERSIONS.get(osInfo.getWindowsBuild());
-					if (windowsVersion != null)
-						helperImageSuffix = "windows-" + windowsVersion.toLowerCase();
-					else
-						throw new ExplicitException("Unsupported windows build number: " + osInfo.getWindowsBuild());
-				} else {
-					helperImageSuffix = "linux";
-				}
-				
-				String helperImage = mapImage(IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion());
+				String helperImage = mapImage(IMAGE_REPO + ":" + KubernetesHelper.getVersion());
 				
 				ArrayList<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(newLinkedHashMap(
@@ -1055,10 +969,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_JOB_TOKEN, 
 						"value", jobToken));
-				commonEnvs.add(newLinkedHashMap(
-						"name", ENV_OS_INFO,
-						"value", Hex.encodeHexString(SerializationUtils.serialize(osInfo))
-						));
 				commonEnvs.add(newLinkedHashMap(
 						"name", "ONEDEV_WORKSPACE",
 						"value", containerWorkspace
@@ -1071,15 +981,14 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					Map<Object, Object> stepContainerSpec;
 					if (facade instanceof CommandFacade) {
 						CommandFacade commandFacade = (CommandFacade) facade;
-						OsExecution execution = commandFacade.getExecution(osInfo);
-						if (execution.getImage() == null) {
+						if (commandFacade.getImage() == null) {
 							throw new ExplicitException("This step can only be executed by server shell "
 									+ "executor or remote shell executor");
 						}
 						
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
-								"image", mapImage(execution.getImage()));
+								"image", mapImage(commandFacade.getImage()));
 						if (isAlwaysPullImage())
 							stepContainerSpec.put("imagePullPolicy", "Always");
 						if (commandFacade.isUseTTY())
@@ -1088,7 +997,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
 						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
-						setupSecurityContext(stepContainerSpec, execution.getRunAs());
+						setupSecurityContext(stepContainerSpec, commandFacade.getRunAs());
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
@@ -1112,13 +1021,8 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					
 					if (stepContainerSpec != null) {
 						String positionStr = stringifyStepPosition(position);
-						if (osInfo.isLinux()) {
-							stepContainerSpec.put("command", newArrayList("sh"));
-							stepContainerSpec.put("args", newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
-						} else {
-							stepContainerSpec.put("command", newArrayList("cmd"));
-							stepContainerSpec.put("args", newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
-						}
+						stepContainerSpec.put("command", newArrayList("sh"));
+						stepContainerSpec.put("args", newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
 
 						Map<Object, Object> requestsSpec = newLinkedHashMap(
 								"cpu", "0",
@@ -1140,12 +1044,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					return null;
 				}, new ArrayList<>());
 				
-				String k8sHelperClassPath;
-				if (osInfo.isLinux()) {
-					k8sHelperClassPath = "/k8s-helper/*";
-				} else {
-					k8sHelperClassPath = "C:\\k8s-helper\\*";
-				}
+				String k8sHelperClassPath = "/k8s-helper/*";
 				
 				List<String> sidecarArgs = newArrayList(
 						"-classpath", k8sHelperClassPath,

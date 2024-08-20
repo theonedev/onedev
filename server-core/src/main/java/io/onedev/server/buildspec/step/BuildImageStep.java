@@ -109,7 +109,7 @@ public class BuildImageStep extends Step {
 	public void setPlatforms(String platforms) {
 		this.platforms = platforms;
 	}
-
+	
 	@Editable(order=1400, group = "More Settings", description="Optionally specify additional options for " +
 			"buildx build command")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -133,6 +133,7 @@ public class BuildImageStep extends Step {
 			accessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
 		else
 			accessToken = null;
+		
 		return new BuildImageFacade(getBuildPath(), getDockerfile(), getOutput().getFacade(), 
 				accessToken, getPlatforms(), getMoreOptions());
 	}

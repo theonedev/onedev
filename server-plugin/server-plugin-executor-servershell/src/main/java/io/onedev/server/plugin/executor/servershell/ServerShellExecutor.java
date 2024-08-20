@@ -149,8 +149,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						private boolean doExecute(LeafFacade facade, List<Integer> position) {
 							if (facade instanceof CommandFacade) {
 								CommandFacade commandFacade = (CommandFacade) facade;
-								OsExecution execution = commandFacade.getExecution(osInfo);
-								if (execution.getImage() != null) {
+								if (commandFacade.getImage() != null) {
 									throw new ExplicitException("This step can only be executed by server docker executor, "
 											+ "remote docker executor, or kubernetes executor");
 								}
@@ -163,7 +162,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								try {
 									FileUtils.writeStringToFile(
 											stepScriptFile,
-											commandFacade.normalizeCommands(replacePlaceholders(execution.getCommands(), buildHome)),
+											commandFacade.normalizeCommands(replacePlaceholders(commandFacade.getCommands(), buildHome)),
 											StandardCharsets.UTF_8);
 								} catch (IOException e) {
 									throw new RuntimeException(e);
@@ -173,6 +172,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								Map<String, String> environments = new HashMap<>();
 								environments.put("GIT_HOME", userHome.getAbsolutePath());
 								environments.put("ONEDEV_WORKSPACE", workspaceDir.getAbsolutePath());
+								environments.putAll(commandFacade.getEnvMap());
 								interpreter.workingDir(workspaceDir).environments(environments);
 								interpreter.addArgs(stepScriptFile.getAbsolutePath());
 

@@ -11,7 +11,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.page.help.ValueInfo.Origin;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
@@ -24,6 +23,9 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
+import static java.util.Comparator.comparing;
 
 public class ApiHelpUtils {
 
@@ -102,23 +104,22 @@ public class ApiHelpUtils {
 							instantiationClass = valueClass;
 						}
 						value = new ObjenesisStd(true).getInstantiatorOf(instantiationClass).newInstance();
-						for (Field field: getJsonFields(instantiationClass, origin)) {
-							Object fieldValue = new ExampleProvider(valueClass, field.getAnnotation(Api.class)).getExample();
-							if (fieldValue == null) {
-								if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
-									fieldValue = field.getType().getDeclaredConstructor().newInstance();
+						for (var member: getJsonMembers(instantiationClass, origin)) {
+							Object memberValue = new ExampleProvider(valueClass, member.getAnnotation(Api.class)).getExample();
+							if (memberValue == null) {
+								if (member.getAnnotation(ManyToOne.class) != null || member.getAnnotation(JoinColumn.class) != null) {
+									memberValue = member.getType().getDeclaredConstructor().newInstance();
 									Field idField = AbstractEntity.class.getDeclaredField("id");
 									Object id = new ExampleProvider(idField.getType(), idField.getAnnotation(Api.class)).getExample();
-									if (id == null) 
+									if (id == null)
 										id = getExampleValue(idField.getGenericType(), new HashSet<>(parsedTypes), origin);
 									idField.setAccessible(true);
-									idField.set(fieldValue, id);
+									idField.set(memberValue, id);
 								} else {
-									fieldValue = getExampleValue(field.getGenericType(), new HashSet<>(parsedTypes), origin);
+									memberValue = getExampleValue(member.getGenericType(), new HashSet<>(parsedTypes), origin);
 								}
 							}
-							field.setAccessible(true);
-							field.set(value, fieldValue);
+							member.setValue(value, memberValue);
 						}
 					} 
 				} catch (InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException 
@@ -150,47 +151,108 @@ public class ApiHelpUtils {
 			implementations.addAll(OneDev.getInstance(ImplementationRegistry.class).getImplementations(clazz));
 		}
 		
-		Collections.sort(implementations, new Comparator<Class<?>>() {
-
-			@Override
-			public int compare(Class<?> o1, Class<?> o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-			
-		});
+		Collections.sort(implementations, comparing((Class<?> o) -> o.getName()));
 		
 		return implementations;
 	}
 	
-	public static List<Field> getJsonFields(Class<?> beanClass, ValueInfo.Origin origin) {
-		List<Field> fields = new ArrayList<>();
+	public static List<JsonMember> getJsonMembers(Class<?> beanClass, ValueInfo.Origin origin) {
+		List<JsonMember> members = new ArrayList<>();
 		for (Field field: BeanUtils.findFields(beanClass)) {
+			var jsonProperty = field.getAnnotation(JsonProperty.class);
+			Method getter = BeanUtils.findGetter(beanClass, field.getName());
 			if (field.getAnnotation(JsonIgnore.class) != null 
 					|| field.getAnnotation(OneToMany.class) != null
 					|| field.getAnnotation(Transient.class) != null
 					|| field.getAnnotation(OneToOne.class) != null && field.getAnnotation(JoinColumn.class) == null
 					|| Modifier.isTransient(field.getModifiers())
-					|| (origin == Origin.CREATE_BODY || origin == Origin.UPDATE_BODY) 
-							&& field.getAnnotation(JsonProperty.class) != null 
-							&& field.getAnnotation(JsonProperty.class).access() == READ_ONLY
-					|| origin == Origin.UPDATE_BODY && field.getAnnotation(Immutable.class) != null) {
+					|| (origin == CREATE_BODY || origin == UPDATE_BODY) && jsonProperty != null && jsonProperty.access() == READ_ONLY
+					|| origin == UPDATE_BODY && field.getAnnotation(Immutable.class) != null
+					|| getter != null && getter.getAnnotation(JsonProperty.class) != null) {
 				continue;
 			}
-			if (field.getAnnotation(JsonProperty.class) != null) {
-				fields.add(field);
-			} else {
-				Method getter = BeanUtils.findGetter(beanClass, field.getName());
-				Method setter = BeanUtils.findSetter(beanClass, field.getName(), field.getType());
+			if (getter == null || getter.getAnnotation(JsonIgnore.class) == null) {
+				members.add(new JsonMember(field.getName(), field) {
+
+					@Override
+					public Class<?> getType() {
+						return field.getType();
+					}
+
+					@Override
+					public Type getGenericType() {
+						return field.getGenericType();
+					}
+
+					@Override
+					public Object getValue(Object obj) {
+						field.setAccessible(true);
+						try {
+							return field.get(obj);
+						} catch (IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+					@Override
+					public void setValue(Object obj, Object value) {
+						field.setAccessible(true);
+						try {
+							field.set(obj, value);
+						} catch (IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
+					}
 					
-				if ((getter == null || getter.getAnnotation(JsonIgnore.class) == null) 
-						&& (setter == null || setter.getAnnotation(JsonIgnore.class) == null)) {
-					fields.add(field);
-				}
+				});
 			}
 		}
 		
-		Collections.sort(fields, new ApiComparator());
+		for (Method getter: BeanUtils.findGetters(beanClass)) {
+			var jsonProperty = getter.getAnnotation(JsonProperty.class);
+			if (getter.getAnnotation(JsonIgnore.class) == null 
+					&& jsonProperty != null
+					&& (origin != CREATE_BODY && origin != UPDATE_BODY || jsonProperty.access() != READ_ONLY)
+					&& (origin != UPDATE_BODY || getter.getAnnotation(Immutable.class) == null)) {
+				members.add(new JsonMember(BeanUtils.getPropertyName(getter), getter) {
+
+					@Override
+					public Class<?> getType() {
+						return getter.getReturnType();
+					}
+
+					@Override
+					public Type getGenericType() {
+						return getter.getGenericReturnType();
+					}
+
+					@Override
+					public Object getValue(Object obj) {
+						try {
+							return getter.invoke(obj);
+						} catch (IllegalAccessException | InvocationTargetException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+					@Override
+					public void setValue(Object obj, Object value) {
+						var setter = BeanUtils.findSetter(getter);
+						if (setter != null) {
+							try {
+								setter.invoke(obj, value);
+							} catch (IllegalAccessException | InvocationTargetException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+					
+				});
+			}
+		}
 		
-		return fields;
+		Collections.sort(members, new ApiComparator());
+		
+		return members;
 	}
 }

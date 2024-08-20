@@ -1,3 +1,11 @@
+# 11.0.6
+
+### RESTful api
+
+1. Project path now gets returned via _Get Basic Info_ operation
+2. Project service desk name now gets returned via _Get Basic Info_ operation
+3. Project service desk name now gets updated via _Update Basic Info_ operation
+
 # 10.9.0
 
 ### RESTful api
