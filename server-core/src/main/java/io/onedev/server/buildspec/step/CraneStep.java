@@ -15,6 +15,8 @@ import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.util.UrlUtils;
 
+import java.util.HashMap;
+
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
 import static java.util.stream.Collectors.toList;
 
@@ -103,7 +105,8 @@ public abstract class CraneStep extends CommandStep {
 					commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt");
 				}
 				commandsBuilder.append(getCommand());
-				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), useTTY);
+				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), 
+						new HashMap<>(), useTTY);
 			}
 			
 		};
