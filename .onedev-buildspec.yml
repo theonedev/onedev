@@ -1,4 +1,4 @@
-version: 32
+version: 35
 imports:
 - projectPath: onedev
   revision: main
@@ -34,8 +34,7 @@ jobs:
 
         projectDir=`pwd`
 
-        # Skip test as we've already tested in CI build
-        mvn -Dmaven.test.skip=true -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
+        mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
 
         # Prepare for artifact and site publish
         cp server-product/target/onedev-${buildVersion}.zip .
@@ -65,6 +64,16 @@ jobs:
         mv docker/onedev-$buildVersion docker/app
         cp -r agent docker/
     useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: scan
+    templateName: scan vulnerabilities
+    paramMatrix:
+    - name: Scan Path
+      secret: false
+      valuesProvider: !SpecifiedValues
+        values:
+        - - server-product/target/docker/app
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifacts
@@ -148,16 +157,11 @@ jobs:
         fi
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CloseMilestoneStep
+  - !CloseIterationStep
     name: close milestone
-    milestoneName: '@build_version@'
+    iterationName: '@build_version@'
     accessTokenSecret: onedev-token
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
-  - jobName: Scan Vulnerabilities
-    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -251,9 +255,6 @@ jobs:
         color: '#0d87e9'
       - value: linux/arm64
         color: '#0d87e9'
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -262,22 +263,38 @@ jobs:
   steps:
   - !CheckoutStep
     name: checkout
-    cloneCredential: !DefaultCredential {}
+    cloneCredential: !HttpCredential
+      accessTokenSecret: onedev-token
     withLfs: false
-    withSubmodules: false
+    withSubmodules: true
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !OsvVulnerScannerStep
+  - !UseTemplateStep
+    name: set up maven cache
+    templateName: set up cache
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: build
+    runInContainer: true
+    image: '@property:buildEnvironment@'
+    interpreter: !DefaultInterpreter
+      commands: |
+        mvn clean package
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
     name: scan
-    recursive: true
-    failThreshold: HIGH
-    reportName: Dependency Vulnerabilities
+    templateName: scan vulnerabilities
+    paramMatrix:
+    - name: Scan Path
+      secret: false
+      valuesProvider: !SpecifiedValues
+        values:
+        - - server-product/target/sandbox
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
     cronExpression: 0 0 1 * * ?
-  - !BranchUpdateTrigger
-    paths: '**/pom.xml'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -305,13 +322,23 @@ jobs:
     templateName: set build version
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: test
+    name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands: |
-        mvn test
+        mvn package
     useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !UseTemplateStep
+    name: scan
+    templateName: scan vulnerabilities
+    paramMatrix:
+    - name: Scan Path
+      secret: false
+      valuesProvider: !SpecifiedValues
+        values:
+        - - server-product/target/sandbox
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
@@ -347,3 +374,22 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+stepTemplates:
+- name: scan vulnerabilities
+  steps:
+  - !TrivyCacheStep
+    name: cache
+    key: trivy
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !RootFSScannerStep
+    name: scan
+    detectVulnerabilities: true
+    scanPath: '@param:Scan Path@'
+    failThreshold: HIGH
+    reportName: Vulnerabilities
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  paramSpecs:
+  - !TextParam
+    name: Scan Path
+    allowEmpty: false
+    multiline: false

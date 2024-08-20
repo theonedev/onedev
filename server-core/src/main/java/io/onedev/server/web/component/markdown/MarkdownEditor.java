@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.onedev.server.validation.validator.ProjectKeyValidator;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
@@ -78,7 +79,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
-
+	
 	protected static final int ATWHO_LIMIT = 10;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MarkdownEditor.class);
@@ -128,10 +129,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected void onModelChanged() {
 		super.onModelChanged();
 		input.setModelObject(getModelObject());
-		var target = RequestCycle.get().find(AjaxRequestTarget.class);
-		var form = findParent(Form.class);
-		if (target != null && form != null)
-			target.prependJavaScript(String.format("onedev.server.form.clearAutosavings($('#%s'));", form.getMarkupId()));
+		if (getAutosaveKey() != null)
+			((BasePage) getPage()).removeAutosaveKey(getAutosaveKey());			
 	}
 	
 	public void clearMarkdown() {
