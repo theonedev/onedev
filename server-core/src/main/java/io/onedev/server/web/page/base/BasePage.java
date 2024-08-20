@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.base;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
@@ -29,7 +31,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -68,6 +72,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
@@ -77,6 +82,9 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
+	private static final MetaDataKey<HashSet<String>> REMOVE_AUTOSAVE_KEYS = new MetaDataKey<>() {
+	};
+	
 	private static final String COOKIE_DARK_MODE = "darkMode";
 
 	private boolean darkMode;
@@ -170,11 +178,19 @@ public abstract class BasePage extends WebPage {
 
 				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
 
+				String jsonOfRemoveAutosaveKeys;
+				try {
+					jsonOfRemoveAutosaveKeys = OneDev.getInstance(ObjectMapper.class).writeValueAsString(getRemoveAutosaveKeys());
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+				getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, null);
 				response.render(OnDomReadyHeaderItem.forScript(
-						String.format("onedev.server.onDomReady('%s', '%s', %s);",
+						String.format("onedev.server.onDomReady('%s', '%s', %s, %s);",
 								String.valueOf(OneDev.getInstance().getBootDate().getTime()),
 								SpriteImage.getVersionedHref(IconScope.class, null),
-								popStateBehavior.getCallbackFunction(explicit("data")).toString())));
+								popStateBehavior.getCallbackFunction(explicit("data")).toString(), 
+								jsonOfRemoveAutosaveKeys)));
 				response.render(OnLoadHeaderItem.forScript("onedev.server.onWindowLoad();"));
 			}
 
@@ -393,6 +409,24 @@ public abstract class BasePage extends WebPage {
 
 	public boolean isSubscriptionActive() {
 		return WicketUtils.isSubscriptionActive();
+	}
+	
+	public void removeAutosaveKey(String autosaveKey) {
+		var target = RequestCycle.get().find(AjaxRequestTarget.class);
+		if (target != null) {
+			target.prependJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
+		} else {
+			var removeAutosaveKeys = getRemoveAutosaveKeys();
+			removeAutosaveKeys.add(autosaveKey);
+			getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, removeAutosaveKeys);
+		}
+	}
+	
+	public HashSet<String> getRemoveAutosaveKeys() {
+		var removeAutosaveKeys = getSession().getMetaData(REMOVE_AUTOSAVE_KEYS);
+		if (removeAutosaveKeys == null)
+			removeAutosaveKeys = new HashSet<>();
+		return removeAutosaveKeys;
 	}
 	
 }
