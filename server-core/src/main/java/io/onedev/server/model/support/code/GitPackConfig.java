@@ -12,16 +12,16 @@ public class GitPackConfig implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Api(description = "May be null")
+	@Api(description = "May be null", example = "0")
 	private String windowMemory;
 
-	@Api(description = "May be null")
+	@Api(description = "May be null", example="1g")
 	private String packSizeLimit;
 
-	@Api(description = "May be null")
+	@Api(description = "May be null", example="0")
 	private String threads;
 
-	@Api(description = "May be null")
+	@Api(description = "May be null", example="10")
 	private String window;
 
 	@Editable(order = 100, placeholder = "Use default", description = "Optionally specify value of git config " +

@@ -40,7 +40,6 @@ import javax.persistence.ManyToOne;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -48,6 +47,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
+import static io.onedev.server.web.page.help.ApiHelpUtils.getJsonMembers;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.*;
 
 @SuppressWarnings("serial")
@@ -122,9 +122,7 @@ public class ExampleValuePanel extends Panel {
 		StringBuilder builder = new StringBuilder();
 		if (isScalarValue()) {
 			builder.append(toJson(getValue()));
-		} else if (getField() != null 
-				&& (getField().getAnnotation(ManyToOne.class) != null 
-					|| getField().getAnnotation(JoinColumn.class) != null)) { 
+		} else if (getMember() != null && (getMember().getAnnotation(ManyToOne.class) != null || getMember().getAnnotation(JoinColumn.class) != null)) { 
 			builder.append(toJson(((AbstractEntity)getValue()).getId()));
 		} else if (getValue() instanceof Collection || getValue() instanceof Serializable[]) {
 			List<String> elements = new ArrayList<>();
@@ -186,9 +184,7 @@ public class ExampleValuePanel extends Panel {
 	protected void onBeforeRender() {
 		if (isScalarValue()) {
 			addOrReplace(newScalarFragment(getValue()));
-		} else if (getField() != null 
-				&& (getField().getAnnotation(ManyToOne.class) != null 
-					|| getField().getAnnotation(JoinColumn.class) != null)) { 
+		} else if (getMember() != null && (getMember().getAnnotation(ManyToOne.class) != null || getMember().getAnnotation(JoinColumn.class) != null)) { 
 			addOrReplace(newScalarFragment(((AbstractEntity)getValue()).getId()));
 		} else if (getValue() instanceof Collection || getValue() instanceof Serializable[]) { 
 			addOrReplace(newArrayFragment());
@@ -233,11 +229,9 @@ public class ExampleValuePanel extends Panel {
 			typeHintFrag.add(new Label("possibleValues", StringUtils.join(possibleValues)));
 			fragment.add(typeHintFrag);
 			hasHint = true;
-		} else if (getField() != null) {
+		} else if (getMember() != null) {
 			fragment.add(new WebMarkupContainer("typeHint").setVisible(false));
-		} else if (getValue() instanceof Long 
-				&& getValueOrigin() == READ_BODY 
-				&& requestBodyClass != null) {
+		} else if (getValue() instanceof Long && getValueOrigin() == READ_BODY && requestBodyClass != null) {
 			if (AbstractEntity.class.isAssignableFrom(requestBodyClass)) {
 				Class<?> resourceClass = resourceMap.get(requestBodyClass);
 				if (resourceClass != null) {
@@ -276,8 +270,8 @@ public class ExampleValuePanel extends Panel {
 		}
 		
 		String description = "";
-		if (getField() != null && getField().getAnnotation(Api.class) != null)
-			description = getField().getAnnotation(Api.class).description();
+		if (getMember() != null && getMember().getAnnotation(Api.class) != null)
+			description = getMember().getAnnotation(Api.class).description();
 		if (description.length() == 0 && getValue() != null 
 				&& getValue().getClass().getAnnotation(Api.class) != null) {
 			description = getValue().getClass().getAnnotation(Api.class).description();
@@ -433,18 +427,19 @@ public class ExampleValuePanel extends Panel {
 	private Fragment newObjectFragment() {
 		Fragment fragment = new Fragment("content", "objectFrag", this);
 		
-		IModel<List<Field>> fieldsModel = new LoadableDetachableModel<>() {
+		IModel<List<JsonMember>> membersModel = new LoadableDetachableModel<>() {
 
 			@Override
-			protected List<Field> load() {
-				List<Field> fields = ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
-				for (var it = fields.iterator(); it.hasNext();) {
-					var field = it.next();
+			protected List<JsonMember> load() {
+				var members = getJsonMembers(getValue().getClass(), getValueOrigin());
+				for (var it = members.iterator(); it.hasNext();) {
+					var member = it.next();
 					var valueOrigin = getValueOrigin();
-					if ((valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY) && field.getAnnotation(Id.class) != null) 
+					var id = member.getAnnotation(Id.class);
+					if ((valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY) && id != null) 
 						it.remove();
 				}
-				return fields;
+				return members;
 			}
 
 		};
@@ -515,17 +510,17 @@ public class ExampleValuePanel extends Panel {
 			});
 			
 			typeInfoFragment.add(new WebMarkupContainer("comma")
-					.setVisible(!fieldsModel.getObject().isEmpty()));
+					.setVisible(!membersModel.getObject().isEmpty()));
 			fragment.add(typeInfoFragment);
 		} else {
 			fragment.add(new WebMarkupContainer("typeInfo").setVisible(false));
 		}
 		
-		fragment.add(new ListView<>("properties", fieldsModel) {
+		fragment.add(new ListView<>("properties", membersModel) {
 
 			@Override
-			protected void populateItem(ListItem<Field> item) {
-				Field field = item.getModelObject();
+			protected void populateItem(ListItem<JsonMember> item) {
+				var member = item.getModelObject();
 
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
@@ -535,18 +530,17 @@ public class ExampleValuePanel extends Panel {
 					}
 
 				};
-				if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null)
-					item.add(new ExampleValuePanel("name", Model.of(field.getName() + "Id"), valueInfoModel, requestBodyClass));
+				
+				if (member.getAnnotation(ManyToOne.class) != null || member.getAnnotation(JoinColumn.class) != null)
+					item.add(new ExampleValuePanel("name", Model.of(member.getName() + "Id"), valueInfoModel, requestBodyClass));
 				else
-					item.add(new ExampleValuePanel("name", Model.of(field.getName()), valueInfoModel, requestBodyClass));
-
-				field.setAccessible(true);
+					item.add(new ExampleValuePanel("name", Model.of(member.getName()), valueInfoModel, requestBodyClass));
 				valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
-						Field field = item.getModelObject();
-						return new ValueInfo(getValueOrigin(), field.getGenericType(), field);
+						var member = item.getModelObject();
+						return new ValueInfo(getValueOrigin(), member.getGenericType(), member);
 					}
 
 				};
@@ -559,24 +553,14 @@ public class ExampleValuePanel extends Panel {
 
 					@Override
 					public Serializable getObject() {
-						try {
-							Field field = item.getModelObject();
-							field.setAccessible(true);
-							return (Serializable) field.get(getValue());
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							throw new RuntimeException(e);
-						}
+						var member = item.getModelObject();
+						return (Serializable) member.getValue(getValue());
 					}
 
 					@Override
 					public void setObject(Serializable object) {
-						try {
-							Field field = item.getModelObject();
-							field.setAccessible(true);
-							field.set(getValue(), object);
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							throw new RuntimeException(e);
-						}
+						var member = item.getModelObject();
+						member.setValue(getValue(), object);
 					}
 
 				}, valueInfoModel, requestBodyClass));
@@ -594,10 +578,10 @@ public class ExampleValuePanel extends Panel {
 	}
 	
 	@Nullable
-	private Field getField() {
-		return getValueInfo().getField();
+	private JsonMember getMember() {
+		return getValueInfo().getMember();
 	}
-
+	
 	private Type getDeclaredType() {
 		return getValueInfo().getDeclaredType();
 	}

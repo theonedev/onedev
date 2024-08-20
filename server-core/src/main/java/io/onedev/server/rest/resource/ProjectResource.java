@@ -1,16 +1,11 @@
 package io.onedev.server.rest.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.pack.ProjectPackSetting;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -19,17 +14,20 @@ import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.date.DateUtils;
 import io.onedev.server.util.date.Day;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -61,16 +59,13 @@ public class ProjectResource {
 	
 	private final UrlManager urlManager;
 	
-	private final ObjectMapper objectMapper;
-	
 	@Inject
 	public ProjectResource(ProjectManager projectManager, IterationManager iterationManager, 
-			CommitInfoManager commitInfoManager, UrlManager urlManager, ObjectMapper objectMapper) {
+			CommitInfoManager commitInfoManager, UrlManager urlManager) {
 		this.projectManager = projectManager;
 		this.iterationManager = iterationManager;
 		this.commitInfoManager = commitInfoManager;
 		this.urlManager = urlManager;
-		this.objectMapper = objectMapper;
 	}
 	
 	@Api(order=100)
@@ -98,20 +93,6 @@ public class ProjectResource {
     	return cloneUrl;
     }
 	
-	@Api(order=150)
-	@Path("/{projectId}/path")
-    @GET
-    public String getPath(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
-    	if (!SecurityUtils.canAccessProject(project))
-			throw new UnauthorizedException();
-		try {
-			return objectMapper.writeValueAsString(project.getPath());
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	@Api(order=200)
 	@Path("/{projectId}/setting")
     @GET
@@ -120,7 +101,6 @@ public class ProjectResource {
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
 		ProjectSetting setting = new ProjectSetting();
-		setting.serviceDeskName = project.getServiceDeskName();
 		setting.branchProtections = project.getBranchProtections();
 		setting.tagProtections = project.getTagProtections();
 		setting.buildSetting = project.getBuildSetting();
@@ -327,7 +307,6 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
-    	project.setServiceDeskName(setting.serviceDeskName);
 		project.setBranchProtections(setting.branchProtections);
 		project.setTagProtections(setting.tagProtections);
 		project.setBuildSetting(setting.buildSetting);
@@ -382,8 +361,6 @@ public class ProjectResource {
 		
 		private static final long serialVersionUID = 1L;
 		
-		private String serviceDeskName;
-
 		private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 		
 		private ArrayList<TagProtection> tagProtections = new ArrayList<>();
@@ -403,14 +380,6 @@ public class ProjectResource {
 		private ArrayList<WebHook> webHooks = new ArrayList<>();
 		
 		private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
-
-		public String getServiceDeskName() {
-			return serviceDeskName;
-		}
-
-		public void setServiceDeskName(String serviceDeskName) {
-			this.serviceDeskName = serviceDeskName;
-		}
 
 		public ArrayList<BranchProtection> getBranchProtections() {
 			return branchProtections;

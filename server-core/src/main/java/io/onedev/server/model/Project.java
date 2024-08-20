@@ -215,7 +215,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Column(nullable=false)
 	private String name;
 	
-	@JsonIgnore
+	@JsonProperty(access = READ_ONLY)
 	@Column(nullable=false)
 	private String path;
 	
@@ -353,7 +353,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
-	@JsonIgnore
 	@Column(unique=true, nullable=false)
 	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
 	
@@ -1043,6 +1042,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	@Nullable
+	@JsonProperty
 	public String getServiceDeskName() {
 		if (serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
 			return null;
@@ -1056,7 +1056,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
 			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
 	}
-
+	
 	public GitPackConfig getGitPackConfig() {
 		return gitPackConfig;
 	}

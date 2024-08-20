@@ -1,7 +1,9 @@
 package io.onedev.server.web.page.help;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
 public class ValueInfo {
@@ -12,12 +14,12 @@ public class ValueInfo {
 	
 	private final Type declaredType;
 	
-	private final Field field;
+	private final JsonMember member;
 	
-	public ValueInfo(Origin origin, Type declaredType, @Nullable Field field) {
+	public ValueInfo(Origin origin, Type declaredType, @Nullable JsonMember member) {
 		this.origin = origin;
 		this.declaredType = declaredType;
-		this.field = field;
+		this.member = member;
 	}
 
 	public ValueInfo(Origin origin, Type declaredType) {
@@ -33,8 +35,8 @@ public class ValueInfo {
 	}
 
 	@Nullable
-	public Field getField() {
-		return field;
+	public JsonMember getMember() {
+		return member;
 	}
 
 }
