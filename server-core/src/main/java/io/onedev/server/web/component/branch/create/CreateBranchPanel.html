@@ -1,7 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="create-branch">
 		<div class="modal-header">
-			<h5 class="modal-title">Create Branch</h5>
+			<h5 class="modal-title"><wicket:message key="Create_Branch" /></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -9,8 +9,8 @@
 			<div wicket:id="editor"></div>
 		</div>
 		<div class="modal-footer">
-			<button wicket:id="create" class="btn btn-primary">Create</button>
-			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+			<button wicket:id="create" class="btn btn-primary"><wicket:message key="Create" /></button>
+			<button wicket:id="cancel" class="btn btn-secondary"><wicket:message key="Cancel" /></button>
 		</div>
 	</form>
 </wicket:panel>

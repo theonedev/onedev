@@ -23,7 +23,7 @@
 					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> <wicket:message key="Operations" />
 				</a>
 				<a wicket:id="listParams" class="list-params text-gray d-inline-block mr-4 mb-2 d-none d-xl-inline text-nowrap">
-					<wicket:svg href="select" class="icon"></wicket:svg> Display Params
+					<wicket:svg href="select" class="icon"></wicket:svg> <wicket:message key="Display_Params" />
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:message key="Order_By" />
@@ -59,16 +59,16 @@
 		<div class="build-list-params">
 			<form wicket:id="form">
 				<div class="modal-header">
-					<h5 id="modal-title" class="modal-title">Params to Display</h5>
+					<h5 id="modal-title" class="modal-title"><wicket:message key="Params_to_Display" /></h5>
 					<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 				</div>
 				<div class="modal-body">
 					<input wicket:id="params" type="hidden" class="form-control">
 				</div>
 				<div class="modal-footer">
-					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
-					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
-					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" wicket:message="value:Save">
+					<button wicket:id="useDefault" class="btn btn-primary"><wicket:message key="Use_Default" /></button>
+					<a wicket:id="cancel" class="btn btn-secondary"><wicket:message key="Cancel" /></a>
 				</div>
 			</form>
 		</div>

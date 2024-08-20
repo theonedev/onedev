@@ -26,7 +26,7 @@
 					<wicket:svg href="select" class="icon"></wicket:svg> Fields & Links
 				</a>
 				<a wicket:id="import" class="import-issues text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="import" class="icon"></wicket:svg> Import
+					<wicket:svg href="import" class="icon"></wicket:svg><wicket:message key="Import" />
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:message key="Order_By" />
@@ -100,7 +100,7 @@
 				<div class="modal-footer">
 					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
 					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
-					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+					<a wicket:id="cancel" class="btn btn-secondary"><wicket:message key="Cancel" /></a>
 				</div>
 			</form>
 		</div>

@@ -1,13 +1,13 @@
 <wicket:extend>
 	<div wicket:id="error">
    		<div class="actions">
-        	<a wicket:id="home" class="btn btn-light-primary">Back To Home</a>
-			<a wicket:id="showDetail" class="btn btn-primary">Show Error Detail</a>			
+        	<a wicket:id="home" class="btn btn-light-primary"><wicket:message key="Back_To_Home" /></a>
+			<a wicket:id="showDetail" class="btn btn-primary"><wicket:message key="Show_Error_Detail" /></a>			
 		</div>
 		<div wicket:id="errorDetail" class="position-relative"></div>
     </div>
 	<wicket:fragment wicket:id="errorDetailFrag">
 		<div wicket:id="content" class="error-detail alert alert-light"></div>
-		<span class="position-absolute copy"><a wicket:id="copy" title="Copy"><wicket:svg href="copy" class="icon"/></a></span>
+		<span class="position-absolute copy"><a wicket:id="copy" wicket:message="title:Copy"><wicket:svg href="copy" class="icon"/></a></span>
 	</wicket:fragment>
 </wicket:extend>

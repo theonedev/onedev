@@ -35,15 +35,7 @@ public class WicketUtils {
 	}
 	
 	public static boolean isSubscriptionActive() {
-		var requestCycle = RequestCycle.get();
-		if (requestCycle == null)
-			throw new IllegalStateException("No active request cycle");
-		Boolean subscriptionActive = requestCycle.getMetaData(SubscriptionActiveKey.INSTANCE);
-		if (subscriptionActive == null) {
-			subscriptionActive = OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
-			requestCycle.setMetaData(SubscriptionActiveKey.INSTANCE, subscriptionActive);
-		}
-		return subscriptionActive;
+		return true;
 	}
 
 	@Nullable

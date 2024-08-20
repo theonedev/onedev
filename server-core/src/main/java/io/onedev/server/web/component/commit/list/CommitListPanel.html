@@ -3,7 +3,7 @@
 		<div class="card-body">
 			<form wicket:id="query" class="clearable-wrapper mb-4">
 				<div class="input-group">
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query commits. Hit space to show syntax helper">
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" wicket:message="placeholder:Query_Commits_Hint">
 					<span class="input-group-append">
 						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" wicket:message="title:Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 					</span>
@@ -25,8 +25,8 @@
 	            <div wicket:id="noCommits" class="no-commits"></div>
 	        </div>
 	        <div wicket:id="foot" class="foot text-center">
-	            <a wicket:id="more" class="btn btn-primary">More commits</a>
-	            <div wicket:id="tooMany" class="mt-4 mb-0 alert alert-light-warning">Too many commits to load</div>
+	            <a wicket:id="more" class="btn btn-primary"><wicket:message key="More_commits" /></a>
+	            <div wicket:id="tooMany" class="mt-4 mb-0 alert alert-light-warning"><wicket:message key="Too_many_commits" /></div>
 	        </div>
 		</div>
 	</div>
