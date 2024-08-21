@@ -205,8 +205,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} else if (fieldSpec instanceof BooleanField) {
 											return SuggestionUtils.suggest(newArrayList("true", "false"), matchWith);
 										} else if (fieldSpec instanceof GroupChoiceField) {
-											List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
+											List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it -> it.getName()).collect(Collectors.toList());
 											return SuggestionUtils.suggest(candidates, matchWith);
+										} else if (fieldSpec instanceof IterationChoiceField) {
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestIterations(project, matchWith);
+											else
+												return null;
 										} else if (fieldName.equals(NAME_PROJECT)) {
 											if (!matchWith.contains("*"))
 												return SuggestionUtils.suggestProjectPaths(matchWith);
@@ -319,18 +324,21 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					var fieldSpec = issueSetting.getFieldSpec(fieldName);
 					if (fieldName.equals(Issue.NAME_PROJECT)) {
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					} else if (fieldName.equals(Issue.NAME_TITLE)
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
-							|| fieldName.equals(IssueSchedule.NAME_ITERATION)) {
+							|| fieldName.equals(IssueSchedule.NAME_ITERATION)
+							|| fieldSpec instanceof IterationChoiceField) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

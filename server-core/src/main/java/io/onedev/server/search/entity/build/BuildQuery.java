@@ -172,16 +172,18 @@ public class BuildQuery extends EntityQuery<Build> {
 						switch (operator) {
 							case BuildQueryLexer.IsUntil:
 							case BuildQueryLexer.IsSince:
-								if (fieldName.equals(NAME_SUBMIT_DATE))
-									return new SubmitDateCriteria(value, operator);
-								else if (fieldName.equals(NAME_PENDING_DATE))
-									return new PendingDateCriteria(value, operator);
-								else if (fieldName.equals(NAME_RUNNING_DATE))
-									return new RunningDateCriteria(value, operator);
-								else if (fieldName.equals(NAME_FINISH_DATE))
-									return new FinishDateCriteria(value, operator);
-								else
-									throw new IllegalStateException();
+								switch (fieldName) {
+									case NAME_SUBMIT_DATE:
+										return new SubmitDateCriteria(value, operator);
+									case NAME_PENDING_DATE:
+										return new PendingDateCriteria(value, operator);
+									case NAME_RUNNING_DATE:
+										return new RunningDateCriteria(value, operator);
+									case NAME_FINISH_DATE:
+										return new FinishDateCriteria(value, operator);
+									default:
+										throw new IllegalStateException();
+								}
 							case BuildQueryLexer.Is:
 							case BuildQueryLexer.IsNot:
 								switch (fieldName) {

@@ -233,14 +233,15 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								else
 									return new DateFieldCriteria(fieldName, value, operator);
 							case IssueQueryLexer.Contains:
-								if (fieldName.equals(NAME_TITLE)) {
-									return new TitleCriteria(value);
-								} else if (fieldName.equals(NAME_DESCRIPTION)) {
-									return new DescriptionCriteria(value);
-								} else if (fieldName.equals(NAME_COMMENT)) {
-									return new CommentCriteria(value);
-								} else {
-									return new StringFieldCriteria(fieldName, value, operator);
+								switch (fieldName) {
+									case NAME_TITLE:
+										return new TitleCriteria(value);
+									case NAME_DESCRIPTION:
+										return new DescriptionCriteria(value);
+									case NAME_COMMENT:
+										return new CommentCriteria(value);
+									default:
+										return new StringFieldCriteria(fieldName, value, operator);
 								}
 							case IssueQueryLexer.Is:
 							case IssueQueryLexer.IsNot:
@@ -282,39 +283,44 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									} else if (field instanceof UserChoiceField
 											|| field instanceof GroupChoiceField) {
 										return new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple());
+									} else if (field instanceof IterationChoiceField) {
+										return new IterationFieldCriteria(fieldName, value, operator, field.isAllowMultiple());
 									} else {
 										return new StringFieldCriteria(fieldName, value, operator);
 									}
 								}
 							case IssueQueryLexer.IsLessThan:
 							case IssueQueryLexer.IsGreaterThan:
-								if (fieldName.equals(NAME_VOTE_COUNT)) {
-									return new VoteCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
-									return new CommentCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
-									return new ReferenceCriteria(project, value, operator);
-								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
-									int intValue = value.equals(NAME_SPENT_TIME)? -1: timeTrackingSetting.parseWorkingPeriod(value);
-									return new EstimatedTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(NAME_SPENT_TIME)) {
-									int intValue = value.equals(NAME_ESTIMATED_TIME)? -1: timeTrackingSetting.parseWorkingPeriod(value);
-									return new SpentTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(NAME_PROGRESS)) {
-									var floatValue = getFloatValue(value);
-									return new ProgressCriteria(floatValue, operator);
-								} else {
-									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
-									if (field instanceof IntegerField) {
-										return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
-									} else {
-										long ordinal;
-										if (validate)
-											ordinal = getValueOrdinal((ChoiceField) field, value);
-										else
-											ordinal = 0;
-										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
+								switch (fieldName) {
+									case NAME_VOTE_COUNT:
+										return new VoteCountCriteria(getIntValue(value), operator);
+									case NAME_COMMENT_COUNT:
+										return new CommentCountCriteria(getIntValue(value), operator);
+									case Issue.NAME_NUMBER:
+										return new ReferenceCriteria(project, value, operator);
+									case NAME_ESTIMATED_TIME: {
+										int intValue = value.equals(NAME_SPENT_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
+										return new EstimatedTimeCriteria(intValue, operator);
 									}
+									case NAME_SPENT_TIME: {
+										int intValue = value.equals(NAME_ESTIMATED_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
+										return new SpentTimeCriteria(intValue, operator);
+									}
+									case NAME_PROGRESS:
+										var floatValue = getFloatValue(value);
+										return new ProgressCriteria(floatValue, operator);
+									default:
+										FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
+										if (field instanceof IntegerField) {
+											return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
+										} else {
+											long ordinal;
+											if (validate)
+												ordinal = getValueOrdinal((ChoiceField) field, value);
+											else
+												ordinal = 0;
+											return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
+										}
 								}
 							case IssueQueryLexer.IsBefore:
 							case IssueQueryLexer.IsAfter:
@@ -452,6 +458,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						&& !(fieldSpec instanceof ChoiceField)
 						&& !(fieldSpec instanceof UserChoiceField)
 						&& !(fieldSpec instanceof GroupChoiceField)
+						&& !(fieldSpec instanceof IterationChoiceField)
 						&& !(fieldSpec instanceof TextField)) {
 					throw newOperatorException(fieldName, operator);
 				}

@@ -36,7 +36,7 @@ public class IterationCriteria extends Criteria<Issue> {
 		Join<?, ?> iterationJoin = schedule.join(IssueSchedule.PROP_ITERATION, JoinType.INNER);
 		scheduleQuery.where(builder.and(
 				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), from), 
-				builder.like(iterationJoin.get(Iteration.PROP_NAME), iterationName.replace("*", "%"))));
+				builder.like(builder.lower(iterationJoin.get(Iteration.PROP_NAME)), iterationName.toLowerCase().replace("*", "%"))));
 		var predicate =  builder.exists(scheduleQuery);
 		if (operator == IssueQueryLexer.IsNot)
 			predicate = builder.not(predicate);
@@ -46,7 +46,7 @@ public class IterationCriteria extends Criteria<Issue> {
 	@Override
 	public boolean matches(Issue issue) {
 		var matches = issue.getSchedules().stream()
-				.anyMatch(it->WildcardUtils.matchString(iterationName, it.getIteration().getName()));
+				.anyMatch(it->WildcardUtils.matchString(iterationName.toLowerCase(), it.getIteration().getName().toLowerCase()));
 		if (operator == IssueQueryLexer.IsNot)
 			matches = !matches;
 		return matches;
