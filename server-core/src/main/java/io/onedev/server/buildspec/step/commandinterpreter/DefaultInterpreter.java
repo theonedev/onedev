@@ -8,6 +8,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.HashMap;
+import java.util.Map;
 
 @Editable(order=100, name="Default (Shell on Linux, Batch on Windows)")
 public class DefaultInterpreter extends Interpreter {
@@ -30,10 +31,11 @@ public class DefaultInterpreter extends Interpreter {
 	}
 
 	@Override
-	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
-									   String runAs, String builtInRegistryAccessToken, boolean useTTY) {
+	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image,
+									   String runAs, String builtInRegistryAccessToken,
+									   Map<String, String> envMap, boolean useTTY) {
 		return new CommandFacade(image, runAs, builtInRegistryAccessToken, getCommands(), 
-				new HashMap<>(), useTTY);
+				envMap, useTTY);
 	}
 	
 }

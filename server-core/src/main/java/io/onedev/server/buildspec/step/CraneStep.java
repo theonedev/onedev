@@ -7,7 +7,6 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.entitymanager.SettingManager;
@@ -16,9 +15,7 @@ import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
 import io.onedev.server.util.UrlUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
 import static java.util.stream.Collectors.toList;
@@ -28,8 +25,6 @@ public abstract class CraneStep extends CommandStep {
 	private static final long serialVersionUID = 1L;
 	
 	private String trustCertificates;
-
-	private List<EnvVar> envVars = new ArrayList<>();
 	
 	@Editable
 	@Override
@@ -84,24 +79,14 @@ public abstract class CraneStep extends CommandStep {
 		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
 	}
-
-	@Editable(order=1150, name="Environment Variables", group="More Settings", description="Optionally specify environment "
-			+ "variables for this step")
-	public List<EnvVar> getEnvVars() {
-		return envVars;
-	}
-
-	public void setEnvVars(List<EnvVar> envVars) {
-		this.envVars = envVars;
-	}
 	
 	@Override
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {
 			
 			@Override
-			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs, 
-											   String builtInRegistryAccessToken, boolean useTTY) {
+			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs,
+											   String builtInRegistryAccessToken, Map<String, String> envMap, boolean useTTY) {
 				var commandsBuilder = new StringBuilder();
 				if (jobExecutor instanceof RegistryLoginAware) {
 					RegistryLoginAware registryLoginAware = (RegistryLoginAware) jobExecutor;
@@ -120,9 +105,6 @@ public abstract class CraneStep extends CommandStep {
 					commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt");
 				}
 				commandsBuilder.append(getCommand());
-				var envMap = new HashMap<String, String>();
-				for (var envVar: getEnvVars())
-					envMap.put(envVar.getName(), envVar.getValue());
 				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), 
 						envMap, useTTY);
 			}

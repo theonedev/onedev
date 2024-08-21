@@ -11,6 +11,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
+import java.util.Map;
 
 @Editable(order=200, name="Custom Linux Shell")
 public class ShellInterpreter extends Interpreter {
@@ -46,9 +47,11 @@ public class ShellInterpreter extends Interpreter {
 	}
 	
 	@Override
-	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, 
-									   String runAs, String builtInRegistryAccessToken, boolean useTTY) {
-		return new ShellFacade(image, runAs, builtInRegistryAccessToken, getShell(), getCommands(), useTTY);
+	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image,
+									   String runAs, String builtInRegistryAccessToken,
+									   Map<String, String> envMap, boolean useTTY) {
+		return new ShellFacade(image, runAs, builtInRegistryAccessToken, getShell(), getCommands(), 
+				envMap, useTTY);
 	}
 
 }

@@ -5,6 +5,7 @@ import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
@@ -17,6 +18,8 @@ import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,8 @@ public class CommandStep extends Step {
 	
 	private String builtInRegistryAccessTokenSecret;
 
+	private List<EnvVar> envVars = new ArrayList<>();
+	
 	private boolean useTTY = true;
 	
 	@Editable(order=50, description="Whether or not to run this step inside container")
@@ -118,6 +123,16 @@ public class CommandStep extends Step {
 		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
 				"<code>" + server + "</code>";
 	}
+
+	@Editable(order=9900, name="Environment Variables", group="More Settings", description="Optionally specify environment "
+			+ "variables for this step")
+	public List<EnvVar> getEnvVars() {
+		return envVars;
+	}
+
+	public void setEnvVars(List<EnvVar> envVars) {
+		this.envVars = envVars;
+	}
 	
 	@Editable(order=10000, name="Enable TTY Mode", group = "More Settings", description=USE_TTY_HELP)
 	@ShowCondition("isRunInContainerEnabled")
@@ -131,15 +146,19 @@ public class CommandStep extends Step {
 	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		var envMap = new HashMap<String, String>();
+		for (var envVar: envVars)
+			envMap.put(envVar.getName(), envVar.getValue());
+		
 		if (isRunInContainer()) {
 			String builtInRegistryAccessToken;
 			if (getBuiltInRegistryAccessTokenSecret() != null)
 				builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
 			else
 				builtInRegistryAccessToken = null;
-			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, builtInRegistryAccessToken, isUseTTY());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, builtInRegistryAccessToken, envMap, isUseTTY());
 		} else {
-			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, null, isUseTTY());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, null, envMap, isUseTTY());
 		}
 	}
 	

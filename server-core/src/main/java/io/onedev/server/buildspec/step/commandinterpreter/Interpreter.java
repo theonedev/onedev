@@ -9,6 +9,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 @Editable
 public abstract class Interpreter implements Serializable {
@@ -26,8 +27,8 @@ public abstract class Interpreter implements Serializable {
 	}
 
 	public abstract CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, @Nullable String image,
-												@Nullable String runAs, @Nullable String builtInRegistryAccessToken, 
-												boolean useTTY);
+												@Nullable String runAs, @Nullable String builtInRegistryAccessToken,
+												Map<String, String> envMap, boolean useTTY);
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, false, true);
