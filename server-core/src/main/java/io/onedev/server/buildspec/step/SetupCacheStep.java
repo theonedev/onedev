@@ -87,7 +87,7 @@ public class SetupCacheStep extends Step {
 
 	@Editable(order=400, description = "Specify cache upload strategy. " +
 			"<var>Upload If Not Hit</var> means to upload when cache is not found with " +
-			"cache key, and <var>Upload If Changed</var> means to upload if some files " +
+			"cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files " +
 			"in cache path are changed")
 	@NotNull
 	public SetupCacheFacade.UploadStrategy getUploadStrategy() {
