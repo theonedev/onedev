@@ -9,6 +9,8 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import javax.validation.constraints.NotEmpty;
 
@@ -44,6 +46,8 @@ public class SystemSetting implements Serializable, Validatable {
 	private CurlLocation curlLocation = new SystemCurl();
 	
 	private boolean disableAutoUpdateCheck;
+	
+	private boolean disableDashboard;
 	
 	private boolean gravatarEnabled;
 	
@@ -128,6 +132,20 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setDisableAutoUpdateCheck(boolean disableAutoUpdateCheck) {
 		this.disableAutoUpdateCheck = disableAutoUpdateCheck;
+	}
+
+	@Editable(order=450)
+	@ShowCondition("isDisableDashboardEnabled")
+	public boolean isDisableDashboard() {
+		return disableDashboard;
+	}
+
+	public void setDisableDashboard(boolean disableDashboard) {
+		this.disableDashboard = disableDashboard;
+	}
+	
+	private static boolean isDisableDashboardEnabled() {
+		return WicketUtils.isSubscriptionActive();
 	}
 
 	@Editable(order=500, description="Whether or not to enable user gravatar (https://gravatar.com)")

@@ -6949,5 +6949,18 @@ public class DataMigrator {
 		}
 		historiesDom.writeToFile(historiesDomFile, true);
 	}
+
+	private void migrate175(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM"))
+						element.element("value").addElement("disableDashboard").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }	
