@@ -3,6 +3,8 @@ package io.onedev.server.model.support.administration;
 import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -15,13 +17,12 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
-import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTrigger;
+import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
+import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.*;
@@ -157,55 +158,48 @@ public class GlobalIssueSetting implements Serializable {
 		
 		stateSpecs.add(closed);
 		
-		TransitionSpec transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
-		PressButtonTrigger pressButton = new PressButtonTrigger();
-		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", PressButtonTrigger.ROLE_SUBMITTER, "{Assignee}"));
-		pressButton.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
-		transition.setTrigger(pressButton);
+		var manualSpec = new ManualSpec();
+		manualSpec.setFromStates(Lists.newArrayList("Open"));
+		manualSpec.setToStates(Lists.newArrayList("Closed"));
+		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", ManualSpec.ROLE_SUBMITTER, "{Assignee}"));
+		manualSpec.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
 		
-		transitionSpecs.add(transition);
+		transitionSpecs.add(manualSpec);
 		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
-		BranchUpdateTrigger branchUpdate = new BranchUpdateTrigger();
-		branchUpdate.setBranches("main");
-		transition.setTrigger(branchUpdate);
+		var branchUpdatedSpec = new BranchUpdatedSpec();
+		branchUpdatedSpec.setFromStates(Lists.newArrayList("Open"));
+		branchUpdatedSpec.setToState("Closed");
+		branchUpdatedSpec.setBranches("main");
 		
-		transitionSpecs.add(transition);
+		transitionSpecs.add(branchUpdatedSpec);
 		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
-		StateTransitionTrigger stateTransition = new StateTransitionTrigger();
-		stateTransition.setStates(Lists.newArrayList("Closed"));
-		stateTransition.setIssueQuery("any \"Child Issue\" matching(current issue) and all \"Child Issue\" matching(\"State\" is \"Closed\")");
-		transition.setTrigger(stateTransition);
+		var issueStateTransitedSpec = new IssueStateTransitedSpec();
+		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Open"));
+		issueStateTransitedSpec.setToState("Closed");
+		issueStateTransitedSpec.setStates(Lists.newArrayList("Closed"));
+		issueStateTransitedSpec.setIssueQuery("any \"Child Issue\" matching(current issue) and all \"Child Issue\" matching(\"State\" is \"Closed\")");
 		
-		transitionSpecs.add(transition);
+		transitionSpecs.add(issueStateTransitedSpec);
 		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed"));
-		transition.setToState("Open");
-		pressButton = new PressButtonTrigger();
-		pressButton.setButtonLabel("Reopen");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader", "Issue Reporter"));
-		transition.setTrigger(pressButton);
+		manualSpec = new ManualSpec();
+		manualSpec.setFromStates(Lists.newArrayList("Closed"));
+		manualSpec.setToStates(Lists.newArrayList("Open"));
+		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader", "Issue Reporter"));
 		
-		transitionSpecs.add(transition);
+		transitionSpecs.add(manualSpec);
 
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed"));
-		transition.setToState("Open");
-		stateTransition = new StateTransitionTrigger();
-		stateTransition.setStates(Lists.newArrayList("Open"));
-		stateTransition.setIssueQuery("any \"Child Issue\" matching(current issue) or any \"Blocked By\" matching(current issue)");
-		transition.setTrigger(stateTransition);
+		issueStateTransitedSpec = new IssueStateTransitedSpec();
+		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Closed"));
+		issueStateTransitedSpec.setToState("Open");
+		issueStateTransitedSpec.setStates(Lists.newArrayList("Open"));
+		issueStateTransitedSpec.setIssueQuery("any \"Child Issue\" matching(current issue) or any \"Blocked By\" matching(current issue)");
 		
-		transitionSpecs.add(transition);
+		transitionSpecs.add(issueStateTransitedSpec);
+
+		manualSpec = new ManualSpec();
+		manualSpec.setAuthorizedRoles(Lists.newArrayList("Issue Manager"));
+
+		transitionSpecs.add(manualSpec);
 		
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.NAME_STATE);

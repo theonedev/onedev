@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -365,18 +365,14 @@ public class IssueResource {
     @POST
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
 		Issue issue = issueManager.load(issueId);
-		var applicableTriggers = new ArrayList<PressButtonTrigger>();
-		for (var transitionSpec: settingManager.getIssueSetting().getTransitionSpecs()) {
-			if (transitionSpec.getFromStates().contains(issue.getState()) 
-					&& transitionSpec.getToState().equals(data.getState())
-					&& transitionSpec.getTrigger() instanceof PressButtonTrigger) {
-				PressButtonTrigger pressButtonTrigger = (PressButtonTrigger) transitionSpec.getTrigger();
-				applicableTriggers.add(pressButtonTrigger);
-			}
+		var applicableTransitions = new ArrayList<ManualSpec>();
+		for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
+			if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, data.getState())) 
+				applicableTransitions.add((ManualSpec) transition);
 		}
-		if (applicableTriggers.isEmpty()) 
+		if (applicableTransitions.isEmpty()) 
 			throw new BadRequestException("No applicable transition spec for: " + issue.getState() + "->" + data.getState());
-		if (applicableTriggers.stream().noneMatch(it->it.isAuthorized(issue)))
+		if (applicableTransitions.stream().noneMatch(it->it.isAuthorized(issue)))
 			throw new UnauthorizedException();
     	
 		issueChangeManager.changeState(issue, data.getState(), getFieldObjs(issue, data.getFields()), 

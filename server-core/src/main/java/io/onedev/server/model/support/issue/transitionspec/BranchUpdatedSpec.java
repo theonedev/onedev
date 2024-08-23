@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.transitiontrigger;
+package io.onedev.server.model.support.issue.transitionspec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +12,19 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=500, name="Code is committed")
-public class BranchUpdateTrigger extends TransitionTrigger {
+public class BranchUpdatedSpec extends AutoSpec {
 
 	private static final long serialVersionUID = 1L;
 
 	private String branches;
 
-	public BranchUpdateTrigger() {
+	public BranchUpdatedSpec() {
 		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
 				.getRuleName(IssueQueryLexer.FixedInCurrentCommit));		
 	}
 	
 	@Editable(order=200, name="Applicable Branches", placeholder="Any branch", description="Optionally specify space-separated branches "
-			+ "applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
+			+ "applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getBranches() {
@@ -44,7 +44,7 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues applicable "
+	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues applicable "
 			+ "for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentCommitCriteria = true)
 	@Override
@@ -57,7 +57,7 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 	}
 	
 	@Override
-	public String getDescription() {
+	public String getTriggerDescription() {
 		if (branches != null)
 			return "code is committed to branches '" + branches + "'";
 		else

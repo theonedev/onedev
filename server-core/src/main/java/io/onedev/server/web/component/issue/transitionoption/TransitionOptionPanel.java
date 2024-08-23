@@ -11,7 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -63,10 +63,11 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 		
 		add(form);
 		
-		form.add(new Label("title", "Issue Transition (" + getTrigger().getButtonLabel() + ")"));
+		var title = String.format("Issue Transition (%s -> %s)", getIssue().getState(), getToState());
+		form.add(new Label("title", title));
 		
 		Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(getIssue().getProject(), 
-				fieldBeanClass, getTrigger().getPromptFields());
+				fieldBeanClass, getTransition().getPromptFields());
 		BeanEditor editor = BeanContext.edit("fields", fieldBean, propertyNames, false); 
 		form.add(editor);
 		
@@ -102,7 +103,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 				super.onSubmit(target, form);
 
 				Collection<String> editableFields = FieldUtils.getEditableFields(
-						getIssue().getProject(), getTrigger().getPromptFields()); 
+						getIssue().getProject(), getTransition().getPromptFields()); 
 				Map<String, Object> fieldValues = FieldUtils.getFieldValues(
 						editor.newComponentContext(), fieldBean, editableFields);
 				onTransit(target, fieldValues, comment);
@@ -154,7 +155,9 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 	
 	protected abstract Issue getIssue();
 
-	protected abstract PressButtonTrigger getTrigger();
+	protected abstract String getToState();
+	
+	protected abstract ManualSpec getTransition();
 	
 	protected abstract void onTransit(AjaxRequestTarget target, Map<String, Object> fieldValues, @Nullable String comment);
 	

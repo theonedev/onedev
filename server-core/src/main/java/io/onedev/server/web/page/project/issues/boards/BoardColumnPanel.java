@@ -12,12 +12,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -147,7 +147,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
 									for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
-										if (transition.canTransitManually(issue, getColumn())) {
+										if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, getColumn())) {
 											issue = SerializationUtils.clone(issue);
 											issue.setState(getColumn());
 											issue.getLastActivity().setDate(new Date());
@@ -362,10 +362,10 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						getIssueChangeManager().addSchedule(issue, iteration);
 						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 					} else if (fieldName.equals(Issue.NAME_STATE)) {
-						AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
+						AtomicReference<ManualSpec> transitionRef = new AtomicReference<>(null);
 						for (TransitionSpec transition : getIssueSetting().getTransitionSpecs()) {
-							if (transition.canTransitManually(issue, getColumn())) {
-								transitionRef.set(transition);
+							if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, getColumn())) {
+								transitionRef.set((ManualSpec) transition);
 								break;
 							}
 						}
@@ -373,8 +373,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 							throw new IllegalStateException();
 
 						boolean hasPromptFields = false;
-						PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
-						for (String promptField : trigger.getPromptFields()) {
+						var transition = transitionRef.get();
+						for (String promptField : transition.getPromptFields()) {
 							FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
 							if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 								Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
@@ -410,8 +410,13 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 										}
 
 										@Override
-										protected TransitionSpec getTransition() {
+										protected ManualSpec getTransition() {
 											return transitionRef.get();
+										}
+
+										@Override
+										protected String getToState() {
+											return getColumn();
 										}
 
 									};

@@ -7,11 +7,13 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.unbescape.html.HtmlEscape;
 
 import java.util.Collection;
 
@@ -20,14 +22,17 @@ public class IssueStateBadge extends Label {
 
 	private final IModel<Issue> issueModel;
 	
-	public IssueStateBadge(String id, IModel<Issue> issueModel) {
+	public IssueStateBadge(String id, IModel<Issue> issueModel, boolean withArrow) {
 		super(id);
 		this.issueModel = issueModel;
 		
 		setDefaultModel(new LoadableDetachableModel<>() {
 			@Override
 			protected Object load() {
-				return issueModel.getObject().getState();
+				var body = "<span>" + HtmlEscape.escapeHtml5(issueModel.getObject().getState()) + "</span>";
+				if (withArrow)
+					body += " <svg class='icon icon-sm'><use xlink:href='" + SpriteImage.getVersionedHref("arrow4") + "'/></svg>";
+				return body;
 			}
 		});
 	}
@@ -62,9 +67,8 @@ public class IssueStateBadge extends Label {
 			}
 
 		});
-		
 		add(AttributeAppender.append("class", "issue-state badge"));
-		
+		setEscapeModelStrings(false);
 		setOutputMarkupId(true);
 	}
 

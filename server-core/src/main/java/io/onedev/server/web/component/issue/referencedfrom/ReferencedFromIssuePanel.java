@@ -33,7 +33,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IssueStateBadge("state", getModel()));
+		add(new IssueStateBadge("state", getModel(), false));
 		
 		Project project = ((ProjectPage)getPage()).getProject();
 		

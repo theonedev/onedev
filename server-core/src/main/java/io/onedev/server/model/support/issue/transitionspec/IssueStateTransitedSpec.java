@@ -1,20 +1,17 @@
-package io.onedev.server.model.support.issue.transitiontrigger;
+package io.onedev.server.model.support.issue.transitionspec;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.OmitName;
 
 @Editable(order=550, name="State of other issue is transited to")
-public class StateTransitionTrigger extends TransitionTrigger {
+public class IssueStateTransitedSpec extends AutoSpec {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -31,16 +28,8 @@ public class StateTransitionTrigger extends TransitionTrigger {
 	public void setStates(List<String> states) {
 		this.states = states;
 	}
-
-	@SuppressWarnings("unused")
-	private static List<String> getStateChoices() {
-		List<String> stateNames = new ArrayList<>();
-		for (StateSpec state: OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs())
-			stateNames.add(state.getName());
-		return stateNames;
-	}
 	
-	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
 			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentIssueCriteria = true)
 	@Override
@@ -53,7 +42,7 @@ public class StateTransitionTrigger extends TransitionTrigger {
 	}
 
 	@Override
-	public String getDescription() {
+	public String getTriggerDescription() {
 		return "state of other issue is transited to " + states;
 	}
 	

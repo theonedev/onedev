@@ -6955,8 +6955,49 @@ public class DataMigrator {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("SYSTEM"))
+					var key = element.elementTextTrim("key");
+					if (key.equals("SYSTEM")) {
 						element.element("value").addElement("disableDashboard").setText("false");
+					} else if (key.equals("ISSUE")) {
+						var transitionSpecsElement = element.element("value").element("transitionSpecs");
+						for (var transitionSpecElement : transitionSpecsElement.elements()) {
+							var toStateElement = transitionSpecElement.element("toState");
+							var triggerElement = transitionSpecElement.element("trigger");
+							var triggerClass = triggerElement.attributeValue("class");
+							if (triggerClass.contains("PressButtonTrigger")) {
+								transitionSpecElement.addElement("toStates").addElement("string").setText(toStateElement.getText().trim());
+								toStateElement.detach();
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.ManualSpec");
+							} else if (triggerClass.contains("BranchUpdateTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec");
+							} else if (triggerClass.contains("BuildSuccessfulTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.BuildSuccessfulSpec");
+							} else if (triggerClass.contains("DiscardPullRequestTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.PullRequestDiscardedSpec");
+							} else if (triggerClass.contains("MergePullRequestTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.PullRequestMergedSpec");
+							} else if (triggerClass.contains("NoActivityTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.NoActivitySpec");
+							} else if (triggerClass.contains("OpenPullRequestTrigger")) {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec");
+							} else {
+								transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec");
+							}
+							for (var childElement: triggerElement.elements()) {
+								if (!childElement.getName().equals("buttonLabel")) {
+									childElement.detach();
+									transitionSpecElement.add(childElement);
+								}
+							}
+							triggerElement.detach();
+						}
+						var transitionSpecElement = transitionSpecsElement.addElement("io.onedev.server.model.support.issue.transitionspec.ManualSpec");
+						transitionSpecElement.addElement("fromStates");
+						transitionSpecElement.addElement("toStates");
+						transitionSpecElement.addElement("removeFields");
+						transitionSpecElement.addElement("authorizedRoles").addElement("string").setText("Project Owner");
+						transitionSpecElement.addElement("promptFields");
+					}
 				}
 				dom.writeToFile(file, false);
 			}

@@ -573,7 +573,7 @@ public abstract class IssueSidePanel extends Panel {
 				protected Issue load() {
 					return getIssueManager().load(linkedIssueId);
 				}
-			}).add(AttributeAppender.append("class", "badge-sm")));
+			}, true).add(AttributeAppender.append("class", "badge-sm")));
 			
 			fragment.add(stateLink);
 

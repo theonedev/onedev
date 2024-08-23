@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.transitiontrigger;
+package io.onedev.server.model.support.issue.transitionspec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-public abstract class PullRequestTrigger extends TransitionTrigger {
+public abstract class PullRequestSpec extends AutoSpec {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String branches;
 	
-	public PullRequestTrigger() {
+	public PullRequestSpec() {
 		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
 				.getRuleName(IssueQueryLexer.FixedInCurrentPullRequest));		
 	}
@@ -37,7 +37,7 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 		this.branches = branches;
 	}
 
-	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
 			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentPullRequestCriteria = true)
 	@Override

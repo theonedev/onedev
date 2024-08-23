@@ -148,7 +148,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 									protected Issue load() {
 										return getIssueManager().load(issueId);
 									}
-								}));
+								}, true));
 								stateFragment.add(transitLink);
 
 								fieldsView.add(stateFragment.setOutputMarkupId(true));

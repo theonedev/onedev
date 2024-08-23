@@ -97,7 +97,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 				};
 
-				transitLink.add(new IssueStateBadge("state", issueModel));
+				transitLink.add(new IssueStateBadge("state", issueModel, false));
 				stateFragment.add(transitLink);
 				fieldsView.add(stateFragment.setOutputMarkupId(true));
 			} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {

@@ -4,7 +4,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
@@ -76,7 +76,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 		
 		List<IColumn<TransitionSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
@@ -88,89 +88,91 @@ public class StateTransitionListPage extends IssueSettingPage {
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				TransitionSpec transition = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "descriptionFrag", StateTransitionListPage.this);
-				if (transition.getFromStates().size() > 1)
+				if (transition.getFromStates().isEmpty())
+					fragment.add(new Label("fromStates", "[Any state]"));
+				else					
 					fragment.add(new Label("fromStates", "[" + StringUtils.join(transition.getFromStates(), ",") + "]"));
+				if (transition.getToStates().isEmpty())
+					fragment.add(new Label("toStates", "[Any state]"));
 				else
-					fragment.add(new Label("fromStates", transition.getFromStates().iterator().next()));
-				
-				fragment.add(new Label("toState", transition.getToState()));
+					fragment.add(new Label("toStates", "[" + StringUtils.join(transition.getToStates(), ",") + "]"));
 
-				fragment.add(new Label("when", "When " + transition.getTrigger().getDescription()));
+				fragment.add(new Label("when", "When " + transition.getTriggerDescription()));
 
-				if (transition.getTrigger().getIssueQuery() != null)
-					fragment.add(new Label("applicable", "For issues matching: " + transition.getTrigger().getIssueQuery()));
+				if (transition.getIssueQuery() != null)
+					fragment.add(new Label("applicable", "For issues matching: " + transition.getIssueQuery()));
 				else
 					fragment.add(new Label("applicable", "For all issues"));
-				
+
 				cellItem.add(fragment);
 			}
-			
+
 		});		
 		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				int transitionIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StateTransitionListPage.this);
 				fragment.add(new ModalLink("edit") {
-	
+
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						return new TransitionEditPanel(id, transitionIndex) {
-	
+
 							@Override
 							protected void onSave(AjaxRequestTarget target) {
 								target.add(transitionsTable);
 								modal.close();
 							}
-	
+
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
 								modal.close();
 							}
-	
+
 							@Override
 							protected GlobalIssueSetting getSetting() {
 								return StateTransitionListPage.this.getSetting();
 							}
-	
+
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
-	
+
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this transition?"));
 					}
-	
+
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getSetting().getTransitionSpecs().remove(transitionIndex);
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 						target.add(transitionsTable);
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
@@ -179,7 +181,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 			public String getCssClass() {
 				return "actions text-nowrap";
 			}
-			
+
 		});		
 		
 		IDataProvider<TransitionSpec> dataProvider = new ListDataProvider<TransitionSpec>() {
@@ -191,7 +193,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 
 		};
 		
-		add(transitionsTable = new DataTable<TransitionSpec, Void>("stateTransitions", columns, dataProvider, Integer.MAX_VALUE));
+		add(transitionsTable = new DataTable<>("stateTransitions", columns, dataProvider, Integer.MAX_VALUE));
 		transitionsTable.addTopToolbar(new HeadersToolbar<Void>(transitionsTable, null));
 		transitionsTable.addBottomToolbar(new NoRecordsToolbar(transitionsTable));
 		transitionsTable.add(new NoRecordsBehavior());

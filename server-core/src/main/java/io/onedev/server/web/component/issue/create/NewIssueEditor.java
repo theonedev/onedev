@@ -173,7 +173,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
-				item.add(new IssueStateBadge("state", item.getModel()));
+				item.add(new IssueStateBadge("state", item.getModel(), false));
 				item.add(new IssueTitlePanel("numberAndTitle") {
 
 					@Override

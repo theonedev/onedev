@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.transitiontrigger;
+package io.onedev.server.model.support.issue.transitionspec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=400, name="Build is successful")
-public class BuildSuccessfulTrigger extends TransitionTrigger {
+public class BuildSuccessfulSpec extends AutoSpec {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -22,13 +22,13 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	
 	private String branches;
 	
-	public BuildSuccessfulTrigger() {
+	public BuildSuccessfulSpec() {
 		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
 				.getRuleName(IssueQueryLexer.FixedInCurrentBuild));		
 	}
 	
 	@Editable(order=100, name="Applicable Jobs", placeholder="Any job", description="Optionally specify space-separated jobs "
-			+ "applicable for this trigger. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
 			+ "Leave empty to match all")
 	@Patterns(suggester = "suggestJobs")
 	public String getJobNames() {
@@ -40,7 +40,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	}
 
 	@Editable(order=200, name="Applicable Branches", placeholder="Any branch", description="Optionally specify space-separated branches "
-			+ "applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
+			+ "applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getBranches() {
@@ -69,7 +69,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 	
-	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
 			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentBuildCriteria = true)
 	@Override
@@ -91,7 +91,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	}
 	
 	@Override
-	public String getDescription() {
+	public String getTriggerDescription() {
 		if (jobNames != null) {
 			if (branches != null)
 				return "build is successful for jobs '" + jobNames + "' on branches '" + branches + "'";

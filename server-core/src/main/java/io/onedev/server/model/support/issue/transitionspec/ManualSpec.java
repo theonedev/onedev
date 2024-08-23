@@ -1,65 +1,59 @@
-package io.onedev.server.model.support.issue.transitiontrigger;
+package io.onedev.server.model.support.issue.transitionspec;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import javax.validation.constraints.NotEmpty;
-
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.Membership;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.IssueQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@Editable(order=100, name="Press Button or Drag & Drop in Boards")
-public class PressButtonTrigger extends TransitionTrigger {
+@Editable(order=100, name="Transit manually")
+public class ManualSpec extends TransitionSpec {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger logger = LoggerFactory.getLogger(PressButtonTrigger.class);
+	private static final Logger logger = LoggerFactory.getLogger(ManualSpec.class);
 	
 	public static final String ROLE_SUBMITTER = "<Issue Submitter>";
-	
-	private String buttonLabel;
 
+	private List<String> toStates = new ArrayList<>();
+	
 	private List<String> authorizedRoles = new ArrayList<>();
 	
 	private List<String> promptFields = new ArrayList<>();
+
+	@Override
+	@Editable(order=150, placeholder = "Any state")
+	@ChoiceProvider("getStateChoices")
+	public List<String> getToStates() {
+		return toStates;
+	}
+
+	public void setToStates(List<String> toStates) {
+		this.toStates = toStates;
+	}
 	
-	@Editable(order=100)
-	@NotEmpty
-	public String getButtonLabel() {
-		return buttonLabel;
-	}
-
-	public void setButtonLabel(String buttonLabel) {
-		this.buttonLabel = buttonLabel;
-	}
-
-	@Editable(order=200, description="Optionally specify authorized roles to press this button. If not specified, all users are allowed")
+	@Editable(order=200, placeholder = "Any user", description="Optionally specify authorized roles to press this button. If not specified, all users are allowed")
 	@ChoiceProvider("getRoleChoices")
 	public List<String> getAuthorizedRoles() {
 		return authorizedRoles;
@@ -94,18 +88,6 @@ public class PressButtonTrigger extends TransitionTrigger {
 		this.promptFields = promptFields;
 	}
 	
-	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<String> getFieldChoices() {
-		List<String> fields = new ArrayList<>();
-		for (FieldSpec field: getIssueSetting().getFieldSpecs())
-			fields.add(field.getName());
-		return fields;
-	}
-
 	@Nullable
 	private String getFieldName(String roleName) {
 		if (roleName.startsWith("{") && roleName.endsWith("}")) {
@@ -116,9 +98,31 @@ public class PressButtonTrigger extends TransitionTrigger {
 		}
 	}
 
+	public boolean canTransit(Issue issue, @Nullable String state) {
+		if ((state == null || getToStates().isEmpty() || getToStates().contains(state)) 
+				&& (getFromStates().isEmpty() || getFromStates().contains(issue.getState())) 
+				&& isAuthorized(issue)) {
+			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = io.onedev.server.search.entity.issue.IssueQuery.parse(issue.getProject(),
+					getIssueQuery(), new IssueQueryParseOption().enableAll(true), true);
+			return parsedQuery.matches(issue);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public Collection<String> getUndefinedStates() {
+		Collection<String> undefinedStates = super.getUndefinedStates();
+		for (var toState: getToStates()) {
+			if (getIssueSetting().getStateSpec(toState) == null)
+				undefinedStates.add(toState);
+		}
+		return undefinedStates;
+	}
+	
 	@Override
 	public Collection<String> getUndefinedFields() {
-		Collection<String> undefinedFields = new ArrayList<>();
+		Collection<String> undefinedFields = super.getUndefinedFields();
 		GlobalIssueSetting setting = getIssueSetting();
 		for (String field: getPromptFields()) {
 			if (setting.getFieldSpec(field) == null)
@@ -134,7 +138,25 @@ public class PressButtonTrigger extends TransitionTrigger {
 	}
 
 	@Override
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		if (!super.fixUndefinedStates(resolutions))
+			return false;
+		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedStateResolution.FixType.CHANGE_TO_ANOTHER_STATE) {
+				ReconcileUtils.renameItem(getToStates(), entry.getKey(), entry.getValue().getNewState());
+			} else {
+				getToStates().remove(entry.getKey());
+				if (getToStates().isEmpty())
+					return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		if (!super.fixUndefinedFields(resolutions))
+			return false;
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) { 
 				ReconcileUtils.renameItem(getPromptFields(), entry.getKey(), entry.getValue().getNewField());
@@ -220,13 +242,13 @@ public class PressButtonTrigger extends TransitionTrigger {
 	public void setIssueQuery(String issueQuery) {
 		super.setIssueQuery(issueQuery);
 	}
-	
+
 	@Override
-	public String getDescription() {
+	public String getTriggerDescription() {
 		if (authorizedRoles.isEmpty())
-			return "button '" + buttonLabel + "' is pressed by any user";
+			return "transit manually by any user";
 		else
-			return "button '" + buttonLabel + "' is pressed by any user of roles " + authorizedRoles;
+			return "transit manually by any user of roles " + authorizedRoles;
 	}
 	
 }

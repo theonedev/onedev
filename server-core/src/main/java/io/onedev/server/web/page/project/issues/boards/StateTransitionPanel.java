@@ -6,9 +6,9 @@ import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -40,13 +40,14 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		add(form);
-		
-		form.add(new Label("state", getTransition().getToState()));
-		
-		PressButtonTrigger trigger = (PressButtonTrigger) getTransition().getTrigger();
+
+		ManualSpec transition = getTransition();
+		var toState = getToState();
+
+		form.add(new Label("state", toState));
 		
 		Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
-				getIssue().getProject(), fieldBeanClass, trigger.getPromptFields());
+				getIssue().getProject(), fieldBeanClass, transition.getPromptFields());
 		BeanEditor editor = BeanContext.edit("editor", fieldBean, propertyNames, false); 
 		form.add(editor);
 		
@@ -57,11 +58,11 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 				
 				Collection<String> editableFields = FieldUtils.getEditableFields(
-						getIssue().getProject(), trigger.getPromptFields());
+						getIssue().getProject(), transition.getPromptFields());
 				Map<String, Object> fieldValues = FieldUtils.getFieldValues(
 						editor.newComponentContext(), fieldBean, editableFields);
 				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), 
-						getTransition().getToState(), fieldValues, getTransition().getRemoveFields(), null);
+						getToState(), fieldValues, transition.getRemoveFields(), null);
 				onSaved(target);
 			}
 
@@ -109,5 +110,8 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	
 	protected abstract void onCancelled(AjaxRequestTarget target);
 	
-	protected abstract TransitionSpec getTransition();
+	protected abstract ManualSpec getTransition();
+	
+	protected abstract String getToState();
+	
 }
