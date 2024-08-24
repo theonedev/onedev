@@ -241,18 +241,15 @@ public class OpenIdConnector extends SsoConnector {
 					if (!subject.equals(json.get("sub")))
 						throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
 
-					if (email == null) {
+					if (email == null) 
 						email = getStringValue(json.get("email"));
-						if (email == null)
-							throw new AuthenticationException("OIDC error: No email claim returned");
-					}
+					if (email == null)
+						throw new AuthenticationException("OIDC error: No email claim returned");
 
-					if (userName == null) {
+					if (userName == null) 
 						userName = getStringValue(json.get("preferred_username"));
-						if (userName == null)
-							userName = email;
-						userName = StringUtils.substringBefore(userName, "@");
-					}
+					if (userName == null)
+						userName = email;
 
 					if (fullName == null)
 						fullName = getStringValue(json.get("name"));
@@ -271,6 +268,7 @@ public class OpenIdConnector extends SsoConnector {
 					throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 				}
 			}
+			userName = StringUtils.substringBefore(userName, "@");
 			if (groups != null)
 				groups = convertGroups(accessToken, groups);
 			return new SsoAuthenticated(userName, email, fullName, groups, null, this);
