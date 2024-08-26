@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.*;
 
-import static io.onedev.server.util.date.DateUtils.toLocalDate;
+import static io.onedev.server.util.DateUtils.toLocalDate;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.*;
 
 public class IterationBurndownPanel extends GenericPanel<Iteration> {

@@ -27,7 +27,7 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.patternset.PatternSet;

@@ -1,10 +1,9 @@
-package io.onedev.server.util.date;
+package io.onedev.server.util;
 
 import com.google.common.collect.Lists;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.util.Constants;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -66,4 +65,5 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	public static Date toDate(LocalDateTime localDateTime) {
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());		
 	}
+	
 }

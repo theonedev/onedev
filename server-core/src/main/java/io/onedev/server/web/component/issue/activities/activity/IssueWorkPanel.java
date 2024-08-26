@@ -5,7 +5,7 @@ import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.BeanContext;
@@ -26,7 +26,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import static io.onedev.server.util.date.DateUtils.formatDateTime;
+import static io.onedev.server.util.DateUtils.formatDateTime;
 
 @SuppressWarnings("serial")
 class IssueWorkPanel extends GenericPanel<IssueWork> {

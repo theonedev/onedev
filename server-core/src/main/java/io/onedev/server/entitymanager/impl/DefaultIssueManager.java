@@ -93,6 +93,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final IssueLinkManager linkManager;
 	
+	private final IssueScheduleManager scheduleManager;
+	
 	private final ClusterManager clusterManager;
 	
 	private final IssueTouchManager touchManager;
@@ -107,7 +109,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 							   SettingManager settingManager, ListenerRegistry listenerRegistry,
 							   ProjectManager projectManager, UserManager userManager, ClusterManager clusterManager,
 							   RoleManager roleManager, LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
-							   IssueAuthorizationManager authorizationManager, IssueTouchManager touchManager) {
+							   IssueAuthorizationManager authorizationManager, IssueTouchManager touchManager, 
+							   IssueScheduleManager scheduleManager) {
 		super(dao);
 		this.fieldManager = fieldManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
@@ -122,6 +125,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.authorizationManager = authorizationManager;
 		this.clusterManager = clusterManager;
 		this.touchManager = touchManager;
+		this.scheduleManager = scheduleManager;
 		
 		numberGenerator = new SequenceGenerator(Issue.class, clusterManager, dao);
 	}
@@ -243,7 +247,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
-			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
+			boolean loadExtraInfo, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -255,9 +259,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
-		if (loadFieldsAndLinks && !issues.isEmpty()) {
+		if (loadExtraInfo && !issues.isEmpty()) {
 			fieldManager.populateFields(issues);
 			linkManager.populateLinks(issues);
+			scheduleManager.populateSchedules(issues);
 		}
 		return issues;
 	}

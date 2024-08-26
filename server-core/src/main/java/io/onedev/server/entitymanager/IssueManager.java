@@ -50,7 +50,7 @@ public interface IssueManager extends EntityManager<Issue> {
 													   From<Issue, Issue> issue);
 	
 	List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
-			boolean loadFieldsAndLinks, int firstResult, int maxResults);
+			boolean loadExtraInfo, int firstResult, int maxResults);
 	
 	int count(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
 	

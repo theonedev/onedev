@@ -1,8 +1,13 @@
 package io.onedev.server.web.page.project.stats.code;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.user.card.PersonCardPanel;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,16 +20,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.git.GitContribution;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.Day;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.user.card.PersonCardPanel;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class CodeContribsPage extends CodeStatsPage {
@@ -75,12 +72,12 @@ public class CodeContribsPage extends CodeStatsPage {
 
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		Map<Integer, Integer[]> data = new HashMap<>();
-		Map<Day, GitContribution> overallContributions = 
+		Map<Integer, GitContribution> overallContributions = 
 				commitInfoManager.getOverallContributions(getProject().getId());
-		for (Map.Entry<Day, GitContribution> entry: overallContributions.entrySet()) {
+		for (Map.Entry<Integer, GitContribution> entry: overallContributions.entrySet()) {
 			GitContribution contribution = entry.getValue();
 			Integer[] dataValue = new Integer[] {contribution.getCommits(), contribution.getAdditions(), contribution.getDeletions()};
-			data.put(entry.getKey().getValue(), dataValue);
+			data.put(entry.getKey(), dataValue);
 		}
 		
 		PageParameters params = TopContributorsResource.paramsOf(getProject()); 

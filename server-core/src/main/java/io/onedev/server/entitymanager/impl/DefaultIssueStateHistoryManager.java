@@ -146,5 +146,5 @@ public class DefaultIssueStateHistoryManager extends BaseEntityManager<IssueStat
 		}
 		return stats;
 	}
-	
+
 }

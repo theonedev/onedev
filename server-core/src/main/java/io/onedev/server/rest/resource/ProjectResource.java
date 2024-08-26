@@ -22,8 +22,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
-import io.onedev.server.util.date.Day;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
@@ -223,11 +222,10 @@ public class ProjectResource {
     	if (count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
-    	Day sinceDay = new Day(LocalDate.parse(since));
-    	Day untilDay = new Day(LocalDate.parse(until));
+    	int sinceDay = (int) LocalDate.parse(since).toEpochDay();
+    	int untilDay = (int) LocalDate.parse(until).toEpochDay();
     	
-    	return commitInfoManager.getTopContributors(project.getId(), 
-    			count, type, sinceDay.getValue(), untilDay.getValue());
+    	return commitInfoManager.getTopContributors(project.getId(), count, type, sinceDay, untilDay);
     }
 	
 	@SuppressWarnings("unused")

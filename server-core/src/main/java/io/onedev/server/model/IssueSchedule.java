@@ -1,17 +1,10 @@
 package io.onedev.server.model;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(
@@ -31,7 +24,7 @@ public class IssueSchedule extends AbstractEntity {
 	
 	public static String PROP_DATE = "date";
 
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;
 	

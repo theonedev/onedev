@@ -1,18 +1,14 @@
 package io.onedev.server.web.util;
 
 import io.onedev.server.model.support.TimeGroups;
-import io.onedev.server.util.date.Day;
-import io.onedev.server.util.date.Month;
-import io.onedev.server.util.date.Week;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
 public enum StatsGroup {
 
@@ -24,13 +20,15 @@ public enum StatsGroup {
 
 		@Override
 		public String toString(int groupValue) {
-			return new Day(groupValue).toString();
+			var localDate = LocalDate.ofEpochDay(groupValue);
+			return String.format("%02d-%02d", localDate.getMonthValue(), localDate.getDayOfMonth());
 		}
 
 		@Override
 		public int getNext(int groupValue) {
-			return new Day(new Day(groupValue).getDate().plusDays(1)).getValue();
+			return (int) LocalDate.ofEpochDay(groupValue).plusDays(1).toEpochDay();
 		}
+		
 	}, 
 	BY_WEEK {
 
@@ -41,12 +39,14 @@ public enum StatsGroup {
 		
 		@Override
 		public String toString(int groupValue) {
-			return new Week(groupValue).toString();
+			var localDate = LocalDate.ofEpochDay(groupValue);
+			var weekFields = WeekFields.of(Locale.getDefault());
+			return String.format("w%02d", localDate.get(weekFields.weekOfWeekBasedYear()));
 		}
 
 		@Override
 		public int getNext(int groupValue) {
-			return new Week(new Week(groupValue).getDate().plusWeeks(1)).getValue();
+			return (int) LocalDate.ofEpochDay(groupValue).plusWeeks(1).toEpochDay();
 		}
 		
 	}, 
@@ -59,12 +59,13 @@ public enum StatsGroup {
 		
 		@Override
 		public String toString(int groupValue) {
-			return new Month(groupValue).toString();
+			var localDate = LocalDate.ofEpochDay(groupValue);
+			return String.format("%04d-%02d", localDate.getYear(), localDate.getMonthValue());
 		}
 
 		@Override
 		public int getNext(int groupValue) {
-			return new Month(new Month(groupValue).getDate().plusMonths(1)).getValue();
+			return (int) LocalDate.ofEpochDay(groupValue).plusMonths(1).toEpochDay();
 		}
 		
 	};

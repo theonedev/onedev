@@ -39,7 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.onedev.server.util.date.DateUtils.toLocalDate;
+import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.lang.Long.valueOf;
 
 @Singleton

@@ -1,20 +1,17 @@
 package io.onedev.server.web.page.project.stats.code;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.server.OneDev;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.util.date.Day;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class SourceLinesPage extends CodeStatsPage {
@@ -27,11 +24,11 @@ public class SourceLinesPage extends CodeStatsPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		Map<Day, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoManager.class)
+		Map<Integer, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoManager.class)
 				.getLineIncrements(getProject().getId());
 		Map<Integer, Map<String, Integer>> data = new HashMap<>();
-		for (Map.Entry<Day, Map<String, Integer>> entry: lineIncrements.entrySet()) 
-			data.put(entry.getKey().getValue(), entry.getValue());
+		for (Map.Entry<Integer, Map<String, Integer>> entry: lineIncrements.entrySet()) 
+			data.put(entry.getKey(), entry.getValue());
 		try {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String jsonOfData = mapper.writeValueAsString(data);

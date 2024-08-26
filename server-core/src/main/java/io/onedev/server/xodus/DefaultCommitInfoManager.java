@@ -36,7 +36,6 @@ import io.onedev.server.util.*;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.date.Day;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
@@ -82,7 +81,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 
-	private static final int INFO_VERSION = 16;
+	private static final int INFO_VERSION = 17;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 
@@ -506,8 +505,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 				@Override
 				public void process(LogCommit currentCommit) {
 					if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
-						int dayValue = new Day(currentCommit.getCommitDate()).getValue();
-						updateContribution(overallContributions, dayValue, currentCommit, filePatterns);
+						int day = (int) DateUtils.toLocalDate(currentCommit.getCommitDate()).toEpochDay();
+						updateContribution(overallContributions, day, currentCommit, filePatterns);
 
 						if (currentCommit.getAuthor() != null) {
 							NameAndEmail author = new NameAndEmail(currentCommit.getAuthor());
@@ -515,11 +514,11 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 							int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
 							Preconditions.checkState(userIndex != -1);
 
-							Map<Integer, GitContribution> contributionsOnDay = dailyContributionsCache.get(dayValue);
+							Map<Integer, GitContribution> contributionsOnDay = dailyContributionsCache.get(day);
 							if (contributionsOnDay == null) {
 								contributionsOnDay = deserializeContributions(readBytes(
-										dailyContributionsStore, txn, new IntByteIterable(dayValue)));
-								dailyContributionsCache.put(dayValue, contributionsOnDay);
+										dailyContributionsStore, txn, new IntByteIterable(day)));
+								dailyContributionsCache.put(day, contributionsOnDay);
 							}
 							updateContribution(contributionsOnDay, userIndex, currentCommit, filePatterns);
 						}
@@ -753,12 +752,12 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private void updateLineStats(Transaction txn, LogCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats,
 								 PatternSet filePatterns) {
-		int dayValue = new Day(currentCommit.getCommitDate()).getValue();
+		int day = (int) DateUtils.toLocalDate(currentCommit.getCommitDate()).toEpochDay();
 
-		Map<String, Integer> lineStatsOnDay = lineStats.get(dayValue);
+		Map<String, Integer> lineStatsOnDay = lineStats.get(day);
 		if (lineStatsOnDay == null) {
 			lineStatsOnDay = new HashMap<>();
-			lineStats.put(dayValue, lineStatsOnDay);
+			lineStats.put(day, lineStatsOnDay);
 		}
 
 		Map<String, Integer> languageLines = new HashMap<>();
@@ -880,24 +879,24 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	}
 
 	@Override
-	public Map<Day, Map<String, Integer>> getLineIncrements(Long projectId) {
+	public Map<Integer, Map<String, Integer>> getLineIncrements(Long projectId) {
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Map<Day, Map<String, Integer>> call() throws Exception {
+			public Map<Integer, Map<String, Integer>> call() throws Exception {
 				Environment env = getEnv(projectId.toString());
 				Store store = getStore(env, DEFAULT_STORE);
 
 				return env.computeInReadonlyTransaction(txn -> {
-					Map<Day, Map<String, Integer>> lineIncrements = new HashMap<>();
+					Map<Integer, Map<String, Integer>> lineIncrements = new HashMap<>();
 					byte[] bytes = readBytes(store, txn, LINE_STATS_KEY);
 					if (bytes != null) {
 						@SuppressWarnings("unchecked")
 						var storedMap = (Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(bytes);
 						for (var entry : storedMap.entrySet())
-							lineIncrements.put(new Day(entry.getKey()), entry.getValue());
+							lineIncrements.put(entry.getKey(), entry.getValue());
 					}
 					return lineIncrements;
 				});
@@ -1285,21 +1284,21 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Sessional
 	@Override
-	public Map<Day, GitContribution> getOverallContributions(Long projectId) {
+	public Map<Integer, GitContribution> getOverallContributions(Long projectId) {
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Map<Day, GitContribution> call() {
+			public Map<Integer, GitContribution> call() {
 				Environment env = getEnv(projectId.toString());
 				Store store = getStore(env, DEFAULT_STORE);
 
 				return env.computeInReadonlyTransaction(txn -> {
-					Map<Day, GitContribution> overallContributions = new HashMap<>();
+					Map<Integer, GitContribution> overallContributions = new HashMap<>();
 					for (Map.Entry<Integer, GitContribution> entry :
 							deserializeContributions(readBytes(store, txn, OVERALL_CONTRIBUTIONS_KEY)).entrySet()) {
-						overallContributions.put(new Day(entry.getKey()), entry.getValue());
+						overallContributions.put(entry.getKey(), entry.getValue());
 					}
 					return overallContributions;
 				});
@@ -1404,24 +1403,23 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 						Set<NameAndEmail> topUserSet = new HashSet<>(topUsers);
 
-						Map<NameAndEmail, Map<Day, Integer>> userContributions = new HashMap<>();
+						Map<NameAndEmail, Map<Integer, Integer>> userContributions = new HashMap<>();
 
 						for (Map.Entry<Integer, Map<Integer, GitContribution>> dayEntry : contributionsByDay.entrySet()) {
 							for (Map.Entry<Integer, GitContribution> userEntry : dayEntry.getValue().entrySet()) {
 								NameAndEmail user = getUser(txn, users, userEntry.getKey());
 								if (user != null && topUserSet.contains(user)) {
-									Map<Day, Integer> contributionsOfUser = userContributions.get(user);
+									Map<Integer, Integer> contributionsOfUser = userContributions.get(user);
 									if (contributionsOfUser == null) {
 										contributionsOfUser = new HashMap<>();
 										userContributions.put(user, contributionsOfUser);
 									}
-									Day day = new Day(dayEntry.getKey());
 									if (type == GitContribution.Type.COMMITS)
-										contributionsOfUser.put(day, userEntry.getValue().getCommits());
+										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getCommits());
 									else if (type == GitContribution.Type.ADDITIONS)
-										contributionsOfUser.put(day, userEntry.getValue().getAdditions());
+										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getAdditions());
 									else
-										contributionsOfUser.put(day, userEntry.getValue().getDeletions());
+										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getDeletions());
 								}
 							}
 						}

@@ -1,12 +1,11 @@
 package io.onedev.server.model.support;
 
-import io.onedev.server.util.date.Day;
-import io.onedev.server.util.date.Hour;
-import io.onedev.server.util.date.Month;
-import io.onedev.server.util.date.Week;
+import io.onedev.server.util.DateUtils;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 @Embeddable
@@ -52,9 +51,10 @@ public class TimeGroups implements Serializable {
 	
 	public static TimeGroups of(Date date) {
 		var timeGroups = new TimeGroups();
-		timeGroups.setMonth(new Month(date).getValue());
-		timeGroups.setWeek(new Week(date).getValue());
-		timeGroups.setDay(new Day(date).getValue());
+		var localDate = DateUtils.toLocalDate(date);
+		timeGroups.setMonth((int) localDate.with(TemporalAdjusters.firstDayOfMonth()).toEpochDay());
+		timeGroups.setWeek((int) localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay());
+		timeGroups.setDay((int) localDate.toEpochDay());
 		return timeGroups;
 	}
 }

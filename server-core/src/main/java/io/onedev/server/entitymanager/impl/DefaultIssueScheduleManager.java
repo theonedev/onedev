@@ -1,19 +1,23 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Singleton
 public class DefaultIssueScheduleManager extends BaseEntityManager<IssueSchedule> 
@@ -52,4 +56,22 @@ public class DefaultIssueScheduleManager extends BaseEntityManager<IssueSchedule
 		dao.persist(schedule);
 	}
 
+	@Sessional
+	@Override
+	public void populateSchedules(Collection<Issue> issues) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<IssueSchedule> query = builder.createQuery(IssueSchedule.class);
+
+		Root<IssueSchedule> root = query.from(IssueSchedule.class);
+		query.select(root);
+
+		query.where(root.get(IssueSchedule.PROP_ISSUE).in(issues));
+
+		for (Issue issue: issues)
+			issue.setSchedules(new ArrayList<>());
+
+		for (IssueSchedule schedule: getSession().createQuery(query).getResultList())
+			schedule.getIssue().getSchedules().add(schedule);
+	}
+	
 }

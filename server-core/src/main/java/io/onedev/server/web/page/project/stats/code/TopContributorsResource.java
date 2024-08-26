@@ -1,38 +1,38 @@
 package io.onedev.server.web.page.project.stats.code;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.commit.AfterCriteria;
 import io.onedev.server.search.commit.AuthorCriteria;
 import io.onedev.server.search.commit.BeforeCriteria;
 import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.git.GitContribution;
-import io.onedev.server.git.GitContributor;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.Day;
-import io.onedev.server.web.avatar.AvatarManager;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class TopContributorsResource extends AbstractResource {
 
@@ -68,8 +68,8 @@ class TopContributorsResource extends AbstractResource {
 					throw new UnauthorizedException();
 
 				DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-				String fromDate = formatter.print(new Day(fromDay).getDate());
-				String toDate = formatter.print(new Day(toDay).getDate().plusDays(1));
+				String fromDate = formatter.print(new DateTime(DateUtils.toDate(LocalDate.ofEpochDay(fromDay).atTime(0, 0, 0, 0))));
+				String toDate = formatter.print(new DateTime(DateUtils.toDate(LocalDate.ofEpochDay(toDay).plusDays(1).atTime(0, 0, 0, 0))));
 				
 				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class)
 						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);
@@ -109,8 +109,8 @@ class TopContributorsResource extends AbstractResource {
 							ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project, query.toString(), null)));
 					
 					Map<Integer, Integer> dailyContributionsData = new HashMap<>();
-					for (Map.Entry<Day, Integer> entry: contributor.getDailyContributions().entrySet()) 
-						dailyContributionsData.put(entry.getKey().getValue(), entry.getValue());
+					for (Map.Entry<Integer, Integer> entry: contributor.getDailyContributions().entrySet()) 
+						dailyContributionsData.put(entry.getKey(), entry.getValue());
 					
 					contributorData.put("dailyContributions", dailyContributionsData);
 					data.add(contributorData);

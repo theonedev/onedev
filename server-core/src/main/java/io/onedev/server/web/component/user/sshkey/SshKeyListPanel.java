@@ -3,7 +3,7 @@ package io.onedev.server.web.component.user.sshkey;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;

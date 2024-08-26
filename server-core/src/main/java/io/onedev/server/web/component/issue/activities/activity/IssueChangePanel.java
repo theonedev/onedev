@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 
 @SuppressWarnings("serial")
 class IssueChangePanel extends GenericPanel<IssueChange> {

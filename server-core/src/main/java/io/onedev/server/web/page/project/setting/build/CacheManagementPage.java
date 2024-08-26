@@ -5,7 +5,7 @@ import io.onedev.server.entitymanager.JobCacheManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.JobCache;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.editable.BeanContext;

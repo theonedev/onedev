@@ -11,7 +11,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {

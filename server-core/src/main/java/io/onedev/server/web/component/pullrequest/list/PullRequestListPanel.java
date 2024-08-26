@@ -18,7 +18,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;

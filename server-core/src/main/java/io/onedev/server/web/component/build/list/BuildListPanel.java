@@ -20,7 +20,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;

@@ -25,7 +25,7 @@ import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;

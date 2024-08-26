@@ -163,10 +163,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
+			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
+			NAME_ID, PROP_ID,
 			NAME_NAME, PROP_NAME, 
 			NAME_KEY, PROP_KEY,
 			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,

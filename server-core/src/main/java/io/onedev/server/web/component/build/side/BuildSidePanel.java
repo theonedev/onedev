@@ -13,7 +13,7 @@ import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.asset.emoji.Emojis;

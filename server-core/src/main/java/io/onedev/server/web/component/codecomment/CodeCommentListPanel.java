@@ -11,7 +11,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.UrlManager;

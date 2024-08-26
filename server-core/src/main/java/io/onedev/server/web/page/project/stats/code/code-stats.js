@@ -9,7 +9,10 @@ onedev.server.codeStats = {
 			value: useKilo? (value/1000).toFixed(1) + " k": value
 		}
 	},
-	
+	formatDay: function(day) {
+		var localDate = JSJoda.LocalDate.ofEpochDay(day);
+		return localDate.year()%100 + "-" + localDate.monthValue() + "-" + localDate.dayOfMonth();
+	},
 	contribs: {
 		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback, darkMode) {
 			var $contribs = $(".code-contribs");
@@ -22,7 +25,7 @@ onedev.server.codeStats = {
 			var contribDays = [];
 
 			for (var day in overallContributions) 
-				contribDays.push(day);
+				contribDays.push(Number(day));
 			
 			contribDays.sort(function(day1, day2) {
 				return day1 - day2;
@@ -34,8 +37,7 @@ onedev.server.codeStats = {
 			var currentDay = contribDays[0];
 			while (currentDay <= lastDay) {
 				days.push(currentDay);
-				var currentDayObj = onedev.server.day.fromValue(currentDay);
-				currentDay = onedev.server.day.toValue(onedev.server.day.plus(currentDayObj, 1));
+				currentDay++;
 			}
 			
 			var fromDay = days[0];
@@ -43,9 +45,9 @@ onedev.server.codeStats = {
 			
 			function updateDateRange() {
 				$contribs.find(".date-range").text(
-						onedev.server.day.format(onedev.server.day.fromValue(fromDay)) 
+						onedev.server.codeStats.formatDay(fromDay) 
 						+ " ~ " 
-						+ onedev.server.day.format(onedev.server.day.fromValue(toDay)));
+						+ onedev.server.codeStats.formatDay(toDay));
 			}
 
 			var $contribType = $contribs.find(".contrib-type");
@@ -56,7 +58,7 @@ onedev.server.codeStats = {
 			
 			var overallXAxisData = [];
 			for (var i=0; i<days.length; i++) {
-				overallXAxisData.push(onedev.server.day.format(onedev.server.day.fromValue(days[i])));
+				overallXAxisData.push(onedev.server.codeStats.formatDay(days[i]));
 			}
 			
 			function getOverallSeriesData() {
@@ -179,7 +181,7 @@ onedev.server.codeStats = {
 							var xAxisData = [];
 							for (var i=0; i<days.length; i++) {
 								if (days[i] >= fromDay && days[i] <= toDay) 
-									xAxisData.push(onedev.server.day.format(onedev.server.day.fromValue(days[i])));
+									xAxisData.push(onedev.server.codeStats.formatDay(days[i]));
 							}
 							
 							var maxValue = 0;
@@ -348,7 +350,7 @@ onedev.server.codeStats = {
 			var incrementDays = [];
 			for (var day in lineIncrements) {
 				delete lineIncrements[day]["@class"];
-				incrementDays.push(day);
+				incrementDays.push(Number(day));
 				var incrementsOnDay = lineIncrements[day];
 				for (var language in incrementsOnDay) {
 					var increment = incrementsOnDay[language];
@@ -392,9 +394,8 @@ onedev.server.codeStats = {
 					else
 						dailyLines.push(increments);
 				}
-				var currentDayObj = onedev.server.day.fromValue(currentDay);
-				xAxisData.push(onedev.server.day.format(currentDayObj));
-				currentDay = onedev.server.day.toValue(onedev.server.day.plus(currentDayObj, 1));
+				xAxisData.push(onedev.server.codeStats.formatDay(currentDay));
+				currentDay++;
 			}
 			
 			var chart = echarts.init($chart[0]);

@@ -940,6 +940,10 @@ public class Upgrade extends AbstractPlugin {
 				wrapperConf += "\r\nwrapper.disable_console_input=TRUE";
 
 			wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
+			wrapperConf = wrapperConf.replaceAll("\n(\n)+\n", "\n\n");
+			wrapperConf = wrapperConf.replace(
+					"wrapperConfwrapper.java.additional.30=--add-modules=java.se", 
+					"wrapper.java.additional.30=--add-modules=java.se");
 			
 			var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
 			if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {

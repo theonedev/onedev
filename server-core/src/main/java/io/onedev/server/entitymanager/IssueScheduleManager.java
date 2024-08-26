@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
+import java.util.List;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -12,4 +13,7 @@ public interface IssueScheduleManager extends EntityManager<IssueSchedule> {
  	void syncIterations(Issue issue, Collection<Iteration> iterations);
 
     void create(IssueSchedule schedule);
+
+    void populateSchedules(Collection<Issue> issues);
+	
 }

@@ -9,7 +9,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.util.date.Day;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.facade.EmailAddressFacade;
 
@@ -50,7 +49,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			map of day to contribution
 	 */
-	Map<Day, GitContribution> getOverallContributions(Long projectId);
+	Map<Integer, GitContribution> getOverallContributions(Long projectId);
 	
 	/**
 	 * Get list of top contributors
@@ -79,7 +78,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			line statistics data
 	 */
-	Map<Day, Map<String, Integer>> getLineIncrements(Long projectId);
+	Map<Integer, Map<String, Integer>> getLineIncrements(Long projectId);
 
 	Collection<ObjectId> getFixCommits(Long projectId, Long issueId);
 	

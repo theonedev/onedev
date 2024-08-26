@@ -5,7 +5,7 @@ import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.date.DateUtils;
+import io.onedev.server.util.DateUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import javax.inject.Inject;

@@ -1,11 +1,9 @@
 package io.onedev.server.git;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.server.util.date.Day;
+import java.io.Serializable;
+import java.util.Map;
 
 public class GitContributor implements Serializable {
 
@@ -15,9 +13,9 @@ public class GitContributor implements Serializable {
 	
 	private final GitContribution totalContribution;
 	
-	private final Map<Day, Integer> dailyContributions;
+	private final Map<Integer, Integer> dailyContributions;
 	
-	public GitContributor(PersonIdent author, GitContribution totalContribution, Map<Day, Integer> dailyContributions) {
+	public GitContributor(PersonIdent author, GitContribution totalContribution, Map<Integer, Integer> dailyContributions) {
 		this.author = author;
 		this.totalContribution = totalContribution;
 		this.dailyContributions = dailyContributions;
@@ -31,7 +29,7 @@ public class GitContributor implements Serializable {
 		return totalContribution;
 	}
 
-	public Map<Day, Integer> getDailyContributions() {
+	public Map<Integer, Integer> getDailyContributions() {
 		return dailyContributions;
 	}
 
