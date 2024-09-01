@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.commits;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -128,10 +129,14 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 		List<String> revisionSegments = new ArrayList<>();
 		String segment = params.get(PARAM_COMMIT).toString();
+		if (segment.contains(".."))
+			throw new ExplicitException("Invalid request path");
 		if (segment.length() != 0)
 			revisionSegments.add(segment);
 		for (int i=0; i<params.getIndexedCount(); i++) {
 			segment = params.get(i).toString();
+			if (segment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				revisionSegments.add(segment);
 		}

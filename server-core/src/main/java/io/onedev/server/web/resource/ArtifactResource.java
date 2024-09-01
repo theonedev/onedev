@@ -57,6 +57,8 @@ public class ArtifactResource extends AbstractResource {
 
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String pathSegment = params.get(i).toString();
+			if (pathSegment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (pathSegment.length() != 0)
 				pathSegments.add(pathSegment);
 		}

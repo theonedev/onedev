@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.builds.detail.report;
 
+import io.onedev.commons.utils.ExplicitException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
@@ -15,8 +16,9 @@ public abstract class BuildReportPage extends BuildDetailPage {
 	
 	public BuildReportPage(PageParameters params) {
 		super(params);
-		
 		reportName = params.get(PARAM_REPORT).toString();
+		if (reportName.contains(".."))
+			throw new ExplicitException("Invalid request path");
 	}
 	
 	@Override

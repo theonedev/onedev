@@ -1,6 +1,7 @@
 package io.onedev.server.web.resource;
 
 import com.google.common.base.Splitter;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -62,6 +63,8 @@ public class RawBlobResource extends AbstractResource {
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
+			if (segment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}

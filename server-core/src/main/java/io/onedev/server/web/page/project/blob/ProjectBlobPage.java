@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -165,6 +166,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		for (int i=0; i<params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
+			if (segment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}

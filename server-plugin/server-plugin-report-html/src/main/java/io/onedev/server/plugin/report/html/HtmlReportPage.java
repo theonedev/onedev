@@ -11,18 +11,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.START_PAGE;
-import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HtmlReportPage extends BuildReportPage {
-
-	private static final String PARAM_REPORT = "report";
-	
-	private final String reportName;
 	
 	public HtmlReportPage(PageParameters params) {
 		super(params);
-		
-		reportName = params.get(PARAM_REPORT).toString();
 	}
 
 	@Override
@@ -37,7 +31,7 @@ public class HtmlReportPage extends BuildReportPage {
 				new ReadPublishedFile(projectId, buildNumber, getReportName(), START_PAGE));
 		
 		PageParameters params = HtmlReportDownloadResource.paramsOf(
-				getBuild(), reportName, new String(startPage, UTF_8));
+				getBuild(), getReportName(), new String(startPage, UTF_8));
 		CharSequence startPageUrl = RequestCycle.get()
 				.urlFor(new HtmlReportDownloadResourceReference(), params);
 		
@@ -50,11 +44,6 @@ public class HtmlReportPage extends BuildReportPage {
 			}
 
 		}.add(AttributeAppender.append("src", startPageUrl.toString())).add(AttributeAppender.append("class", "d-flex flex-grow-1")));
-	}
-
-	@Override
-	public String getReportName() {
-		return reportName;
 	}
 
 }

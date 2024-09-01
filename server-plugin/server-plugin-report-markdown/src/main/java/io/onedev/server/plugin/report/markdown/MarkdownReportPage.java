@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.markdown;
 
 import com.google.common.base.Splitter;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -37,10 +38,14 @@ public class MarkdownReportPage extends BuildDetailPage {
 		super(params);
 		
 		reportName = params.get(PARAM_REPORT).toString();
+		if (reportName.contains(".."))
+			throw new ExplicitException("Invalid request path");
 		
 		List<String> pathSegments = new ArrayList<>();
 		for (int i=0; i<params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
+			if (segment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				pathSegments.add(segment);
 		}

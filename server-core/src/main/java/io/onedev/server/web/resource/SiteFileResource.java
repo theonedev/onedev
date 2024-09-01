@@ -2,6 +2,7 @@ package io.onedev.server.web.resource;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -60,6 +62,8 @@ public class SiteFileResource extends AbstractResource {
 		List<String> filePathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
+			if (segment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				filePathSegments.add(segment);
 		}
@@ -172,8 +176,7 @@ public class SiteFileResource extends AbstractResource {
 				attributes.getResponse().write("Site file not found: " + filePath);
 			}
 			
-		});
-				
+		});			
 	}
 
 	private ProjectManager getProjectManager() {

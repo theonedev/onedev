@@ -57,6 +57,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		
 		if (reportName == null)
 			throw new IllegalArgumentException("Markdown report name has to be specified");
+		if (reportName.contains(".."))
+			throw new ExplicitException("Invalid request path");
 		
 		if (!SecurityUtils.canAccessReport(build, reportName))
 			throw new UnauthorizedException();
@@ -64,6 +66,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		List<String> pathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String pathSegment = params.get(i).toString();
+			if (pathSegment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (pathSegment.length() != 0)
 				pathSegments.add(pathSegment);
 		}

@@ -49,6 +49,8 @@ public class HtmlReportDownloadResource extends AbstractResource {
 		}
 		
 		String reportName = params.get(PARAM_REPORT).toString();
+		if (reportName.contains(".."))
+			throw new ExplicitException("Invalid request path");
 
 		if (!SecurityUtils.canAccessReport(build, reportName))
 			throw new UnauthorizedException();
@@ -57,6 +59,8 @@ public class HtmlReportDownloadResource extends AbstractResource {
 
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String pathSegment = params.get(i).toString();
+			if (pathSegment.contains(".."))
+				throw new ExplicitException("Invalid request path");
 			if (pathSegment.length() != 0)
 				pathSegments.add(pathSegment);
 		}
