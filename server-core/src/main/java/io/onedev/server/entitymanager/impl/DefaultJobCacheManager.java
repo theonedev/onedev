@@ -172,15 +172,18 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		var cacheHome = projectManager.getCacheDir(projectId);
 		var cacheDir = new File(cacheHome, String.valueOf(cacheId));
 		if (cacheDir.exists()) {
-			var stamp = readString(new File(cacheDir, "stamp"));
-			if (stamp.equals(CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths))) {
-				try {
-					var marks = FileUtils.readFileToByteArray(new File(cacheDir, "marks"));
-					return new SequenceInputStream(
-							new ByteArrayInputStream(marks), 
-							new FileInputStream(new File(cacheDir, "data")));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+			var stampFile = new File(cacheDir, "stamp");
+			if (stampFile.exists()) {
+				var stamp = readString(stampFile);
+				if (stamp.equals(CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths))) {
+					try {
+						var marks = FileUtils.readFileToByteArray(new File(cacheDir, "marks"));
+						return new SequenceInputStream(
+								new ByteArrayInputStream(marks),
+								new FileInputStream(new File(cacheDir, "data")));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 		}
@@ -220,13 +223,16 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		return cacheId;
 	}
 	
-	private OutputStream openCacheOutputStream(Long projectId, Long cacheId, List<String> cachePaths) {
+	private void writeStamp(File cacheDir, List<String> cachePaths) {
+		writeString(new File(cacheDir, "stamp"), CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths));
+	}
+	
+	private Pair<File, OutputStream> openCacheOutputStream(Long projectId, Long cacheId) {
 		var cacheHome = projectManager.getCacheDir(projectId);
 		var cacheDir = new File(cacheHome, String.valueOf(cacheId));
-		FileUtils.createDir(cacheDir);
-		writeString(new File(cacheDir, "stamp"), CACHE_VERSION + ":" + Joiner.on('\n').join(cachePaths));
+		FileUtils.cleanDir(cacheDir);
 		try {
-			return new FilterOutputStream(new FileOutputStream(new File(cacheDir, "data"))) {
+			return new ImmutablePair<>(cacheDir, new FilterOutputStream(new FileOutputStream(new File(cacheDir, "data"))) {
 
 				private final byte[] buffer = new byte[CacheHelper.MARK_BUFFER_SIZE];
 				
@@ -271,7 +277,7 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 					FileUtils.writeByteArrayToFile(new File(cacheDir, "marks"), buffer);
 				}
 				
-			};		
+			});		
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -281,11 +287,13 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	public void uploadCache(Long projectId, Long cacheId, List<String> cachePaths,
 							Consumer<OutputStream> cacheStreamHandler) {
 		write(JobCache.getLockName(projectId, cacheId), () -> {
-			try (var os = openCacheOutputStream(projectId, cacheId, cachePaths)) {
-				cacheStreamHandler.accept(os);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			var result = openCacheOutputStream(projectId, cacheId);
+			try {
+				cacheStreamHandler.accept(result.getRight());
+			} finally {
+				IOUtils.closeQuietly(result.getRight());
 			}
+			writeStamp(result.getLeft(), cachePaths);
 		});
 	}
 	
@@ -293,11 +301,15 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	public void uploadCache(Long projectId, Long cacheId, List<String> cachePaths,
 							InputStream cacheStream) {
 		write(JobCache.getLockName(projectId, cacheId), () -> {
-			try (var os = openCacheOutputStream(projectId, cacheId, cachePaths)) {
-				IOUtils.copy(cacheStream, os, BUFFER_SIZE);	
+			var result = openCacheOutputStream(projectId, cacheId);
+			try {
+				IOUtils.copy(cacheStream, result.getRight(), BUFFER_SIZE);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			} finally {
+				IOUtils.closeQuietly(result.getRight());
 			}
+			writeStamp(result.getLeft(), cachePaths);
 		});
 	}
 
@@ -319,11 +331,14 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		return projectManager.runOnActiveServer(projectId, () -> read(JobCache.getLockName(projectId, cacheId), () -> {
 			var cacheDir = new File(projectManager.getCacheDir(projectId), String.valueOf(cacheId));
 			if (cacheDir.exists()) {
-				var stamp = readString(new File(cacheDir, "stamp"));
-				if (stamp.startsWith(CACHE_VERSION + ":")) {
-					var dataFile = new File(cacheDir, "data");
-					if (dataFile.exists())
-						return dataFile.length();
+				var stampFile = new File(cacheDir, "stamp");
+				if (stampFile.exists()) {
+					var stamp = readString(stampFile);
+					if (stamp.startsWith(CACHE_VERSION + ":")) {
+						var dataFile = new File(cacheDir, "data");
+						if (dataFile.exists())
+							return dataFile.length();
+					}
 				}
 			}
 			return null;
