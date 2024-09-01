@@ -302,7 +302,7 @@ jobs:
   postBuildActions:
   - !SendNotificationAction
     condition: failed
-    receivers: committers
+    receivers: user(robin)
 - name: CI
   steps:
   - !CheckoutStep
