@@ -244,7 +244,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 					}, new ArrayList<>());
 
-					cacheHelper.buildFinished();
+					cacheHelper.buildFinished(successful);
 					
 					return successful;
 				} finally {
