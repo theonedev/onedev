@@ -18,8 +18,8 @@ public class RepoTarget extends ProblemTarget {
 
 	private final PlanarRange location;
 
-	public RepoTarget(String name, @Nullable PlanarRange location) {
-		super(new GroupKey(name));
+	public RepoTarget(String blobPath, @Nullable PlanarRange location) {
+		super(new GroupKey(blobPath));
 		this.location = location;
 	}
 

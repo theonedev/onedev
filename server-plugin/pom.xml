@@ -34,6 +34,7 @@
 		<module>server-plugin-report-clover</module>
 		<module>server-plugin-report-cobertura</module>
 		<module>server-plugin-report-checkstyle</module>
+		<module>server-plugin-report-pylint</module>
 		<module>server-plugin-import-github</module>
 		<module>server-plugin-import-gitlab</module>
 		<module>server-plugin-import-gitea</module>

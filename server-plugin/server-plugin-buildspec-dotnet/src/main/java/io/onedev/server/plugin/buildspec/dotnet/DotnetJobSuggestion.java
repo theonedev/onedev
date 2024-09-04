@@ -50,14 +50,14 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			setupCache.getLoadKeys().add("nuget_packages");
 			job.getSteps().add(setupCache);
 			
-			var runTest = new CommandStep();
-			runTest.setName("run tests");
-			runTest.setImage("mcr.microsoft.com/dotnet/sdk");
-			runTest.getInterpreter().setCommands(
+			var testAndAnalyze = new CommandStep();
+			testAndAnalyze.setName("test and analyze");
+			testAndAnalyze.setImage("mcr.microsoft.com/dotnet/sdk");
+			testAndAnalyze.getInterpreter().setCommands(
 					"dotnet tool install -g roslynator.dotnet.cli\n" + 
 					"dotnet test -l trx --collect:\"XPlat Code Coverage\"\n" +  
 					"/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml\n");
-			job.getSteps().add(runTest);
+			job.getSteps().add(testAndAnalyze);
 			
 			var publishUnitTestReportStep = new PublishTRXReportStep();
 			publishUnitTestReportStep.setName("publish unit test report");

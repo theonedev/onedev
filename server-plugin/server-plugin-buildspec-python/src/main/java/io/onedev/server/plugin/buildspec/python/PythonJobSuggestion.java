@@ -14,6 +14,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
+import io.onedev.server.plugin.report.pylint.PublishPylintReportStep;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.yaml.snakeyaml.Yaml;
@@ -40,6 +41,15 @@ public class PythonJobSuggestion implements JobSuggestion {
 		publishCoverageReport.setFilePatterns("coverage.xml");
 		publishCoverageReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishCoverageReport;
+	}
+
+	private PublishPylintReportStep newPylintReportPublishStep() {
+		var publishPylintReportStep = new PublishPylintReportStep();
+		publishPylintReportStep.setName("publish pylint report");
+		publishPylintReportStep.setReportName("Pylint");
+		publishPylintReportStep.setFilePatterns("pylint-result.json");
+		publishPylintReportStep.setCondition(ExecuteCondition.ALWAYS);
+		return publishPylintReportStep;
 	}
 	
 	@Override
@@ -78,26 +88,26 @@ public class PythonJobSuggestion implements JobSuggestion {
 			setBuildVersion.setBuildVersion("@file:buildVersion@");
 			job.getSteps().add(setBuildVersion);
 
-			CommandStep runTests = new CommandStep();
-			runTests.setName("run tests");
-			runTests.setImage("1dev/poetry:1.0.1");
+			CommandStep testAndLint = new CommandStep();
+			testAndLint.setName("test and lint");
+			testAndLint.setImage("1dev/poetry:1.0.1");
 			String commands = "" +
 					"poetry install\n" +
-					"poetry add coverage\n";
+					"poetry add coverage pylint\n";
 
-			if (blob.getText().getContent().contains("\"pytest\"")) {
-				runTests.getInterpreter().setCommands(commands + 
-						"poetry run coverage run -m pytest --junitxml=./test-result.xml\n" +
-						"poetry run coverage xml");
-				job.getSteps().add(runTests);
+			var withPytest = blob.getText().getContent().contains("\"pytest\"");
+			if (withPytest) 
+				commands += "poetry run coverage run -m pytest --junitxml=./test-result.xml\n";
+			else 
+				commands += "poetry run coverage run -m unittest\n";
+			testAndLint.getInterpreter().setCommands(commands +
+					"poetry run coverage xml\n" +
+					"poetry run pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.git .");
+			job.getSteps().add(testAndLint);
+			if (withPytest) 
 				job.getSteps().add(newUnitTestReportPublishStep());
-			} else {
-				runTests.getInterpreter().setCommands(commands + 
-						"poetry run coverage run -m unittest\n" +
-						"poetry run coverage xml");
-				job.getSteps().add(runTests);
-			}
 			job.getSteps().add(newCoverageReportPublishStep());
+			job.getSteps().add(newPylintReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -124,31 +134,30 @@ public class PythonJobSuggestion implements JobSuggestion {
 			setupCache.getLoadKeys().add("venv_cache");
 			job.getSteps().add(setupCache);
 			
-			CommandStep runTests = new CommandStep();
+			CommandStep testAndLint = new CommandStep();
 			var interpreter = new ShellInterpreter();
-			runTests.setInterpreter(interpreter);
-			runTests.setName("run tests");
-			runTests.setImage("python:3.11");
+			testAndLint.setInterpreter(interpreter);
+			testAndLint.setName("test and lint");
+			testAndLint.setImage("python:3.11");
 			var commands = "" +
 					"python -m venv .venv\n" +
 					"source .venv/bin/activate\n" +
 					"pip install -r requirements.txt\n" +
-					"pip install coverage\n";
+					"pip install coverage pylint\n";
 			
-			var blobContent = blob.getText().getContent();
-			if (blobContent.contains("pytest==")) {
-				interpreter.setCommands(commands + 
-						"coverage run -m pytest --junitxml=./test-result.xml\n" +
-						"coverage xml");
-				job.getSteps().add(runTests);
+			var withPytest = blob.getText().getContent().contains("pytest==");
+			if (withPytest) 
+				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
+			else 
+				commands += "coverage run -m unittest\n";
+			interpreter.setCommands(commands + 
+					"coverage xml\n" +
+					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.venv,.git .");
+			job.getSteps().add(testAndLint);
+			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
-			} else {
-				interpreter.setCommands(commands +
-						"coverage run -m unittest\n" +
-						"coverage xml");
-				job.getSteps().add(runTests);
-			}
 			job.getSteps().add(newCoverageReportPublishStep());
+			job.getSteps().add(newPylintReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -185,21 +194,21 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"source /root/.bashrc\n" +
 					"conda env update\n" +
 					"conda activate " + environments.get("name") + "\n" +
-					"conda install -y coverage\n";
+					"conda install -y coverage pylint\n";
 
-			if (blobContent.contains("pytest")) {
-				runTests.getInterpreter().setCommands(commands + 
-						"coverage run -m pytest --junitxml=./test-result.xml\n" +
-						"coverage xml");
-				job.getSteps().add(runTests);
-				job.getSteps().add(newUnitTestReportPublishStep());
-			} else {
-				runTests.getInterpreter().setCommands(commands + 
-						"coverage run -m unittest\n" +
-						"coverage xml");
-				job.getSteps().add(runTests);
-			}
+			var withPytest = blobContent.contains("pytest");
+			if (withPytest) 
+				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
+			else 
+				commands += "coverage run -m unittest\n";
+			runTests.getInterpreter().setCommands(commands + 
+					"coverage xml\n" +
+					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.git .");
+			job.getSteps().add(runTests);
+			if (withPytest)
+				job.getSteps().add(newUnitTestReportPublishStep());				
 			job.getSteps().add(newCoverageReportPublishStep());
+			job.getSteps().add(newPylintReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
