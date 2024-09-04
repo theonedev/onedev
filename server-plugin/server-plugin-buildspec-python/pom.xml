@@ -13,6 +13,11 @@
 			<artifactId>server-plugin-report-junit</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-cobertura</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.python.PythonModule</moduleClass>

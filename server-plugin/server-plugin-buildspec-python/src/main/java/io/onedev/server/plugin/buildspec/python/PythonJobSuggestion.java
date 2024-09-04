@@ -11,6 +11,8 @@ import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
+import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
+import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -29,6 +31,15 @@ public class PythonJobSuggestion implements JobSuggestion {
 		publishUnitTestReport.setFilePatterns("test-result.xml");
 		publishUnitTestReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishUnitTestReport;
+	}
+
+	private PublishCoverageReportStep newCoverageReportPublishStep() {
+		var publishCoverageReport = new PublishCoberturaReportStep();
+		publishCoverageReport.setName("publish coverage report");
+		publishCoverageReport.setReportName("Coverage");
+		publishCoverageReport.setFilePatterns("coverage.xml");
+		publishCoverageReport.setCondition(ExecuteCondition.ALWAYS);
+		return publishCoverageReport;
 	}
 	
 	@Override
@@ -67,19 +78,26 @@ public class PythonJobSuggestion implements JobSuggestion {
 			setBuildVersion.setBuildVersion("@file:buildVersion@");
 			job.getSteps().add(setBuildVersion);
 
-			CommandStep test = new CommandStep();
-			test.setName("test");
-			test.setImage("1dev/poetry:1.0.1");
-			String commands = "poetry install\n";
+			CommandStep runTests = new CommandStep();
+			runTests.setName("run tests");
+			runTests.setImage("1dev/poetry:1.0.1");
+			String commands = "" +
+					"poetry install\n" +
+					"poetry add coverage\n";
 
 			if (blob.getText().getContent().contains("\"pytest\"")) {
-				test.getInterpreter().setCommands(commands + "poetry run pytest --junitxml=./test-result.xml");
-				job.getSteps().add(test);
+				runTests.getInterpreter().setCommands(commands + 
+						"poetry run coverage run -m pytest --junitxml=./test-result.xml\n" +
+						"poetry run coverage xml");
+				job.getSteps().add(runTests);
 				job.getSteps().add(newUnitTestReportPublishStep());
 			} else {
-				test.getInterpreter().setCommands(commands + "poetry run python -m unittest");
-				job.getSteps().add(test);
+				runTests.getInterpreter().setCommands(commands + 
+						"poetry run coverage run -m unittest\n" +
+						"poetry run coverage xml");
+				job.getSteps().add(runTests);
 			}
+			job.getSteps().add(newCoverageReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -106,28 +124,31 @@ public class PythonJobSuggestion implements JobSuggestion {
 			setupCache.getLoadKeys().add("venv_cache");
 			job.getSteps().add(setupCache);
 			
-			CommandStep test = new CommandStep();
+			CommandStep runTests = new CommandStep();
 			var interpreter = new ShellInterpreter();
-			test.setInterpreter(interpreter);
-			test.setName("test");
-			test.setImage("python:3.11");
+			runTests.setInterpreter(interpreter);
+			runTests.setName("run tests");
+			runTests.setImage("python:3.11");
 			var commands = "" +
 					"python -m venv .venv\n" +
 					"source .venv/bin/activate\n" +
-					"pip install -r requirements.txt\n";
+					"pip install -r requirements.txt\n" +
+					"pip install coverage\n";
 			
 			var blobContent = blob.getText().getContent();
 			if (blobContent.contains("pytest==")) {
-				interpreter.setCommands(commands + "pytest --junitxml=./test-result.xml");
-				job.getSteps().add(test);
+				interpreter.setCommands(commands + 
+						"coverage run -m pytest --junitxml=./test-result.xml\n" +
+						"coverage xml");
+				job.getSteps().add(runTests);
 				job.getSteps().add(newUnitTestReportPublishStep());
-			} else if (blobContent.contains("Django==")) {
-				interpreter.setCommands(commands + "python manage.py test");
-				job.getSteps().add(test);
 			} else {
-				interpreter.setCommands(commands + "python -m unittest");
-				job.getSteps().add(test);
+				interpreter.setCommands(commands +
+						"coverage run -m unittest\n" +
+						"coverage xml");
+				job.getSteps().add(runTests);
 			}
+			job.getSteps().add(newCoverageReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -156,23 +177,29 @@ public class PythonJobSuggestion implements JobSuggestion {
 			
 			var blobContent = blob.getText().getContent();
 			Map<String, Object> environments = new Yaml().load(blobContent);
-			CommandStep test = new CommandStep();
-			test.setName("test");
-			test.setImage("1dev/conda:1.0.4");
-			test.setInterpreter(new ShellInterpreter());
+			CommandStep runTests = new CommandStep();
+			runTests.setName("run tests");
+			runTests.setImage("1dev/conda:1.0.4");
+			runTests.setInterpreter(new ShellInterpreter());
 			String commands = "" +
 					"source /root/.bashrc\n" +
 					"conda env update\n" +
-					"conda activate " + environments.get("name") + "\n";
+					"conda activate " + environments.get("name") + "\n" +
+					"conda install -y coverage\n";
 
 			if (blobContent.contains("pytest")) {
-				test.getInterpreter().setCommands(commands + "pytest --junitxml=./test-result.xml");
-				job.getSteps().add(test);
+				runTests.getInterpreter().setCommands(commands + 
+						"coverage run -m pytest --junitxml=./test-result.xml\n" +
+						"coverage xml");
+				job.getSteps().add(runTests);
 				job.getSteps().add(newUnitTestReportPublishStep());
 			} else {
-				test.getInterpreter().setCommands(commands + "python -m unittest");
-				job.getSteps().add(test);
+				runTests.getInterpreter().setCommands(commands + 
+						"coverage run -m unittest\n" +
+						"coverage xml");
+				job.getSteps().add(runTests);
 			}
+			job.getSteps().add(newCoverageReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
