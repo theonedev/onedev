@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.buildspec.python;
 
 import com.google.common.collect.Lists;
+import com.moandjiezana.toml.Toml;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -95,7 +96,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"poetry install\n" +
 					"poetry add coverage pylint\n";
 
-			var withPytest = blob.getText().getContent().contains("\"pytest\"");
+			var withPytest = blob.getText().getContent().contains("pytest");
 			if (withPytest) 
 				commands += "poetry run coverage run -m pytest --junitxml=./test-result.xml\n";
 			else 
@@ -133,7 +134,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 			setupCache.setPaths(Lists.newArrayList(".venv"));
 			setupCache.getLoadKeys().add("venv_cache");
 			job.getSteps().add(setupCache);
-			
+
 			CommandStep testAndLint = new CommandStep();
 			var interpreter = new ShellInterpreter();
 			testAndLint.setInterpreter(interpreter);
@@ -144,13 +145,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"source .venv/bin/activate\n" +
 					"pip install -r requirements.txt\n" +
 					"pip install coverage pylint\n";
-			
-			var withPytest = blob.getText().getContent().contains("pytest==");
-			if (withPytest) 
+
+			var withPytest = blob.getText().getContent().contains("pytest");
+			if (withPytest)
 				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
-			else 
+			else
 				commands += "coverage run -m unittest\n";
-			interpreter.setCommands(commands + 
+			interpreter.setCommands(commands +
 					"coverage xml\n" +
 					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.venv,.git .");
 			job.getSteps().add(testAndLint);
@@ -162,7 +163,81 @@ public class PythonJobSuggestion implements JobSuggestion {
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
 
-			jobs.add(job);			
+			jobs.add(job);
+		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
+			Job job = new Job();
+			job.setName("python ci");
+
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout code");
+			job.getSteps().add(checkout);
+
+			var generateChecksum = new GenerateChecksumStep();
+			generateChecksum.setName("generate pyproject checksum");
+			generateChecksum.setFiles("pyproject.toml");
+			generateChecksum.setTargetFile("checksum");
+			job.getSteps().add(generateChecksum);
+
+			var setupCache = new SetupCacheStep();
+			setupCache.setName("set up venv cache");
+			setupCache.setKey("venv_cache_@file:checksum@");
+			setupCache.setPaths(Lists.newArrayList(".venv"));
+			setupCache.getLoadKeys().add("venv_cache");
+			job.getSteps().add(setupCache);
+
+			var blobContent = blob.getText().getContent();
+			if (new Toml().read(blobContent).getString("project.version") != null) {
+				CommandStep detectBuildVersion = new CommandStep();
+				detectBuildVersion.setName("detect build version");
+				detectBuildVersion.setImage("1dev/yq:1.0.0");
+				detectBuildVersion.getInterpreter().setCommands("yq '.project.version' pyproject.toml > buildVersion");
+				job.getSteps().add(detectBuildVersion);
+
+				SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+				setBuildVersion.setName("set build version");
+				setBuildVersion.setBuildVersion("@file:buildVersion@");
+				job.getSteps().add(setBuildVersion);
+			}
+			
+			CommandStep testAndLint = new CommandStep();
+			var interpreter = new ShellInterpreter();
+			testAndLint.setInterpreter(interpreter);
+			testAndLint.setName("test and lint");
+			testAndLint.setImage("python:3.11");
+			var commands = "" +
+					"python -m venv .venv\n" +
+					"source .venv/bin/activate\n" +
+					"pip install .\n" +
+					"pip install coverage pylint\n";
+
+			var withPytest = blobContent.contains("pytest");
+			if (!withPytest) {
+				var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
+				if (setupPy != null && setupPy.getText().getContent().contains("pytest"))				
+					withPytest = true;
+			}
+			if (!withPytest) {
+				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
+				if (setupCfg != null && setupCfg.getText().getContent().contains("pytest"))
+					withPytest = true;
+			}
+			if (withPytest)
+				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
+			else
+				commands += "coverage run -m unittest\n";
+			interpreter.setCommands(commands +
+					"coverage xml\n" +
+					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.venv,.git .");
+			job.getSteps().add(testAndLint);
+			if (withPytest)
+				job.getSteps().add(newUnitTestReportPublishStep());
+			job.getSteps().add(newCoverageReportPublishStep());
+			job.getSteps().add(newPylintReportPublishStep());
+
+			job.getTriggers().add(new BranchUpdateTrigger());
+			job.getTriggers().add(new PullRequestUpdateTrigger());
+
+			jobs.add(job);
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
 			Job job = new Job();
 			job.setName("python ci");

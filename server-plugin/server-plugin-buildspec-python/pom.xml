@@ -23,6 +23,11 @@
 			<artifactId>server-plugin-report-pylint</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.moandjiezana.toml</groupId>
+			<artifactId>toml4j</artifactId>
+			<version>0.7.2</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.python.PythonModule</moduleClass>
