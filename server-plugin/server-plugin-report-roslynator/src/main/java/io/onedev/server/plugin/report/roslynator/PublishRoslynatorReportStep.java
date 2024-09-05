@@ -30,7 +30,7 @@ import java.util.*;
 import static java.lang.Integer.parseInt;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
-@Editable(order=8040, group=StepGroup.PUBLISH, name="Roslynator Report")
+@Editable(order=10000, group=StepGroup.PUBLISH, name="Roslynator Report")
 public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

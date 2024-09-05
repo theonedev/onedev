@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@Editable(order=8000, group=StepGroup.PUBLISH, name="Checkstyle Report")
+@Editable(order=10000, group=StepGroup.PUBLISH, name="Checkstyle Report")
 public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

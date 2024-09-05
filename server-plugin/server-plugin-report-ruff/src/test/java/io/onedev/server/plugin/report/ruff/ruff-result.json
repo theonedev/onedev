@@ -1,0 +1,1147 @@
+[
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 27,
+      "row": 186
+    },
+    "filename": "/example/docs/source/conf.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 186
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 186,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 28,
+      "row": 187
+    },
+    "filename": "/example/docs/source/conf.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 187
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 187,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 45,
+      "row": 188
+    },
+    "filename": "/example/docs/source/conf.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 188
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 188,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 77,
+      "row": 279
+    },
+    "filename": "/example/docs/source/conf.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 279
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 279,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 33,
+      "row": 280
+    },
+    "filename": "/example/docs/source/conf.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 280
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 280,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 68,
+      "row": 540
+    },
+    "filename": "/example/recipes/dev/lora_finetune_fsdp2.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n                return x in self.adapter_params",
+          "end_location": {
+            "column": 68,
+            "row": 540
+          },
+          "location": {
+            "column": 13,
+            "row": 540
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 13,
+      "row": 540
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 540,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 27,
+      "row": 567
+    },
+    "filename": "/example/recipes/dev/lora_finetune_fsdp2.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 30,
+            "row": 567
+          },
+          "location": {
+            "column": 13,
+            "row": 567
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `adapter_config`"
+    },
+    "location": {
+      "column": 13,
+      "row": 567
+    },
+    "message": "Local variable `adapter_config` is assigned to but never used",
+    "noqa_row": 567,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 68,
+      "row": 509
+    },
+    "filename": "/example/recipes/lora_dpo_distributed.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n                return x in self.adapter_params",
+          "end_location": {
+            "column": 68,
+            "row": 509
+          },
+          "location": {
+            "column": 13,
+            "row": 509
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 13,
+      "row": 509
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 509,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 64,
+      "row": 425
+    },
+    "filename": "/example/recipes/lora_dpo_single_device.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n            return x in self.adapter_params",
+          "end_location": {
+            "column": 64,
+            "row": 425
+          },
+          "location": {
+            "column": 9,
+            "row": 425
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 9,
+      "row": 425
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 425,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 68,
+      "row": 608
+    },
+    "filename": "/example/recipes/lora_finetune_distributed.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n                return x in self.adapter_params",
+          "end_location": {
+            "column": 68,
+            "row": 608
+          },
+          "location": {
+            "column": 13,
+            "row": 608
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 13,
+      "row": 608
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 608,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 64,
+      "row": 551
+    },
+    "filename": "/example/recipes/lora_finetune_single_device.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n            return x in self.adapter_params",
+          "end_location": {
+            "column": 64,
+            "row": 551
+          },
+          "location": {
+            "column": 9,
+            "row": 551
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 9,
+      "row": 551
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 551,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 19,
+      "row": 104
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_decoder.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 104
+    },
+    "message": "Undefined name `model`",
+    "noqa_row": 104,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 19,
+      "row": 119
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_decoder.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 119
+    },
+    "message": "Undefined name `model`",
+    "noqa_row": 119,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 74,
+      "row": 18
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_decoder_layer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 19
+          },
+          "location": {
+            "column": 1,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.models.llama2._model_utils.scale_hidden_dim_for_mlp`"
+    },
+    "location": {
+      "column": 50,
+      "row": 18
+    },
+    "message": "`torchtune.models.llama2._model_utils.scale_hidden_dim_for_mlp` imported but unused",
+    "noqa_row": 18,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 43,
+      "row": 140
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_decoder_layer.py",
+    "fix": null,
+    "location": {
+      "column": 18,
+      "row": 140
+    },
+    "message": "Undefined name `_scale_hidden_dim_for_mlp`",
+    "noqa_row": 140,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 45,
+      "row": 22
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_dora.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 23
+          },
+          "location": {
+            "column": 1,
+            "row": 22
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.training.seed.set_seed`"
+    },
+    "location": {
+      "column": 37,
+      "row": 22
+    },
+    "message": "`torchtune.training.seed.set_seed` imported but unused",
+    "noqa_row": 22,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 74,
+      "row": 14
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_feed_forward.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.models.llama2._model_utils.scale_hidden_dim_for_mlp`"
+    },
+    "location": {
+      "column": 50,
+      "row": 14
+    },
+    "message": "`torchtune.models.llama2._model_utils.scale_hidden_dim_for_mlp` imported but unused",
+    "noqa_row": 14,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 43,
+      "row": 67
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_feed_forward.py",
+    "fix": null,
+    "location": {
+      "column": 18,
+      "row": 67
+    },
+    "message": "Undefined name `_scale_hidden_dim_for_mlp`",
+    "noqa_row": 67,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 35,
+      "row": 7
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_fused_attention.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import Optional",
+          "end_location": {
+            "column": 35,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Tuple`"
+    },
+    "location": {
+      "column": 30,
+      "row": 7
+    },
+    "message": "`typing.Tuple` imported but unused",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 29,
+      "row": 11
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_fused_attention.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from torch import nn",
+          "end_location": {
+            "column": 29,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `torch.Tensor`"
+    },
+    "location": {
+      "column": 23,
+      "row": 11
+    },
+    "message": "`torch.Tensor` imported but unused",
+    "noqa_row": 11,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 7
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_lora_attention.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `math`"
+    },
+    "location": {
+      "column": 8,
+      "row": 7
+    },
+    "message": "`math` imported but unused",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 7,
+      "row": 21
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_lora_attention.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 21
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 21,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 7
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_lora_llama2.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `math`"
+    },
+    "location": {
+      "column": 8,
+      "row": 7
+    },
+    "message": "`math` imported but unused",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E722",
+    "end_location": {
+      "column": 7,
+      "row": 20
+    },
+    "filename": "/example/tests/torchtune/models/llama2/scripts/compare_lora_llama2.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 20
+    },
+    "message": "Do not use bare `except`",
+    "noqa_row": 20,
+    "url": "https://docs.astral.sh/ruff/rules/bare-except"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 19,
+      "row": 325
+    },
+    "filename": "/example/tests/torchtune/modules/test_transformer_decoder.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 22,
+            "row": 325
+          },
+          "location": {
+            "column": 13,
+            "row": 325
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `output`"
+    },
+    "location": {
+      "column": 13,
+      "row": 325
+    },
+    "message": "Local variable `output` is assigned to but never used",
+    "noqa_row": 325,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 59,
+      "row": 397
+    },
+    "filename": "/example/tests/torchtune/training/checkpointing/test_checkpointer.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def adapter_key_filter(x):\n            return x in adapter_params",
+          "end_location": {
+            "column": 59,
+            "row": 397
+          },
+          "location": {
+            "column": 9,
+            "row": 397
+          }
+        }
+      ],
+      "message": "Rewrite `adapter_key_filter` as a `def`"
+    },
+    "location": {
+      "column": 9,
+      "row": 397
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 397,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 46,
+      "row": 134
+    },
+    "filename": "/example/tests/torchtune/training/test_metric_logging.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 46,
+            "row": 134
+          },
+          "location": {
+            "column": 33,
+            "row": 134
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `mock_init`"
+    },
+    "location": {
+      "column": 37,
+      "row": 134
+    },
+    "message": "Local variable `mock_init` is assigned to but never used",
+    "noqa_row": 134,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 46,
+      "row": 145
+    },
+    "filename": "/example/tests/torchtune/training/test_metric_logging.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 46,
+            "row": 145
+          },
+          "location": {
+            "column": 33,
+            "row": 145
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `mock_init`"
+    },
+    "location": {
+      "column": 37,
+      "row": 145
+    },
+    "message": "Local variable `mock_init` is assigned to but never used",
+    "noqa_row": 145,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 46,
+      "row": 154
+    },
+    "filename": "/example/tests/torchtune/training/test_metric_logging.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 46,
+            "row": 154
+          },
+          "location": {
+            "column": 33,
+            "row": 154
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `mock_init`"
+    },
+    "location": {
+      "column": 37,
+      "row": 154
+    },
+    "message": "Local variable `mock_init` is assigned to but never used",
+    "noqa_row": 154,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 33,
+      "row": 8
+    },
+    "filename": "/example/torchtune/models/llama3/_component_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import List, Optional",
+          "end_location": {
+            "column": 43,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 8
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Literal`"
+    },
+    "location": {
+      "column": 26,
+      "row": 8
+    },
+    "message": "`typing.Literal` imported but unused",
+    "noqa_row": 8,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 18
+    },
+    "filename": "/example/torchtune/models/llama3/_component_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from torchtune.modules import (\n    MultiHeadAttention,\n    FeedForward,\n    FrozenNF4Linear,\n    RMSNorm,\n    RotaryPositionalEmbeddings,\n    TransformerDecoder,\n    TransformerSelfAttentionLayer,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 23
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.modules.KVCache`"
+    },
+    "location": {
+      "column": 5,
+      "row": 18
+    },
+    "message": "`torchtune.modules.KVCache` imported but unused",
+    "noqa_row": 18,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 33,
+      "row": 8
+    },
+    "filename": "/example/torchtune/models/llama3_1/_component_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import List, Optional",
+          "end_location": {
+            "column": 43,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 8
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Literal`"
+    },
+    "location": {
+      "column": 26,
+      "row": 8
+    },
+    "message": "`typing.Literal` imported but unused",
+    "noqa_row": 8,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 19
+    },
+    "filename": "/example/torchtune/models/llama3_1/_component_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from torchtune.modules import (\n    MultiHeadAttention,\n    FeedForward,\n    FrozenNF4Linear,\n    RMSNorm,\n    TransformerDecoder,\n    TransformerSelfAttentionLayer,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 23
+          },
+          "location": {
+            "column": 1,
+            "row": 15
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.modules.KVCache`"
+    },
+    "location": {
+      "column": 5,
+      "row": 19
+    },
+    "message": "`torchtune.modules.KVCache` imported but unused",
+    "noqa_row": 19,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 34,
+      "row": 6
+    },
+    "filename": "/example/torchtune/models/llama3_1/_model_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from typing import List",
+          "end_location": {
+            "column": 34,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import: `typing.Optional`"
+    },
+    "location": {
+      "column": 26,
+      "row": 6
+    },
+    "message": "`typing.Optional` imported but unused",
+    "noqa_row": 6,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 63,
+      "row": 12
+    },
+    "filename": "/example/torchtune/models/llama3_1/_model_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 13
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.models.llama3._tokenizer.Llama3Tokenizer`"
+    },
+    "location": {
+      "column": 48,
+      "row": 12
+    },
+    "message": "`torchtune.models.llama3._tokenizer.Llama3Tokenizer` imported but unused",
+    "noqa_row": 12,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 65,
+      "row": 14
+    },
+    "filename": "/example/torchtune/models/llama3_1/_model_builders.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import: `torchtune.modules.tokenizers.parse_hf_tokenizer_json`"
+    },
+    "location": {
+      "column": 42,
+      "row": 14
+    },
+    "message": "`torchtune.modules.tokenizers.parse_hf_tokenizer_json` imported but unused",
+    "noqa_row": 14,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 6,
+      "row": 160
+    },
+    "filename": "/example/torchtune/modules/peft/_utils.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def is_lora_param(x):\n        return any([\".\".join([k, \"lora\"]) in x or \".\".join([k, \"magnitude\"]) in x for k in lora_modules])",
+          "end_location": {
+            "column": 6,
+            "row": 160
+          },
+          "location": {
+            "column": 5,
+            "row": 155
+          }
+        }
+      ],
+      "message": "Rewrite `is_lora_param` as a `def`"
+    },
+    "location": {
+      "column": 5,
+      "row": 155
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 155,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "E731",
+    "end_location": {
+      "column": 6,
+      "row": 358
+    },
+    "filename": "/example/torchtune/modules/peft/_utils.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "def is_lora_param(x):\n        return any([\".\".join([k, \"lora\"]) in x or \".\".join([k, \"magnitude\"]) in x for k in lora_modules])",
+          "end_location": {
+            "column": 6,
+            "row": 358
+          },
+          "location": {
+            "column": 5,
+            "row": 353
+          }
+        }
+      ],
+      "message": "Rewrite `is_lora_param` as a `def`"
+    },
+    "location": {
+      "column": 5,
+      "row": 353
+    },
+    "message": "Do not assign a `lambda` expression, use a `def`",
+    "noqa_row": 353,
+    "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 16,
+      "row": 191
+    },
+    "filename": "/example/torchtune/training/metric_logging.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 19,
+            "row": 191
+          },
+          "location": {
+            "column": 13,
+            "row": 191
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `run`"
+    },
+    "location": {
+      "column": 13,
+      "row": 191
+    },
+    "message": "Local variable `run` is assigned to but never used",
+    "noqa_row": 191,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 73,
+      "row": 19
+    },
+    "filename": "/example/torchtune/training/quantization.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 19
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 19,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 2,
+      "row": 29
+    },
+    "filename": "/example/torchtune/training/quantization.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 25
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 25,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  }
+]

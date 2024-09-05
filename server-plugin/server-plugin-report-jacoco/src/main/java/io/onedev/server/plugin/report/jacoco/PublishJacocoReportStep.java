@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Editable(order=9920, group=StepGroup.PUBLISH, name="JaCoCo Coverage Report")
+@Editable(order=10000, group=StepGroup.PUBLISH, name="JaCoCo Coverage Report")
 public class PublishJacocoReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;

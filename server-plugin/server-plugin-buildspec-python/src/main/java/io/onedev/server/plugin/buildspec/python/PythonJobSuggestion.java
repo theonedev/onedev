@@ -15,7 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
-import io.onedev.server.plugin.report.pylint.PublishPylintReportStep;
+import io.onedev.server.plugin.report.ruff.PublishRuffReportStep;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.yaml.snakeyaml.Yaml;
@@ -44,13 +44,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 		return publishCoverageReport;
 	}
 
-	private PublishPylintReportStep newPylintReportPublishStep() {
-		var publishPylintReportStep = new PublishPylintReportStep();
-		publishPylintReportStep.setName("publish pylint report");
-		publishPylintReportStep.setReportName("Pylint");
-		publishPylintReportStep.setFilePatterns("pylint-result.json");
-		publishPylintReportStep.setCondition(ExecuteCondition.ALWAYS);
-		return publishPylintReportStep;
+	private PublishRuffReportStep newRuffReportPublishStep() {
+		var publishRuffReport = new PublishRuffReportStep();
+		publishRuffReport.setName("publish ruff report");
+		publishRuffReport.setReportName("Ruff");
+		publishRuffReport.setFilePatterns("ruff-result.json");
+		publishRuffReport.setCondition(ExecuteCondition.ALWAYS);
+		return publishRuffReport;
 	}
 	
 	@Override
@@ -94,7 +94,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 			testAndLint.setImage("1dev/poetry:1.0.1");
 			String commands = "" +
 					"poetry install\n" +
-					"poetry add coverage pylint\n";
+					"poetry add coverage ruff\n";
 
 			var withPytest = blob.getText().getContent().contains("pytest");
 			if (withPytest) 
@@ -103,12 +103,12 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "poetry run coverage run -m unittest\n";
 			testAndLint.getInterpreter().setCommands(commands +
 					"poetry run coverage xml\n" +
-					"poetry run pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.git .");
+					"poetry run ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
 			job.getSteps().add(testAndLint);
 			if (withPytest) 
 				job.getSteps().add(newUnitTestReportPublishStep());
 			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newPylintReportPublishStep());
+			job.getSteps().add(newRuffReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -144,7 +144,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"python -m venv .venv\n" +
 					"source .venv/bin/activate\n" +
 					"pip install -r requirements.txt\n" +
-					"pip install coverage pylint\n";
+					"pip install coverage ruff\n";
 
 			var withPytest = blob.getText().getContent().contains("pytest");
 			if (withPytest)
@@ -153,12 +153,12 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m unittest\n";
 			interpreter.setCommands(commands +
 					"coverage xml\n" +
-					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.venv,.git .");
+					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git --exclude=.venv");
 			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
 			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newPylintReportPublishStep());
+			job.getSteps().add(newRuffReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -208,7 +208,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"python -m venv .venv\n" +
 					"source .venv/bin/activate\n" +
 					"pip install .\n" +
-					"pip install coverage pylint\n";
+					"pip install coverage ruff\n";
 
 			var withPytest = blobContent.contains("pytest");
 			if (!withPytest) {
@@ -227,12 +227,12 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m unittest\n";
 			interpreter.setCommands(commands +
 					"coverage xml\n" +
-					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.venv,.git .");
+					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git --exclude=.venv");
 			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
 			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newPylintReportPublishStep());
+			job.getSteps().add(newRuffReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
@@ -269,7 +269,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"source /root/.bashrc\n" +
 					"conda env update\n" +
 					"conda activate " + environments.get("name") + "\n" +
-					"conda install -y coverage pylint\n";
+					"conda install -y coverage ruff\n";
 
 			var withPytest = blobContent.contains("pytest");
 			if (withPytest) 
@@ -278,12 +278,12 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m unittest\n";
 			runTests.getInterpreter().setCommands(commands + 
 					"coverage xml\n" +
-					"pylint --recursive=y --exit-zero --output-format=json:pylint-result.json --ignore-paths=.git .");
+					"pruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
 			job.getSteps().add(runTests);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());				
 			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newPylintReportPublishStep());
+			job.getSteps().add(newRuffReportPublishStep());
 
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());

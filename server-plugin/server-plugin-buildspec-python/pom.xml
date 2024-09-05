@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-report-pylint</artifactId>
+			<artifactId>server-plugin-report-ruff</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

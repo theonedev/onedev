@@ -29,12 +29,6 @@
 		<module>server-plugin-mailservice-office365</module>
 		<module>server-plugin-mailservice-gmail</module>
 		<module>server-plugin-sso-openid</module>
-		<module>server-plugin-report-markdown</module>
-		<module>server-plugin-report-jest</module>
-		<module>server-plugin-report-clover</module>
-		<module>server-plugin-report-cobertura</module>
-		<module>server-plugin-report-checkstyle</module>
-		<module>server-plugin-report-pylint</module>
 		<module>server-plugin-import-github</module>
 		<module>server-plugin-import-gitlab</module>
 		<module>server-plugin-import-gitea</module>
@@ -56,6 +50,13 @@
 		<module>server-plugin-report-html</module>
 		<module>server-plugin-report-roslynator</module>
 		<module>server-plugin-report-cpd</module>
+		<module>server-plugin-report-markdown</module>
+		<module>server-plugin-report-jest</module>
+		<module>server-plugin-report-clover</module>
+		<module>server-plugin-report-cobertura</module>
+		<module>server-plugin-report-checkstyle</module>
+		<module>server-plugin-report-pylint</module>
+		<module>server-plugin-report-ruff</module>
 		<module>server-plugin-sso-discord</module>
 		<module>server-plugin-notification-slack</module>
     	<module>server-plugin-notification-discord</module>

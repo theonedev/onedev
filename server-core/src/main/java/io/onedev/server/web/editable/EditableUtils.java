@@ -13,6 +13,7 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 import javax.annotation.Nullable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.List;
 
 public class EditableUtils {
@@ -196,7 +197,14 @@ public class EditableUtils {
 	 *			annotated elements to be sorted 
 	 */
 	public static <T extends AnnotatedElement> void sortAnnotatedElements(List<T> annotatedElements) {
-		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
+		annotatedElements.sort((element1, element2) -> {
+			var order1 = getOrder(element1);
+			var order2 = getOrder(element2);
+			if (order1 != order2)
+				return order1 - order2;
+			else 
+				return getDisplayName(element1).toLowerCase().compareTo(getDisplayName(element2).toLowerCase());
+		});
 	}
 
 	public static String getGroupedType(Class<?> clazz) {
