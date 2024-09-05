@@ -261,10 +261,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 			
 			var blobContent = blob.getText().getContent();
 			Map<String, Object> environments = new Yaml().load(blobContent);
-			CommandStep runTests = new CommandStep();
-			runTests.setName("run tests");
-			runTests.setImage("1dev/conda:1.0.4");
-			runTests.setInterpreter(new ShellInterpreter());
+			CommandStep testAndLint = new CommandStep();
+			testAndLint.setName("test and lint");
+			testAndLint.setImage("1dev/conda:1.0.4");
+			testAndLint.setInterpreter(new ShellInterpreter());
 			String commands = "" +
 					"source /root/.bashrc\n" +
 					"conda env update\n" +
@@ -276,10 +276,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
 			else 
 				commands += "coverage run -m unittest\n";
-			runTests.getInterpreter().setCommands(commands + 
+			testAndLint.getInterpreter().setCommands(commands + 
 					"coverage xml\n" +
-					"pruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
-			job.getSteps().add(runTests);
+					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
+			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());				
 			job.getSteps().add(newCoverageReportPublishStep());
