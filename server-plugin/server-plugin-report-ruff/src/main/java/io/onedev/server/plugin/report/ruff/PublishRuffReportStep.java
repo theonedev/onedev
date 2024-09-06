@@ -31,8 +31,8 @@ public class PublishRuffReportStep extends PublishProblemReportStep {
 	}
 	
 	@Editable(order=100, description="Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. "
-			+ "This file can be generated with ruff json output format option, for instance <code>--output-format json --output-file ruff-result.json</code>. "
-			+ "Use * or ? for pattern match")
+			+ "This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. "
+			+ "Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty
