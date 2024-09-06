@@ -851,17 +851,16 @@ public class PullRequest extends ProjectBelonging
 	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
-			if (getSubmitter() != null)
-				participants.add(getSubmitter());
-			for (PullRequestComment comment: getComments()) {
-				if (comment.getUser() != null)
-					participants.add(comment.getUser());
-			}
+			participants.add(getSubmitter());
+			for (PullRequestComment comment: getComments()) 
+				participants.add(comment.getUser());
 			for (PullRequestChange change: getChanges()) {
 				if (change.getUser() != null)
 					participants.add(change.getUser());
 			}
-			participants.remove(OneDev.getInstance(UserManager.class).getSystem());
+			var userManager = OneDev.getInstance(UserManager.class);
+			participants.remove(userManager.getSystem());
+			participants.remove(userManager.getUnknown());
 		}
 		return new ArrayList<>(participants);
 	}

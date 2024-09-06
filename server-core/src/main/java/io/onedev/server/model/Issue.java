@@ -815,8 +815,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
-			if (getSubmitter() != null)
-				participants.add(getSubmitter());
+			participants.add(getSubmitter());
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (IssueField field: getFields()) {
 				if (field.getType().equals(InputSpec.USER)) {
@@ -833,15 +832,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 					}
 				}
 			}
-			for (IssueComment comment: getComments()) {
-				if (comment.getUser() != null)
-					participants.add(comment.getUser());
-			}
+			for (IssueComment comment: getComments()) 
+				participants.add(comment.getUser());
 			for (IssueChange change: getChanges()) {
 				if (change.getUser() != null)
 					participants.add(change.getUser());
 			}
 			participants.remove(userManager.getSystem());
+			participants.remove(userManager.getUnknown());
 		}
 		return new ArrayList<>(participants);
 	}

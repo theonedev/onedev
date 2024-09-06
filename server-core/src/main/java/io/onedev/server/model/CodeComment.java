@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
@@ -279,12 +280,12 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	public List<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
-			if (getUser() != null)
-				participants.add(getUser());
-			for (CodeCommentReply reply: getReplies()) {
-				if (reply.getUser() != null)
-					participants.add(reply.getUser());
-			}
+			participants.add(getUser());
+			for (CodeCommentReply reply: getReplies()) 
+				participants.add(reply.getUser());
+			var userManager = OneDev.getInstance(UserManager.class);
+			participants.remove(userManager.getSystem());
+			participants.remove(userManager.getUnknown());
 		}
 		return new ArrayList<>(participants);
 	}
