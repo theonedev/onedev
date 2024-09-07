@@ -89,7 +89,16 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				});
 
+				var committer = commit.getCommitterIdent();
+				item.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
+						.add(new AttributeAppender("title", DateUtils.formatDateTime(committer.getWhen()))));
+
 				item.add(new SignatureStatusPanel("signature") {
+					
+					@Override
+					protected String getIconClass() {
+						return "icon icon-sm";
+					}
 
 					@Override
 					protected RevObject getRevObject() {
@@ -106,12 +115,6 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				item.add(hashLink);
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 				item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
-
-				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
-				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-				browseState.requestId = getUpdate().getRequest().getId();
-				params = ProjectBlobPage.paramsOf(project, browseState);
-				item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 			}
 			
 		});

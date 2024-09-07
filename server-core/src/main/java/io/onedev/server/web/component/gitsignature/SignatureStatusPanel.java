@@ -62,11 +62,16 @@ public abstract class SignatureStatusPanel extends DropdownLink {
 				else
 					icon = "unlocked";
 				return String.format(
-						"<svg class='icon'><use xlink:href='%s'/></svg>", 
+						"<svg class='%s'><use xlink:href='%s'/></svg>",
+						getIconClass(),
 						SpriteImage.getVersionedHref(icon));
 			}
 			
 		};
+	}
+	
+	protected String getIconClass() {
+		return "icon";
 	}
 
 	@Override

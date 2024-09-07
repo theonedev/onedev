@@ -104,12 +104,16 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		if (activity.getUser() != null)
-			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
-		else
-			row.add(new WebMarkupContainer("avatar"));
+		var avatarColumn = new WebMarkupContainer("avatar");
+		row.add(avatarColumn);
+		if (activity.getUser() != null) {
+			avatarColumn.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		} else {
+			avatarColumn.setVisible(false);
+			avatarColumn.add(new WebMarkupContainer("avatar"));
+		}
 		
-		Component content = activity.render("content", new DeleteCallback() {
+		Component contentColumn = activity.render("content", new DeleteCallback() {
 
 			@Override
 			public void onDelete(AjaxRequestTarget target) {
@@ -118,8 +122,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			}
 			
 		});
+		if (activity.getUser() == null)
+			contentColumn.add(AttributeAppender.append("colspan", "2"));
 		
-		row.add(content);
+		row.add(contentColumn);
 		
 		row.add(AttributeAppender.append("class", activity.getClass().getSimpleName()));
 		
@@ -181,7 +187,9 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		row.setOutputMarkupId(true);
 		
 		String avatarHtml = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", SpriteImage.getVersionedHref("diff"));
-		row.add(new Label("avatar", avatarHtml) {
+		var avatarColumn = new WebMarkupContainer("avatar");
+		row.add(avatarColumn);
+		avatarColumn.add(new Label("avatar", avatarHtml) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {

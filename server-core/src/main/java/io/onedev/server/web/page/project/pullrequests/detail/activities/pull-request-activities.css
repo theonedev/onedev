@@ -58,14 +58,26 @@
 	padding-bottom: 0;
 }
 .pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit {
-	padding: 0.5rem 0;
+	padding: 0.8rem 0;
+	margin-left: -9px;
 }
-
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>svg:first-child {
+	background: white;
+	opacity: 100%;
+	width: 17px !important;
+	height: 17px !important;
+}
+.dark-mode .pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>svg:first-child {
+	background: var(--dark-mode-dark);
+}
 .pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.head {
 	display: none;
 }
 .pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body {
 	margin: 0;
+}
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body {
+	margin-left: 10px;
 }
 .pull-request-detail>.card-body>.main>.activities .PullRequestChangeActivity>td.content>.body>.detail+.comment {
 	margin-top: 1rem;
