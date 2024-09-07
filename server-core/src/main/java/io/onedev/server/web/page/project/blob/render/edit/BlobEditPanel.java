@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
@@ -12,6 +13,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,6 +29,10 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @SuppressWarnings("serial")
 public abstract class BlobEditPanel extends Panel {
@@ -77,6 +83,7 @@ public abstract class BlobEditPanel extends Panel {
 			}
 			
 		});
+		
 		
 		add(newEditOptions("editOptions"));
 		
@@ -146,18 +153,28 @@ public abstract class BlobEditPanel extends Panel {
 				
 				add(new FencedFeedbackPanel("feedback", this));
 				
-				byte[] content;
-				if (context.getMode() == Mode.EDIT)
-					content = context.getProject().getBlob(context.getBlobIdent(), true).getBytes();
-				else
-					content = new byte[0];
-				add(editor = newEditor("editor", content));
+				byte[] bytes;
+				if (context.getMode() == Mode.EDIT) {
+					var blob = context.getProject().getBlob(context.getBlobIdent(), true);
+					bytes = blob.getBytes();
+					if (blob.getText() != null && !Arrays.equals(bytes, blob.getText().getContent().getBytes(StandardCharsets.UTF_8))) {
+						var message = String.format(
+								"<svg class='icon icon-sm mr-1'><use xlink:href='%s'/></svg> %s will be transcoded to UTF-8 upon commit",
+								SpriteImage.getVersionedHref("warning-o"), blob.getText().getCharset().name());
+						BlobEditPanel.this.add(new Label("transcodeWarning", message).setEscapeModelStrings(false));
+					}
+				} else {
+					bytes = new byte[0];
+				}
+				add(editor = newEditor("editor", bytes));
 				editor.setOutputMarkupId(true);
 				
 				add(newSubmitLink("edit", Tab.EDIT));
 				add(newSubmitLink("editPlain", Tab.EDIT_PLAIN));
 				add(newSubmitLink("save", Tab.SAVE));
-				
+
+				if (BlobEditPanel.this.get("transcodeWarning") == null)
+					BlobEditPanel.this.add(new WebMarkupContainer("transcodeWarning").setVisible(false));					
 				setOutputMarkupId(true);
 			}
 
