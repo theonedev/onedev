@@ -92,6 +92,8 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 	
+	private static final int MAX_DESCRIPTION_LEN = 120;
+	
 	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
@@ -1086,24 +1088,29 @@ public class ProjectListPanel extends Panel {
 				fragment.add(projectLink);
 
 				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
+				if (project.getDescription() != null) {
+					fragment.add(new Label("description", StringUtils.abbreviate(project.getDescription(), MAX_DESCRIPTION_LEN)));
+				} else {
+					fragment.add(new WebMarkupContainer("description").setVisible(false));
+				}
 				
 				if (!project.isPendingDelete() && project.getActiveServer(false) != null) {
 					if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
 						fragment.add(new CodeStatsPanel("codeStats", rowModel));
-						fragment.add(new PullRequestStatsPanel("pullRequestStats", rowModel, 
-								new LoadableDetachableModel<Map<PullRequest.Status, Long>>() {
-	
-							@Override
-							protected Map<PullRequest.Status, Long> load() {
-								Map<PullRequest.Status, Long> statusCounts = new LinkedHashMap<>();
-								for (ProjectPullRequestStatusStat stats: pullRequestStatsModel.getObject()) {
-									if (stats.getProjectId().equals(projectId)) 
-										statusCounts.put(stats.getPullRequestStatus(), stats.getStatusCount());
-								}
-								return statusCounts;
-							}
-							
-						}));
+						fragment.add(new PullRequestStatsPanel("pullRequestStats", rowModel,
+								new LoadableDetachableModel<>() {
+
+									@Override
+									protected Map<PullRequest.Status, Long> load() {
+										Map<PullRequest.Status, Long> statusCounts = new LinkedHashMap<>();
+										for (ProjectPullRequestStatusStat stats : pullRequestStatsModel.getObject()) {
+											if (stats.getProjectId().equals(projectId))
+												statusCounts.put(stats.getPullRequestStatus(), stats.getStatusCount());
+										}
+										return statusCounts;
+									}
+
+								}));
 					} else {
 						fragment.add(new WebMarkupContainer("codeStats").setVisible(false));
 						fragment.add(new WebMarkupContainer("pullRequestStats").setVisible(false));
