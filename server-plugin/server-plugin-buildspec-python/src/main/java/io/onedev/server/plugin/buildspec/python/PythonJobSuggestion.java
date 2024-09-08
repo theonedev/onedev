@@ -93,6 +93,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 			testAndLint.setName("test and lint");
 			testAndLint.setImage("1dev/poetry:1.0.1");
 			String commands = "" +
+					"poetry config virtualenvs.create false\n" +
 					"poetry install\n" +
 					"poetry add coverage ruff\n";
 
@@ -129,10 +130,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 			job.getSteps().add(generateChecksum);
 
 			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up venv cache");
-			setupCache.setKey("venv_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList(".venv"));
-			setupCache.getLoadKeys().add("venv_cache");
+			setupCache.setName("set up pip cache");
+			setupCache.setKey("pip_cache_@file:checksum@");
+			setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
+			setupCache.getLoadKeys().add("pip_cache");
 			job.getSteps().add(setupCache);
 
 			CommandStep testAndLint = new CommandStep();
@@ -141,8 +142,6 @@ public class PythonJobSuggestion implements JobSuggestion {
 			testAndLint.setName("test and lint");
 			testAndLint.setImage("python:3.11");
 			var commands = "" +
-					"python -m venv .venv\n" +
-					"source .venv/bin/activate\n" +
 					"pip install -r requirements.txt\n" +
 					"pip install coverage ruff\n";
 
@@ -153,7 +152,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m unittest\n";
 			interpreter.setCommands(commands +
 					"coverage xml\n" +
-					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git --exclude=.venv");
+					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
 			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
@@ -179,10 +178,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 			job.getSteps().add(generateChecksum);
 
 			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up venv cache");
-			setupCache.setKey("venv_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList(".venv"));
-			setupCache.getLoadKeys().add("venv_cache");
+			setupCache.setName("set up pip cache");
+			setupCache.setKey("pip_cache_@file:checksum@");
+			setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
+			setupCache.getLoadKeys().add("pip_cache");
 			job.getSteps().add(setupCache);
 
 			var blobContent = blob.getText().getContent();
@@ -205,8 +204,6 @@ public class PythonJobSuggestion implements JobSuggestion {
 			testAndLint.setName("test and lint");
 			testAndLint.setImage("python:3.11");
 			var commands = "" +
-					"python -m venv .venv\n" +
-					"source .venv/bin/activate\n" +
 					"pip install .\n" +
 					"pip install coverage ruff\n";
 
@@ -227,7 +224,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				commands += "coverage run -m unittest\n";
 			interpreter.setCommands(commands +
 					"coverage xml\n" +
-					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git --exclude=.venv");
+					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
 			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());

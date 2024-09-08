@@ -13,7 +13,14 @@ public class JobLogEntryExTest {
 	@Test
 	public void test() {
 		JobLogEntryEx entry;
-
+		
+		var styleBuilder = new StyleBuilder();
+		JobLogEntryEx.parse("\u001B[30;43ma\u001B[39;49m", styleBuilder);
+		entry = JobLogEntryEx.parse("\u001B[34mb\u001B[39m", styleBuilder);
+		assertEquals(Lists.newArrayList(
+				new Message(new Style("34", Style.BACKGROUND_COLOR_DEFAULT, false), "b")
+		), entry.getMessages());
+		
 		entry = JobLogEntryEx.parse("a\r\nb", new StyleBuilder());
 		assertEquals(Lists.newArrayList(
 				new Message(new Style(Style.FOREGROUND_COLOR_DEFAULT, Style.BACKGROUND_COLOR_DEFAULT, false), "a\nb")
