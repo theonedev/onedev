@@ -53,26 +53,58 @@ public class PythonJobSuggestion implements JobSuggestion {
 		return publishRuffReport;
 	}
 	
+	private SetupCacheStep newPipCacheSetupStep() {
+		var setupCache = new SetupCacheStep();
+		setupCache.setName("set up dependency cache");
+		setupCache.setKey("pip_cache_@file:checksum@");
+		setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
+		setupCache.getLoadKeys().add("pip_cache");
+		return setupCache;
+	}
+	
+	private String getCoverageAndRuffCommand(boolean withPytest, String prefix) {
+		String command;
+		if (withPytest)
+			command = prefix + "coverage run -m pytest --junitxml=./test-result.xml\n";
+		else
+			command = prefix + "coverage run -m unittest\n";
+		return command + 
+				prefix + "coverage xml\n" +
+				prefix + "ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git";
+	}
+	
+	private CommandStep newPipTestAndLintStep(String dependencyInstallCommand, boolean withPytest) {
+		CommandStep testAndLint = new CommandStep();
+		var interpreter = new ShellInterpreter();
+		testAndLint.setInterpreter(interpreter);
+		testAndLint.setName("test and lint");
+		testAndLint.setImage("python:3.11");
+		interpreter.setCommands(dependencyInstallCommand + "\n" + "pip install coverage ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
+		return testAndLint;
+	}
+	
+	private GenerateChecksumStep newChecksumGenerateStep(String files) {
+		var generateChecksum = new GenerateChecksumStep();
+		generateChecksum.setName("generate dependency checksum");
+		generateChecksum.setFiles(files);
+		generateChecksum.setTargetFile("checksum");
+		return generateChecksum;
+	}
+	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
-		Collection<Job> jobs = new ArrayList<>();
+		Job job = new Job();
+		job.setName("python ci");
+		var checkout = new CheckoutStep();
+		checkout.setName("checkout code");
+		job.getSteps().add(checkout);
+		
 		Blob blob;
 		if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
-			Job job = new Job();
-			job.setName("python ci");
-			
-			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate poetry lock checksum");
-			generateChecksum.setFiles("poetry.lock");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
+			job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
 
 			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up poetry cache");
+			setupCache.setName("set up dependency cache");
 			setupCache.setKey("poetry_cache_@file:checksum@");
 			setupCache.setPaths(Lists.newArrayList("/root/.cache/pypoetry"));
 			setupCache.getLoadKeys().add("poetry_cache");
@@ -98,91 +130,29 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"poetry add coverage ruff\n";
 
 			var withPytest = blob.getText().getContent().contains("pytest");
-			if (withPytest) 
-				commands += "poetry run coverage run -m pytest --junitxml=./test-result.xml\n";
-			else 
-				commands += "poetry run coverage run -m unittest\n";
-			testAndLint.getInterpreter().setCommands(commands +
-					"poetry run coverage xml\n" +
-					"poetry run ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
+			testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
 			job.getSteps().add(testAndLint);
 			if (withPytest) 
 				job.getSteps().add(newUnitTestReportPublishStep());
-			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newRuffReportPublishStep());
-
-			job.getTriggers().add(new BranchUpdateTrigger());
-			job.getTriggers().add(new PullRequestUpdateTrigger());
-			
-			jobs.add(job);
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
-			Job job = new Job();
-			job.setName("python ci");
-
-			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate requirements checksum");
-			generateChecksum.setFiles("requirements.txt");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
-
-			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up pip cache");
-			setupCache.setKey("pip_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
-			setupCache.getLoadKeys().add("pip_cache");
-			job.getSteps().add(setupCache);
-
-			CommandStep testAndLint = new CommandStep();
-			var interpreter = new ShellInterpreter();
-			testAndLint.setInterpreter(interpreter);
-			testAndLint.setName("test and lint");
-			testAndLint.setImage("python:3.11");
-			var commands = "" +
-					"pip install -r requirements.txt\n" +
-					"pip install coverage ruff\n";
-
+			job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
+			job.getSteps().add(newPipCacheSetupStep());
+			
 			var withPytest = blob.getText().getContent().contains("pytest");
-			if (withPytest)
-				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
-			else
-				commands += "coverage run -m unittest\n";
-			interpreter.setCommands(commands +
-					"coverage xml\n" +
-					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
-			job.getSteps().add(testAndLint);
+			job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
-			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newRuffReportPublishStep());
-
-			job.getTriggers().add(new BranchUpdateTrigger());
-			job.getTriggers().add(new PullRequestUpdateTrigger());
-
-			jobs.add(job);
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
-			Job job = new Job();
-			job.setName("python ci");
+			var dependencyFiles = "pyproject.toml";
+			var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
+			if (setupPy != null)
+				dependencyFiles += " setup.py";
+			var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
+			if (setupCfg != null)
+				dependencyFiles += " setup.cfg";
 
-			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate pyproject checksum");
-			generateChecksum.setFiles("pyproject.toml");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
-
-			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up pip cache");
-			setupCache.setKey("pip_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
-			setupCache.getLoadKeys().add("pip_cache");
-			job.getSteps().add(setupCache);
+			job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
+			job.getSteps().add(newPipCacheSetupStep());
 
 			var blobContent = blob.getText().getContent();
 			if (new Toml().read(blobContent).getString("project.version") != null) {
@@ -197,60 +167,32 @@ public class PythonJobSuggestion implements JobSuggestion {
 				setBuildVersion.setBuildVersion("@file:buildVersion@");
 				job.getSteps().add(setBuildVersion);
 			}
-			
-			CommandStep testAndLint = new CommandStep();
-			var interpreter = new ShellInterpreter();
-			testAndLint.setInterpreter(interpreter);
-			testAndLint.setName("test and lint");
-			testAndLint.setImage("python:3.11");
-			var commands = "" +
-					"pip install .\n" +
-					"pip install coverage ruff\n";
 
-			var withPytest = blobContent.contains("pytest");
-			if (!withPytest) {
-				var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
-				if (setupPy != null && setupPy.getText().getContent().contains("pytest"))				
-					withPytest = true;
-			}
-			if (!withPytest) {
-				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
-				if (setupCfg != null && setupCfg.getText().getContent().contains("pytest"))
-					withPytest = true;
-			}
-			if (withPytest)
-				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
-			else
-				commands += "coverage run -m unittest\n";
-			interpreter.setCommands(commands +
-					"coverage xml\n" +
-					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
-			job.getSteps().add(testAndLint);
+			var withPytest = blobContent.contains("pytest")
+					|| setupPy != null && setupPy.getText().getContent().contains("pytest")
+					|| setupCfg != null && setupCfg.getText().getContent().contains("pytest");
+			job.getSteps().add(newPipTestAndLintStep("pip install .", withPytest));			
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
-			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newRuffReportPublishStep());
+		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
+			var dependencyFiles = "setup.py";
+			var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
+			if (setupCfg != null)
+				dependencyFiles += " setup.cfg";
+			
+			job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
+			job.getSteps().add(newPipCacheSetupStep());
 
-			job.getTriggers().add(new BranchUpdateTrigger());
-			job.getTriggers().add(new PullRequestUpdateTrigger());
-
-			jobs.add(job);
+			var blobContent = blob.getText().getContent();
+			var withPytest = blobContent.contains("pytest") || setupCfg != null && setupCfg.getText().getContent().contains("pytest");
+			job.getSteps().add(newPipTestAndLintStep("pip install .", withPytest));
+			if (withPytest)
+				job.getSteps().add(newUnitTestReportPublishStep());
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
-			Job job = new Job();
-			job.setName("python ci");
-
-			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate environment checksum");
-			generateChecksum.setFiles("environment.yml");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
+			job.getSteps().add(newChecksumGenerateStep("environment.yml"));
 
 			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up environment cache");
+			setupCache.setName("set up dependency cache");
 			setupCache.setKey("conda_cache_@file:checksum@");
 			setupCache.setPaths(Lists.newArrayList("/root/miniconda3/envs"));
 			setupCache.getLoadKeys().add("conda_cache");
@@ -267,27 +209,23 @@ public class PythonJobSuggestion implements JobSuggestion {
 					"conda env update\n" +
 					"conda activate " + environments.get("name") + "\n" +
 					"conda install -y coverage ruff\n";
-
+			
 			var withPytest = blobContent.contains("pytest");
-			if (withPytest) 
-				commands += "coverage run -m pytest --junitxml=./test-result.xml\n";
-			else 
-				commands += "coverage run -m unittest\n";
-			testAndLint.getInterpreter().setCommands(commands + 
-					"coverage xml\n" +
-					"ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git");
+			testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, ""));
 			job.getSteps().add(testAndLint);
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());				
+		}
+		if (job.getSteps().size() > 1) {
 			job.getSteps().add(newCoverageReportPublishStep());
 			job.getSteps().add(newRuffReportPublishStep());
-
 			job.getTriggers().add(new BranchUpdateTrigger());
 			job.getTriggers().add(new PullRequestUpdateTrigger());
-
-			jobs.add(job);
+			
+			return Lists.newArrayList(job);
+		} else {
+			return new ArrayList<>();
 		}
-		return jobs;
 	}
 
 }
