@@ -74,7 +74,7 @@ public class CoverageInfo implements Serializable {
 	}
 	
 	public static int getCoverage(int total, int covered)	{
-		return total != 0? covered * 100 / total: 100;
+		return total != 0? covered * 100 / total: -1;
 	}
 	
 }

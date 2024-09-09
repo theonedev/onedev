@@ -79,7 +79,6 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	protected abstract ProcessResult process(Build build, File inputDir, TaskLogger logger);
 
 	private void writeLineStatuses(Build build, String blobPath, Map<Integer, CoverageStatus> lineStatuses) {
-		lineStatuses.entrySet().removeIf(it -> it.getValue() == CoverageStatus.NOT_COVERED);
 		if (!lineStatuses.isEmpty()) {
 			File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
 			File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);

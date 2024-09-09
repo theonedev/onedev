@@ -154,12 +154,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 										status = COVERED;
 									}
 								}
-
-								var prevStatus = coverageStatusesOfFile.get(lineNum);
-								if (prevStatus != null) 
-									coverageStatusesOfFile.put(lineNum, prevStatus.mergeWith(status));
-								else if (status != NOT_COVERED)
-									coverageStatusesOfFile.put(lineNum, status);
+								coverageStatusesOfFile.put(lineNum, status.mergeWith(coverageStatusesOfFile.get(lineNum)));
 							}
 							
 							if (!coverageStatusesOfFile.isEmpty())
