@@ -30,7 +30,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		var publishUnitTestReport = new PublishJUnitReportStep();
 		publishUnitTestReport.setName("publish unit test report");
 		publishUnitTestReport.setReportName("Unit Test");
-		publishUnitTestReport.setFilePatterns("test-result.xml");
+		publishUnitTestReport.setFilePatterns("pytest-result*.xml");
 		publishUnitTestReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishUnitTestReport;
 	}
@@ -39,7 +39,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		var publishCoverageReport = new PublishCoberturaReportStep();
 		publishCoverageReport.setName("publish coverage report");
 		publishCoverageReport.setReportName("Coverage");
-		publishCoverageReport.setFilePatterns("coverage.xml");
+		publishCoverageReport.setFilePatterns("coverage*.xml");
 		publishCoverageReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishCoverageReport;
 	}
@@ -65,7 +65,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 	private String getCoverageAndRuffCommand(boolean withPytest, String prefix) {
 		String command;
 		if (withPytest)
-			command = prefix + "coverage run -m pytest --junitxml=./test-result.xml\n";
+			command = prefix + "coverage run -m pytest --junitxml=./pytest-result.xml\n";
 		else
 			command = prefix + "coverage run -m unittest\n";
 		return command + 
@@ -78,7 +78,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		var interpreter = new ShellInterpreter();
 		testAndLint.setInterpreter(interpreter);
 		testAndLint.setName("test and lint");
-		testAndLint.setImage("python:3.11");
+		testAndLint.setImage("python");
 		interpreter.setCommands(dependencyInstallCommand + "\n" + "pip install coverage ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
 		return testAndLint;
 	}
@@ -100,7 +100,23 @@ public class PythonJobSuggestion implements JobSuggestion {
 		job.getSteps().add(checkout);
 		
 		Blob blob;
-		if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
+		if ((blob = project.getBlob(new BlobIdent(commitId.name(), "tox.ini", FileMode.TYPE_FILE), false)) != null) {
+			job.getSteps().add(newChecksumGenerateStep("tox.ini"));
+			var setupCache = new SetupCacheStep();
+			setupCache.setName("set up dependency cache");
+			setupCache.setKey("tox_envs_@file:checksum@");
+			setupCache.setPaths(Lists.newArrayList(".tox"));
+			setupCache.getLoadKeys().add("tox_cache");
+			job.getSteps().add(setupCache);
+
+			CommandStep testAndLint = new CommandStep();
+			testAndLint.setName("test");
+			testAndLint.setImage("1dev/tox:1.0.0");
+			testAndLint.getInterpreter().setCommands("tox");
+			job.getSteps().add(testAndLint);
+			if (blob.getText().getContent().contains("pytest"))
+				job.getSteps().add(newUnitTestReportPublishStep());
+		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
 			job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
 
 			var setupCache = new SetupCacheStep();
@@ -134,14 +150,6 @@ public class PythonJobSuggestion implements JobSuggestion {
 			job.getSteps().add(testAndLint);
 			if (withPytest) 
 				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
-			job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
-			job.getSteps().add(newPipCacheSetupStep());
-			
-			var withPytest = blob.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
-			if (withPytest)
-				job.getSteps().add(newUnitTestReportPublishStep());
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
 			var dependencyFiles = "pyproject.toml";
 			var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
@@ -171,7 +179,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 			var withPytest = blobContent.contains("pytest")
 					|| setupPy != null && setupPy.getText().getContent().contains("pytest")
 					|| setupCfg != null && setupCfg.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install .", withPytest));			
+			job.getSteps().add(newPipTestAndLintStep("pip install -e .", withPytest));			
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
@@ -185,7 +193,15 @@ public class PythonJobSuggestion implements JobSuggestion {
 
 			var blobContent = blob.getText().getContent();
 			var withPytest = blobContent.contains("pytest") || setupCfg != null && setupCfg.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install .", withPytest));
+			job.getSteps().add(newPipTestAndLintStep("pip install -e .", withPytest));
+			if (withPytest)
+				job.getSteps().add(newUnitTestReportPublishStep());
+		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
+			job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
+			job.getSteps().add(newPipCacheSetupStep());
+
+			var withPytest = blob.getText().getContent().contains("pytest");
+			job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
 			if (withPytest)
 				job.getSteps().add(newUnitTestReportPublishStep());
 		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
