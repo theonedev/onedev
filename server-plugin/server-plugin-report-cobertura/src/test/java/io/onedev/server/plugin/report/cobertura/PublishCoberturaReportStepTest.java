@@ -46,6 +46,13 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			try (
+					var is = Resources.getResource(PublishCoberturaReportStepTest.class, "coverage3.xml").openStream();
+					var os = new FileOutputStream(new File(inputDir, "coverage3.xml"))) {
+				IOUtils.copy(is, os);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 			var logger = new TaskLogger() {
 				@Override
 				public void log(String message, @Nullable String sessionId) {
@@ -58,8 +65,8 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			var overallCoverage = result.getReport().getOverallCoverages();
 			assertEquals(16, overallCoverage.getTotalBranches());
 			assertEquals(8, overallCoverage.getCoveredBranches());
-			assertEquals(94, overallCoverage.getTotalLines());
-			assertEquals(68, overallCoverage.getCoveredLines());
+			assertEquals(2311, overallCoverage.getTotalLines());
+			assertEquals(1992, overallCoverage.getCoveredLines());
 
 			FileCoverageInfo fileCoverage = null;
 			boolean program1Found = false;
@@ -109,6 +116,14 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			expected.put(27, CoverageStatus.COVERED);
 			
 			assertEquals(expected, statusesOfFile);
+			
+			for (var groupCoverage: result.getReport().getGroupCoverages()) {
+				for (var each: groupCoverage.getFileCoverages()) {
+					if (each.getBlobPath().endsWith("help.py")) 
+						assertEquals(-1, each.getBranchCoverage());
+				}
+			}
+			assertEquals(CoverageStatus.NOT_COVERED, result.getStatuses().get("/example/src/requests/help.py").get(49));
 		} finally {
 			FileUtils.deleteDir(inputDir);
 		}
