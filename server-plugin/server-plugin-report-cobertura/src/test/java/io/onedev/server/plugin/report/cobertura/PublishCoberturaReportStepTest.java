@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 
     @Test
-    public void process() {
+    public void test() {
 		var inputDir = FileUtils.createTempDir();
 		try {
 			var build = new Build() {

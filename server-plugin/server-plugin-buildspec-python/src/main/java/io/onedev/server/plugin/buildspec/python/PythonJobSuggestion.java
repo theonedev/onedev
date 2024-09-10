@@ -2,6 +2,7 @@ package io.onedev.server.plugin.buildspec.python;
 
 import com.google.common.collect.Lists;
 import com.moandjiezana.toml.Toml;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -18,13 +19,24 @@ import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
 import io.onedev.server.plugin.report.ruff.PublishRuffReportStep;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PythonJobSuggestion implements JobSuggestion {
+	
+	private static final Logger logger = LoggerFactory.getLogger(PythonJobSuggestion.class);
+	
+	private static final Pattern SETUP_PY_EXTRAS_REQUIRE_PATTERN = Pattern.compile("extras_require\\s*=\\s*\\{(.*?)}", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern SETUP_PY_EXTRAS_REQUIRE_GROUP_PATTERN = Pattern.compile("[\"'](\\w+)[\"']\\s*:");
 	
 	private PublishJUnitReportStep newUnitTestReportPublishStep() {
 		var publishUnitTestReport = new PublishJUnitReportStep();
@@ -91,155 +103,253 @@ public class PythonJobSuggestion implements JobSuggestion {
 		return generateChecksum;
 	}
 	
+	@Nullable
+	private String guessPyprojectOptionalTestGroup(Toml pyprojectToml) {
+		if (pyprojectToml.getBoolean("tool.poetry.group.test.optional", false))
+			return "test";
+		else if (pyprojectToml.getBoolean("tool.poetry.group.tests.optional", false))
+			return "tests";
+		else if (pyprojectToml.getBoolean("tool.poetry.group.dev.optional", false))
+			return "dev";
+		else if (pyprojectToml.getBoolean("tool.poetry.group.develop.optional", false))
+			return "develop";
+		else if (pyprojectToml.getBoolean("tool.poetry.group.development.optional", false))
+			return "development";
+		else 
+			return null;
+	}
+	
+	@Nullable
+	private String guessSetupPyOptionalTestGroup(String setupPy) {
+		Matcher extrasRequireMatcher = SETUP_PY_EXTRAS_REQUIRE_PATTERN.matcher(StringUtils.deleteWhitespace(setupPy));
+		while (extrasRequireMatcher.find()) {
+			Matcher groupMatcher = SETUP_PY_EXTRAS_REQUIRE_GROUP_PATTERN.matcher(extrasRequireMatcher.group(1));
+			while (groupMatcher.find()) {
+				var group = groupMatcher.group(1);
+				if (group.equals("test") || group.equals("tests")
+						|| group.equals("dev") || group.equals("develop")
+						|| group.equals("development")) {
+					return group;
+				}
+			}
+		}
+		return null;
+	}
+	
+	@Nullable
+	private String guessSetupCfgOptionalTestGroup(String setupCfg) {
+		var inExtrasRequire = false;
+		for (var line: StringUtils.split(setupCfg, '\n')) {
+			if (line.trim().equals("[options.extras_require]")) {
+				inExtrasRequire = true;
+			} else if (line.trim().startsWith("[")) {
+				inExtrasRequire = false;
+			} else if (inExtrasRequire) {
+				var group = StringUtils.substringBefore(line, "=").trim();
+				if (group.equals("test") || group.equals("tests")
+						|| group.equals("dev") || group.equals("develop")
+						|| group.equals("development")) {
+					return group;
+				}
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
-		Job job = new Job();
-		job.setName("python ci");
-		var checkout = new CheckoutStep();
-		checkout.setName("checkout code");
-		job.getSteps().add(checkout);
-		
-		Blob blob;
-		if ((blob = project.getBlob(new BlobIdent(commitId.name(), "tox.ini", FileMode.TYPE_FILE), false)) != null) {
-			job.getSteps().add(newChecksumGenerateStep("tox.ini"));
-			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up dependency cache");
-			setupCache.setKey("tox_envs_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList(".tox"));
-			setupCache.getLoadKeys().add("tox_cache");
-			job.getSteps().add(setupCache);
+		try {
+			Job job = new Job();
+			job.setName("python ci");
+			var checkout = new CheckoutStep();
+			checkout.setName("checkout code");
+			job.getSteps().add(checkout);
 
-			CommandStep testAndLint = new CommandStep();
-			testAndLint.setName("test");
-			testAndLint.setImage("1dev/tox:1.0.0");
-			testAndLint.getInterpreter().setCommands("tox");
-			job.getSteps().add(testAndLint);
-			if (blob.getText().getContent().contains("pytest"))
-				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
-			job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
+			Blob blob;
+			if ((blob = project.getBlob(new BlobIdent(commitId.name(), "tox.ini", FileMode.TYPE_FILE), false)) != null) {
+				job.getSteps().add(newChecksumGenerateStep("tox.ini"));
+				var setupCache = new SetupCacheStep();
+				setupCache.setName("set up dependency cache");
+				setupCache.setKey("tox_envs_@file:checksum@");
+				setupCache.setPaths(Lists.newArrayList(".tox"));
+				setupCache.getLoadKeys().add("tox_cache");
+				job.getSteps().add(setupCache);
 
-			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up dependency cache");
-			setupCache.setKey("poetry_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.cache/pypoetry"));
-			setupCache.getLoadKeys().add("poetry_cache");
-			job.getSteps().add(setupCache);
-			
-			CommandStep detectBuildVersion = new CommandStep();
-			detectBuildVersion.setName("detect build version");
-			detectBuildVersion.setImage("1dev/yq:1.0.0");
-			detectBuildVersion.getInterpreter().setCommands("yq '.tool.poetry.version' pyproject.toml > buildVersion");
-			job.getSteps().add(detectBuildVersion);
-			
-			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
-			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@file:buildVersion@");
-			job.getSteps().add(setBuildVersion);
+				CommandStep testAndLint = new CommandStep();
+				testAndLint.setName("test");
+				testAndLint.setImage("1dev/tox:1.0.0");
+				testAndLint.getInterpreter().setCommands("tox");
+				job.getSteps().add(testAndLint);
+				if (blob.getText().getContent().contains("pytest"))
+					job.getSteps().add(newUnitTestReportPublishStep());
+			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
+				job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
 
-			CommandStep testAndLint = new CommandStep();
-			testAndLint.setName("test and lint");
-			testAndLint.setImage("1dev/poetry:1.0.1");
-			String commands = "" +
-					"poetry config virtualenvs.create false\n" +
-					"poetry install\n" +
-					"poetry add coverage ruff\n";
+				var setupCache = new SetupCacheStep();
+				setupCache.setName("set up dependency cache");
+				setupCache.setKey("poetry_cache_@file:checksum@");
+				setupCache.setPaths(Lists.newArrayList("/root/.cache/pypoetry"));
+				setupCache.getLoadKeys().add("poetry_cache");
+				job.getSteps().add(setupCache);
 
-			var withPytest = blob.getText().getContent().contains("pytest");
-			testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
-			job.getSteps().add(testAndLint);
-			if (withPytest) 
-				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
-			var dependencyFiles = "pyproject.toml";
-			var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
-			if (setupPy != null)
-				dependencyFiles += " setup.py";
-			var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
-			if (setupCfg != null)
-				dependencyFiles += " setup.cfg";
+				var pyproject = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false);
+				var pyprojectToml = pyproject != null ? new Toml().read(pyproject.getText().getContent()) : null;
+				if (pyprojectToml != null && pyprojectToml.getString("tool.poetry.version") != null) {
+					CommandStep detectBuildVersion = new CommandStep();
+					detectBuildVersion.setName("detect build version");
+					detectBuildVersion.setImage("1dev/yq:1.0.0");
+					detectBuildVersion.getInterpreter().setCommands("yq '.tool.poetry.version' pyproject.toml > buildVersion");
+					job.getSteps().add(detectBuildVersion);
 
-			job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
-			job.getSteps().add(newPipCacheSetupStep());
+					SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+					setBuildVersion.setName("set build version");
+					setBuildVersion.setBuildVersion("@file:buildVersion@");
+					job.getSteps().add(setBuildVersion);
+				}
 
-			var blobContent = blob.getText().getContent();
-			if (new Toml().read(blobContent).getString("project.version") != null) {
-				CommandStep detectBuildVersion = new CommandStep();
-				detectBuildVersion.setName("detect build version");
-				detectBuildVersion.setImage("1dev/yq:1.0.0");
-				detectBuildVersion.getInterpreter().setCommands("yq '.project.version' pyproject.toml > buildVersion");
-				job.getSteps().add(detectBuildVersion);
+				String installCommand = "poetry install";
+				if (pyprojectToml != null) {
+					var optionalTestGroup = guessPyprojectOptionalTestGroup(pyprojectToml);
+					if (optionalTestGroup != null)
+						installCommand += " --with " + optionalTestGroup;
+				}
+				CommandStep testAndLint = new CommandStep();
+				testAndLint.setName("test and lint");
+				testAndLint.setImage("1dev/poetry:1.0.1");
+				String commands = "" +
+						"poetry config virtualenvs.create false\n" +
+						installCommand + "\n" +
+						"poetry add coverage ruff\n";
 
-				SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
-				setBuildVersion.setName("set build version");
-				setBuildVersion.setBuildVersion("@file:buildVersion@");
-				job.getSteps().add(setBuildVersion);
+				var withPytest = blob.getText().getContent().contains("pytest");
+				testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
+				job.getSteps().add(testAndLint);
+				if (withPytest)
+					job.getSteps().add(newUnitTestReportPublishStep());
+			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
+				var dependencyFiles = "pyproject.toml";
+				var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
+				if (setupPy != null)
+					dependencyFiles += " setup.py";
+				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
+				if (setupCfg != null)
+					dependencyFiles += " setup.cfg";
+				var requirements = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false);
+				if (requirements != null)
+					dependencyFiles += " requirements.txt";
+
+				job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
+				job.getSteps().add(newPipCacheSetupStep());
+
+				var blobContent = blob.getText().getContent();
+				var pyprojectToml = new Toml().read(blobContent);
+				if (pyprojectToml.getString("project.version") != null) {
+					CommandStep detectBuildVersion = new CommandStep();
+					detectBuildVersion.setName("detect build version");
+					detectBuildVersion.setImage("1dev/yq:1.0.0");
+					detectBuildVersion.getInterpreter().setCommands("yq '.project.version' pyproject.toml > buildVersion");
+					job.getSteps().add(detectBuildVersion);
+
+					SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+					setBuildVersion.setName("set build version");
+					setBuildVersion.setBuildVersion("@file:buildVersion@");
+					job.getSteps().add(setBuildVersion);
+				}
+
+				var installCommand = "pip install -e .";
+				var optionalTestGroup = guessPyprojectOptionalTestGroup(pyprojectToml);
+				if (optionalTestGroup == null && setupPy != null)
+					optionalTestGroup = guessSetupPyOptionalTestGroup(setupPy.getText().getContent());
+				if (optionalTestGroup == null && setupCfg != null)
+					optionalTestGroup = guessSetupCfgOptionalTestGroup(setupCfg.getText().getContent());
+				if (optionalTestGroup != null)
+					installCommand += "[" + optionalTestGroup + "]";
+				if (requirements != null)
+					installCommand += "\npip install -r requirements.txt";
+
+				var withPytest = blobContent.contains("pytest")
+						|| setupPy != null && setupPy.getText().getContent().contains("pytest")
+						|| setupCfg != null && setupCfg.getText().getContent().contains("pytest")
+						|| requirements != null && requirements.getText().getContent().contains("pytest");
+				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
+				if (withPytest)
+					job.getSteps().add(newUnitTestReportPublishStep());
+			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
+				var dependencyFiles = "setup.py";
+				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
+				if (setupCfg != null)
+					dependencyFiles += " setup.cfg";
+				var requirements = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false);
+				if (requirements != null)
+					dependencyFiles += " requirements.txt";
+				
+				job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
+				job.getSteps().add(newPipCacheSetupStep());
+
+				var blobContent = blob.getText().getContent();
+				var installCommand = "pip install -e .";
+				var optionalTestGroup = guessSetupPyOptionalTestGroup(blobContent);
+				if (optionalTestGroup == null && setupCfg != null)
+					optionalTestGroup = guessSetupCfgOptionalTestGroup(setupCfg.getText().getContent());
+				if (optionalTestGroup != null)
+					installCommand += "[" + optionalTestGroup + "]";
+				if (requirements != null)
+					installCommand += "\npip install -r requirements.txt";
+
+				var withPytest = blobContent.contains("pytest") 
+						|| setupCfg != null && setupCfg.getText().getContent().contains("pytest")
+						|| requirements != null && requirements.getText().getContent().contains("pytest");
+				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
+				if (withPytest)
+					job.getSteps().add(newUnitTestReportPublishStep());
+			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
+				job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
+				job.getSteps().add(newPipCacheSetupStep());
+
+				var withPytest = blob.getText().getContent().contains("pytest");
+				job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
+				if (withPytest)
+					job.getSteps().add(newUnitTestReportPublishStep());
+			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
+				job.getSteps().add(newChecksumGenerateStep("environment.yml"));
+
+				var setupCache = new SetupCacheStep();
+				setupCache.setName("set up dependency cache");
+				setupCache.setKey("conda_cache_@file:checksum@");
+				setupCache.setPaths(Lists.newArrayList("/root/miniconda3/envs"));
+				setupCache.getLoadKeys().add("conda_cache");
+				job.getSteps().add(setupCache);
+
+				var blobContent = blob.getText().getContent();
+				Map<String, Object> environments = new Yaml().load(blobContent);
+				CommandStep testAndLint = new CommandStep();
+				testAndLint.setName("test and lint");
+				testAndLint.setImage("1dev/conda:1.0.4");
+				testAndLint.setInterpreter(new ShellInterpreter());
+				String commands = "" +
+						"source /root/.bashrc\n" +
+						"conda env update\n" +
+						"conda activate " + environments.get("name") + "\n" +
+						"conda install -y coverage ruff\n";
+
+				var withPytest = blobContent.contains("pytest");
+				testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, ""));
+				job.getSteps().add(testAndLint);
+				if (withPytest)
+					job.getSteps().add(newUnitTestReportPublishStep());
 			}
+			if (job.getSteps().size() > 1) {
+				job.getSteps().add(newCoverageReportPublishStep());
+				job.getSteps().add(newRuffReportPublishStep());
+				job.getTriggers().add(new BranchUpdateTrigger());
+				job.getTriggers().add(new PullRequestUpdateTrigger());
 
-			var withPytest = blobContent.contains("pytest")
-					|| setupPy != null && setupPy.getText().getContent().contains("pytest")
-					|| setupCfg != null && setupCfg.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install -e .", withPytest));			
-			if (withPytest)
-				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
-			var dependencyFiles = "setup.py";
-			var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
-			if (setupCfg != null)
-				dependencyFiles += " setup.cfg";
-			
-			job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
-			job.getSteps().add(newPipCacheSetupStep());
-
-			var blobContent = blob.getText().getContent();
-			var withPytest = blobContent.contains("pytest") || setupCfg != null && setupCfg.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install -e .", withPytest));
-			if (withPytest)
-				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
-			job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
-			job.getSteps().add(newPipCacheSetupStep());
-
-			var withPytest = blob.getText().getContent().contains("pytest");
-			job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
-			if (withPytest)
-				job.getSteps().add(newUnitTestReportPublishStep());
-		} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
-			job.getSteps().add(newChecksumGenerateStep("environment.yml"));
-
-			var setupCache = new SetupCacheStep();
-			setupCache.setName("set up dependency cache");
-			setupCache.setKey("conda_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/miniconda3/envs"));
-			setupCache.getLoadKeys().add("conda_cache");
-			job.getSteps().add(setupCache);
-			
-			var blobContent = blob.getText().getContent();
-			Map<String, Object> environments = new Yaml().load(blobContent);
-			CommandStep testAndLint = new CommandStep();
-			testAndLint.setName("test and lint");
-			testAndLint.setImage("1dev/conda:1.0.4");
-			testAndLint.setInterpreter(new ShellInterpreter());
-			String commands = "" +
-					"source /root/.bashrc\n" +
-					"conda env update\n" +
-					"conda activate " + environments.get("name") + "\n" +
-					"conda install -y coverage ruff\n";
-			
-			var withPytest = blobContent.contains("pytest");
-			testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, ""));
-			job.getSteps().add(testAndLint);
-			if (withPytest)
-				job.getSteps().add(newUnitTestReportPublishStep());				
-		}
-		if (job.getSteps().size() > 1) {
-			job.getSteps().add(newCoverageReportPublishStep());
-			job.getSteps().add(newRuffReportPublishStep());
-			job.getTriggers().add(new BranchUpdateTrigger());
-			job.getTriggers().add(new PullRequestUpdateTrigger());
-			
-			return Lists.newArrayList(job);
-		} else {
+				return Lists.newArrayList(job);
+			} else {
+				return new ArrayList<>();
+			}
+		} catch (Exception e) {
+			logger.error("Error suggesting python jobs", e);
 			return new ArrayList<>();
 		}
 	}
