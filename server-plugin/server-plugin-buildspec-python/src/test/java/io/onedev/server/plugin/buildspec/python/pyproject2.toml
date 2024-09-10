@@ -51,10 +51,6 @@ mypy = ">=0.931"
 pexpect = ">=4.8.0"
 poethepoet = ">=0.12.3"
 pre-commit = ">=2.17.0"
-pytest = ">=7.2.0"
-pytest-cov = ">=3.0.0"
-pytest-gitconfig = ">=0.6.0"
-pytest-xdist = ">=2.5.0"
 types-backports = ">=0.1.3"
 types-colorama = ">=0.4"
 types-psutil = "*"
@@ -76,10 +72,6 @@ optional = true
 [tool.poetry.group.build.dependencies]
 poetry-dynamic-versioning = { version = ">=1.1.0", markers = "python_version < '4'" }
 
-[tool.poe.tasks.coverage]
-cmd = "pytest --cov-report html --cov copier copier tests"
-help = "generate an HTML report of the coverage"
-
 [tool.poe.tasks.dev-setup]
 script = "devtasks:dev_setup"
 help = "set up local development environment"
@@ -91,10 +83,6 @@ help = "start local docs server"
 [tool.poe.tasks.lint]
 script = "devtasks:lint"
 help = "check (and auto-fix) style with pre-commit"
-
-[tool.poe.tasks.test]
-cmd = "pytest --color=yes"
-help = "run tests"
 
 [tool.poe.tasks.types]
 cmd = "mypy ."
@@ -158,10 +146,6 @@ warn_return_any = false
 [[tool.mypy.overrides]]
 module = ["tests.test_cli", "tests.test_prompt"]
 disable_error_code = ["no-untyped-def"]
-
-[tool.pytest.ini_options]
-addopts = "-n auto -ra"
-markers = ["impure: needs network or is not 100% reproducible"]
 
 [tool.commitizen]
 annotated_tag = true

@@ -13,7 +13,6 @@ import org.junit.Test;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class PythonJobSuggestionTest {
@@ -24,7 +23,7 @@ public class PythonJobSuggestionTest {
 			@Override
 			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
 				if (blobIdent.path.equals("poetry.lock"))
-					return new Blob(blobIdent, ObjectId.zeroId(), new byte[0]);
+					return new Blob(blobIdent, ObjectId.zeroId(), "pytest".getBytes());
 				else if (blobIdent.path.equals("pyproject.toml"))
 					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("pyproject1.toml"));
 				else
@@ -32,7 +31,27 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		var jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("poetry install --with dev"));
+		var testAndLinkCommands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(testAndLinkCommands.contains("poetry install --with dev") && 
+				testAndLinkCommands.contains("poetry add pytest-cov") && 
+				testAndLinkCommands.contains("poetry run pytest --cov"));
+
+		project = new Project() {
+			@Override
+			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
+				if (blobIdent.path.equals("poetry.lock"))
+					return new Blob(blobIdent, ObjectId.zeroId(), new byte[0]);
+				else if (blobIdent.path.equals("pyproject.toml"))
+					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("pyproject2.toml"));
+				else
+					return null;
+			}
+		};
+		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
+		testAndLinkCommands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(!testAndLinkCommands.contains("poetry install --with") && 
+				testAndLinkCommands.contains("poetry add coverage") &&
+				testAndLinkCommands.contains("poetry run coverage"));
 	}
 	
 	@Test
@@ -47,13 +66,43 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		var jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
+		var commands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(!commands.contains("pip install -e .[dev]") && 
+				commands.contains("pytest --cov") && 
+				commands.contains("pytest-cov"));
 
 		project = new Project() {
 			@Override
 			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
 				if (blobIdent.path.equals("pyproject.toml"))
 					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("pyproject2.toml"));
+				else
+					return null;
+			}
+		};
+		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
+		commands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(!commands.contains("pip install -e .[") && 
+				commands.contains("pip install coverage") && 
+				commands.contains("coverage run -m unittest"));
+		
+		project = new Project() {
+			@Override
+			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
+				if (blobIdent.path.equals("pyproject.toml"))
+					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("pyproject3.toml"));
+				else
+					return null;
+			}
+		};
+		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
+		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[test]"));
+		
+		project = new Project() {
+			@Override
+			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
+				if (blobIdent.path.equals("pyproject.toml"))
+					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("pyproject1.toml"));
 				else if (blobIdent.path.equals("setup.cfg"))
 					return new Blob(blobIdent, ObjectId.zeroId(), readTestResource("setup.cfg"));
 				else

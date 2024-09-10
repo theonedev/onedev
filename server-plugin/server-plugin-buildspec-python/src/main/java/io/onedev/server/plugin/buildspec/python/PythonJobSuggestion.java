@@ -77,12 +77,16 @@ public class PythonJobSuggestion implements JobSuggestion {
 	private String getCoverageAndRuffCommand(boolean withPytest, String prefix) {
 		String command;
 		if (withPytest)
-			command = prefix + "coverage run -m pytest --junitxml=./pytest-result.xml\n";
+			command = prefix + "pytest --cov --junitxml=./pytest-result.xml\n";
 		else
 			command = prefix + "coverage run -m unittest\n";
 		return command + 
 				prefix + "coverage xml\n" +
 				prefix + "ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git";
+	}
+	
+	private String getCoveragePackage(boolean withPytest) {
+		return withPytest?"pytest-cov":"coverage";
 	}
 	
 	private CommandStep newPipTestAndLintStep(String dependencyInstallCommand, boolean withPytest) {
@@ -91,7 +95,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		testAndLint.setInterpreter(interpreter);
 		testAndLint.setName("test and lint");
 		testAndLint.setImage("python");
-		interpreter.setCommands(dependencyInstallCommand + "\n" + "pip install coverage ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
+		interpreter.setCommands(dependencyInstallCommand + "\n" + "pip install " + getCoveragePackage(withPytest) + " ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
 		return testAndLint;
 	}
 	
@@ -104,18 +108,22 @@ public class PythonJobSuggestion implements JobSuggestion {
 	}
 	
 	@Nullable
-	private String guessPyprojectOptionalTestGroup(Toml pyprojectToml) {
+	private String guessPoetryOptionalTestGroup(Toml pyprojectToml) {
 		if (pyprojectToml.getBoolean("tool.poetry.group.test.optional", false))
 			return "test";
-		else if (pyprojectToml.getBoolean("tool.poetry.group.tests.optional", false))
-			return "tests";
 		else if (pyprojectToml.getBoolean("tool.poetry.group.dev.optional", false))
 			return "dev";
-		else if (pyprojectToml.getBoolean("tool.poetry.group.develop.optional", false))
-			return "develop";
-		else if (pyprojectToml.getBoolean("tool.poetry.group.development.optional", false))
-			return "development";
 		else 
+			return null;
+	}
+
+	@Nullable
+	private String guessPyprojectOptionalTestGroup(Toml pyprojectToml) {
+		if (pyprojectToml.getList("project.optional-dependencies.test") != null)
+			return "test";
+		else if (pyprojectToml.getList("project.optional-dependencies.dev") != null)
+			return "dev";
+		else
 			return null;
 	}
 	
@@ -126,11 +134,8 @@ public class PythonJobSuggestion implements JobSuggestion {
 			Matcher groupMatcher = SETUP_PY_EXTRAS_REQUIRE_GROUP_PATTERN.matcher(extrasRequireMatcher.group(1));
 			while (groupMatcher.find()) {
 				var group = groupMatcher.group(1);
-				if (group.equals("test") || group.equals("tests")
-						|| group.equals("dev") || group.equals("develop")
-						|| group.equals("development")) {
+				if (group.equals("test") || group.equals("dev")) 
 					return group;
-				}
 			}
 		}
 		return null;
@@ -146,11 +151,8 @@ public class PythonJobSuggestion implements JobSuggestion {
 				inExtrasRequire = false;
 			} else if (inExtrasRequire) {
 				var group = StringUtils.substringBefore(line, "=").trim();
-				if (group.equals("test") || group.equals("tests")
-						|| group.equals("dev") || group.equals("develop")
-						|| group.equals("development")) {
+				if (group.equals("test") || group.equals("dev")) 
 					return group;
-				}
 			}
 		}
 		return null;
@@ -209,19 +211,21 @@ public class PythonJobSuggestion implements JobSuggestion {
 
 				String installCommand = "poetry install";
 				if (pyprojectToml != null) {
-					var optionalTestGroup = guessPyprojectOptionalTestGroup(pyprojectToml);
+					var optionalTestGroup = guessPoetryOptionalTestGroup(pyprojectToml);
 					if (optionalTestGroup != null)
 						installCommand += " --with " + optionalTestGroup;
 				}
+				
+				var withPytest = blob.getText().getContent().contains("pytest");
+				
 				CommandStep testAndLint = new CommandStep();
 				testAndLint.setName("test and lint");
 				testAndLint.setImage("1dev/poetry:1.0.1");
 				String commands = "" +
 						"poetry config virtualenvs.create false\n" +
 						installCommand + "\n" +
-						"poetry add coverage ruff\n";
+						"poetry add " + getCoveragePackage(withPytest) + " ruff\n";
 
-				var withPytest = blob.getText().getContent().contains("pytest");
 				testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
 				job.getSteps().add(testAndLint);
 				if (withPytest)
