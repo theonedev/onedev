@@ -42,7 +42,6 @@ class UniversalEncodingListener implements CharsetListener {
         }
     }
 
-    @Override
 	public void report(String name) {
         if (Constants.CHARSET_WINDOWS_1252.equals(name)) {
             if (hint != null) {
@@ -64,7 +63,7 @@ class UniversalEncodingListener implements CharsetListener {
         }
         try {
             this.charset = CharsetUtils.forName(name);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             // ignore
         }
     }

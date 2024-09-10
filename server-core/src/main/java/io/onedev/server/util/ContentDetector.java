@@ -5,11 +5,14 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
 import javax.annotation.Nullable;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
 public class ContentDetector {
+	
+	private static final int BUFSIZE = 1024;
 	
 	private static final Tika tika = new Tika();
 	
@@ -24,23 +27,25 @@ public class ContentDetector {
 	@Nullable
 	public static Charset detectCharset(byte[] bytes) {
 		if (bytes.length != 0) {
-			var listener = new UniversalEncodingListener(new Metadata());
-			var pos = 0;
-			var lookAhead = 1024;
-			while (true) {
-				var left = bytes.length - pos;
-				if (left < lookAhead) {
-					listener.handleData(bytes, pos, left);
-					break;
-				} else {
-					listener.handleData(bytes, pos, lookAhead);
-					if (listener.isDone())
-						break;
-					else
-						pos += lookAhead;
+			var input = new ByteArrayInputStream(bytes);
+			input.mark(bytes.length);
+			try {
+				UniversalEncodingListener listener = new UniversalEncodingListener(new Metadata());
+
+				byte[] b = new byte[BUFSIZE];
+				int n = 0;
+				int m = input.read(b);
+				while (m != -1 && n < bytes.length && !listener.isDone()) {
+					n += m;
+					listener.handleData(b, 0, m);
+					m = input.read(b, 0, Math.min(b.length, bytes.length - n));
 				}
-			}
-			return listener.dataEnd();
+				return listener.dataEnd();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				input.reset();
+			}			
 		} else {
 			return null;
 		}

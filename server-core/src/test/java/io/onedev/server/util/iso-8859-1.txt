@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: poetry-core
+Version: 1.5.0
+Summary: Poetry PEP 517 Build Backend
+Home-page: https://github.com/python-poetry/poetry-core
+License: MIT
+Keywords: packaging,dependency,poetry
