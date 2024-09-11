@@ -14,7 +14,7 @@ for (def pack in packs) {
         dataRequiresPython = "";
     for (def entry in pack.data.sha256BlobHashes.entrySet()) {
     print """
-        <a href="${baseUrl}/${UrlUtils.encodePath(pack.version)}/${UrlUtils.encodePath(entry.key)}#sha256-${entry.value}"${dataRequiresPython}>${HtmlEscape.escapeHtml5(entry.key)}</a>
+        <a href="${baseUrl}/${UrlUtils.encodePath(pack.version)}/${UrlUtils.encodePath(entry.key)}#sha256=${entry.value}"${dataRequiresPython}>${HtmlEscape.escapeHtml5(entry.key)}</a>
     """
     }
 }
