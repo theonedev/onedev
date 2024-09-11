@@ -5,7 +5,7 @@
 	font-size: 1rem;
 }
 .pull-request-detail>.card-body>.main>.summary {
-	border: 2px dashed var(--light-gray);
+	border: 1px solid var(--light-dark);
 	padding: 1.2rem 1.5rem;
 	border-radius: 0.42rem;
 }
