@@ -10,8 +10,9 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 @SuppressWarnings("serial")
 public class SourceLinesPage extends CodeStatsPage {
@@ -26,9 +27,9 @@ public class SourceLinesPage extends CodeStatsPage {
 		
 		Map<Integer, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoManager.class)
 				.getLineIncrements(getProject().getId());
-		Map<Integer, Map<String, Integer>> data = new HashMap<>();
-		for (Map.Entry<Integer, Map<String, Integer>> entry: lineIncrements.entrySet()) 
-			data.put(entry.getKey(), entry.getValue());
+		Map<Integer, Map<String, Integer>> data = new LinkedHashMap<>();
+		for (var key: new TreeSet<>(lineIncrements.keySet())) 
+			data.put(key, lineIncrements.get(key));
 		try {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String jsonOfData = mapper.writeValueAsString(data);

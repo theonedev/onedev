@@ -362,9 +362,6 @@ onedev.server.codeStats = {
 					languageLines[language] = dailyLinesByLanguages;
 				}
 			}
-			incrementDays.sort(function(day1, day2) {
-				return day1 - day2;
-			});
 			
 			var languages = Object.keys(languageLines);
 			languages.sort(function(a, b) {
@@ -384,10 +381,13 @@ onedev.server.codeStats = {
 				for (var language in dailyLinesByLanguages) {
 					var dailyLines = dailyLinesByLanguages[language];
 					var increments;
-					if (incrementsOnCurrentDay)
+					if (incrementsOnCurrentDay) {
 						increments = incrementsOnCurrentDay[language];
-					if (increments == undefined)
+						if (increments == undefined)
+							increments = 0;
+					} else {
 						increments = 0;
+					}
 					
 					if (dailyLines.length != 0)
 						dailyLines.push(dailyLines[dailyLines.length-1] + increments);
@@ -397,6 +397,7 @@ onedev.server.codeStats = {
 				xAxisData.push(onedev.server.codeStats.formatDay(currentDay));
 				currentDay++;
 			}
+			console.log(dailyLinesByLanguages["HTML"]);
 			
 			var chart = echarts.init($chart[0]);
 			
