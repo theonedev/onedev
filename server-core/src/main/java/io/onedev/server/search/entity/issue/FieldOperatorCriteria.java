@@ -116,10 +116,15 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			else
 				return fieldValue == null;
 		} else if (operator == IssueQueryLexer.IsMe) {
-			if (User.get() != null)
-				return Objects.equals(fieldValue, User.get().getName());
-			else
+			if (User.get() != null) {
+				var userName = User.get().getName();
+				if (fieldValue instanceof Collection)
+					return ((Collection) fieldValue).contains(userName);
+				else 
+					return Objects.equals(fieldValue, userName);
+			} else {
 				throw new ExplicitException("Please login to perform this query");
+			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {
 				Build build = Build.get();
