@@ -59,12 +59,10 @@ public class ServerConfig {
 		String sshPortStr = System.getenv(PROP_SSH_PORT);
 		if (StringUtils.isBlank(sshPortStr))
 			sshPortStr = props.getProperty(PROP_SSH_PORT);
-		if (StringUtils.isNotBlank(sshPortStr)) {
+		if (StringUtils.isNotBlank(sshPortStr)) 
 			sshPort = parseInt(sshPortStr.trim());
-		} else {
-			logger.warn(PROP_SSH_PORT + " not specified, default to 6611");
-			sshPort = 6611;
-		}
+		else 
+			sshPort = 0;
 
 		String serverName = System.getenv(PROP_SERVER_NAME);
 		if (StringUtils.isBlank(serverName))

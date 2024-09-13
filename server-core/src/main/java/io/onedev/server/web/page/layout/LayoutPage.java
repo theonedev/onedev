@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AlertManager;
@@ -205,15 +206,19 @@ public abstract class LayoutPage extends BasePage {
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authentication Source", authenticationMenuItems));
 
+					var sshPort = OneDev.getInstance(ServerConfig.class).getSshPort();
 					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key",
-							SshServerKeyPage.class, new PageParameters()));
+					if (sshPort != 0) {
+						keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key",
+								SshServerKeyPage.class, new PageParameters()));
+					}
 					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key",
 							GpgSigningKeyPage.class, new PageParameters()));
 					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys",
 							GpgTrustedKeysPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "SSH & GPG Keys", keyManagementMenuItems));
+					var keysTitle = sshPort!=0? "SSH & GPG Keys": "GPG Keys";
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, keysTitle, keyManagementMenuItems));
 
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields",
@@ -803,9 +808,13 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
-		if (getPage() instanceof MySshKeysPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
+			if (getPage() instanceof MySshKeysPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("mySshKeys").setVisible(false));
+		}
 
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
 		if (getPage() instanceof MyGpgKeysPage)

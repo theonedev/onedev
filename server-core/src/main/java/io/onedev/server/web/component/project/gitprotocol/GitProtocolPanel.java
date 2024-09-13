@@ -2,6 +2,7 @@ package io.onedev.server.web.component.project.gitprotocol;
 
 import javax.servlet.http.Cookie;
 
+import io.onedev.server.ServerConfig;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -32,7 +33,7 @@ public abstract class GitProtocolPanel extends Panel {
 	public GitProtocolPanel(String id) {
 		super(id);
 	
-		if (SecurityUtils.getAuthUser() != null) {
+		if (SecurityUtils.getAuthUser() != null && getSshPort() != 0) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_USE_SSH);
 			useSsh = cookie!=null && String.valueOf(true).equals(cookie.getValue());
@@ -50,9 +51,9 @@ public abstract class GitProtocolPanel extends Panel {
 			@Override
 			protected String load() {
 				if (useSsh)
-					return "Showing SSH URL";
+					return "SSH Clone URL";
 				else
-					return "Showing HTTP(S) URL";
+					return "HTTP(S) Clone URL";
 			}
 			
 		}));
@@ -76,7 +77,7 @@ public abstract class GitProtocolPanel extends Panel {
 			}
 			
 		}));
-		add(switchLink.setVisible(SecurityUtils.getAuthUser() != null));
+		add(switchLink.setVisible(SecurityUtils.getAuthUser() != null && getSshPort() != 0));
 		
 		WebMarkupContainer noSshKeysWarning = new WebMarkupContainer("noSshKeysWarning") {
 
@@ -127,6 +128,10 @@ public abstract class GitProtocolPanel extends Panel {
 		response.addCookie(cookie);
 		
 		target.add(this);
+	}
+	
+	private int getSshPort() {
+		return OneDev.getInstance(ServerConfig.class).getSshPort();
 	}
 
 	protected abstract Project getProject();

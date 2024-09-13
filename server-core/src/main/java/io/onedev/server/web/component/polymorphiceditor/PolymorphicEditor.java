@@ -3,9 +3,12 @@ package io.onedev.server.web.component.polymorphiceditor;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ImplementationProvider;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -23,10 +26,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PolymorphicEditor extends ValueEditor<Serializable> {
 
@@ -38,9 +38,14 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 		super(id, model);
 
 		this.baseClass = baseClass;
-		
-		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
-		implementations.addAll(registry.getImplementations(baseClass));
+
+		var implementationProvider = baseClass.getAnnotation(ImplementationProvider.class);
+		if (implementationProvider != null) {
+			implementations.addAll((Collection<? extends Class<? extends Serializable>>) ReflectionUtils.invokeStaticMethod(baseClass, implementationProvider.value()));
+		} else {
+			ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
+			implementations.addAll(registry.getImplementations(baseClass));
+		}
 
 		Preconditions.checkArgument(
 				!implementations.isEmpty(),

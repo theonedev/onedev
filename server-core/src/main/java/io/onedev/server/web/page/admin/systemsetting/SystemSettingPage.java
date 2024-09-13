@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
+import io.onedev.server.ServerConfig;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -53,6 +54,8 @@ public class SystemSettingPage extends AdministrationPage {
 		}
 		if (OneDev.getInstance().getIngressUrl() != null)
 			excludedProps.add("serverUrl");
+		if (OneDev.getInstance(ServerConfig.class).getSshPort() == 0)
+			excludedProps.add(SystemSetting.PROP_SSH_ROOT_URL);
 		
 		form.add(BeanContext.edit("editor", systemSetting, excludedProps, true));
 		

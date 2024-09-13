@@ -76,7 +76,8 @@ public class DefaultSshManager implements SshManager, Serializable {
     
     @Listen
     public void on(SystemStarted event) {
-		start();
+		if (serverConfig.getSshPort() != 0)
+			start();
 	}
 	
 	private synchronized void start() {
@@ -156,7 +157,8 @@ public class DefaultSshManager implements SshManager, Serializable {
 
     @Listen
     public void on(SystemStopping event) {
-		stop();
+		if (serverConfig.getSshPort() != 0)
+			stop();
     }
 	
 	private synchronized void stop() {
@@ -194,7 +196,7 @@ public class DefaultSshManager implements SshManager, Serializable {
 
 	@Listen
 	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof Setting) {
+		if (serverConfig.getSshPort() != 0 && event.getEntity() instanceof Setting) {
 			var setting = (Setting) event.getEntity();
 			if (setting.getKey() == Setting.Key.SSH) {
 				transactionManager.runAfterCommit(() -> clusterManager.submitToAllServers(() -> {

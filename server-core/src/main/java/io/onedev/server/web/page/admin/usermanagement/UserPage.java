@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.usermanagement;
 
 import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -76,7 +77,8 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		tabs.add(new PageTab(Model.of("Change Password"), Model.of("password"), UserPasswordPage.class, params));
 		tabs.add(new PageTab(Model.of("Belonging Groups"), Model.of("group"), UserMembershipsPage.class, params));
 		tabs.add(new PageTab(Model.of("Authorized Projects"), Model.of("project"), UserAuthorizationsPage.class, params));
-		tabs.add(new PageTab(Model.of("SSH Keys"), Model.of("key"), UserSshKeysPage.class, params));
+		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)
+			tabs.add(new PageTab(Model.of("SSH Keys"), Model.of("key"), UserSshKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("GPG Keys"), Model.of("key"), UserGpgKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("Access Tokens"), Model.of("token"), UserAccessTokensPage.class, params));
 		tabs.add(new PageTab(Model.of("Preferences"), Model.of("sliders"), UserPreferencesPage.class, params));
