@@ -104,16 +104,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		var avatarColumn = new WebMarkupContainer("avatar");
-		row.add(avatarColumn);
-		if (activity.getUser() != null) {
-			avatarColumn.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
-		} else {
-			avatarColumn.setVisible(false);
-			avatarColumn.add(new WebMarkupContainer("avatar"));
-		}
+		if (activity.getUser() != null) 
+			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		else 
+			row.add(new WebMarkupContainer("avatar"));
 		
-		Component contentColumn = activity.render("content", new DeleteCallback() {
+		row.add(activity.render("content", new DeleteCallback() {
 
 			@Override
 			public void onDelete(AjaxRequestTarget target) {
@@ -121,11 +117,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 			}
 			
-		});
-		if (activity.getUser() == null)
-			contentColumn.add(AttributeAppender.append("colspan", "2"));
-		
-		row.add(contentColumn);
+		}));
 		
 		row.add(AttributeAppender.append("class", activity.getClass().getSimpleName()));
 		

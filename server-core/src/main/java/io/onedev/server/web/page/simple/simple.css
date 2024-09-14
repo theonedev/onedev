@@ -103,7 +103,9 @@
 .SimplePage.dark-mode .main .error-detail+.copy {
 	background: #323248;
 }
-
+.SimplePage a.input-clear {
+	top: 11px;
+}
 .PageNotFoundErrorPage h3 {
 	font-size: 3rem;
 }
