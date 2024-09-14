@@ -690,4 +690,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		return blobRenderContext;
 	}
 	
+	public void focus(AjaxRequestTarget target) {
+		target.appendJavaScript(String.format("$('#%s textarea').focus();", getMarkupId()));
+	}
+	
 }

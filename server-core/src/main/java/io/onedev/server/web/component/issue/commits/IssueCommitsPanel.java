@@ -29,7 +29,7 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 
 			@Override
 			public List<ProjectScopedCommit> getObject() {
-				return getIssue().getCommits();
+				return getIssue().getFixCommits();
 			}
 			
 		}) {

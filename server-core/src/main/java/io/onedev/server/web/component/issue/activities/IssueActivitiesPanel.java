@@ -38,16 +38,14 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
 import javax.servlet.http.Cookie;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {
@@ -56,13 +54,19 @@ public abstract class IssueActivitiesPanel extends Panel {
 	
 	private static final String COOKIE_SHOW_CHANGE_HISTORY = "onedev.server.issue.showChangeHistory";
 
+	private static final String COOKIE_SHOW_REFERENCES = "onedev.server.issue.showReferences";
+	
 	private static final String COOKIE_SHOW_WORK_LOG = "onedev.server.issue.showWorkLog";
 	
 	private RepeatingView activitiesView;
+	
+	private Component showCommentsLink;
 
 	private boolean showComments = true;
 	
 	private boolean showChangeHistory = true;
+	
+	private boolean showReferences = true;
 	
 	private boolean showWorkLog = true;
 	
@@ -78,6 +82,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 		if (cookie != null)
 			showChangeHistory = Boolean.valueOf(cookie.getValue());
 
+		cookie = request.getCookie(COOKIE_SHOW_REFERENCES);
+		if (cookie != null)
+			showReferences = Boolean.valueOf(cookie.getValue());
+		
 		cookie = request.getCookie(COOKIE_SHOW_WORK_LOG);
 		if (cookie != null)
 			showWorkLog = Boolean.valueOf(cookie.getValue());
@@ -113,19 +121,27 @@ public abstract class IssueActivitiesPanel extends Panel {
 		
 		if (showChangeHistory) {
 			for (IssueChange change: getIssue().getChanges()) {
+				if (!(change.getData() instanceof ReferencedFromAware) 
+						&& !(change.getData() instanceof IssueReferencedFromCommitData)
+						&& !(change.getData() instanceof IssueDescriptionChangeData)
+						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
+						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
+						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
+					otherActivities.add(new IssueChangeActivity(change));
+				}
+			}
+		}
+
+		if (showReferences) {
+			for (IssueChange change: getIssue().getChanges()) {
 				if (change.getData() instanceof ReferencedFromAware) {
 					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
 					if (ReferencedFromAware.canDisplay(referencedFromAware))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueReferencedFromCommitData) {
 					ProjectScopedCommit commit = ((IssueReferencedFromCommitData) change.getData()).getCommit();
-					if (commit.canDisplay() && !getIssue().getCommits().contains(commit))
+					if (commit.canDisplay())
 						otherActivities.add(new IssueChangeActivity(change));
-				} else if (!(change.getData() instanceof IssueDescriptionChangeData)
-						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
-						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
-						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
-					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}
 		}
@@ -140,14 +156,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				otherActivities.add(new IssueWorkActivity(work));
 		}
 		
-		otherActivities.sort((o1, o2) -> {
-			if (o1.getDate().getTime()<o2.getDate().getTime())
-				return -1;
-			else if (o1.getDate().getTime()>o2.getDate().getTime())
-				return 1;
-			else 
-				return 0;
-		});
+		otherActivities.sort(Comparator.comparingLong(o -> o.getDate().getTime()));
 		
 		activities.addAll(otherActivities);
 		
@@ -273,10 +282,17 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
 						OneDev.getInstance(IssueCommentManager.class).create(comment, new ArrayList<>());
-						((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 						
+						if (showComments) {
+							((BasePage) getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
+							target.add(fragment);
+						} else {
+							showComments = true;
+							target.add(IssueActivitiesPanel.this);
+							target.add(showCommentsLink);
+						}
 						input.clearMarkdown();
-						target.add(fragment);
+						input.focus(target);
 					}
 				}
 
@@ -316,14 +332,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
-		fragment.add(new AjaxLink<Void>("showComments") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				if (showComments)
-					add(AttributeAppender.append("class", "active"));
-			}
+		fragment.add(showCommentsLink = new AjaxLink<Void>("showComments") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -344,6 +353,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 			}
 
 		});
+		showCommentsLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				return showComments?"active":"";
+			}
+		}));
 		
 		fragment.add(new AjaxLink<Void>("showChangeHistory") {
 
@@ -374,6 +389,35 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 		});
 
+		fragment.add(new AjaxLink<Void>("showReferences") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showReferences)
+					add(AttributeAppender.append("class", "active"));
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showReferences = !showReferences;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_REFERENCES, String.valueOf(showReferences));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(IssueActivitiesPanel.this);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+		
 		fragment.add(new AjaxLink<Void>("showWorkLog") {
 
 			@Override

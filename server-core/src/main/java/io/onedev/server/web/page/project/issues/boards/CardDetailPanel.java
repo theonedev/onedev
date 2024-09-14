@@ -123,7 +123,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			
 		});
 		
-		if (!getIssue().getCommits().isEmpty()) {
+		if (!getIssue().getFixCommits().isEmpty()) {
 			if (SecurityUtils.canReadCode(getIssue().getProject())) {
 				tabs.add(new AjaxActionTab(Model.of("Fixing Commits")) {
 

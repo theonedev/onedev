@@ -16,6 +16,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -47,6 +48,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -68,16 +70,22 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	private static final String COOKIE_SHOW_COMMITS = "onedev.server.pullRequest.showCommits";
 	
 	private static final String COOKIE_SHOW_CHANGE_HISTORY = "onedev.server.pullRequest.showChangeHistory";
- 	
+
+	private static final String COOKIE_SHOW_REFERENCES = "onedev.server.pullRequest.showReferences";
+	
 	private boolean showComments = true;
 	
 	private boolean showCommits = true;
 	
 	private boolean showChangeHistory = true;
+
+	private boolean showReferences = true;
 	
 	private WebMarkupContainer container;
 	
 	private RepeatingView activitiesView;
+	
+	private Component showCommentsLink;	
 	
 	public PullRequestActivitiesPage(PageParameters params) {
 		super(params);
@@ -94,6 +102,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		cookie = request.getCookie(COOKIE_SHOW_CHANGE_HISTORY);
 		if (cookie != null)
 			showChangeHistory = Boolean.valueOf(cookie.getValue());
+
+		cookie = request.getCookie(COOKIE_SHOW_REFERENCES);
+		if (cookie != null)
+			showReferences = Boolean.valueOf(cookie.getValue());
 	}
 	
 	private Component newActivityRow(String id, PullRequestActivity activity) {
@@ -131,6 +143,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		activities.add(new PullRequestOpenedActivity(request));
 		
 		List<PullRequestActivity> otherActivities = new ArrayList<>();
+		
+		if (showComments) {
+			for (PullRequestComment comment: request.getComments()) 
+				otherActivities.add(new PullRequestCommentedActivity(comment));
+		}
+
 		if (showCommits) {
 			for (PullRequestUpdate update: request.getUpdates())
 				otherActivities.add(new PullRequestUpdatedActivity(update));
@@ -138,23 +156,25 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 		if (showChangeHistory) {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
+				if (!(change.getData() instanceof ReferencedFromAware) 
+						&& !(change.getData() instanceof PullRequestReferencedFromCommitData) 
+						&& !(change.getData() instanceof PullRequestDescriptionChangeData)) {
+					otherActivities.add(new PullRequestChangeActivity(change));
+				}
+			}
+		}
+
+		if (showReferences) {
+			for (PullRequestChange change: getPullRequest().getChanges()) {
 				if (change.getData() instanceof ReferencedFromAware) {
 					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
 					if (ReferencedFromAware.canDisplay(referencedFromAware))
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else if (change.getData() instanceof PullRequestReferencedFromCommitData) {
 					ProjectScopedCommit commit = ((PullRequestReferencedFromCommitData) change.getData()).getCommit();
-					if (commit.canDisplay() && getPullRequest().getUpdates().stream().noneMatch(it->it.getCommits().contains(commit.getCommitId()))) 
+					if (commit.canDisplay())
 						otherActivities.add(new PullRequestChangeActivity(change));
-				} else if (!(change.getData() instanceof PullRequestDescriptionChangeData)) {
-					otherActivities.add(new PullRequestChangeActivity(change));
 				}
-			}
-		}
-		
-		if (showComments) {
-			for (PullRequestComment comment: request.getComments()) { 
-				otherActivities.add(new PullRequestCommentedActivity(comment));
 			}
 		}
 		
@@ -321,10 +341,18 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
 						OneDev.getInstance(PullRequestCommentManager.class).create(comment, new ArrayList<>());
-						((BasePage)getPage()).notifyObservableChange(target,
-								PullRequest.getChangeObservable(getPullRequest().getId()));
+						
+						if (showComments) {
+							((BasePage) getPage()).notifyObservableChange(target,
+									PullRequest.getChangeObservable(getPullRequest().getId()));
+							target.add(fragment);
+						} else {
+							showComments = true;
+							target.add(container);
+							target.add(showCommentsLink);
+						}
 						input.clearMarkdown();
-						target.add(fragment);
+						input.focus(target);
 					}
 				}
 
@@ -426,13 +454,17 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
-		fragment.add(new AjaxLink<Void>("showComments") {
+		fragment.add(showCommentsLink = new AjaxLink<Void>("showComments") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (showComments)
-					add(AttributeAppender.append("class", "active"));
+				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+					@Override
+					public String getObject() {
+						return showComments?"active":""	;
+					}
+				}));
 				setOutputMarkupId(true);
 			}
 
@@ -501,6 +533,36 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				showChangeHistory = !showChangeHistory;
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(container);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+
+		fragment.add(new AjaxLink<Void>("showReferences") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showReferences)
+					add(AttributeAppender.append("class", "active"));
+				setOutputMarkupId(true);
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showReferences = !showReferences;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_REFERENCES, String.valueOf(showReferences));
 				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);

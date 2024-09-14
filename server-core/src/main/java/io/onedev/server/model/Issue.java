@@ -301,7 +301,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> targetLinks = new ArrayList<>();
 	
-	private transient List<ProjectScopedCommit> commits;
+	private transient List<ProjectScopedCommit> fixCommits;
 	
 	private transient List<PullRequest> pullRequests;
 	
@@ -874,7 +874,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 			PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class); 
 			Collection<Long> pullRequestIds = new HashSet<>();
-			for (ProjectScopedCommit commit: getCommits()) 
+			for (ProjectScopedCommit commit: getFixCommits()) 
 				pullRequestIds.addAll(infoManager.getPullRequestIds(commit.getProject(), commit.getCommitId()));		
 			
 			for (Long requestId: pullRequestIds) {
@@ -882,41 +882,27 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 				if (request != null && !pullRequests.contains(request))
 					pullRequests.add(request);
 			}
-			Collections.sort(pullRequests, new Comparator<PullRequest>() {
-
-				@Override
-				public int compare(PullRequest o1, PullRequest o2) {
-					return o2.getId().compareTo(o1.getId());
-				}
-				
-			});
+			Collections.sort(pullRequests, (Comparator<PullRequest>) (o1, o2) -> o2.getId().compareTo(o1.getId()));
 		}
 		return pullRequests;
 	}
 	
-	public List<ProjectScopedCommit> getCommits() {
-		if (commits == null) {
-			commits = new ArrayList<>();
+	public List<ProjectScopedCommit> getFixCommits() {
+		if (fixCommits == null) {
+			fixCommits = new ArrayList<>();
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 			
-			getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
+			getProject().getTree().stream().filter(Project::isCodeManagement).forEach(it-> {
 				for (ObjectId commitId: commitInfoManager.getFixCommits(it.getId(), getId())) {
 					RevCommit commit = it.getRevCommit(commitId, false);
 					if (commit != null)
-						commits.add(new ProjectScopedCommit(it, commit.copy()));
+						fixCommits.add(new ProjectScopedCommit(it, commit.copy()));
 				}
 			});
 			
-			Collections.sort(commits, new Comparator<ProjectScopedCommit>() {
-	
-				@Override
-				public int compare(ProjectScopedCommit o1, ProjectScopedCommit o2) {
-					return o2.getRevCommit().getCommitTime() - o1.getRevCommit().getCommitTime();
-				}
-				
-			});
+			Collections.sort(fixCommits, (Comparator<ProjectScopedCommit>) (o1, o2) -> o2.getRevCommit().getCommitTime() - o1.getRevCommit().getCommitTime());
 		}
-		return commits;		
+		return fixCommits;		
 	}
 
 	@Override
