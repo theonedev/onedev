@@ -81,7 +81,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 
-	private static final int INFO_VERSION = 18;
+	private static final int INFO_VERSION = 17;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 

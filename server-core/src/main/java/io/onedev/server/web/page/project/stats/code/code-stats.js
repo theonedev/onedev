@@ -397,7 +397,6 @@ onedev.server.codeStats = {
 				xAxisData.push(onedev.server.codeStats.formatDay(currentDay));
 				currentDay++;
 			}
-			console.log(dailyLinesByLanguages["HTML"]);
 			
 			var chart = echarts.init($chart[0]);
 			
