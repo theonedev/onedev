@@ -1503,7 +1503,7 @@ public abstract class IssueListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null) {
-						return getIssueManager().query(getProjectScope(), (IssueQuery) query,
+						return getIssueManager().query(getProjectScope(), query,
 								true, (int) first, (int) count).iterator();
 					}
 				} catch (ExplicitException e) {

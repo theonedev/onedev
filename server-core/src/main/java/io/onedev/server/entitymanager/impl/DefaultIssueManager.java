@@ -237,6 +237,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		if (orders.isEmpty())
 			orders.add(builder.desc(IssueQuery.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
+		addOrderByIdIfNecessary(builder, issue, orders);
+		
 		return orders;
 	}
 	

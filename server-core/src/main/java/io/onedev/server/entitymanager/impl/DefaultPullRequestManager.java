@@ -857,7 +857,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 		if (orders.isEmpty()) 
 			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
-		
+		addOrderByIdIfNecessary(builder, root, orders);
 		query.orderBy(orders);
 		
 		return query;

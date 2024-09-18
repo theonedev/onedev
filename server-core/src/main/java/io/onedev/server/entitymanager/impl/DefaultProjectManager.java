@@ -955,6 +955,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 		if (orders.isEmpty())
 			orders.add(builder.asc(root.get(Project.PROP_PATH_LEN)));
+		addOrderByIdIfNecessary(builder, root, orders);
+		
 		query.orderBy(orders);
 
 		return query;

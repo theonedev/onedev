@@ -6,6 +6,11 @@ import org.hibernate.Session;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.ReflectionUtils;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 
 public abstract class BaseEntityManager<T extends AbstractEntity> implements EntityManager<T> {
 
@@ -91,6 +96,19 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 
 	public Class<T> getEntityClass() {
 		return entityClass;
+	}
+	
+	protected void addOrderByIdIfNecessary(CriteriaBuilder builder, From<?, ?> from, List<Order> orders) {
+		boolean orderByIdFound = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath 
+					&& ((SingularAttributePath) order.getExpression()).getAttribute().getName().equals(AbstractEntity.PROP_ID)) {
+				orderByIdFound = true;
+				break;
+			}
+		}
+		if (!orderByIdFound)
+			orders.add(builder.desc(from.get(AbstractEntity.PROP_ID)));
 	}
 	
 }

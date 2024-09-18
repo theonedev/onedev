@@ -261,6 +261,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 		if (orders.isEmpty()) 
 			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
+		addOrderByIdIfNecessary(builder, root, orders);
 		query.orderBy(orders);
 		
 		return query;
