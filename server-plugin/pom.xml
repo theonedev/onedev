@@ -41,6 +41,7 @@
 		<module>server-plugin-executor-remoteshell</module>
 		<module>server-plugin-report-unittest</module>
 		<module>server-plugin-report-junit</module>
+		<module>server-plugin-report-gtest</module>
 		<module>server-plugin-report-trx</module>
 		<module>server-plugin-report-coverage</module>
 		<module>server-plugin-report-jacoco</module>

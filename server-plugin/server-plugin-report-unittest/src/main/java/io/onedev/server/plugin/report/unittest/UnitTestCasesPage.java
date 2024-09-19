@@ -437,7 +437,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 						name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
 					}
 					if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) {
-						name = escapeHtml5("[" + testCase.getStatusText() + "] ") + name;
+						name = name + escapeHtml5(" [" + testCase.getStatusText() + "]");
 					}
 					item.add(new Label("name", name).setEscapeModelStrings(false));
 					if (getReport().hasTestCaseDuration())
