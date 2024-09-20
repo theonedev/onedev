@@ -10,10 +10,10 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.codequality.ProblemTarget;
-import io.onedev.server.codequality.RepoTarget;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ExceptionUtils;
@@ -255,7 +255,7 @@ public class ProblemReportPage extends BuildReportPage {
 					state.problemReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params)
-							.setVisible(groupKey instanceof RepoTarget.GroupKey));
+							.setVisible(groupKey instanceof BlobTarget.GroupKey));
 
 					item.add(new Label("tooManyProblems",
 							"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {
@@ -278,11 +278,11 @@ public class ProblemReportPage extends BuildReportPage {
 								if (o1.getSeverity() != o2.getSeverity())
 									return o1.getSeverity().ordinal() - o2.getSeverity().ordinal();
 								PlanarRange location1 = null;
-								if (o1.getTarget() instanceof RepoTarget)
-									location1 = ((RepoTarget) o1.getTarget()).getLocation();
+								if (o1.getTarget() instanceof BlobTarget)
+									location1 = ((BlobTarget) o1.getTarget()).getLocation();
 								PlanarRange location2 = null;
-								if (o2.getTarget() instanceof RepoTarget)
-									location2 = ((RepoTarget) o2.getTarget()).getLocation();
+								if (o2.getTarget() instanceof BlobTarget)
+									location2 = ((BlobTarget) o2.getTarget()).getLocation();
 								
 								if (location1 != null) {
 									if (location2 != null) {
@@ -322,9 +322,9 @@ public class ProblemReportPage extends BuildReportPage {
 
 							item.add(new Label("message", problem.getMessage()).setEscapeModelStrings(false));
 
-							if (problem.getTarget() instanceof RepoTarget 
-									&& ((RepoTarget) problem.getTarget()).getLocation() != null) {
-								var location = ((RepoTarget) problem.getTarget()).getLocation();
+							if (problem.getTarget() instanceof BlobTarget 
+									&& ((BlobTarget) problem.getTarget()).getLocation() != null) {
+								var location = ((BlobTarget) problem.getTarget()).getLocation();
 								ProjectBlobPage.State state = new ProjectBlobPage.State();
 								state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
 										keyName, FileMode.REGULAR_FILE.getBits());
@@ -415,10 +415,7 @@ public class ProblemReportPage extends BuildReportPage {
 	}
 	
 	protected String describe(PlanarRange range) {
-		if (range.getToRow() == -1)
-			return "Line: " + (range.getFromRow()+1);
-		else
-			return "Line: " + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
+		return "Line: " + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
 	}
 	
 	public static PageParameters paramsOf(Build build, String reportName, @Nullable String file) {

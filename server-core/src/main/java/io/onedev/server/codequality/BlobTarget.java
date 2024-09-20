@@ -12,13 +12,13 @@ import java.util.*;
 
 import static java.util.Comparator.comparingInt;
 
-public class RepoTarget extends ProblemTarget {
+public class BlobTarget extends ProblemTarget {
 
 	private static final long serialVersionUID = 1L;
 
 	private final PlanarRange location;
 
-	public RepoTarget(String blobPath, @Nullable PlanarRange location) {
+	public BlobTarget(String blobPath, @Nullable PlanarRange location) {
 		super(new GroupKey(blobPath));
 		this.location = location;
 	}
@@ -32,10 +32,10 @@ public class RepoTarget extends ProblemTarget {
 		Map<Integer, List<CodeProblem>> problemsByLine = new HashMap<>();
 
 		for (CodeProblem problem: problems) {
-			if (problem.getTarget() instanceof RepoTarget) {
-				RepoTarget repoTarget = (RepoTarget) problem.getTarget();
+			if (problem.getTarget() instanceof BlobTarget) {
+				BlobTarget repoTarget = (BlobTarget) problem.getTarget();
 				if (repoTarget.getLocation() != null) {
-					repoTarget = new RepoTarget(repoTarget.getGroupKey().getName(), repoTarget.getLocation().normalize(lines));
+					repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), repoTarget.getLocation().normalize(lines));
 					problem = new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage());
 					int line = repoTarget.getLocation().getFromRow();
 					var problemsAtLine = problemsByLine.computeIfAbsent(line, k -> new ArrayList<>());

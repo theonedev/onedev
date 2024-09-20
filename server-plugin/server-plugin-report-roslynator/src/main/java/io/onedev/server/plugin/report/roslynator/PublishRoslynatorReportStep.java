@@ -12,7 +12,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -112,7 +112,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 							int line = parseInt(locationElement.attributeValue("Line"));
 							int character = parseInt(locationElement.attributeValue("Character"));
 							var location = new PlanarRange(line-1, character-1, line-1, character);
-							problems.add(new CodeProblem(severity, new RepoTarget(blobPath.get(), location), message));
+							problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), message));
 						}
 					}
 				}

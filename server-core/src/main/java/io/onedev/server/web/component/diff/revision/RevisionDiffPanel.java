@@ -15,7 +15,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
@@ -1142,8 +1142,8 @@ public abstract class RevisionDiffPanel extends Panel {
 									oldProblems = new HashSet<>();
 									if (getOldBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getOldProblems(getOldBlobIdent().path)) {
-											if (problem.getTarget() instanceof RepoTarget) {
-												var repoTarget = (RepoTarget) problem.getTarget();
+											if (problem.getTarget() instanceof BlobTarget) {
+												var repoTarget = (BlobTarget) problem.getTarget();
 												if (repoTarget.getLocation() != null && isVisible(new DiffPlanarRange(true, repoTarget.getLocation())))
 													oldProblems.add(problem);
 											}
@@ -1161,8 +1161,8 @@ public abstract class RevisionDiffPanel extends Panel {
 									newProblems = new HashSet<>();
 									if (getNewBlobIdent().path != null) {
 										for (CodeProblem problem: annotationSupport.getNewProblems(getNewBlobIdent().path)) {
-											if (problem.getTarget() instanceof RepoTarget) {
-												var repoTarget = (RepoTarget) problem.getTarget();
+											if (problem.getTarget() instanceof BlobTarget) {
+												var repoTarget = (BlobTarget) problem.getTarget();
 												if (repoTarget.getLocation() != null && isVisible(new DiffPlanarRange(false, repoTarget.getLocation())))
 													newProblems.add(problem);
 											}

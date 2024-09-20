@@ -11,7 +11,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -105,7 +105,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						if (location == null) 
 							location = new PlanarRange(0, -1, 0, -1);
 
-						problems.add(new CodeProblem(severity, new RepoTarget(blobPath, location), message));
+						problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), message));
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);
 					}

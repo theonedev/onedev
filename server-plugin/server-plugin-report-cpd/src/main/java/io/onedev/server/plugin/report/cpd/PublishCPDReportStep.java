@@ -12,7 +12,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
@@ -123,7 +123,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 									duplicateWith.location.getToRow()+1);
 							CodeProblem problem = new CodeProblem(
 									Severity.LOW, 
-									new RepoTarget(duplication.blobPath, duplication.location), 
+									new BlobTarget(duplication.blobPath, duplication.location), 
 									message);
 							problems.add(problem);
 						}

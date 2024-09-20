@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.15.0"/>
+    <errors>
+        <error id="unknownMacro" severity="error" msg="There is an unknown macro here somewhere. Configuration is required. If NLOHMANN_JSON_NAMESPACE_BEGIN is a macro then please configure it." verbose="There is an unknown macro here somewhere. Configuration is required. If NLOHMANN_JSON_NAMESPACE_BEGIN is a macro then please configure it." file0="docs/examples/nlohmann_json_namespace_begin.c++17.cpp">
+            <location file="docs/examples/nlohmann_json_namespace_begin.c++17.cpp" line="6" column="1"/>
+        </error>
+        <error id="unknownMacro" severity="error" msg="There is an unknown macro here somewhere. Configuration is required. If NLOHMANN_JSON_SERIALIZE_ENUM is a macro then please configure it." verbose="There is an unknown macro here somewhere. Configuration is required. If NLOHMANN_JSON_SERIALIZE_ENUM is a macro then please configure it." file0="docs/examples/nlohmann_json_serialize_enum.cpp">
+            <location file="docs/examples/nlohmann_json_serialize_enum.cpp" line="16" column="1"/>
+        </error>
+        <error id="syntaxError" severity="error" msg="syntax error" verbose="syntax error" file0="tests/benchmarks/src/benchmarks.cpp">
+            <location file="tests/benchmarks/src/benchmarks.cpp" line="101" column="36"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="tests/src/unit-element_access2.cpp">
+            <location file="tests/src/unit-element_access2.cpp" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="tests/thirdparty/Fuzzer/FuzzerLoop.cpp">
+            <location file="tests/thirdparty/Fuzzer/FuzzerLoop.cpp" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="tools/macro_builder/main.cpp">
+            <location file="tools/macro_builder/main.cpp" line="0" column="0"/>
+        </error>
+        <error id="ctuOneDefinitionRuleViolation" severity="error" msg="The one definition rule is violated, different classes/structs have the same name &apos;Foo&apos;" verbose="The one definition rule is violated, different classes/structs have the same name &apos;Foo&apos;" cwe="758">
+            <location file="tests/cmake_target_include_directories/project/Foo.hpp" line="12" column="1"/>
+            <location file="tests/src/unit-no-mem-leak-on-adl-serialize.cpp" line="15" column="1"/>
+            <symbol>Foo</symbol>
+        </error>
+        <error id="ctuOneDefinitionRuleViolation" severity="error" msg="The one definition rule is violated, different classes/structs have the same name &apos;Foo&apos;" verbose="The one definition rule is violated, different classes/structs have the same name &apos;Foo&apos;" cwe="758">
+            <location file="tests/cmake_target_include_directories/project/Foo.hpp" line="12" column="1"/>
+            <location file="tests/src/unit-regression2.cpp" line="210" column="1"/>
+            <symbol>Foo</symbol>
+        </error>
+    </errors>
+</results>

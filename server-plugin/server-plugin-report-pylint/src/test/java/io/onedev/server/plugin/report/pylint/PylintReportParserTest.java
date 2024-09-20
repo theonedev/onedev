@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ public class PylintReportParserTest {
 			});
 			var problem = problems.get(0);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
-			var target = (RepoTarget) problem.getTarget();
+			var target = (BlobTarget) problem.getTarget();
 			assertEquals(31, target.getLocation().getFromRow());
 			assertEquals(8, target.getLocation().getFromColumn());
 			assertEquals(31, target.getLocation().getToRow());
@@ -43,7 +43,7 @@ public class PylintReportParserTest {
 			
 			problem = problems.get(problems.size()-1);
 			assertEquals(CodeProblem.Severity.LOW, problem.getSeverity());
-			target = (RepoTarget) problem.getTarget();
+			target = (BlobTarget) problem.getTarget();
 			assertEquals(0, target.getLocation().getFromRow());
 			assertEquals(0, target.getLocation().getFromColumn());
 			assertEquals(0, target.getLocation().getToRow());

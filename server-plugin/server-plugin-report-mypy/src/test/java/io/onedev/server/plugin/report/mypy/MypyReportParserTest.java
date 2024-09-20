@@ -3,7 +3,7 @@ package io.onedev.server.plugin.report.mypy;
 import com.google.common.io.Resources;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -39,13 +39,13 @@ public class MypyReportParserTest {
 			
 			var problem = problems.get(0);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
-			assertEquals("6.1-6.2-1", ((RepoTarget)problem.getTarget()).getLocation().toString());
+			assertEquals("6.1-6.2-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			assertEquals("torchtune/utils/_version.py", problem.getTarget().getGroupKey().getName());
 			assertEquals("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]", problem.getMessage());
 
 			problem = problems.get(1);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
-			assertEquals("10.1-10.2-1", ((RepoTarget)problem.getTarget()).getLocation().toString());
+			assertEquals("10.1-10.2-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			assertEquals("torchtune/utils:/_device.py", problem.getTarget().getGroupKey().getName());
 			assertEquals("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]", problem.getMessage());
 
@@ -55,7 +55,7 @@ public class MypyReportParserTest {
 
 			problem = problems.get(4);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
-			assertEquals("88.5-135.22-1", ((RepoTarget)problem.getTarget()).getLocation().toString());
+			assertEquals("88.5-135.22-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			assertEquals("" +
 					"Signature of \"encode\" incompatible with supertype \"BaseTokenizer\"  [override]\n" +
 					"    Superclass:\n" +
@@ -68,11 +68,11 @@ public class MypyReportParserTest {
 			assertEquals(CodeProblem.Severity.LOW, problems.get(6).getSeverity());
 			
 			problem = problems.get(8);
-			assertEquals("174.21-174.0-1", ((RepoTarget)problem.getTarget()).getLocation().toString());
+			assertEquals("174.21-174.0-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			
 			problem = problems.get(9);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
-			assertEquals("109.1-109.0-1", ((RepoTarget)problem.getTarget()).getLocation().toString());
+			assertEquals("109.1-109.0-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

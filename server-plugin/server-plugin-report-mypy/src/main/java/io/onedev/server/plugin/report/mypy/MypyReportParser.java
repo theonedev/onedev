@@ -6,7 +6,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -75,7 +75,7 @@ public class MypyReportParser {
 		if (blobPath.isPresent()) {
 			var location = new PlanarRange(parsedLine.fromRow-1, parsedLine.fromColumn-1, parsedLine.toRow-1, parsedLine.toColumn, 1);
 			var severity = parsedLine.error?MEDIUM:LOW;
-			problems.add(new CodeProblem(severity, new RepoTarget(blobPath.get(), location), parsedLine.message));
+			problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), parsedLine.message));
 		}
 	}
 	

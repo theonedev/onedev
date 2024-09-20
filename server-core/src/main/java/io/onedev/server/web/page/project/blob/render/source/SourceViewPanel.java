@@ -153,7 +153,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 			return new AnnotationInfo(
 					CodeCommentInfo.groupByLine(comments), 
-					RepoTarget.groupByLine(problems, lines), coverages);
+					BlobTarget.groupByLine(problems, lines), coverages);
 		}
 		
 	};

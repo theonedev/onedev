@@ -3,8 +3,7 @@ package io.onedev.server.plugin.report.ruff;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
@@ -34,14 +33,14 @@ public class RuffReportParserTest {
 				}
 			});
 			var problem = problems.get(0);
-			var target = (RepoTarget) problem.getTarget();
+			var target = (BlobTarget) problem.getTarget();
 			assertEquals(185, target.getLocation().getFromRow());
 			assertEquals(0, target.getLocation().getFromColumn());
 			assertEquals(185, target.getLocation().getToRow());
 			assertEquals(26, target.getLocation().getToColumn());
 			
 			problem = problems.get(problems.size()-1);
-			target = (RepoTarget) problem.getTarget();
+			target = (BlobTarget) problem.getTarget();
 			assertEquals(24, target.getLocation().getFromRow());
 			assertEquals(0, target.getLocation().getFromColumn());
 			assertEquals(28, target.getLocation().getToRow());

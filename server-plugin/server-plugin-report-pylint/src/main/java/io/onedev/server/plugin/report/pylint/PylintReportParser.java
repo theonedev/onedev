@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.RepoTarget;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 
 import java.util.*;
@@ -48,7 +48,7 @@ public class PylintReportParser {
 				if (problemNode.hasNonNull("endColumn"))
 					endColumn = parseInt(problemNode.get("endColumn").asText());
 				var location = new PlanarRange(line-1, column, endLine-1, endColumn);
-				problems.add(new CodeProblem(severity, new RepoTarget(blobPath.get(), location), message));
+				problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), message));
 			}
 		}
 		return problems;

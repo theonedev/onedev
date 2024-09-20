@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.diff.blob.text;
 
-import static io.onedev.server.codequality.RepoTarget.groupByLine;
+import static io.onedev.server.codequality.BlobTarget.groupByLine;
 import static io.onedev.server.util.diff.DiffRenderer.toHtml;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 

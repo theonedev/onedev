@@ -942,12 +942,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-						if (problem.getTarget() instanceof RepoTarget) {
-							RepoTarget repoTarget = (RepoTarget) problem.getTarget();
+						if (problem.getTarget() instanceof BlobTarget) {
+							BlobTarget repoTarget = (BlobTarget) problem.getTarget();
 							if (repoTarget.getLocation() != null) {
 								PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
 								if (location != null) {
-									repoTarget = new RepoTarget(repoTarget.getGroupKey().getName(), location);
+									repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
 									problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
 								}
 							}
@@ -978,12 +978,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						if (!state.newCommitHash.equals(buildCommitId.name())) {
 							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
 									ObjectId.fromString(state.newCommitHash), blobPath);
-							if (problem.getTarget() instanceof RepoTarget) {
-								RepoTarget repoTarget = (RepoTarget) problem.getTarget();
+							if (problem.getTarget() instanceof BlobTarget) {
+								BlobTarget repoTarget = (BlobTarget) problem.getTarget();
 								if (repoTarget.getLocation() != null) {
 									PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
 									if (location != null) {
-										repoTarget = new RepoTarget(repoTarget.getGroupKey().getName(), location);
+										repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
 										problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
 									}
 								}
