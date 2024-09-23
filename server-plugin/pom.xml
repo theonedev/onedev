@@ -24,6 +24,8 @@
 		<module>server-plugin-buildspec-gradle</module>
 		<module>server-plugin-buildspec-node</module>
 		<module>server-plugin-buildspec-python</module>
+		<module>server-plugin-buildspec-cmake</module>
+		<module>server-plugin-buildspec-bazel</module>
 		<module>server-plugin-authenticator-ldap</module>
 		<module>server-plugin-mailservice-smtpimap</module>
 		<module>server-plugin-mailservice-office365</module>

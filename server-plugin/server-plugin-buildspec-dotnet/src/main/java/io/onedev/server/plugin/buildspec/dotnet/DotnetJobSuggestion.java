@@ -53,7 +53,8 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			var testAndAnalyze = new CommandStep();
 			testAndAnalyze.setName("test and analyze");
 			testAndAnalyze.setImage("mcr.microsoft.com/dotnet/sdk");
-			testAndAnalyze.getInterpreter().setCommands(
+			testAndAnalyze.getInterpreter().setCommands("" +
+					"set -e\n" +
 					"dotnet tool install -g roslynator.dotnet.cli\n" + 
 					"dotnet test -l trx --collect:\"XPlat Code Coverage\"\n" +  
 					"/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml\n");

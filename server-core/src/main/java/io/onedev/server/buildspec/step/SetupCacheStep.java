@@ -85,7 +85,7 @@ public class SetupCacheStep extends Step {
 		this.paths = paths;
 	}
 
-	@Editable(order=400, description = "Specify cache upload strategy. " +
+	@Editable(order=400, description = "Specify cache upload strategy after build successful. " +
 			"<var>Upload If Not Hit</var> means to upload when cache is not found with " +
 			"cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files " +
 			"in cache path are changed")

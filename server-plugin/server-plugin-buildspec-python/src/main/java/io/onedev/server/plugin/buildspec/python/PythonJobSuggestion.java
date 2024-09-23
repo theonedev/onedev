@@ -95,7 +95,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		testAndLint.setInterpreter(interpreter);
 		testAndLint.setName("test and lint");
 		testAndLint.setImage("python");
-		interpreter.setCommands(dependencyInstallCommand + "\n" + "pip install " + getCoveragePackage(withPytest) + " ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
+		interpreter.setCommands("set -e\n" + dependencyInstallCommand + "\n" + "pip install " + getCoveragePackage(withPytest) + " ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
 		return testAndLint;
 	}
 	
@@ -158,17 +158,29 @@ public class PythonJobSuggestion implements JobSuggestion {
 		return null;
 	}
 	
+	private Job newJob() {
+		var job = new Job();
+		job.setName("python ci");
+		return job;
+	}
+	
+	private void addCommonStepsAndTriggers(Job job) {
+		var checkout = new CheckoutStep();
+		checkout.setName("checkout code");
+		job.getSteps().add(0, checkout);
+		job.getSteps().add(newCoverageReportPublishStep());
+		job.getSteps().add(newRuffReportPublishStep());
+		job.getTriggers().add(new BranchUpdateTrigger());
+		job.getTriggers().add(new PullRequestUpdateTrigger());
+	}
+	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
+		var jobs = new ArrayList<Job>();
 		try {
-			Job job = new Job();
-			job.setName("python ci");
-			var checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-
 			Blob blob;
 			if ((blob = project.getBlob(new BlobIdent(commitId.name(), "tox.ini", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				job.getSteps().add(newChecksumGenerateStep("tox.ini"));
 				var setupCache = new SetupCacheStep();
 				setupCache.setName("set up dependency cache");
@@ -184,7 +196,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(testAndLint);
 				if (blob.getText().getContent().contains("pytest"))
 					job.getSteps().add(newUnitTestReportPublishStep());
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
 
 				var setupCache = new SetupCacheStep();
@@ -222,6 +237,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				testAndLint.setName("test and lint");
 				testAndLint.setImage("1dev/poetry:1.0.1");
 				String commands = "" +
+						"set -e\n" +
 						"poetry config virtualenvs.create false\n" +
 						installCommand + "\n" +
 						"poetry add " + getCoveragePackage(withPytest) + " ruff\n";
@@ -230,7 +246,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(testAndLint);
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				var dependencyFiles = "pyproject.toml";
 				var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
 				if (setupPy != null)
@@ -278,7 +297,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				var dependencyFiles = "setup.py";
 				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
 				if (setupCfg != null)
@@ -306,7 +328,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
 				job.getSteps().add(newPipCacheSetupStep());
 
@@ -314,7 +339,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
+				var job = newJob();
 				job.getSteps().add(newChecksumGenerateStep("environment.yml"));
 
 				var setupCache = new SetupCacheStep();
@@ -331,6 +359,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				testAndLint.setImage("1dev/conda:1.0.4");
 				testAndLint.setInterpreter(new ShellInterpreter());
 				String commands = "" +
+						"set -e\n" +
 						"source /root/.bashrc\n" +
 						"conda env update\n" +
 						"conda activate " + environments.get("name") + "\n" +
@@ -341,21 +370,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(testAndLint);
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
-			}
-			if (job.getSteps().size() > 1) {
-				job.getSteps().add(newCoverageReportPublishStep());
-				job.getSteps().add(newRuffReportPublishStep());
-				job.getTriggers().add(new BranchUpdateTrigger());
-				job.getTriggers().add(new PullRequestUpdateTrigger());
-
-				return Lists.newArrayList(job);
-			} else {
-				return new ArrayList<>();
+				addCommonStepsAndTriggers(job);
+				jobs.add(job);
 			}
 		} catch (Exception e) {
 			logger.error("Error suggesting python jobs", e);
-			return new ArrayList<>();
 		}
+		return jobs;
 	}
 
 }
