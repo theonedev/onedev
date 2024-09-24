@@ -4,10 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TarUtils;
+import io.onedev.commons.utils.*;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -46,6 +43,7 @@ import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalComputable;
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -1040,7 +1038,13 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			refs.addAll(projectManager.getRepository(projectId).getRefDatabase().getRefsByPrefix(Constants.R_TAGS));
 
 			for (Ref ref : refs) {
-				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
+				RevObject revObj;
+				try {
+					revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
+				} catch (MissingObjectException e) {
+					var message = String.format("%s (project id: %d, ref: %s)", e.getMessage(), projectId, ref.getName());
+					throw new ExplicitException(message);
+				}
 				if (revObj instanceof RevCommit) {
 					RevCommit commit = (RevCommit) revObj;
 					works.add(new CollectingWork(PRIORITY, commit.copy(), 

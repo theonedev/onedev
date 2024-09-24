@@ -36,7 +36,7 @@ public class CloverReportParser {
 				}
 			}
 
-			var pair = parsePackageCoverage("[no name]", projectElement.elements("file"), build, logger);
+			var pair = parsePackageCoverage("[root]", projectElement.elements("file"), build, logger);
 			var packageCoverage = pair.getLeft();
 			if (!packageCoverage.getFileCoverages().isEmpty()) {
 				packageCoverages.add(packageCoverage);
