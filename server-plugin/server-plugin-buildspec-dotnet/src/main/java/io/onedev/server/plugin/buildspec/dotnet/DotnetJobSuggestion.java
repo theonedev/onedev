@@ -57,7 +57,7 @@ public class DotnetJobSuggestion implements JobSuggestion {
 					"set -e\n" +
 					"dotnet tool install -g roslynator.dotnet.cli\n" + 
 					"dotnet test -l trx --collect:\"XPlat Code Coverage\"\n" +  
-					"/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml\n");
+					"#/root/.dotnet/tools/roslynator analyze -o roslynator-analysis.xml\n");
 			job.getSteps().add(testAndAnalyze);
 			
 			var publishUnitTestReportStep = new PublishTRXReportStep();
