@@ -9,7 +9,7 @@
 			<property name="gopherProxySet" value="false"/>
 			<property name="java.vm.vendor" value="Oracle Corporation"/>
 			<property name="maven.multiModuleProjectDirectory"
-					  value="/Users/robin/Projects/onedev/reports/junit4-demo"/>
+					  value="junit4-demo"/>
 			<property name="java.vendor.url" value="http://java.oracle.com/"/>
 			<property name="path.separator" value=":"/>
 			<property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -19,7 +19,7 @@
 			<property name="sun.java.launcher" value="SUN_STANDARD"/>
 			<property name="sun.os.patch.level" value="unknown"/>
 			<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-			<property name="user.dir" value="/Users/robin/Projects/onedev/reports/junit4-demo"/>
+			<property name="user.dir" value="junit4-demo"/>
 			<property name="java.runtime.version" value="1.8.0_291-b10"/>
 			<property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
 			<property name="java.endorsed.dirs"
@@ -33,7 +33,7 @@
 			<property name="classworlds.conf" value="/usr/local/Cellar/maven/3.8.1/libexec/bin/m2.conf"/>
 			<property name="sun.jnu.encoding" value="UTF-8"/>
 			<property name="java.library.path"
-					  value="/Users/robin/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+					  value="/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
 			<property name="maven.conf" value="/usr/local/Cellar/maven/3.8.1/libexec/conf"/>
 			<property name="java.specification.name" value="Java Platform API Specification"/>
 			<property name="java.class.version" value="52.0"/>
@@ -42,7 +42,6 @@
 			<property name="library.jansi.path" value="/usr/local/Cellar/maven/3.8.1/libexec/lib/jansi-native"/>
 			<property name="http.nonProxyHosts"
 					  value="local|*.local|169.254/16|*.169.254/16|192.168/16|*.192.168/16|localhost|*.localhost|matrix|*.matrix|ubuntu|*.ubuntu|lark|*.lark|saturn.local|*.saturn.local|mimas|*.mimas"/>
-			<property name="user.home" value="/Users/robin"/>
 			<property name="user.timezone" value="Asia/Shanghai"/>
 			<property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/>
 			<property name="java.specification.version" value="1.8"/>
@@ -60,7 +59,7 @@
 			<property name="java.vm.info" value="mixed mode"/>
 			<property name="java.version" value="1.8.0_291"/>
 			<property name="java.ext.dirs"
-					  value="/Users/robin/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
+					  value="/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
 			<property name="sun.boot.class.path"
 					  value="/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/classes"/>
 			<property name="java.vendor" value="Oracle Corporation"/>
@@ -160,7 +159,7 @@
 			<property name="gopherProxySet" value="false"/>
 			<property name="java.vm.vendor" value="Oracle Corporation"/>
 			<property name="maven.multiModuleProjectDirectory"
-					  value="/Users/robin/Projects/onedev/reports/junit4-demo"/>
+					  value="junit4-demo"/>
 			<property name="java.vendor.url" value="http://java.oracle.com/"/>
 			<property name="path.separator" value=":"/>
 			<property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -170,7 +169,6 @@
 			<property name="sun.java.launcher" value="SUN_STANDARD"/>
 			<property name="sun.os.patch.level" value="unknown"/>
 			<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-			<property name="user.dir" value="/Users/robin/Projects/onedev/reports/junit4-demo"/>
 			<property name="java.runtime.version" value="1.8.0_291-b10"/>
 			<property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
 			<property name="java.endorsed.dirs"
@@ -184,7 +182,7 @@
 			<property name="classworlds.conf" value="/usr/local/Cellar/maven/3.8.1/libexec/bin/m2.conf"/>
 			<property name="sun.jnu.encoding" value="UTF-8"/>
 			<property name="java.library.path"
-					  value="/Users/robin/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+					  value="/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
 			<property name="maven.conf" value="/usr/local/Cellar/maven/3.8.1/libexec/conf"/>
 			<property name="java.specification.name" value="Java Platform API Specification"/>
 			<property name="java.class.version" value="52.0"/>
@@ -193,8 +191,6 @@
 			<property name="library.jansi.path" value="/usr/local/Cellar/maven/3.8.1/libexec/lib/jansi-native"/>
 			<property name="http.nonProxyHosts"
 					  value="local|*.local|169.254/16|*.169.254/16|192.168/16|*.192.168/16|localhost|*.localhost|matrix|*.matrix|ubuntu|*.ubuntu|lark|*.lark|saturn.local|*.saturn.local|mimas|*.mimas"/>
-			<property name="user.home" value="/Users/robin"/>
-			<property name="user.timezone" value="Asia/Shanghai"/>
 			<property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/>
 			<property name="java.specification.version" value="1.8"/>
 			<property name="file.encoding" value="UTF-8"/>
@@ -211,7 +207,7 @@
 			<property name="java.vm.info" value="mixed mode"/>
 			<property name="java.version" value="1.8.0_291"/>
 			<property name="java.ext.dirs"
-					  value="/Users/robin/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
+					  value="/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
 			<property name="sun.boot.class.path"
 					  value="/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home/jre/classes"/>
 			<property name="java.vendor" value="Oracle Corporation"/>

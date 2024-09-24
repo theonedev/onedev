@@ -10,7 +10,7 @@
       <Output>
         <ErrorInfo>
           <Message>Assert.AreEqual failed. Expected:&lt;Good morning&gt;. Actual:&lt;Hello&gt;. </Message>
-          <StackTrace>   at test.mario.TestDialogue.TestSayHello() in /Users/robin/Projects/onedev/reports/trx/test/TestMario.cs:line 22
+          <StackTrace>   at test.mario.TestDialogue.TestSayHello() in TestMario.cs:line 22
    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
    at System.Reflection.MethodInvoker.Invoke(Object obj, IntPtr* args, BindingFlags invokeAttr)
 </StackTrace>
@@ -23,7 +23,7 @@
       <Output>
         <ErrorInfo>
           <Message>Assert.AreEqual failed. Expected:&lt;Hello&gt;. Actual:&lt;Good bye&gt;. </Message>
-          <StackTrace>   at test.TestDialogue.TestSayGoodbye() in /Users/robin/Projects/onedev/reports/trx/test/TestDialogue.cs:line 17
+          <StackTrace>   at test.TestDialogue.TestSayGoodbye() in TestDialogue.cs:line 17
    at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
    at System.Reflection.MethodInvoker.Invoke(Object obj, IntPtr* args, BindingFlags invokeAttr)
 </StackTrace>
@@ -32,25 +32,25 @@
     </UnitTestResult>
   </Results>
   <TestDefinitions>
-    <UnitTest name="TestWalk" storage="/users/robin/projects/onedev/reports/trx/test/bin/debug/net7.0/test.dll" id="3cb97cf5-129d-3743-7011-5fb8fd862986">
+    <UnitTest name="TestWalk" storage="test/bin/debug/net7.0/test.dll" id="3cb97cf5-129d-3743-7011-5fb8fd862986">
       <Execution id="b18e5d6f-7a7b-4b7c-89ce-852338750b8e" />
-      <TestMethod codeBase="/Users/robin/Projects/onedev/reports/trx/test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.mario.TestMovement" name="TestWalk" />
+      <TestMethod codeBase="test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.mario.TestMovement" name="TestWalk" />
     </UnitTest>
-    <UnitTest name="TestSayHello" storage="/users/robin/projects/onedev/reports/trx/test/bin/debug/net7.0/test.dll" id="a17d7922-4f75-704d-6be9-4d6a1eabd14d">
+    <UnitTest name="TestSayHello" storage="test/bin/debug/net7.0/test.dll" id="a17d7922-4f75-704d-6be9-4d6a1eabd14d">
       <Execution id="eac4da46-a2a7-4618-b73f-d878c846f98b" />
-      <TestMethod codeBase="/Users/robin/Projects/onedev/reports/trx/test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestDialogue" name="TestSayHello" />
+      <TestMethod codeBase="test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestDialogue" name="TestSayHello" />
     </UnitTest>
-    <UnitTest name="TestWalk" storage="/users/robin/projects/onedev/reports/trx/test/bin/debug/net7.0/test.dll" id="47953ea1-cab9-e271-5203-470c30dc93e9">
+    <UnitTest name="TestWalk" storage="test/bin/debug/net7.0/test.dll" id="47953ea1-cab9-e271-5203-470c30dc93e9">
       <Execution id="5cf743e7-16a3-4a76-882e-265fba6eccd0" />
-      <TestMethod codeBase="/Users/robin/Projects/onedev/reports/trx/test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestMovement" name="TestWalk" />
+      <TestMethod codeBase="test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestMovement" name="TestWalk" />
     </UnitTest>
-    <UnitTest name="TestSayGoodbye" storage="/users/robin/projects/onedev/reports/trx/test/bin/debug/net7.0/test.dll" id="2ca1491f-9664-4bbc-f779-2a0990ac785e">
+    <UnitTest name="TestSayGoodbye" storage="test/bin/debug/net7.0/test.dll" id="2ca1491f-9664-4bbc-f779-2a0990ac785e">
       <Execution id="18558b46-0e58-440a-b87c-4b23ad4e2d78" />
-      <TestMethod codeBase="/Users/robin/Projects/onedev/reports/trx/test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestDialogue" name="TestSayGoodbye" />
+      <TestMethod codeBase="test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.TestDialogue" name="TestSayGoodbye" />
     </UnitTest>
-    <UnitTest name="TestSayHello" storage="/users/robin/projects/onedev/reports/trx/test/bin/debug/net7.0/test.dll" id="0df1ac64-03a8-7bc9-f37a-b4eadbe2d6ca">
+    <UnitTest name="TestSayHello" storage="test/bin/debug/net7.0/test.dll" id="0df1ac64-03a8-7bc9-f37a-b4eadbe2d6ca">
       <Execution id="2d42822f-4500-49d4-b6d1-c039c781bd95" />
-      <TestMethod codeBase="/Users/robin/Projects/onedev/reports/trx/test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.mario.TestDialogue" name="TestSayHello" />
+      <TestMethod codeBase="test/bin/Debug/net7.0/test.dll" adapterTypeName="executor://mstestadapter/v2" className="test.mario.TestDialogue" name="TestSayHello" />
     </UnitTest>
   </TestDefinitions>
   <TestEntries>

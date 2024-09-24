@@ -60,13 +60,13 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 	}
 
 	@Override
-	protected ProcessResult process(Build build, File inputDir, TaskLogger logger) {
+	protected CoverageReport process(Build build, File inputDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
-		List<GroupCoverageInfo> packageCoverages = new ArrayList<>();
-		var coverageInfo = new CoverageInfo();
+		List<GroupCoverage> packageCoverages = new ArrayList<>();
+		var coverageInfo = new Coverage();
 		
 		Map<String, Map<Integer, CoverageStatus>> coverageStatuses = new HashMap<>();
 		
@@ -81,7 +81,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 				for (Element packageElement: doc.getRootElement().elements("package")) {
 					String packageName = packageElement.attributeValue("name");
 					var packageCoverageInfo = getCoverageInfo(packageElement);
-					List<FileCoverageInfo> fileCoverages = new ArrayList<>();
+					List<FileCoverage> fileCoverages = new ArrayList<>();
 					
 					for (Element fileElement: packageElement.elements("sourcefile")) {
 						String fileName = fileElement.attributeValue("name");
@@ -89,7 +89,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 						String blobPath = searchManager.findBlobPathBySuffix(build.getProject(), build.getCommitId(), 
 								packageName + "/" + fileName);
 						if (blobPath != null) {
-							fileCoverages.add(new FileCoverageInfo(blobPath, fileCoverageInfo));
+							fileCoverages.add(new FileCoverage(blobPath, fileCoverageInfo));
 							Map<Integer, CoverageStatus> coverageStatusesOfFile = new HashMap<>();
 							for (Element lineElement: fileElement.elements("line")) {
 								int lineNum = Integer.parseInt(lineElement.attributeValue("nr")) - 1;
@@ -116,7 +116,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 						}
 					}
 					
-					packageCoverages.add(new GroupCoverageInfo(packageName, packageCoverageInfo, fileCoverages));
+					packageCoverages.add(new GroupCoverage(packageName, packageCoverageInfo, fileCoverages));
 				}
 				coverageInfo.mergeWith(getCoverageInfo(doc.getRootElement()));
 			} catch (DocumentException e) {
@@ -127,15 +127,15 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 		}
 		
 		if (!packageCoverages.isEmpty()) {
-			return new ProcessResult(
-					new CoverageReport(coverageInfo, packageCoverages),
+			return new CoverageReport(
+					new CoverageStats(coverageInfo, packageCoverages),
 					coverageStatuses);
 		} else {
 			return null;
 		}
 	}
 	
-	private CoverageInfo getCoverageInfo(Element element) {
+	private Coverage getCoverageInfo(Element element) {
 		int totalBranches = 0;
 		int coveredBranches = 0;
 		int totalLines = 0;
@@ -154,7 +154,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 					break;
 			}
 		}
-		return new CoverageInfo(totalBranches, coveredBranches, totalLines, coveredLines);
+		return new Coverage(totalBranches, coveredBranches, totalLines, coveredLines);
 	}
 
 }

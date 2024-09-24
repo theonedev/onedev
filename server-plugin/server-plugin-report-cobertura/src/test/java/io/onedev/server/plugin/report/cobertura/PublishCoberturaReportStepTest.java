@@ -6,11 +6,9 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.coverage.FileCoverageInfo;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.plugin.report.coverage.FileCoverage;
 import org.apache.commons.compress.utils.IOUtils;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -62,22 +60,22 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			var step = new PublishCoberturaReportStep();
 			step.setFilePatterns("*.xml");
 			var result = step.process(build, inputDir, logger);
-			var overallCoverage = result.getReport().getOverallCoverages();
+			var overallCoverage = result.getStats().getOverallCoverage();
 			assertEquals(16, overallCoverage.getTotalBranches());
 			assertEquals(8, overallCoverage.getCoveredBranches());
 			assertEquals(2311, overallCoverage.getTotalLines());
 			assertEquals(1992, overallCoverage.getCoveredLines());
 
-			FileCoverageInfo fileCoverage = null;
+			FileCoverage fileCoverage = null;
 			boolean program1Found = false;
 			boolean program2Found = false;
-			for (var groupCoverage: result.getReport().getGroupCoverages()) {
+			for (var groupCoverage: result.getStats().getGroupCoverages()) {
 				for (var each: groupCoverage.getFileCoverages()) {
 					if (each.getBlobPath().endsWith("Program1.cs"))
 						program1Found = true;
 					if (each.getBlobPath().endsWith("Program2.cs"))
 						program2Found = true;
-					if (each.getBlobPath().equals("/Users/robin/Projects/onedev/reports/coverlet//supermario/Movement.cs")) 
+					if (each.getBlobPath().equals("coverlet/supermario/Movement.cs")) 
 						fileCoverage = each;						
 				}
 			}
@@ -89,7 +87,7 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			assertEquals(36, fileCoverage.getTotalLines());
 			assertEquals(33, fileCoverage.getCoveredLines());
 			
-			var statusesOfFile = result.getStatuses().get("/Users/robin/Projects/onedev/reports/coverlet//supermario/Movement.cs");
+			var statusesOfFile = result.getStatuses().get("coverlet/supermario/Movement.cs");
 			
 			var expected = new HashMap<Integer, CoverageStatus>();
 			expected.put(37, CoverageStatus.COVERED);
@@ -117,10 +115,10 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 			
 			assertEquals(expected, statusesOfFile);
 			
-			for (var groupCoverage: result.getReport().getGroupCoverages()) {
+			for (var groupCoverage: result.getStats().getGroupCoverages()) {
 				for (var each: groupCoverage.getFileCoverages()) {
 					if (each.getBlobPath().endsWith("help.py")) 
-						assertEquals(-1, each.getBranchCoverage());
+						assertEquals(-1, each.getBranchPercentage());
 				}
 			}
 			assertEquals(CoverageStatus.NOT_COVERED, result.getStatuses().get("/example/src/requests/help.py").get(49));

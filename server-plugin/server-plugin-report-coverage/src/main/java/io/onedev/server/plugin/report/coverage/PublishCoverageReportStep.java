@@ -22,7 +22,7 @@ import java.io.*;
 import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.plugin.report.coverage.CoverageReport.getReportLockName;
+import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
 
 @Editable
 public abstract class PublishCoverageReportStep extends PublishReportStep {
@@ -33,14 +33,14 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		return OneDev.getInstance(SessionManager.class).call(() -> {
 			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			ProcessResult result = write(getReportLockName(build), () -> {
-				File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
+			CoverageReport result = write(getReportLockName(build), () -> {
+				File reportDir = new File(build.getDir(), CoverageStats.CATEGORY + "/" + getReportName());
 
 				FileUtils.createDir(reportDir);
 				try {
-					ProcessResult aResult = process(build, inputDir, logger);
+					CoverageReport aResult = process(build, inputDir, logger);
 					if (aResult != null) {
-						aResult.getReport().writeTo(reportDir);
+						aResult.getStats().writeTo(reportDir);
 						for (var entry: aResult.getStatuses().entrySet())
 							writeLineStatuses(build, entry.getKey(), entry.getValue());
 
@@ -65,9 +65,9 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 					metric.setReportName(getReportName());
 				}
 
-				CoverageInfo coverages = result.getReport().getOverallCoverages();
-				metric.setBranchCoverage(coverages.getBranchCoverage());
-				metric.setLineCoverage(coverages.getLineCoverage());
+				Coverage coverages = result.getStats().getOverallCoverage();
+				metric.setBranchCoverage(coverages.getBranchPercentage());
+				metric.setLineCoverage(coverages.getLinePercentage());
 
 				OneDev.getInstance(Dao.class).persist(metric);
 			}
@@ -76,12 +76,12 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	}
 
 	@Nullable
-	protected abstract ProcessResult process(Build build, File inputDir, TaskLogger logger);
+	protected abstract CoverageReport process(Build build, File inputDir, TaskLogger logger);
 
 	private void writeLineStatuses(Build build, String blobPath, Map<Integer, CoverageStatus> lineStatuses) {
 		if (!lineStatuses.isEmpty()) {
-			File reportDir = new File(build.getDir(), CoverageReport.CATEGORY + "/" + getReportName());
-			File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
+			File reportDir = new File(build.getDir(), CoverageStats.CATEGORY + "/" + getReportName());
+			File lineCoverageFile = new File(reportDir, CoverageStats.FILES + "/" + blobPath);
 			FileUtils.createDir(lineCoverageFile.getParentFile());
 			try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
 				SerializationUtils.serialize((Serializable) lineStatuses, os);

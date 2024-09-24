@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1727141273135" clover="3.2.0">
+  <project timestamp="1727141273135" name="All files">
+    <metrics statements="12" coveredstatements="1" conditionals="4" coveredconditionals="0" methods="3" coveredmethods="1" elements="19" coveredelements="2" complexity="0" loc="12" ncloc="12" packages="1" files="3" classes="3"/>
+    <file name="App.js" path="src/App.js">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="5" count="1" type="stmt"/>
+    </file>
+    <file name="index.js" path="src/index.js">
+      <metrics statements="3" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <line num="7" count="0" type="stmt"/>
+      <line num="8" count="0" type="stmt"/>
+      <line num="17" count="0" type="stmt"/>
+    </file>
+    <file name="reportWebVitals.js" path="src/reportWebVitals.js">
+      <metrics statements="8" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
+      <line num="1" count="0" type="stmt"/>
+      <line num="2" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="3" count="0" type="stmt"/>
+      <line num="4" count="0" type="stmt"/>
+      <line num="5" count="0" type="stmt"/>
+      <line num="6" count="0" type="stmt"/>
+      <line num="7" count="0" type="stmt"/>
+      <line num="8" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>

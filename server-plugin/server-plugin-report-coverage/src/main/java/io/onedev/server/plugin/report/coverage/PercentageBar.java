@@ -7,9 +7,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 @SuppressWarnings("serial")
-public class CoverageBar extends GenericPanel<Integer> {
+public class PercentageBar extends GenericPanel<Integer> {
 
-	public CoverageBar(String id, IModel<Integer> model) {
+	public PercentageBar(String id, IModel<Integer> model) {
 		super(id, model);
 	}
 

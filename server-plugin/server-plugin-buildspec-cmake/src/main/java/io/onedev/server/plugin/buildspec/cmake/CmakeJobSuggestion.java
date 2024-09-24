@@ -131,7 +131,7 @@ public class CmakeJobSuggestion implements JobSuggestion {
 					"\ncmake --build build\n" +
 					"GTEST_COLOR=1 ctest --test-dir build --verbose\n" +
 					"gcovr --exclude build --cobertura --cobertura-pretty > coverage.xml\n" +
-					"cppcheck -ibuild . --xml 2>check-result.xml");
+					"#cppcheck -ibuild . --xml 2>check-result.xml");
 			testAndCheck.getInterpreter().setCommands(commandsBuilder.toString());
 			job.getSteps().add(testAndCheck);
 			addCommonJobsAndTriggers(job);

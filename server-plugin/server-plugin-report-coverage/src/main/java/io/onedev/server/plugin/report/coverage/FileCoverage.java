@@ -1,20 +1,20 @@
 package io.onedev.server.plugin.report.coverage;
 
-public class FileCoverageInfo extends NamedCoverageInfo {
+public class FileCoverage extends NamedCoverage {
 
 	private static final long serialVersionUID = 1L;
 	
-	public FileCoverageInfo(String blobPath, int totalBranches, int coveredBranches,
-							int totalLines, int coveredLines) {
+	public FileCoverage(String blobPath, int totalBranches, int coveredBranches,
+						int totalLines, int coveredLines) {
 		super(blobPath, totalBranches, coveredBranches, totalLines, coveredLines);
 	}
 
-	public FileCoverageInfo(String blobPath, CoverageInfo coverageInfo) {
+	public FileCoverage(String blobPath, Coverage coverageInfo) {
 		this(blobPath, coverageInfo.getTotalBranches(), coverageInfo.getCoveredBranches(), 
 				coverageInfo.getTotalLines(), coverageInfo.getCoveredLines());
 	}
 	
-	public FileCoverageInfo(String blobPath) {
+	public FileCoverage(String blobPath) {
 		super(blobPath);
 	}
 	

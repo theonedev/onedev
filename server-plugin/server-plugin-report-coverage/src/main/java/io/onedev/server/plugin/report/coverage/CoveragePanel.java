@@ -7,9 +7,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
- class CoverageInfoPanel<T extends CoverageInfo> extends GenericPanel<T> {
+ class CoveragePanel<T extends Coverage> extends GenericPanel<T> {
 
-	public CoverageInfoPanel(String id, IModel<T> model) {
+	public CoveragePanel(String id, IModel<T> model) {
 		super(id, model);
 	}
 
@@ -18,46 +18,46 @@ import org.apache.wicket.model.IModel;
 		super.onInitialize();
 		
 		var branchContainer = new WebMarkupContainer("branch");
-		add(branchContainer.setVisible(getCoverageInfo().getBranchCoverage() >= 0));
+		add(branchContainer.setVisible(getCoverageInfo().getBranchPercentage() >= 0));
 		branchContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Branches " + getCoverageInfo().getBranchCoverage() + "%";
+				return "Branches " + getCoverageInfo().getBranchPercentage() + "%";
 			}
 			
 		}));
-		branchContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
+		branchContainer.add(new PercentageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
 			public Integer getObject() {
-				return getCoverageInfo().getBranchCoverage();
+				return getCoverageInfo().getBranchPercentage();
 			}
 			
 		}));
 		
 		var lineContainer = new WebMarkupContainer("line");
-		add(lineContainer.setVisible(getCoverageInfo().getLineCoverage() >= 0));
+		add(lineContainer.setVisible(getCoverageInfo().getLinePercentage() >= 0));
 		lineContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return "Lines " + getCoverageInfo().getLineCoverage() + "%";
+				return "Lines " + getCoverageInfo().getLinePercentage() + "%";
 			}
 			
 		}));
-		lineContainer.add(new CoverageBar("bar", new AbstractReadOnlyModel<>() {
+		lineContainer.add(new PercentageBar("bar", new AbstractReadOnlyModel<>() {
 
 			@Override
 			public Integer getObject() {
-				return getCoverageInfo().getLineCoverage();
+				return getCoverageInfo().getLinePercentage();
 			}
 			
 		}));		
 		
 	}
 
-	private CoverageInfo getCoverageInfo() {
+	private Coverage getCoverageInfo() {
 		return getModelObject();
 	}
 	

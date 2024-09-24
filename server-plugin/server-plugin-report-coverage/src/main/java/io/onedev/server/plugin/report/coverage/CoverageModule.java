@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getProjectRelativeDirPath;
-import static io.onedev.server.plugin.report.coverage.CoverageReport.CATEGORY;
-import static io.onedev.server.plugin.report.coverage.CoverageReport.getReportLockName;
+import static io.onedev.server.plugin.report.coverage.CoverageStats.CATEGORY;
+import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
 /**
@@ -178,7 +178,7 @@ public class CoverageModule extends AbstractPluginModule {
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (reportName == null || reportName.equals(reportDir.getName())) { 
-							File lineCoveragesFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
+							File lineCoveragesFile = new File(reportDir, CoverageStats.FILES + "/" + blobPath);
 							if (lineCoveragesFile.exists()) {
 								try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
 									coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));

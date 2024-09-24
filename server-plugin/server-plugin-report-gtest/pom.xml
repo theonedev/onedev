@@ -13,12 +13,6 @@
 			<artifactId>server-plugin-report-unittest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>commons-loader</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.report.gtest.GTestModule</moduleClass>

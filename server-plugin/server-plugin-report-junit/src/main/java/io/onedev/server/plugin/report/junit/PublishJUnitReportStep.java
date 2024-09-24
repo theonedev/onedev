@@ -58,7 +58,7 @@ public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	protected UnitTestReport createReport(Build build, File inputDir, TaskLogger logger) {
+	protected UnitTestReport process(Build build, File inputDir, TaskLogger logger) {
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 		

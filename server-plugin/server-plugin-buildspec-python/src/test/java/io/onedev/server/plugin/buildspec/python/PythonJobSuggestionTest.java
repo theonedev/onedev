@@ -31,10 +31,10 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		var jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		var testAndLinkCommands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
-		assertTrue(testAndLinkCommands.contains("poetry install --with dev") && 
-				testAndLinkCommands.contains("poetry add pytest-cov") && 
-				testAndLinkCommands.contains("poetry run pytest --cov"));
+		var buildAndTestCommands = getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(buildAndTestCommands.contains("poetry install --with dev") && 
+				buildAndTestCommands.contains("poetry add pytest-cov") && 
+				buildAndTestCommands.contains("poetry run pytest --cov"));
 
 		project = new Project() {
 			@Override
@@ -48,10 +48,10 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		testAndLinkCommands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
-		assertTrue(!testAndLinkCommands.contains("poetry install --with") && 
-				testAndLinkCommands.contains("poetry add coverage") &&
-				testAndLinkCommands.contains("poetry run coverage"));
+		buildAndTestCommands = getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands();
+		assertTrue(!buildAndTestCommands.contains("poetry install --with") && 
+				buildAndTestCommands.contains("poetry add coverage") &&
+				buildAndTestCommands.contains("poetry run coverage"));
 	}
 	
 	@Test
@@ -66,7 +66,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		var jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		var commands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		var commands = getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands();
 		assertTrue(!commands.contains("pip install -e .[dev]") && 
 				commands.contains("pytest --cov") && 
 				commands.contains("pytest-cov"));
@@ -81,7 +81,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		commands = getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands();
+		commands = getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands();
 		assertTrue(!commands.contains("pip install -e .[") && 
 				commands.contains("pip install coverage") && 
 				commands.contains("coverage run -m unittest"));
@@ -96,7 +96,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[test]"));
+		assertTrue(getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[test]"));
 		
 		project = new Project() {
 			@Override
@@ -110,7 +110,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
+		assertTrue(getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		var jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
+		assertTrue(getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
 
 		project = new Project() {
 			@Override
@@ -137,7 +137,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[test]"));
+		assertTrue(getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[test]"));
 
 		project = new Project() {
 			@Override
@@ -151,7 +151,7 @@ public class PythonJobSuggestionTest {
 			}
 		};
 		jobs = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId());
-		assertTrue(getTestAndLintStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
+		assertTrue(getBuildAndTestStep(jobs.iterator().next()).getInterpreter().getCommands().contains("pip install -e .[dev]"));
 	}
 	
 	private byte[] readTestResource(String path) {
@@ -163,9 +163,9 @@ public class PythonJobSuggestionTest {
 	}
 	
 	@Nullable
-	private CommandStep getTestAndLintStep(Job job) {
+	private CommandStep getBuildAndTestStep(Job job) {
 		for (var step: job.getSteps()) {
-			if (step.getName().equals("test and lint"))
+			if (step.getName().equals("build and test"))
 				return (CommandStep) step;
 		}
 		return null;

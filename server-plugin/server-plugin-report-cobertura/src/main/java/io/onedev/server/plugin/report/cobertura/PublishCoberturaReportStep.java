@@ -55,7 +55,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 	}
 
 	@Override
-	protected ProcessResult process(Build build, File inputDir, TaskLogger logger) {
+	protected CoverageReport process(Build build, File inputDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
@@ -65,7 +65,7 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 		int totalLines = 0;
 		int coveredLines = 0;
 		
-		Map<String, GroupCoverageInfo> packageCoverageMap = new HashMap<>();
+		Map<String, GroupCoverage> packageCoverageMap = new HashMap<>();
 		Map<String, Map<Integer, CoverageStatus>> coverageStatuses = new HashMap<>();
 		
 		for (File file: getPatternSet().listFiles(inputDir)) {
@@ -172,19 +172,19 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 					int packageTotalLines = fileTotalLines.values().stream().mapToInt(Integer::intValue).sum();
 					int packageCoveredLines = fileCoveredLines.values().stream().mapToInt(Integer::intValue).sum();
 
-					var fileCoverages = new ArrayList<FileCoverageInfo>();
+					var fileCoverages = new ArrayList<FileCoverage>();
 					for (var blobPath: packageBlobPaths) {
-						var fileCoverage = new FileCoverageInfo(blobPath,
+						var fileCoverage = new FileCoverage(blobPath,
 								fileTotalBranches.computeIfAbsent(blobPath, it -> 0),
 								fileCoveredBranches.computeIfAbsent(blobPath, it -> 0),
 								fileTotalLines.computeIfAbsent(blobPath, it -> 0),
 								fileCoveredLines.computeIfAbsent(blobPath, it -> 0));
-						if (fileCoverage.getLineCoverage() != 0)
+						if (fileCoverage.getLinePercentage() != 0)
 							fileCoverages.add(fileCoverage);
 					}
 					if (packageCoveredLines != 0) {
-						var packageCoverage = packageCoverageMap.computeIfAbsent(packageName, GroupCoverageInfo::new);
-						packageCoverage.mergeWith(new GroupCoverageInfo(
+						var packageCoverage = packageCoverageMap.computeIfAbsent(packageName, GroupCoverage::new);
+						packageCoverage.mergeWith(new GroupCoverage(
 								packageName, packageTotalBranches, packageCoveredBranches,
 								packageTotalLines, packageCoveredLines, fileCoverages));
 					}
@@ -197,15 +197,15 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 		}
 
 		if (!packageCoverageMap.isEmpty()) {
-			CoverageInfo coverageInfo = new CoverageInfo(
+			Coverage coverageInfo = new Coverage(
 					totalBranches, coveredBranches, 
 					totalLines, coveredLines);
 			var packageCoverages = new ArrayList<>(packageCoverageMap.values());
-			packageCoverages.sort(comparing(GroupCoverageInfo::getName));
+			packageCoverages.sort(comparing(GroupCoverage::getName));
 			for (var packageCoverage: packageCoverages) 
-				packageCoverage.getFileCoverages().sort(comparing(FileCoverageInfo::getBlobPath));
-			return new ProcessResult(
-					new CoverageReport(coverageInfo, packageCoverages), coverageStatuses);
+				packageCoverage.getFileCoverages().sort(comparing(FileCoverage::getBlobPath));
+			return new CoverageReport(
+					new CoverageStats(coverageInfo, packageCoverages), coverageStatuses);
 		} else {
 			return null;
 		}

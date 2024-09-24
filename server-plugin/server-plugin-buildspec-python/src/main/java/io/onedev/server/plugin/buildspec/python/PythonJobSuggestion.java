@@ -82,21 +82,21 @@ public class PythonJobSuggestion implements JobSuggestion {
 			command = prefix + "coverage run -m unittest\n";
 		return command + 
 				prefix + "coverage xml\n" +
-				prefix + "ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git";
+				"#" + prefix + "ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git";
 	}
 	
 	private String getCoveragePackage(boolean withPytest) {
 		return withPytest?"pytest-cov":"coverage";
 	}
 	
-	private CommandStep newPipTestAndLintStep(String dependencyInstallCommand, boolean withPytest) {
-		CommandStep testAndLint = new CommandStep();
+	private CommandStep newPipBuildAndTestStep(String dependencyInstallCommand, boolean withPytest) {
+		CommandStep buildAndTest = new CommandStep();
 		var interpreter = new ShellInterpreter();
-		testAndLint.setInterpreter(interpreter);
-		testAndLint.setName("test and lint");
-		testAndLint.setImage("python");
+		buildAndTest.setInterpreter(interpreter);
+		buildAndTest.setName("build and test");
+		buildAndTest.setImage("python");
 		interpreter.setCommands("set -e\n" + dependencyInstallCommand + "\n" + "pip install " + getCoveragePackage(withPytest) + " ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
-		return testAndLint;
+		return buildAndTest;
 	}
 	
 	private GenerateChecksumStep newChecksumGenerateStep(String files) {
@@ -184,16 +184,16 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(newChecksumGenerateStep("tox.ini"));
 				var setupCache = new SetupCacheStep();
 				setupCache.setName("set up dependency cache");
-				setupCache.setKey("tox_envs_@file:checksum@");
+				setupCache.setKey("tox_cache_@file:checksum@");
 				setupCache.setPaths(Lists.newArrayList(".tox"));
 				setupCache.getLoadKeys().add("tox_cache");
 				job.getSteps().add(setupCache);
 
-				CommandStep testAndLint = new CommandStep();
-				testAndLint.setName("test");
-				testAndLint.setImage("1dev/tox:1.0.0");
-				testAndLint.getInterpreter().setCommands("tox");
-				job.getSteps().add(testAndLint);
+				CommandStep buildAndTest = new CommandStep();
+				buildAndTest.setName("build and test");
+				buildAndTest.setImage("1dev/tox:1.0.0");
+				buildAndTest.getInterpreter().setCommands("tox");
+				job.getSteps().add(buildAndTest);
 				if (blob.getText().getContent().contains("pytest"))
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);
@@ -233,17 +233,17 @@ public class PythonJobSuggestion implements JobSuggestion {
 				
 				var withPytest = blob.getText().getContent().contains("pytest");
 				
-				CommandStep testAndLint = new CommandStep();
-				testAndLint.setName("test and lint");
-				testAndLint.setImage("1dev/poetry:1.0.1");
+				CommandStep buildAndTest = new CommandStep();
+				buildAndTest.setName("build and test");
+				buildAndTest.setImage("1dev/poetry:1.0.1");
 				String commands = "" +
 						"set -e\n" +
 						"poetry config virtualenvs.create false\n" +
 						installCommand + "\n" +
 						"poetry add " + getCoveragePackage(withPytest) + " ruff\n";
 
-				testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
-				job.getSteps().add(testAndLint);
+				buildAndTest.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, "poetry run "));
+				job.getSteps().add(buildAndTest);
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);
@@ -294,7 +294,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 						|| setupPy != null && setupPy.getText().getContent().contains("pytest")
 						|| setupCfg != null && setupCfg.getText().getContent().contains("pytest")
 						|| requirements != null && requirements.getText().getContent().contains("pytest");
-				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
+				job.getSteps().add(newPipBuildAndTestStep(installCommand, withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);
@@ -325,7 +325,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				var withPytest = blobContent.contains("pytest") 
 						|| setupCfg != null && setupCfg.getText().getContent().contains("pytest")
 						|| requirements != null && requirements.getText().getContent().contains("pytest");
-				job.getSteps().add(newPipTestAndLintStep(installCommand, withPytest));
+				job.getSteps().add(newPipBuildAndTestStep(installCommand, withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);
@@ -336,7 +336,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(newPipCacheSetupStep());
 
 				var withPytest = blob.getText().getContent().contains("pytest");
-				job.getSteps().add(newPipTestAndLintStep("pip install -r requirements.txt", withPytest));
+				job.getSteps().add(newPipBuildAndTestStep("pip install -r requirements.txt", withPytest));
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);
@@ -354,10 +354,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 
 				var blobContent = blob.getText().getContent();
 				Map<String, Object> environments = new Yaml().load(blobContent);
-				CommandStep testAndLint = new CommandStep();
-				testAndLint.setName("test and lint");
-				testAndLint.setImage("1dev/conda:1.0.4");
-				testAndLint.setInterpreter(new ShellInterpreter());
+				CommandStep buildAndTest = new CommandStep();
+				buildAndTest.setName("build and test");
+				buildAndTest.setImage("1dev/conda:1.0.4");
+				buildAndTest.setInterpreter(new ShellInterpreter());
 				String commands = "" +
 						"set -e\n" +
 						"source /root/.bashrc\n" +
@@ -366,8 +366,8 @@ public class PythonJobSuggestion implements JobSuggestion {
 						"conda install -y coverage ruff\n";
 
 				var withPytest = blobContent.contains("pytest");
-				testAndLint.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, ""));
-				job.getSteps().add(testAndLint);
+				buildAndTest.getInterpreter().setCommands(commands + getCoverageAndRuffCommand(withPytest, ""));
+				job.getSteps().add(buildAndTest);
 				if (withPytest)
 					job.getSteps().add(newUnitTestReportPublishStep());
 				addCommonStepsAndTriggers(job);

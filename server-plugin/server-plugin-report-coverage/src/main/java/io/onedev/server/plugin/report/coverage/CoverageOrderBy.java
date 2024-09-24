@@ -6,7 +6,7 @@ enum CoverageOrderBy {
 	DEFAULT {
 
 		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
+		public int compare(Coverage obj1, Coverage obj2) {
 			return 0;
 		}
 
@@ -14,15 +14,15 @@ enum CoverageOrderBy {
 	LEAST_BRANCH_COVERAGE {
 
 		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getBranchCoverage() - obj2.getBranchCoverage();
+		public int compare(Coverage obj1, Coverage obj2) {
+			return obj1.getBranchPercentage() - obj2.getBranchPercentage();
 		}
 		
 	}, 
 	MOST_BRANCH_COVERAGE {
 
 		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
+		public int compare(Coverage obj1, Coverage obj2) {
 			return LEAST_BRANCH_COVERAGE.compare(obj2, obj1);
 		}
 		
@@ -30,15 +30,15 @@ enum CoverageOrderBy {
 	LEAST_LINE_COVERAGE {
 
 		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
-			return obj1.getLineCoverage() - obj2.getLineCoverage();
+		public int compare(Coverage obj1, Coverage obj2) {
+			return obj1.getLinePercentage() - obj2.getLinePercentage();
 		}
 		
 	}, 
 	MOST_LINE_COVERAGE {
 
 		@Override
-		public int compare(CoverageInfo obj1, CoverageInfo obj2) {
+		public int compare(Coverage obj1, Coverage obj2) {
 			return LEAST_LINE_COVERAGE.compare(obj2, obj1);
 		}
 		
@@ -48,6 +48,6 @@ enum CoverageOrderBy {
 		return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
 	}
 
-	public abstract int compare(CoverageInfo obj1, CoverageInfo obj2);
+	public abstract int compare(Coverage obj1, Coverage obj2);
 	
 }

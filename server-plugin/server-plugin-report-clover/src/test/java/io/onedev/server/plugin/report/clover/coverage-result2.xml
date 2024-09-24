@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1727148520970" clover="4.4.1">
+   <project name="my-app 1.0-SNAPSHOT" timestamp="1727148516797">
+      <metrics coveredelements="10" complexity="11" loc="67" methods="10" classes="4" statements="12" packages="3" coveredconditionals="2" coveredmethods="3" elements="24" ncloc="51" files="4" conditionals="2" coveredstatements="5"/>
+      <package name="default-pkg">
+         <metrics coveredelements="0" complexity="1" loc="5" methods="1" classes="1" statements="1" coveredconditionals="0" coveredmethods="0" elements="2" ncloc="5" files="1" conditionals="0" coveredstatements="0"/>
+         <file path="src/main/java/Top.java" name="Top.java">
+            <metrics coveredelements="0" coveredconditionals="0" complexity="1" loc="5" coveredmethods="0" methods="1" elements="2" classes="1" ncloc="5" statements="1" conditionals="0" coveredstatements="0"/>
+            <class name="Top">
+               <metrics coveredelements="0" coveredconditionals="0" complexity="1" coveredmethods="0" methods="1" elements="2" statements="1" conditionals="0" coveredstatements="0"/>
+            </class>
+            <line complexity="1" visibility="public" signature="ping() : String" num="2" count="0" type="method"/>
+            <line num="3" count="0" type="stmt"/>
+         </file>
+      </package>
+      <package name="com.mycompany.app.internal">
+         <metrics coveredelements="0" complexity="1" loc="9" methods="1" classes="1" statements="1" coveredconditionals="0" coveredmethods="0" elements="2" ncloc="6" files="1" conditionals="0" coveredstatements="0"/>
+         <file path="src/main/java/com/mycompany/app/internal/BuildEngine.java" name="BuildEngine.java">
+            <metrics coveredelements="0" coveredconditionals="0" complexity="1" loc="9" coveredmethods="0" methods="1" elements="2" classes="1" ncloc="6" statements="1" conditionals="0" coveredstatements="0"/>
+            <class name="BuildEngine">
+               <metrics coveredelements="0" coveredconditionals="0" complexity="1" coveredmethods="0" methods="1" elements="2" statements="1" conditionals="0" coveredstatements="0"/>
+            </class>
+            <line complexity="1" visibility="public" signature="gogo(String,String) : String" num="5" count="0" type="method"/>
+            <line num="6" count="0" type="stmt"/>
+         </file>
+      </package>
+      <package name="com.mycompany.app">
+         <metrics coveredelements="10" complexity="9" loc="53" methods="8" classes="2" statements="10" coveredconditionals="2" coveredmethods="3" elements="20" ncloc="40" files="2" conditionals="2" coveredstatements="5"/>
+         <file path="src/main/java/com/mycompany/app/App.java" name="App.java">
+            <metrics coveredelements="2" coveredconditionals="0" complexity="4" loc="26" coveredmethods="1" methods="4" elements="8" classes="1" ncloc="17" statements="4" conditionals="0" coveredstatements="1"/>
+            <class name="App">
+               <metrics coveredelements="2" coveredconditionals="0" complexity="4" coveredmethods="1" methods="4" elements="8" statements="4" conditionals="0" coveredstatements="1"/>
+            </class>
+            <line complexity="1" visibility="public" signature="main(String[]) : void" num="9" count="0" type="method"/>
+            <line num="11" count="0" type="stmt"/>
+            <line complexity="1" visibility="public" signature="getMessage() : String" num="14" count="1" type="method"/>
+            <line num="15" count="1" type="stmt"/>
+            <line complexity="1" visibility="public" signature="getMessage2() : String" num="18" count="0" type="method"/>
+            <line num="19" count="0" type="stmt"/>
+            <line complexity="1" visibility="public" signature="getMessage3() : String" num="22" count="0" type="method"/>
+            <line num="23" count="0" type="stmt"/>
+         </file>
+         <file path="src/main/java/com/mycompany/app/Util.java" name="Util.java">
+            <metrics coveredelements="8" coveredconditionals="2" complexity="5" loc="27" coveredmethods="2" methods="4" elements="12" classes="1" ncloc="23" statements="6" conditionals="2" coveredstatements="4"/>
+            <class name="Util">
+               <metrics coveredelements="8" coveredconditionals="2" complexity="5" coveredmethods="2" methods="4" elements="12" statements="6" conditionals="2" coveredstatements="4"/>
+            </class>
+            <line complexity="2" visibility="public" signature="add(int,int) : int" num="5" count="2" type="method"/>
+            <line num="7" count="2" type="stmt"/>
+            <line falsecount="1" truecount="1" num="7" type="cond"/>
+            <line num="8" count="1" type="stmt"/>
+            <line num="10" count="1" type="stmt"/>
+            <line complexity="1" visibility="public" signature="subtract(int,int) : int" num="13" count="0" type="method"/>
+            <line num="15" count="0" type="stmt"/>
+            <line complexity="1" visibility="public" signature="mul(int,int) : int" num="18" count="1" type="method"/>
+            <line num="20" count="1" type="stmt"/>
+            <line complexity="1" visibility="public" signature="divide(int,int) : int" num="23" count="0" type="method"/>
+            <line num="25" count="0" type="stmt"/>
+         </file>
+      </package>
+   </project>
+   <testproject name="my-app 1.0-SNAPSHOT" timestamp="1727148516797">
+      <metrics coveredelements="6" complexity="2" loc="40" methods="2" classes="2" statements="4" packages="1" coveredconditionals="0" coveredmethods="2" elements="6" ncloc="24" files="2" conditionals="0" coveredstatements="4"/>
+      <package name="com.mycompany.app">
+         <metrics coveredelements="6" complexity="2" loc="40" methods="2" classes="2" statements="4" coveredconditionals="0" coveredmethods="2" elements="6" ncloc="24" files="2" conditionals="0" coveredstatements="4"/>
+         <file path="src/test/java/com/mycompany/app/AppTest.java" name="AppTest.java">
+            <metrics coveredelements="2" coveredconditionals="0" complexity="1" loc="21" coveredmethods="1" methods="1" elements="2" classes="1" ncloc="11" statements="1" conditionals="0" coveredstatements="1"/>
+            <class name="AppTest">
+               <metrics coveredelements="2" complexity="1" methods="1" testruns="1" statements="1" coveredconditionals="0" coveredmethods="1" elements="2" testfailures="0" testduration="0.0" conditionals="0" coveredstatements="1" testpasses="1"/>
+            </class>
+            <line complexity="1" visibility="public" signature="shouldAnswerWithTrue() : void" num="15" testsuccess="true" count="1" testduration="0.0" type="method"/>
+            <line num="18" count="1" type="stmt"/>
+         </file>
+         <file path="src/test/java/com/mycompany/app/UtilTest.java" name="UtilTest.java">
+            <metrics coveredelements="4" coveredconditionals="0" complexity="1" loc="19" coveredmethods="1" methods="1" elements="4" classes="1" ncloc="13" statements="3" conditionals="0" coveredstatements="3"/>
+            <class name="UtilTest">
+               <metrics coveredelements="4" complexity="1" methods="1" testruns="1" statements="3" coveredconditionals="0" coveredmethods="1" elements="4" testfailures="0" testduration="0.005" conditionals="0" coveredstatements="3" testpasses="1"/>
+            </class>
+            <line complexity="1" visibility="public" signature="test() : void" num="12" testsuccess="true" count="1" testduration="0.005" type="method"/>
+            <line num="15" count="1" type="stmt"/>
+            <line num="16" count="1" type="stmt"/>
+            <line num="17" count="1" type="stmt"/>
+         </file>
+      </package>
+   </testproject>
+</coverage>

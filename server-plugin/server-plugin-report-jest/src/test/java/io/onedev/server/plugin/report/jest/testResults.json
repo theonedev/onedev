@@ -24,7 +24,7 @@
     "unchecked": 1,
     "uncheckedKeysByFile": [
       {
-        "filePath": "/Users/robin/Projects/onedev/reports/jest-demo/src/components/Items.test.js",
+        "filePath": "src/components/Items.test.js",
         "keys": [
           "renders correctly when there are no items 1"
         ]
@@ -41,7 +41,7 @@
         {
           "ancestorTitles": [],
           "failureMessages": [
-            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 600\nReceived: 500\n    at Object.<anonymous> (/Users/robin/Projects/onedev/reports/jest-demo/src/utils/Arith.test.js:4:21)\n    at Promise.then.completed (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/utils.js:276:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/utils.js:216:10)\n    at _callCircusTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:212:40)\n    at processTicksAndRejections (internal/process/task_queues.js:97:5)\n    at _runTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:149:3)\n    at _runTestsForDescribeBlock (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:63:9)\n    at run (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:25:3)\n    at runAndTransformResultsToJestFormat (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:176:21)\n    at jestAdapter (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:109:19)\n    at runTestInternal (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-runner/build/runTest.js:380:16)\n    at runTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-runner/build/runTest.js:472:34)"
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 600\nReceived: 500\n    at Object.<anonymous> (src/utils/Arith.test.js:4:21)\n    at Promise.then.completed (node_modules/jest-circus/build/utils.js:276:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (node_modules/jest-circus/build/utils.js:216:10)\n    at _callCircusTest (node_modules/jest-circus/build/run.js:212:40)\n    at processTicksAndRejections (internal/process/task_queues.js:97:5)\n    at _runTest (node_modules/jest-circus/build/run.js:149:3)\n    at _runTestsForDescribeBlock (node_modules/jest-circus/build/run.js:63:9)\n    at run (node_modules/jest-circus/build/run.js:25:3)\n    at runAndTransformResultsToJestFormat (node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:176:21)\n    at jestAdapter (node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:109:19)\n    at runTestInternal (node_modules/jest-runner/build/runTest.js:380:16)\n    at runTest (node_modules/jest-runner/build/runTest.js:472:34)"
           ],
           "fullName": "calc",
           "location": null,
@@ -59,7 +59,7 @@
       ],
       "endTime": 1608965514276,
       "message": "  ● calc\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 600\n    Received: 500\n\n      2 | \n      3 | it('calc', () => {\n    > 4 |   expect(add(2, 3)).toBe(600);\n        |                     ^\n      5 | });\n      6 | \n      7 | it('mul', () => {\n\n      at Object.<anonymous> (src/utils/Arith.test.js:4:21)\n",
-      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/utils/Arith.test.js",
+      "name": "src/utils/Arith.test.js",
       "startTime": 1608965513679,
       "status": "failed",
       "summary": ""
@@ -90,7 +90,7 @@
       ],
       "endTime": 1608965514417,
       "message": "",
-      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/Integration.test.js",
+      "name": "src/Integration.test.js",
       "startTime": 1608965514292,
       "status": "passed",
       "summary": ""
@@ -116,7 +116,7 @@
       ],
       "endTime": 1608965514575,
       "message": "",
-      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/components/Items.test.js",
+      "name": "src/components/Items.test.js",
       "startTime": 1608965514428,
       "status": "passed",
       "summary": ""
@@ -134,7 +134,7 @@
       ],
       "endTime": 1608965514696,
       "message": "",
-      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/ProductManager.test.js",
+      "name": "src/ProductManager.test.js",
       "startTime": 1608965514584,
       "status": "passed",
       "summary": ""

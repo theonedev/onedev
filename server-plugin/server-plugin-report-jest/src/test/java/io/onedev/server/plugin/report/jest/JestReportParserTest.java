@@ -29,7 +29,7 @@ public class JestReportParserTest {
 			Build build = new Build() {
 				@Override
 				public String getBlobPath(String filePath) {
-					return filePath.substring("/Users/robin/Projects/onedev/reports/jest-demo/".length());
+					return filePath;
 				}
 			};
 			UnitTestReport report = new UnitTestReport(JestReportParser.parse(build, rootNode), false);

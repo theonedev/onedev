@@ -82,10 +82,10 @@ public class CoverageReportPage extends BuildReportPage {
 	
 	private WebMarkupContainer itemsContainer;
 	
-	private final IModel<CoverageReport> reportDataModel = new LoadableDetachableModel<CoverageReport>() {
+	private final IModel<CoverageStats> reportDataModel = new LoadableDetachableModel<CoverageStats>() {
 
 		@Override
-		protected CoverageReport load() {
+		protected CoverageStats load() {
 			try {
 				Long projectId = getProject().getId();
 				return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
@@ -110,7 +110,7 @@ public class CoverageReportPage extends BuildReportPage {
 	}
 	
 	@Nullable
-	private GroupCoverageInfo getGroupCoverage() {
+	private GroupCoverage getGroupCoverage() {
 		if (groupIndex != null)
 			return getReportData().getGroupCoverages().get(groupIndex);
 		else 
@@ -130,14 +130,14 @@ public class CoverageReportPage extends BuildReportPage {
 			else
 				fragment.add(new Label("coverageTitle", "Overall"));
 
-			fragment.add(new CoverageInfoPanel<>("coverages", new LoadableDetachableModel<>() {
+			fragment.add(new CoveragePanel<>("coverages", new LoadableDetachableModel<>() {
 
 				@Override
-				protected CoverageInfo load() {
+				protected Coverage load() {
 					if (getGroupCoverage() != null) 
 						return getGroupCoverage();
 					else 
-						return getReportData().getOverallCoverages();
+						return getReportData().getOverallCoverage();
 				}
 
 			}));
@@ -190,9 +190,9 @@ public class CoverageReportPage extends BuildReportPage {
 				protected List<InputSuggestion> suggest(String matchWith) {
 					List<String> names;
 					if (getGroupCoverage() != null) {
-						names = getGroupCoverage().getFileCoverages().stream().map(NamedCoverageInfo::getName).collect(toList());
+						names = getGroupCoverage().getFileCoverages().stream().map(NamedCoverage::getName).collect(toList());
 					} else {
-						names = getReportData().getGroupCoverages().stream().map(NamedCoverageInfo::getName).collect(toList());
+						names = getReportData().getGroupCoverages().stream().map(NamedCoverage::getName).collect(toList());
 					}
 					return SuggestionUtils.suggest(names, matchWith);
 				}
@@ -256,12 +256,12 @@ public class CoverageReportPage extends BuildReportPage {
 				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 					List<MenuItem> menuItems = new ArrayList<>();
 					menuItems.add(newMenuItem(dropdown, CoverageOrderBy.DEFAULT));
-					var overallCoverages = getReportData().getOverallCoverages();
-					if (overallCoverages.getBranchCoverage() >= 0) {
+					var overallCoverages = getReportData().getOverallCoverage();
+					if (overallCoverages.getBranchPercentage() >= 0) {
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_BRANCH_COVERAGE));
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_BRANCH_COVERAGE));
 					}
-					if (overallCoverages.getLineCoverage() >= 0) {
+					if (overallCoverages.getLinePercentage() >= 0) {
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.LEAST_LINE_COVERAGE));
 						menuItems.add(newMenuItem(dropdown, CoverageOrderBy.MOST_LINE_COVERAGE));
 					}
@@ -300,14 +300,14 @@ public class CoverageReportPage extends BuildReportPage {
 			itemsContainer.setOutputMarkupId(true);
 			fragment.add(itemsContainer);
 
-			PageableListView<NamedCoverageInfo> itemsView =
-					new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<>() {
+			PageableListView<NamedCoverage> itemsView =
+					new PageableListView<NamedCoverage>("items", new LoadableDetachableModel<>() {
 
 						@SuppressWarnings("unchecked")
 						@Override
-						protected List<NamedCoverageInfo> load() {
+						protected List<NamedCoverage> load() {
 							if (filterPatterns != null) {
-								List<? extends NamedCoverageInfo> coverages;
+								List<? extends NamedCoverage> coverages;
 								if (getGroupCoverage() != null) 
 									coverages = getGroupCoverage().getFileCoverages();
 								else 
@@ -318,8 +318,8 @@ public class CoverageReportPage extends BuildReportPage {
 											.filter(it -> filterPatterns.get().matches(matcher, it.getName().toLowerCase()))
 											.collect(toList());
 								}
-								coverages.sort((Comparator<CoverageInfo>) (o1, o2) -> state.orderBy.compare(o1, o2));
-								return (List<NamedCoverageInfo>) coverages;
+								coverages.sort((Comparator<Coverage>) (o1, o2) -> state.orderBy.compare(o1, o2));
+								return (List<NamedCoverage>) coverages;
 							} else {
 								return new ArrayList<>();
 							}
@@ -328,18 +328,18 @@ public class CoverageReportPage extends BuildReportPage {
 					}, WebConstants.PAGE_SIZE) {
 
 						@Override
-						protected void populateItem(ListItem<NamedCoverageInfo> item) {
-							NamedCoverageInfo coverageInfo = item.getModelObject();
+						protected void populateItem(ListItem<NamedCoverage> item) {
+							NamedCoverage coverageInfo = item.getModelObject();
 
 							Link<Void> nameLink;
-							if (coverageInfo instanceof GroupCoverageInfo) {
+							if (coverageInfo instanceof GroupCoverage) {
 								State state = new State();
 								state.orderBy = CoverageReportPage.this.state.orderBy;
 								PageParameters params = paramsOf(getBuild(), getReportName(),
 										item.getIndex(), state);
 								nameLink = new BookmarkablePageLink<Void>("name", CoverageReportPage.class, params);
 							} else {
-								var fileCoverageInfo = (FileCoverageInfo) coverageInfo;
+								var fileCoverageInfo = (FileCoverage) coverageInfo;
 								ProjectBlobPage.State state = new ProjectBlobPage.State();
 								state.blobIdent = new BlobIdent(getBuild().getCommitHash(),
 										fileCoverageInfo.getBlobPath(), FileMode.REGULAR_FILE.getBits());
@@ -351,7 +351,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 							item.add(nameLink);
 
-							item.add(new CoverageInfoPanel<>("coverages", item.getModel()));
+							item.add(new CoveragePanel<>("coverages", item.getModel()));
 						}
 
 					};
@@ -377,7 +377,7 @@ public class CoverageReportPage extends BuildReportPage {
 	}
 	
 	@Nullable
-	private CoverageReport getReportData() {
+	private CoverageStats getReportData() {
 		return reportDataModel.getObject();
 	}
 	
@@ -428,7 +428,7 @@ public class CoverageReportPage extends BuildReportPage {
 		
 	}
 	
-	private static class GetCoverageReport implements ClusterTask<CoverageReport> {
+	private static class GetCoverageReport implements ClusterTask<CoverageStats> {
 
 		private final Long projectId;
 		
@@ -443,12 +443,12 @@ public class CoverageReportPage extends BuildReportPage {
 		}
 		
 		@Override
-		public CoverageReport call() throws Exception {
-			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<CoverageReport>() {
+		public CoverageStats call() throws Exception {
+			return LockUtils.read(CoverageStats.getReportLockName(projectId, buildNumber), new Callable<CoverageStats>() {
 
 				@Override
-				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
+				public CoverageStats call() throws Exception {
+					return CoverageStats.readFrom(new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CoverageStats.CATEGORY + "/" + reportName));
 				}
 				
 			});

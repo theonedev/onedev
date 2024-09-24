@@ -32,7 +32,7 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 			File reportDir = new File(build.getDir(), UnitTestReport.CATEGORY + "/" + getReportName());
 
 			UnitTestReport report = write(getReportLockName(build), () -> {
-				UnitTestReport aReport = createReport(build, inputDir, logger);
+				UnitTestReport aReport = process(build, inputDir, logger);
 				if (aReport != null) {
 					FileUtils.createDir(reportDir);
 					aReport.writeTo(reportDir);
@@ -64,6 +64,6 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	}
 
 	@Nullable
-	protected abstract UnitTestReport createReport(Build build, File inputDir, TaskLogger logger);
+	protected abstract UnitTestReport process(Build build, File inputDir, TaskLogger logger);
 	
 }

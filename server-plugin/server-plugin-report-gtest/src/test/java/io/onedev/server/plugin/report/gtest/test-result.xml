@@ -2,7 +2,7 @@
 <testsuites tests="7" failures="1" disabled="3" errors="0" time="1.504" timestamp="2024-09-18T20:34:05.972" name="AllTests">
 	<testsuite name="MultiplyTests" tests="3" failures="1" disabled="1" skipped="1" errors="0" time="1.503" timestamp="2024-09-18T20:34:05.972">
 		<testcase name="TestIntegerOne_One" status="run" result="completed" time="1.503" timestamp="2024-09-18T20:34:05.972" classname="MultiplyTests">
-			<failure message="/Users/robin/temp/gtest/tests/calc_test.cpp:11&#x0A;Expected equality of these values:&#x0A;  expected&#x0A;    Which is: 2&#x0A;  actual&#x0A;    Which is: 1" type=""><![CDATA[/Users/robin/temp/gtest/tests/calc_test.cpp:11
+			<failure message="tests/calc_test.cpp:11&#x0A;Expected equality of these values:&#x0A;  expected&#x0A;    Which is: 2&#x0A;  actual&#x0A;    Which is: 1" type=""><![CDATA[tests/calc_test.cpp:11
 Expected equality of these values:
   expected
     Which is: 2
@@ -10,7 +10,7 @@ Expected equality of these values:
     Which is: 1]]></failure>
 		</testcase>
 		<testcase name="TestIntegerZero_Zero" status="run" result="skipped" time="0" timestamp="2024-09-18T20:34:07.476" classname="MultiplyTests">
-			<skipped message="/Users/robin/temp/gtest/tests/calc_test.cpp:16&#x0A;"><![CDATA[/Users/robin/temp/gtest/tests/calc_test.cpp:16
+			<skipped message="tests/calc_test.cpp:16&#x0A;"><![CDATA[tests/calc_test.cpp:16
 ]]></skipped>
 		</testcase>
 		<testcase name="DISABLED_TestIntegerZero_One" status="notrun" result="suppressed" time="0" timestamp="1970-01-01T08:00:00.000" classname="MultiplyTests" />
@@ -18,7 +18,7 @@ Expected equality of these values:
 	<testsuite name="DivideTests" tests="2" failures="0" disabled="0" skipped="1" errors="0" time="0" timestamp="2024-09-18T20:34:07.476">
 		<testcase name="TestIntegerOne_One" status="run" result="completed" time="0" timestamp="2024-09-18T20:34:07.476" classname="DivideTests" />
 		<testcase name="TestIntegerTwo_One" status="run" result="skipped" time="0" timestamp="2024-09-18T20:34:07.476" classname="DivideTests">
-			<skipped message="/Users/robin/temp/gtest/tests/calc_test.cpp:38&#x0A;Skipping single test"><![CDATA[/Users/robin/temp/gtest/tests/calc_test.cpp:38
+			<skipped message="tests/calc_test.cpp:38&#x0A;Skipping single test"><![CDATA[tests/calc_test.cpp:38
 Skipping single test]]></skipped>
 		</testcase>
 	</testsuite>

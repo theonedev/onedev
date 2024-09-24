@@ -2,7 +2,7 @@ package io.onedev.server.plugin.report.coverage;
 
 import java.io.Serializable;
 
-public class CoverageInfo implements Serializable {
+public class Coverage implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -14,15 +14,15 @@ public class CoverageInfo implements Serializable {
 
 	private int coveredLines;
 
-	public CoverageInfo(int totalBranches, int coveredBranches,
-						int totalLines, int coveredLines) {
+	public Coverage(int totalBranches, int coveredBranches,
+					int totalLines, int coveredLines) {
 		this.totalBranches = totalBranches;
 		this.coveredBranches = coveredBranches;
 		this.totalLines = totalLines;
 		this.coveredLines = coveredLines;
 	}
 
-	public CoverageInfo() {
+	public Coverage() {
 		this(0, 0, 0, 0);
 	}
 	
@@ -34,8 +34,8 @@ public class CoverageInfo implements Serializable {
 		return coveredBranches;
 	}
 	
-	public int getBranchCoverage() {
-		return getCoverage(totalBranches, coveredBranches);
+	public int getBranchPercentage() {
+		return getPercentage(totalBranches, coveredBranches);
 	}
 
 	public int getTotalLines() {
@@ -46,8 +46,8 @@ public class CoverageInfo implements Serializable {
 		return coveredLines;
 	}
 	
-	public int getLineCoverage() {
-		return getCoverage(totalLines, coveredLines);
+	public int getLinePercentage() {
+		return getPercentage(totalLines, coveredLines);
 	}
 
 	public void setTotalBranches(int totalBranches) {
@@ -66,14 +66,14 @@ public class CoverageInfo implements Serializable {
 		this.coveredLines = coveredLines;
 	}
 
-	public void mergeWith(CoverageInfo otherCoverage) {
+	public void mergeWith(Coverage otherCoverage) {
 		totalBranches += otherCoverage.totalBranches;
 		coveredBranches += otherCoverage.coveredBranches;
 		totalLines += otherCoverage.totalLines;
 		coveredLines += otherCoverage.coveredLines;
 	}
 	
-	public static int getCoverage(int total, int covered)	{
+	public static int getPercentage(int total, int covered)	{
 		return total != 0? covered * 100 / total: -1;
 	}
 	
