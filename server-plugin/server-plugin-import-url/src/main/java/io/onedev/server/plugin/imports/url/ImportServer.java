@@ -79,8 +79,11 @@ public class ImportServer implements Serializable, Validatable {
 		String hostAndPath = StringUtils.substringAfter(url, "//");
 		if (StringUtils.isNotBlank(hostAndPath)) {
 			String path = StringUtils.stripEnd(StringUtils.substringAfter(hostAndPath, "/"), "/");
-			if (StringUtils.isNotBlank(path))
+			if (StringUtils.isNotBlank(path)) {
+				if (path.endsWith(".git"))
+					path = path.substring(0, path.length()-".git".length());
 				return path;
+			}
 		}
 		return null;
 	}
