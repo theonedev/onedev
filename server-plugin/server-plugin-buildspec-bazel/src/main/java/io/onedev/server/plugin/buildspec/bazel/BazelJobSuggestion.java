@@ -45,7 +45,9 @@ public class BazelJobSuggestion implements JobSuggestion {
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
 		List<Job> jobs = new ArrayList<>();
-		if (project.getBlob(new BlobIdent(commitId.name(), "MODULE.bazel", FileMode.TYPE_FILE), false) != null) {
+		if (project.getBlob(new BlobIdent(commitId.name(), "MODULE.bazel", FileMode.TYPE_FILE), false) != null ||
+				project.getBlob(new BlobIdent(commitId.name(), "BUILD.bazel", FileMode.TYPE_FILE), false) != null ||
+				project.getBlob(new BlobIdent(commitId.name(), "WORKSPACE.bazel", FileMode.TYPE_FILE), false) != null) {
 			Job job = newJob();
 			job.getSteps().add(newChecksumGenerateStep("generate bazel checksum", ".bazelversion MODULE.bazel MODULE.bazel.lock **/BUILD **/BUILD.bazel"));
 			var setupCache = new SetupCacheStep();
