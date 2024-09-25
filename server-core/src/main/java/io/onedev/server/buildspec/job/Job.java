@@ -83,7 +83,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<JobTrigger> triggers = new ArrayList<>();
 
-	private long timeout = 3600;
+	private long timeout = 14400;
 	
 	private List<PostBuildAction> postBuildActions = new ArrayList<>();
 	
