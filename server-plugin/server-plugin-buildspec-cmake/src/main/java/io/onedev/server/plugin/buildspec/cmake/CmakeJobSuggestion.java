@@ -67,7 +67,7 @@ public class CmakeJobSuggestion implements JobSuggestion {
 		var publishCoverageReport = new PublishCoberturaReportStep();
 		publishCoverageReport.setName("publish coverage report");
 		publishCoverageReport.setReportName("Coverage");
-		publishCoverageReport.setFilePatterns("coverage*.xml");
+		publishCoverageReport.setFilePatterns("coverage.xml");
 		publishCoverageReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishCoverageReport;
 	}

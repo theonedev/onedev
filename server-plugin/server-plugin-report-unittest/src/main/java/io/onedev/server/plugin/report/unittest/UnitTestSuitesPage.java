@@ -5,11 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -19,8 +17,6 @@ import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
@@ -42,7 +38,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
-import org.eclipse.jgit.lib.FileMode;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -325,18 +320,6 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 					Link<Void> link = new ViewStateAwarePageLink<Void>("testCases",
 							UnitTestCasesPage.class, params);
 					link.add(new Label("label", testSuite.getName()));
-
-					if (testSuite.getBlobPath() != null && SecurityUtils.canReadCode(getProject())) {
-						var sourceViewState = new ProjectBlobPage.State();
-						sourceViewState.blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath());
-						if (testSuite.getPosition() != null)
-							sourceViewState.position = BlobRenderer.getSourcePosition(testSuite.getPosition());
-						item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class,
-								ProjectBlobPage.paramsOf(getProject(), sourceViewState)));
-					} else {
-						item.add(new WebMarkupContainer("viewSource").setVisible(false));
-					}
-
 					item.add(new Label("duration", DurationFormatUtils.formatDuration(testSuite.getDuration(), "s.SSS 's'")));
 					item.add(link);
 

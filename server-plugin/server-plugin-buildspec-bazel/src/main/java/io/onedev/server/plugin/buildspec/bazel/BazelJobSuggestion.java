@@ -57,14 +57,14 @@ public class BazelJobSuggestion implements JobSuggestion {
 			setupCache.getLoadKeys().add("bazel_cache");
 			job.getSteps().add(setupCache);
 
-			CommandStep testAndCheck = new CommandStep();
-			testAndCheck.setName("build and test");
-			testAndCheck.setImage("1dev/bazelisk:1.0.2");
-			testAndCheck.getInterpreter().setCommands("" +
+			CommandStep buildAndTest = new CommandStep();
+			buildAndTest.setName("build and test");
+			buildAndTest.setImage("1dev/bazelisk:1.0.2");
+			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"bazelisk build //...\n" +
 					"bazelisk test //...");
-			job.getSteps().add(testAndCheck);
+			job.getSteps().add(buildAndTest);
 			addCommonJobsAndTriggers(job);
 			jobs.add(job);
 		}

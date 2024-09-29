@@ -69,7 +69,7 @@ public class PublishTRXReportStep extends PublishUnitTestReportStep {
 			try {
 				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				xml = XmlUtils.stripDoctype(StringUtils.removeBOM(xml));
-				testCases.addAll(TRXReportParser.parse(build, reader.read(new StringReader(xml))));
+				testCases.addAll(TRXReportParser.parse(reader.read(new StringReader(xml))));
 			} catch (DocumentException e) {
 				logger.warning("Ignored TRX report '" + relativePath + "' as it is not a valid XML");
 			} catch (IOException e) {

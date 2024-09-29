@@ -42,7 +42,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		var publishUnitTestReport = new PublishJUnitReportStep();
 		publishUnitTestReport.setName("publish unit test report");
 		publishUnitTestReport.setReportName("Unit Test");
-		publishUnitTestReport.setFilePatterns("pytest-result*.xml");
+		publishUnitTestReport.setFilePatterns("pytest-result.xml");
 		publishUnitTestReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishUnitTestReport;
 	}
@@ -51,7 +51,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		var publishCoverageReport = new PublishCoberturaReportStep();
 		publishCoverageReport.setName("publish coverage report");
 		publishCoverageReport.setReportName("Coverage");
-		publishCoverageReport.setFilePatterns("coverage*.xml");
+		publishCoverageReport.setFilePatterns("coverage.xml");
 		publishCoverageReport.setCondition(ExecuteCondition.ALWAYS);
 		return publishCoverageReport;
 	}

@@ -1,9 +1,9 @@
 package io.onedev.server.plugin.report.unittest;
 
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.model.Build;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.model.Build;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
@@ -158,17 +158,11 @@ public class UnitTestReport implements Serializable {
 		
 		private final long duration;
 		
-		private final String blobPath;
-		
-		private final PlanarRange position;
-		
 		public TestSuite(String name, Status status, long duration, @Nullable String blobPath, 
 						 @Nullable PlanarRange position) {
 			this.name = name;
 			this.status = status;
 			this.duration = duration;
-			this.blobPath = blobPath;
-			this.position = position;
 		}
 
 		public String getName() {
@@ -181,16 +175,6 @@ public class UnitTestReport implements Serializable {
 
 		public Status getStatus() {
 			return status;
-		}
-
-		@Nullable
-		public String getBlobPath() {
-			return blobPath;
-		}
-
-		@Nullable
-		public PlanarRange getPosition() {
-			return position;
 		}
 
 		@Nullable

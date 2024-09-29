@@ -3,13 +3,11 @@ package io.onedev.server.plugin.report.trx;
 import com.google.common.base.Splitter;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -36,7 +34,7 @@ public class TRXReportParser {
 
 	private static final Pattern PATTERN_LOCATION = Pattern.compile("\\sin\\s(.*):line\\s(\\d+)(\\s|$)", Pattern.MULTILINE);
 
-	public static List<TestCase> parse(Build build, Document doc) {
+	public static List<TestCase> parse(Document doc) {
 		List<TestCase> testCases = new ArrayList<>();
 		Element testRunElement = doc.getRootElement();
 
@@ -97,14 +95,10 @@ public class TRXReportParser {
 					testCaseDatum.computeIfAbsent(testClass, it -> new ArrayList<>()).add(testCaseData);
 			}
 
-			var searchManager = OneDev.getInstance(CodeSearchManager.class);
 			for (var entry: testCaseDatum.entrySet()) {
 				Status status = getOverallStatus(entry.getValue().stream().map(it->it.status).collect(toSet()));
 				var duration = entry.getValue().stream().mapToLong(it -> it.duration).sum();
-				var symbolHit = searchManager.findPrimarySymbol(build.getProject(), build.getCommitId(), entry.getKey(), ".");
-				var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
-				var position = symbolHit != null? symbolHit.getHitPos(): null;
-				var testSuite = new TestSuite(entry.getKey(), status, duration, blobPath, position) {
+				var testSuite = new TestSuite(entry.getKey(), status, duration, null, null) {
 
 					@Override
 					protected Component renderDetail(String componentId, Build build) {

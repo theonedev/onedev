@@ -424,21 +424,9 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					TestCase testCase = item.getModelObject();
 					item.add(new TestStatusBadge("status", testCase.getStatus()));
 
-					var name = escapeHtml5(testCase.getName());
-					if (testCase.getTestSuite().getBlobPath() != null && SecurityUtils.canReadCode(getProject())) {
-						var sourceViewState = new ProjectBlobPage.State();
-						sourceViewState.blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getBlobPath());
-						if (testCase.getTestSuite().getPosition() != null)
-							sourceViewState.position = BlobRenderer.getSourcePosition(testCase.getTestSuite().getPosition());
-						
-						var blobUrl = urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), sourceViewState));
-						name += " (<a href='" + blobUrl + "' target='_blank'>" + escapeHtml5(testCase.getTestSuite().getName()) + "</a>)";
-					} else {
-						name += " (" + escapeHtml5(testCase.getTestSuite().getName()) + ")";
-					}
-					if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) {
+					var name = escapeHtml5(testCase.getName()) + (" (" + escapeHtml5(testCase.getTestSuite().getName()) + ")");
+					if (testCase.getStatusText() != null && !testCase.getStatusText().equalsIgnoreCase(testCase.getStatus().name().replace("_", " "))) 
 						name = name + escapeHtml5(" [" + testCase.getStatusText() + "]");
-					}
 					item.add(new Label("name", name).setEscapeModelStrings(false));
 					if (getReport().hasTestCaseDuration())
 						item.add(new Label("duration", DurationFormatUtils.formatDuration(testCase.getDuration(), "s.SSS 's'")));

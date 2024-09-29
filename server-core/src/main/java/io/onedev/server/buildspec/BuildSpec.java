@@ -2148,5 +2148,19 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		});
 	}
+
+	private void migrate36(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				var stepType = stepNode.getTag().getValue();
+				if (stepType.equals("!PublishCheckstyleReportStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "tabWidth"),
+							new ScalarNode(Tag.STR, "8")));
+				}
+			}
+		});
+	}
 	
 }

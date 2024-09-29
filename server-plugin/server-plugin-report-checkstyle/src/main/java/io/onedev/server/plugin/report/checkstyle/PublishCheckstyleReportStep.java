@@ -34,7 +34,7 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final int TAB_WIDTH = 8;
+	private int tabWidth = 8;
 	
 	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
@@ -79,9 +79,12 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 							Severity severity;
 							String severityStr = violationElement.attributeValue("severity");
 							if (severityStr.equalsIgnoreCase("error"))
+								severity = Severity.HIGH;
+							else if (severityStr.equalsIgnoreCase("warning"))
 								severity = Severity.MEDIUM;
 							else
 								severity = Severity.LOW;
+								
 							String message = violationElement.attributeValue("source") + ": " 
 									+ HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
 							int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
@@ -90,9 +93,9 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 							PlanarRange location;
 							if (column != null) {
 								int columnNo = Integer.parseInt(column)-1;
-								location = new PlanarRange(lineNo, columnNo, lineNo, -1, TAB_WIDTH);
+								location = new PlanarRange(lineNo, columnNo, lineNo, -1, tabWidth);
 							} else {
-								location = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
+								location = new PlanarRange(lineNo, -1, lineNo, -1, tabWidth);
 							}
 							
 							problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), message));
@@ -110,5 +113,15 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 
 		return problems;
 	}
+	
+	@Editable(order=1000, group="More Settings", description="Specify tab width used to calculate " +
+			"column value of found problems in provided report")
+	public int getTabWidth() {
+		return tabWidth;
+	}
 
+	public void setTabWidth(int tabWidth) {
+		this.tabWidth = tabWidth;
+	}
+	
 }

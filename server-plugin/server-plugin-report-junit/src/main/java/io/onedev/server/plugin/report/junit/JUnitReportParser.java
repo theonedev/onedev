@@ -1,26 +1,23 @@
 package io.onedev.server.plugin.report.junit;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.Build;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.search.code.CodeSearchManager;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class JUnitReportParser {
 
-	public static List<TestCase> parse(Build build, Document doc) {
+	public static List<TestCase> parse(Document doc) {
 		List<TestCase> testCases = new ArrayList<>();
 		Element rootElement = doc.getRootElement();
 
@@ -58,12 +55,7 @@ public class JUnitReportParser {
 			else
 				status = Status.PASSED;
 			
-			var symbolHit = OneDev.getInstance(CodeSearchManager.class).findPrimarySymbol(
-					build.getProject(), build.getCommitId(), name, ".");
-			
-			var blobPath = symbolHit != null? symbolHit.getBlobPath(): null;
-			var position = symbolHit != null? symbolHit.getHitPos(): null;
-			TestSuite testSuite = new TestSuite(name, status, duration, blobPath, position) {
+			TestSuite testSuite = new TestSuite(name, status, duration, null, null) {
 
 				@Nullable
 				@Override
@@ -86,7 +78,7 @@ public class JUnitReportParser {
 				} else {
 					duration = getDouble(testCaseElement.attributeValue("time"));
 					status = Status.PASSED;
-					String message = null;
+					String message;
 					Element failureElement = testCaseElement.element("failure");
 					Element errorElement = testCaseElement.element("error");
 					if (failureElement != null) {
@@ -95,16 +87,16 @@ public class JUnitReportParser {
 					} else if (errorElement != null) {
 						status = Status.NOT_PASSED;
 						message = errorElement.getText();
+					} else {
+						message = null;
 					}
-					
-					var finalMessage = message;
 					testCases.add(new TestCase(testSuite, name, status, null, duration) {
 
 						@Nullable
 						@Override
 						protected Component renderDetail(String componentId, Build build) {
-							if (finalMessage != null)
-								return new Label(componentId, finalMessage);
+							if (message != null)
+								return new Label(componentId, message);
 							else 
 								return null;
 						}
