@@ -3,13 +3,14 @@ package io.onedev.server.plugin.report.ruff;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.BlobTarget;
+import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class RuffReportParser {
 	
@@ -33,7 +34,7 @@ public class RuffReportParser {
 				int endColumn = parseInt(problemNode.get("end_location").get("column").asText());
 				
 				var location = new PlanarRange(row-1, column-1, endRow-1, endColumn-1);
-				problems.add(new CodeProblem(CodeProblem.Severity.MEDIUM, new BlobTarget(blobPath.get(), location), message));
+				problems.add(new CodeProblem(CodeProblem.Severity.MEDIUM, new BlobTarget(blobPath.get(), location), escapeHtml5(message)));
 			}
 		}
 		return problems;

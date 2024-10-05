@@ -9,9 +9,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -20,7 +20,6 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
@@ -30,6 +29,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="SpotBugs Report")
 public class PublishSpotBugsReportStep extends PublishProblemReportStep {
@@ -92,7 +93,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						if (StringUtils.isBlank(message))
 							message = bugElement.elementText("ShortMessage");
 						
-						message = type + ": " + HtmlEscape.escapeHtml5(message);
+						message = type + ": " + message;
 						
 						PlanarRange location = getLocation(bugElement, true);
 
@@ -105,7 +106,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 						if (location == null) 
 							location = new PlanarRange(0, -1, 0, -1);
 
-						problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), message));
+						problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), escapeHtml5(message)));
 					} else {
 						logger.warning("Unable to find blob path for file: " + filePath);
 					}

@@ -1,5 +1,20 @@
 .problem-popover.popover {
-	max-width: 370px;
+	max-width: 360px;
+}
+@media(min-width: 600px) {
+	.problem-popover.popover {
+		max-width: 400px;
+	}
+}
+@media(min-width: 900px) {
+	.problem-popover.popover {
+		max-width: 600px;
+	}
+}
+@media(min-width: 1200px) {
+	.problem-popover.popover {
+		max-width: 900px;
+	}
 }
 .problem-popover .problem-content+.problem-content {
 	margin-top: 0.75rem;

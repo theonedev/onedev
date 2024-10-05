@@ -27,6 +27,7 @@
 		<module>server-plugin-buildspec-cmake</module>
 		<module>server-plugin-buildspec-bazel</module>
 		<module>server-plugin-buildspec-golang</module>
+		<module>server-plugin-buildspec-rust</module>
 		<module>server-plugin-authenticator-ldap</module>
 		<module>server-plugin-mailservice-smtpimap</module>
 		<module>server-plugin-mailservice-office365</module>
@@ -63,6 +64,7 @@
 		<module>server-plugin-report-ruff</module>
 		<module>server-plugin-report-mypy</module>
 		<module>server-plugin-report-cppcheck</module>
+		<module>server-plugin-report-clippy</module>
 		<module>server-plugin-sso-discord</module>
 		<module>server-plugin-notification-slack</module>
     	<module>server-plugin-notification-discord</module>

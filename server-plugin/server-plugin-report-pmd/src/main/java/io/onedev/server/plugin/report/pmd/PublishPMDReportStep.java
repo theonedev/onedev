@@ -9,9 +9,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -19,7 +19,6 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.unbescape.html.HtmlEscape;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
@@ -28,6 +27,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="PMD Report")
 public class PublishPMDReportStep extends PublishProblemReportStep {
@@ -92,7 +93,7 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 							else
 								severity = Severity.LOW;
 							
-							String message = type + ": " + HtmlEscape.escapeHtml5(violationElement.getText());
+							String message = escapeHtml5(type + ": " + violationElement.getText());
 							problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), message));
 						}
 					} else {

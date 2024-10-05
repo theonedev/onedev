@@ -1,7 +1,6 @@
 package io.onedev.server.plugin.report.cobertura;
 
 import com.google.common.io.Resources;
-import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CoverageStatus;
@@ -18,7 +17,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
-public class PublishCoberturaReportStepTest extends AppLoaderMocker {
+public class PublishCoberturaReportStepTest {
 
     @Test
     public void test() {
@@ -127,13 +126,4 @@ public class PublishCoberturaReportStepTest extends AppLoaderMocker {
 		}
     }
 
-	@Override
-	protected void setup() {
-		
-	}
-
-	@Override
-	protected void teardown() {
-
-	}
 }

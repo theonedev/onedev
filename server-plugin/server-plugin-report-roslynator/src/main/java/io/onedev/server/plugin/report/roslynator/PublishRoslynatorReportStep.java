@@ -10,9 +10,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -75,10 +75,10 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 				Map<String, String> messages = new HashMap<>();
 				for (var diagnosticElement: codeAnalysisElement.element("Summary").elements("Diagnostic")) {
 					var id = diagnosticElement.attributeValue("Id");
-					var message = escapeHtml5(diagnosticElement.attributeValue("Title"));
+					var message = diagnosticElement.attributeValue("Title");
 					var description = diagnosticElement.elementText("Description");
 					if (description != null)
-						message += "<br><br>" + escapeHtml5(description);
+						message += "\n\n" + description;
 					messages.put(id, message);
 				}
 				for (var projectElement: codeAnalysisElement.element("Projects").elements("Project")) {
@@ -112,7 +112,7 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 							int line = parseInt(locationElement.attributeValue("Line"));
 							int character = parseInt(locationElement.attributeValue("Character"));
 							var location = new PlanarRange(line-1, character-1, line-1, character);
-							problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), message));
+							problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), escapeHtml5(message)));
 						}
 					}
 				}

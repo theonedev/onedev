@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class CppcheckReportParser {
 	
@@ -69,7 +70,7 @@ public class CppcheckReportParser {
 						location = new PlanarRange(line-1, column-1, line-1, column);
 					else
 						location = new PlanarRange(line-1, -1, line-1, -1);						
-					problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), message.toString()));
+					problems.add(new CodeProblem(severity, new BlobTarget(blobPath, location), escapeHtml5(message.toString())));
 				}
 			}
 		}

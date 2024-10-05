@@ -319,7 +319,7 @@ public class ProblemReportPage extends BuildReportPage {
 								severityLabel.add(AttributeAppender.append("class", "badge-warning"));
 							else
 								severityLabel.add(AttributeAppender.append("class", "badge-secondary"));
-
+							
 							item.add(new Label("message", problem.getMessage()).setEscapeModelStrings(false));
 
 							if (problem.getTarget() instanceof BlobTarget 

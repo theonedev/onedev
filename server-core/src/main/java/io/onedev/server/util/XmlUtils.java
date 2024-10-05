@@ -3,8 +3,11 @@ package io.onedev.server.util;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.SAXException;
 
+import java.util.regex.Pattern;
+
 public class XmlUtils {
 	
+	private static final Pattern DOC_TYPE = Pattern.compile("<!DOCTYPE\\s.*?>", Pattern.DOTALL);
 	// Prevent XXE attack as the xml might be provided by malicious users
 	public static void disallowDocTypeDecl(SAXReader reader) {
 		try {
@@ -15,7 +18,7 @@ public class XmlUtils {
 	}
 	
 	public static String stripDoctype(String xml) {
-		return xml.replaceFirst("<!DOCTYPE\\s.*?>", "");
+		return DOC_TYPE.matcher(xml).replaceFirst("");
 	}
 
 }
