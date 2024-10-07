@@ -30,10 +30,10 @@ import io.onedev.server.web.component.issue.create.CreateIssuePanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.iteration.IterationStatusLabel;
 import io.onedev.server.web.component.iteration.choice.AbstractIterationChoiceProvider;
 import io.onedev.server.web.component.iteration.choice.IterationChoiceResourceReference;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.select2.Response;
@@ -149,12 +149,10 @@ public abstract class IssueSidePanel extends Panel {
 		});
 		
 		String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
-		if (SecurityUtils.canManageIssues(getProject()) 
-				|| getIssue().getState().equals(initialState) && getIssue().getSubmitter().equals(SecurityUtils.getAuthUser())) {
+		if (SecurityUtils.canManageIssues(getProject())) 
 			addOrReplace(newDeleteLink("delete"));		
-		} else {
+		else 
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
-		}
 		
 		super.onBeforeRender();
 	}
