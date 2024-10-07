@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class MypyReportParserTest {
 
@@ -41,27 +42,27 @@ public class MypyReportParserTest {
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
 			assertEquals("6.1-6.2-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			assertEquals("torchtune/utils/_version.py", problem.getTarget().getGroupKey().getName());
-			assertEquals("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]", problem.getMessage());
+			assertEquals(escapeHtml5("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]"), problem.getMessage());
 
 			problem = problems.get(1);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
 			assertEquals("10.1-10.2-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
 			assertEquals("torchtune/utils:/_device.py", problem.getTarget().getGroupKey().getName());
-			assertEquals("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]", problem.getMessage());
+			assertEquals(escapeHtml5("Cannot find implementation or library stub for module named \"torch\"  [import-not-found]"), problem.getMessage());
 
 			problem = problems.get(2);
 			assertEquals(CodeProblem.Severity.LOW, problem.getSeverity());
-			assertEquals("PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True", problem.getMessage());
+			assertEquals(escapeHtml5("PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True"), problem.getMessage());
 
 			problem = problems.get(4);
 			assertEquals(CodeProblem.Severity.MEDIUM, problem.getSeverity());
 			assertEquals("88.5-135.22-1", ((BlobTarget)problem.getTarget()).getLocation().toString());
-			assertEquals("" +
-					"Signature of \"encode\" incompatible with supertype \"BaseTokenizer\"  [override]\n" +
+			assertEquals(
+					escapeHtml5("Signature of \"encode\" incompatible with supertype \"BaseTokenizer\"  [override]\n" +
 					"    Superclass:\n" +
 					"        def encode(self, text: str, **kwargs: dict[str, Any]) -> list[int]\n" +
 					"    Subclass:\n" +
-					"        def encode(self, text: str, add_bos: bool = ..., add_eos: bool = ...) -> list[int]", 
+					"        def encode(self, text: str, add_bos: bool = ..., add_eos: bool = ...) -> list[int]"), 
 					problem.getMessage());
 			
 			assertEquals(CodeProblem.Severity.MEDIUM, problems.get(5).getSeverity());
