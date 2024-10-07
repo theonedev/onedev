@@ -154,30 +154,32 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 								
 							});
 						}
-						if (getUser().getEmailAddresses().size() > 1) {
-							menuItems.add(new MenuItem() {
+						menuItems.add(new MenuItem() {
 
-								@Override
-								public String getLabel() {
-									return "Delete";
-								}
+							@Override
+							public String getLabel() {
+								return "Delete";
+							}
 
-								@Override
-								public WebMarkupContainer newLink(String id) {
-									Link<Void> link = new Link<Void>(id) {
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								var link = new Link<Void>(id) {
 
-										@Override
-										public void onClick() {
+									@Override
+									public void onClick() {
+										if (getUser().getEmailAddresses().size() > 1)
 											getEmailAddressManager().delete(getEmailAddressManager().load(addressId));
-										}
+										else 
+											Session.get().warn("Can not delete as at least one email address should be provided");
+									}
 
-									};
+								};
+								if (getUser().getEmailAddresses().size() > 1)
 									link.add(new ConfirmClickModifier("Do you really want to delete this email address?"));
-									return link;
-								}
-								
-							});
-						}
+								return link;
+							}
+							
+						});
 						return menuItems;
 					}
 
