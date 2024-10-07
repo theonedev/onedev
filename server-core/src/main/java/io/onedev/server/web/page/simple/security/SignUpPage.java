@@ -27,8 +27,7 @@ import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
-import static io.onedev.server.model.User.PROP_GUEST;
-import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.User.*;
 
 @SuppressWarnings("serial")
 public class SignUpPage extends SimplePage {
@@ -51,7 +50,7 @@ public class SignUpPage extends SimplePage {
 		super.onInitialize();
 	
 		NewUserBean newUserBean = new NewUserBean();
-		BeanEditor editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_GUEST, PROP_NOTIFY_OWN_EVENTS), true);
+		BeanEditor editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_GUEST, PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

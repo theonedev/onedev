@@ -14,6 +14,9 @@ import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
 
+import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+
 @SuppressWarnings("serial")
 public class PreferencesEditPanel extends GenericPanel<User> {
 
@@ -31,7 +34,7 @@ public class PreferencesEditPanel extends GenericPanel<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+		editor = BeanContext.editModel("editor", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -46,8 +49,8 @@ public class PreferencesEditPanel extends GenericPanel<User> {
 			public void setObject(Serializable object) {
 				editor.getDescriptor().copyProperties(object, getUser());
 			}
-			
-		}, Sets.newHashSet(User.PROP_NOTIFY_OWN_EVENTS), false);
+
+		}, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), false);
 		
 		Form<?> form = new Form<Void>("form") {
 

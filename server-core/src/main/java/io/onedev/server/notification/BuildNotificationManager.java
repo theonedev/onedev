@@ -116,16 +116,19 @@ public class BuildNotificationManager {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {
-				for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					String commonName = NamedQuery.getCommonName(name);
-					if (commonName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-								NamedQuery.find(project.getNamedBuildQueries(), commonName));
-					}
-					String personalName = NamedQuery.getPersonalName(name);
-					if (personalName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-								NamedQuery.find(personalization.getQueries(), personalName));
+				var user = personalization.getUser();
+				if (!user.isDisableWatchNotifications()) {
+					for (String name : personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+						String commonName = NamedQuery.getCommonName(name);
+						if (commonName != null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user,
+									NamedQuery.find(project.getNamedBuildQueries(), commonName));
+						}
+						String personalName = NamedQuery.getPersonalName(name);
+						if (personalName != null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user,
+									NamedQuery.find(personalization.getQueries(), personalName));
+						}
 					}
 				}
 			}

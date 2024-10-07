@@ -27,6 +27,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
+import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 
 @SuppressWarnings("serial")
@@ -44,7 +45,7 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_NOTIFY_OWN_EVENTS), true);
+		var editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
