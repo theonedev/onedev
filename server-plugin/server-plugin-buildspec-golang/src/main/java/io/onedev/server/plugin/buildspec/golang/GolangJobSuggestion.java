@@ -108,7 +108,7 @@ public class GolangJobSuggestion implements JobSuggestion {
 					"go install github.com/AlekSi/gocov-xml@@latest\n" +
 					"go install github.com/jstemmer/go-junit-report/v2@@latest\n" +
 					"set +e\n" +
-					"# Turn off vet as the optional golangci-lint can do this\n" +
+					"# Turn off vet as the \"check and lint\" step can do this \n" +
 					"go test -vet=off -v -coverprofile=coverage.out ./... > test-result.out\n" +
 					"TEST_STATUS=$?\n" +
 					"go-junit-report -in test-result.out -out test-result.xml -set-exit-code\n" +
