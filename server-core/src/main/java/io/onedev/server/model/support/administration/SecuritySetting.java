@@ -3,6 +3,7 @@ package io.onedev.server.model.support.administration;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.GroupChoice;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
@@ -26,6 +27,8 @@ public class SecuritySetting implements Serializable {
 	private boolean enableAnonymousAccess = false;
 	
 	private boolean enableSelfRegister = true;
+	
+	private String allowedSelfRegisterEmailDomain;
 	
 	private boolean selfRegisterAsGuest = false;
 	
@@ -53,6 +56,17 @@ public class SecuritySetting implements Serializable {
 
 	public void setEnableSelfRegister(boolean enableSelfRegister) {
 		this.enableSelfRegister = enableSelfRegister;
+	}
+
+	@Editable(order=225, name="Allowed Self Sign-Up Email Domain", description = "Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match")
+	@Patterns
+	@ShowCondition("isEnableSelfRegisterEnabled")
+	public String getAllowedSelfRegisterEmailDomain() {
+		return allowedSelfRegisterEmailDomain;
+	}
+
+	public void setAllowedSelfRegisterEmailDomain(String allowedSelfRegisterEmailDomain) {
+		this.allowedSelfRegisterEmailDomain = allowedSelfRegisterEmailDomain;
 	}
 
 	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")

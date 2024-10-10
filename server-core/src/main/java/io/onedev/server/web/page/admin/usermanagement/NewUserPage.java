@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
 import com.google.common.collect.Sets;
+import io.onedev.server.web.util.editbean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -22,10 +23,8 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
-import io.onedev.server.web.util.editbean.NewUserBean;
 
 import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
@@ -33,7 +32,7 @@ import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 @SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {
 
-	private NewUserBean newUserBean = new NewUserBean();
+	private NewUserBean bean = new NewUserBean();
 	
 	private boolean continueToAdd;
 	
@@ -45,7 +44,7 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var editor = BeanContext.edit("editor", newUserBean, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
+		var editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -53,25 +52,25 @@ public class NewUserPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				User userWithSameName = getUserManager().findByName(newUserBean.getName());
+				User userWithSameName = getUserManager().findByName(bean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							"Login name already used by another account");
 				} 
 				
-				if (getEmailAddressManager().findByValue(newUserBean.getEmailAddress()) != null) {
+				if (getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
 							"Email address already used by another user");
 				} 
 				if (editor.isValid()){
 					User user = new User();
-					user.setName(newUserBean.getName());
-					user.setFullName(newUserBean.getFullName());
-					user.setGuest(newUserBean.isGuest());
-					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUserBean.getPassword()));
+					user.setName(bean.getName());
+					user.setFullName(bean.getFullName());
+					user.setGuest(bean.isGuest());
+					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
 					
 					EmailAddress emailAddress = new EmailAddress();
-					emailAddress.setValue(newUserBean.getEmailAddress());
+					emailAddress.setValue(bean.getEmailAddress());
 					emailAddress.setOwner(user);
 					emailAddress.setVerificationCode(null);
 					
@@ -87,8 +86,8 @@ public class NewUserPage extends AdministrationPage {
 					
 					Session.get().success("New user created");
 					if (continueToAdd) {
-						newUserBean = new NewUserBean();
-						replace(BeanContext.edit("editor", newUserBean));
+						bean = new NewUserBean();
+						replace(BeanContext.edit("editor", bean));
 					} else {
 						setResponsePage(UserProfilePage.class, UserProfilePage.paramsOf(user));
 					}
