@@ -64,24 +64,24 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 			@Override
 			protected void populateItem(ListItem<EmailAddress> item) {
-				EmailAddress address = item.getModelObject();
-				item.add(new Label("value", address.getValue()));
+				EmailAddress emailAddress = item.getModelObject();
+				item.add(new Label("value", emailAddress.getValue()));
 				
 				item.add(new WebMarkupContainer("primary")
-						.setVisible(address.equals(getUser().getPrimaryEmailAddress())));
+						.setVisible(emailAddress.equals(getUser().getPrimaryEmailAddress())));
 				item.add(new WebMarkupContainer("git")
-						.setVisible(address.equals(getUser().getGitEmailAddress())));
+						.setVisible(emailAddress.equals(getUser().getGitEmailAddress())));
 				
-				item.add(new EmailAddressVerificationStatusBadge("verificationStatus", item.getModel())); 
+				item.add(new EmailAddressVerificationStatusBadge("verificationStatus", item.getModel()));
 				
+				Long emailAddressId = emailAddress.getId();
 				item.add(new MenuLink("operations") {
 
 					@Override
 					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 						List<MenuItem> menuItems = new ArrayList<>();
-						EmailAddress address = item.getModelObject();
-						Long addressId = address.getId();
-						if (!address.equals(getUser().getPrimaryEmailAddress())) {
+						var emailAddress = getEmailAddressManager().load(emailAddressId);
+						if (!emailAddress.equals(getUser().getPrimaryEmailAddress())) {
 							menuItems.add(new MenuItem() {
 
 								@Override
@@ -95,7 +95,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().setAsPrimary(getEmailAddressManager().load(addressId));
+											getEmailAddressManager().setAsPrimary(getEmailAddressManager().load(emailAddressId));
 										}
 										
 									};
@@ -103,7 +103,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 								
 							});
 						}
-						if (!address.equals(getUser().getGitEmailAddress())) {
+						if (!emailAddress.equals(getUser().getGitEmailAddress())) {
 							menuItems.add(new MenuItem() {
 
 								@Override
@@ -117,7 +117,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().useForGitOperations(getEmailAddressManager().load(addressId));
+											getEmailAddressManager().useForGitOperations(getEmailAddressManager().load(emailAddressId));
 										}
 										
 									};
@@ -125,7 +125,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 								
 							});
 						}
-						if (!address.isVerified()) {
+						if (!emailAddress.isVerified()) {
 							menuItems.add(new MenuItem() {
 
 								@Override
@@ -163,14 +163,15 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 							@Override
 							public WebMarkupContainer newLink(String id) {
+								var hasMultipleEmailAddresses = getUser().getEmailAddresses().size() > 1;
 								var link = new Link<Void>(id) {
 
 									@Override
 									public void onClick() {
-										if (getUser().getEmailAddresses().size() > 1)
-											getEmailAddressManager().delete(getEmailAddressManager().load(addressId));
+										if (hasMultipleEmailAddresses)
+											getEmailAddressManager().delete(getEmailAddressManager().load(emailAddressId));
 										else 
-											Session.get().warn("Can not delete as at least one email address should be provided");
+											Session.get().warn("At least one email address should be configured, please add a new one first");
 									}
 
 								};

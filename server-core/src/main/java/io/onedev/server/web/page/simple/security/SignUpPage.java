@@ -1,10 +1,24 @@
 package io.onedev.server.web.page.simple.security;
 
 import com.google.common.collect.Sets;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.match.StringMatcher;
-import io.onedev.commons.utils.match.WildcardUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.HomePage;
+import io.onedev.server.web.page.simple.SimplePage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
@@ -14,25 +28,8 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.HomePage;
-import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.util.editbean.NewUserBean;
-import org.eclipse.jgit.ignore.internal.WildCardMatcher;
-
 import static io.onedev.server.model.User.*;
+import static io.onedev.server.web.page.simple.security.SignUpBean.PROP_EMAIL_ADDRESS;
 
 @SuppressWarnings("serial")
 public class SignUpPage extends SimplePage {
@@ -74,13 +71,13 @@ public class SignUpPage extends SimplePage {
 					var emailDomain = StringUtils.substringAfter(bean.getEmailAddress(), "@").toLowerCase();
 					var patternSet = PatternSet.parse(getSecuritySetting().getAllowedSelfRegisterEmailDomain().toLowerCase());
 					if (!patternSet.matches(new StringMatcher(), emailDomain)) {
-						editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
+						editor.error(new Path(new PathNode.Named(PROP_EMAIL_ADDRESS)),
 								"This email domain is not accepted for self sign-up");
 						invalidEmailAddress = true;
 					}
 				}
 				if (!invalidEmailAddress && getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
-					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
+					editor.error(new Path(new PathNode.Named(PROP_EMAIL_ADDRESS)),
 							"Email address already used by another user");
 				} 
 				if (editor.isValid()) {
