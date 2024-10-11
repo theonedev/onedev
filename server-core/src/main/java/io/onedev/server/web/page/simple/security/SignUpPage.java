@@ -22,6 +22,7 @@ import io.onedev.server.web.page.simple.SimplePage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
@@ -110,7 +111,7 @@ public class SignUpPage extends SimplePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(HomePage.class);
+				throw new RestartResponseException(HomePage.class);
 			}
 			
 		});
