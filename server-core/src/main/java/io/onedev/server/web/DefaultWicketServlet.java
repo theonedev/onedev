@@ -40,7 +40,10 @@ public class DefaultWicketServlet extends WicketServlet {
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 		sessionManager.run(() -> {
-			((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+			var httpRes = (HttpServletResponse) res;
+			httpRes.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+			// Disable cloudflare suggested prefetch to fix OD-2120
+			httpRes.setHeader("Speculation-Rules", "/prefetch.json");
 			try {
 				super.service(req, res);
 			} catch (ServletException | IOException e) {
