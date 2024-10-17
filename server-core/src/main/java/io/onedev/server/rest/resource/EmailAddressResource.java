@@ -86,7 +86,7 @@ public class EmailAddressResource {
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
-		if (owner.isExternalManaged())
+		if (owner.getPassword() == null)
 			throw new ExplicitException("Can not set primary email address for externally authenticated user");
 		
 		emailAddressManager.setAsPrimary(emailAddress);
@@ -133,7 +133,7 @@ public class EmailAddressResource {
 		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		
-		if (emailAddress.isPrimary() && emailAddress.getOwner().isExternalManaged()) {
+		if (emailAddress.isPrimary() && emailAddress.getOwner().getPassword() == null) {
 			throw new ExplicitException("Can not delete primary email address of "
 					+ "externally authenticated user");
 		}

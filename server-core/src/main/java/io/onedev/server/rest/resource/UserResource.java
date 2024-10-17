@@ -307,22 +307,37 @@ public class UserResource {
     @POST
     public Response setPassword(@PathParam("userId") Long userId, @NotEmpty String password) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) { 
-			throw new UnauthorizedException();
-    	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
-			if (user.getSsoConnector() != null) {
-				throw new ExplicitException("The user is currently authenticated via SSO provider '" 
-						+ user.getSsoConnector() + "', please change password there instead");
-			} else {
+		if (SecurityUtils.isAdministrator()) {
+			user.setPassword(passwordService.encryptPassword(password));
+			userManager.update(user, null);
+			return Response.ok().build();
+		} else if (user.equals(SecurityUtils.getAuthUser())) {
+			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
 						+ "please change password there instead");
-			}
-		} else {
-	    	user.setPassword(passwordService.encryptPassword(password));
-	    	userManager.update(user, null);
-	    	return Response.ok().build();
+			} else {
+				user.setPassword(passwordService.encryptPassword(password));
+				userManager.update(user, null);
+				return Response.ok().build();
+			}			
+    	} else {
+			throw new UnauthorizedException();
 		}
     }
+
+	@Api(order=2025)
+	@Path("/{userId}/two-factor-authentication")
+	@DELETE
+	public Response resetTwoFactorAuthentication(@PathParam("userId") Long userId) {
+		User user = userManager.load(userId);
+		if (SecurityUtils.isAdministrator()) {
+			user.setTwoFactorAuthentication(null);
+			userManager.update(user, null);
+			return Response.ok().build();
+		} else {
+			throw new UnauthorizedException();
+		}
+	}
 	
 	@Api(order=2050)
 	@Path("/{userId}/guest")

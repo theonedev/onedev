@@ -70,7 +70,6 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 		if (userName.contains("@"))
 			userName = StringUtils.substringBefore(userName, "@");
 		user.setName(UserNameValidator.suggestUserName(userName));
-		user.setPassword(User.EXTERNAL_MANAGED);
 		user.setGuest(createAsGuest);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
@@ -117,7 +116,6 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 			emailAddress.setGit(true);
 			emailAddressManager.create(emailAddress);
 		}
-		user.setSsoConnector(null);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.update(user, null);
@@ -141,7 +139,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 				else 
 					user = userManager.findByName(userNameOrEmailAddressValue);
 				if (user != null) {
-					if (user.isExternalManaged()) {
+					if (user.getPassword() == null) {
 						Authenticator authenticator = settingManager.getAuthenticator();
 						if (authenticator != null) {
 							UsernamePasswordToken authToken = (UsernamePasswordToken) token;

@@ -31,10 +31,6 @@ public interface UserManager extends EntityManager<User> {
 	void delete(User user);
 	
 	void delete(Collection<User> users);
-	
-	void useInternalAuthentication(Collection<User> users);
-	
-	void useExternalAuthentication(Collection<User> users);
 
 	void setAsGuest(Collection<User> users, boolean guest);
 	
@@ -88,10 +84,6 @@ public interface UserManager extends EntityManager<User> {
 	List<User> query(@Nullable String term, int firstResult, int maxResults);
 	
 	int count(String term);
-	
-	void onRenameSsoConnector(String oldName, String newName);
-	 
-	void onDeleteSsoConnector(String name);
 	
 	UserCache cloneCache();
 	

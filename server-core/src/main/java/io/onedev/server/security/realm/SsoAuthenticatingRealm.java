@@ -48,8 +48,6 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 		User user = new User();
 		user.setName(authenticated.getUserName());
 		user.setGuest(authenticated.getConnector().isCreateUserAsGuest());
-		user.setSsoConnector(authenticated.getConnector().getName());
-		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);
@@ -78,8 +76,6 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 	private void updateUser(EmailAddress emailAddress, SsoAuthenticated authenticated) {
 		User user = emailAddress.getOwner();
 		user.setName(authenticated.getUserName());
-		user.setSsoConnector(authenticated.getConnector().getName());
-		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.update(user, null);

@@ -199,12 +199,12 @@ public abstract class LayoutPage extends BasePage {
 							new PageParameters(), Lists.newArrayList(NewGroupPage.class, GroupPage.class)));
 
 					List<SidebarMenuItem> authenticationMenuItems = new ArrayList<>();
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication",
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Authenticator",
 							AuthenticatorPage.class, new PageParameters()));
 					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On",
 							SsoConnectorListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authentication Source", authenticationMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "External Auth Source", authenticationMenuItems));
 
 					var sshPort = OneDev.getInstance(ServerConfig.class).getSshPort();
 					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
@@ -804,9 +804,13 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
-		if (getPage() instanceof MyPasswordPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (loginUser != null && loginUser.getPassword() != null) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
+			if (getPage() instanceof MyPasswordPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myPassword").setVisible(false));
+		}
 
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
@@ -828,7 +832,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLoginUser().isEnforce2FA() && getLoginUser().getSsoConnector() == null);
+				setVisible(getLoginUser().isEnforce2FA());
 			}
 		});
 		if (getPage() instanceof MyTwoFactorAuthenticationPage)

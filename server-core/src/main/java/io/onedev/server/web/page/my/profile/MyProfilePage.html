@@ -1,9 +1,10 @@
 <wicket:extend>
-	<div class="card m-2 m-sm-5">
-		<div class="card-body">
-			<div wicket:id="externalManagedNote" class="alert alert-warning alert-light-warning"></div>
-			<div wicket:id="content"></div>
-			<a wicket:id="delete" class="btn btn-light-danger">Delete</a>
-		</div>
-	</div>
+	<div wicket:id="authSource" class="mb-4"></div>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
+		<div class="alert alert-light alert-notice">You are authenticating via internal database</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="authViaExternalSystemFrag">
+		<div class="alert alert-light-warning alert-notice">You are authenticating via external system</div>
+	</wicket:fragment>
 </wicket:extend>

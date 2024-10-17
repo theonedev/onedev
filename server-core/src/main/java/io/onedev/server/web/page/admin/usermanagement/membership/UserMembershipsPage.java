@@ -85,9 +85,6 @@ public class UserMembershipsPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("externalManagedNote", "Group membership of this user is managed from " + getUser().getAuthSource())
-				.setVisible(getUser().isMembershipExternalManaged()));
-		
 		TextField<String> searchField;
 		
 		add(searchField = new TextField<String>("filterGroups", Model.of(query)));
@@ -157,7 +154,7 @@ public class UserMembershipsPage extends UserPage {
 				response.render(JavaScriptHeaderItem.forReference(new GroupChoiceResourceReference()));
 			}
 			
-		}.setVisible(!getUser().isMembershipExternalManaged()));			
+		});			
 		
 		add(new MenuLink("delete") {
 
@@ -292,56 +289,49 @@ public class UserMembershipsPage extends UserPage {
 				return menuItems;
 			}
 			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getUser().isMembershipExternalManaged());
-			}
-			
 		});
 
 		List<IColumn<Membership, Void>> columns = new ArrayList<>();
 		
-		if (!getUser().isMembershipExternalManaged())
-			columns.add(selectionColumn = new SelectionColumn<Membership, Void>());
+		columns.add(selectionColumn = new SelectionColumn<>());
 		
-		columns.add(new AbstractColumn<Membership, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
-					IModel<Membership> rowModel) {
+									 IModel<Membership> rowModel) {
 				Membership membership = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "groupFrag", UserMembershipsPage.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("group", GroupProfilePage.class, 
+				Link<Void> link = new BookmarkablePageLink<Void>("group", GroupProfilePage.class,
 						GroupProfilePage.paramsOf(membership.getGroup())) {
 
 					@Override
 					public IModel<?> getBody() {
 						return Model.of(rowModel.getObject().getGroup().getName());
 					}
-					
+
 				};
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
 		});
 		
-		columns.add(new AbstractColumn<Membership, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<>(Model.of("Description")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
-					IModel<Membership> rowModel) {
+									 IModel<Membership> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getGroup().getDescription()));
 			}
 		});
 		
-		dataProvider = new SortableDataProvider<Membership, Void>() {
+		dataProvider = new SortableDataProvider<>() {
 
 			@Override
 			public Iterator<? extends Membership> iterator(long first, long count) {
 				EntityCriteria<Membership> criteria = getCriteria();
 				criteria.addOrder(Order.desc("id"));
-				return OneDev.getInstance(MembershipManager.class).query(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(MembershipManager.class).query(criteria, (int) first, (int) count).iterator();
 			}
 
 			@Override
@@ -352,18 +342,18 @@ public class UserMembershipsPage extends UserPage {
 			@Override
 			public IModel<Membership> model(Membership object) {
 				Long id = object.getId();
-				return new LoadableDetachableModel<Membership>() {
+				return new LoadableDetachableModel<>() {
 
 					@Override
 					protected Membership load() {
 						return OneDev.getInstance(MembershipManager.class).load(id);
 					}
-					
+
 				};
 			}
 		};
 		
-		add(membershipsTable = new DefaultDataTable<Membership, Void>("memberships", columns, dataProvider, 
+		add(membershipsTable = new DefaultDataTable<>("memberships", columns, dataProvider,
 				WebConstants.PAGE_SIZE, null));
 	}
 

@@ -12,7 +12,7 @@ public class AuthenticatorBean implements Serializable {
 
 	private Authenticator authenticator;
 
-	@Editable(placeholder="No external authentication")
+	@Editable(placeholder="No external authenticator")
 	public Authenticator getAuthenticator() {
 		return authenticator;
 	}

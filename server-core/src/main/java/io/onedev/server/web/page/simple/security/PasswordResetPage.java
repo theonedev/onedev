@@ -58,7 +58,7 @@ public class PasswordResetPage extends SimplePage {
 			
 			Form<?> form = new Form<Void>("form");
 			form.add(new FencedFeedbackPanel("feedback", form));
-			form.add(new TextField<String>("loginNameOrEmail", new IModel<String>() {
+			form.add(new TextField<>("loginNameOrEmail", new IModel<String>() {
 
 				@Override
 				public void detach() {
@@ -87,13 +87,14 @@ public class PasswordResetPage extends SimplePage {
 
 				@Override
 				protected TaskResult runTask(TaskLogger logger) {
-					OneDev.getInstance(SessionManager.class).openSession();
-					try {
+					return OneDev.getInstance(SessionManager.class).call(() -> {
 						User user = getUserManager().findByName(loginNameOrEmail);
 						if (user == null)
 							user = getUserManager().findByVerifiedEmailAddress(loginNameOrEmail);
 						if (user == null) {
 							throw new ExplicitException("No user found with login name or verified email: " + loginNameOrEmail);
+						} else if (user.getPassword() == null) {
+							throw new ExplicitException("Can not reset password for user authenticating via external system");
 						} else {
 							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 							if (settingManager.getMailService() != null) {
@@ -131,12 +132,10 @@ public class PasswordResetPage extends SimplePage {
 
 								return new TaskResult(true, new PlainMessage("Please check your email for password reset instructions"));
 							} else {
-								return new TaskResult(false, new PlainMessage("Unable to send password reset email as smtp settings are not defined"));
+								return new TaskResult(false, new PlainMessage("Unable to send password reset email as mail service is not configured"));
 							}
 						}
-					} finally {
-						OneDev.getInstance(SessionManager.class).closeSession();
-					}
+					});
 				}
 
 			});
@@ -163,7 +162,6 @@ public class PasswordResetPage extends SimplePage {
 						super.onSubmit();
 						var user = getUserManager().load(userId);
 						user.setPasswordResetCode(null);
-						user.setSsoConnector(null);
 						user.setPassword(OneDev.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 						getUserManager().update(user, null);
 						Session.get().success("Password changed. Please login with your new password");
@@ -183,7 +181,7 @@ public class PasswordResetPage extends SimplePage {
 			} else {
 				throw new ExplicitException("Password reset url is invalid or obsolete");
 			}
-		} 
+		}  
 	}
 	
 	private UserManager getUserManager() {

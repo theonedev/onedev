@@ -1,13 +1,10 @@
 package io.onedev.server.security;
 
-import java.util.regex.Pattern;
-
-import javax.inject.Singleton;
-
+import io.onedev.commons.utils.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.User;
+import javax.inject.Singleton;
+import java.util.regex.Pattern;
 
 @Singleton
 public class DefaultPasswordService implements PasswordService {
@@ -29,7 +26,7 @@ public class DefaultPasswordService implements PasswordService {
 
     @Override
     public boolean passwordsMatch(Object submittedPlaintext, String encrypted) {
-    	if (encrypted.equals(User.EXTERNAL_MANAGED)) {
+    	if (encrypted.length() == 0) {
     		return true;
     	} else {
             String raw;

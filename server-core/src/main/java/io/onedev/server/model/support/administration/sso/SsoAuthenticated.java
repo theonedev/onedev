@@ -38,7 +38,7 @@ public class SsoAuthenticated extends Authenticated implements AuthenticationTok
 
 	@Override
 	public Object getCredentials() {
-		return User.EXTERNAL_MANAGED;
+		return null;
 	}
 
 }

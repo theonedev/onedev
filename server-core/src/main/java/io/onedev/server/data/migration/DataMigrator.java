@@ -7047,5 +7047,22 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate178(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var ssoConnectorElement = element.element("ssoConnector");
+					if (ssoConnectorElement != null)
+						ssoConnectorElement.detach();
+					var passwordElement = element.element("password");
+					if (passwordElement.getText().trim().equals("external_managed"))
+						passwordElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

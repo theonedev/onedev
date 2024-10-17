@@ -1,17 +1,17 @@
-package io.onedev.server.web.page.my.twofactorauthentication;
+package io.onedev.server.web.page.admin.usermanagement.twofactorauthentication;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationStatusPanel;
-import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
-public class MyTwoFactorAuthenticationPage extends MyPage {
+public class UserTwoFactorAuthenticationPage extends UserPage {
 
-	public MyTwoFactorAuthenticationPage(PageParameters params) {
+	public UserTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
 	}
 	
@@ -19,13 +19,13 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (!getLoginUser().isEnforce2FA())
+		if (!getUser().isEnforce2FA())
 			throw new ExplicitException("Two-factor authentication not enabled");
-		
+
 		add(new TwoFactorAuthenticationStatusPanel("content") {
 			@Override
 			protected User getUser() {
-				return getLoginUser();
+				return UserTwoFactorAuthenticationPage.this.getUser();
 			}
 		});
 	}

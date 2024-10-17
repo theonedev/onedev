@@ -56,6 +56,7 @@ import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.usermanagement.preferences.UserPreferencesPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
@@ -233,6 +234,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/access-tokens", UserAccessTokensPage.class));
+		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~administration/users/${user}/preferences", UserPreferencesPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));
 		add(new BasePageMapper("~administration/invitations/new", NewInvitationPage.class));

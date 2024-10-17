@@ -69,6 +69,4 @@ public abstract class SsoConnector implements Serializable {
 	
 	public abstract void initiateLogin();
 
-	public abstract boolean isManagingMemberships();
-
 }

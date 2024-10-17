@@ -14,8 +14,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pack.NamedPackQuery;
@@ -37,14 +35,13 @@ import javax.validation.constraints.NotEmpty;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.onedev.server.model.User.*;
+import static io.onedev.server.model.User.PROP_FULL_NAME;
+import static io.onedev.server.model.User.PROP_NAME;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
 
 @Entity
-@Table(
-		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME), 
-				@Index(columnList=PROP_SSO_CONNECTOR)})
+@Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -63,15 +60,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String UNKNOWN_NAME = "unknown";
 	
-	public static final String EXTERNAL_MANAGED = "external_managed";
-	
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_PASSWORD = "password";
 	
 	public static final String PROP_FULL_NAME = "fullName";
-	
-	public static final String PROP_SSO_CONNECTOR = "ssoConnector";
 	
 	public static final String PROP_GUEST = "guest";
 	
@@ -93,14 +86,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	private String passwordResetCode;
 
-    @Column(length=1024, nullable=false)
+    @Column(length=1024)
     @JsonIgnore
     private String password;
 
 	private String fullName;
-
-	@JsonIgnore
-	private String ssoConnector;
 	
 	private boolean guest;
 	
@@ -501,7 +491,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     @Override
     public Object getCredentials() {
-    	return password;
+    	return password!=null?password:"";
     }
 
     public Subject asSubject() {
@@ -518,10 +508,16 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public void setName(String name) {
     	this.name = name;
     }
-    
+
+	/**
+	 * Password will be null if user is created by external authenticator. However, when 
+	 * created via OneDev, it is required. So it has @NotEmpty and @Nullable in the same 
+	 * time
+	 */
 	@Editable(order=150)
 	@Password(needConfirm=true, autoComplete="new-password")
 	@NotEmpty
+	@Nullable
 	public String getPassword() {
 		return password;
 	}
@@ -532,7 +528,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
      * @param password
      * 			password to set
      */
-    public void setPassword(String password) {
+    public void setPassword(@Nullable String password) {
     	this.password = password;
     }
 
@@ -543,10 +539,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setPasswordResetCode(String passwordResetCode) {
 		this.passwordResetCode = passwordResetCode;
 	}
-
-	public boolean isExternalManaged() {
-    	return getPassword().equals(EXTERNAL_MANAGED);
-    }
     
 	@Editable(order=200)
 	public String getFullName() {
@@ -555,15 +547,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
-	}
-
-	@Nullable
-	public String getSsoConnector() {
-		return ssoConnector;
-	}
-
-	public void setSsoConnector(String ssoConnector) {
-		this.ssoConnector = ssoConnector;
 	}
 
 	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
@@ -741,33 +724,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setGpgKeys(Collection<GpgKey> gpgKeys) {
 		this.gpgKeys = gpgKeys;
 	}
-
-    public boolean isMembershipExternalManaged() {
-    	if (isExternalManaged()) {
-    		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-    		if (getSsoConnector() != null) {
-    			SsoConnector ssoConnector = settingManager.getSsoConnectors().stream()
-    					.filter(it->it.getName().equals(getSsoConnector()))
-    					.findFirst().orElse(null);
-    			return ssoConnector != null && ssoConnector.isManagingMemberships();
-    		} else {
-	    		Authenticator authenticator = settingManager.getAuthenticator();
-	    		return authenticator != null && authenticator.isManagingMemberships();
-    		}
-    	} else {
-    		return false;
-    	}
-    }
-
+	
     public String getAuthSource() {
-		if (isExternalManaged()) {
-			if (getSsoConnector() != null)
-				return "SSO Provider: " + getSsoConnector();
-			else
-				return "External Authenticator";
-		} else {
-			return "Builtin User Store";
-		}
+		if (getPassword() == null) 
+			return "External System";
+		else 
+			return "Internal Database";
     }
 
 	public Collection<Dashboard> getDashboards() {

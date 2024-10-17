@@ -36,8 +36,6 @@ import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.List;
 
-import static io.onedev.server.model.User.*;
-
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
 	
@@ -254,24 +252,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 	@Transactional
 	@Override
-	public void useInternalAuthentication(Collection<User> users) {
-		for (var user: users) {
-			user.setPassword(passwordService.encryptPassword(CryptoUtils.generateSecret()));
-			user.setSsoConnector(null);
-		}
-	}
-
-	@Transactional
-	@Override
-	public void useExternalAuthentication(Collection<User> users) {
-		for (var user: users) {
-			user.setPassword(EXTERNAL_MANAGED);
-			user.setSsoConnector(null);
-		}
-	}
-
-	@Transactional
-	@Override
 	public void setAsGuest(Collection<User> users, boolean guest) {
 		for (var user: users) {
 			user.setGuest(guest);
@@ -364,26 +344,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		for (User user: query())
 			cache.put(user.getId(), user.getFacade());
     }
-    
-	@Transactional
-	@Override
-	public void onRenameSsoConnector(String oldName, String newName) {
-    	Query<?> query = getSession().createQuery(String.format("update User set %s=:newName "
-    			+ "where %s=:oldName", PROP_SSO_CONNECTOR, PROP_SSO_CONNECTOR));
-    	query.setParameter("oldName", oldName);
-    	query.setParameter("newName", newName);
-    	query.executeUpdate();
-	}
-
-	@Transactional
-	@Override
-	public void onDeleteSsoConnector(String name) {
-    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s='12345' "
-    			+ "where %s=:name", 
-    			PROP_SSO_CONNECTOR, PROP_PASSWORD, PROP_SSO_CONNECTOR));
-    	query.setParameter("name", name);
-    	query.executeUpdate();
-	}
 
 	private Predicate[] getPredicates(CriteriaBuilder builder, CriteriaQuery<?> query, 
 			Root<User> root, String term) {

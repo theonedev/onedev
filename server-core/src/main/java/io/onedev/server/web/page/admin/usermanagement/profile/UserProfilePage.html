@@ -1,5 +1,14 @@
 <wicket:extend>
-	<div wicket:id="externalManagedNote" class="alert alert-notice alert-light-warning"></div>
+	<div wicket:id="authSource" class="mb-4"></div>
 	<div wicket:id="content"></div>
-	<a wicket:id="delete" class="btn btn-light-danger">Delete</a>
+	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
+		<div class="alert alert-light alert-notice">This user is authenticating via internal database.
+			<a wicket:id="removePassword">Remove password</a> to force the user to authenticate via external system
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="authViaExternalSystemFrag">
+		<div class="alert alert-light-warning alert-notice">This user is authenticating via external system.
+			To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <form wicket:id="tellUserToResetPassword" class="d-inline"><a wicket:id="tellUserToResetPassword">tell user to reset password</a></form>
+		</div>
+	</wicket:fragment>
 </wicket:extend>

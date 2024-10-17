@@ -1,8 +1,5 @@
 package io.onedev.server.plugin.sso.openid;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
@@ -15,10 +12,12 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
-
 import io.onedev.server.annotation.Editable;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Editable(name="Twitch", order=200, description = "Single sign on via twitch.tv")
 public class TwitchConnector extends OpenIdConnector {
@@ -46,11 +45,6 @@ public class TwitchConnector extends OpenIdConnector {
 	@Override
 	public String getGroupsClaim() {
 		return super.getGroupsClaim();
-	}
-
-	@Override
-	public boolean isManagingMemberships() {
-		return false;
 	}
 
 	@Override

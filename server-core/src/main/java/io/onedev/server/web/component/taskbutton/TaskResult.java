@@ -27,7 +27,7 @@ public class TaskResult implements Serializable {
 				successful? "alert-light-success": "alert-light-danger", message.getHtmlText());
 	}
 
-	public static interface Message extends Serializable {
+	public interface Message extends Serializable {
 		
 		String getHtmlText();
 	}

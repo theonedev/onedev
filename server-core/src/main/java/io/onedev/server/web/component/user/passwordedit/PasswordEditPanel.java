@@ -8,8 +8,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import java.util.HashSet;
@@ -43,9 +46,13 @@ public class PasswordEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
+				if (getUser().getPassword() != null)
+					Session.get().success("Password has been changed");
+				else
+					Session.get().success("Password has been set");
+					
 				getUser().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 				OneDev.getInstance(UserManager.class).update(getUser(), null);
-				Session.get().success("Password has been changed");
 
 				bean.setOldPassword(null);
 				
@@ -56,6 +63,12 @@ public class PasswordEditPanel extends GenericPanel<User> {
 		add(form);
 		
 		form.add(BeanContext.edit("editor", bean, excludedProperties, true));
+		form.add(new Button("submit").add(AttributeAppender.append("value", new AbstractReadOnlyModel<>() {
+			@Override
+			public String getObject() {
+				return getUser().getPassword()!=null?"Change":"Set";
+			}
+		})));
 	}
 	
 }

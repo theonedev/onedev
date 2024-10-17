@@ -75,11 +75,6 @@ public class OpenIdConnector extends SsoConnector {
 		ResourceReference logo = new PackageResourceReference(OpenIdConnector.class, "openid.png");
 		buttonImageUrl = RequestCycle.get().urlFor(logo, new PageParameters()).toString();
 	}
-	
-	@Override
-	public boolean isManagingMemberships() {
-		return getGroupsClaim() != null;
-	}
 
 	@Editable(order=100, description="Name of the provider will serve two purpose: "
 			+ "<ul>"

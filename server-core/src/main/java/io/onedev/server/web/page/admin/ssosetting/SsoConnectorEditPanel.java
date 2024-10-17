@@ -1,9 +1,14 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -13,16 +18,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 abstract class SsoConnectorEditPanel extends Panel {
@@ -93,15 +90,10 @@ abstract class SsoConnectorEditPanel extends Panel {
 
 						@Override
 						public void run() {
-							if (connectorIndex != -1) { 
-								String oldName = getConnectors().get(connectorIndex).getName();
-								String newName = bean.getConnector().getName();
-								if (!oldName.equals(newName)) 
-									OneDev.getInstance(UserManager.class).onRenameSsoConnector(oldName, newName);
+							if (connectorIndex != -1)  
 								getConnectors().set(connectorIndex, bean.getConnector());
-							} else { 
+							else 
 								getConnectors().add(bean.getConnector());
-							}
 							OneDev.getInstance(SettingManager.class).saveSsoConnectors(getConnectors());
 						}
 						

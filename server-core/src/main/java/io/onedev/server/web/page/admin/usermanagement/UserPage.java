@@ -18,6 +18,7 @@ import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.usermanagement.preferences.UserPreferencesPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.util.UserAware;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -53,13 +54,13 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		Long userId = Long.valueOf(userIdString);
 		Preconditions.checkArgument(userId > 0);
 		
-		userModel = new LoadableDetachableModel<User>() {
+		userModel = new LoadableDetachableModel<>() {
 
 			@Override
 			protected User load() {
-				return OneDev.getInstance(UserManager.class).load(userId);
+				return getUserManager().load(userId);
 			}
-			
+
 		};
 	}
 
@@ -74,13 +75,15 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		tabs.add(new PageTab(Model.of("Email Addresses"), Model.of("mail"), UserEmailAddressesPage.class, params));
 		tabs.add(new PageTab(Model.of("Edit Avatar"), Model.of("avatar"), UserAvatarPage.class, params));
 			
-		tabs.add(new PageTab(Model.of("Change Password"), Model.of("password"), UserPasswordPage.class, params));
+		tabs.add(new PageTab(Model.of("Password"), Model.of("password"), UserPasswordPage.class, params));
 		tabs.add(new PageTab(Model.of("Belonging Groups"), Model.of("group"), UserMembershipsPage.class, params));
 		tabs.add(new PageTab(Model.of("Authorized Projects"), Model.of("project"), UserAuthorizationsPage.class, params));
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)
 			tabs.add(new PageTab(Model.of("SSH Keys"), Model.of("key"), UserSshKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("GPG Keys"), Model.of("key"), UserGpgKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("Access Tokens"), Model.of("token"), UserAccessTokensPage.class, params));
+		if (getUser().isEnforce2FA())
+			tabs.add(new PageTab(Model.of("Two-factor Authentication"), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
 		tabs.add(new PageTab(Model.of("Preferences"), Model.of("sliders"), UserPreferencesPage.class, params));
 		
 		add(new Tabbable("userTabs", tabs));
@@ -102,6 +105,10 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 	@Override
 	public User getUser() {
 		return userModel.getObject();
+	}
+	
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
 	}
 	
 	public static PageParameters paramsOf(User user) {

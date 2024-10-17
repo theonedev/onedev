@@ -1,0 +1,14 @@
+<wicket:panel>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="configuredFrag">
+		<div class="alert alert-notice alert-light-success mb-0">
+			Two-factor authentication already set up. <a wicket:id="requestToSetupAgain">Request to set up again</a> in case 
+			both TOTP authenticator and access codes are lost 
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="notConfiguredFrag">
+		<div class="alert alert-notice alert-light-warning mb-0">
+			Will be prompted to set up two-factor authentication upon next login
+		</div>
+	</wicket:fragment>
+</wicket:panel>

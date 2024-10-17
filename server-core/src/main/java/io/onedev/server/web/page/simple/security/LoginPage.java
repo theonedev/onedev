@@ -160,16 +160,7 @@ public class LoginPage extends SimplePage {
 			
 		}));
 		
-		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(OneDev.getInstance(SettingManager.class).getMailService() != null);
-			}
-			
-		});
-		
+		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class));
 		fragment.add(form);
 		
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class);

@@ -102,9 +102,4 @@ public class GitHubConnector extends OpenIdConnector {
 		}
 	}
 
-	@Override
-	public boolean isManagingMemberships() {
-		return false;
-	}
-
 }

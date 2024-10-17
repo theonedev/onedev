@@ -70,7 +70,6 @@ public class ResetAdminPassword extends CommandHandler {
 				if (root == null)
 					throw new ExplicitException("Server not set up yet");
 				String password = Bootstrap.command.getArgs()[0];
-				root.setSsoConnector(null);
 				root.setTwoFactorAuthentication(null);
 				root.setPassword(passwordService.encryptPassword(password));
 				userManager.update(root, null);
