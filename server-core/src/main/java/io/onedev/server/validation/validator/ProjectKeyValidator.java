@@ -26,7 +26,7 @@ public class ProjectKeyValidator implements ConstraintValidator<ProjectKey, Stri
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0) 
-				message = "Should be two ore more uppercase letters";
+				message = "Should be two or more uppercase letters";
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		} else {
