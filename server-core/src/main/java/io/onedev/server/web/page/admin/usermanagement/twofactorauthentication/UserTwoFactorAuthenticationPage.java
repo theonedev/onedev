@@ -4,8 +4,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationStatusPanel;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
@@ -28,11 +26,6 @@ public class UserTwoFactorAuthenticationPage extends UserPage {
 				return UserTwoFactorAuthenticationPage.this.getUser();
 			}
 		});
-	}
-
-	@Override
-	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Two Factor Authentication");
 	}
 
 }
