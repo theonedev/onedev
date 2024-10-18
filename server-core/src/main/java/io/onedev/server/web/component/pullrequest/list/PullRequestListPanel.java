@@ -15,6 +15,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.pullrequest.FuzzyCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
@@ -151,16 +152,19 @@ public abstract class PullRequestListPanel extends Panel {
 	
 	@Nullable
 	private PullRequestQuery parse(@Nullable String queryString, PullRequestQuery baseQuery) {
+		PullRequestQuery parsedQuery;
 		try {
-			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString, true));
+			parsedQuery = PullRequestQuery.parse(getProject(), queryString, true);
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			if (e instanceof ExplicitException)
+			if (e instanceof ExplicitException) {
 				error(e.getMessage());
-			else
-				error("Malformed query");
-			return null;
+				return null;
+			} else {
+				parsedQuery = new PullRequestQuery(new FuzzyCriteria(queryString));
+			}
 		}
+		return PullRequestQuery.merge(baseQuery, parsedQuery);
 	}
 	
 	@Override

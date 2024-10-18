@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;

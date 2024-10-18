@@ -16,11 +16,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
-import io.onedev.server.util.Input;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
@@ -151,16 +152,19 @@ public abstract class BuildListPanel extends Panel {
 	
 	@Nullable
 	private BuildQuery parse(@Nullable String queryString, BuildQuery baseQuery) {
+		BuildQuery parsedQuery;
 		try {
-			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
+			parsedQuery = BuildQuery.parse(getProject(), queryString, true, true);
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			if (e instanceof ExplicitException)
+			if (e instanceof ExplicitException) {
 				error(e.getMessage());
-			else
-				error("Malformed query");
-			return null;
+				return null;
+			} else {
+				parsedQuery = new BuildQuery(new FuzzyCriteria(queryString));
+			}
 		}
+		return BuildQuery.merge(baseQuery, parsedQuery);
 	}
 	
 	@Override

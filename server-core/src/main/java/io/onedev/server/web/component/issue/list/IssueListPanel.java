@@ -17,15 +17,16 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.issue.FuzzyCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
@@ -173,16 +174,19 @@ public abstract class IssueListPanel extends Panel {
 		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 		if (getProject() != null)
 			option.withCurrentProjectCriteria(true);
+		IssueQuery parsedQuery;
 		try {
-			return merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
+			parsedQuery = IssueQuery.parse(getProject(), queryString, option, true);
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			if (e instanceof ExplicitException)
+			if (e instanceof ExplicitException) {
 				error(e.getMessage());
-			else
-				error("Malformed query");
-			return null;
+				return null;
+			} else {
+				parsedQuery = new IssueQuery(new FuzzyCriteria(queryString));
+			}
 		}
+		return merge(baseQuery, parsedQuery);
 	}
 
 	@Nullable

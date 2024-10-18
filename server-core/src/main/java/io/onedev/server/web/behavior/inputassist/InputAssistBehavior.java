@@ -34,7 +34,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
-	private boolean hideIfBlank;
+	private final boolean hideIfBlank;
 	
 	private FloatingPanel dropdown;
 	

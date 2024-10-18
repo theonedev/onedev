@@ -89,18 +89,20 @@ public abstract class CommitListPanel extends Panel {
 
 		@Override
 		protected CommitQuery load() {
-			getFeedbackMessages().clear();
 			String queryString = queryStringModel.getObject();
+			CommitQuery parsedQuery;
 			try {
-				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString, true));
+				parsedQuery = CommitQuery.parse(getProject(), queryString, true);
 			} catch (Exception e) {
 				getFeedbackMessages().clear();
-				if (e instanceof ExplicitException)
+				if (e instanceof ExplicitException) {
 					error(e.getMessage());
-				else 
-					error("Malformed query");
-				return null;
+					return null;
+				} else {
+					parsedQuery = new CommitQuery(Lists.newArrayList(new FuzzyCriteria(Lists.newArrayList(queryString))));
+				}
 			}
+			return CommitQuery.merge(getBaseQuery(), parsedQuery);
 		}
 		
 	};

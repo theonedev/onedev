@@ -11,6 +11,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.project.ChildrenOfCriteria;
+import io.onedev.server.search.entity.project.FuzzyCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
@@ -1248,16 +1249,19 @@ public class ProjectListPanel extends Panel {
 	
 	@Nullable
 	private ProjectQuery parse(@Nullable String queryString, ProjectQuery baseQuery) {
+		ProjectQuery parsedQuery;
 		try {
-			return ProjectQuery.merge(baseQuery, ProjectQuery.parse(queryString));
+			parsedQuery = ProjectQuery.parse(queryString);
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			if (e instanceof ExplicitException)
+			if (e instanceof ExplicitException) {
 				error(e.getMessage());
-			else 
-				error("Malformed query");
-			return null;
+				return null;
+			} else {
+				parsedQuery = new ProjectQuery(new FuzzyCriteria(queryString));
+			}
 		}
+		return ProjectQuery.merge(baseQuery, parsedQuery);
 	}
 	
 	@Nullable

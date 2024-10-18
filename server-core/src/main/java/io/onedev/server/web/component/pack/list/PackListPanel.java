@@ -7,6 +7,7 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.pack.FuzzyCriteria;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.TypeCriteria;
@@ -115,19 +116,22 @@ public abstract class PackListPanel extends Panel {
 	
 	@Nullable
 	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery, @Nullable String packType) {
+		PackQuery parsedQuery;
 		try {
-			var query = PackQuery.merge(baseQuery, PackQuery.parse(getProject(), queryString, true));
-			if (packType != null)
-				query = PackQuery.merge(query, new PackQuery(new TypeCriteria(packType, PackQueryLexer.Is)));
-			return query;
+			parsedQuery = PackQuery.parse(getProject(), queryString, true);
 		} catch (Exception e) {
 			getFeedbackMessages().clear();
-			if (e instanceof ExplicitException)
+			if (e instanceof ExplicitException) {
 				error(e.getMessage());
-			else
-				error("Malformed query");
-			return null;
+				return null;
+			} else {
+				parsedQuery = new PackQuery(new FuzzyCriteria(queryString));
+			}
 		}
+		var query = PackQuery.merge(baseQuery, parsedQuery);
+		if (packType != null)
+			query = PackQuery.merge(query, new PackQuery(new TypeCriteria(packType, PackQueryLexer.Is)));
+		return query;			
 	}
 	
 	@Override

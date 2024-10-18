@@ -9,6 +9,7 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
 import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -89,11 +90,12 @@ public abstract class CodeCommentListPanel extends Panel {
 				return CodeCommentQuery.parse(getProject(), queryString, true);
 			} catch (Exception e) {
 				getFeedbackMessages().clear();
-				if (e instanceof ExplicitException)
+				if (e instanceof ExplicitException) {
 					error(e.getMessage());
-				else 
-					error("Malformed query");
-				return null;
+					return null;
+				} else {
+					return new CodeCommentQuery(new FuzzyCriteria(queryString));
+				}
 			}
 		}
 		
