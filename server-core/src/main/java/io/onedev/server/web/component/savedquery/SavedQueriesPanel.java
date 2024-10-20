@@ -1,13 +1,21 @@
 package io.onedev.server.web.component.savedquery;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.model.support.QueryPersonalization;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.watch.WatchStatus;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.watchstatus.WatchStatusLink;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -32,22 +40,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QueryPersonalization;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.watch.WatchStatus;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;
-import io.onedev.server.web.component.tabbable.AjaxActionTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.component.watchstatus.WatchStatusLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.base.BasePage;
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
@@ -472,6 +470,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					for (NamedQuery namedQuery: bean.getQueries()) {
 						if (names.contains(namedQuery.getName())) {
 							form.error("Duplicate name found: " + namedQuery.getName());
+							target.add(form);
 							return;
 						} else {
 							names.add(namedQuery.getName());
