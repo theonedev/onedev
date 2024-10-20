@@ -9,8 +9,8 @@ query
 criteria
 	: operator=(Successful|Failed|Cancelled|Running|Finished|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
     | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
-	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|RanOn) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -22,6 +22,10 @@ criteria
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
+
+multipleQuoted
+    : Quoted(','Quoted)*
+    ;
 
 Successful
 	: 'successful'

@@ -75,19 +75,19 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					@Override
 					public Criteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-							case CodeCommentQueryLexer.Resolved:
+							case Resolved:
 								return new ResolvedCriteria();
-							case CodeCommentQueryLexer.Unresolved:
+							case Unresolved:
 								return new UnresolvedCriteria();
-							case CodeCommentQueryLexer.MentionedMe:
+							case MentionedMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new MentionedMeCriteria();
-							case CodeCommentQueryLexer.CreatedByMe:
+							case CreatedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new CreatedByMeCriteria();
-							case CodeCommentQueryLexer.RepliedByMe:
+							case RepliedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new RepliedByMeCriteria();
@@ -99,68 +99,86 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					@Override
 					public Criteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						int operator = ctx.operator.getType();
-						String value = getValue(ctx.Quoted().getText());
-						if (operator == CodeCommentQueryLexer.Mentioned) {
-							return new MentionedCriteria(getUser(value));
-						} else if (operator == CodeCommentQueryLexer.CreatedBy) {
-							return new CreatedByCriteria(getUser(value));
-						} else if (operator == CodeCommentQueryLexer.RepliedBy) {
-							return new RepliedByCriteria(getUser(value));
-						} else {
-							ProjectScopedCommit commitId = getCommitId(project, value);
-							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());
+						var criterias = new ArrayList<Criteria<CodeComment>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (operator == Mentioned) {
+								criterias.add(new MentionedCriteria(getUser(value)));
+							} else if (operator == CreatedBy) {
+								criterias.add(new CreatedByCriteria(getUser(value)));
+							} else if (operator == RepliedBy) {
+								criterias.add(new RepliedByCriteria(getUser(value)));
+							} else {
+								ProjectScopedCommit commitId = getCommitId(project, value);
+								criterias.add(new OnCommitCriteria(commitId.getProject(), commitId.getCommitId()));
+							}
 						}
+						return new OrCriteria<>(criterias);
 					}
 
 					@Override
 					public Criteria<CodeComment> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<CodeComment>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
 					public Criteria<CodeComment> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 
-						switch (operator) {
-							case CodeCommentQueryLexer.IsUntil:
-							case CodeCommentQueryLexer.IsSince:
-								Date dateValue = getDateValue(value);
-								switch (fieldName) {
-									case NAME_CREATE_DATE:
-										return new CreateDateCriteria(dateValue, value, operator);
-									case NAME_LAST_ACTIVITY_DATE:
-										return new LastActivityDateCriteria(dateValue, value, operator);
-									default:
-										throw new IllegalStateException();
-								}
-							case CodeCommentQueryLexer.IsLessThan:
-							case CodeCommentQueryLexer.IsGreaterThan:
-								return new ReplyCountCriteria(getIntValue(value), operator);
-							case CodeCommentQueryLexer.Contains:
-								switch (fieldName) {
-									case NAME_CONTENT:
-										return new ContentCriteria(value);
-									case NAME_REPLY:
-										return new ReplyCriteria(value);
-									default:
-										throw new IllegalStateException();
-								}
-							case CodeCommentQueryLexer.Is:
-							case CodeCommentQueryLexer.IsNot:
-								switch (fieldName) {
-									case NAME_PATH:
-										return new PathCriteria(value, operator);
-									case NAME_REPLY_COUNT:
-										return new ReplyCountCriteria(getIntValue(value), operator);
-									default:
-										throw new IllegalStateException();
-								}
-							default:
-								throw new IllegalStateException();
+						var criterias = new ArrayList<Criteria<CodeComment>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (operator) {
+								case IsUntil:
+								case IsSince:
+									Date dateValue = getDateValue(value);
+									switch (fieldName) {
+										case NAME_CREATE_DATE:
+											criterias.add(new CreateDateCriteria(dateValue, value, operator));
+											break;
+										case NAME_LAST_ACTIVITY_DATE:
+											criterias.add(new LastActivityDateCriteria(dateValue, value, operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case IsLessThan:
+								case IsGreaterThan:
+									criterias.add(new ReplyCountCriteria(getIntValue(value), operator));
+									break;
+								case Contains:
+									switch (fieldName) {
+										case NAME_CONTENT:
+											criterias.add(new ContentCriteria(value));
+											break;
+										case NAME_REPLY:
+											criterias.add(new ReplyCriteria(value));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case Is:
+								case IsNot:
+									switch (fieldName) {
+										case NAME_PATH:
+											criterias.add(new PathCriteria(value, operator));
+											break;
+										case NAME_REPLY_COUNT:
+											criterias.add(new ReplyCountCriteria(getIntValue(value), operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								default:
+									throw new IllegalStateException();
+							}
 						}
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 
 					@Override
@@ -168,7 +186,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<CodeComment>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -176,12 +194,12 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<CodeComment>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<CodeComment> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<CodeComment>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -214,22 +232,22 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		if (!QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case CodeCommentQueryLexer.IsUntil:
-			case CodeCommentQueryLexer.IsSince:
+			case IsUntil:
+			case IsSince:
 				if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_LAST_ACTIVITY_DATE))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case CodeCommentQueryLexer.IsGreaterThan:
-			case CodeCommentQueryLexer.IsLessThan:
+			case IsGreaterThan:
+			case IsLessThan:
 				if (!fieldName.equals(NAME_REPLY_COUNT))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case CodeCommentQueryLexer.Contains:
+			case Contains:
 				if (!fieldName.equals(NAME_CONTENT) && !fieldName.equals(NAME_REPLY))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case CodeCommentQueryLexer.Is:
-			case CodeCommentQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(NAME_REPLY_COUNT) && !fieldName.equals(NAME_PATH))
 					throw newOperatorException(fieldName, operator);
 				break;

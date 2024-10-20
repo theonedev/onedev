@@ -72,7 +72,7 @@ public class PackQuery extends EntityQuery<Pack> {
 					
 					public Criteria<Pack> visitOperatorCriteria(PackQueryParser.OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-							case PackQueryLexer.PublishedByMe:
+							case PublishedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new PublishedByMeCriteria();
@@ -83,50 +83,65 @@ public class PackQuery extends EntityQuery<Pack> {
 
 					@Override
 					public Criteria<Pack> visitOperatorValueCriteria(PackQueryParser.OperatorValueCriteriaContext ctx) {
-						String value = getValue(ctx.Quoted().getText());
-						if (ctx.PublishedByUser() != null)
-							return new PublishedByUserCriteria(getUser(value));
-						else if (ctx.PublishedByBuild() != null)
-							return new PublishedByBuildCriteria(project, value);
-						else if (ctx.PublishedByProject() != null)
-							return new PublishedByProjectCriteria(value);
-						else
-							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						var criterias = new ArrayList<Criteria<Pack>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (ctx.PublishedByUser() != null)
+								criterias.add(new PublishedByUserCriteria(getUser(value)));
+							else if (ctx.PublishedByBuild() != null)
+								criterias.add(new PublishedByBuildCriteria(project, value));
+							else if (ctx.PublishedByProject() != null)
+								criterias.add(new PublishedByProjectCriteria(value));
+							else
+								throw new ExplicitException("Unexpected criteria: " + ctx.operator.getText());
+						}
+						return new OrCriteria<>(criterias);
 					}
 					
 					@Override
 					public Criteria<Pack> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 
-						switch (operator) {
-							case PackQueryLexer.IsUntil:
-							case PackQueryLexer.IsSince:
-								if (fieldName.equals(NAME_PUBLISH_DATE))
-									return new PublishDateCriteria(value, operator);
-								else
-									throw new IllegalStateException();
-							case PackQueryLexer.Is:
-							case PackQueryLexer.IsNot:
-								switch (fieldName) {
-									case NAME_PROJECT:
-										return new ProjectCriteria(value, operator);
-									case NAME_NAME:
-										return new NameCriteria(value, operator);
-									case NAME_VERSION:
-										return new VersionCriteria(value, operator);
-									case NAME_TYPE:
-										return new TypeCriteria(value, operator);
-									case NAME_LABEL:
-										return new LabelCriteria(getLabelSpec(value), operator);
-									default:
+						var criterias = new ArrayList<Criteria<Pack>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (operator) {
+								case IsUntil:
+								case IsSince:
+									if (fieldName.equals(NAME_PUBLISH_DATE))
+										criterias.add(new PublishDateCriteria(value, operator));
+									else
 										throw new IllegalStateException();
-								}
-							default:
-								throw new IllegalStateException();
-						}
+									break;
+								case Is:
+								case IsNot:
+									switch (fieldName) {
+										case NAME_PROJECT:
+											criterias.add(new ProjectCriteria(value, operator));
+											break;
+										case NAME_NAME:
+											criterias.add(new NameCriteria(value, operator));
+											break;
+										case NAME_VERSION:
+											criterias.add(new VersionCriteria(value, operator));
+											break;
+										case NAME_TYPE:
+											criterias.add(new TypeCriteria(value, operator));
+											break;
+										case NAME_LABEL:
+											criterias.add(new LabelCriteria(getLabelSpec(value), operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								default:
+									throw new IllegalStateException();
+							}
+						} 
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 
 					@Override
@@ -185,13 +200,13 @@ public class PackQuery extends EntityQuery<Pack> {
 		if (!QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case PackQueryLexer.IsUntil:
-			case PackQueryLexer.IsSince:
+			case IsUntil:
+			case IsSince:
 				if (!fieldName.equals(NAME_PUBLISH_DATE))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case PackQueryLexer.Is:
-			case PackQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_TYPE)
 						&& !fieldName.equals(NAME_NAME) && !fieldName.equals(NAME_VERSION)
 						&& !fieldName.equals(NAME_LABEL)) {

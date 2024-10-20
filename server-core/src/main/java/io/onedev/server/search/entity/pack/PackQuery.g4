@@ -8,8 +8,8 @@ query
 
 criteria
 	: operator=PublishedByMe #OperatorCriteria
-	| operator=(PublishedByUser|PublishedByBuild|PublishedByProject) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+	| operator=(PublishedByUser|PublishedByBuild|PublishedByProject) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -20,6 +20,10 @@ criteria
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
+
+multipleQuoted
+    : Quoted(','Quoted)*
+    ;
 
 PublishedByMe
     : 'published' WS+ 'by' WS+ 'me'

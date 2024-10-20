@@ -6,6 +6,7 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.search.entity.agent.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AgentQueryBehavior;
@@ -72,11 +73,12 @@ class AgentListPanel extends Panel {
 			try {
 				return AgentQuery.parse(queryString, false);
 			} catch (Exception e) {
-				if (e instanceof ExplicitException)
+				if (e instanceof ExplicitException) {
 					error(e.getMessage());
-				else
-					error("Malformed query");
-				return null;
+					return null;
+				} else {
+					return new AgentQuery(new FuzzyCriteria(queryString));
+				}
 			}
 		}
 		

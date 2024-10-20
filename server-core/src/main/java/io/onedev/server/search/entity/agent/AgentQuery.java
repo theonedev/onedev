@@ -77,13 +77,13 @@ public class AgentQuery extends EntityQuery<Agent> {
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
 						switch (ctx.operator.getType()) {
-						case AgentQueryLexer.Online:
+						case Online:
 							return new OnlineCriteria();
-						case AgentQueryLexer.Offline:
+						case Offline:
 							return new OfflineCriteria();
-						case AgentQueryLexer.Paused:
+						case Paused:
 							return new PausedCriteria();
-						case AgentQueryLexer.HasRunningBuilds:
+						case HasRunningBuilds:
 							return new HasRunningBuildsCriteria();
 						default:
 							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
@@ -95,48 +95,62 @@ public class AgentQuery extends EntityQuery<Agent> {
 						if (forExecutor && ctx.HasAttribute() == null)
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
-						String value = getValue(ctx.Quoted().getText());
-						if (ctx.HasAttribute() != null) 
-							return new HasAttributeCriteria(value);
-						else if (ctx.NotUsedSince() != null) 
-							return new NotUsedSinceCriteria(value);
-						else if (ctx.EverUsedSince() != null) 
-							return new EverUsedSinceCriteria(value);
-						else if (ctx.RanBuild() != null) 
-							return new RanBuildCriteria(value);
-						else 
-							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						var criterias = new ArrayList<Criteria<Agent>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (ctx.HasAttribute() != null)
+								criterias.add(new HasAttributeCriteria(value));
+							else if (ctx.NotUsedSince() != null)
+								criterias.add(new NotUsedSinceCriteria(value));
+							else if (ctx.EverUsedSince() != null)
+								criterias.add(new EverUsedSinceCriteria(value));
+							else if (ctx.RanBuild() != null)
+								criterias.add(new RanBuildCriteria(value));
+							else
+								throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						}
+						return new OrCriteria<>(criterias);
 					}
 					
 					@Override
 					public Criteria<Agent> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Agent>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
 					public Criteria<Agent> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(fieldName, operator);
 
-						if (operator == AgentQueryLexer.Is || operator == AgentQueryLexer.IsNot) {
-							switch (fieldName) {
-								case NAME_NAME:
-									return new NameCriteria(value, operator);
-								case NAME_OS_NAME:
-									return new OsCriteria(value, operator);
-								case NAME_OS_VERSION:
-									return new OsVersionCriteria(value, operator);
-								case NAME_OS_ARCH:
-									return new OsArchCriteria(value, operator);
-								case NAME_IP_ADDRESS:
-									return new IpAddressCriteria(value, operator);
-								default:
-									return new AttributeCriteria(fieldName, value, operator);
+						var criterias = new ArrayList<Criteria<Agent>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (operator == Is || operator == IsNot) {
+								switch (fieldName) {
+									case NAME_NAME:
+										criterias.add(new NameCriteria(value, operator));
+										break;
+									case NAME_OS_NAME:
+										criterias.add(new OsCriteria(value, operator));
+										break;
+									case NAME_OS_VERSION:
+										criterias.add(new OsVersionCriteria(value, operator));
+										break;
+									case NAME_OS_ARCH:
+										criterias.add(new OsArchCriteria(value, operator));
+										break;
+									case NAME_IP_ADDRESS:
+										criterias.add(new IpAddressCriteria(value, operator));
+										break;
+									default:
+										criterias.add(new AttributeCriteria(fieldName, value, operator));
+								}
+							} else {
+								throw new IllegalStateException();
 							}
 						}
-						throw new IllegalStateException();
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 					
 					@Override
@@ -144,7 +158,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 						List<Criteria<Agent>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<Agent>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -152,12 +166,12 @@ public class AgentQuery extends EntityQuery<Agent> {
 						List<Criteria<Agent>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<Agent>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<Agent> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<Agent>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);

@@ -48,6 +48,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>();
 							if (withProjectCriteria)							
@@ -55,13 +56,13 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 							if (withJobCriteria)
 								fields.add(Build.NAME_JOB);
 							return SuggestionUtils.suggest(fields, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getLexerRule(ruleNames, operatorName);							
 							if (operator == Is || operator == IsNot) {
-								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+								List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
 								if (fieldName.equals(Build.NAME_PROJECT)) {
@@ -97,6 +98,9 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (suggestedLiteral.equals(getLexerRuleName(ruleNames, OnBranch))) 
 			return Optional.of("branch the build commit is merged into");
+		else if (suggestedLiteral.equals(",")) 
+			return Optional.of("add another value");
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

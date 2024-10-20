@@ -2,6 +2,7 @@ package io.onedev.server.web.behavior;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -85,11 +86,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Number")) {
-				return SuggestionUtils.suggestNumber(
-						terminalExpect.getUnmatchedText(), 
-						"find issue with this number");
-			} else if (spec.getRuleName().equals("Quoted")) {
+			if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					private Map<String, String> getFieldCandidates(Collection<String> fields) {
@@ -115,6 +112,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							Map<String, String> candidates = getFieldCandidates(QUERY_FIELDS);
 							if (!option.withProjectCriteria())
@@ -161,9 +159,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							case "build":
 								return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							}
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ("linkSpec".equals(spec.getLabel())) {
+							return SuggestionUtils.suggestLinkSpecs(matchWith);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);							
@@ -259,8 +259,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								} catch (ExplicitException ex) {
 								}
 							}
-						} else if ("linkSpec".equals(spec.getLabel())) {
-							return SuggestionUtils.suggestLinkSpecs(matchWith);
 						}
 						return new ArrayList<>();
 					}
@@ -290,7 +288,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		} 
 		return null;
 	}
-	
+
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
@@ -300,6 +298,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
+		} else if (suggestedLiteral.equals(",")) {
+			return Optional.of("add another value");
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find issue by number");

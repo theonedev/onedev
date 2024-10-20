@@ -59,6 +59,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Project.QUERY_FIELDS);
 							if (childQuery)
@@ -71,9 +72,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
 								candidates.remove(Project.NAME_SERVICE_DESK_NAME);
 							return SuggestionUtils.suggest(candidates, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = ProjectQuery.getOperator(operatorName);							
@@ -127,7 +128,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										return null;
 									}
-								} catch (ExplicitException ex) {
+								} catch (ExplicitException ignored) {
 								}
 							}
 						}
@@ -164,7 +165,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 		if (!OneDev.getInstance(ClusterManager.class).isClusteringSupported() 
 				&& (suggestedLiteral.equals(getRuleName(WithoutEnoughReplicas)) || suggestedLiteral.equals(getRuleName(HasOutdatedReplicas)))) {
 			return null;
+		} else if (suggestedLiteral.equals(",")) {
+			return Optional.of("add another value");
 		}
+		
 		if (childQuery) {
 			if (suggestedLiteral.equals(getRuleName(ChildrenOf))
 					|| suggestedLiteral.equals(getRuleName(Roots))) { 
@@ -183,6 +187,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				}
 			}
 		}
+		
 		return super.describe(parseExpect, suggestedLiteral);
 	}
 

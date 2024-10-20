@@ -2,7 +2,6 @@ package io.onedev.server.search.entity.issue;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
@@ -108,37 +107,37 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					@Override
 					public Criteria<Issue> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-							case IssueQueryLexer.Confidential:
+							case Confidential:
 								return new ConfidentialCriteria();
-							case IssueQueryLexer.MentionedMe:
+							case MentionedMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new MentionedMeCriteria();
-							case IssueQueryLexer.SubmittedByMe:
+							case SubmittedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
-							case IssueQueryLexer.WatchedByMe:
+							case WatchedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new WatchedByMeCriteria();
-							case IssueQueryLexer.CommentedByMe:
+							case CommentedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new CommentedByMeCriteria();
-							case IssueQueryLexer.FixedInCurrentBuild:
+							case FixedInCurrentBuild:
 								if (!option.withCurrentBuildCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new FixedInCurrentBuildCriteria();
-							case IssueQueryLexer.FixedInCurrentPullRequest:
+							case FixedInCurrentPullRequest:
 								if (!option.withCurrentPullRequestCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new FixedInCurrentPullRequestCriteria();
-							case IssueQueryLexer.FixedInCurrentCommit:
+							case FixedInCurrentCommit:
 								if (!option.withCurrentCommitCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new FixedInCurrentCommitCriteria();
-							case IssueQueryLexer.CurrentIssue:
+							case CurrentIssue:
 								if (!option.withCurrentIssueCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new CurrentIssueCriteria();
@@ -175,25 +174,29 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					}
 
 					public Criteria<Issue> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						String value = getValue(ctx.Quoted().getText());
-						if (ctx.Mentioned() != null)
-							return new MentionedCriteria(getUser(value));
-						else if (ctx.SubmittedBy() != null)
-							return new SubmittedByCriteria(getUser(value));
-						else if (ctx.WatchedBy() != null)
-							return new WatchedByCriteria(getUser(value));
-						else if (ctx.CommentedBy() != null)
-							return new CommentedByCriteria(getUser(value));
-						else if (ctx.FixedInBuild() != null)
-							return new FixedInBuildCriteria(project, value);
-						else if (ctx.FixedInPullRequest() != null)
-							return new FixedInPullRequestCriteria(project, value);
-						else if (ctx.FixedInCommit() != null)
-							return new FixedInCommitCriteria(project, value);
-						else if (ctx.HasAny() != null)
-							return new HasLinkCriteria(value);
-						else
-							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
+						var criterias = new ArrayList<Criteria<Issue>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (ctx.Mentioned() != null)
+								criterias.add(new MentionedCriteria(getUser(value)));
+							else if (ctx.SubmittedBy() != null)
+								criterias.add(new SubmittedByCriteria(getUser(value)));
+							else if (ctx.WatchedBy() != null)
+								criterias.add(new WatchedByCriteria(getUser(value)));
+							else if (ctx.CommentedBy() != null)
+								criterias.add(new CommentedByCriteria(getUser(value)));
+							else if (ctx.FixedInBuild() != null)
+								criterias.add(new FixedInBuildCriteria(project, value));
+							else if (ctx.FixedInPullRequest() != null)
+								criterias.add(new FixedInPullRequestCriteria(project, value));
+							else if (ctx.FixedInCommit() != null)
+								criterias.add(new FixedInCommitCriteria(project, value));
+							else if (ctx.HasAny() != null)
+								criterias.add(new HasLinkCriteria(value));
+							else
+								throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
+						}
+						return new OrCriteria<>(criterias);
 					}
 
 					@Override
@@ -211,124 +214,140 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 
 					@Override
 					public Criteria<Issue> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<Issue>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
 					public Criteria<Issue> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						if (validate)
 							checkField(fieldName, operator, option);
-
-						var timeTrackingSetting = OneDev.getInstance(SettingManager.class)
-								.getIssueSetting().getTimeTrackingSetting();
-						switch (operator) {
-							case IssueQueryLexer.IsUntil:
-							case IssueQueryLexer.IsSince:
-								if (fieldName.equals(NAME_SUBMIT_DATE))
-									return new SubmitDateCriteria(value, operator);
-								else if (fieldName.equals(NAME_LAST_ACTIVITY_DATE))
-									return new LastActivityDateCriteria(value, operator);
-								else
-									return new DateFieldCriteria(fieldName, value, operator);
-							case IssueQueryLexer.Contains:
-								switch (fieldName) {
-									case NAME_TITLE:
-										return new TitleCriteria(value);
-									case NAME_DESCRIPTION:
-										return new DescriptionCriteria(value);
-									case NAME_COMMENT:
-										return new CommentCriteria(value);
-									default:
-										return new StringFieldCriteria(fieldName, value, operator);
-								}
-							case IssueQueryLexer.Is:
-							case IssueQueryLexer.IsNot:
-								if (fieldName.equals(NAME_PROJECT)) {
-									return new ProjectCriteria(value, operator);
-								} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
-									return new IterationCriteria(value, operator);
-								} else if (fieldName.equals(NAME_STATE)) {
-									return new StateCriteria(value, operator);
-								} else if (fieldName.equals(NAME_VOTE_COUNT)) {
-									return new VoteCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
-									return new CommentCountCriteria(getIntValue(value), operator);
-								} else if (fieldName.equals(Issue.NAME_NUMBER)) {
-									return new ReferenceCriteria(project, value, operator);
-								} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
-									int intValue = timeTrackingSetting.parseWorkingPeriod(value);
-									return new EstimatedTimeCriteria(intValue, operator);
-								} else if (fieldName.equals(NAME_SPENT_TIME)) {
-									int intValue = timeTrackingSetting.parseWorkingPeriod(value);
-									return new SpentTimeCriteria(intValue, operator);
-								} else {
-									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
-									if (field instanceof IssueChoiceField) {
-										return new IssueFieldCriteria(fieldName, project, value, operator);
-									} else if (field instanceof BuildChoiceField) {
-										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple(), operator);
-									} else if (field instanceof PullRequestChoiceField) {
-										return new PullRequestFieldCriteria(fieldName, project, value, operator);
-									} else if (field instanceof CommitField) {
-										return new CommitFieldCriteria(fieldName, project, value, operator);
-									} else if (field instanceof BooleanField) {
-										return new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator);
-									} else if (field instanceof IntegerField) {
-										return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
-									} else if (field instanceof ChoiceField) {
-										long ordinal = getValueOrdinal((ChoiceField) field, value);
-										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple());
-									} else if (field instanceof UserChoiceField
-											|| field instanceof GroupChoiceField) {
-										return new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple());
-									} else if (field instanceof IterationChoiceField) {
-										return new IterationFieldCriteria(fieldName, value, operator, field.isAllowMultiple());
+						
+						List<Criteria<Issue>> criterias = new ArrayList<>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							var timeTrackingSetting = OneDev.getInstance(SettingManager.class)
+									.getIssueSetting().getTimeTrackingSetting();
+							switch (operator) {
+								case IsUntil:
+								case IsSince:
+									if (fieldName.equals(NAME_SUBMIT_DATE))
+										criterias.add(new SubmitDateCriteria(value, operator));
+									else if (fieldName.equals(NAME_LAST_ACTIVITY_DATE))
+										criterias.add(new LastActivityDateCriteria(value, operator));
+									else
+										criterias.add(new DateFieldCriteria(fieldName, value, operator));
+									break;
+								case Contains:
+									switch (fieldName) {
+										case NAME_TITLE:
+											criterias.add(new TitleCriteria(value));
+											break;
+										case NAME_DESCRIPTION:
+											criterias.add(new DescriptionCriteria(value));
+											break;
+										case NAME_COMMENT:
+											criterias.add(new CommentCriteria(value));
+											break;
+										default:
+											criterias.add(new StringFieldCriteria(fieldName, value, operator));
+									}
+									break;
+								case Is:
+								case IsNot:
+									if (fieldName.equals(NAME_PROJECT)) {
+										criterias.add(new ProjectCriteria(value, operator));
+									} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
+										criterias.add(new IterationCriteria(value, operator));
+									} else if (fieldName.equals(NAME_STATE)) {
+										criterias.add(new StateCriteria(value, operator));
+									} else if (fieldName.equals(NAME_VOTE_COUNT)) {
+										criterias.add(new VoteCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
+										criterias.add(new CommentCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(Issue.NAME_NUMBER)) {
+										criterias.add(new ReferenceCriteria(project, value, operator));
+									} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
+										int intValue = timeTrackingSetting.parseWorkingPeriod(value);
+										criterias.add(new EstimatedTimeCriteria(intValue, operator));
+									} else if (fieldName.equals(NAME_SPENT_TIME)) {
+										int intValue = timeTrackingSetting.parseWorkingPeriod(value);
+										criterias.add(new SpentTimeCriteria(intValue, operator));
 									} else {
-										return new StringFieldCriteria(fieldName, value, operator);
-									}
-								}
-							case IssueQueryLexer.IsLessThan:
-							case IssueQueryLexer.IsGreaterThan:
-								switch (fieldName) {
-									case NAME_VOTE_COUNT:
-										return new VoteCountCriteria(getIntValue(value), operator);
-									case NAME_COMMENT_COUNT:
-										return new CommentCountCriteria(getIntValue(value), operator);
-									case Issue.NAME_NUMBER:
-										return new ReferenceCriteria(project, value, operator);
-									case NAME_ESTIMATED_TIME: {
-										int intValue = value.equals(NAME_SPENT_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
-										return new EstimatedTimeCriteria(intValue, operator);
-									}
-									case NAME_SPENT_TIME: {
-										int intValue = value.equals(NAME_ESTIMATED_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
-										return new SpentTimeCriteria(intValue, operator);
-									}
-									case NAME_PROGRESS:
-										var floatValue = getFloatValue(value);
-										return new ProgressCriteria(floatValue, operator);
-									default:
 										FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
-										if (field instanceof IntegerField) {
-											return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
+										if (field instanceof IssueChoiceField) {
+											criterias.add(new IssueFieldCriteria(fieldName, project, value, operator));
+										} else if (field instanceof BuildChoiceField) {
+											criterias.add(new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple(), operator));
+										} else if (field instanceof PullRequestChoiceField) {
+											criterias.add(new PullRequestFieldCriteria(fieldName, project, value, operator));
+										} else if (field instanceof CommitField) {
+											criterias.add(new CommitFieldCriteria(fieldName, project, value, operator));
+										} else if (field instanceof BooleanField) {
+											criterias.add(new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator));
+										} else if (field instanceof IntegerField) {
+											criterias.add(new NumericFieldCriteria(fieldName, getIntValue(value), operator));
+										} else if (field instanceof ChoiceField) {
+											long ordinal = getValueOrdinal((ChoiceField) field, value);
+											criterias.add(new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple()));
+										} else if (field instanceof UserChoiceField
+												|| field instanceof GroupChoiceField) {
+											criterias.add(new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple()));
+										} else if (field instanceof IterationChoiceField) {
+											criterias.add(new IterationFieldCriteria(fieldName, value, operator, field.isAllowMultiple()));
 										} else {
-											long ordinal;
-											if (validate)
-												ordinal = getValueOrdinal((ChoiceField) field, value);
-											else
-												ordinal = 0;
-											return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
+											criterias.add(new StringFieldCriteria(fieldName, value, operator));
 										}
-								}
-							case IssueQueryLexer.IsBefore:
-							case IssueQueryLexer.IsAfter:
-								return new StateCriteria(value, operator);
-							default:
-								throw new ExplicitException("Unexpected operator " + getRuleName(operator));
+									}
+									break;
+								case IsLessThan:
+								case IsGreaterThan:
+									switch (fieldName) {
+										case NAME_VOTE_COUNT:
+											criterias.add(new VoteCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_COMMENT_COUNT:
+											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
+											break;
+										case Issue.NAME_NUMBER:
+											criterias.add(new ReferenceCriteria(project, value, operator));
+											break;
+										case NAME_ESTIMATED_TIME: 
+											int intValue = value.equals(NAME_SPENT_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
+											criterias.add(new EstimatedTimeCriteria(intValue, operator));
+											break;
+										case NAME_SPENT_TIME: 
+											intValue = value.equals(NAME_ESTIMATED_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
+											criterias.add(new SpentTimeCriteria(intValue, operator));
+											break;
+										case NAME_PROGRESS:
+											var floatValue = getFloatValue(value);
+											criterias.add(new ProgressCriteria(floatValue, operator));
+											break;
+										default:
+											FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
+											if (field instanceof IntegerField) {
+												criterias.add(new NumericFieldCriteria(fieldName, getIntValue(value), operator));
+											} else {
+												long ordinal;
+												if (validate)
+													ordinal = getValueOrdinal((ChoiceField) field, value);
+												else
+													ordinal = 0;
+												criterias.add(new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false));
+											}
+									}
+									break;
+								case IsBefore:
+								case IsAfter:
+									criterias.add(new StateCriteria(value, operator));
+									break;
+								default:
+									throw new ExplicitException("Unexpected operator " + getRuleName(operator));
+							}
 						}
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 
 					@Override
@@ -336,7 +355,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						List<Criteria<Issue>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<Issue>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -344,12 +363,12 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						List<Criteria<Issue>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<Issue>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<Issue> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<Issue>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -400,15 +419,15 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 		if (fieldSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case IssueQueryLexer.IsEmpty:
-			case IssueQueryLexer.IsNotEmpty:
+			case IsEmpty:
+			case IsNotEmpty:
 				if (Issue.QUERY_FIELDS.contains(fieldName)
 						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case IssueQueryLexer.IsMe:
-			case IssueQueryLexer.IsNotMe:
+			case IsMe:
+			case IsNotMe:
 				if (!(fieldSpec instanceof UserChoiceField && option.withCurrentUserCriteria()))
 					throw newOperatorException(fieldName, operator);
 				break;
@@ -419,12 +438,12 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						|| fieldSpec instanceof CommitField && option.withCurrentCommitCriteria()))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case IssueQueryLexer.IsPrevious:
+			case IsPrevious:
 				if (!(fieldSpec instanceof BuildChoiceField && option.withCurrentBuildCriteria()))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case IssueQueryLexer.IsUntil:
-			case IssueQueryLexer.IsSince:
+			case IsUntil:
+			case IsSince:
 				if (!fieldName.equals(Issue.NAME_SUBMIT_DATE)
 						&& !fieldName.equals(Issue.NAME_LAST_ACTIVITY_DATE)
 						&& !(fieldSpec instanceof DateField)
@@ -432,7 +451,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case IssueQueryLexer.Contains:
+			case Contains:
 				if (!fieldName.equals(Issue.NAME_TITLE)
 						&& !fieldName.equals(Issue.NAME_DESCRIPTION)
 						&& !fieldName.equals(Issue.NAME_COMMENT)
@@ -440,8 +459,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case IssueQueryLexer.Is:
-			case IssueQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(Issue.NAME_PROJECT)
 						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
 						&& !fieldName.equals(NAME_SPENT_TIME)
@@ -464,13 +483,13 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case IssueQueryLexer.IsBefore:
-			case IssueQueryLexer.IsAfter:
+			case IsBefore:
+			case IsAfter:
 				if (!fieldName.equals(Issue.NAME_STATE))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case IssueQueryLexer.IsLessThan:
-			case IssueQueryLexer.IsGreaterThan:
+			case IsLessThan:
+			case IsGreaterThan:
 				if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_ESTIMATED_TIME)
 						&& !fieldName.equals(NAME_SPENT_TIME)

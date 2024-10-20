@@ -17,9 +17,9 @@ criteria
 	;
 
 revisionCriteria
-	: ((UNTIL|SINCE) WS+)? ((BRANCH|TAG|COMMIT|BUILD) Value | DefaultBranch)
+	: ((UNTIL|SINCE) WS+)? ((BRANCH|TAG|COMMIT|BUILD) Value+ | DefaultBranch)
 	;
-	
+
 beforeCriteria
 	: BEFORE Value
 	;
@@ -29,21 +29,21 @@ afterCriteria
 	;
 
 committerCriteria
-	: COMMITTER Value
+	: COMMITTER Value+
 	| CommittedByMe
 	;
 
 authorCriteria
-	: AUTHOR Value
+	: AUTHOR Value+
 	| AuthoredByMe
 	;
 
 pathCriteria
-	: PATH Value
+	: PATH Value+
 	;
 
 messageCriteria
-	: MESSAGE Value
+	: MESSAGE Value+
 	;
 
 SINCE

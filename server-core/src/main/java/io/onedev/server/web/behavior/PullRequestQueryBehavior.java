@@ -79,6 +79,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(PullRequest.QUERY_FIELDS);
 							if (getProject() != null)
@@ -89,9 +90,9 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);
@@ -106,44 +107,47 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								try {
 									checkField(fieldName, operator);
-									if (fieldName.equals(PullRequest.NAME_SUBMIT_DATE)
-											|| fieldName.equals(PullRequest.NAME_LAST_ACTIVITY_DATE)
-											|| fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
-										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
-										return !suggestions.isEmpty() ? suggestions : null;
-									} else if (fieldName.equals(PullRequest.NAME_STATUS)) {
-										List<String> candidates = new ArrayList<>();
-										for (PullRequest.Status status : PullRequest.Status.values())
-											candidates.add(status.toString());
-										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
-											|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)) {
-										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjectPaths(matchWith);
-										else
+									switch (fieldName) {
+										case PullRequest.NAME_SUBMIT_DATE:
+										case PullRequest.NAME_LAST_ACTIVITY_DATE:
+										case PullRequest.NAME_CLOSE_DATE:
+											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+											return !suggestions.isEmpty() ? suggestions : null;
+										case PullRequest.NAME_STATUS: {
+											List<String> candidates = new ArrayList<>();
+											for (PullRequest.Status status : PullRequest.Status.values())
+												candidates.add(status.toString());
+											return SuggestionUtils.suggest(candidates, matchWith);
+										}
+										case PullRequest.NAME_TARGET_PROJECT:
+										case PullRequest.NAME_SOURCE_PROJECT:
+											if (!matchWith.contains("*"))
+												return SuggestionUtils.suggestProjectPaths(matchWith);
+											else
+												return null;
+										case PullRequest.NAME_TARGET_BRANCH:
+										case PullRequest.NAME_SOURCE_BRANCH:
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestBranches(project, matchWith);
+											else
+												return null;
+										case NAME_NUMBER:
+											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										case PullRequest.NAME_MERGE_STRATEGY: {
+											List<String> candidates = new ArrayList<>();
+											for (MergeStrategy strategy : MergeStrategy.values())
+												candidates.add(strategy.toString());
+											return SuggestionUtils.suggest(candidates, matchWith);
+										}
+										case PullRequest.NAME_LABEL:
+											return SuggestionUtils.suggestLabels(matchWith);
+										case PullRequest.NAME_TITLE:
+										case PullRequest.NAME_DESCRIPTION:
+										case PullRequest.NAME_COMMENT_COUNT:
+										case PullRequest.NAME_COMMENT:
 											return null;
-									} else if (fieldName.equals(PullRequest.NAME_TARGET_BRANCH)
-											|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)) {
-										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestBranches(project, matchWith);
-										else
-											return null;
-									} else if (fieldName.equals(NAME_NUMBER)) {
-										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)) {
-										List<String> candidates = new ArrayList<>();
-										for (MergeStrategy strategy : MergeStrategy.values())
-											candidates.add(strategy.toString());
-										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(PullRequest.NAME_LABEL)) {
-										return SuggestionUtils.suggestLabels(matchWith);
-									} else if (fieldName.equals(PullRequest.NAME_TITLE)
-											|| fieldName.equals(PullRequest.NAME_DESCRIPTION)
-											|| fieldName.equals(PullRequest.NAME_COMMENT_COUNT)
-											|| fieldName.equals(PullRequest.NAME_COMMENT)) {
-										return null;
 									}
-								} catch (ExplicitException ex) {
+								} catch (ExplicitException ignored) {
 								}
 							}
 						}
@@ -180,6 +184,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
 				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(NeedMyAction)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(ToBeReviewedByMe)) || suggestedLiteral.equals(getRuleName(RequestedForChangesByMe)) || suggestedLiteral.equals(getRuleName(ApprovedByMe)) || suggestedLiteral.equals(getRuleName(AssignedToMe)) || suggestedLiteral.equals(getRuleName(ToBeChangedByMe)) || suggestedLiteral.equals(getRuleName(ToBeMergedByMe)))) {
 			return null;
+		} else if (suggestedLiteral.equals(",")) {
+			return Optional.of("add another value");
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find pull request by number");

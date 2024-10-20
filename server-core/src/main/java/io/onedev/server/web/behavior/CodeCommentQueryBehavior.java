@@ -72,13 +72,14 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							return SuggestionUtils.suggest(CodeComment.QUERY_FIELDS, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							return SuggestionUtils.suggest(new ArrayList<>(CodeComment.ORDER_FIELDS.keySet()), matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = CodeCommentQuery.getOperator(operatorName);							
@@ -100,7 +101,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										return null;
 									}
-								} catch (ExplicitException ex) {
+								} catch (ExplicitException ignored) {
 								}
 							}
 						}
@@ -137,6 +138,8 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
 				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(CreatedByMe)) || suggestedLiteral.equals(getRuleName(RepliedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))) {
 			return null;
+		} else if (suggestedLiteral.equals(",")) {
+			return Optional.of("add another value");
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

@@ -16,21 +16,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.ChildrenOf;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.Contains;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.ForkRoots;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.ForksOf;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.HasOutdatedReplicas;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.Is;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.IsSince;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.IsUntil;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.Leafs;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.MissingStorage;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.OwnedByMe;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.OwnedByNone;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.Roots;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.WithoutEnoughReplicas;
-import static io.onedev.server.search.entity.project.ProjectQueryLexer.ruleNames;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 public class ProjectQuery extends EntityQuery<Project> {
@@ -119,13 +104,17 @@ public class ProjectQuery extends EntityQuery<Project> {
 					}
 					
 					public Criteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						String value = getValue(ctx.Quoted().getText());
-						if (ctx.operator.getType() == ChildrenOf)
-							return new ChildrenOfCriteria(value);
-						else if (ctx.operator.getType() == ForksOf)
-							return new ForksOfCriteria(value);
-						else
-							return new OwnedByCriteria(getUser(value));
+						var criterias = new ArrayList<Criteria<Project>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (ctx.operator.getType() == ChildrenOf)
+								criterias.add(new ChildrenOfCriteria(value));
+							else if (ctx.operator.getType() == ForksOf)
+								criterias.add(new ForksOfCriteria(value));
+							else
+								criterias.add(new OwnedByCriteria(getUser(value)));
+						}
+						return new OrCriteria<>(criterias);
 					}
 					
 					@Override
@@ -135,39 +124,51 @@ public class ProjectQuery extends EntityQuery<Project> {
 
 					@Override
 					public Criteria<Project> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(fieldName, operator);
-						
-						switch (operator) {
-							case Is:
-							case IsNot:
-								switch (fieldName) {
-									case Project.NAME_ID:
-										return new IdCriteria(getLongValue(value), operator);
-									case Project.NAME_NAME:
-										return new NameCriteria(value, operator);
-									case Project.NAME_KEY:
-										return new KeyCriteria(value, operator);
-									case Project.NAME_SERVICE_DESK_NAME:
-										return new ServiceDeskNameCriteria(value, operator);
-									case Project.NAME_PATH:
-										return new PathCriteria(value, operator);
-									default:
-										return new LabelCriteria(getLabelSpec(value), operator);
-								}
-						case Contains:
-							return new DescriptionCriteria(value);
-						case IsUntil:
-						case IsSince:
-							if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE))
-								return new LastActivityDateCriteria(value, operator);
-							else 
-								return new CommitDateCriteria(value, operator);
-						default:
-							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
+							
+						var criterias = new ArrayList<Criteria<Project>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (operator) {
+								case Is:
+								case IsNot:
+									switch (fieldName) {
+										case Project.NAME_ID:
+											criterias.add(new IdCriteria(getLongValue(value), operator));
+											break;
+										case Project.NAME_NAME:
+											criterias.add(new NameCriteria(value, operator));
+											break;
+										case Project.NAME_KEY:
+											criterias.add(new KeyCriteria(value, operator));
+											break;
+										case Project.NAME_SERVICE_DESK_NAME:
+											criterias.add(new ServiceDeskNameCriteria(value, operator));
+											break;
+										case Project.NAME_PATH:
+											criterias.add(new PathCriteria(value, operator));
+											break;
+										default:
+											criterias.add(new LabelCriteria(getLabelSpec(value), operator));
+									}
+									break;
+								case Contains:
+									criterias.add(new DescriptionCriteria(value));
+									break;
+								case IsUntil:
+								case IsSince:
+									if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE))
+										criterias.add(new LastActivityDateCriteria(value, operator));
+									else
+										criterias.add(new CommitDateCriteria(value, operator));
+									break;
+								default:
+									throw new ExplicitException("Unexpected operator " + getRuleName(operator));
+							}
 						}
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 					
 					@Override
@@ -175,7 +176,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						List<Criteria<Project>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<Project>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -183,12 +184,12 @@ public class ProjectQuery extends EntityQuery<Project> {
 						List<Criteria<Project>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<Project>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<Project> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<Project>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 					
 				}.visit(criteriaContext);
@@ -268,11 +269,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return AntlrUtils.getLexerRuleName(ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(ProjectQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return AntlrUtils.getLexerRule(ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(ProjectQueryLexer.ruleNames, operatorName);
 	}
 	
 }

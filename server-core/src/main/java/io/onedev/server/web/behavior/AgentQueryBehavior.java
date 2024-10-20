@@ -55,6 +55,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						AgentManager agentManager = OneDev.getInstance(AgentManager.class);
 						AgentAttributeManager attributeManager = OneDev.getInstance(AgentAttributeManager.class);
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							var fields = new ArrayList<>(Agent.QUERY_FIELDS);
 							var attributeNames = new ArrayList<>(attributeManager.getAttributeNames());
@@ -64,9 +65,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Agent.ORDER_FIELDS.keySet());
 							return SuggestionUtils.suggest(candidates, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = AgentQuery.getOperator(operatorName);							
@@ -84,20 +85,21 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									AgentQuery.checkField(fieldName, operator);
-									if (fieldName.equals(Agent.NAME_OS_NAME)) {
-										var osNames = new ArrayList<>(agentManager.getOsNames());
-										sort(osNames);
-										return SuggestionUtils.suggest(osNames, matchWith);
-									} else if (fieldName.equals(Agent.NAME_NAME)) {
-										return SuggestionUtils.suggestAgents(matchWith);
-									} else if (fieldName.equals(Agent.NAME_OS_ARCH)) {
-										var osArchs = new ArrayList<>(agentManager.getOsArchs());
-										sort(osArchs);
-										return SuggestionUtils.suggest(osArchs, matchWith);
-									} else {
-										return null;
+									switch (fieldName) {
+										case Agent.NAME_OS_NAME:
+											var osNames = new ArrayList<>(agentManager.getOsNames());
+											sort(osNames);
+											return SuggestionUtils.suggest(osNames, matchWith);
+										case Agent.NAME_NAME:
+											return SuggestionUtils.suggestAgents(matchWith);
+										case Agent.NAME_OS_ARCH:
+											var osArchs = new ArrayList<>(agentManager.getOsArchs());
+											sort(osArchs);
+											return SuggestionUtils.suggest(osArchs, matchWith);
+										default:
+											return null;
 									}
-								} catch (ExplicitException ex) {
+								} catch (ExplicitException ignored) {
 								}
 							}
 						}
@@ -144,6 +146,8 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 				return null;
 			}
 		}
+		if (suggestedLiteral.equals(",")) 
+			return Optional.of("add another value");
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

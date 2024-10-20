@@ -1,35 +1,33 @@
 package io.onedev.server.web.behavior;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.onedev.commons.codeassist.InputCompletion;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.PatternApplied;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.NameAndEmail;
-import io.onedev.commons.utils.match.PatternApplied;
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.xodus.CommitInfoManager;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
@@ -70,47 +68,47 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
+						int tokenType = terminalExpect.getState().getFirstMatchedToken().getType();
 						Project project = projectModel.getObject();
 						switch (tokenType) {
-						case CommitQueryParser.BRANCH:
-							return SuggestionUtils.suggestBranches(project, matchWith);
-						case CommitQueryParser.TAG:
-							return SuggestionUtils.suggestTags(project, matchWith);
-						case CommitQueryParser.BUILD:
-							return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-						case CommitQueryParser.AUTHOR:
-						case CommitQueryParser.COMMITTER:
-							Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
-							CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-							List<NameAndEmail> users = commitInfoManager.getUsers(project.getId());
-							for (NameAndEmail user: users) {
-								String content;
-								if (StringUtils.isNotBlank(user.getEmailAddress()))
-									content = user.getName() + " <" + user.getEmailAddress() + ">";
-								else
-									content = user.getName() + " <>";
-								content = content.trim();
-								PatternApplied applied = WildcardUtils.applyStringPattern(matchWith, content, false);
-								if (applied != null)
-									suggestedInputs.put(applied.getText(), applied.getMatch());
-							}
-							
-							List<InputSuggestion> suggestions = new ArrayList<>();
-							for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) 
-								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()));
-							return suggestions;
-						case CommitQueryParser.BEFORE:
-						case CommitQueryParser.AFTER:
-							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
-							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
-							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions = SuggestionUtils.suggest(candidates, matchWith);
-							return !suggestions.isEmpty()? suggestions: null;
-						case CommitQueryParser.PATH:
-							return SuggestionUtils.suggestBlobs(projectModel.getObject(), matchWith);
-						default: 
-							return null;
+							case CommitQueryParser.BRANCH:
+								return SuggestionUtils.suggestBranches(project, matchWith);
+							case CommitQueryParser.TAG:
+								return SuggestionUtils.suggestTags(project, matchWith);
+							case CommitQueryParser.BUILD:
+								return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+							case CommitQueryParser.AUTHOR:
+							case CommitQueryParser.COMMITTER:
+								Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
+								CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+								List<NameAndEmail> users = commitInfoManager.getUsers(project.getId());
+								for (NameAndEmail user: users) {
+									String content;
+									if (StringUtils.isNotBlank(user.getEmailAddress()))
+										content = user.getName() + " <" + user.getEmailAddress() + ">";
+									else
+										content = user.getName() + " <>";
+									content = content.trim();
+									PatternApplied applied = WildcardUtils.applyStringPattern(matchWith, content, false);
+									if (applied != null)
+										suggestedInputs.put(applied.getText(), applied.getMatch());
+								}
+								
+								List<InputSuggestion> suggestions = new ArrayList<>();
+								for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) 
+									suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()));
+								return suggestions;
+							case CommitQueryParser.BEFORE:
+							case CommitQueryParser.AFTER:
+								List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
+								candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
+								candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
+								suggestions = SuggestionUtils.suggest(candidates, matchWith);
+								return !suggestions.isEmpty()? suggestions: null;
+							case CommitQueryParser.PATH:
+								return SuggestionUtils.suggestBlobs(projectModel.getObject(), matchWith);
+							default: 
+								return null;
 						} 
 					}
 
@@ -167,29 +165,29 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		}
 		String description;
 		switch (suggestedLiteral) {
-		case "committer":
-			description = "committed by";
-			break;
-		case "author":
-			description = "authored by";
-			break;
-		case "message":
-			description = "commit message contains";
-			break;
-		case "before":
-			description = "before specified date";
-			break;
-		case "after":
-			description = "after specified date";
-			break;
-		case "path":
-			description = "touching specified path";
-			break;
-		case " ":
-			description = "space";
-			break;
-		default:
-			description = null;
+			case "committer":
+				description = "committed by";
+				break;
+			case "author":
+				description = "authored by";
+				break;
+			case "message":
+				description = "commit message contains";
+				break;
+			case "before":
+				description = "before specified date";
+				break;
+			case "after":
+				description = "after specified date";
+				break;
+			case "path":
+				description = "touching specified path";
+				break;
+			case " ":
+				description = "space";
+				break;
+			default:
+				description = null;
 		}
 		return Optional.fromNullable(description);
 	}

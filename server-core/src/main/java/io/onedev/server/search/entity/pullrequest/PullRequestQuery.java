@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,67 +97,67 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					@Override
 					public Criteria<PullRequest> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-							case PullRequestQueryLexer.Open:
+							case Open:
 								return new OpenCriteria();
-							case PullRequestQueryLexer.Merged:
+							case Merged:
 								return new MergedCriteria();
-							case PullRequestQueryLexer.Discarded:
+							case Discarded:
 								return new DiscardedCriteria();
-							case PullRequestQueryLexer.ReadyToMerge:
+							case ReadyToMerge:
 								return new ReadyToMergeCriteria();
-							case PullRequestQueryLexer.NeedMyAction:
+							case NeedMyAction:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new NeedMyActionCriteria();
-							case PullRequestQueryLexer.ToBeMergedByMe:
+							case ToBeMergedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new ToBeMergedByMeCriteria();
-							case PullRequestQueryLexer.ToBeChangedByMe:
+							case ToBeChangedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new ToBeChangedByMeCriteria();
-							case PullRequestQueryLexer.MentionedMe:
+							case MentionedMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new MentionedMeCriteria();
-							case PullRequestQueryLexer.SubmittedByMe:
+							case SubmittedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
-							case PullRequestQueryLexer.WatchedByMe:
+							case WatchedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new WatchedByMeCriteria();
-							case PullRequestQueryLexer.CommentedByMe:
+							case CommentedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new CommentedByMeCriteria();
-							case PullRequestQueryLexer.ToBeReviewedByMe:
+							case ToBeReviewedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new ToBeReviewedByMeCriteria();
-							case PullRequestQueryLexer.RequestedForChangesByMe:
+							case RequestedForChangesByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new RequestedForChangesByMeCriteria();
-							case PullRequestQueryLexer.ApprovedByMe:
+							case ApprovedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new ApprovedByMeCriteria();
-							case PullRequestQueryLexer.AssignedToMe:
+							case AssignedToMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new AssignedToMeCriteria();
-							case PullRequestQueryLexer.SomeoneRequestedForChanges:
+							case SomeoneRequestedForChanges:
 								return new SomeoneRequestedForChangesCriteria();
-							case PullRequestQueryLexer.HasUnsuccessfulBuilds:
+							case HasUnsuccessfulBuilds:
 								return new HasUnsuccessfulBuilds();
-							case PullRequestQueryLexer.HasMergeConflicts:
+							case HasMergeConflicts:
 								return new HasMergeConflictsCriteria();
-							case PullRequestQueryLexer.HasUnfinishedBuilds:
+							case HasUnfinishedBuilds:
 								return new HasUnfinishedBuildsCriteria();
-							case PullRequestQueryLexer.HasPendingReviews:
+							case HasPendingReviews:
 								return new HasPendingReviewsCriteria();
 							default:
 								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
@@ -165,116 +166,158 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 					@Override
 					public Criteria<PullRequest> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						String value = getValue(ctx.Quoted().getText());
-						switch (ctx.operator.getType()) {
-							case PullRequestQueryLexer.ToBeReviewedBy:
-								return new ToBeReviewedByCriteria(getUser(value));
-							case PullRequestQueryLexer.ToBeChangedBy:
-								return new ToBeChangedByCriteria(getUser(value));
-							case PullRequestQueryLexer.ToBeMergedBy:
-								return new ToBeMergedByCriteria(getUser(value));
-							case PullRequestQueryLexer.ApprovedBy:
-								return new ApprovedByCriteria(getUser(value));
-							case PullRequestQueryLexer.AssignedTo:
-								return new AssignedToCriteria(getUser(value));
-							case PullRequestQueryLexer.RequestedForChangesBy:
-								return new RequestedForChangesByCriteria(getUser(value));
-							case PullRequestQueryLexer.Mentioned:
-								return new MentionedCriteria(getUser(value));
-							case PullRequestQueryLexer.SubmittedBy:
-								return new SubmittedByCriteria(getUser(value));
-							case PullRequestQueryLexer.WatchedBy:
-								return new WatchedByCriteria(getUser(value));
-							case PullRequestQueryLexer.NeedActionOf:
-								return new NeedActionOfCriteria(getUser(value));
-							case PullRequestQueryLexer.CommentedBy:
-								return new CommentedByCriteria(getUser(value));
-							case PullRequestQueryLexer.IncludesCommit:
-								return new IncludesCommitCriteria(project, value);
-							case PullRequestQueryLexer.IncludesIssue:
-								return new IncludesIssueCriteria(project, value);
-							default:
-								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
-						}
+						List<Criteria<PullRequest>> criterias = new ArrayList<>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (ctx.operator.getType()) {
+								case ToBeReviewedBy:
+									criterias.add(new ToBeReviewedByCriteria(getUser(value)));
+									break;
+								case ToBeChangedBy:
+									criterias.add(new ToBeChangedByCriteria(getUser(value)));
+									break;
+								case ToBeMergedBy:
+									criterias.add(new ToBeMergedByCriteria(getUser(value)));
+									break;
+								case ApprovedBy:
+									criterias.add(new ApprovedByCriteria(getUser(value)));
+									break;
+								case AssignedTo:
+									criterias.add(new AssignedToCriteria(getUser(value)));
+									break;
+								case RequestedForChangesBy:
+									criterias.add(new RequestedForChangesByCriteria(getUser(value)));
+									break;
+								case Mentioned:
+									criterias.add(new MentionedCriteria(getUser(value)));
+									break;
+								case SubmittedBy:
+									criterias.add(new SubmittedByCriteria(getUser(value)));
+									break;
+								case WatchedBy:
+									criterias.add(new WatchedByCriteria(getUser(value)));
+									break;
+								case NeedActionOf:
+									criterias.add(new NeedActionOfCriteria(getUser(value)));
+									break;
+								case CommentedBy:
+									criterias.add(new CommentedByCriteria(getUser(value)));
+									break;
+								case IncludesCommit:
+									criterias.add(new IncludesCommitCriteria(project, value));
+									break;
+								case IncludesIssue:
+									criterias.add(new IncludesIssueCriteria(project, value));
+									break;
+								default:
+									throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
+							}
+						} 
+						return new OrCriteria<>(criterias);
 					}
 
 					@Override
 					public Criteria<PullRequest> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (Criteria<PullRequest>) visit(ctx.criteria()).withParens(true);
+						return visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
 					public Criteria<PullRequest> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(fieldName, operator);
 
-						switch (operator) {
-							case PullRequestQueryLexer.IsUntil:
-							case PullRequestQueryLexer.IsSince:
-								switch (fieldName) {
-									case PullRequest.NAME_SUBMIT_DATE:
-										return new SubmitDateCriteria(value, operator);
-									case PullRequest.NAME_CLOSE_DATE:
-										return new CloseDateCriteria(value, operator);
-									case PullRequest.NAME_LAST_ACTIVITY_DATE:
-										return new LastActivityDateCriteria(value, operator);
-									default:
-										throw new IllegalStateException();
-								}
-							case PullRequestQueryLexer.Contains:
-								switch (fieldName) {
-									case PullRequest.NAME_TITLE:
-										return new TitleCriteria(value);
-									case PullRequest.NAME_DESCRIPTION:
-										return new DescriptionCriteria(value);
-									case PullRequest.NAME_COMMENT:
-										return new CommentCriteria(value);
-									default:
-										throw new IllegalStateException();
-								}
-							case PullRequestQueryLexer.Is:
-							case PullRequestQueryLexer.IsNot:
-								switch (fieldName) {
-									case PullRequest.NAME_NUMBER:
-										return new ReferenceCriteria(project, value, operator);
-									case PullRequest.NAME_STATUS:
-										try {
-											return new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()), operator);
-										} catch (IllegalArgumentException e) {
-											throw new ExplicitException("Invalid status: " + value);
-										}
-									case PullRequest.NAME_MERGE_STRATEGY:
-										return new MergeStrategyCriteria(MergeStrategy.fromString(value), operator);
-									case PullRequest.NAME_SOURCE_BRANCH:
-										return new SourceBranchCriteria(value, operator);
-									case PullRequest.NAME_SOURCE_PROJECT:
-										return new SourceProjectCriteria(value, operator);
-									case PullRequest.NAME_TARGET_BRANCH:
-										return new TargetBranchCriteria(value, operator);
-									case PullRequest.NAME_TARGET_PROJECT:
-										return new TargetProjectCriteria(value, operator);
-									case PullRequest.NAME_LABEL:
-										return new LabelCriteria(getLabelSpec(value), operator);
-									case PullRequest.NAME_COMMENT_COUNT:
-										return new CommentCountCriteria(getIntValue(value), operator);
-									default:
-										throw new IllegalStateException();
-								}
-							case PullRequestQueryLexer.IsLessThan:
-							case PullRequestQueryLexer.IsGreaterThan:
-								switch (fieldName) {
-									case PullRequest.NAME_NUMBER:
-										return new ReferenceCriteria(project, value, operator);
-									case PullRequest.NAME_COMMENT_COUNT:
-										return new CommentCountCriteria(getIntValue(value), operator);
-									default:
-										throw new IllegalStateException();
-								}
-							default:
-								throw new IllegalStateException();
+						var criterias = new ArrayList<Criteria<PullRequest>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (operator) {
+								case PullRequestQueryLexer.IsUntil:
+								case PullRequestQueryLexer.IsSince:
+									switch (fieldName) {
+										case PullRequest.NAME_SUBMIT_DATE:
+											criterias.add(new SubmitDateCriteria(value, operator));
+											break;
+										case PullRequest.NAME_CLOSE_DATE:
+											criterias.add(new CloseDateCriteria(value, operator));
+											break;
+										case PullRequest.NAME_LAST_ACTIVITY_DATE:
+											criterias.add(new LastActivityDateCriteria(value, operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case PullRequestQueryLexer.Contains:
+									switch (fieldName) {
+										case PullRequest.NAME_TITLE:
+											criterias.add(new TitleCriteria(value));
+											break;
+										case PullRequest.NAME_DESCRIPTION:
+											criterias.add(new DescriptionCriteria(value));
+											break;
+										case PullRequest.NAME_COMMENT:
+											criterias.add(new CommentCriteria(value));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case Is:
+								case IsNot:
+									switch (fieldName) {
+										case PullRequest.NAME_NUMBER:
+											criterias.add(new ReferenceCriteria(project, value, operator));
+											break;
+										case PullRequest.NAME_STATUS:
+											try {
+												criterias.add(new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()), operator));
+												break;
+											} catch (IllegalArgumentException e) {
+												throw new ExplicitException("Invalid status: " + value);
+											}
+										case PullRequest.NAME_MERGE_STRATEGY:
+											criterias.add(new MergeStrategyCriteria(MergeStrategy.fromString(value), operator));
+											break;
+										case PullRequest.NAME_SOURCE_BRANCH:
+											criterias.add(new SourceBranchCriteria(value, operator));
+											break;
+										case PullRequest.NAME_SOURCE_PROJECT:
+											criterias.add(new SourceProjectCriteria(value, operator));
+											break;
+										case PullRequest.NAME_TARGET_BRANCH:
+											criterias.add(new TargetBranchCriteria(value, operator));
+											break;
+										case PullRequest.NAME_TARGET_PROJECT:
+											criterias.add(new TargetProjectCriteria(value, operator));
+											break;
+										case PullRequest.NAME_LABEL:
+											criterias.add(new LabelCriteria(getLabelSpec(value), operator));
+											break;
+										case PullRequest.NAME_COMMENT_COUNT:
+											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case IsLessThan:
+								case IsGreaterThan:
+									switch (fieldName) {
+										case PullRequest.NAME_NUMBER:
+											criterias.add(new ReferenceCriteria(project, value, operator));
+											break;
+										case PullRequest.NAME_COMMENT_COUNT:
+											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								default:
+									throw new IllegalStateException();
+							}
 						}
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 
 					@Override
@@ -282,7 +325,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						List<Criteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<PullRequest>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -290,12 +333,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						List<Criteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<PullRequest>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<PullRequest> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<PullRequest>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -328,23 +371,23 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		if (!PullRequest.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case PullRequestQueryLexer.IsUntil:
-			case PullRequestQueryLexer.IsSince:
+			case IsUntil:
+			case IsSince:
 				if (!fieldName.equals(PullRequest.NAME_SUBMIT_DATE)
 						&& !fieldName.equals(PullRequest.NAME_LAST_ACTIVITY_DATE)
 						&& !fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case PullRequestQueryLexer.Contains:
+			case Contains:
 				if (!fieldName.equals(PullRequest.NAME_TITLE)
 						&& !fieldName.equals(PullRequest.NAME_DESCRIPTION)
 						&& !fieldName.equals(PullRequest.NAME_COMMENT)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case PullRequestQueryLexer.Is:
-			case PullRequestQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(PullRequest.NAME_NUMBER)
 						&& !fieldName.equals(PullRequest.NAME_STATUS)
 						&& !fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)
@@ -357,8 +400,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case PullRequestQueryLexer.IsLessThan:
-			case PullRequestQueryLexer.IsGreaterThan:
+			case IsLessThan:
+			case IsGreaterThan:
 				if (!fieldName.equals(PullRequest.NAME_NUMBER)
 						&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
 					throw newOperatorException(fieldName, operator);

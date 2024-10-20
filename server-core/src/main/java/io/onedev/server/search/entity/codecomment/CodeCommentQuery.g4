@@ -8,8 +8,8 @@ query
 
 criteria
 	: operator=(CreatedByMe|RepliedByMe|MentionedMe|Resolved|Unresolved) #OperatorCriteria
-    | operator=(CreatedBy|RepliedBy|Mentioned|OnCommit) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | operator=(CreatedBy|RepliedBy|Mentioned|OnCommit) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsUntil|IsSince|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -20,6 +20,10 @@ criteria
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
+
+multipleQuoted
+    : Quoted(','Quoted)*
+    ;
 
 CreatedByMe
 	: 'created' WS+ 'by' WS+ 'me'

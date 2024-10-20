@@ -82,6 +82,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(Build.QUERY_FIELDS);
 							if (getProject() != null)
@@ -96,9 +97,9 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								candidates.remove(Build.NAME_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = BuildQuery.getOperator(operatorName);							
@@ -118,52 +119,53 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									BuildQuery.checkField(project, fieldName, operator);
-									if (fieldName.equals(Build.NAME_SUBMIT_DATE) 
-											|| fieldName.equals(Build.NAME_PENDING_DATE)
-											|| fieldName.equals(Build.NAME_RUNNING_DATE)
-											|| fieldName.equals(Build.NAME_FINISH_DATE)) {
-										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
-										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(Build.NAME_PROJECT)) {
-										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjectPaths(matchWith);
-										else
+									switch (fieldName) {
+										case Build.NAME_SUBMIT_DATE:
+										case Build.NAME_PENDING_DATE:
+										case Build.NAME_RUNNING_DATE:
+										case Build.NAME_FINISH_DATE:
+											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+											return !suggestions.isEmpty() ? suggestions : null;
+										case Build.NAME_PROJECT:
+											if (!matchWith.contains("*"))
+												return SuggestionUtils.suggestProjectPaths(matchWith);
+											else
+												return null;
+										case Build.NAME_JOB:
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestJobs(project, matchWith);
+											else
+												return null;
+										case Build.NAME_STATUS:
+											List<String> candidates = new ArrayList<>();
+											for (Build.Status status : Build.Status.values())
+												candidates.add(status.toString());
+											return SuggestionUtils.suggest(candidates, matchWith);
+										case Build.NAME_NUMBER:
+											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										case Build.NAME_VERSION:
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestBuildVersions(project, matchWith);
+											else
+												return null;
+										case Build.NAME_BRANCH:
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestBranches(project, matchWith);
+											else
+												return null;
+										case Build.NAME_TAG:
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestTags(project, matchWith);
+											else
+												return null;
+										case Build.NAME_LABEL:
+											return SuggestionUtils.suggestLabels(matchWith);
+										case Build.NAME_PULL_REQUEST:
+											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										default:
 											return null;
-									} else if (fieldName.equals(Build.NAME_JOB)) {
-										if (project != null && !matchWith.contains("*")) 
-											return SuggestionUtils.suggestJobs(project, matchWith);
-										else 
-											return null;
-									} else if (fieldName.equals(Build.NAME_STATUS)) {
-										List<String> candidates = new ArrayList<>();
-										for (Build.Status status: Build.Status.values())
-											candidates.add(status.toString());
-										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(Build.NAME_NUMBER)) {
-										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(Build.NAME_VERSION)) {
-										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestBuildVersions(project, matchWith);
-										else
-											return null;
-									} else if (fieldName.equals(Build.NAME_BRANCH)) {
-										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestBranches(project, matchWith);
-										else
-											return null;
-									} else if (fieldName.equals(Build.NAME_TAG)) {
-										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestTags(project, matchWith);
-										else
-											return null;
-									} else if (fieldName.equals(Build.NAME_LABEL)) {
-										return SuggestionUtils.suggestLabels(matchWith);
-									} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {
-										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else {
-										return null;
 									}
-								} catch (ExplicitException ex) {
+								} catch (ExplicitException ignored) {
 								}
 							}
 						}
@@ -212,7 +214,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				return null;
 			}
 		}
-		if (suggestedLiteral.equals("#")) {
+
+		if (suggestedLiteral.equals(",")) {
+			return Optional.of("add another value");
+		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find build by number");
 			else

@@ -70,7 +70,8 @@ public class CommitQuery implements Serializable {
 							throw new ExplicitException("Criteria '" + criteria.authorCriteria().AuthoredByMe().getText() + "' is not supported here");
 						authorValues.add(null);
 					} else {
-						authorValues.add(getValue(criteria.authorCriteria().Value()));
+						for (var value: criteria.authorCriteria().Value())
+							authorValues.add(getValue(value));
 					}
 				} else if (criteria.committerCriteria() != null) {
 					if (criteria.committerCriteria().CommittedByMe() != null) {
@@ -78,32 +79,39 @@ public class CommitQuery implements Serializable {
 							throw new ExplicitException("Criteria '" + criteria.committerCriteria().CommittedByMe().getText() + "' is not supported here");
 						committerValues.add(null);
 					} else {
-						committerValues.add(getValue(criteria.committerCriteria().Value()));
+						for (var value: criteria.committerCriteria().Value())
+							committerValues.add(getValue(value));
 					}
 				} else if (criteria.messageCriteria() != null) {
-					messageValues.add(getValue(criteria.messageCriteria().Value()));
+					for (var value: criteria.messageCriteria().Value()) 
+						messageValues.add(getValue(value));
 				} else if (criteria.fuzzyCriteria() != null) {
 					fuzzyValues.add(unescape(unfence(criteria.fuzzyCriteria().getText())));
 				} else if (criteria.pathCriteria() != null) {
-					pathValues.add(getValue(criteria.pathCriteria().Value()));
+					for (var value: criteria.pathCriteria().Value())
+						pathValues.add(getValue(value));
 				} else if (criteria.beforeCriteria() != null) {
 					beforeValues.add(getValue(criteria.beforeCriteria().Value()));
 				} else if (criteria.afterCriteria() != null) {
 					afterValues.add(getValue(criteria.afterCriteria().Value()));
 				} else if (criteria.revisionCriteria() != null) {
-					String value;
+					List<String> values = new ArrayList<>();
 					Revision.Scope scope;
-					if (criteria.revisionCriteria().DefaultBranch() != null) 
-						value = project.getDefaultBranch();
-					else 
-						value = getValue(criteria.revisionCriteria().Value());
-					if (criteria.revisionCriteria().BUILD() != null) {
-						var buildReference = BuildReference.of(value, project);
-						Build build = OneDev.getInstance(BuildManager.class).find(buildReference.getProject(), buildReference.getNumber());
-						if (build == null)
-							throw new ExplicitException("Unable to find build: " + value);
-						else
-							value = build.getCommitHash();
+					if (criteria.revisionCriteria().DefaultBranch() != null) {
+						values.add(project.getDefaultBranch());
+					} else {
+						for (var valueNode: criteria.revisionCriteria().Value()) {
+							var value = getValue(valueNode);
+							if (criteria.revisionCriteria().BUILD() != null) {
+								var buildReference = BuildReference.of(value, project);
+								Build build = OneDev.getInstance(BuildManager.class).find(buildReference.getProject(), buildReference.getNumber());
+								if (build == null)
+									throw new ExplicitException("Unable to find build: " + value);
+								else
+									value = build.getCommitHash();
+							}
+							values.add(value);
+						}
 					}
 					if (criteria.revisionCriteria().SINCE() != null)
 						scope = Revision.Scope.SINCE;
@@ -111,7 +119,7 @@ public class CommitQuery implements Serializable {
 						scope = Revision.Scope.UNTIL;
 					else
 						scope = null;
-					if (value != null)
+					for (var value: values) 
 						revisions.add(new Revision(value, scope, criteria.revisionCriteria().getText()));
 				}
 			}

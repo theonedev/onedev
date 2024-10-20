@@ -78,6 +78,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
+						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(Pack.QUERY_FIELDS);
 							if (getProject() != null)
@@ -90,9 +91,9 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								candidates.remove(Pack.NAME_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
-						} else if ("criteriaValue".equals(spec.getLabel())) {
-							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
+							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = PackQuery.getOperator(operatorName);							
@@ -174,6 +175,9 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		if (!withCurrentUserCriteria && suggestedLiteral.equals(PackQuery.getRuleName(PackQueryLexer.PublishedByMe))) 
 			return null;
+		if (suggestedLiteral.equals(","))
+			return Optional.of("add another value");
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

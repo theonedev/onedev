@@ -1,42 +1,22 @@
 package io.onedev.server.search.buildmetric;
 
-import static io.onedev.server.model.Build.METRIC_QUERY_FIELDS;
-import static io.onedev.server.model.Build.NAME_BRANCH;
-import static io.onedev.server.model.Build.NAME_JOB;
-import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.AndCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.CriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.FieldOperatorCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.NotCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.OrCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser.QueryContext;
 import io.onedev.server.search.entity.EntityQuery;
+import org.antlr.v4.runtime.*;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static io.onedev.server.model.Build.*;
+import static io.onedev.server.search.buildmetric.BuildMetricQueryParser.*;
 
 public class BuildMetricQuery implements Serializable {
 
@@ -79,9 +59,9 @@ public class BuildMetricQuery implements Serializable {
 					@Override
 					public BuildMetricCriteria visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-						case BuildMetricQueryLexer.BuildIsSuccessful:
+						case BuildIsSuccessful:
 							return new BuildIsSuccessfulCriteria();
-						case BuildMetricQueryLexer.BuildIsFailed:
+						case BuildIsFailed:
 							return new BuildIsFailedCriteria();
 						default:
 							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
@@ -106,34 +86,46 @@ public class BuildMetricQuery implements Serializable {
 					
 					@Override
 					public BuildMetricCriteria visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = EntityQuery.getValue(ctx.Quoted(0).getText());
-						String value = EntityQuery.getValue(ctx.Quoted(1).getText());
+						String fieldName = EntityQuery.getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-
-						if (operator == BuildMetricQueryLexer.Is || operator == BuildMetricQueryLexer.IsNot) {
-							switch (fieldName) {
-								case BuildMetric.NAME_REPORT:
-									return new ReportCriteria(value, operator);
-								case NAME_JOB:
-									return new JobCriteria(value, operator);
-								case NAME_BRANCH:
-									return new BranchCriteria(value, operator);
-								default:
-									return new ParamCriteria(fieldName, value, operator);
+						
+						var criterias = new ArrayList<BuildMetricCriteria>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = EntityQuery.getValue(quoted.getText());
+							if (operator == Is || operator == IsNot) {
+								switch (fieldName) {
+									case BuildMetric.NAME_REPORT:
+										criterias.add(new ReportCriteria(value, operator));
+										break;
+									case NAME_JOB:
+										criterias.add(new JobCriteria(value, operator));
+										break;
+									case NAME_BRANCH:
+										criterias.add(new BranchCriteria(value, operator));
+										break;
+									default:
+										criterias.add(new ParamCriteria(fieldName, value, operator));
+								}
+							} else {
+								throw new IllegalStateException();
 							}
 						}
-						throw new IllegalStateException();
+						return operator==IsNot? new AndBuildMetricCriteria(criterias): new OrBuildMetricCriteria(criterias);
 					}
 					
 					@Override
 					public BuildMetricCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						int operator = ctx.operator.getType();
-						String value = EntityQuery.getValue(ctx.Quoted().getText());
-						if (operator == BuildMetricQueryLexer.Since || operator == BuildMetricQueryLexer.Until)
-							return new DateCriteria(value, operator);
-						else 
-							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						var criterias = new ArrayList<BuildMetricCriteria>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							int operator = ctx.operator.getType();
+							String value = EntityQuery.getValue(quoted.getText());
+							if (operator == Since || operator == Until)
+								criterias.add(new DateCriteria(value, operator));
+							else
+								throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						}
+						return new OrBuildMetricCriteria(criterias);
 					}
 
 					@Override
@@ -173,16 +165,16 @@ public class BuildMetricQuery implements Serializable {
 		if (!METRIC_QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName)) 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case BuildMetricQueryLexer.Is:
-			case BuildMetricQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_BRANCH)
 						&& !fieldName.equals(BuildMetric.NAME_REPORT)
 						&& !paramNames.contains(fieldName)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case BuildMetricQueryLexer.IsEmpty:
-			case BuildMetricQueryLexer.IsNotEmpty:
+			case IsEmpty:
+			case IsNotEmpty:
 				if (!fieldName.equals(NAME_PULL_REQUEST) && !paramNames.contains(fieldName))
 					throw newOperatorException(fieldName, operator);
 				break;

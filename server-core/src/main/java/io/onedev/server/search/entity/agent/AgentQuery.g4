@@ -8,8 +8,8 @@ query
 
 criteria
 	: operator=(Online|Offline|Paused|HasRunningBuilds) #OperatorCriteria
-	| operator=(HasAttribute|NotUsedSince|EverUsedSince|RanBuild) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+	| operator=(HasAttribute|NotUsedSince|EverUsedSince|RanBuild) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -20,6 +20,10 @@ criteria
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
+
+multipleQuoted
+    : Quoted(','Quoted)*
+    ;
 
 Online
 	: 'online'

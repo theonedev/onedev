@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
+import static io.onedev.server.job.match.JobMatchParser.*;
 
 public class JobMatch extends Criteria<JobMatchContext> {
 
@@ -65,37 +66,49 @@ public class JobMatch extends Criteria<JobMatchContext> {
 			@Override
 			public Criteria<io.onedev.server.job.match.JobMatchContext> visitFieldOperatorValueCriteria(JobMatchParser.FieldOperatorValueCriteriaContext ctx) {
 				int operator = ctx.operator.getType();
-				String fieldName = getValue(ctx.Quoted(0).getText());
-				String fieldValue = getValue(ctx.Quoted(1).getText());
+				String fieldName = getValue(ctx.criteriaField.getText());
 				checkField(fieldName, withProjectCriteria, withJobCriteria);
+				
+				var criterias = new ArrayList<Criteria<io.onedev.server.job.match.JobMatchContext>>();
+				for (var quoted: ctx.criteriaValue.Quoted()) {
+					String fieldValue = getValue(quoted.getText());
 
-				if (fieldName.equals(Build.NAME_PROJECT)) 
-					return new ProjectCriteria(fieldValue, operator);
-				else
-					return new JobCriteria(fieldValue, operator);
+					if (fieldName.equals(Build.NAME_PROJECT))
+						criterias.add(new ProjectCriteria(fieldValue, operator));
+					else
+						criterias.add(new JobCriteria(fieldValue, operator));
+				}
+				return operator == IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 			}
 			
 			@Override
 			public Criteria<io.onedev.server.job.match.JobMatchContext> visitOperatorValueCriteria(JobMatchParser.OperatorValueCriteriaContext ctx) {
-				String fieldValue = getValue(ctx.Quoted().getText());
-				switch (ctx.operator.getType()) {
-					case JobMatchParser.OnBranch:
-						return new OnBranchCriteria(fieldValue);
-					case JobMatchParser.SubmittedByGroup:
-						var group = OneDev.getInstance(GroupManager.class).find(fieldValue);
-						if (group != null)
-							return new GroupCriteria(group);
-						else
-							throw new ExplicitException("Unable to find group: " + fieldValue);
-					case JobMatchParser.SubmittedByUser:
-						var user = OneDev.getInstance(UserManager.class).findByName(fieldValue);
-						if (user != null)
-							return new UserCriteria(user);
-						else
-							throw new ExplicitException("Unable to find user with login: " + fieldValue);
-					default:
-						throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
+				var criterias = new ArrayList<Criteria<io.onedev.server.job.match.JobMatchContext>>();
+				for (var quoted: ctx.criteriaValue.Quoted()) {
+					String fieldValue = getValue(quoted.getText());
+					switch (ctx.operator.getType()) {
+						case OnBranch:
+							criterias.add(new OnBranchCriteria(fieldValue));
+							break;
+						case SubmittedByGroup:
+							var group = OneDev.getInstance(GroupManager.class).find(fieldValue);
+							if (group != null)
+								criterias.add(new GroupCriteria(group));
+							else
+								throw new ExplicitException("Unable to find group: " + fieldValue);
+							break;
+						case SubmittedByUser:
+							var user = OneDev.getInstance(UserManager.class).findByName(fieldValue);
+							if (user != null)
+								criterias.add(new UserCriteria(user));
+							else
+								throw new ExplicitException("Unable to find user with login: " + fieldValue);
+							break;
+						default:
+							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
+					}
 				}
+				return new OrCriteria<>(criterias);
 			}
 			
 			@Override

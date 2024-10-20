@@ -73,7 +73,7 @@ public class BuildQuery extends EntityQuery<Build> {
 
 					@Override
 					public Criteria<Build> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new ReferenceCriteria(project, ctx.getText(), Is);
+						return new ReferenceCriteria(project, ctx.getText(), BuildQueryParser.Is);
 					}
 
 					@Override
@@ -84,35 +84,35 @@ public class BuildQuery extends EntityQuery<Build> {
 					@Override
 					public Criteria<Build> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-						case BuildQueryLexer.Successful:
+						case Successful:
 							return new SuccessfulCriteria();
-						case BuildQueryLexer.Failed:
+						case Failed:
 							return new FailedCriteria();
-						case BuildQueryLexer.Cancelled:
+						case Cancelled:
 							return new CancelledCriteria();
-						case BuildQueryLexer.TimedOut:
+						case TimedOut:
 							return new TimedOutCriteria();
-						case BuildQueryLexer.Finished:
+						case Finished:
 							if (!withUnfinishedCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FinishedCriteria();
-						case BuildQueryLexer.Waiting:
+						case Waiting:
 							if (!withUnfinishedCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new WaitingCriteria();
-						case BuildQueryLexer.Pending:
+						case Pending:
 							if (!withUnfinishedCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new PendingCriteria();
-						case BuildQueryLexer.Running:
+						case Running:
 							if (!withUnfinishedCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new RunningCriteria();
-						case BuildQueryLexer.SubmittedByMe:
+						case SubmittedByMe:
 							if (!withCurrentUserCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
-						case BuildQueryLexer.CancelledByMe:
+						case CancelledByMe:
 							if (!withCurrentUserCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new CancelledByMeCriteria();
@@ -123,21 +123,25 @@ public class BuildQuery extends EntityQuery<Build> {
 					
 					@Override
 					public Criteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						String value = getValue(ctx.Quoted().getText());
-						if (ctx.SubmittedBy() != null) 
-							return new SubmittedByCriteria(getUser(value));
-						else if (ctx.CancelledBy() != null) 
-							return new CancelledByCriteria(getUser(value));
-						else if (ctx.FixedIssue() != null) 
-							return new FixedIssueCriteria(project, value);
-						else if (ctx.DependsOn() != null) 
-							return new DependsOnCriteria(project, value);
-						else if (ctx.DependenciesOf() != null) 
-							return new DependenciesOfCriteria(project, value);
-						else if (ctx.RanOn() != null)
-							return new RanOnCriteria(value);
-						else 
-							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						var criterias = new ArrayList<Criteria<Build>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							if (ctx.SubmittedBy() != null)
+								criterias.add(new SubmittedByCriteria(getUser(value)));
+							else if (ctx.CancelledBy() != null)
+								criterias.add(new CancelledByCriteria(getUser(value)));
+							else if (ctx.FixedIssue() != null)
+								criterias.add(new FixedIssueCriteria(project, value));
+							else if (ctx.DependsOn() != null)
+								criterias.add(new DependsOnCriteria(project, value));
+							else if (ctx.DependenciesOf() != null)
+								criterias.add(new DependenciesOfCriteria(project, value));
+							else if (ctx.RanOn() != null)
+								criterias.add(new RanOnCriteria(value));
+							else
+								throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
+						}
+						return new OrCriteria<>(criterias);
 					}
 					
 					@Override
@@ -150,77 +154,100 @@ public class BuildQuery extends EntityQuery<Build> {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-						if (fieldName.equals(NAME_VERSION))
-							return new VersionEmptyCriteria(operator);
-						else if (fieldName.equals(NAME_PULL_REQUEST))
-							return new PullRequestEmptyCriteria(operator);
-						else if (fieldName.equals(NAME_BRANCH))
-							return new BranchEmptyCriteria(operator);
-						else if (fieldName.equals(NAME_TAG))
-							return new TagEmptyCriteria(operator);
-						else
-							return new ParamEmptyCriteria(fieldName, operator);
+						switch (fieldName) {
+							case NAME_VERSION:
+								return new VersionEmptyCriteria(operator);
+							case NAME_PULL_REQUEST:
+								return new PullRequestEmptyCriteria(operator);
+							case NAME_BRANCH:
+								return new BranchEmptyCriteria(operator);
+							case NAME_TAG:
+								return new TagEmptyCriteria(operator);
+							default:
+								return new ParamEmptyCriteria(fieldName, operator);
+						}
 					}
 					
 					@Override
 					public Criteria<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted(0).getText());
-						String value = getValue(ctx.Quoted(1).getText());
+						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-						
-						switch (operator) {
-							case BuildQueryLexer.IsUntil:
-							case BuildQueryLexer.IsSince:
-								switch (fieldName) {
-									case NAME_SUBMIT_DATE:
-										return new SubmitDateCriteria(value, operator);
-									case NAME_PENDING_DATE:
-										return new PendingDateCriteria(value, operator);
-									case NAME_RUNNING_DATE:
-										return new RunningDateCriteria(value, operator);
-									case NAME_FINISH_DATE:
-										return new FinishDateCriteria(value, operator);
-									default:
-										throw new IllegalStateException();
-								}
-							case BuildQueryLexer.Is:
-							case BuildQueryLexer.IsNot:
-								switch (fieldName) {
-									case NAME_PROJECT:
-										return new ProjectCriteria(value, operator);
-									case NAME_STATUS:
-										Build.Status status = Build.Status.of(value);
-										if (status != null)
-											return new StatusCriteria(status, operator);
-										else
-											throw new ExplicitException("Invalid status: " + value);
-									case NAME_COMMIT:
-										ProjectScopedCommit commitId = getCommitId(project, value);
-										return new CommitCriteria(commitId.getProject(), commitId.getCommitId(), operator);
-									case NAME_JOB:
-										return new JobCriteria(value, operator);
-									case NAME_NUMBER:
-										return new ReferenceCriteria(project, value, operator);
-									case NAME_VERSION:
-										return new VersionCriteria(value, operator);
-									case NAME_BRANCH:
-										return new BranchCriteria(value, operator);
-									case NAME_TAG:
-										return new TagCriteria(value, operator);
-									case NAME_LABEL:
-										return new LabelCriteria(getLabelSpec(value), operator);
-									case NAME_PULL_REQUEST:
-										return new PullRequestCriteria(project, value, operator);
-									default:
-										return new ParamCriteria(fieldName, value, operator);
-								}
-							case BuildQueryLexer.IsLessThan:
-							case BuildQueryLexer.IsGreaterThan:
-								return new ReferenceCriteria(project, value, operator);
-							default:
-								throw new IllegalStateException();
+
+						var criterias = new ArrayList<Criteria<Build>>();
+						for (var quoted: ctx.criteriaValue.Quoted()) {
+							String value = getValue(quoted.getText());
+							switch (operator) {
+								case IsUntil:
+								case IsSince:
+									switch (fieldName) {
+										case NAME_SUBMIT_DATE:
+											criterias.add(new SubmitDateCriteria(value, operator));
+											break;
+										case NAME_PENDING_DATE:
+											criterias.add(new PendingDateCriteria(value, operator));
+											break;
+										case NAME_RUNNING_DATE:
+											criterias.add(new RunningDateCriteria(value, operator));
+											break;
+										case NAME_FINISH_DATE:
+											criterias.add(new FinishDateCriteria(value, operator));
+											break;
+										default:
+											throw new IllegalStateException();
+									}
+									break;
+								case Is:
+								case IsNot:
+									switch (fieldName) {
+										case NAME_PROJECT:
+											criterias.add(new ProjectCriteria(value, operator));
+											break;
+										case NAME_STATUS:
+											Status status = Status.of(value);
+											if (status != null)
+												criterias.add(new StatusCriteria(status, operator));
+											else
+												throw new ExplicitException("Invalid status: " + value);
+											break;
+										case NAME_COMMIT:
+											ProjectScopedCommit commitId = getCommitId(project, value);
+											criterias.add(new CommitCriteria(commitId.getProject(), commitId.getCommitId(), operator));
+											break;
+										case NAME_JOB:
+											criterias.add(new JobCriteria(value, operator));
+											break;
+										case NAME_NUMBER:
+											criterias.add(new ReferenceCriteria(project, value, operator));
+											break;
+										case NAME_VERSION:
+											criterias.add(new VersionCriteria(value, operator));
+											break;
+										case NAME_BRANCH:
+											criterias.add(new BranchCriteria(value, operator));
+											break;
+										case NAME_TAG:
+											criterias.add(new TagCriteria(value, operator));
+											break;
+										case NAME_LABEL:
+											criterias.add(new LabelCriteria(getLabelSpec(value), operator));
+											break;
+										case NAME_PULL_REQUEST:
+											criterias.add(new PullRequestCriteria(project, value, operator));
+											break;
+										default:
+											criterias.add(new ParamCriteria(fieldName, value, operator));
+									}
+									break;
+								case IsLessThan:
+								case IsGreaterThan:
+									criterias.add(new ReferenceCriteria(project, value, operator));
+									break;
+								default:
+									throw new IllegalStateException();
+							}
 						}
+						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
 					}
 					
 					@Override
@@ -228,7 +255,7 @@ public class BuildQuery extends EntityQuery<Build> {
 						List<Criteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria<Build>(childCriterias);
+						return new OrCriteria<>(childCriterias);
 					}
 
 					@Override
@@ -236,12 +263,12 @@ public class BuildQuery extends EntityQuery<Build> {
 						List<Criteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria<Build>(childCriterias);
+						return new AndCriteria<>(childCriterias);
 					}
 
 					@Override
 					public Criteria<Build> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria<Build>(visit(ctx.criteria()));
+						return new NotCriteria<>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -275,16 +302,16 @@ public class BuildQuery extends EntityQuery<Build> {
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-			case BuildQueryLexer.IsUntil:
-			case BuildQueryLexer.IsSince:
+			case IsUntil:
+			case IsSince:
 				if (!fieldName.equals(NAME_SUBMIT_DATE)
 						&& !fieldName.equals(NAME_PENDING_DATE)
 						&& !fieldName.equals(NAME_RUNNING_DATE)
 						&& !fieldName.equals(NAME_FINISH_DATE))
 					throw newOperatorException(fieldName, operator);
 				break;
-			case BuildQueryLexer.Is:
-			case BuildQueryLexer.IsNot:
+			case Is:
+			case IsNot:
 				if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_COMMIT)
 						&& !fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_NUMBER)
 						&& !fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)
@@ -294,16 +321,16 @@ public class BuildQuery extends EntityQuery<Build> {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case BuildQueryLexer.IsEmpty:
-			case BuildQueryLexer.IsNotEmpty:
+			case IsEmpty:
+			case IsNotEmpty:
 				if (!fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION)
 						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
 						&& !paramNames.contains(fieldName)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
-			case BuildQueryLexer.IsLessThan:
-			case BuildQueryLexer.IsGreaterThan:
+			case IsLessThan:
+			case IsGreaterThan:
 				if (!fieldName.equals(NAME_NUMBER))
 					throw newOperatorException(fieldName, operator);
 				break;
