@@ -94,6 +94,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					error(e.getMessage());
 					return null;
 				} else {
+					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and unresolved");
 					return new CodeCommentQuery(new FuzzyCriteria(queryString));
 				}
 			}

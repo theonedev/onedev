@@ -161,6 +161,7 @@ public abstract class PullRequestListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
+				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and open");
 				parsedQuery = new PullRequestQuery(new FuzzyCriteria(queryString));
 			}
 		}

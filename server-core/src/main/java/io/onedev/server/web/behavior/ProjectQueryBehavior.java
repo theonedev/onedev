@@ -37,7 +37,7 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 @SuppressWarnings("serial")
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final boolean childQuery;
 	

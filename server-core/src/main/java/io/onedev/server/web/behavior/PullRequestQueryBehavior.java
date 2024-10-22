@@ -34,7 +34,7 @@ import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*
 @SuppressWarnings("serial")
 public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	

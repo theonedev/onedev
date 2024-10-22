@@ -183,6 +183,7 @@ public abstract class IssueListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
+				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"State\" is \"Open\"");
 				parsedQuery = new IssueQuery(new FuzzyCriteria(queryString));
 			}
 		}

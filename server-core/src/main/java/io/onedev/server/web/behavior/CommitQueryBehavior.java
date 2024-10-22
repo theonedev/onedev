@@ -32,7 +32,7 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	

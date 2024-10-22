@@ -33,7 +33,7 @@ import static io.onedev.server.model.Pack.*;
 @SuppressWarnings("serial")
 public class PackQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	
