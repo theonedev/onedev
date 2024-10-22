@@ -73,8 +73,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
-	private static final String PARAM_CURRENT_FILE = "current-file";
-	
 	private static final String PARAM_BLAME_FILE = "blame-file";
 	
 	public static final String PARAM_COMMENT = "comment";
@@ -157,7 +155,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
 		state.createdCommitHash = params.get(ProjectBlobPage.PARAM_CREATED_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		     
@@ -592,7 +589,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		state.commentId = comment.getId();
 		state.mark = comment.getMark();
 		state.pathFilter = comment.getCompareContext().getPathFilter();
-		state.currentFile = comment.getCompareContext().getCurrentFile();
 		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
 		state.oldCommitHash = compareContext.getOldCommitHash();
 		state.newCommitHash = compareContext.getNewCommitHash();
@@ -614,8 +610,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
-		if (state.currentFile != null)
-			params.add(PARAM_CURRENT_FILE, state.currentFile);
 		if (state.blameFile != null)
 			params.add(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
@@ -671,25 +665,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
-				state.currentFile = null;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
-			}
-			
-		};
-		IModel<String> currentFileModel = new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return state.currentFile;
-			}
-
-			@Override
-			public void setObject(String object) {
-				state.currentFile = object;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 			}
 			
@@ -715,8 +690,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		};
 		
 		Component revisionDiff = new RevisionDiffPanel("revisionDiff", getComparisonBase().name(), 
-				state.newCommitHash, pathFilterModel, currentFileModel, whitespaceOptionModel, 
-				blameModel, this) {
+				state.newCommitHash, pathFilterModel, whitespaceOptionModel, blameModel, this) {
 			
 			@Override
 			protected Project getProject() {
@@ -775,7 +749,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			markState.oldCommitHash = state.oldCommitHash;
 			markState.newCommitHash = state.newCommitHash;
 			markState.pathFilter = state.pathFilter;
-			markState.currentFile = state.currentFile;
 			markState.whitespaceOption = state.whitespaceOption;
 			return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
 		} else {
@@ -898,9 +871,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		@Nullable
 		public String pathFilter;
-		
-		@Nullable
-		public String currentFile;
 		
 		@Nullable
 		public String blameFile;

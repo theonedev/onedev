@@ -9,13 +9,13 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
@@ -117,8 +117,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	private Mark mark;
 	
 	private String pathFilter;
-	
-	private String currentFile;
 	
 	private String blameFile;
 	
@@ -492,25 +490,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 			@Override
 			public void setObject(String object) {
-				currentFile = null;
 				pathFilter = object;
-			}
-			
-		};
-		IModel<String> currentFileModel = new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return currentFile;
-			}
-
-			@Override
-			public void setObject(String object) {
-				currentFile = object;
 			}
 			
 		};
@@ -539,8 +519,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		 * it above when loading the project  
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, request.getBaseCommitHash(), 
-				source.getRevision(), pathFilterModel, currentFileModel, whitespaceOptionModel, 
-				blameModel, this) {
+				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this) {
 
 			@Override
 			protected Project getProject() {
@@ -908,7 +887,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
-		state.currentFile = currentFile;
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;

@@ -92,8 +92,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
-	private static final String PARAM_CURRENT_FILE = "current-file";
-	
 	private static final String PARAM_COMMIT_QUERY = "commit-query";
 	
 	private static final String PARAM_BLAME_FILE = "blame-file";
@@ -139,7 +137,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = compareContext.getWhitespaceOption();
 		state.pathFilter = compareContext.getPathFilter();
-		state.currentFile = compareContext.getCurrentFile();
 		return state;
 	}
 	
@@ -157,8 +154,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
-		if (state.currentFile != null)
-			params.add(PARAM_CURRENT_FILE, state.currentFile);
 		if (state.commitQuery != null)
 			params.add(PARAM_COMMIT_QUERY, state.commitQuery);
 		if (state.blameFile != null)
@@ -219,7 +214,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 			throw new IllegalArgumentException("Can only compare with common ancestor when different projects are involved");
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(
 				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.IGNORE_TRAILING.name()));
@@ -269,7 +263,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				newState.leftSide = new ProjectAndRevision(project, revision);
 				newState.rightSide = state.rightSide;
 				newState.pathFilter = state.pathFilter;
-				newState.currentFile = state.currentFile;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
@@ -364,7 +357,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				newState.leftSide = state.leftSide;
 				newState.rightSide = new ProjectAndRevision(project, revision);
 				newState.pathFilter = state.pathFilter;
-				newState.currentFile = state.currentFile;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
@@ -386,7 +378,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				newState.leftSide = state.rightSide;
 				newState.rightSide = state.leftSide;
 				newState.pathFilter = state.pathFilter;
-				newState.currentFile = state.currentFile;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
@@ -603,25 +594,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				@Override
 				public void setObject(String object) {
 					state.pathFilter = object;
-					state.currentFile = null;
-					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
-				}
-				
-			};
-			IModel<String> currentFileModel = new IModel<String>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public String getObject() {
-					return state.currentFile;
-				}
-
-				@Override
-				public void setObject(String object) {
-					state.currentFile = object;
 					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 				}
 				
@@ -647,8 +619,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 			
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, 
 					state.compareWithMergeBase?mergeBase.name():state.leftSide.getRevision(), 
-					state.rightSide.getRevision(), pathFilterModel, currentFileModel, 
-					whitespaceOptionModel,blameModel, this) {
+					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel,
+					blameModel, this) {
 				
 				@Override
 				protected Project getProject() {
@@ -770,9 +742,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		public String pathFilter;
 		
 		@Nullable
-		public String currentFile;
-		
-		@Nullable
 		public String blameFile;
 		
 		@Nullable
@@ -790,7 +759,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 			compareWithMergeBase = state.compareWithMergeBase;
 			whitespaceOption = state.whitespaceOption;
 			pathFilter = state.pathFilter;
-			currentFile = state.currentFile;
 			blameFile = state.blameFile;
 			commentId = state.commentId;
 			mark = state.mark;
@@ -879,7 +847,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		markState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
-		markState.currentFile = state.currentFile;
 		markState.tabPanel = TabPanel.FILE_CHANGES;
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = false;

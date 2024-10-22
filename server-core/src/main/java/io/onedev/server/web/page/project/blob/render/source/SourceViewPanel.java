@@ -855,7 +855,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		compareContext.setOldCommitHash(context.getCommit().name());
 		compareContext.setNewCommitHash(context.getCommit().name());
 		if (context.getBlobIdent().path != null)
-			compareContext.setCurrentFile(context.getBlobIdent().path);
+			compareContext.setPathFilter(PatternSet.quoteIfNecessary(context.getBlobIdent().path));
 		return compareContext;
 	}
 	

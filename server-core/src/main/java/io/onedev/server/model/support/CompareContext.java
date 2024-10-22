@@ -1,19 +1,13 @@
 package io.onedev.server.model.support;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.diff.WhitespaceOption;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.diff.WhitespaceOption;
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Embeddable
 public class CompareContext implements Serializable {
@@ -43,8 +37,6 @@ public class CompareContext implements Serializable {
 	
 	private String pathFilter;
 	
-	private String currentFile;
-	
 	@Column(nullable=false)
 	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 
@@ -73,15 +65,6 @@ public class CompareContext implements Serializable {
 		this.pathFilter = pathFilter;
 	}
 
-	@Nullable
-	public String getCurrentFile() {
-		return currentFile;
-	}
-
-	public void setCurrentFile(@Nullable String currentFile) {
-		this.currentFile = currentFile;
-	}
-
 	public WhitespaceOption getWhitespaceOption() {
 		return whitespaceOption;
 	}
@@ -102,7 +85,6 @@ public class CompareContext implements Serializable {
 				.append(oldCommitHash, otherContext.oldCommitHash)
 				.append(newCommitHash, otherContext.newCommitHash)
 				.append(pathFilter, otherContext.pathFilter)
-				.append(currentFile, otherContext.currentFile)
 				.append(whitespaceOption, otherContext.whitespaceOption)
 				.isEquals();
 	}
@@ -114,7 +96,6 @@ public class CompareContext implements Serializable {
 				.append(oldCommitHash)
 				.append(newCommitHash)
 				.append(pathFilter)
-				.append(currentFile)
 				.append(whitespaceOption)
 				.toHashCode();
 	}

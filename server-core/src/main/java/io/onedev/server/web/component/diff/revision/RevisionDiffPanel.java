@@ -13,9 +13,9 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
@@ -45,7 +45,6 @@ import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -67,7 +66,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -123,8 +121,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	private final IModel<WhitespaceOption> whitespaceOptionModel;
 	
 	private DiffViewMode diffMode;
-	
-	private final IModel<String> currentFileModel;
 	
 	private final IModel<List<DiffEntryFacade>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntryFacade>>() {
 
@@ -224,16 +220,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		@Override
 		protected List<BlobChange> load() {
 			List<BlobChange> diffChanges = new ArrayList<>();
-			if (getCurrentFile() != null) {
-				for (BlobChange change: getTotalChanges()) {
-					if (change.getPaths().contains(getCurrentFile()))
-						diffChanges.add(change);
-				}
-			} else if (getTotalChanges().size() > WebConstants.MAX_DIFF_FILES) {
+			if (getTotalChanges().size() > WebConstants.MAX_DIFF_FILES) 
 				diffChanges = getTotalChanges().subList(0, WebConstants.MAX_DIFF_FILES);
-			} else {
+			else 
 				diffChanges = getTotalChanges();
-			}
 			
 	    	List<BlobChange> displayChanges = new ArrayList<>();
 	    	int totalChangedLines = 0;
@@ -281,13 +271,12 @@ public abstract class RevisionDiffPanel extends Panel {
 
 	private ListView<BlobChange> diffsView;
 	
-	private WebMarkupContainer navs;
-	
 	private WebMarkupContainer body;
 	
-	public RevisionDiffPanel(String id, String oldRev, String newRev, IModel<String> pathFilterModel, 
-			IModel<String> currentFileModel, IModel<WhitespaceOption> whitespaceOptionModel, 
-			@Nullable IModel<String> blameModel, @Nullable RevisionDiff.AnnotationSupport annotationSupport) {
+	public RevisionDiffPanel(String id, String oldRev, String newRev, 
+							 IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
+							 @Nullable IModel<String> blameModel, 
+							 @Nullable RevisionDiff.AnnotationSupport annotationSupport) {
 		super(id);
 		
 		this.oldRev = oldRev;
@@ -326,24 +315,11 @@ public abstract class RevisionDiffPanel extends Panel {
 			diffMode = DiffViewMode.UNIFIED;
 		else
 			diffMode = DiffViewMode.valueOf(cookie.getValue());
-		
-		this.currentFileModel = currentFileModel;
 	}
 
 	private void doFilter(AjaxRequestTarget target) {
 		body.replace(commentContainer = newCommentContainer());
 		target.add(body);
-		target.add(navs);
-	}
-	
-	@Nullable
-	private String getCurrentFile() {
-		return currentFileModel.getObject();
-	}
-	
-	private void setCurrentFile(@Nullable String currentFile) {
-		currentFileModel.setObject(currentFile);
-		body.replace(commentContainer = newCommentContainer());
 	}
 	
 	@Override
@@ -533,7 +509,6 @@ public abstract class RevisionDiffPanel extends Panel {
 								
 								whitespaceOptionModel.setObject(bean.getWhitespaceOption());
 								
-								target.add(navs);
 								target.add(body);
 								
 								close();
@@ -624,160 +599,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		add(pathFilterForm);
 		
-		navs = new WebMarkupContainer("navs");
-		navs.setOutputMarkupId(true);
-		add(navs);
-		
-		navs.add(new WebMarkupContainer("showAllFiles") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("totalFiles", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return "Total " + getTotalChanges().size() + " files";
-					}
-					
-				}));
-				add(new ViewStateAwareAjaxLink<Void>("showSingleFile") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						setCurrentFile(getTotalChanges().iterator().next().getPath());
-						target.add(body);
-						target.add(navs);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getTotalChanges().size() > 1);
-					}
-					
-				});
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getCurrentFile() == null);
-			}
-			
-		});
-		
-		navs.add(new WebMarkupContainer("showSingleFile") {
-
-			private int getIndex() {
-				int index = 0;
-				for (BlobChange change: getTotalChanges()) {
-					if (change.getPaths().contains(getCurrentFile()))
-						return index;
-					index++;
-				}
-				return -1;
-			}
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new ViewStateAwareAjaxLink<Void>("prev") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						int index = getIndex() - 1;
-						if (index >=0 && index < getTotalChanges().size()) {
-							setCurrentFile(getTotalChanges().get(index).getPath());
-							target.add(body);
-							target.add(navs);
-							target.appendJavaScript("onedev.server.revisionDiff.scrollToFilesTop();");							
-						}
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (!isEnabled())
-							tag.put("disabled", "disabled");
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						int index = getIndex();
-						setEnabled(index > 0);
-						setVisible(index != -1);
-					}
-					
-				});
-				
-				add(new Label("message", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						int index = getIndex();
-						if (index != -1)
-							return "File " + (index +1) + " of " + getTotalChanges().size();
-						else
-							return "File '" + getCurrentFile() + "' not found in change set";
-					}
-					
-				}));
-				
-				add(new ViewStateAwareAjaxLink<Void>("next") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						int index = getIndex() + 1;
-						if (index >=0 && index < getTotalChanges().size()) {
-							setCurrentFile(getTotalChanges().get(index).getPath());
-							target.add(body);
-							target.add(navs);
-							target.appendJavaScript("onedev.server.revisionDiff.scrollToFilesTop();");							
-						}
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (!isEnabled())
-							tag.put("disabled", "disabled");
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						int index = getIndex();
-						setEnabled(index < getTotalChanges().size()-1);
-						setVisible(index != -1);
-					}
-					
-				});
-				
-				add(new ViewStateAwareAjaxLink<Void>("showAllFiles") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						setCurrentFile(null);
-						target.add(body);
-						target.add(navs);
-					}
-
-				});
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getCurrentFile() != null);
-			}
-			
-		});
-
 		body = new WebMarkupContainer("body");
 		body.setOutputMarkupId(true);
 		add(body);
@@ -797,7 +618,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getCurrentFile() == null && getDisplayChanges().size() < getTotalChanges().size());
+				setVisible(getDisplayChanges().size() < getTotalChanges().size());
 			}
 			
 		});		
@@ -1232,7 +1053,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		compareContext.setOldCommitHash(getOldCommitId().name());
 		compareContext.setNewCommitHash(getNewCommitId().name());
 		compareContext.setPathFilter(pathFilterModel.getObject());
-		compareContext.setCurrentFile(currentFileModel.getObject());
 		compareContext.setWhitespaceOption(whitespaceOptionModel.getObject());
 		return compareContext;
 	}
@@ -1614,7 +1434,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			blameFileModel.detach();
 		pathFilterModel.detach();
 		whitespaceOptionModel.detach();
-		currentFileModel.detach();
 		pendingSuggestionAppliesModel.detach();
 		
 		super.onDetach();
