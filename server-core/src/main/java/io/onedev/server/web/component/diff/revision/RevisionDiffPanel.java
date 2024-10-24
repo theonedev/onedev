@@ -120,7 +120,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final IModel<WhitespaceOption> whitespaceOptionModel;
 	
-	private DiffViewMode diffMode;
+	private DiffViewMode viewMode;
 	
 	private final IModel<List<DiffEntryFacade>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntryFacade>>() {
 
@@ -312,9 +312,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
 		if (cookie == null)
-			diffMode = DiffViewMode.UNIFIED;
+			viewMode = DiffViewMode.UNIFIED;
 		else
-			diffMode = DiffViewMode.valueOf(cookie.getValue());
+			viewMode = DiffViewMode.valueOf(cookie.getValue());
 	}
 
 	private void doFilter(AjaxRequestTarget target) {
@@ -488,34 +488,72 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 				});
 
-				add(new AjaxLink<Void>("option") {
+				add(new MenuLink("option") {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						DiffOption diffOption = new DiffOption();
-						diffOption.setWhitespaceOption(whitespaceOptionModel.getObject());
-						diffOption.setViewMode(diffMode);
-						new BeanEditModalPanel<DiffOption>(target, diffOption) {
-							
-							@Override
-							protected void onSave(AjaxRequestTarget target, DiffOption bean) {
-								diffMode = bean.getViewMode();
-								
-								WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-								Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
-								cookie.setMaxAge(Integer.MAX_VALUE);
-								cookie.setPath("/");
-								response.addCookie(cookie);
-								
-								whitespaceOptionModel.setObject(bean.getWhitespaceOption());
-								
-								target.add(body);
-								
-								close();
-							}
-						};
-					}
+					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+						var menuItems = new ArrayList<MenuItem>();
+						for (var value: DiffViewMode.values()) {
+							menuItems.add(new MenuItem() {
+								@Override
+								public boolean isSelected() {
+									return value == viewMode;
+								}
 
+								@Override
+								public String getLabel() {
+									return StringUtils.capitalize(value.name().toLowerCase()) + " view";
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxLink<Void>(id) {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											viewMode = value;
+											WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+											Cookie cookie = new Cookie(COOKIE_VIEW_MODE, value.name());
+											cookie.setMaxAge(Integer.MAX_VALUE);
+											cookie.setPath("/");
+											response.addCookie(cookie);
+											target.add(body);
+											dropdown.close();
+										}
+									};
+								}
+							});
+						}
+						menuItems.add(null);
+						for (var value: WhitespaceOption.values()) {
+							menuItems.add(new MenuItem() {
+								@Override
+								public boolean isSelected() {
+									return value == whitespaceOptionModel.getObject();
+								}
+
+								@Override
+								public String getLabel() {
+									return StringUtils.capitalize(value.name().toLowerCase()).replace('_', ' ') + " whitespace";
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxLink<Void>(id) {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											whitespaceOptionModel.setObject(value);
+											target.add(body);
+											dropdown.close();
+										}
+									};
+								}
+							});
+						}
+						return menuItems;
+					}
+					
 				});
 			}			
 			
@@ -636,7 +674,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + encodePath(change.getPath()));
-				item.add(new BlobDiffPanel("diff", change, diffMode, getBlobBlameModel(change)) {
+				item.add(new BlobDiffPanel("diff", change, viewMode, getBlobBlameModel(change)) {
 
 					@Override
 					protected PullRequest getPullRequest() {
@@ -652,7 +690,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return "diff-mode-" + diffMode.name().toLowerCase();
+				return "diff-mode-" + viewMode.name().toLowerCase();
 			}
 			
 		}));
