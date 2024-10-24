@@ -505,15 +505,17 @@ public class SuggestionUtils {
 		pattern = pattern.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
-		if (pattern.length() == 0) {
-			var exts = new TreeSet<String>();
-			for (var path: paths) {
-				var ext = StringUtils.substringAfter(Paths.get(path).getFileName().toFile().getName(), ".");
-				if (ext.length() != 0)
-					exts.add(ext);
-			}
-			for (var ext: exts)
-				suggestions.add(new InputSuggestion("**/*." + ext, -1, "files with ext '" + ext + "'", null));
+		var exts = new TreeSet<String>();
+		for (var path: paths) {
+			var ext = StringUtils.substringAfter(Paths.get(path).getFileName().toFile().getName(), ".");
+			if (ext.length() != 0)
+				exts.add(ext);
+		}
+		for (var ext: exts) {
+			var suggestContent = "**/*." + ext;
+			var index = suggestContent.indexOf(pattern);
+			if (index != -1)
+				suggestions.add(new InputSuggestion(suggestContent, -1, "files with ext '" + ext + "'", new LinearRange(index, index + pattern.length())));
 		}
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
