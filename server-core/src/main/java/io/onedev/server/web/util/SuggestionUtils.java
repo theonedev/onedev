@@ -30,9 +30,11 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.xodus.CommitInfoManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nullable;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static java.util.Collections.sort;
@@ -502,6 +504,17 @@ public class SuggestionUtils {
 	public static List<InputSuggestion> suggestByPattern(List<String> paths, String pattern) {
 		pattern = pattern.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
+
+		if (pattern.length() == 0) {
+			var exts = new TreeSet<String>();
+			for (var path: paths) {
+				var ext = StringUtils.substringAfter(Paths.get(path).getFileName().toFile().getName(), ".");
+				if (ext.length() != 0)
+					exts.add(ext);
+			}
+			for (var ext: exts)
+				suggestions.add(new InputSuggestion("**/*." + ext, -1, "files with ext '" + ext + "'", null));
+		}
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
 		for (String path: paths) {
@@ -509,7 +522,7 @@ public class SuggestionUtils {
 			if (applied != null) 
 				allApplied.add(applied);
 		}
-		allApplied.sort((o1, o2) -> o1.getMatch().getFrom() - o2.getMatch().getFrom());
+		allApplied.sort(comparingInt(o -> o.getMatch().getFrom()));
 
 		Map<String, Set<String>> childrenCache = new HashMap<>();
 		Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
