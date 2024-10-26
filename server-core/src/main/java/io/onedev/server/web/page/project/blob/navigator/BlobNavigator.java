@@ -1,11 +1,23 @@
 package io.onedev.server.web.page.project.blob.navigator;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Splitter;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.util.ChildrenAggregator;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
+import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
+import io.onedev.server.web.component.blob.BlobIcon;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxChannel.Type;
@@ -16,6 +28,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.nested.BranchItem;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -35,24 +48,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Splitter;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
-import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
-import io.onedev.server.web.component.blob.BlobIcon;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class BlobNavigator extends Panel {
@@ -156,6 +155,17 @@ public class BlobNavigator extends Panel {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
+						var childrenAggregator = new ChildrenAggregator<BlobIdent>() {
+
+							@Override
+							protected List<BlobIdent> getChildren(BlobIdent node) {
+								if (blobIdent.isTree())
+									return context.getProject().getBlobChildren(node, BlobIdentFilter.ALL);								
+								else
+									return new ArrayList<>();
+							}
+							
+						};
 						return new NestedTree<BlobIdent>(id, new ITreeProvider<BlobIdent>() {
 
 							@Override
@@ -165,7 +175,7 @@ public class BlobNavigator extends Panel {
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
 								if (blobIdent.revision != null)
-									return context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+									return childrenAggregator.getAggregatedChildren(blobIdent).iterator();
 								else
 									return new ArrayList<BlobIdent>().iterator();
 							}
@@ -177,7 +187,7 @@ public class BlobNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getChildren(BlobIdent blobIdent) {
-								return context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+								return childrenAggregator.getAggregatedChildren(blobIdent).iterator();
 							}
 
 							@Override
@@ -194,17 +204,8 @@ public class BlobNavigator extends Panel {
 							}
 
 							@Override
-							public void expand(BlobIdent blobIdent) {
-								super.expand(blobIdent);
-								
-								List<BlobIdent> children = context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL);
-								if (children.size() == 1 && children.get(0).isTree()) 
-									expand(children.get(0));
-							}
-
-							@Override
 							protected Component newContentComponent(String id, final IModel<BlobIdent> model) {
-								BlobIdent blobIdent = model.getObject();
+								BlobIdent currentBlobIdent = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", BlobNavigator.this);
 
 								WebMarkupContainer link = new WebMarkupContainer("link") {
@@ -239,11 +240,19 @@ public class BlobNavigator extends Panel {
 								});
 								
 								link.add(new BlobIcon("icon", model));
-								
-								if (blobIdent.path.indexOf('/') != -1)
-									link.add(new Label("label", StringUtils.substringAfterLast(blobIdent.path, "/")));
-								else
-									link.add(new Label("label", blobIdent.path));
+								link.add(new Label("label", new LoadableDetachableModel<String>() {
+									@Override
+									protected String load() {
+										var label = currentBlobIdent.path;
+										var parentBlobIdent = blobIdent;
+										var branchItem = fragment.getParent().getParent().findParent(BranchItem.class);
+										if (branchItem != null) {
+											parentBlobIdent = (BlobIdent) branchItem.getModelObject();
+											label = label.substring(parentBlobIdent.path.length() + 1);
+										}
+										return label;
+									}
+								}));
 								fragment.add(link);
 								
 								return fragment;

@@ -50,12 +50,14 @@
 	margin-right: 0.3rem;
 }
 
-.revision-diff>.body>.detail>.comment {
+.revision-diff>.body>.detail>.comment,
+.revision-diff>.body>.detail>.navigation {
 	top: 64px;
 	max-height: calc(100vh - 64px - var(--topbar-height));
 }
 
-.revision-diff>.body>.detail>.comment>.ui-resizable-handle {
+.revision-diff>.body>.detail>.comment>.ui-resizable-handle,
+.revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
 	border-right: 1px solid var(--light-gray);
 	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
@@ -64,10 +66,17 @@
 	position: relative;
 	right: 0;
 }
-.dark-mode .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
+.dark-mode .revision-diff>.body>.detail>.comment>.ui-resizable-handle,
+.dark-mode .revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
 	border-right-color: var(--dark-mode-lighter-dark);
 	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
+}
+.revision-diff>.body>.detail>.comment>.ui-resizable-handle {
+	right: 0;
+}
+.revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
+	left: 0;
 }
 
 .revision-diff>.body>.detail>.diffs>.diff:last-child {

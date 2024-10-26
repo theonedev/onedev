@@ -7064,5 +7064,40 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate179_removeSingleFile(Element element) {
+		var compareContextElement = element.element("compareContext");
+		if (compareContextElement != null) {
+			var currentFileElement = compareContextElement.element("currentFile");
+			if (currentFileElement != null)
+				currentFileElement.detach();
+		}
+	}
+	
+	private void migrate179(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					migrate179_removeSingleFile(element);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					migrate179_removeSingleFile(element);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					migrate179_removeSingleFile(element);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentStatusChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					migrate179_removeSingleFile(element);
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

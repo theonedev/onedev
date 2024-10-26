@@ -38,17 +38,17 @@
 	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
 }
-.source-view>.outline>.content>.body {
+.source-view>.outline>.content {
 	padding: 0.5rem 1rem;
 }
-.source-view>.outline>.content>.body .tree-content {
+.source-view>.outline>.content .tree-content {
 	border-radius: 4px;
 	padding: 1px 4px 1px 3px;
 }
-.source-view>.outline>.content>.body .tree-content.active {
+.source-view>.outline>.content .tree-content.active {
 	background: #FCF5DA;
 }
-.dark-mode .source-view>.outline>.content>.body .tree-content.active {
+.dark-mode .source-view>.outline>.content .tree-content.active {
 	background: var(--dark-mode-light-warning);
 }
 

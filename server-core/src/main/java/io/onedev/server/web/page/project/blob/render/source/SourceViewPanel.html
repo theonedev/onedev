@@ -16,13 +16,7 @@
 		<div class="code flex-grow-1 autofit overflow-hidden d-flex flex-column resize-aware"></div>
 		<div wicket:id="outline" class="outline need-width d-flex overflow-hidden flex-shrink-0">
 			<div class="ui-resizable-handle ui-resizable-w flex-shrink-0"></div>
-			<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
-				<div class="head d-flex align-items-center px-3 py-2 flex-shrink-0 border-bottom">
-					<h6 class="mb-0 mr-auto">Outline</h6>
-					<a wicket:id="close" class="text-muted text-hover-primary ml-3" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
-				</div>
-				<div wicket:id="body" class="body overflow-auto flex-grow-1"></div>
-			</div>
+			<div wicket:id="content" class="content flex-grow-1 overflow-auto d-flex"></div>
 		</div>
 	</div>
 	<div wicket:id="symbolTooltip"></div>

@@ -160,7 +160,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private WebMarkupContainer commentContainer;
 	
-	private WebMarkupContainer outline;
+	private WebMarkupContainer outlineContainer;
 	
 	private SourceFormatPanel sourceFormat;
 	
@@ -242,17 +242,17 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private void toggleOutline(AjaxRequestTarget target) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie;
-		if (outline.isVisible()) {
+		if (outlineContainer.isVisible()) {
 			cookie = new Cookie(COOKIE_OUTLINE, "no");
-			outline.setVisible(false);
+			outlineContainer.setVisible(false);
 		} else {
 			cookie = new Cookie(COOKIE_OUTLINE, "yes");
-			outline.setVisible(true);
+			outlineContainer.setVisible(true);
 		}
 		cookie.setPath("/");
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
-		target.add(outline);
+		target.add(outlineContainer);
 		target.appendJavaScript("onedev.server.sourceView.onToggleOutline();");
 	}
 
@@ -707,7 +707,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					}
 					if (closest != null) {
 						@SuppressWarnings("unchecked")
-						NestedTree<Symbol> tree = (NestedTree<Symbol>) outline.get("body");
+						NestedTree<Symbol> tree = (NestedTree<Symbol>) outlineContainer.get("content");
 						Symbol current = closest;
 						while (current != null) {
 							tree.expand(current);
@@ -731,7 +731,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 		});
 		
-		outline = new WebMarkupContainer("outline") {
+		outlineContainer = new WebMarkupContainer("outline") {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -748,18 +748,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		else 
 			outlineWidth = 300;
 		
-		outline.add(AttributeAppender.append("style", "width:" + outlineWidth + "px"));
-		outline.add(new AjaxLink<Void>("close") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				toggleOutline(target);
-			}
-			
-		});
+		outlineContainer.add(AttributeAppender.append("style", "width:" + outlineWidth + "px"));
 		
 		IModel<HashSet<Symbol>> state = new Model<HashSet<Symbol>>(new HashSet<>(getChildSymbols(symbols, null)));
-		NestedTree<Symbol> tree = new NestedTree<Symbol>("body", newSymbolTreeProvider(symbols), state) {
+		NestedTree<Symbol> tree = new NestedTree<Symbol>("content", newSymbolTreeProvider(symbols), state) {
 
 			@Override
 			protected void onInitialize() {
@@ -794,12 +786,12 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 		};		
 		
-		outline.add(tree);
+		outlineContainer.add(tree);
 		
-		outline.setOutputMarkupPlaceholderTag(true);
-		add(outline);
+		outlineContainer.setOutputMarkupPlaceholderTag(true);
+		add(outlineContainer);
 		
-		outline.setVisible(isOutlineVisibleInitially());
+		outlineContainer.setVisible(isOutlineVisibleInitially());
 		
 		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip") {
 

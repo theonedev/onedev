@@ -1,11 +1,12 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ChildrenAggregator;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
@@ -93,14 +94,14 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 		});
 		
-		List<IColumn<ArtifactInfo, Void>> columns = new ArrayList<>();
+		List<IColumn<Pair<String, ArtifactInfo>, Void>> columns = new ArrayList<>();
 		
 		columns.add(new TreeColumn<>(Model.of("Name")));
 		columns.add(new AbstractColumn<>(Model.of("Size")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
-				ArtifactInfo artifact = rowModel.getObject();
+			public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
+				var artifact = rowModel.getObject().getRight();
 				if (artifact instanceof DirectoryInfo) {
 					cellItem.add(new Label(componentId, ""));
 				} else {
@@ -114,8 +115,8 @@ public class BuildArtifactsPage extends BuildDetailPage {
 		columns.add(new AbstractColumn<>(Model.of("Last Modified")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
-				ArtifactInfo artifact = rowModel.getObject();
+			public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
+				ArtifactInfo artifact = rowModel.getObject().getRight();
 				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(artifact.getLastModified()))));
 			}
 
@@ -124,14 +125,14 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			columns.add(new AbstractColumn<>(Model.of("")) {
 
 				@Override
-				public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
+				public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
 					Fragment fragment = new Fragment(componentId, "deleteFrag", BuildArtifactsPage.this);
 					AjaxLink<?> link = new AjaxLink<Void>("link") {
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
 							String confirmMessage;
-							if (rowModel.getObject() instanceof DirectoryInfo)
+							if (rowModel.getObject().getRight() instanceof DirectoryInfo)
 								confirmMessage = "Do you really want to delete this directory?";
 							else
 								confirmMessage = "Do you really want to delete this file?";
@@ -140,7 +141,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							getBuildManager().deleteArtifact(getBuild(), rowModel.getObject().getPath());
+							getBuildManager().deleteArtifact(getBuild(), rowModel.getObject().getRight().getPath());
 							updateArtifacts(target);
 						}
 
@@ -152,38 +153,57 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			});
 		}
 		
-		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<>() {
+		var childrenAggregator = new ChildrenAggregator<ArtifactInfo>() {
+
+			@Override
+			protected List<ArtifactInfo> getChildren(ArtifactInfo node) {
+				if (node != null) {
+					if (node instanceof DirectoryInfo) {
+						var directoryNode = (DirectoryInfo) node;
+						if (directoryNode.getChildren() != null) {
+							return directoryNode.getChildren();
+						} else {
+							directoryNode = ((DirectoryInfo) getBuildManager()
+									.getArtifactInfo(getBuild(), directoryNode.getPath()));
+							return directoryNode.getChildren();
+						}
+					} else {
+						return new ArrayList<>();
+					}
+				} else {
+					return getBuild().getRootArtifacts();
+				}
+			}
+		};
+		ITreeProvider<Pair<String, ArtifactInfo>> dataProvider = new ITreeProvider<>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Iterator<? extends ArtifactInfo> getChildren(ArtifactInfo node) {
-				String artifactPath = node != null ? node.getPath() : null;
-				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
-						.getArtifactInfo(getBuild(), artifactPath));
-				return directory.getChildren().iterator();
+			public Iterator<? extends Pair<String, ArtifactInfo>> getChildren(Pair<String, ArtifactInfo> node) {
+				return childrenAggregator.getAggregatedChildren(node.getRight()).stream().map(it->new Pair<>(node.getRight().getPath(), it)).iterator();
 			}
 
 			@Override
-			public Iterator<? extends ArtifactInfo> getRoots() {
-				return getBuild().getRootArtifacts().iterator();
+			public Iterator<? extends Pair<String, ArtifactInfo>> getRoots() {
+				return childrenAggregator.getAggregatedChildren(null).stream().map(it->new Pair<String, ArtifactInfo>(null, it)).iterator();
 			}
 
 			@Override
-			public boolean hasChildren(ArtifactInfo node) {
-				return node instanceof DirectoryInfo && getChildren(node).hasNext();
+			public boolean hasChildren(Pair<String, ArtifactInfo> node) {
+				return node.getRight() instanceof DirectoryInfo;
 			}
 
 			@Override
-			public IModel<ArtifactInfo> model(ArtifactInfo object) {
+			public IModel<Pair<String, ArtifactInfo>> model(Pair<String, ArtifactInfo> object) {
 				return Model.of(object);
 			}
 
 		};
 		
-		add(new TableTree<>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new TableTree<Pair<String, ArtifactInfo>, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -204,38 +224,24 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 			@Override
-			protected Item<ArtifactInfo> newRowItem(String id, int index, IModel<ArtifactInfo> model) {
+			protected Item<Pair<String, ArtifactInfo>> newRowItem(String id, int index, IModel<Pair<String, ArtifactInfo>> model) {
 				return new OddEvenItem<>(id, index, model);
 			}
 
 			@Override
-			public void expand(ArtifactInfo artifact) {
-				super.expand(artifact);
-
-				String artifactPath = artifact != null ? artifact.getPath() : null;
-				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
-						.getArtifactInfo(getBuild(), artifactPath));
-				if (directory != null
-						&& directory.getChildren().size() == 1
-						&& directory.getChildren().get(0) instanceof DirectoryInfo) {
-					expand(directory.getChildren().get(0));
-				}
-			}
-
-			@Override
-			protected Component newContentComponent(String id, IModel<ArtifactInfo> model) {
+			protected Component newContentComponent(String id, IModel<Pair<String, ArtifactInfo>> model) {
 				Fragment fragment = new Fragment(id, "artifactFrag", BuildArtifactsPage.this);
-				ArtifactInfo artifact = model.getObject();
+				Pair<String, ArtifactInfo> pair = model.getObject();
 				WebMarkupContainer link;
-				if (artifact instanceof DirectoryInfo) {
+				if (pair.getRight() instanceof DirectoryInfo) {
 					link = new AjaxLink<Void>("link") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							if (getState(artifact) == State.EXPANDED)
-								collapse(artifact);
+							if (getState(pair) == State.EXPANDED)
+								collapse(pair);
 							else
-								expand(artifact);
+								expand(pair);
 						}
 
 					};
@@ -243,15 +249,15 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					link.add(AttributeAppender.append("class", "folder"));
 				} else {
 					PageParameters params = ArtifactResource.paramsOf(
-							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath());
+							getBuild().getProject().getId(), getBuild().getNumber(), pair.getRight().getPath());
 					link = new ResourceLink<Void>("link", new ArtifactResourceReference(), params);
 					link.add(new SpriteImage("icon", "file"));
 					link.add(AttributeAppender.append("class", "file"));
 				}
-				String fileName = artifact.getPath();
-				if (fileName.contains("/"))
-					fileName = StringUtils.substringAfterLast(fileName, "/");
-				link.add(new Label("label", fileName));
+				var label = pair.getRight().getPath();
+				if (pair.getLeft() != null)
+					label = label.substring(pair.getLeft().length()+1);
+				link.add(new Label("label", label));
 				fragment.add(link);
 
 				return fragment;
