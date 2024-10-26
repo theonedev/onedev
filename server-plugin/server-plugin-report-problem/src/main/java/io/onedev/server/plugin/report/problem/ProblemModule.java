@@ -20,8 +20,11 @@ import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
+import org.apache.commons.lang.SerializationException;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
@@ -43,6 +46,8 @@ import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
  */
 public class ProblemModule extends AbstractPluginModule {
 
+	private static final Logger logger = LoggerFactory.getLogger(ProblemModule.class);
+	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -150,6 +155,8 @@ public class ProblemModule extends AbstractPluginModule {
 							if (file.exists()) {
 								try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
 									problems.put(reportDir.getName(), (Collection<CodeProblem>) SerializationUtils.deserialize(is));
+								} catch (SerializationException e) {
+									logger.error("Error reading problem report: " + file, e);
 								}
 							}
 						}

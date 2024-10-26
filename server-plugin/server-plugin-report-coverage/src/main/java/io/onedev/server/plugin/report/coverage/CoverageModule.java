@@ -20,8 +20,11 @@ import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
+import org.apache.commons.lang.SerializationException;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
@@ -43,6 +46,8 @@ import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
  */
 public class CoverageModule extends AbstractPluginModule {
 
+	private static final Logger logger = LoggerFactory.getLogger(CoverageModule.class);
+	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -180,8 +185,10 @@ public class CoverageModule extends AbstractPluginModule {
 						if (reportName == null || reportName.equals(reportDir.getName())) { 
 							File lineCoveragesFile = new File(reportDir, CoverageStats.FILES + "/" + blobPath);
 							if (lineCoveragesFile.exists()) {
-								try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
+								try (var is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
 									coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));
+								} catch (SerializationException e) {
+									logger.error("Error reading coverage status: " + lineCoveragesFile, e);
 								}
 							}
 						}

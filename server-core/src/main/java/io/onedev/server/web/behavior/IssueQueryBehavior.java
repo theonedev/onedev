@@ -49,7 +49,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
 @SuppressWarnings("serial")
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "surround with ~";
+	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	
