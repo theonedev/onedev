@@ -1273,11 +1273,11 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		navigationContainer.add(AttributeAppender.append("style", "width:" + navigationWidth + "px"));
 		
-		var paths = new TreeSet<String>();
+		var changes = new TreeMap<String, BlobChange>();
 		var treeState = new HashSet<String>();
 		for (var change: getDisplayChanges()) {
 			for (var path: change.getPaths()) {
-				paths.add(path);
+				changes.put(path, change);
 				var parent = Paths.get(path).getParent();
 				while (parent != null) {
 					treeState.add(parent + "/");
@@ -1290,7 +1290,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 			@Override
 			public Iterator<? extends String> getRoots() {
-				return RevisionDiffPanel.this.getChildren(paths, "").iterator();
+				return RevisionDiffPanel.this.getChildren(changes.keySet(), "").iterator();
 			}
 
 			@Override
@@ -1300,7 +1300,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public Iterator<? extends String> getChildren(String node) {
-				return RevisionDiffPanel.this.getChildren(paths, node).iterator();
+				return RevisionDiffPanel.this.getChildren(changes.keySet(), node).iterator();
 			}
 
 			@Override
@@ -1340,7 +1340,23 @@ public abstract class RevisionDiffPanel extends Panel {
 				} else {
 					link = new WebMarkupContainer("link");
 					link.add(AttributeModifier.replace("href", "#diff-" + encodePath(path)));
-					link.add(new SpriteImage("icon", "diff2"));
+					String icon;
+					String color;
+					var change = changes.get(path);
+					if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
+						icon = "plus-square";
+						color = "text-success";
+					} else if (change.getType() == ChangeType.DELETE) {
+						icon = "minus-square";
+						color = "text-danger";
+					} else if (change.getType() == ChangeType.MODIFY) {
+						icon = "dot-square";
+						color = "text-warning";
+					} else {
+						icon = "arrow-square";
+						color = "text-warning";
+					}
+					link.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", color)));
 				}
 				
 				link.add(new Label("label", new LoadableDetachableModel<String>() {

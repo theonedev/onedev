@@ -507,8 +507,8 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 .tree-theme-human span.tree-content {
     margin-left: 0.4rem !important;
 }
-.tree-theme-human span.tree-content a {
-	color: var(--dark-blue) !important;
+.tree-theme-human .tree-node span.tree-content a {
+	color: var(--dark-blue);
 	text-decoration: none !important;
 }
 .dark-mode .tree-theme-human span.tree-content a {

@@ -1,18 +1,45 @@
 package io.onedev.server.web.component.diff.blob.text;
 
-import static io.onedev.server.codequality.BlobTarget.groupByLine;
-import static io.onedev.server.util.diff.DiffRenderer.toHtml;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.git.*;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.diff.DiffBlock;
+import io.onedev.server.util.diff.DiffMatchPatch.Operation;
+import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
+import io.onedev.server.web.component.diff.blob.ReviewStatus;
+import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
+import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
+import io.onedev.server.web.component.diff.revision.DiffViewMode;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.AnnotationInfo;
+import io.onedev.server.web.util.CodeCommentInfo;
+import io.onedev.server.web.util.DiffPlanarRange;
+import io.onedev.server.web.util.EditParamsAware;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -36,49 +63,13 @@ import org.eclipse.jgit.lib.FileMode;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.git.BlameBlock;
-import io.onedev.server.git.BlameCommit;
-import io.onedev.server.git.BlobChange;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.diff.DiffBlock;
-import io.onedev.server.util.diff.DiffMatchPatch.Operation;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.asset.icon.IconScope;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
-import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
-import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
-import io.onedev.server.web.component.diff.revision.DiffViewMode;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.AnnotationInfo;
-import io.onedev.server.web.util.CodeCommentInfo;
-import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.EditParamsAware;
+import static io.onedev.server.codequality.BlobTarget.groupByLine;
+import static io.onedev.server.util.diff.DiffRenderer.toHtml;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public class BlobTextDiffPanel extends Panel {
@@ -131,6 +122,8 @@ public class BlobTextDiffPanel extends Panel {
 	
 	private BlameInfo blameInfo;
 	
+	private boolean collapsed;
+	
 	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
 			@Nullable IModel<Boolean> blameModel) {
 		super(id);
@@ -139,10 +132,12 @@ public class BlobTextDiffPanel extends Panel {
 		this.diffMode = diffMode;
 		this.blameModel = blameModel;
 		
-		if (blameModel != null && blameModel.getObject()) {
+		if (blameModel != null && blameModel.getObject()) 
 			blameInfo = getBlameInfo();
-		}
 		
+		var reviewStatus = getReviewStatus();
+		if (reviewStatus != null)
+			collapsed = reviewStatus.isCollapsed();
 	}
 
 	private String convertToJson(Object obj) {
@@ -188,11 +183,36 @@ public class BlobTextDiffPanel extends Panel {
 		}
 		return blameInfo;
 	}
+	
+	private void toggleDiff(AjaxRequestTarget target) {
+		collapsed = !collapsed;
+		if (getReviewStatus() != null)
+			getReviewStatus().setCollapsed(collapsed);
+		String script;
+		if (collapsed)
+			script = "$('#%s').addClass('collapsed');";
+		else
+			script = "$('#%s').removeClass('collapsed');";
+		target.appendJavaScript(String.format(script, getMarkupId()));
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 
-	private WebMarkupContainer newActions() {
-		WebMarkupContainer actions = new WebMarkupContainer("actions");
+		add(new AjaxLink<Void>("toggle") {
 
-		actions.add(new AjaxLink<Void>("blameFile") {
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				toggleDiff(target);
+			}
+			
+		});
+		
+		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
+		add(new BlobDiffTitle("title", change));
+
+		add(new AjaxLink<Void>("blameFile") {
 
 			@Override
 			protected void onConfigure() {
@@ -211,33 +231,33 @@ public class BlobTextDiffPanel extends Panel {
 				blameModel.setObject(blameInfo != null);
 				((BasePage)getPage()).resizeWindow(target);
 			}
-			
+
 		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return blameInfo!=null? "active": "";
 			}
-			
+
 		})).setOutputMarkupId(true));
-		
+
 		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
 
 		viewState.requestId = PullRequest.idOf(getPullRequest());
 		PageParameters params = ProjectBlobPage.paramsOf(getProject(), viewState);
-		actions.add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
-		
+		add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
+
 		if (change.getType() != ChangeType.DELETE && change.getNewBlob().getLfsPointer() == null) {
-			if (getPullRequest() != null 
-					&& getPullRequest().getSource() != null 
+			if (getPullRequest() != null
+					&& getPullRequest().getSource() != null
 					&& getPullRequest().getSource().getObjectName(false) != null
-					&& SecurityUtils.canModifyFile(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) { 
+					&& SecurityUtils.canModifyFile(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) {
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
 					@Override
 					public void onClick() {
-						BlobIdent blobIdent = new BlobIdent(getPullRequest().getSourceBranch(), change.getPath(), 
+						BlobIdent blobIdent = new BlobIdent(getPullRequest().getSourceBranch(), change.getPath(),
 								FileMode.REGULAR_FILE.getBits());
 						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
 						editState.requestId = getPullRequest().getId();
@@ -247,11 +267,11 @@ public class BlobTextDiffPanel extends Panel {
 						PageParameters params = ProjectBlobPage.paramsOf(getPullRequest().getSourceProject(), editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}
-					
+
 				};
 				editLink.add(AttributeAppender.replace("title", "Edit on source branch"));
-				actions.add(editLink);
-			} else if (SecurityUtils.canModifyFile(getProject(), change.getBlobIdent().revision, change.getPath()) 
+				add(editLink);
+			} else if (SecurityUtils.canModifyFile(getProject(), change.getBlobIdent().revision, change.getPath())
 					&& getProject().getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch 
 				Link<Void> editLink = new Link<Void>("editFile") {
@@ -265,28 +285,16 @@ public class BlobTextDiffPanel extends Panel {
 						PageParameters params = ProjectBlobPage.paramsOf(getProject(), editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}
-					
+
 				};
 				editLink.add(AttributeAppender.replace("title", "Edit on branch " + change.getBlobIdent().revision));
-				actions.add(editLink);
+				add(editLink);
 			} else {
-				actions.add(new WebMarkupContainer("editFile").setVisible(false));
+				add(new WebMarkupContainer("editFile").setVisible(false));
 			}
 		} else {
-			actions.add(new WebMarkupContainer("editFile").setVisible(false));
+			add(new WebMarkupContainer("editFile").setVisible(false));
 		}
-		
-		return actions;
-	}
-	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-
-		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
-		add(new BlobDiffTitle("title", change));
-
-		add(newActions());
 		
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
 
@@ -445,11 +453,16 @@ public class BlobTextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new LoadableDetachableModel<>() {
 
 			@Override
-			public String getObject() {
-				return blameInfo!=null? "need-width": "";
+			protected String load() {
+				List<String> cssClasses = new ArrayList<>();
+				if (blameInfo != null)
+					cssClasses.add("need-width");
+				if (collapsed)
+					cssClasses.add("collapsed");
+				return Joiner.on(' ').join(cssClasses);
 			}
 			
 		}));
@@ -1046,6 +1059,8 @@ public class BlobTextDiffPanel extends Panel {
 	}
 	
 	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
+		if (collapsed)
+			toggleDiff(target);
 		String script = String.format(""
 			+ "var $container = $('#%s');"
 			+ "var markRange = %s;"
@@ -1067,6 +1082,11 @@ public class BlobTextDiffPanel extends Panel {
 	public void onUnblame(AjaxRequestTarget target) {
 		blameInfo = null;
 		target.add(this);
+	}
+
+	@Nullable
+	public ReviewStatus getReviewStatus() {
+		return null;
 	}
 	
 	private static class BlameInfo implements Serializable {

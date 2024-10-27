@@ -1287,7 +1287,7 @@ input[type="radio"], input[type="checkbox"] {
 .btn.btn-success:hover:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
 .btn.btn-success:focus:not(.disabled):not(:disabled):not([disabled]):not(.btn-text),
 .btn.btn-success:active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
-.btn.btn-secondary.active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.btn.btn-success.active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
 .show>.btn.btn-success.dropdown-toggle, .show .btn.btn-success.btn-dropdown {
 	background-color: #0BB7AF;
     border-color: #0BB7AF;
@@ -1722,48 +1722,47 @@ input[type="radio"], input[type="checkbox"] {
 }
 
 .btn.btn-hover-primary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
-.btn.btn-hover-primary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
-.btn.btn-hover-primary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-hover-primary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--primary) !important;
     border-color: var(--primary) !important;
 }
 .btn.btn-hover-secondary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
-.btn.btn-hover-secondary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-secondary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--gray-dark) !important;
     background-color: var(--secondary) !important;
     border-color: var(--secondary) !important;
 }
-.btn.btn-hover-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
+.btn.btn-hover-light:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.btn.btn-hover-light:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+	color: var(--gray) !important;
+	background-color: var(--light) !important;
+	border-color: var(--light) !important;
+}
 .btn.btn-hover-success:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-success:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--success) !important;
     border-color: var(--success) !important;
 }
-.btn.btn-hover-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-danger:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-danger:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--danger) !important;
     border-color: var(--danger) !important;
 }
-.btn.btn-hover-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-warning:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-warning:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--warning) !important;
     border-color: var(--warning) !important;
 }
-.btn.btn-hover-info.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-info:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-info:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--info) !important;
     border-color: var(--info) !important;
 }
-.btn.btn-hover-dark.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-dark:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-dark:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
@@ -1771,7 +1770,6 @@ input[type="radio"], input[type="checkbox"] {
     border-color: var(--dark) !important;
 }
 
-.btn.btn-hover-light-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-success:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-success:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--success) !important;
@@ -1780,43 +1778,51 @@ input[type="radio"], input[type="checkbox"] {
 }
 
 
-.btn.btn-hover-light-primary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-primary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-primary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--primary) !important;
     background-color: var(--light-primary) !important;
     border-color: transparent !important;
 }
-.btn.btn-hover-light-danger.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-danger:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-danger:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--danger) !important;
     background-color: var(--light-danger) !important;
     border-color: transparent !important;
 }
-.btn.btn-hover-light-warning.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-warning:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-warning:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--warning) !important;
     background-color: var(--light-warning) !important;
     border-color: transparent !important;
 }
-.btn.btn-hover-light-dark.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-dark:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-light-dark:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: var(--dark) !important;
     background-color: var(--light-dark) !important;
     border-color: transparent !important;
 }
-.dark-mode .btn.btn-hover-light-dark.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .dark-mode .btn.btn-hover-light-dark:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .dark-mode .btn.btn-hover-light-dark:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: #fff !important;
     background-color: var(--dark-mode-light-dark) !important;
     border-color: transparent !important;
 }
+.dark-mode .btn.btn-hover-light:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-hover-light:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+	color: var(--dark-mode-gray) !important;
+	border-color: #323248 !important;
+	background-color: #323248 !important;
+}
+.dark-mode .btn.btn-hover-secondary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-hover-secondary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+	color: var(--dark-mode-light-gray) !important;
+	border-color: #323248 !important;
+	background-color: #323248 !important;
+}
 
-.btn.btn-active-primary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-active-primary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-active-primary.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--primary) !important;
     border-color: var(--primary) !important;
@@ -1832,22 +1838,26 @@ input[type="radio"], input[type="checkbox"] {
     border-color: #323248 !important;
 }
 
-.btn.btn-active-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-active-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-active-success.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--success) !important;
     border-color: var(--success) !important;
 }
-.btn.btn-active-danger.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-active-danger.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-active-danger.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
 	color: white !important;
     background-color: var(--danger) !important;
     border-color: var(--danger) !important;
 }
-.btn.btn-active-warning.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-active-warning.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-active-warning.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--warning) !important;
     border-color: var(--warning) !important;
 }
-.btn.btn-active-info.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
+.btn.btn-active-info.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
+.dark-mode .btn.btn-active-info.active:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
     color: white !important;
     background-color: var(--info) !important;
     border-color: var(--info) !important;
