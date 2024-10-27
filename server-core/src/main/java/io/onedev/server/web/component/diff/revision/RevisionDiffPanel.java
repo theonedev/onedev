@@ -61,7 +61,6 @@ import io.onedev.server.web.util.RevisionDiff;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -138,6 +137,8 @@ public abstract class RevisionDiffPanel extends Panel {
 	private final IModel<WhitespaceOption> whitespaceOptionModel;
 	
 	private DiffViewMode viewMode;
+	
+	private String selectedPath;
 	
 	private final IModel<List<DiffEntryFacade>> diffEntriesModel = new LoadableDetachableModel<>() {
 
@@ -338,6 +339,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		body.replace(commentContainer = newCommentContainer());
 		body.replace(navigationContainer = newNavigationContainer());
 		target.add(body);
+		target.appendJavaScript("" +
+				"var $diffs = $('.revision-diff>.body li.diff'); " +
+				"if ($diffs.length != 0) $diffs[0].scrollIntoView();");
 	}
 	
 	@Override
@@ -659,9 +663,16 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				toggleNavigation(target);
+				target.add(this);
 			}
 
-		});
+		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				navigationContainer.configure();
+				return navigationContainer.isVisible()? "active": "";
+			}
+		})));
 		
 		body = new WebMarkupContainer("body") {
 			@Override
@@ -694,7 +705,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});		
 		
-		body.add(diffsView = new ListView<>("diffs", new AbstractReadOnlyModel<List<BlobChange>>() {
+		body.add(diffsView = new ListView<BlobChange>("diffs", new AbstractReadOnlyModel<>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -714,12 +725,27 @@ public abstract class RevisionDiffPanel extends Panel {
 						return RevisionDiffPanel.this.getPullRequest();
 					}
 
+					@Override
+					protected void onActivate(AjaxRequestTarget target) {
+						selectedPath = change.getPath();
+						var encodedPath = encodePath(selectedPath);
+						target.appendJavaScript(String.format(
+								"onedev.server.revisionDiff.setDiffLinkActive('diff-link-%s');$('#diff-link-%s')[0].scrollIntoViewIfNeeded(false);", 
+								encodedPath, encodedPath));
+					}
 				};
 				item.add(diffPanel);
 				if (change.getOldBlobIdent().path != null && !change.getOldBlobIdent().path.equals(change.getPath()))
 					diffPanel.setMarkupId("diff-" + encodePath(change.getOldBlobIdent().path));
 			}
 
+		});
+		body.add(new WebMarkupContainer("noDiffs") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getDisplayChanges().isEmpty());
+			}
 		});
 		
 		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
@@ -1268,8 +1294,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		};
-		navigationContainer.setOutputMarkupPlaceholderTag(true);
-		navigationContainer.setVisible(isNavigationVisibleInitially());
 
 		float navigationWidth = 360;
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
@@ -1282,8 +1306,8 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		var changes = new TreeMap<String, BlobChange>();
 		var treeState = new HashSet<String>();
-		for (var change: getDisplayChanges()) {
-			for (var path: change.getPaths()) {
+		for (var change : getDisplayChanges()) {
+			for (var path : change.getPaths()) {
 				changes.put(path, change);
 				var parent = Paths.get(path).getParent();
 				while (parent != null) {
@@ -1292,98 +1316,119 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			}
 		}
-		
-		navigationContainer.add(new NestedTree<String>("content", new ITreeProvider<>() {
-			
-			@Override
-			public Iterator<? extends String> getRoots() {
-				return RevisionDiffPanel.this.getChildren(changes.keySet(), "").iterator();
-			}
+		if (!changes.isEmpty()) {
+			navigationContainer.add(new NestedTree<String>("content", new ITreeProvider<>() {
 
-			@Override
-			public boolean hasChildren(String node) {
-				return node.endsWith("/");
-			}
-
-			@Override
-			public Iterator<? extends String> getChildren(String node) {
-				return RevisionDiffPanel.this.getChildren(changes.keySet(), node).iterator();
-			}
-
-			@Override
-			public IModel<String> model(String object) {
-				return Model.of(object);
-			}
-
-			@Override
-			public void detach() {
-			}
-			
-		}, Model.ofSet(treeState)) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new HumanTheme());
-			}
-			
-			@Override
-			protected Component newContentComponent(String id, IModel<String> model) {
-				var path = model.getObject();
-				var fragment = new Fragment(id, "navTreeNodeFrag", RevisionDiffPanel.this);
-				WebMarkupContainer link;
-				if (path.endsWith("/")) {
-					link = new AjaxLink<Void>("link") {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							if (getState(path) == State.EXPANDED)
-								collapse(path);
-							else
-								expand(path);
-						}
-					};
-					link.add(new SpriteImage("icon", "folder"));
-				} else {
-					link = new WebMarkupContainer("link");
-					link.add(AttributeModifier.append("href", "#diff-" + encodePath(path)));
-					String icon;
-					String color;
-					var change = changes.get(path);
-					if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
-						icon = "plus-square";
-						color = "text-success";
-					} else if (change.getType() == ChangeType.DELETE) {
-						icon = "minus-square";
-						color = "text-danger";
-					} else if (change.getType() == ChangeType.MODIFY) {
-						icon = "dot-square";
-						color = "text-warning";
-					} else {
-						icon = "arrow-square";
-						color = "text-warning";
-					}
-					link.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", color)));
+				@Override
+				public Iterator<? extends String> getRoots() {
+					return RevisionDiffPanel.this.getChildren(changes.keySet(), "").iterator();
 				}
-				
-				link.add(new Label("label", new LoadableDetachableModel<String>() {
-					@Override
-					protected String load() {
-						String label = path;
-						var branchItem = fragment.getParent().getParent().findParent(BranchItem.class);
-						if (branchItem != null) {
-							var parentPath = (String) branchItem.getModelObject();							
-							label = path.substring(parentPath.length());
+
+				@Override
+				public boolean hasChildren(String node) {
+					return node.endsWith("/");
+				}
+
+				@Override
+				public Iterator<? extends String> getChildren(String node) {
+					return RevisionDiffPanel.this.getChildren(changes.keySet(), node).iterator();
+				}
+
+				@Override
+				public IModel<String> model(String object) {
+					return Model.of(object);
+				}
+
+				@Override
+				public void detach() {
+				}
+
+			}, Model.ofSet(treeState)) {
+
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					add(new HumanTheme());
+				}
+
+				@Override
+				protected Component newContentComponent(String id, IModel<String> model) {
+					var path = model.getObject();
+					var fragment = new Fragment(id, "navTreeNodeFrag", RevisionDiffPanel.this);
+					fragment.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+						@Override
+						public String getObject() {
+							return path.equals(selectedPath) ? "active" : "";
 						}
-						return StringUtils.stripEnd(label, "/");
+					}));
+					WebMarkupContainer link;
+					if (path.endsWith("/")) {
+						link = new AjaxLink<Void>("link") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								if (getState(path) == State.EXPANDED)
+									collapse(path);
+								else
+									expand(path);
+							}
+						};
+						link.add(new SpriteImage("icon", "folder"));
+					} else {
+						link = new AjaxLink<Void>("link") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								selectedPath = path;
+								var encodedPath = encodePath(selectedPath);
+								target.appendJavaScript(String.format(
+										"onedev.server.revisionDiff.setDiffLinkActive('diff-link-%s');$('#diff-%s')[0].scrollIntoView();",
+										encodedPath, encodedPath));
+							}
+						};
+						link.setMarkupId("diff-link-" + encodePath(path));
+						String icon;
+						String color;
+						var change = changes.get(path);
+						if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
+							icon = "plus-square";
+							color = "text-success";
+						} else if (change.getType() == ChangeType.DELETE) {
+							icon = "minus-square";
+							color = "text-danger";
+						} else if (change.getType() == ChangeType.MODIFY) {
+							icon = "dot-square";
+							color = "text-warning";
+						} else {
+							icon = "arrow-square";
+							color = "text-warning";
+						}
+						link.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", color)));
 					}
-				}));
-				fragment.add(link);
-				
-				return fragment;
-			}
-		});
-		
+
+					link.add(new Label("label", new LoadableDetachableModel<String>() {
+						@Override
+						protected String load() {
+							String label = path;
+							var branchItem = fragment.getParent().getParent().findParent(BranchItem.class);
+							if (branchItem != null) {
+								var parentPath = (String) branchItem.getModelObject();
+								label = path.substring(parentPath.length());
+							}
+							return StringUtils.stripEnd(label, "/");
+						}
+					}));
+					fragment.add(link);
+
+					return fragment;
+				}
+			});
+		} else {
+			navigationContainer.add(new Label("content", "<i>No diffs to navigate</i>").setEscapeModelStrings(false));
+		}
+
+		navigationContainer.setOutputMarkupPlaceholderTag(true);
+		navigationContainer.setVisible(isNavigationVisibleInitially());
 		return navigationContainer;
 	}
 	

@@ -41,14 +41,15 @@
 .source-view>.outline>.content {
 	padding: 0.5rem 1rem;
 }
-.source-view>.outline>.content .tree-content {
+.source-view>.outline>.content .tree-content>a {
+	display: inline-block;
 	border-radius: 4px;
 	padding: 1px 4px 1px 3px;
 }
-.source-view>.outline>.content .tree-content.active {
+.source-view>.outline>.content .tree-content>a.active {
 	background: #FCF5DA;
 }
-.dark-mode .source-view>.outline>.content .tree-content.active {
+.dark-mode .source-view>.outline>.content .tree-content>a.active {
 	background: var(--dark-mode-light-warning);
 }
 

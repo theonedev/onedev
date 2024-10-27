@@ -1,9 +1,11 @@
 onedev.server.revisionDiff = {
 	onBodyDomReady: function() {
-		var $anchors = $(".revision-diff>.body li.diff, .revision-diff>.body li.diff>div");
-		$anchors.css("scroll-margin-top", $(".revision-diff>.head").outerHeight() + "px");
-		if ($anchors.length != 0)
-			$anchors[0].scrollIntoView();
+		$(".revision-diff>.body li.diff, .revision-diff>.body li.diff>div")
+			.css("scroll-margin-top", $(".revision-diff>.head").outerHeight() + "px");
+	},
+	setDiffLinkActive: function(linkId) {
+		$(".revision-diff>.body>.detail>.navigation .tree-content>a").removeClass("active");
+		$("#" + linkId).addClass('active');
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");

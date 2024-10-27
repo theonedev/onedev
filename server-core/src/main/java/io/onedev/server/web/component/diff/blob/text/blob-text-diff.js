@@ -36,6 +36,11 @@ onedev.server.blobTextDiff = {
 			}
 		});
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
+		$container.find("td.content").click(function() {
+			$(".text-diff td.content").removeClass("active");
+			$(this).addClass("active");
+			callback("setActive");
+		});
 
 		onedev.server.blobTextDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 		

@@ -78,8 +78,20 @@
 .revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
 	left: 0;
 }
-
+.revision-diff>.body>.detail>.diffs:empty {
+	display: none;
+}
 .revision-diff>.body>.detail>.diffs>.diff:last-child {
 	margin-bottom: 0 !important;
 }
-
+.revision-diff>.body>.detail>.navigation>.content .tree-content>a {
+	display: inline-block;
+	border-radius: 4px;
+	padding: 1px 4px 1px 3px;
+}
+.revision-diff>.body>.detail>.navigation>.content .tree-content>a.active {
+	background: #FCF5DA;
+}
+.dark-mode .revision-diff>.body>.detail>.navigation>.content .tree-content>a.active {
+	background: var(--dark-mode-light-warning);
+}

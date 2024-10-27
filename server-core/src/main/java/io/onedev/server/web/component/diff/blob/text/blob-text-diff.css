@@ -175,6 +175,9 @@
 	background: rgb(66, 44, 0);
 	border-left-color: rgb(103, 68, 0);
 }
+.blob-text-diff td.content.active {
+	border: 1px dotted var(--primary) !important;
+}
 .blob-text-diff>tbody>tr>td.content>span.content-mark {
 	background: #8950FC;
 	color: white !important;

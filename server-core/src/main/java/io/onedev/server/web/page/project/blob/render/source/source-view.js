@@ -213,13 +213,13 @@ onedev.server.sourceView = {
 	},
 	syncOutline: function(symbolId) {
 		var $body = $(".source-view>.outline>.content>.body");
-		var $symbol = $("#" + symbolId);
-		if ($symbol.length != 0) {
-			$symbol[0].scrollIntoViewIfNeeded(true);
-			$body.find(".tree-content").removeClass("active");
-			$symbol.addClass("active");
+		var $symbolLink = $("#" + symbolId + ">a");
+		if ($symbolLink.length != 0) {
+			$symbolLink[0].scrollIntoViewIfNeeded(false);
+			$body.find(".tree-content>a").removeClass("active");
+			$symbolLink.addClass("active");
 		} else {
-			$body.find(".tree-content").removeClass("active");
+			$body.find(".tree-content>a").removeClass("active");
 		}
 	},
 	addCoverageGutter: function(line, coverageStatus) {

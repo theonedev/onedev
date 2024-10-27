@@ -97,7 +97,11 @@ public class BlobDiffPanel extends Panel {
 					protected PullRequest getPullRequest() {
 						return BlobDiffPanel.this.getPullRequest();
 					}
-					
+
+					@Override
+					protected void onActivate(AjaxRequestTarget target) {
+						BlobDiffPanel.this.onActivate(target);
+					}
 				});
 			}
 		} else {
@@ -151,6 +155,11 @@ public class BlobDiffPanel extends Panel {
 							@Override
 							protected PullRequest getPullRequest() {
 								return BlobDiffPanel.this.getPullRequest();
+							}
+
+							@Override
+							protected void onActivate(AjaxRequestTarget target) {
+								BlobDiffPanel.this.onActivate(target);
 							}
 							
 						});
@@ -206,4 +215,7 @@ public class BlobDiffPanel extends Panel {
 			((BlobTextDiffPanel) content).onUnblame(target);
 	}
 
+	protected void onActivate(AjaxRequestTarget target) {
+		
+	}
 }

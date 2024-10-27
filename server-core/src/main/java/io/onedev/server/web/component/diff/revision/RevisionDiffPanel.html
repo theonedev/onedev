@@ -10,7 +10,7 @@
 				<a wicket:id="batchedSuggestions" class="batched-suggestions btn btn-light flex-shrink-0" title="Batched suggestions"><wicket:svg href="diff" class="icon icon-lg mr-2"/> <span wicket:id="count" class="mr-1">3</span><wicket:svg href="arrow" class="icon rotate-90"/></a>
 				<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0" title="Diff options"><wicket:svg href="gear" class="icon"/></a>
 			</span>
-			<div class="path-filter flex-grow-1 mr-3">				
+			<div class="path-filter flex-grow-1">				
 				<form wicket:id="pathFilter">
 					<div class="clearable-wrapper">
 						<div class="input-group">
@@ -22,7 +22,7 @@
 					</div>
 				</form>
 			</div>
-			<a wicket:id="toggleNavigation" class="btn btn-icon btn-light" title="Toggle navigation"><wicket:svg href="sidebar" class="icon flip-x"/></a>
+			<a wicket:id="toggleNavigation" class="btn btn-icon btn-light btn-active-primary ml-3" title="Toggle navigation"><wicket:svg href="sidebar" class="icon flip-x"/></a>
 		</div>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
@@ -41,11 +41,8 @@
 					</div>
 					<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 				</div>
-				<ul class="diffs list-unstyled flex-grow-1 mb-0">
-					<li wicket:id="diffs" class="diff mb-4">
-						<div wicket:id="diff"></div>
-					</li>
-				</ul>
+				<ul class="diffs list-unstyled flex-grow-1 mb-0"><li wicket:id="diffs" class="diff mb-4"><div wicket:id="diff"></div></li></ul>
+				<div wicket:id="noDiffs" class="alert alert-notice alert-light-warning flex-grow-1 mb-0">No diffs</div>
 				<div wicket:id="navigation" class="navigation need-width border border-left-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky ml-3">
 					<div class="ui-resizable-handle ui-resizable-w flex-shrink-0"></div>
 					<div wicket:id="content" class="content flex-grow-1 overflow-auto p-3"></div>

@@ -351,67 +351,70 @@ public class BlobTextDiffPanel extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				switch (params.getParameterValue("action").toString("")) {
-				case "expand":
-					if (blameInfo != null) {
-						blameInfo.lastCommitHash = null;
-						blameInfo.lastOldCommitHash = null;
-						blameInfo.lastNewCommitHash = null;
-					}
-					int index = params.getParameterValue("param1").toInt();
-					Integer lastContextSize = contextSizes.get(index);
-					if (lastContextSize == null)
-						lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
-					int contextSize = lastContextSize + WebConstants.DIFF_EXPAND_SIZE;
-					contextSizes.put(index, contextSize);
-					
-					StringBuilder builder = new StringBuilder();
-					appendEquals(builder, index, lastContextSize, contextSize);
-					
-					String expanded = StringUtils.replace(builder.toString(), "\n", "");
-					String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
-							getMarkupId(), index, JavaScriptEscape.escapeJavaScript(expanded));
-					target.appendJavaScript(script);
-					break;
-				case "openSelectionPopover":
-					String jsonOfPosition = String.format("{left: %d, top: %d}", 
-							params.getParameterValue("param1").toInt(), 
-							params.getParameterValue("param2").toInt());
-					DiffPlanarRange commentRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
-					
-					String markUrl;
-					if (change.getAnnotationSupport() != null) {
-						markUrl = change.getAnnotationSupport().getMarkUrl(commentRange);
-						if (markUrl != null) 
-							markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
-						else 
+					case "expand":
+						if (blameInfo != null) {
+							blameInfo.lastCommitHash = null;
+							blameInfo.lastOldCommitHash = null;
+							blameInfo.lastNewCommitHash = null;
+						}
+						int index = params.getParameterValue("param1").toInt();
+						Integer lastContextSize = contextSizes.get(index);
+						if (lastContextSize == null)
+							lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
+						int contextSize = lastContextSize + WebConstants.DIFF_EXPAND_SIZE;
+						contextSizes.put(index, contextSize);
+						
+						StringBuilder builder = new StringBuilder();
+						appendEquals(builder, index, lastContextSize, contextSize);
+						
+						String expanded = StringUtils.replace(builder.toString(), "\n", "");
+						String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
+								getMarkupId(), index, JavaScriptEscape.escapeJavaScript(expanded));
+						target.appendJavaScript(script);
+						break;
+					case "openSelectionPopover":
+						String jsonOfPosition = String.format("{left: %d, top: %d}", 
+								params.getParameterValue("param1").toInt(), 
+								params.getParameterValue("param2").toInt());
+						DiffPlanarRange commentRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
+						
+						String markUrl;
+						if (change.getAnnotationSupport() != null) {
+							markUrl = change.getAnnotationSupport().getMarkUrl(commentRange);
+							if (markUrl != null) 
+								markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
+							else 
+								markUrl = "undefined";
+						} else {
 							markUrl = "undefined";
-					} else {
-						markUrl = "undefined";
-					}
-					script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
-							getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
-							JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
-							SecurityUtils.getAuthUser()!=null);
-					target.appendJavaScript(script);
-					break;
-				case "addComment":
-					Preconditions.checkNotNull(SecurityUtils.getAuthUser());
-					
-					commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
-					change.getAnnotationSupport().onAddComment(target, commentRange);
-					script = String.format("onedev.server.blobTextDiff.onAddComment($('#%s'), %s);", 
-							getMarkupId(), convertToJson(commentRange));
-					target.appendJavaScript(script);
-					break;
-				case "openComment": 
-					Long commentId = params.getParameterValue("param1").toLong();
-					commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
-					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-					change.getAnnotationSupport().onOpenComment(target, comment, commentRange);
-					script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
-							getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
-					target.appendJavaScript(script);
-					break;
+						}
+						script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
+								getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
+								JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
+								SecurityUtils.getAuthUser()!=null);
+						target.appendJavaScript(script);
+						break;
+					case "addComment":
+						Preconditions.checkNotNull(SecurityUtils.getAuthUser());
+						
+						commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
+						change.getAnnotationSupport().onAddComment(target, commentRange);
+						script = String.format("onedev.server.blobTextDiff.onAddComment($('#%s'), %s);", 
+								getMarkupId(), convertToJson(commentRange));
+						target.appendJavaScript(script);
+						break;
+					case "openComment": 
+						Long commentId = params.getParameterValue("param1").toLong();
+						commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
+						CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
+						change.getAnnotationSupport().onOpenComment(target, comment, commentRange);
+						script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
+								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
+						target.appendJavaScript(script);
+						break;
+					case "setActive": 
+						onActivate(target);
+						break;
 				}
 			}
 
@@ -479,6 +482,10 @@ public class BlobTextDiffPanel extends Panel {
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
 		return new DiffPlanarRange(leftSide, beginLine, beginChar, endLine, endChar);
+	}
+	
+	protected void onActivate(AjaxRequestTarget target) {
+		
 	}
 	
 	@Override
