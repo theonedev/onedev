@@ -60,6 +60,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.RevisionDiff;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -77,7 +78,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -102,6 +102,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -662,7 +663,13 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		});
 		
-		body = new WebMarkupContainer("body");
+		body = new WebMarkupContainer("body") {
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onBodyDomReady();"));
+			}
+		};
 		body.setOutputMarkupId(true);
 		add(body);
 
@@ -1217,7 +1224,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	}
 	
 	private String encodePath(String path) {
-		return path.replace("/", "-").replace(" ", "-");
+		return Hex.encodeHexString(path.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	private @Nullable IModel<Boolean> getBlobBlameModel(BlobChange change) {
@@ -1339,7 +1346,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					link.add(new SpriteImage("icon", "folder"));
 				} else {
 					link = new WebMarkupContainer("link");
-					link.add(AttributeModifier.replace("href", "#diff-" + encodePath(path)));
+					link.add(AttributeModifier.append("href", "#diff-" + encodePath(path)));
 					String icon;
 					String color;
 					var change = changes.get(path);
@@ -1852,7 +1859,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new RevisionDiffResourceReference()));
-		response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onLoad();"));
 	}
 	
 	private Set<String> getChangeObservables() {

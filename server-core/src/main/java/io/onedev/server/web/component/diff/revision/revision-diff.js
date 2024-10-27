@@ -1,15 +1,9 @@
 onedev.server.revisionDiff = {
-	onLoad: function() {
-		$(".revision-diff").scrollParent().css("scroll-padding-top", $(".revision-diff>.head").outerHeight() + "px");	
-	},
-	scrollToFilesTop: function() {
-		var $textDiffContent = $(".blob-text-diff>tbody").first();
-		if ($textDiffContent.length != 0) {
-			var $head = $(".revision-diff>.head");
-			var $textDiffCaption = $textDiffContent.parent().prev();
-			$textDiffContent.css("scroll-margin-top", $head.outerHeight() + $textDiffCaption.outerHeight());
-			$textDiffContent[0].scrollIntoView();
-		}
+	onBodyDomReady: function() {
+		var $anchors = $(".revision-diff>.body li.diff, .revision-diff>.body li.diff>div");
+		$anchors.css("scroll-margin-top", $(".revision-diff>.head").outerHeight() + "px");
+		if ($anchors.length != 0)
+			$anchors[0].scrollIntoView();
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");
