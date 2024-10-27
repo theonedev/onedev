@@ -50,44 +50,37 @@ onedev.server.inputassist = {
 			}
 		});
 		
-		$input.bind("keydown", "up", function() {
+		function keyUpOrDown(keyUp) {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
 				var $active = $dropdown.find("li.active");
 				if ($active.length != 0) {
-					var $prev = $active.prev("li:not(.loading-indicator)");
-					if ($prev.length != 0) {
-						$prev.addClass("active");
-						$active.removeClass("active");
-					}
-				} else {
-					$dropdown.find("li:not(.loading-indicator)").last().addClass("active");
-				}
-				$dropdown.find(".suggestions li.active")[0].scrollIntoViewIfNeeded(false);
-				onedev.server.inputassist.updateHelp($dropdown);
-				$dropdown.align($dropdown.data("alignment"));
-				return false;
-			}
-		});
-		
-		$input.bind("keydown", "down", function() {
-			var $dropdown = $input.data("dropdown");
-			if ($dropdown) {
-				var $active = $dropdown.find("li.active");
-				if ($active.length != 0) {
-					var $next = $active.next("li:not(.loading-indicator)");
+					var $next;
+					if (keyUp) 
+						$next = $active.prev("li:not(.loading-indicator)");
+					else
+						$next = $active.next("li:not(.loading-indicator)");
 					if ($next.length != 0) {
 						$next.addClass("active");
 						$active.removeClass("active");
 					}
 				} else {
-					$dropdown.find("li:not(.loading-indicator)").first().addClass("active");
+					if (keyUp)
+						$dropdown.find("li:not(.loading-indicator)").last().addClass("active");
+					else
+						$dropdown.find("li:not(.loading-indicator)").first().addClass("active");						
 				}
 				$dropdown.find(".suggestions li.active")[0].scrollIntoViewIfNeeded(false);
 				onedev.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
 			}
+		}
+		$input.bind("keydown", "up", function() {
+			keyUpOrDown(true);
+		});
+		$input.bind("keydown", "down", function() {
+			keyUpOrDown(false);
 		});
 		
 		$input.bind("keydown", "return", function() {
