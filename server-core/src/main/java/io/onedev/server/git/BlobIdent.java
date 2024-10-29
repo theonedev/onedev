@@ -66,19 +66,19 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	}
 	
 	public boolean isTree() {
-		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_TREE;
+		return mode != null && (FileMode.TYPE_MASK & mode) == FileMode.TYPE_TREE;
 	}
 	
 	public boolean isGitLink() {
-		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_GITLINK;
+		return mode != null && (FileMode.TYPE_MASK & mode) == FileMode.TYPE_GITLINK;
 	}
 	
 	public boolean isSymbolLink() {
-		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_SYMLINK;
+		return mode != null && (FileMode.TYPE_MASK & mode) == FileMode.TYPE_SYMLINK;
 	}
 
 	public boolean isFile() {
-		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_FILE;
+		return mode != null && (FileMode.TYPE_MASK & mode) == FileMode.TYPE_FILE;
 	}
 	
 	@Nullable

@@ -51,15 +51,19 @@ html.dark-mode, .dark-mode body {
 a {
 	transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;	
 }
-a, a:not([href]):not([class]) {
+a, a:not([href]):not([class]), .btn, .btn:not([href]):not([class]) {
 	color: var(--dark-blue);
 }
-.dark-mode a, .dark-mode a:not([href]):not([class]) {
+.dark-mode a, .dark-mode a:not([href]):not([class]), 
+.dark-mode .btn, .dark-mode .btn:not([href]):not([class]) {
 	color: rgb(155, 171, 225);	
 }
 a:hover, a:focus, a:not([href]):not([class]):hover, a:not([href]):not([class]):focus {
 	text-decoration: none;
     color: var(--primary);
+}
+.btn:hover, .btn:focus, .btn:not([href]):not([class]):hover, .btn:not([href]):not([class]):focus {
+	color: inherit;
 }
 
 a, button {
@@ -1729,13 +1733,11 @@ input[type="radio"], input[type="checkbox"] {
 }
 .btn.btn-hover-secondary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]), 
 .btn.btn-hover-secondary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
-    color: var(--gray-dark) !important;
     background-color: var(--secondary) !important;
     border-color: var(--secondary) !important;
 }
 .btn.btn-hover-light:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
 .btn.btn-hover-light:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
-	color: var(--gray) !important;
 	background-color: var(--light) !important;
 	border-color: var(--light) !important;
 }
@@ -1810,13 +1812,11 @@ input[type="radio"], input[type="checkbox"] {
 }
 .dark-mode .btn.btn-hover-light:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
 .dark-mode .btn.btn-hover-light:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
-	color: var(--dark-mode-gray) !important;
 	border-color: #323248 !important;
 	background-color: #323248 !important;
 }
 .dark-mode .btn.btn-hover-secondary:hover:not(.btn-text):not(:disabled):not(.disabled):not([disabled]),
 .dark-mode .btn.btn-hover-secondary:focus:not(.btn-text):not(:disabled):not(.disabled):not([disabled]) {
-	color: var(--dark-mode-light-gray) !important;
 	border-color: #323248 !important;
 	background-color: #323248 !important;
 }
@@ -2221,8 +2221,11 @@ input[type="radio"], input[type="checkbox"] {
 .dark-mode .border-bottom {
 	border-color: var(--dark-mode-light-dark) !important;
 }
-.border-primary {
+.border-primary, .dark-mode .border-primary {
 	border-color: var(--primary) !important;
+}
+.border-success, .dark-mode .border-success {
+	border-color: var(--success) !important;
 }
 .border-secondary {
 	border-color: var(--secondary) !important;
@@ -2230,13 +2233,13 @@ input[type="radio"], input[type="checkbox"] {
 .dark-mode .border-secondary {
 	border-color: #323248 !important;
 }
-.border-danger {
+.border-danger, .dark-mode .border-danger {
 	border-color: var(--danger) !important;
 }
-.border-warning {
+.border-warning, .dark-mode .border-warning {
 	border-color: var(--warning) !important;
 }
-.border-info {
+.border-info, .dark-mode .border-info {
 	border-color: var(--info) !important;
 }
 .border-dark {
@@ -2297,7 +2300,6 @@ input[type="radio"], input[type="checkbox"] {
 .rounded-0 {
 	border-radius: 0 !important;
 }
-
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-weight: 500;

@@ -1,17 +1,16 @@
 package io.onedev.server.web.component.diff.blob.image;
 
-import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.PackageResourceReference;
-
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
-import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.resource.PackageResourceReference;
 
 @SuppressWarnings("serial")
 public class BlobImageDiffPanel extends Panel {
@@ -27,8 +26,6 @@ public class BlobImageDiffPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(new BlobDiffTitle("title", change));
 		
 		add(newImage("old", change.getOldBlobIdent(), new Provider<Blob>() {
 
@@ -48,6 +45,7 @@ public class BlobImageDiffPanel extends Panel {
 			
 		}));
 		
+		add(AttributeAppender.append("class", "border border-top-0 rounded-bottom blob-image-diff d-flex"));
 	}
 	
 	private Image newImage(String id, BlobIdent blobIdent, Provider<Blob> blobProvider) {

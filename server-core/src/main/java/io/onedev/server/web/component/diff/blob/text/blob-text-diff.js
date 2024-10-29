@@ -72,28 +72,28 @@ onedev.server.blobTextDiff = {
     		var endOffset = lastRange.endOffset;
     		
 			var $startDiff;
-			if ($start.hasClass("blob-text-diff"))
+			if ($start.hasClass("text-diff"))
 				$startDiff = $start;
-			else if ($start.children(".blob-text-diff").length != 0)
-				$startDiff = $start.children(".blob-text-diff");
+			else if ($start.children(".text-diff").length != 0)
+				$startDiff = $start.children(".text-diff");
 			else
-				$startDiff = $start.closest(".blob-text-diff");
+				$startDiff = $start.closest(".text-diff");
 			
 			var $endDiff;
-			if ($end.hasClass("blob-text-diff"))
+			if ($end.hasClass("text-diff"))
 				$endDiff = $end;
-			else if ($end.children(".blob-text-diff").length != 0)
-				$endDiff = $end.children(".blob-text-diff");
+			else if ($end.children(".text-diff").length != 0)
+				$endDiff = $end.children(".text-diff");
 			else
-				$endDiff = $end.closest(".blob-text-diff");
+				$endDiff = $end.closest(".text-diff");
 				
 			// selection must be within same file
 			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
 	    		return "close";
 			}
 			
-			var $startTd = $start.is("td.content")? $start: $start.closest(".blob-text-diff td.content");
-			var $endTd = $end.is("td.content")? $end: $end.closest(".blob-text-diff td.content");
+			var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
+			var $endTd = $end.is("td.content")? $end: $end.closest(".text-diff td.content");
 
 			// at least one side of selection must be within a table cell
 			if ($startTd.length == 0 && $endTd.length == 0) {
@@ -487,7 +487,7 @@ onedev.server.blobTextDiff = {
 		if (!$scrollParent.data("onTextDiffScrollInstalled"))	{
 			$scrollParent.data("onTextDiffScrollInstalled", true);
 			$scrollParent.doneEvents("scroll", function() {
-				$(".blob-text-diff").each(function() {
+				$(".text-diff").each(function() {
 					onedev.server.blobTextDiff.highlightSyntax($(this).parent());
 				}, 100);
 			});
@@ -903,7 +903,7 @@ onedev.server.blobTextDiff = {
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
 			var $scrollParent = $startTd.scrollParent();
-			var marginTop = $startTd.closest(".blob-text-diff").prev().height() + 120;
+			var marginTop = $startTd.closest(".text-diff").prev().height() + 120;
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-marginTop);
 		}
 	},

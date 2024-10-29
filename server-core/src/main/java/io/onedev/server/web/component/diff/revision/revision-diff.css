@@ -95,3 +95,23 @@
 .dark-mode .revision-diff>.body>.detail>.navigation>.content .tree-content>a.active {
 	background: var(--dark-mode-light-warning);
 }
+.revision-diff>.head>.review-progress {
+	min-width: 120px;
+	height: calc(1.5em + 1.3rem + 2px);
+	border: 1px solid #BBDFF9;
+}
+.dark-mode .revision-diff>.head>.review-progress {
+	border-color: rgb(48, 68, 107);
+}
+.revision-diff>.head>.review-progress>:first-child {
+	background: var(--light-primary);
+	left: 0;
+	top: 0;
+	bottom: 0;
+}
+.revision-diff>.head>.review-progress>:last-child {
+	z-index: 1;
+}
+.dark-mode .revision-diff>.head>.review-progress>:first-child {
+	background: var(--dark-mode-light-primary);
+}

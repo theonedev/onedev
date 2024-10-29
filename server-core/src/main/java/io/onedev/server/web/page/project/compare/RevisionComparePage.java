@@ -24,6 +24,7 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
+import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.revision.AffinalRevisionPicker;
@@ -37,7 +38,6 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.RevisionDiff;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -62,7 +62,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends ProjectPage implements RevisionDiff.AnnotationSupport, EditParamsAware {
+public class RevisionComparePage extends ProjectPage implements RevisionAnnotationSupport, EditParamsAware {
 
 	public enum TabPanel {
 		COMMITS, 

@@ -5,10 +5,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.*;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.*;
@@ -21,14 +18,15 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.diff.revision.RevisionDiffReviewSupport;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.RevisionDiff;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -63,7 +61,7 @@ import java.util.*;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
-public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionDiff.AnnotationSupport, EditParamsAware {
+public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionAnnotationSupport, EditParamsAware {
 
 	public static final String PARAM_OLD_COMMIT = "old-commit";
 	
@@ -139,6 +137,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				}
 			}
 			return newComments;
+		}
+		
+	};
+	
+	private final IModel<Map<String, ReviewedDiff>> reviewedDiffsModel = new LoadableDetachableModel<>() {
+
+		@Override
+		protected Map<String, ReviewedDiff> load() {
+			return getDiffReviewStatusManager().query(getLoginUser(), state.oldCommitHash, state.newCommitHash);
 		}
 		
 	};
@@ -256,6 +263,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	private PullRequestManager getPullRequestManager() {
 		return OneDev.getInstance(PullRequestManager.class);
+	}
+	
+	private ReviewedDiffManager getDiffReviewStatusManager() {
+		return OneDev.getInstance(ReviewedDiffManager.class);
 	}
 	
 	private Component newChangesContainer() {
@@ -574,6 +585,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		comparisonBaseModel.detach();
 		oldCommentsModel.detach();
 		newCommentsModel.detach();
+		reviewedDiffsModel.detach();
 		super.onDetach();
 	}
 	
@@ -700,6 +712,43 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			protected PullRequest getPullRequest() {
 				return requestModel.getObject();
+			}
+
+			@Override
+			protected RevisionDiffReviewSupport getReviewSupport() {
+				if (getLoginUser() != null) {
+					return new RevisionDiffReviewSupport() {
+
+						@Override
+						public void setReviewed(String blobPath, boolean reviewed) {
+							var reviewedDiffs = reviewedDiffsModel.getObject();
+							var reviewedDiff = reviewedDiffsModel.getObject().get(blobPath);
+							if (reviewed) {
+								if (reviewedDiff == null) {
+									reviewedDiff = new ReviewedDiff();
+									reviewedDiff.setUser(getLoginUser());
+									reviewedDiff.setOldCommitHash(state.oldCommitHash);
+									reviewedDiff.setNewCommitHash(state.newCommitHash);
+									reviewedDiff.setBlobPath(blobPath);
+								}
+								reviewedDiff.setDate(new Date());
+								getDiffReviewStatusManager().createOrUpdate(reviewedDiff);
+								reviewedDiffs.put(blobPath, reviewedDiff);
+							} else if (reviewedDiff != null) {
+								getDiffReviewStatusManager().delete(reviewedDiff);
+								reviewedDiffs.remove(blobPath);
+							}
+						}
+
+						@Override
+						public boolean isReviewed(String blobPath) {
+							return reviewedDiffsModel.getObject().containsKey(blobPath);
+						}
+
+					};
+				} else {
+					return null;
+				}
 			}
 
 			@Override

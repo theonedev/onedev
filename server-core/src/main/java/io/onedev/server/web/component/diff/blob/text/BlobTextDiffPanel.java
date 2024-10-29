@@ -2,14 +2,16 @@ package io.onedev.server.web.component.diff.blob.text;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.git.*;
+import io.onedev.server.git.BlameBlock;
+import io.onedev.server.git.BlameCommit;
+import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -25,32 +27,25 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
-import io.onedev.server.web.component.diff.blob.ReviewStatus;
-import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
-import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
+import io.onedev.server.web.component.diff.blob.BlobAnnotationSupport;
+import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.EditParamsAware;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -59,7 +54,6 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.lib.FileMode;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -86,25 +80,25 @@ public class BlobTextDiffPanel extends Panel {
 
 		@Override
 		protected DiffAnnotationInfo load() {
-			if (change.getAnnotationSupport() != null) {
+			if (getAnnotationSupport() != null) {
 				Map<Integer, List<CodeCommentInfo>> oldCommentsByLine = 
-						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getOldComments());
+						CodeCommentInfo.groupByLine(getAnnotationSupport().getOldComments());
 				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = 
-						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getNewComments());
+						CodeCommentInfo.groupByLine(getAnnotationSupport().getNewComments());
 
 				var oldLines = change.getType()!=ChangeType.ADD? change.getOldText().getLines(): new ArrayList<String>();
 				Map<Integer, List<CodeProblem>> oldProblems = groupByLine(
-						change.getAnnotationSupport().getOldProblems(), oldLines);
+						getAnnotationSupport().getOldProblems(), oldLines);
 
 				var newLines = change.getType()!=ChangeType.DELETE? change.getNewText().getLines(): new ArrayList<String>();
 				Map<Integer, List<CodeProblem>> newProblems = groupByLine(
-						change.getAnnotationSupport().getNewProblems(), newLines);
+						getAnnotationSupport().getNewProblems(), newLines);
 				
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(oldCommentsByLine, oldProblems, 
-								change.getAnnotationSupport().getOldCoverages()), 
+								getAnnotationSupport().getOldCoverages()), 
 						new AnnotationInfo(newCommentsByLine, newProblems, 
-								change.getAnnotationSupport().getNewCoverages()));
+								getAnnotationSupport().getNewCoverages()));
 			} else {
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(new HashMap<>(), new HashMap<>(), new HashMap<>()), 
@@ -122,8 +116,6 @@ public class BlobTextDiffPanel extends Panel {
 	
 	private BlameInfo blameInfo;
 	
-	private boolean collapsed;
-	
 	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
 			@Nullable IModel<Boolean> blameModel) {
 		super(id);
@@ -134,10 +126,6 @@ public class BlobTextDiffPanel extends Panel {
 		
 		if (blameModel != null && blameModel.getObject()) 
 			blameInfo = getBlameInfo();
-		
-		var reviewStatus = getReviewStatus();
-		if (reviewStatus != null)
-			collapsed = reviewStatus.isCollapsed();
 	}
 
 	private String convertToJson(Object obj) {
@@ -148,8 +136,18 @@ public class BlobTextDiffPanel extends Panel {
 		}
 	}
 	
-	private Project getProject() {
-		return change.getProject();
+	public void toggleBlame(AjaxRequestTarget target) {
+		if (blameInfo != null) 
+			blameInfo = null;
+		else 
+			blameInfo = getBlameInfo();
+		target.add(this);
+		blameModel.setObject(blameInfo != null);
+		((BasePage)getPage()).resizeWindow(target);
+	}
+	
+ 	public boolean isBlame() {
+		return blameInfo != null;
 	}
 	
 	@Nullable
@@ -165,7 +163,7 @@ public class BlobTextDiffPanel extends Panel {
 		blameInfo = new BlameInfo();
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
-			for (BlameBlock blame: getGitService().blame(getProject(), change.getOldCommitId(), oldPath, null)) {
+			for (BlameBlock blame: getGitService().blame(change.getProject(), change.getOldCommitId(), oldPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
@@ -174,7 +172,7 @@ public class BlobTextDiffPanel extends Panel {
 		}
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
-			for (BlameBlock blame: getGitService().blame(getProject(), change.getNewCommitId(), newPath, null)) {
+			for (BlameBlock blame: getGitService().blame(change.getProject(), change.getNewCommitId(), newPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());
@@ -184,117 +182,9 @@ public class BlobTextDiffPanel extends Panel {
 		return blameInfo;
 	}
 	
-	private void toggleDiff(AjaxRequestTarget target) {
-		collapsed = !collapsed;
-		if (getReviewStatus() != null)
-			getReviewStatus().setCollapsed(collapsed);
-		String script;
-		if (collapsed)
-			script = "$('#%s').addClass('collapsed');";
-		else
-			script = "$('#%s').removeClass('collapsed');";
-		target.appendJavaScript(String.format(script, getMarkupId()));
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(new AjaxLink<Void>("toggle") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				toggleDiff(target);
-			}
-			
-		});
-		
-		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
-		add(new BlobDiffTitle("title", change));
-
-		add(new AjaxLink<Void>("blameFile") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(blameModel != null);
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (blameInfo != null) {
-					blameInfo = null;
-				} else {
-					blameInfo = getBlameInfo();
-				}
-				target.add(BlobTextDiffPanel.this);
-				blameModel.setObject(blameInfo != null);
-				((BasePage)getPage()).resizeWindow(target);
-			}
-
-		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return blameInfo!=null? "active": "";
-			}
-
-		})).setOutputMarkupId(true));
-
-		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
-
-		viewState.requestId = PullRequest.idOf(getPullRequest());
-		PageParameters params = ProjectBlobPage.paramsOf(getProject(), viewState);
-		add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
-
-		if (change.getType() != ChangeType.DELETE && change.getNewBlob().getLfsPointer() == null) {
-			if (getPullRequest() != null
-					&& getPullRequest().getSource() != null
-					&& getPullRequest().getSource().getObjectName(false) != null
-					&& SecurityUtils.canModifyFile(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) {
-				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
-				Link<Void> editLink = new Link<Void>("editFile") {
-
-					@Override
-					public void onClick() {
-						BlobIdent blobIdent = new BlobIdent(getPullRequest().getSourceBranch(), change.getPath(),
-								FileMode.REGULAR_FILE.getBits());
-						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
-						editState.requestId = getPullRequest().getId();
-						editState.mode = Mode.EDIT;
-						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
-						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(getPullRequest().getSourceProject(), editState);
-						setResponsePage(ProjectBlobPage.class, params);
-					}
-
-				};
-				editLink.add(AttributeAppender.replace("title", "Edit on source branch"));
-				add(editLink);
-			} else if (SecurityUtils.canModifyFile(getProject(), change.getBlobIdent().revision, change.getPath())
-					&& getProject().getBranchRef(change.getBlobIdent().revision) != null) {
-				// we are on a branch 
-				Link<Void> editLink = new Link<Void>("editFile") {
-
-					@Override
-					public void onClick() {
-						ProjectBlobPage.State editState = new ProjectBlobPage.State(change.getBlobIdent());
-						editState.mode = Mode.EDIT;
-						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
-						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(getProject(), editState);
-						setResponsePage(ProjectBlobPage.class, params);
-					}
-
-				};
-				editLink.add(AttributeAppender.replace("title", "Edit on branch " + change.getBlobIdent().revision));
-				add(editLink);
-			} else {
-				add(new WebMarkupContainer("editFile").setVisible(false));
-			}
-		} else {
-			add(new WebMarkupContainer("editFile").setVisible(false));
-		}
 		
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
 
@@ -379,8 +269,8 @@ public class BlobTextDiffPanel extends Panel {
 						DiffPlanarRange commentRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
 						
 						String markUrl;
-						if (change.getAnnotationSupport() != null) {
-							markUrl = change.getAnnotationSupport().getMarkUrl(commentRange);
+						if (getAnnotationSupport() != null) {
+							markUrl = getAnnotationSupport().getMarkUrl(commentRange);
 							if (markUrl != null) 
 								markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
 							else 
@@ -398,7 +288,7 @@ public class BlobTextDiffPanel extends Panel {
 						Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 						
 						commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
-						change.getAnnotationSupport().onAddComment(target, commentRange);
+						getAnnotationSupport().onAddComment(target, commentRange);
 						script = String.format("onedev.server.blobTextDiff.onAddComment($('#%s'), %s);", 
 								getMarkupId(), convertToJson(commentRange));
 						target.appendJavaScript(script);
@@ -407,13 +297,13 @@ public class BlobTextDiffPanel extends Panel {
 						Long commentId = params.getParameterValue("param1").toLong();
 						commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
 						CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-						change.getAnnotationSupport().onOpenComment(target, comment, commentRange);
+						getAnnotationSupport().onOpenComment(target, comment, commentRange);
 						script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
 								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
 						target.appendJavaScript(script);
 						break;
 					case "setActive": 
-						onActivate(target);
+						onActive(target);
 						break;
 				}
 			}
@@ -456,20 +346,12 @@ public class BlobTextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
-		add(AttributeAppender.append("class", new LoadableDetachableModel<>() {
-
+		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 			@Override
-			protected String load() {
-				List<String> cssClasses = new ArrayList<>();
-				if (blameInfo != null)
-					cssClasses.add("need-width");
-				if (collapsed)
-					cssClasses.add("collapsed");
-				return Joiner.on(' ').join(cssClasses);
+			public String getObject() {
+				return blameInfo!=null? "blob-text-diff need-width": "blob-text-diff";
 			}
-			
 		}));
-		
 		setOutputMarkupId(true);
 	}
 	
@@ -484,7 +366,7 @@ public class BlobTextDiffPanel extends Panel {
 		return new DiffPlanarRange(leftSide, beginLine, beginChar, endLine, endChar);
 	}
 	
-	protected void onActivate(AjaxRequestTarget target) {
+	protected void onActive(AjaxRequestTarget target) {
 		
 	}
 	
@@ -497,14 +379,14 @@ public class BlobTextDiffPanel extends Panel {
 		DiffCodeCommentInfo openCommentInfo;
 		DiffPlanarRange markRange;
 		String commentContainerId;
-		if (change.getAnnotationSupport() != null) {
-			markRange = change.getAnnotationSupport().getMarkRange();
-			Pair<CodeComment, DiffPlanarRange> openCommentPair = change.getAnnotationSupport().getOpenComment();
+		if (getAnnotationSupport() != null) {
+			markRange = getAnnotationSupport().getMarkRange();
+			Pair<CodeComment, DiffPlanarRange> openCommentPair = getAnnotationSupport().getOpenComment();
 			if (openCommentPair != null) 
 				openCommentInfo = new DiffCodeCommentInfo(openCommentPair.getLeft(), openCommentPair.getRight());
 			else 
 				openCommentInfo = null;
-			commentContainerId = "'" + change.getAnnotationSupport().getCommentContainer().getMarkupId() + "'";
+			commentContainerId = "'" + getAnnotationSupport().getCommentContainer().getMarkupId() + "'";
 		} else {
 			markRange = null;
 			openCommentInfo = null;
@@ -689,7 +571,7 @@ public class BlobTextDiffPanel extends Panel {
 				CommitDetailPage.State state = new CommitDetailPage.State();
 				state.revision = commit.getHash();
 				state.whitespaceOption = change.getWhitespaceOption();
-				PageParameters params = CommitDetailPage.paramsOf(getProject(), state);
+				PageParameters params = CommitDetailPage.paramsOf(change.getProject(), state);
 				String url = urlFor(CommitDetailPage.class, params).toString();
 				if (diffMode == DiffViewMode.UNIFIED) {
 					builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>",
@@ -1066,8 +948,6 @@ public class BlobTextDiffPanel extends Panel {
 	}
 	
 	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
-		if (collapsed)
-			toggleDiff(target);
 		String script = String.format(""
 			+ "var $container = $('#%s');"
 			+ "var markRange = %s;"
@@ -1090,11 +970,11 @@ public class BlobTextDiffPanel extends Panel {
 		blameInfo = null;
 		target.add(this);
 	}
-
+	
 	@Nullable
-	public ReviewStatus getReviewStatus() {
+	public BlobAnnotationSupport getAnnotationSupport() {
 		return null;
-	}
+	} 
 	
 	private static class BlameInfo implements Serializable {
 		

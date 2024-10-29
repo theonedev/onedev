@@ -1,0 +1,21 @@
+.blob-diff>.head {
+	border-radius: 0.42rem 0.42rem 0 0;
+	top: 64px;
+	background: white;
+	z-index: 5;
+}
+.dark-mode .blob-diff>.head {
+	background: var(--dark-mode-dark);
+	border-color: var(--dark-mode-lighter-dark) !important;
+}
+.blob-diff.collapsed>.head>.toggle>svg {
+	transform: rotate(0) !important;
+}
+.blob-diff.collapsed>.body {
+	display: none !important;
+}
+.blob-diff>.head .btn.btn-icon.btn-hover-light.active,
+.blob-diff>.head .btn.btn-icon.btn-hover-light.active:hover,
+.blob-diff>.head .btn.btn-icon.btn-hover-light.active:focus {
+	color: var(--primary) !important;
+}

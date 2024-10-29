@@ -1,11 +1,17 @@
 <wicket:panel>
-	<div wicket:id="content"></div>
-	<wicket:fragment wicket:id="noDiffFrag">
-		<div class="no-diff border rounded">
-			<div wicket:id="title" class="head text-break py-2 px-3 border-bottom"></div>
-			<div class="body p-3 d-flex align-items-center">
-				<svg wicket:id="icon" class="icon mr-2"></svg> <i wicket:id="message"></i>
-			</div>
+	<div class="d-flex align-items-center p-2 border position-sticky head">
+		<a wicket:id="toggleBody" class="btn btn-icon btn-xs btn-hover-light mr-2 toggle"><wicket:svg href="arrow" class="icon rotate-90"/></a>
+		<div wicket:id="title" class="mr-3 text-break"></div>
+		<div class="ml-auto text-nowrap d-flex align-items-center">
+			<a wicket:id="toggleReviewed" class="btn btn-xs btn-icon btn-hover-light"><svg wicket:id="icon" class="icon"/></a>
+			<a wicket:id="blameFile" title="Blame" class="btn btn-xs btn-icon btn-hover-light"><wicket:svg href="commit" class="icon"/></a>
+			<a wicket:id="viewFile" title="View" class="btn btn-xs btn-icon btn-hover-light ml-1"><wicket:svg href="eye" class="icon"/></a>
+			<a wicket:id="editFile" title="Edit" class="btn btn-xs btn-icon btn-hover-light ml-1"><wicket:svg href="edit" class="icon"/></a>
+			<span wicket:id="diffStat" class="ml-2 text-nowrap"></span>
 		</div>
+	</div>
+	<div wicket:id="body" class="body"></div>
+	<wicket:fragment wicket:id="messageFrag">
+		<svg wicket:id="icon" class="icon mr-2"></svg> <i wicket:id="message"></i>
 	</wicket:fragment>
 </wicket:panel>

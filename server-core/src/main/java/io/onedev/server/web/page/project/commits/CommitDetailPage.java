@@ -32,6 +32,7 @@ import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
+import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
@@ -42,7 +43,7 @@ import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.RevisionDiff;
+import io.onedev.server.web.util.AnnotationSupport;
 import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -79,7 +80,7 @@ import java.util.stream.Collectors;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
 @SuppressWarnings("serial")
-public class CommitDetailPage extends ProjectPage implements RevisionDiff.AnnotationSupport, JobAuthorizationContextAware {
+public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 	

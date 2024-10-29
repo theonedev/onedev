@@ -36,6 +36,7 @@ import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
+import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
@@ -52,7 +53,6 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.util.RevisionDiff;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -88,7 +88,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
-public class NewPullRequestPage extends ProjectPage implements RevisionDiff.AnnotationSupport {
+public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
 	private static final String TABS_ID = "tabs";
 	

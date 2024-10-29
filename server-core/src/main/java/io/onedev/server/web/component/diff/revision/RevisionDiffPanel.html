@@ -22,6 +22,10 @@
 					</div>
 				</form>
 			</div>
+			<div wicket:id="reviewProgress" class="position-relative review-progress rounded d-flex align-items-center px-2 ml-3">
+				<div wicket:id="bar" class="position-absolute rounded"></div>
+				<div wicket:id="label" class="font-size-sm ml-auto mr-auto"></div>
+			</div>
 			<a wicket:id="toggleNavigation" class="btn btn-icon btn-light btn-active-primary ml-3" title="Toggle navigation"><wicket:svg href="sidebar" class="icon flip-x"/></a>
 		</div>
 		<div wicket:id="body" class="body">

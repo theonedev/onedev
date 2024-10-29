@@ -1,34 +1,24 @@
 package io.onedev.server.git;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.util.DiffPlanarRange;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -182,11 +172,6 @@ public abstract class BlobChange implements Serializable {
 	
 	public abstract Project getProject();
 	
-	@Nullable
-	public AnnotationSupport getAnnotationSupport() {
-		return null;
-	}
-	
 	public ObjectId getOldCommitId() {
 		if (oldBlobIdent.revision.equals(ObjectId.zeroId().name().toString())) 
 			return ObjectId.zeroId();
@@ -213,37 +198,5 @@ public abstract class BlobChange implements Serializable {
 		}
 		return mark;
 	}
-	
-	public static interface AnnotationSupport extends Serializable {
-		
-		@Nullable 
-		DiffPlanarRange getMarkRange();
-		
-		String getMarkUrl(DiffPlanarRange markRange);
-		
-		Map<CodeComment, PlanarRange> getOldComments();
-		
-		Map<CodeComment, PlanarRange> getNewComments();
-		
-		Collection<CodeProblem> getOldProblems();
-		
-		Collection<CodeProblem> getNewProblems();
-		
-		Map<Integer, CoverageStatus> getOldCoverages();
-		
-		Map<Integer, CoverageStatus> getNewCoverages();
-		
-		DiffPlanarRange getCommentRange(CodeComment comment);
-		
-		@Nullable 
-		Pair<CodeComment, DiffPlanarRange> getOpenComment();
 
-		void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange);
-		
-		void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
-		
-		Component getCommentContainer();
-		
-	}
-	
 }

@@ -295,6 +295,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PackBlobAuthorizationManager.class).to(DefaultPackBlobAuthorizationManager.class);
 		bind(AccessTokenManager.class).to(DefaultAccessTokenManager.class);
 		bind(AccessTokenAuthorizationManager.class).to(DefaultAccessTokenAuthorizationManager.class);
+		bind(ReviewedDiffManager.class).to(DefaultReviewedDiffManager.class);
 		
 		bind(WebHookManager.class);
 		
