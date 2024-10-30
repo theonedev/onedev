@@ -52,7 +52,7 @@ public class FixedIssueCriteria extends Criteria<Build> {
 		Path<Long> attribute = from.get(Build.PROP_NUMBER);
 		List<Predicate> predicates = new ArrayList<>();
 		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
-			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(it.getId(), issue.getId());
+			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(it.getId(), issue.getId(), true);
 			Collection<String> descendants = new HashSet<>();
 			for (ObjectId each: getCommitInfoManager().getDescendants(it.getId(), fixCommits))
 				descendants.add(each.name());
@@ -70,7 +70,7 @@ public class FixedIssueCriteria extends Criteria<Build> {
 	@Override
 	public boolean matches(Build build) {
 		Collection<ObjectId> fixCommits = getCommitInfoManager()
-				.getFixCommits(build.getProject().getId(), issue.getId()); 
+				.getFixCommits(build.getProject().getId(), issue.getId(), true); 
 		GitService gitService = OneDev.getInstance(GitService.class);
 		for (ObjectId commit: fixCommits) {
 			ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());

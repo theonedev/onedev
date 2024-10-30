@@ -80,7 +80,7 @@ public interface CommitInfoManager {
 	 */
 	Map<Integer, Map<String, Integer>> getLineIncrements(Long projectId);
 
-	Collection<ObjectId> getFixCommits(Long projectId, Long issueId);
+	Collection<ObjectId> getFixCommits(Long projectId, Long issueId, boolean headOnly);
 	
 	List<Long> sortUsersByContribution(Map<Long, Collection<EmailAddressFacade>> userEmails, 
 			Long projectId, Collection<String> files);

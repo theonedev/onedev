@@ -79,7 +79,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 
-	private static final int INFO_VERSION = 17;
+	private static final int INFO_VERSION = 18;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 
@@ -96,7 +96,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	private static final String COMMITS_STORE = "commits";
 
 	private static final String FIX_COMMITS_STORE = "fixCommits";
-
+	
 	private static final String COMMIT_COUNTS_STORE = "commitCounts";
 
 	private static final String HISTORY_PATHS_STORE = "historyPaths";
@@ -310,8 +310,13 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 							Repository innerRepository = projectManager.getRepository(project.getId());
 							for (Long issueId : project.parseFixedIssueIds(commitMessage)) {
-								ByteIterable issueKey = new LongByteIterable(issueId);
-								Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
+								ByteIterable key = new LongByteIterable(issueId);
+								var fixingCommits = readCommits(fixCommitsStore, txn, key);
+								fixingCommits.add(currentCommitId);
+								writeCommits(fixCommitsStore, txn, key, fixingCommits);
+								
+								key  = new StringByteIterable(issueId + ".head");
+								fixingCommits = readCommits(fixCommitsStore, txn, key);
 
 								boolean addNextCommit = true;
 								for (Iterator<ObjectId> it = fixingCommits.iterator(); it.hasNext(); ) {
@@ -325,7 +330,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 								}
 								if (addNextCommit)
 									fixingCommits.add(currentCommitId);
-								writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
+								writeCommits(fixCommitsStore, txn, key, fixingCommits);
+								
 								listenerRegistry.post(new IssueCommitsAttached(issueManager.load(issueId)));
 							}
 							
@@ -1497,13 +1503,13 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	}
 
 	@Override
-	public Collection<ObjectId> getFixCommits(Long projectId, Long issueId) {
+	public Collection<ObjectId> getFixCommits(Long projectId, Long issueId, boolean headOnly) {
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Collection<ObjectId> call() throws Exception {
+			public Collection<ObjectId> call() {
 				Environment env = getEnv(projectId.toString());
 				Store store = getStore(env, FIX_COMMITS_STORE);
 
@@ -1515,7 +1521,12 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 					for (var ref: GitUtils.getCommitRefs(repository, Constants.R_TAGS)) 
 						refCommitIds.add(ref.getPeeledObj().getId());
 					var fixCommitIds = new ArrayList<ObjectId>();
-					for (var commitId: readCommits(store, txn, new LongByteIterable(issueId))) {
+					ByteIterable key;
+					if (headOnly)
+						key = new StringByteIterable(issueId + ".head");
+					else  
+						key = new LongByteIterable(issueId);
+					for (var commitId: readCommits(store, txn, key)) {
 						if (refCommitIds.contains(commitId)) {
 							fixCommitIds.add(commitId);
 						} else {

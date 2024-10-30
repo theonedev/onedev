@@ -155,7 +155,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 				});
 
-				if (!getIssue().getFixCommits().isEmpty()) {
+				if (!getIssue().getFixCommits(false).isEmpty()) {
 					if (SecurityUtils.canReadCode(getProject())) {
 						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())));
 						if (!getIssue().getPullRequests().isEmpty())

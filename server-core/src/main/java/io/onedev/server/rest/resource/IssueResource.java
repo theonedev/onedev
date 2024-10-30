@@ -185,7 +185,7 @@ public class IssueResource {
 			throw new UnauthorizedException();
     	
     	List<FixCommit> issueCommits = new ArrayList<>();
-    	for (ProjectScopedCommit commit: issue.getFixCommits()) {
+    	for (ProjectScopedCommit commit: issue.getFixCommits(false)) {
     		FixCommit issueCommit = new FixCommit();
     		issueCommit.setProjectId(commit.getProject().getId());
     		issueCommit.setCommitHash(commit.getCommitId().name());

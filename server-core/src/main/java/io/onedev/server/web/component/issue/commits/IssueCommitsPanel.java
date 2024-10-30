@@ -25,13 +25,13 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<ProjectScopedCommit>("commits", new AbstractReadOnlyModel<List<ProjectScopedCommit>>() {
+		add(new ListView<>("commits", new AbstractReadOnlyModel<List<ProjectScopedCommit>>() {
 
 			@Override
 			public List<ProjectScopedCommit> getObject() {
-				return getIssue().getFixCommits();
+				return getIssue().getFixCommits(false);
 			}
-			
+
 		}) {
 
 			@Override
@@ -42,10 +42,10 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 					protected Project getProject() {
 						return getIssue().getProject();
 					}
-					
+
 				});
 			}
-			
+
 		});
 		
 	}
