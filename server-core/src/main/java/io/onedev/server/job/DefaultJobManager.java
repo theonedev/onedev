@@ -521,7 +521,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
 		TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask);
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
-		JobExecutor jobExecutor = getJobExecutor(build, jobExecutorName, jobLogger);
+		JobExecutor jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
 		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
 		String sequentialKey;
 		if (sequentialGroup != null)

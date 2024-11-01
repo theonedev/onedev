@@ -437,7 +437,7 @@
  * activated by Select2's "allowClear" option).
  */
 .select2-container .select2-choice abbr {
-  top: 50%;
+  top: 1.6rem;
 }
 
 /**

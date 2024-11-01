@@ -6,8 +6,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.buildspec.step.RegistryLogin;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Editable
 public class Service implements NamedElement, Serializable {
@@ -32,8 +34,8 @@ public class Service implements NamedElement, Serializable {
 	private String readinessCheckCommand;
 	
 	private String runAs;
-	
-	private String builtInRegistryAccessTokenSecret;
+
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	@Editable(order=100, description="Specify name of the service, which will be used as host name to access the service")
 	@SuggestionProvider("getNameSuggestions")
@@ -115,19 +117,15 @@ public class Service implements NamedElement, Serializable {
 		this.runAs = runAs;
 	}
 
-	@Editable(order=500, name="Built-in Registry Access Token", group="More Settings", description = "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in docker registry")
-	@ChoiceProvider("getAccessTokenSecretChoices")
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return builtInRegistryAccessTokenSecret;
+	@Editable(order=475, group="More Settings", description="Optionally specify registry logins to override " +
+			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
+			"<code>@job_token@</code> for user name, and access token secret for password secret")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
-	}
-
-	private static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
 	
 	@SuppressWarnings("unused")
@@ -139,8 +137,9 @@ public class Service implements NamedElement, Serializable {
 		var envs = new HashMap<String, String>();
 		for (var envVar: getEnvVars())
 			envs.put(envVar.getName(), envVar.getValue());
-		return new ServiceFacade(getName(), getImage(), getRunAs(), getArguments(), envs, 
-				getReadinessCheckCommand(), getBuiltInRegistryAccessTokenSecret());		
+		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
+		return new ServiceFacade(getName(), getImage(), getRunAs(), getArguments(), envs,
+				getReadinessCheckCommand(), registryLogins);		
 	}
 	
 }

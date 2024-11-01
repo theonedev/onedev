@@ -21,10 +21,10 @@ public abstract class EmptyValueLabel extends Label {
 				ComponentContext.push(new ComponentContext(EmptyValueLabel.this));
 				try {
 					String placeholder = EditableUtils.getPlaceholder(getElement());
-					if (placeholder != null)
-						return HtmlEscape.escapeHtml5(placeholder);
+					if (placeholder != null && EditableUtils.isDisplayPlaceholderAsValue(getElement()))
+						return "<i>" + HtmlEscape.escapeHtml5(placeholder) + "</i>";
 					else
-						return "Not defined";
+						return "<i>Not defined</i>";
 				} finally {
 					ComponentContext.pop();
 				}

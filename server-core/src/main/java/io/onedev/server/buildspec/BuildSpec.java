@@ -2163,4 +2163,48 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 	
+	private void migrate37_registryLogins(MappingNode node) {
+		String accessTokenSecret = null;
+		for (var itTuple = node.getValue().iterator(); itTuple.hasNext();) {
+			var tuple = itTuple.next();
+			var tupleKey = ((ScalarNode)tuple.getKeyNode()).getValue();
+			if (tupleKey.equals("builtInRegistryAccessTokenSecret")) {
+				accessTokenSecret = ((ScalarNode)tuple.getValueNode()).getValue();
+				itTuple.remove();
+				break;
+			}
+		}
+		if (accessTokenSecret != null) {
+			var loginProps = new ArrayList<NodeTuple>();
+			loginProps.add(new NodeTuple(
+					new ScalarNode(Tag.STR, "registryUrl"), 
+					new ScalarNode(Tag.STR, "@server_url@")));
+			loginProps.add(new NodeTuple(
+					new ScalarNode(Tag.STR, "userName"),
+					new ScalarNode(Tag.STR, "@job_token@")));
+			loginProps.add(new NodeTuple(
+					new ScalarNode(Tag.STR, "passwordSecret"),
+					new ScalarNode(Tag.STR, accessTokenSecret)));
+			var login = new MappingNode(Tag.MAP, loginProps, FlowStyle.BLOCK);
+			var logins = new SequenceNode(Tag.SEQ, Lists.newArrayList(login), FlowStyle.BLOCK);
+			node.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "registryLogins"), logins));
+		}
+	}
+	
+	private void migrate37(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("services")) {
+				SequenceNode servicesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node servicesNodeItem: servicesNode.getValue()) 
+					migrate37_registryLogins((MappingNode) servicesNodeItem);
+			}
+		}
+		
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNode: stepsNode.getValue()) 
+				migrate37_registryLogins((MappingNode)stepNode);
+		});
+	}
+	
 }

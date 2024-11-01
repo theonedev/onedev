@@ -3,19 +3,16 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
@@ -35,7 +32,7 @@ public class BuildImageStep extends Step {
 
 	private Output output = new RegistryOutput();
 	
-	private String builtInRegistryAccessTokenSecret;
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private String platforms;
 	
@@ -75,28 +72,17 @@ public class BuildImageStep extends Step {
 		this.output = output;
 	}
 
-	@Editable(order=1000, name="Built-in Registry Access Token Secret", group = "More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
-	@ChoiceProvider("getAccessTokenSecretChoices")
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return builtInRegistryAccessTokenSecret;
+	@Editable(order=1000, group="More Settings", description="Optionally specify registry logins to override " +
+			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
+			"<code>@job_token@</code> for user name, and access token secret for password secret")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
-
-	private static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).distinct().collect(toList());
-	}
-
-	private static String getBuiltInRegistryAccessTokenSecretDescription() {
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		var server = UrlUtils.getServer(serverUrl);
-		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
-				"<code>" + server + "</code>";
-	}
-
+	
 	@Editable(order=1300, group = "More Settings", placeholder = "Current platform", description = "Optionally specify " +
 			"<span class='text-info'>comma separated</span> platforms to build, for instance <tt>linux/amd64,linux/arm64</tt>. " +
 			"Leave empty to build for platform of the node running the job")
@@ -128,14 +114,9 @@ public class BuildImageStep extends Step {
 	
 	@Override
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
-		String accessToken;
-		if (getBuiltInRegistryAccessTokenSecret() != null)
-			accessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
-		else
-			accessToken = null;
-		
+		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		return new BuildImageFacade(getBuildPath(), getDockerfile(), getOutput().getFacade(), 
-				accessToken, getPlatforms(), getMoreOptions());
+				registryLogins, getPlatforms(), getMoreOptions());
 	}
 	
 	@Editable

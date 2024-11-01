@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.k8shelper.KubernetesHelper.*;
+import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
 import static java.lang.Integer.parseInt;
@@ -116,29 +117,9 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private transient List<ImageMappingFacade> imageMappingFacades;
 	
-	@Editable(order=500, group = "More Settings", description="Optionally specify node selector of the job pods")
-	public List<NodeSelectorEntry> getNodeSelector() {
-		return nodeSelector;
-	}
-
-	public void setNodeSelector(List<NodeSelectorEntry> nodeSelector) {
-		this.nodeSelector = nodeSelector;
-	}
-
-	@Editable(order=600, group="More Settings", description="Optionally specify cluster role the job pods service account "
-			+ "binding to. This is necessary if you want to do things such as running other "
-			+ "Kubernetes pods in job command")
-	public String getClusterRole() {
-		return clusterRole;
-	}
-
-	public void setClusterRole(String clusterRole) {
-		this.clusterRole = clusterRole;
-	}
-
-	@Editable(order=200, description="Specify login information of docker registries if necessary. "
-			+ "These logins will be used to create image pull secrets of the job pods")
-	@Override
+	@Editable(order=200, description="Specify registry logins if necessary. For built-in registry, " +
+			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
+			"access token for password")
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
@@ -242,6 +223,26 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.alwaysPullImage = alwaysPullImage;
 	}
 
+	@Editable(order=500, group = "More Settings", description="Optionally specify node selector of the job pods")
+	public List<NodeSelectorEntry> getNodeSelector() {
+		return nodeSelector;
+	}
+
+	public void setNodeSelector(List<NodeSelectorEntry> nodeSelector) {
+		this.nodeSelector = nodeSelector;
+	}
+
+	@Editable(order=600, group="More Settings", description="Optionally specify cluster role the job pods service account "
+			+ "binding to. This is necessary if you want to do things such as running other "
+			+ "Kubernetes pods in job command")
+	public String getClusterRole() {
+		return clusterRole;
+	}
+
+	public void setClusterRole(String clusterRole) {
+		this.clusterRole = clusterRole;
+	}
+	
 	@Editable(order=25000, group="More Settings", description="Optionally specify where to run service pods "
 			+ "specified in job. The first matching locator will be used. If no any locators are found, "
 			+ "node selector of the executor will be used")
@@ -383,6 +384,11 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	@Override
 	public boolean isPlaceholderAllowed() {
 		return false;
+	}
+
+	@Override
+	public List<RegistryLoginFacade> getRegistryLogins(String jobToken) {
+		return getRegistryLogins().stream().map(it->it.getFacade(jobToken)).collect(toList());
 	}
 
 	@Override
@@ -544,48 +550,45 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl().toString();
 	}
 	
+	private void mergeAndEnsureUnique(Collection<RegistryLoginFacade> logins, Collection<RegistryLoginFacade> otherLogins) {
+		for (var login: logins) {
+			if (otherLogins.stream().anyMatch(it->it.getRegistryUrl().equals(login.getRegistryUrl()) && !it.equals(login))) {
+				var errorMessage = String.format("Login for registry '%s' should be the same across all " +
+						"command steps and services executing via Kubernetes executor", login.getRegistryUrl());
+				throw new ExplicitException(errorMessage);
+			}
+		}
+		logins.addAll(otherLogins);
+	}
+	
 	@Nullable
 	private String createImagePullSecret(String namespace, @Nullable JobContext jobContext, TaskLogger jobLogger) {
-		Map<Object, Object> auths = new LinkedHashMap<>();
-		for (RegistryLogin login: getRegistryLogins()) {
-			String auth = login.getUserName() + ":" + login.getPassword();
-			String registryUrl = login.getRegistryUrl();
-			if (registryUrl == null)
-				registryUrl = "https://index.docker.io/v1/";
-			auths.put(registryUrl, newLinkedHashMap(
-					"auth", encodeBase64String(auth.getBytes(UTF_8))));
-		}
-		
+		List<RegistryLoginFacade> registryLogins;
 		if (jobContext != null) {
-			var accessTokens = new HashSet<String>();
+			registryLogins = getRegistryLogins(jobContext.getJobToken());
+			var jobRegistryLogins = new ArrayList<RegistryLoginFacade>();
 			new CompositeFacade(jobContext.getActions()).traverse((facade, position) -> {
 				if (facade instanceof CommandFacade) {
 					CommandFacade commandFacade = (CommandFacade) facade;
-					if (commandFacade.getBuiltInRegistryAccessToken() != null)
-						accessTokens.add(commandFacade.getBuiltInRegistryAccessToken());
+					mergeAndEnsureUnique(jobRegistryLogins, commandFacade.getRegistryLogins());
 				}
 				return null;
 			}, new ArrayList<>());
 
-			for (var service: jobContext.getServices()) {
-				if (service.getBuiltInRegistryAccessToken() != null)
-					accessTokens.add(service.getBuiltInRegistryAccessToken());
-			}
+			for (var service: jobContext.getServices()) 
+				mergeAndEnsureUnique(jobRegistryLogins, service.getRegistryLogins());
 			
-			if (accessTokens.size() > 1) {
-				throw new ExplicitException("Built-in registry access token should be the same " +
-						"for all command steps and services executing via Kubernetes executor");
-			}
-						
-			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-			var auth = new StringBuilder();
-			auth.append(jobContext.getJobToken()).append(":");
-			if (!accessTokens.isEmpty())
-				auth.append(accessTokens.iterator().next());
-			auths.put(serverUrl, newLinkedHashMap(
-					"auth", encodeBase64String(auth.toString().getBytes(UTF_8))));
+			registryLogins = merge(jobRegistryLogins, registryLogins);
+		} else {
+			registryLogins = getRegistryLogins(UUID.randomUUID().toString());
 		}
-		
+
+		Map<Object, Object> auths = new LinkedHashMap<>();
+		for (var login: registryLogins) {
+			String auth = login.getUserName() + ":" + login.getPassword();
+			auths.put(login.getRegistryUrl(), newLinkedHashMap(
+					"auth", encodeBase64String(auth.getBytes(UTF_8))));
+		}
 		if (!auths.isEmpty()) {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {

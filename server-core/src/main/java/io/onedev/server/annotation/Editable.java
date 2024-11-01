@@ -23,6 +23,8 @@ public @interface Editable {
 	
 	String rootPlaceholderProvider() default "";
 	
+	boolean displayPlaceholderAsValue() default false;
+	
 	int order() default 0;
 	
 	String description() default "";

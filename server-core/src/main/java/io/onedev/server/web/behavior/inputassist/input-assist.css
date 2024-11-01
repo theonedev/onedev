@@ -1,6 +1,3 @@
-input.input-assist {
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-}
 .floating>.content>.input-assist {
 	padding: 1rem;
 }

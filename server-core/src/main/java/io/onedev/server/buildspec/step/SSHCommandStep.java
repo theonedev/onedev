@@ -11,11 +11,10 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
 @Editable(order=1090, group = UTILITIES, name="Execute Commands via SSH", description = "" +
@@ -121,10 +120,10 @@ public class SSHCommandStep extends CommandStep {
 	}
 
 	@Override
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return null;
+	public List<RegistryLogin> getRegistryLogins() {
+		return new ArrayList<>();
 	}
-	
+
 	@Override
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {

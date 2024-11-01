@@ -1,12 +1,11 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
-import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.ShellFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
@@ -48,9 +47,9 @@ public class ShellInterpreter extends Interpreter {
 	
 	@Override
 	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image,
-									   String runAs, String builtInRegistryAccessToken,
+									   String runAs, List<RegistryLoginFacade> registryLogins,
 									   Map<String, String> envMap, boolean useTTY) {
-		return new ShellFacade(image, runAs, builtInRegistryAccessToken, getShell(), getCommands(), 
+		return new ShellFacade(image, runAs, registryLogins, getShell(), getCommands(), 
 				envMap, useTTY);
 	}
 

@@ -1,20 +1,16 @@
 package io.onedev.server.buildspec.step;
 
-import io.onedev.agent.BuiltInRegistryLogin;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.CommandFacade;
-import io.onedev.server.OneDev;
+import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
-import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -24,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
+import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
-import static java.util.stream.Collectors.toList;
 
 @Editable(order=200, name="Build Image (Kaniko)", group = DOCKER_IMAGE, description="Build docker image with kaniko. " +
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
@@ -99,25 +95,19 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.trustCertificates = trustCertificates;
 	}
 
-	@Editable(order=1100, name="Built-in Registry Access Token Secret", group="More Settings", descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
-	@ChoiceProvider("getAccessTokenSecretChoices")
+	@Editable(order=1100, group="More Settings", description="Optionally specify registry logins to override " +
+			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
+			"<code>@job_token@</code> for user name, and access token secret for password secret")
 	@Override
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return super.getBuiltInRegistryAccessTokenSecret();
+	public List<RegistryLogin> getRegistryLogins() {
+		return super.getRegistryLogins();
 	}
 
 	@Override
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		super.setBuiltInRegistryAccessTokenSecret(builtInRegistryAccessTokenSecret);
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		super.setRegistryLogins(registryLogins);
 	}
 
-	private static String getBuiltInRegistryAccessTokenSecretDescription() {
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		var server = UrlUtils.getServer(serverUrl);
-		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
-				"<code>" + server + "</code>";
-	}
-	
 	@Editable(order=1200, group="More Settings", description="Optionally specify <a href='https://github.com/GoogleContainerTools/kaniko?tab=readme-ov-file#additional-flags' target='_blank'>additional options</a> of kaniko")
 	@Interpolative(variableSuggester="suggestVariables")
 	@ReservedOptions({"(--context)=.*", "(--destination)=.*", "(--oci-layout-path)=.*", "--no-push"})
@@ -135,15 +125,14 @@ public class BuildImageWithKanikoStep extends CommandStep {
 			
 			@Override
 			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs,
-											   String builtInRegistryAccessToken, Map<String, String> envMap, boolean useTTY) {
+											   List<RegistryLoginFacade> registryLogins, Map<String, String> envMap, 
+											   boolean useTTY) {
 				var commandsBuilder = new StringBuilder();
 				if (jobExecutor instanceof RegistryLoginAware) {
 					RegistryLoginAware registryLoginAware = (RegistryLoginAware) jobExecutor;
 					commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
-					var registryLogins = registryLoginAware.getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
-					var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-					var builtInRegistryLogin = new BuiltInRegistryLogin(builtInRegistryUrl, jobToken, builtInRegistryAccessToken);
-					commandsBuilder.append(buildDockerConfig(registryLogins, builtInRegistryLogin)).append("\n");
+					var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
+					commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
 					commandsBuilder.append("EOF\n");
 				}
 				if (getTrustCertificates() != null) {
@@ -165,7 +154,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 				
 				commandsBuilder.append("\n");
 				
-				return new CommandFacade(image, runAs, builtInRegistryAccessToken, commandsBuilder.toString(), envMap, useTTY);
+				return new CommandFacade(image, runAs, registryLogins, commandsBuilder.toString(), envMap, useTTY);
 			}
 			
 		};

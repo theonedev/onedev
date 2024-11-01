@@ -1,12 +1,21 @@
 package io.onedev.server.model.support.administration.jobexecutor;
 
-import java.io.Serializable;
+import com.google.common.collect.Lists;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.buildspec.job.JobVariable;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.web.util.SuggestionUtils;
 
 import javax.validation.constraints.NotEmpty;
-
-import io.onedev.agent.job.RegistryLoginFacade;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import java.io.Serializable;
+import java.util.List;
 
 @Editable
 public class RegistryLogin implements Serializable {
@@ -19,17 +28,22 @@ public class RegistryLogin implements Serializable {
 	
 	private String password;
 
-	@Editable(order=100, placeholder="Docker hub", 
-			description="Specify registry url. Leave empty for official registry")
+	@Editable(order=100, placeholder="Docker hub", description="Specify registry url. Leave empty for official registry")
+	@Interpolative(variableSuggester = "suggestRegistryUrlVariables")
 	public String getRegistryUrl() {
 		return registryUrl;
 	}
-
+	
 	public void setRegistryUrl(String registryUrl) {
 		this.registryUrl = registryUrl;
 	}
 
-	@Editable(order=200)
+	private static List<InputSuggestion> suggestRegistryUrlVariables(String matchWith) {
+		return SuggestionUtils.suggest(Lists.newArrayList(JobVariable.SERVER_URL.name().toLowerCase()), matchWith);
+	}
+	
+	@Editable(order=200, description = "Specify user name of specified registry")
+	@Interpolative(variableSuggester = "suggestUserNameVariables")
 	@NotEmpty
 	public String getUserName() {
 		return userName;
@@ -39,7 +53,11 @@ public class RegistryLogin implements Serializable {
 		this.userName = userName;
 	}
 
-	@Editable(order=300)
+	private static List<InputSuggestion> suggestUserNameVariables(String matchWith) {
+		return SuggestionUtils.suggest(Lists.newArrayList(JobVariable.JOB_TOKEN.name().toLowerCase()), matchWith);
+	}
+	
+	@Editable(order=300, name="Password", description = "Specify password or access token of specified registry")
 	@NotEmpty
 	@Password
 	public String getPassword() {
@@ -49,12 +67,20 @@ public class RegistryLogin implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	public RegistryLoginFacade getFacade() {
-		var registryUrl = getRegistryUrl();
-		if (registryUrl == null)
-			registryUrl = "https://index.docker.io/v1/";
-		return new RegistryLoginFacade(registryUrl, getUserName(), getPassword());
+
+	public RegistryLoginFacade getFacade(String jobToken) {
+		var interpolator = new VariableInterpolator(t -> {
+			if (t.equalsIgnoreCase(JobVariable.SERVER_URL.name()))
+				return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			else if (t.equalsIgnoreCase(JobVariable.JOB_TOKEN.name()))
+				return jobToken;
+			else
+				throw new ExplicitException("Unrecognized interpolation variable: " + t);
+		});
+		return new RegistryLoginFacade(
+				interpolator.interpolate(getRegistryUrl()), 
+				interpolator.interpolate(getUserName()), 
+				getPassword());
 	}
 	
 }

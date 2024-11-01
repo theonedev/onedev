@@ -13,7 +13,6 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 import javax.annotation.Nullable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.Comparator;
 import java.util.List;
 
 public class EditableUtils {
@@ -138,6 +137,10 @@ public class EditableUtils {
 		}
 	}
 
+	public static boolean isDisplayPlaceholderAsValue(AnnotatedElement element) {
+		return element.getAnnotation(Editable.class).displayPlaceholderAsValue();
+	}
+	
 	@Nullable
 	public static String getPlaceholder(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);

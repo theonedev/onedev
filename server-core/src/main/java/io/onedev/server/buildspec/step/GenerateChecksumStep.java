@@ -66,8 +66,8 @@ public class GenerateChecksumStep extends CommandStep {
 	}
 
 	@Override
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return null;
+	public List<RegistryLogin> getRegistryLogins() {
+		return new ArrayList<>();
 	}
 
 	@Override

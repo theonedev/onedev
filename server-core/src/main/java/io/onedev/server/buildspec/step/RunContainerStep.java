@@ -3,9 +3,6 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.RegEx;
@@ -13,7 +10,6 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.annotation.Nullable;
@@ -23,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> "
 		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. " +
@@ -44,7 +42,7 @@ public class RunContainerStep extends Step {
 	
 	private List<VolumeMount> volumeMounts = new ArrayList<>();
 
-	private String builtInRegistryAccessTokenSecret;
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private boolean useTTY = true;
 	
@@ -114,26 +112,15 @@ public class RunContainerStep extends Step {
 		this.volumeMounts = volumeMounts;
 	}
 
-	@Editable(order=600, name="Built-in Registry Access Token Secret", group = "More Settings", description="Optionally specify a " +
-			"<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in container registry. If this step needs to " +
-			"access external container registry, login information should be configured in corresponding " +
-			"executor then")
-	@ChoiceProvider("getAccessTokenSecretChoices")
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return builtInRegistryAccessTokenSecret;
+	@Editable(order=600, group="More Settings", description="Optionally specify registry logins to override " +
+			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
+			"<code>@job_token@</code> for user name, and access token secret for password secret")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
-	}
-
-	protected static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
-	}
-	
-	private static boolean isSubscriptionActive() {
-		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
 	
 	@Editable(order=10000, name="Enable TTY Mode", group = "More Settings", description="Many commands print outputs with ANSI colors in "
@@ -165,13 +152,9 @@ public class RunContainerStep extends Step {
 			mountMap.put(sourcePath, mount.getTargetPath());
 		}
 		
-		String builtInRegistryAccessToken;
-		if (getBuiltInRegistryAccessTokenSecret() != null)
-			builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
-		else 
-			builtInRegistryAccessToken = null;
+		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		return new RunContainerFacade(getImage(), getRunAs(), getArgs(), envMap, getWorkingDir(), mountMap, 
-				builtInRegistryAccessToken, isUseTTY());
+				registryLogins, isUseTTY());
 	}
 	
 }

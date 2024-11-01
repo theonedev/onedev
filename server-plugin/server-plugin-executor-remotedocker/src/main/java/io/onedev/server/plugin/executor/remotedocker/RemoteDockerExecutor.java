@@ -16,7 +16,6 @@ import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.model.support.ImageMapping;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
@@ -102,15 +101,14 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...",
 							getName(), agentData.getName()));
 
-					var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
+					String jobToken = jobContext.getJobToken();
+					var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(jobToken)).collect(toList());
 					var imageMappings = getImageMappings().stream().map(ImageMapping::getFacade).collect(toList());
 					
-					String jobToken = jobContext.getJobToken();
-					var builtInRegistryUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
-							jobContext.getServices(), registryLogins, builtInRegistryUrl, imageMappings, 
+							jobContext.getServices(), registryLogins, imageMappings, 
 							isMountDockerSock(), getDockerSockPath(), getDockerBuilder(), getCpuLimit(), 
 							getMemoryLimit(), getRunOptions(), getNetworkOptions(), isAlwaysPullImage());
 
@@ -176,7 +174,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				currentJobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
 
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
-						testData.getDockerImage(), getDockerSockPath(), getRegistryLoginFacades(), 
+						testData.getDockerImage(), getDockerSockPath(), getRegistryLogins(jobToken), 
 						OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl(),
 						getRunOptions());
 

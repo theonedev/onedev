@@ -10,10 +10,10 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
 @Editable(order=1100, group = UTILITIES, name="Copy Files with SCP", description = "" +
@@ -102,8 +102,8 @@ public class SCPCommandStep extends CommandStep {
 	}
 
 	@Override
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return null;
+	public List<RegistryLogin> getRegistryLogins() {
+		return new ArrayList<>();
 	}
 	
 	@Override

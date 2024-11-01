@@ -29,7 +29,7 @@ public class NodePluginModule extends AbstractPluginModule {
 				script.setContent(Lists.newArrayList("io.onedev.server.plugin.buildspec.node.NodeJobSuggestion.determineProjectVersion()"));
 				return script;
 			}
-			
+			 
 		});
 		
 	}

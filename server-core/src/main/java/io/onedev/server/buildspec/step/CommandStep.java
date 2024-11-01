@@ -2,19 +2,19 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.UrlUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
@@ -41,8 +43,8 @@ public class CommandStep extends Step {
 	
 	private String runAs;
 	
-	private String builtInRegistryAccessTokenSecret;
-
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
+	
 	private List<EnvVar> envVars = new ArrayList<>();
 	
 	private boolean useTTY = true;
@@ -99,31 +101,19 @@ public class CommandStep extends Step {
 	public void setRunAs(String runAs) {
 		this.runAs = runAs;
 	}
-	
-	@Editable(order=9000, name="Built-in Registry Access Token Secret", group = "More Settings",
-			descriptionProvider = "getBuiltInRegistryAccessTokenSecretDescription")
-	@ChoiceProvider("getAccessTokenSecretChoices")
+
+	@Editable(order=8500, group="More Settings", description="Optionally specify registry logins to override " +
+			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
+			"<code>@job_token@</code> for user name, and access token secret for password secret")
 	@ShowCondition("isRunInContainerEnabled")
-	public String getBuiltInRegistryAccessTokenSecret() {
-		return builtInRegistryAccessTokenSecret;
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setBuiltInRegistryAccessTokenSecret(String builtInRegistryAccessTokenSecret) {
-		this.builtInRegistryAccessTokenSecret = builtInRegistryAccessTokenSecret;
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
-
-	protected static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
-	}
-
-	private static String getBuiltInRegistryAccessTokenSecretDescription() {
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		var server = UrlUtils.getServer(serverUrl);
-		return "Optionally specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token for built-in registry server " +
-				"<code>" + server + "</code>";
-	}
-
+	
 	@Editable(order=9900, name="Environment Variables", group="More Settings", description="Optionally specify environment "
 			+ "variables for this step")
 	public List<EnvVar> getEnvVars() {
@@ -151,14 +141,10 @@ public class CommandStep extends Step {
 			envMap.put(envVar.getName(), envVar.getValue());
 		
 		if (isRunInContainer()) {
-			String builtInRegistryAccessToken;
-			if (getBuiltInRegistryAccessTokenSecret() != null)
-				builtInRegistryAccessToken = build.getJobAuthorizationContext().getSecretValue(getBuiltInRegistryAccessTokenSecret());
-			else
-				builtInRegistryAccessToken = null;
-			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, builtInRegistryAccessToken, envMap, isUseTTY());
+			var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, registryLogins, envMap, isUseTTY());
 		} else {
-			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, null, envMap, isUseTTY());
+			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, new ArrayList<>(), envMap, isUseTTY());
 		}
 	}
 	
