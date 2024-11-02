@@ -414,6 +414,7 @@ a {
 
 a.disabled:not(.btn), a[disabled]:not(.btn) {
 	opacity: 0.5;
+	cursor: default;
 	color: inherit !important;
 }
 
