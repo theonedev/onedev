@@ -117,6 +117,9 @@ public class CmakeJobSuggestion implements JobSuggestion {
 
 			CommandStep testAndCheck = new CommandStep();
 			testAndCheck.setName("test and check");
+			
+			// Use 1.0.0 instead of 1.0.1 (build from dev branch using cmake version 3.30.3) as the cmake 
+			// vcpkg example does not work
 			testAndCheck.setImage("1dev/cmake:1.0.0");
 			var commandsBuilder = new StringBuilder("set -e\n");
 			if (hasConan) 
