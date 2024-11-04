@@ -443,7 +443,11 @@ public abstract class RevisionDiffPanel extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										new BeanEditModalPanel<SuggestionBatchApplyBean>(target, new SuggestionBatchApplyBean()) {
-											
+											@Override
+											protected boolean isDirtyAware() {
+												return false;
+											}
+
 											@Override
 											protected void onSave(AjaxRequestTarget target, SuggestionBatchApplyBean bean) {
 												String commitMessage = bean.getCommitMessage(); 

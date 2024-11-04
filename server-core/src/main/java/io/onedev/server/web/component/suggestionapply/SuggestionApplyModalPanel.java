@@ -37,6 +37,11 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 	}
 
 	@Override
+	protected boolean isDirtyAware() {
+		return false;
+	}
+
+	@Override
 	protected void onSave(AjaxRequestTarget target, SuggestionApplyBean bean) {
 		CodeComment comment = getComment();
 		BlobEdits blobEdits = new BlobEdits();
