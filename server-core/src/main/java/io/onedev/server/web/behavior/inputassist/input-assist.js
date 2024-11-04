@@ -77,10 +77,10 @@ onedev.server.inputassist = {
 			}
 		}
 		$input.bind("keydown", "up", function() {
-			keyUpOrDown(true);
+			return keyUpOrDown(true);
 		});
 		$input.bind("keydown", "down", function() {
-			keyUpOrDown(false);
+			return keyUpOrDown(false);
 		});
 		
 		$input.bind("keydown", "return", function() {
