@@ -63,7 +63,6 @@ public abstract class JobSecretEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				List<JobSecret> secrets = getProject().getBuildSetting().getJobSecrets();
-				System.out.println(secrets.get(index).getValue().equals(editingSecret.getValue()));
 				if (index == -1) 
 					secrets.add(editingSecret);
 				else 
