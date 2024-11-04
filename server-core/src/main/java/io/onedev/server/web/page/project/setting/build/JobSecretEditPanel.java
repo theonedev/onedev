@@ -19,8 +19,6 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class JobSecretEditPanel extends Panel {
 	
-	private static final String MASK = "************";
-	
 	private final int index;
 	
 	public JobSecretEditPanel(String id, int index) {
@@ -36,12 +34,10 @@ public abstract class JobSecretEditPanel extends Panel {
 		form.setOutputMarkupId(true);
 		
 		JobSecret editingSecret;
-		if (index != -1) {
+		if (index != -1) 
 			editingSecret = getProject().getBuildSetting().getJobSecrets().get(index);
-			editingSecret.setValue(MASK);
-		} else { 
+		else 
 			editingSecret = new JobSecret();
-		}
 		
 		BeanEditor editor = BeanContext.edit("editor", editingSecret);
 		form.add(editor);
@@ -67,13 +63,11 @@ public abstract class JobSecretEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				List<JobSecret> secrets = getProject().getBuildSetting().getJobSecrets();
-				if (index == -1) {
+				System.out.println(secrets.get(index).getValue().equals(editingSecret.getValue()));
+				if (index == -1) 
 					secrets.add(editingSecret);
-				} else {
-					if (editingSecret.getValue().equals(MASK))
-						editingSecret.setValue(secrets.get(index).getValue());
+				else 
 					secrets.set(index, editingSecret);
-				}
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				onSaved(target);
 			}

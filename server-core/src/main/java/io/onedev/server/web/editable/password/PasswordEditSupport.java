@@ -3,6 +3,7 @@ package io.onedev.server.web.editable.password;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import java.lang.reflect.AnnotatedElement;
@@ -25,7 +26,7 @@ public class PasswordEditSupport implements EditSupport {
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 									if (model.getObject() != null) {
-										return new PasswordPropertyViewer(id, model.getObject(), password.copyable());
+										return new Label(id, "********");
 									} else {
 										return new EmptyValueLabel(id) {
 
@@ -57,7 +58,7 @@ public class PasswordEditSupport implements EditSupport {
 								@Override
 								protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 									if (model.getObject() != null) {
-										return new PasswordPropertyViewer(id, model.getObject(), password.copyable());
+										return new Label(id, "********");
 									} else {
 										return new EmptyValueLabel(id) {
 

@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.user.accesstoken;
 
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.security.SecurityUtils;
@@ -43,7 +43,7 @@ public class AccessTokenEditBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Password(copyable = true)
+	@Secret
 	@NotEmpty
 	public String getValue() {
 		return value;

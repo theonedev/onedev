@@ -1,17 +1,16 @@
 package io.onedev.server.web.editable.password;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.Password;
 
 @SuppressWarnings("serial")
 public class PasswordPropertyEditor extends PropertyEditor<String> {
@@ -35,7 +34,7 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
 		String autoComplete = password.autoComplete();
 		if (StringUtils.isNotBlank(autoComplete))
-			input.add(AttributeAppender.append("autocomplete", autoComplete));
+			input.add(AttributeModifier.replace("autocomplete", autoComplete));
 		input.add(new OnTypingDoneBehavior() {
 
 			@Override

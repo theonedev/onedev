@@ -7,10 +7,5 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Password {
-	
-	boolean needConfirm() default false;
-	
-	String autoComplete() default "";
-	
+public @interface Secret {
 }

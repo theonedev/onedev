@@ -2,6 +2,7 @@ package io.onedev.server.model.support.build;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.server.annotation.RegEx;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.annotation.Editable;
@@ -24,6 +25,7 @@ public class JobProperty implements NamedElement, Serializable {
 	private boolean archived;
 
 	@Editable(order=100)
+	@RegEx(pattern="[^@]+", message="Character '@' not allowed in property name")
 	@SuggestionProvider("getNameSuggestions")
 	@NotEmpty
 	@Override
