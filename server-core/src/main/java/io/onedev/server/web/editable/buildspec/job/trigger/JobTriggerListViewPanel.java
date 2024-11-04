@@ -120,7 +120,7 @@ class JobTriggerListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
 				add(new NoRecordsBehavior());
 			}
 

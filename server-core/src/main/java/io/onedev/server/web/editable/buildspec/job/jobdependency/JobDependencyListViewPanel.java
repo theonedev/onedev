@@ -130,7 +130,7 @@ class JobDependencyListViewPanel extends Panel {
 				super.onInitialize();
 				add(new NoRecordsBehavior());
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
 			}
 			
 		});

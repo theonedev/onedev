@@ -214,7 +214,7 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		DataTable<ProjectDependency, Void> dataTable;
 		add(dataTable = new DataTable<ProjectDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
 		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {

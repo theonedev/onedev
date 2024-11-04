@@ -41,7 +41,7 @@ public class DefaultDataTable<T, S> extends DataTable<T, S> {
 			}
 
 		});
-		addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+		addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
 	}
 
 	@Override

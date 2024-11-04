@@ -198,7 +198,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<JobPrivilege, Void> dataTable;
 		add(dataTable = new DataTable<>("privileges", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
 		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {

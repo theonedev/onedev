@@ -236,7 +236,7 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<JobDependency, Void> dataTable;
 		add(dataTable = new DataTable<JobDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
 		dataTable.add(new NoRecordsBehavior());
 		dataTable.add(new SortBehavior() {
 

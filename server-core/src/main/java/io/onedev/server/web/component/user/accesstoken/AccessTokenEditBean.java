@@ -43,7 +43,7 @@ public class AccessTokenEditBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Secret
+	@Secret(displayChars=4)
 	@NotEmpty
 	public String getValue() {
 		return value;

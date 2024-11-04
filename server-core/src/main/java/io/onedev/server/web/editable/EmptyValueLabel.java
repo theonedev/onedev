@@ -24,7 +24,7 @@ public abstract class EmptyValueLabel extends Label {
 					if (placeholder != null && EditableUtils.isDisplayPlaceholderAsValue(getElement()))
 						return "<i>" + HtmlEscape.escapeHtml5(placeholder) + "</i>";
 					else
-						return "<i>Not defined</i>";
+						return "<i>Unspecified</i>";
 				} finally {
 					ComponentContext.pop();
 				}

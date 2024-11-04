@@ -24,7 +24,7 @@ public class SecretEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new SecretPropertyViewer(id, model.getObject());
+									return new SecretPropertyViewer(id, model.getObject(), secret.displayChars());
 								} else {
 									return new EmptyValueLabel(id) {
 
