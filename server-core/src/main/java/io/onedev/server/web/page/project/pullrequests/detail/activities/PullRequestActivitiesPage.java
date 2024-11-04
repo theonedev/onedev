@@ -16,7 +16,6 @@ import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -199,9 +198,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		row.setOutputMarkupId(true);
 		
 		String avatarHtml = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", SpriteImage.getVersionedHref("diff"));
-		var avatarColumn = new WebMarkupContainer("avatar");
-		row.add(avatarColumn);
-		avatarColumn.add(new Label("avatar", avatarHtml) {
+		row.add(new Label("avatar", avatarHtml) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
