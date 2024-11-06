@@ -1,16 +1,14 @@
 package io.onedev.server.model.support.administration.authenticator;
 
-import java.io.Serializable;
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
+import io.onedev.server.util.usage.Usage;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
-import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.GroupChoice;
+import java.io.Serializable;
 
 @Editable
 @JsonTypeInfo(use=Id.CLASS)
@@ -20,18 +18,7 @@ public abstract class Authenticator implements Serializable {
 	
 	private String defaultGroup;
 	
-	private boolean createUserAsGuest;
-	
 	private int timeout = 300;
-
-	@Editable(order=10000, description = "Whether or not to create authenticated user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
-	public boolean isCreateUserAsGuest() {
-		return createUserAsGuest;
-	}
-
-	public void setCreateUserAsGuest(boolean createUserAsGuest) {
-		this.createUserAsGuest = createUserAsGuest;
-	}
 	
 	@Editable(order=15000, placeholder="No default group", description="Optionally add newly authenticated user to "
 			+ "specified group if membership information is not retrieved")
@@ -66,7 +53,5 @@ public abstract class Authenticator implements Serializable {
 	}
 	
 	public abstract Authenticated authenticate(UsernamePasswordToken token) throws AuthenticationException;
-	
-	public abstract boolean isManagingMemberships();
 	
 }

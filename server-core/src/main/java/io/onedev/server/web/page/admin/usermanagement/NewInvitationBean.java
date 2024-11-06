@@ -1,22 +1,19 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
-
 import com.google.common.base.Splitter;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.validation.Validatable;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.validation.Validatable;
+import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.List;
 
 @Editable
 @ClassValidating
@@ -26,8 +23,6 @@ public class NewInvitationBean implements Serializable, Validatable {
 
 	private String emailAddresses;
 	
-	private boolean inviteAsGuest;
-
 	@Editable(order=100, description="Specify email addresses to send invitations, with one per line")
 	@Multiline
 	@NotEmpty
@@ -37,15 +32,6 @@ public class NewInvitationBean implements Serializable, Validatable {
 
 	public void setEmailAddresses(String emailAddresses) {
 		this.emailAddresses = emailAddresses;
-	}
-
-	@Editable(order=200, description = "Whether or not to invite the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
-	public boolean isInviteAsGuest() {
-		return inviteAsGuest;
-	}
-
-	public void setInviteAsGuest(boolean inviteAsGuest) {
-		this.inviteAsGuest = inviteAsGuest;
 	}
 
 	public List<String> getListOfEmailAddresses() {

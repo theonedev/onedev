@@ -21,7 +21,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
@@ -249,44 +248,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		for (var user: users)
 			delete(user);
 	}
-
-	@Transactional
-	@Override
-	public void setAsGuest(Collection<User> users, boolean guest) {
-		for (var user: users) {
-			user.setGuest(guest);
-			if (guest) {
-				var query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
-				query.setParameter("submitter", user);
-				query.setParameter("unknown", getUnknown());
-				query.executeUpdate();
-
-				query = getSession().createQuery("update Build set canceller=:unknown where canceller=:canceller");
-				query.setParameter("canceller", user);
-				query.setParameter("unknown", getUnknown());
-				query.executeUpdate();
-
-				query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
-				query.setParameter("submitter", user);
-				query.setParameter("unknown", getUnknown());
-				query.executeUpdate();
-				
-				query = getSession().createQuery("delete from PullRequestAssignment where user=:user");
-				query.setParameter("user", user);
-				query.executeUpdate();
-				
-				query = getSession().createQuery("delete from IssueWork where user=:user");
-				query.setParameter("user", user);
-				query.executeUpdate();
-				
-				query = getSession().createQuery("delete from Stopwatch where user=:user");
-				query.setParameter("user", user);
-				query.executeUpdate();
-			}
-			dao.persist(user);
-		}
-	}
-
+	
 	@Sessional
     @Override
     public User findByName(String userName) {

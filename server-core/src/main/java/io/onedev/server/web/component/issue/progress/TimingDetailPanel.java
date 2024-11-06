@@ -145,7 +145,7 @@ abstract class TimingDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				var user = SecurityUtils.getAuthUser();
-				setVisible(user != null && !user.isEffectiveGuest() && getStopWatchManager().find(user, getIssue()) == null);
+				setVisible(user != null && getStopWatchManager().find(user, getIssue()) == null);
 			}
 		};
 	}
@@ -163,7 +163,7 @@ abstract class TimingDetailPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				var user = SecurityUtils.getAuthUser();
-				setVisible(user != null && !user.isEffectiveGuest() && getStopWatchManager().find(user, getIssue()) == null);
+				setVisible(user != null && getStopWatchManager().find(user, getIssue()) == null);
 			}
 		};
 	}

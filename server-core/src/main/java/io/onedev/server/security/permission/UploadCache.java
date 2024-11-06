@@ -13,7 +13,7 @@ public class UploadCache implements BasePermission {
 
 	@Override
 	public boolean isApplicable(@Nullable UserFacade user) {
-		return user != null && !user.isEffectiveGuest();
+		return user != null;
 	}
 	
 }

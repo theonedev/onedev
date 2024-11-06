@@ -1,10 +1,17 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.model.UserInvitation;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.PagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,18 +33,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.model.UserInvitation;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class InvitationListPage extends AdministrationPage {
@@ -143,16 +142,6 @@ public class InvitationListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
 									 String componentId, IModel<UserInvitation> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getEmailAddress()));
-			}
-
-		});
-
-		columns.add(new AbstractColumn<>(Model.of("Invite as Guest")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
-									 String componentId, IModel<UserInvitation> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isInviteAsGuest()));
 			}
 
 		});

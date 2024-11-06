@@ -31,8 +31,6 @@ public interface UserManager extends EntityManager<User> {
 	void delete(User user);
 	
 	void delete(Collection<User> users);
-
-	void setAsGuest(Collection<User> users, boolean guest);
 	
 	/**
 	 * Find root user in the system. 

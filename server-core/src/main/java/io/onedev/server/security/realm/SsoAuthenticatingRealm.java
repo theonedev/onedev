@@ -47,7 +47,6 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 	private User newUser(SsoAuthenticated authenticated) {
 		User user = new User();
 		user.setName(authenticated.getUserName());
-		user.setGuest(authenticated.getConnector().isCreateUserAsGuest());
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);

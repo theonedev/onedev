@@ -15,4 +15,5 @@ public class AccessBuild implements BasePermission {
 	public boolean isApplicable(@Nullable UserFacade user) {
 		return true;
 	}
+	
 }

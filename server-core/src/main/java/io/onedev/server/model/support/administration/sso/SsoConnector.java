@@ -15,8 +15,6 @@ public abstract class SsoConnector implements Serializable {
 
 	private String name;
 	
-	private boolean createUserAsGuest;
-	
 	private String defaultGroup;
 
 	@Editable(order=100, description="Name of the provider will be displayed on login button")
@@ -30,15 +28,6 @@ public abstract class SsoConnector implements Serializable {
 	}
 
 	public abstract String getButtonImageUrl();
-
-	@Editable(order=10000, description = "Whether or not to create authenticated user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
-	public boolean isCreateUserAsGuest() {
-		return createUserAsGuest;
-	}
-
-	public void setCreateUserAsGuest(boolean createUserAsGuest) {
-		this.createUserAsGuest = createUserAsGuest;
-	}
 
 	@Editable(order=20000, placeholder="No default group", description="Optionally add newly authenticated "
 			+ "user to specified group if membership information is not available")

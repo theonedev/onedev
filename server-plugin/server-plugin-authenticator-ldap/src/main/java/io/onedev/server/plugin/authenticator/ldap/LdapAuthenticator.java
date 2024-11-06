@@ -431,11 +431,6 @@ public class LdapAuthenticator extends Authenticator {
 			return null;
 		}
 	}
-
-	@Override
-	public boolean isManagingMemberships() {
-		return !(getGroupRetrieval() instanceof DoNotRetrieveGroups);
-	}
 	
 	/* Copied from Spring LdapEncoder.java */
     private static String[] FILTER_ESCAPE_TABLE = new String['\\' + 1];

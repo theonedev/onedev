@@ -30,8 +30,6 @@ public class SecuritySetting implements Serializable {
 	
 	private String allowedSelfRegisterEmailDomain;
 	
-	private boolean selfRegisterAsGuest = false;
-	
 	private boolean enableSelfDeregister;
 	
 	private String defaultLoginGroupName;
@@ -67,16 +65,6 @@ public class SecuritySetting implements Serializable {
 
 	public void setAllowedSelfRegisterEmailDomain(String allowedSelfRegisterEmailDomain) {
 		this.allowedSelfRegisterEmailDomain = allowedSelfRegisterEmailDomain;
-	}
-
-	@Editable(order=250, name="Self Sign-Up as Guest", description = "Whether or not to create self sign-up user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
-	@ShowCondition("isEnableSelfRegisterEnabled")
-	public boolean isSelfRegisterAsGuest() {
-		return selfRegisterAsGuest;
-	}
-
-	public void setSelfRegisterAsGuest(boolean selfRegisterAsGuest) {
-		this.selfRegisterAsGuest = selfRegisterAsGuest;
 	}
 	
 	private static boolean isEnableSelfRegisterEnabled() {

@@ -53,7 +53,7 @@ public class SignUpPage extends SimplePage {
 		super.onInitialize();
 
 		SignUpBean bean = new SignUpBean();
-		BeanEditor editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_GUEST, PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
+		BeanEditor editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -86,7 +86,6 @@ public class SignUpPage extends SimplePage {
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
-					user.setGuest(getSecuritySetting().isSelfRegisterAsGuest());
 					
 					EmailAddress emailAddress = new EmailAddress();
 					emailAddress.setValue(bean.getEmailAddress());

@@ -7099,5 +7099,41 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate180(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.element("guest").detach();
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("UserInvitations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.element("inviteAsGuest").detach();
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.element("selfRegisterAsGuest").detach();
+					} else if (key.equals("AUTHENTICATOR")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.element("createUserAsGuest").detach();
+					} else if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element connectorElement : valueElement.elements())
+								connectorElement.element("createUserAsGuest").detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

@@ -1,13 +1,5 @@
 package io.onedev.server.web.page.simple.security;
 
-import com.google.common.collect.Sets;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -25,6 +17,12 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
 public class CreateUserFromInvitationPage extends SimplePage {
@@ -58,7 +56,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 		super.onInitialize();
 
 		User newUser = new User();
-		BeanEditor editor = BeanContext.edit("editor", newUser, Sets.newHashSet(User.PROP_GUEST), true);
+		BeanEditor editor = BeanContext.edit("editor", newUser);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -77,7 +75,6 @@ public class CreateUserFromInvitationPage extends SimplePage {
 					user.setName(newUser.getName());
 					user.setFullName(newUser.getFullName());
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUser.getPassword()));
-					user.setGuest(invitationModel.getObject().isInviteAsGuest());
 					
 					EmailAddress emailAddress = new EmailAddress();
 					emailAddress.setValue(invitationModel.getObject().getEmailAddress());

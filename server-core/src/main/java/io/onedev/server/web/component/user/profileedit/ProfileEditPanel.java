@@ -57,7 +57,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				editor.getDescriptor().copyProperties(object, getUser());
 			}
 			
-		}, Sets.newHashSet("password", "guest"), true);
+		}, Sets.newHashSet("password"), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

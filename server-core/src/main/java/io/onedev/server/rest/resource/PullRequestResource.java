@@ -9,9 +9,9 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -200,7 +200,7 @@ public class PullRequestResource {
 		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
 		ProjectAndBranch source = new ProjectAndBranch(data.getSourceProjectId(), data.getSourceBranch());
 		
-		if (user.isEffectiveGuest() || !SecurityUtils.canReadCode(target.getProject()) || !SecurityUtils.canReadCode(source.getProject()))
+		if (!SecurityUtils.canReadCode(target.getProject()) || !SecurityUtils.canReadCode(source.getProject()))
 			throw new UnauthorizedException();
 		
 		if (target.equals(source))

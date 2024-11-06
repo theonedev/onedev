@@ -12,13 +12,10 @@ public class UserFacade extends EntityFacade {
 	
 	private final String fullName;
 	
-	private final boolean guest;
-	
-	public UserFacade(Long id, String name, @Nullable String fullName, boolean guest) {
+	public UserFacade(Long id, String name, @Nullable String fullName) {
 		super(id);
 		this.name = name;
 		this.fullName = fullName;
-		this.guest = guest;
 	}
 
 	public String getName() {
@@ -27,10 +24,6 @@ public class UserFacade extends EntityFacade {
 
 	public String getFullName() {
 		return fullName;
-	}
-
-	public boolean isGuest() {
-		return guest;
 	}
 
 	public String getDisplayName() {
@@ -50,10 +43,6 @@ public class UserFacade extends EntityFacade {
 
 	public boolean isUnknown() {
 		return User.UNKNOWN_ID.equals(getId());
-	}
-
-	public boolean isEffectiveGuest() {
-		return guest && !isRoot() && !isSystem();
 	}
 	
 	public static UserFacade of(@Nullable User user) {

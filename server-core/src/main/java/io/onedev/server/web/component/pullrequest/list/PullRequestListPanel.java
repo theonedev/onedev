@@ -820,9 +820,6 @@ public abstract class PullRequestListPanel extends Panel {
 			add(newPullRequestLink = new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
 					NewPullRequestPage.paramsOf(getProject())));		
 		}
-		var user = SecurityUtils.getAuthUser();
-		newPullRequestLink.setVisible(user == null || !user.isEffectiveGuest());
-		
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
 

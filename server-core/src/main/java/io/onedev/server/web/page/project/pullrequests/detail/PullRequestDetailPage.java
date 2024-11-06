@@ -1296,7 +1296,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		statusBarContainer.add(new BookmarkablePageLink<Void>(
 				"newPullRequest", 
 				NewPullRequestPage.class, 
-				NewPullRequestPage.paramsOf(getProject())).setVisible(user == null || !user.isEffectiveGuest()));		
+				NewPullRequestPage.paramsOf(getProject())));		
 		
 		return statusBarContainer;
 	}

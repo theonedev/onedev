@@ -122,7 +122,6 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("users", UserListPage.class));
 		fragment.add(new Label("userName", getUser().getDisplayName()));
-		fragment.add(new WebMarkupContainer("guest").setVisible(getUser().isEffectiveGuest()));
 		return fragment;
 	}
 

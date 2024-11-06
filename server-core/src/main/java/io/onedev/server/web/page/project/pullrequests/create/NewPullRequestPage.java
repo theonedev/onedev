@@ -239,7 +239,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 					request.getAssignments().add(assignment);
 				} else {
 					for (UserAuthorization authorization: target.getProject().getUserAuthorizations()) {
-						if (authorization.getRole().isOwner() && !authorization.getUser().isEffectiveGuest()) {
+						if (authorization.getRole().isOwner()) {
 							PullRequestAssignment assignment = new PullRequestAssignment();
 							assignment.setRequest(request);
 							assignment.setUser(authorization.getUser());
@@ -1024,8 +1024,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	
 	@Override
 	protected boolean isPermitted() {
-		return !SecurityUtils.getAuthUser().isEffectiveGuest() 
-				&& SecurityUtils.canReadCode(target.getProject()) 
+		return SecurityUtils.canReadCode(target.getProject()) 
 				&& SecurityUtils.canReadCode(source.getProject());
 	}
 

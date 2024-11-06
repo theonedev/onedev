@@ -62,11 +62,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_NAME = "name";
 	
-	public static final String PROP_PASSWORD = "password";
-	
 	public static final String PROP_FULL_NAME = "fullName";
-	
-	public static final String PROP_GUEST = "guest";
 	
 	public static final String PROP_DISABLE_WATCH_NOTIFICATIONS = "disableWatchNotifications";
 	
@@ -91,8 +87,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private String password;
 
 	private String fullName;
-	
-	private boolean guest;
 	
 	private boolean disableWatchNotifications;
 	
@@ -549,15 +543,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.fullName = fullName;
 	}
 
-	@Editable(order=300, description = "Whether or not to create the user as <a href='https://docs.onedev.io/concepts#guest-user' target='_blank'>guest</a>")
-	public boolean isGuest() {
-		return guest;
-	}
-
-	public void setGuest(boolean guest) {
-		this.guest = guest;
-	}
-
 	@Editable(order=350, description = "Whether or not to disable email notifications for watched " +
 			"events. Note that forced notifications such as mention notification, review invitation, " +
 			"and build failure notification will still be sent")
@@ -576,10 +561,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setNotifyOwnEvents(boolean sendOwnEvents) {
 		this.notifyOwnEvents = sendOwnEvents;
-	}
-
-	public boolean isEffectiveGuest() {
-		return guest && !isRoot() && !isSystem();
 	}
 
 	public Collection<AccessToken> getAccessTokens() {
@@ -966,7 +947,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), isGuest());
+		return new UserFacade(getId(), getName(), getFullName());
 	}
 	
 }

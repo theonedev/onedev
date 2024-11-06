@@ -1,21 +1,18 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.UserInvitation.PROP_EMAIL_ADDRESS;
-import static io.onedev.server.model.UserInvitation.PROP_INVITATION_CODE;
-
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.onedev.server.annotation.Editable;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.util.UUID;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import io.onedev.server.annotation.Editable;
+import static io.onedev.server.model.UserInvitation.PROP_EMAIL_ADDRESS;
+import static io.onedev.server.model.UserInvitation.PROP_INVITATION_CODE;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_EMAIL_ADDRESS), @Index(columnList=PROP_INVITATION_CODE)})
@@ -36,8 +33,6 @@ public class UserInvitation extends AbstractEntity {
     @JsonIgnore
     private String invitationCode = UUID.randomUUID().toString();
 	
-	private boolean inviteAsGuest;
-
 	public String getEmailAddress() {
 		return emailAddress;
 	}
@@ -54,11 +49,4 @@ public class UserInvitation extends AbstractEntity {
 		this.invitationCode = invitationCode;
 	}
 
-	public boolean isInviteAsGuest() {
-		return inviteAsGuest;
-	}
-
-	public void setInviteAsGuest(boolean inviteAsGuest) {
-		this.inviteAsGuest = inviteAsGuest;
-	}
 }

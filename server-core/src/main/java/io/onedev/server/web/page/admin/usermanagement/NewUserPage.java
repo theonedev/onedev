@@ -66,7 +66,6 @@ public class NewUserPage extends AdministrationPage {
 					User user = new User();
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
-					user.setGuest(bean.isGuest());
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
 					
 					EmailAddress emailAddress = new EmailAddress();
