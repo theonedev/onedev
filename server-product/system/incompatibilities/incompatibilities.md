@@ -1,3 +1,9 @@
+# 11.5.0
+
+Guest concept is removed as administrator can create read-only roles achieving same purpose. 
+If you are limiting user permissions via guest option, please make sure to assign those users 
+appropriate roles before upgrade 
+
 # 11.0.6
 
 ### RESTful api
