@@ -66,7 +66,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +81,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.onedev.server.model.User.*;
+import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.support.administration.SystemSetting.*;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -686,10 +691,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "disableAutoUpdateCheck", "gravatarEnabled");
+			Collection<String> excludedProps = Sets.newHashSet(PROP_SSH_ROOT_URL, PROP_DISABLE_AUTO_UPDATE_CHECK, PROP_USE_AVATAR_SERVICE);
 			if (Bootstrap.isInDocker()) {
-				excludedProps.add(SystemSetting.PROP_GIT_LOCATION);
-				excludedProps.add(SystemSetting.PROP_CURL_LOCATION);
+				excludedProps.add(PROP_GIT_LOCATION);
+				excludedProps.add(PROP_CURL_LOCATION);
 			}
 			if (ingressUrl != null)
 				excludedProps.add("serverUrl");

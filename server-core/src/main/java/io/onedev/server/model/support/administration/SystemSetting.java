@@ -1,31 +1,28 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.StringUtils;
-import javax.validation.constraints.NotEmpty;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.git.location.CurlLocation;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.location.SystemCurl;
 import io.onedev.server.git.location.SystemGit;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
+import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Editable
 @ClassValidating
@@ -39,6 +36,10 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	public static final String PROP_SSH_ROOT_URL = "sshRootUrl";
 	
+	public static final String PROP_USE_AVATAR_SERVICE = "useAvatarService";
+	
+	public static final String PROP_DISABLE_AUTO_UPDATE_CHECK = "disableAutoUpdateCheck";
+	
 	private String serverUrl;
 	
 	private String sshRootUrl;
@@ -51,7 +52,9 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private boolean disableDashboard;
 	
-	private boolean gravatarEnabled;
+	private boolean useAvatarService;
+	
+	private String avatarServiceUrl = "https://secure.gravatar.com/avatar/";
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
 	@NotEmpty
@@ -150,15 +153,30 @@ public class SystemSetting implements Serializable, Validatable {
 		return WicketUtils.isSubscriptionActive();
 	}
 
-	@Editable(order=500, description="Whether or not to enable user gravatar (https://gravatar.com)")
-	public boolean isGravatarEnabled() {
-		return gravatarEnabled;
+	@Editable(order=500, description="Whether or not to use user avatar from a public service")
+	public boolean isUseAvatarService() {
+		return useAvatarService;
 	}
 
-	public void setGravatarEnabled(boolean gravatarEnabled) {
-		this.gravatarEnabled = gravatarEnabled;
+	public void setUseAvatarService(boolean useAvatarService) {
+		this.useAvatarService = useAvatarService;
 	}
 
+	@Editable(order=600, description="User avatar will be requested by appending a hash to this url")
+	@ShowCondition("isUseAvatarServiceEnabled")
+	@NotEmpty
+	public String getAvatarServiceUrl() {
+		return avatarServiceUrl;
+	}
+
+	public void setAvatarServiceUrl(String avatarServiceUrl) {
+		this.avatarServiceUrl = avatarServiceUrl;
+	}
+
+	private static boolean isUseAvatarServiceEnabled() {
+		return (boolean) EditContext.get().getInputValue(PROP_USE_AVATAR_SERVICE); 
+	}	
+	
 	public String getEffectiveSshRootUrl() {
 		if (getSshRootUrl() != null)
 			return getSshRootUrl();

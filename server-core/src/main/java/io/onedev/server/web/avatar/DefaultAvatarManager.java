@@ -76,8 +76,8 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 			UserFacade user = userManager.findFacadeById(userId);
 			if (emailAddress == null || !emailAddress.isVerified()) 
 				return generateAvatar(user.getName(), null);
-			else if (settingManager.getSystemSetting().isGravatarEnabled()) 
-				return Gravatar.getURL(emailAddress.getValue(), GRAVATAR_SIZE);
+			else if (settingManager.getSystemSetting().isUseAvatarService()) 
+				return AvatarService.getURL(emailAddress.getValue(), GRAVATAR_SIZE);
 			else  
 				return generateAvatar(user.getName(), emailAddress.getValue());
 		}
@@ -91,9 +91,9 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 			EmailAddressFacade emailAddress = emailAddressManager.findFacadeByValue(personIdent.getEmailAddress());
 			if (emailAddress != null && emailAddress.isVerified()) { 
 				return getUserAvatarUrl(emailAddress.getOwnerId());
-			} else if (settingManager.getSystemSetting().isGravatarEnabled() 
+			} else if (settingManager.getSystemSetting().isUseAvatarService() 
 					&& StringUtils.isNotBlank(personIdent.getEmailAddress())) {
-				return Gravatar.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
+				return AvatarService.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
 			} else { 
 				return generateAvatar(personIdent.getName(), personIdent.getEmailAddress());
 			}

@@ -7153,7 +7153,13 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					String key = element.elementTextTrim("key");
-					if (key.equals("SERVICE_DESK_SETTING")) {
+					if (key.equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("gravatarEnabled").setName("useAvatarService");
+							valueElement.addElement("avatarServiceUrl").setText("https://secure.gravatar.com/avatar/");
+						}						
+					} else if (key.equals("SERVICE_DESK_SETTING")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							valueElement.element("senderAuthorizations").detach();

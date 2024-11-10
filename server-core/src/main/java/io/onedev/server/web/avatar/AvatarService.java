@@ -1,5 +1,9 @@
 package io.onedev.server.web.avatar;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLDecoder;
@@ -12,27 +16,16 @@ import java.security.NoSuchAlgorithmException;
  * 
  * @author Finn Kuusisto
  */
-public class Gravatar {
-
-	public static final String PRE = "https://secure.gravatar.com/avatar/";
-
+public class AvatarService {
+	
 	// default images
 	public static final int DFLT_DEFAULT = 2;
-	public static final int DFLT_FOUR_O_FOUR = 0;
-	public static final int DFLT_MYSTERY_MAN = 1;
-	public static final int DFLT_IDENTICON = 2;
-	public static final int DFLT_MONSTERID = 3;
-	public static final int DFLT_WAVATAR = 4;
-	public static final int DFLT_RETRO = 5;
 	public static final int DFLT_BLANK = 6;
 	private static final String[] dfltImages = { "404", "mm", "identicon",
 			"monsterid", "wavatar", "retro", "blank" };
 
 	// ratings
 	public static final int RTNG_NONE = -1;
-	public static final int RTNG_G = 0;
-	public static final int RTNG_PG = 1;
-	public static final int RTNG_R = 2;
 	public static final int RTNG_X = 3;
 	private static final String[] ratings = { "g", "pg", "r", "x" };
 
@@ -50,11 +43,11 @@ public class Gravatar {
 	 * @param email
 	 *            the email for this Gravatar
 	 */
-	public Gravatar(String email) {
+	public AvatarService(String email) {
 		this.email = email;
 		byte[] buf = email.trim().toLowerCase().getBytes();
 		try {
-			this.hash = Gravatar.toHexString(MessageDigest.getInstance("MD5")
+			this.hash = AvatarService.toHexString(MessageDigest.getInstance("MD5")
 					.digest(buf));
 			this.hash = this.hash.toLowerCase();
 		} catch (NoSuchAlgorithmException e) {
@@ -192,13 +185,13 @@ public class Gravatar {
 	/**
 	 * Get the URL for this Gravatar, HTTPS if specified.
 	 * 
-	 * @param secure
 	 *            true if HTTPS is desired
 	 * @return URL for this Gravatar
 	 */
 	public String getURL() {
-		StringBuilder str = new StringBuilder();
-		str.append(PRE);
+		var str = new StringBuilder();
+		var url = OneDev.getInstance(SettingManager.class).getSystemSetting().getAvatarServiceUrl();
+		str.append(StringUtils.stripEnd(url, "/\\")).append("/");
 		str.append(this.hash);
 		str.append(this.getOptions());
 		return str.toString();
@@ -255,7 +248,7 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email) {
-		return Gravatar.getURL(email, 0, DFLT_DEFAULT, false, RTNG_NONE);
+		return AvatarService.getURL(email, 0, DFLT_DEFAULT, false, RTNG_NONE);
 	}
 
 	/**
@@ -268,7 +261,7 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size) {
-		return Gravatar.getURL(email, size, DFLT_DEFAULT);
+		return AvatarService.getURL(email, size, DFLT_DEFAULT);
 	}
 
 	/**
@@ -283,7 +276,7 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, int dflt) {
-		return Gravatar.getURL(email, size, dflt, RTNG_NONE);
+		return AvatarService.getURL(email, size, dflt, RTNG_NONE);
 	}
 
 	/**
@@ -301,7 +294,7 @@ public class Gravatar {
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, int dflt, int rating) {
-		return Gravatar.getURL(email, size, dflt, false, rating);
+		return AvatarService.getURL(email, size, dflt, false, rating);
 	}
 
 	/**
@@ -312,19 +305,15 @@ public class Gravatar {
 	 *            the email for this Gravatar
 	 * @param size
 	 *            the desired size for this Gravatar [1-512]
-	 * @param customDefault
-	 *            URL of custom default image
 	 * @param forceDefault
 	 *            true if the default should always be returned
 	 * @param rating
 	 *            must be one of the RTNG_XXX constants
-	 * @param secure
-	 *            true if HTTPS desired
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, int dflt,
 			boolean forceDefault, int rating) {
-		Gravatar g = new Gravatar(email);
+		AvatarService g = new AvatarService(email);
 		g.setSize(size);
 		g.setDefault(dflt);
 		g.setForceDefault(forceDefault);
@@ -346,13 +335,11 @@ public class Gravatar {
 	 *            true if the default should always be returned
 	 * @param rating
 	 *            must be one of the RTNG_XXX constants
-	 * @param secure
-	 *            true if HTTPS desired
 	 * @return the URL of the Gravatar
 	 */
 	public static String getURL(String email, int size, String customDefault,
 			boolean forceDefault, int rating) {
-		Gravatar g = new Gravatar(email);
+		AvatarService g = new AvatarService(email);
 		g.setSize(size);
 		g.setCustomDefault(customDefault);
 		g.setForceDefault(forceDefault);
