@@ -13,6 +13,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -23,7 +24,9 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.onedev.server.model.IssueWork.*;
 import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
@@ -74,6 +77,19 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		query.setFirstResult(0);
 		query.setMaxResults(Integer.MAX_VALUE);
 		var works = query.getResultList();
+		
+		Map<Project, Boolean> accessibleCache = new HashMap<>();
+		for (var it = works.iterator(); it.hasNext();) {
+			var work = it.next();
+			var workProject = work.getIssue().getProject();
+			var accessible = accessibleCache.get(workProject);
+			if (accessible == null) {
+				accessible = SecurityUtils.canAccessTimeTracking(workProject);
+				accessibleCache.put(workProject, accessible);
+			}
+			if (!accessible)
+				it.remove();
+		}
 		issueFieldManager.populateFields(works.stream().map(IssueWork::getIssue).collect(toSet()));
 		
 		return works;

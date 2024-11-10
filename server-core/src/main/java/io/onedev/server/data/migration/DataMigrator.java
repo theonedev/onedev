@@ -7144,6 +7144,11 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements())
 					element.addElement("externalParticipants");
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.addElement("accessTimeTracking").setText("true");
+				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {

@@ -173,6 +173,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		codeReader.setName("Code Reader");
 		codeReader.setCodePrivilege(CodePrivilege.READ);
 		codeReader.setPackPrivilege(PackPrivilege.READ);
+		codeReader.setAccessTimeTracking(false);
 		
 		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
@@ -204,6 +205,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role packReader = new Role();
 		packReader.setName("Package Reader");
 		packReader.setPackPrivilege(PackPrivilege.READ);
+		packReader.setAccessTimeTracking(false);
 		
 		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
@@ -232,6 +234,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
 		issueReporter.setCodePrivilege(CodePrivilege.NONE);
+		issueReporter.setAccessTimeTracking(false);
 		
 		if (hasAssigneeField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();

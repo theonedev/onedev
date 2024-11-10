@@ -310,7 +310,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				builder.sum(root.get(PROP_OWN_SPENT_TIME)));
 		return getSession().createQuery(criteriaQuery).uniqueResult();
 	}
-
+	
 	@Override
 	public Predicate[] buildPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria,
 									   CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue) {
@@ -341,9 +341,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject()); 
+			var projects = SecurityUtils.getAuthorizedProjects(new AccessProject());				
 			if (!projects.isEmpty()) { 
-				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(toSet());
+				var projectIds = projects.stream().map(AbstractEntity::getId).collect(toSet());
 				predicates.add(builder.or(
 						buildPredicate(builder, issue, projectIds), 
 						buildAuthorizationPredicate(query, builder, issue, projectIds)));

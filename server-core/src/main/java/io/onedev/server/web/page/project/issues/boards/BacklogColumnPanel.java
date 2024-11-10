@@ -124,7 +124,9 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 		
 		add(addToIterationLink = newAddToIterationLink("addToIteration"));
 
-		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+		if (getQuery() != null && getProject().isTimeTracking() 
+				&& WicketUtils.isSubscriptionActive() 
+				&& SecurityUtils.canAccessTimeTracking(getProject())) {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {

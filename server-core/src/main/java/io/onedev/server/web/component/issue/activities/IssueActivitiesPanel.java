@@ -47,6 +47,8 @@ import org.apache.wicket.request.http.WebResponse;
 import javax.servlet.http.Cookie;
 import java.util.*;
 
+import static io.onedev.server.security.SecurityUtils.canAccessTimeTracking;
+
 @SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {
 
@@ -120,13 +122,15 @@ public abstract class IssueActivitiesPanel extends Panel {
 		List<IssueActivity> otherActivities = new ArrayList<>();
 		
 		if (showChangeHistory) {
+			var project = getIssue().getProject();
 			for (IssueChange change: getIssue().getChanges()) {
 				if (!(change.getData() instanceof ReferencedFromAware) 
 						&& !(change.getData() instanceof IssueReferencedFromCommitData)
 						&& !(change.getData() instanceof IssueDescriptionChangeData)
 						&& !(change.getData() instanceof IssueTotalEstimatedTimeChangeData)
 						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
-						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)) {
+						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)
+						&& !(change.getData() instanceof IssueOwnEstimatedTimeChangeData && !canAccessTimeTracking(project))) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}
@@ -151,7 +155,9 @@ public abstract class IssueActivitiesPanel extends Panel {
 				otherActivities.add(new IssueCommentedActivity(comment));
 		}
 		
-		if (showWorkLog && getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+		if (showWorkLog && getIssue().getProject().isTimeTracking() 
+				&& WicketUtils.isSubscriptionActive() 
+				&& canAccessTimeTracking(getIssue().getProject())) {
 			for (IssueWork work: getIssue().getWorks())
 				otherActivities.add(new IssueWorkActivity(work));
 		}
@@ -448,7 +454,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive());
+				var project = getIssue().getProject();
+				setVisible(project.isTimeTracking() 
+						&& WicketUtils.isSubscriptionActive() 
+						&& canAccessTimeTracking(project));
 			}
 			
 		});

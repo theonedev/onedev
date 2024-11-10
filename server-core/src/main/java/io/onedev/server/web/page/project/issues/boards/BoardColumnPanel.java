@@ -269,7 +269,9 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 			content.add(AttributeAppender.append("style", "border-color:" + color + ";"));
 		}
 
-		if (getQuery() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+		if (getQuery() != null && getProject().isTimeTracking() 
+				&& WicketUtils.isSubscriptionActive() 
+				&& SecurityUtils.canAccessTimeTracking(getProject())) {
 			head.add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {

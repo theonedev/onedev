@@ -298,6 +298,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new AccessConfidentialIssues()));
 	}
 	
+	public static boolean canAccessTimeTracking(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new AccessTimeTracking()));
+	}
+	
 	public static boolean canAccessIssue(Issue issue) {
 		return canAccessIssue(getSubject(), issue);
 	}

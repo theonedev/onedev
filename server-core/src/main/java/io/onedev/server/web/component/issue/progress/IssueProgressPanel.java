@@ -136,7 +136,9 @@ public abstract class IssueProgressPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(getIssue().getProject().isTimeTracking() && WicketUtils.isSubscriptionActive());
+		setVisible(getIssue().getProject().isTimeTracking() 
+				&& WicketUtils.isSubscriptionActive() 
+				&& SecurityUtils.canAccessTimeTracking(getIssue().getProject()));
 	}
 
 	@Override

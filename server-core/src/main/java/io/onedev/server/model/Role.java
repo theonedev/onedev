@@ -13,6 +13,7 @@ import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -55,6 +56,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean manageIssues;
 	
 	private boolean accessConfidentialIssues;
+
+	private boolean accessTimeTracking = true;
 	
 	private boolean scheduleIssues;
 	
@@ -202,7 +205,17 @@ public class Role extends AbstractEntity implements BasePermission {
 	public void setAccessConfidentialIssues(boolean accessConfidentialIssues) {
 		this.accessConfidentialIssues = accessConfidentialIssues;
 	}
-	
+
+	@Editable(order=475, description = "Whether or not to be able to access time tracking info of issues")
+	@ShowCondition("isSubscriptionActive")
+	public boolean isAccessTimeTracking() {
+		return accessTimeTracking;
+	}
+
+	public void setAccessTimeTracking(boolean accessTimeTracking) {
+		this.accessTimeTracking = accessTimeTracking;
+	}
+
 	@Editable(order=500, description = "This permission enables one to schedule issues into iterations")
 	@ShowCondition("isManageIssuesDisabled")
 	public boolean isScheduleIssues() {
@@ -338,6 +351,8 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new ManageIssues());
 		if (accessConfidentialIssues)
 			permissions.add(new AccessConfidentialIssues());
+		if (accessTimeTracking)
+			permissions.add(new AccessTimeTracking());
 		if (scheduleIssues)
 			permissions.add(new ScheduleIssues());
 		permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
@@ -363,6 +378,10 @@ public class Role extends AbstractEntity implements BasePermission {
 			}
 		}
 		return permissions;
+	}
+	
+	private static boolean isSubscriptionActive() {
+		return WicketUtils.isSubscriptionActive();
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public interface IssueManager extends EntityManager<Issue> {
 
 	Predicate[] buildPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria,
 								CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue);
-
+	
 	List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
 													   From<Issue, Issue> issue);
 	

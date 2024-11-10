@@ -9,6 +9,7 @@ public class ManageIssues implements BasePermission {
 	@Override
 	public boolean implies(Permission p) {
 		return p instanceof ManageIssues 
+				|| new AccessTimeTracking().implies(p)
 				|| new AccessConfidentialIssues().implies(p)
 				|| new EditIssueField(null).implies(p) 
 				|| new EditIssueLink(null).implies(p) 
