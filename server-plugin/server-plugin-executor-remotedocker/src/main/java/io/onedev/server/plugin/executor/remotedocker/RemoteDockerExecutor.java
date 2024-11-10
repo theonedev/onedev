@@ -15,7 +15,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
-import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
@@ -103,14 +102,13 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 
 					String jobToken = jobContext.getJobToken();
 					var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(jobToken)).collect(toList());
-					var imageMappings = getImageMappings().stream().map(ImageMapping::getFacade).collect(toList());
 					
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
-							jobContext.getServices(), registryLogins, imageMappings, 
-							isMountDockerSock(), getDockerSockPath(), getDockerBuilder(), getCpuLimit(), 
-							getMemoryLimit(), getRunOptions(), getNetworkOptions(), isAlwaysPullImage());
+							jobContext.getServices(), registryLogins, isMountDockerSock(), getDockerSockPath(), 
+							getDockerBuilder(), getCpuLimit(), getMemoryLimit(), getRunOptions(), 
+							getNetworkOptions(), isAlwaysPullImage());
 
 					try {
 						return call(agentSession, jobData, jobContext.getTimeout()*1000L);

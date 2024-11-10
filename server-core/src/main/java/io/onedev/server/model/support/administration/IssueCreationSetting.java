@@ -36,7 +36,7 @@ public class IssueCreationSetting implements Serializable {
 	
 	private String applicableProjects;
 	
-	private boolean confidential;
+	private boolean confidential = true;
 	
 	private List<FieldInstance> issueFields = new ArrayList<>();
 

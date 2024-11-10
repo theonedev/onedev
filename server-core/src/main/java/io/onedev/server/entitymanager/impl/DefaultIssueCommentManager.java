@@ -16,6 +16,7 @@ import io.onedev.server.security.SecurityUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Singleton
@@ -53,6 +54,10 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment> 
 		changeManager.create(change, null);
 	}
 
+	public void create(IssueComment comment) {
+		create(comment, new ArrayList<>());
+	}
+	
 	@Transactional
 	@Override
 	public void create(IssueComment comment, Collection<String> notifiedEmailAddresses) {

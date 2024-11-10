@@ -15,12 +15,16 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static io.onedev.server.util.EmailAddressUtils.describe;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 class IssueOpenedPanel extends GenericPanel<Issue> {
@@ -37,6 +41,11 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 		add(new Label("user", issue.getSubmitter().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
+
+		if (issue.getOnBehalfOf() != null)
+			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(issue.getOnBehalfOf())) + "</b>").setEscapeModelStrings(false));
+		else 
+			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		
 		add(new CommentPanel("body") {
 			

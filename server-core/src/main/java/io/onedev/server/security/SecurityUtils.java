@@ -317,7 +317,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canReadCode(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new ReadCode()));
+		return canReadCode(getSubject(), project);
+	}
+
+	public static boolean canReadCode(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new ReadCode()));
 	}
 	
 	public static boolean canWriteCode(Project project) {
@@ -425,7 +429,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean isAdministrator() {
-		return getSubject().isPermitted(new SystemAdministration());
+		return isAdministrator(getSubject());
+	}
+	
+	public static boolean isAdministrator(Subject subject) {
+		return subject.isPermitted(new SystemAdministration());
 	}
 	
 	public static boolean canModifyOrDelete(CodeComment comment) {

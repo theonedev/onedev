@@ -32,6 +32,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 
 @SuppressWarnings("serial")

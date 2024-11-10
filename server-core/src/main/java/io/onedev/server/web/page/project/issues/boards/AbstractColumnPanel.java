@@ -28,6 +28,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.visit.IVisitor;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 
 @SuppressWarnings("serial")
 abstract class AbstractColumnPanel extends Panel implements EditContext {

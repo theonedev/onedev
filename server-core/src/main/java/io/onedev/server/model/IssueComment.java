@@ -3,6 +3,8 @@ package io.onedev.server.model;
 import io.onedev.server.model.support.EntityComment;
 import io.onedev.server.rest.annotation.Immutable;
 
+import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
 import javax.persistence.*;
 
 @Entity
@@ -18,6 +20,9 @@ public class IssueComment extends EntityComment {
 	@JoinColumn(nullable=false)
 	@Immutable
 	private Issue issue;
+	
+	@Lob
+	private InternetAddress onBehalfOf;
 
 	public Issue getIssue() {
 		return issue;
@@ -25,6 +30,15 @@ public class IssueComment extends EntityComment {
 
 	public void setIssue(Issue issue) {
 		this.issue = issue;
+	}
+
+	@Nullable
+	public InternetAddress getOnBehalfOf() {
+		return onBehalfOf;
+	}
+
+	public void setOnBehalfOf(@Nullable InternetAddress onBehalfOf) {
+		this.onBehalfOf = onBehalfOf;
 	}
 
 	@Override

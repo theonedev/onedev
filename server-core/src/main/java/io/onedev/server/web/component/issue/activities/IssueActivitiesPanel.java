@@ -281,7 +281,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setUser(SecurityUtils.getAuthUser());
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
-						OneDev.getInstance(IssueCommentManager.class).create(comment, new ArrayList<>());
+						OneDev.getInstance(IssueCommentManager.class).create(comment);
 						
 						if (showComments) {
 							((BasePage) getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));

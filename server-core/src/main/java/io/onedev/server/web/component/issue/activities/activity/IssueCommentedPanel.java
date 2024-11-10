@@ -25,6 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static io.onedev.server.util.EmailAddressUtils.describe;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
 @SuppressWarnings("serial")
 class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
@@ -42,6 +45,10 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 		add(new Label("user", getComment().getUser().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
+		if (getComment().getOnBehalfOf() != null)
+			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(getComment().getOnBehalfOf())) + "</b>").setEscapeModelStrings(false));
+		else
+			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		
 		add(new WebMarkupContainer("anchor") {
 

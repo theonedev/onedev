@@ -219,11 +219,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 
 		Role issueManager = new Role();
 		issueManager.setName("Issue Manager");
+		issueManager.setManageIssues(true);
 		issueManager.setCodePrivilege(CodePrivilege.READ);
-		codeWriter.setPackPrivilege(PackPrivilege.READ);
-		codeWriter.setScheduleIssues(true);
-		codeWriter.setAccessConfidentialIssues(true);
-		issueManager.setEditableIssueFields(new AllIssueFields());
+		issueManager.setPackPrivilege(PackPrivilege.READ);
 
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");

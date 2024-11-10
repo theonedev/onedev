@@ -1,35 +1,16 @@
 package io.onedev.server.notification;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.event.project.issue.*;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.web.asset.emoji.Emojis;
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.event.project.issue.IssueCommentCreated;
+import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.issue.IssueOpened;
+import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -38,10 +19,22 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.xodus.VisitInfoManager;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.mail.internet.InternetAddress;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isNotified;
+import static io.onedev.server.util.EmailAddressUtils.describe;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
@@ -143,6 +136,13 @@ public class IssueNotificationManager {
 		}
 	}
 	
+	private String getSenderName(InternetAddress internetAddress) {
+		var senderName = internetAddress.getPersonal();
+		if (senderName == null)
+			senderName = StringUtils.substringBefore(internetAddress.getAddress(), "@");
+		return senderName;
+	}
+	
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
@@ -155,20 +155,35 @@ public class IssueNotificationManager {
 		String url = event.getUrl();
 
 		String senderName;
-		String summary; 
-		if (user != null) {
+		String summary;
+		IssueComment comment;
+		if (event instanceof IssueOpened && issue.getOnBehalfOf() != null) {
+			senderName = getSenderName(issue.getOnBehalfOf());
+			summary = describe(issue.getOnBehalfOf()) + " " + event.getActivity();
+		} else if (event instanceof IssueCommentCreated && (comment = ((IssueCommentCreated) event).getComment()).getOnBehalfOf() != null) {
+			senderName = getSenderName(comment.getOnBehalfOf());
+			summary = describe(comment.getOnBehalfOf()) + " " + event.getActivity();
+		} else if (user != null) {
 			senderName = user.getDisplayName();
-			summary = user.getDisplayName() + " " + event.getActivity();
+			summary = senderName + " " + event.getActivity();
 		} else {
 			senderName = null;
 			summary = StringUtils.capitalize(event.getActivity());
 		}
 
 		setupWatches(issue);
+
+		Collection<String> notifiedEmailAddresses;
+		if (event instanceof IssueCommentCreated)
+			notifiedEmailAddresses = ((IssueCommentCreated) event).getNotifiedEmailAddresses();
+		else if (event instanceof IssueOpened)
+			notifiedEmailAddresses = ((IssueOpened) event).getNotifiedEmailAddresses();
+		else
+			notifiedEmailAddresses = new HashSet<>();
 		
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
-			if (!user.isNotifyOwnEvents())
+			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
 			if (!user.isSystem())
 				watchManager.watch(issue, user, true);
@@ -235,12 +250,6 @@ public class IssueNotificationManager {
 			notifiedUsers.addAll(entry.getValue());
 		}
 		
-		Collection<String> notifiedEmailAddresses;
-		if (event instanceof IssueCommentCreated)
-			notifiedEmailAddresses = ((IssueCommentCreated) event).getNotifiedEmailAddresses();
-		else
-			notifiedEmailAddresses = new ArrayList<>();
-		
 		if (event.getCommentText() instanceof MarkdownText) {
 			MarkdownText markdown = (MarkdownText) event.getCommentText();
 			for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
@@ -272,7 +281,7 @@ public class IssueNotificationManager {
 
 		Collection<String> bccEmailAddresses = new HashSet<>();
 		
-		if (user != null && user.isNotifyOwnEvents() 
+		if (user != null && !notifiedUsers.contains(user)
 				&& user.getPrimaryEmailAddress() != null 
 				&& user.getPrimaryEmailAddress().isVerified()) {
 			bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());
@@ -290,6 +299,17 @@ public class IssueNotificationManager {
 				if (emailAddress != null && emailAddress.isVerified())
 					bccEmailAddresses.add(emailAddress.getValue());
 			}
+		}
+		
+		for (var notifiedUser: notifiedUsers) {
+			for (var emailAddress: notifiedUser.getEmailAddresses()) {
+				if (emailAddress.isVerified())
+					notifiedEmailAddresses.add(emailAddress.getValue());
+			}
+		}
+		for (var participant: issue.getExternalParticipants()) {
+			if (!notifiedEmailAddresses.contains(participant.getAddress())) 
+				bccEmailAddresses.add(participant.getAddress());
 		}
 
 		if (!bccEmailAddresses.isEmpty()) {

@@ -14,7 +14,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 
 @Editable
-public class ProjectDesignation implements Serializable {
+public class DefaultProjectSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

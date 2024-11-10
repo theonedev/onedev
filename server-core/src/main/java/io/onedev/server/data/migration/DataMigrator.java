@@ -7135,5 +7135,44 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate181(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("externalParticipants");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SERVICE_DESK_SETTING")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("senderAuthorizations").detach();
+							var projectDesignationsElement = valueElement.element("projectDesignations"); 
+							projectDesignationsElement.setName("defaultProjectSettings");
+							for (var projectDesignationElement: projectDesignationsElement.elements()) {
+								projectDesignationElement.setName("io.onedev.server.model.support.administration.DefaultProjectSetting");
+							}
+						}
+					} else if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements()) {
+								if (executorElement.getName().contains("KubernetesExecutor")
+										|| executorElement.getName().contains("DockerExecutor")) {
+									executorElement.element("imageMappings").detach();
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+	
 }

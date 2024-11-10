@@ -443,8 +443,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	@Override
 	public void onRenameRole(String oldName, String newName) {
 		getIssueSetting().onRenameRole(oldName, newName);
-		if (getServiceDeskSetting() != null)
-			getServiceDeskSetting().onRenameRole(oldName, newName);
 		saveSetting(Key.ISSUE, getIssueSetting());
 		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 	}
@@ -452,11 +450,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	@Override
 	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
-		
 		usage.add(getIssueSetting().onDeleteRole(roleName));
-		if (getServiceDeskSetting() != null)
-			usage.add(getServiceDeskSetting().onDeleteRole(roleName));
-		
 		return usage.prefix("administration");
 	}
 

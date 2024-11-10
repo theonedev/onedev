@@ -126,9 +126,15 @@ public class PullRequestNotificationManager {
 			watchManager.watch(request, entry.getKey(), entry.getValue());
 		}
 
+		Collection<String> notifiedEmailAddresses;
+		if (event instanceof PullRequestCommentCreated)
+			notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
+		else
+			notifiedEmailAddresses = new HashSet<>();
+		
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
-			if (!user.isNotifyOwnEvents())
+			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
 			if (!user.isSystem())
 				watchManager.watch(request, user, true);
@@ -254,13 +260,7 @@ public class PullRequestNotificationManager {
 				notifiedUsers.add(reviewer);
 			}
 		}
-
-		Collection<String> notifiedEmailAddresses;
-		if (event instanceof PullRequestCommentCreated)
-			notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
-		else
-			notifiedEmailAddresses = new ArrayList<>();
-
+		
 		if (event.getCommentText() instanceof MarkdownText) {
 			MarkdownText markdown = (MarkdownText) event.getCommentText();
 			for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
@@ -291,7 +291,7 @@ public class PullRequestNotificationManager {
 
 		if (!event.isMinor()) {
 			Collection<String> bccEmailAddresses = new HashSet<>();
-			if (user != null && user.isNotifyOwnEvents() 
+			if (user != null && !notifiedUsers.contains(user) 
 					&& user.getPrimaryEmailAddress() != null 
 					&& user.getPrimaryEmailAddress().isVerified()) {
 				bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());

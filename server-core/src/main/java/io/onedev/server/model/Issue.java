@@ -45,6 +45,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
@@ -228,7 +229,10 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	@Column(nullable=false)
 	private Date submitDate = new Date();
-	
+
+	@Lob
+	private InternetAddress onBehalfOf;
+
 	private int voteCount;
 	
 	private int commentCount;
@@ -263,6 +267,10 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private Date pinDate;
 	
 	private int boardPosition;
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<InternetAddress> externalParticipants = new LinkedHashSet<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
@@ -450,6 +458,15 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		this.submitDate = submitDate;
 	}
 
+	@Nullable
+	public InternetAddress getOnBehalfOf() {
+		return onBehalfOf;
+	}
+
+	public void setOnBehalfOf(@Nullable InternetAddress onBehalfOf) {
+		this.onBehalfOf = onBehalfOf;
+	}
+
 	public Collection<IssueSchedule> getSchedules() {
 		return schedules;
 	}
@@ -612,6 +629,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setBoardPosition(int boardPosition) {
 		this.boardPosition = boardPosition;
+	}
+
+	public LinkedHashSet<InternetAddress> getExternalParticipants() {
+		return externalParticipants;
+	}
+
+	public void setExternalParticipants(LinkedHashSet<InternetAddress> externalParticipants) {
+		this.externalParticipants = externalParticipants;
 	}
 
 	public Collection<IssueField> getFields() {

@@ -3,7 +3,6 @@ package io.onedev.server.plugin.executor.serverdocker;
 import com.google.common.base.Preconditions;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
-import io.onedev.agent.job.ImageMappingFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
@@ -20,7 +19,6 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.*;
-import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
@@ -78,15 +76,11 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	
 	private String concurrency;
 	
-	private List<ImageMapping> imageMappings = new ArrayList<>();
-	
 	private transient volatile File hostBuildHome;
 	
 	private transient volatile LeafFacade runningStep;
 	
 	private transient volatile String containerName;
-	
-	private transient List<ImageMappingFacade> imageMappingFacades;
 	
 	private static volatile String hostInstallPath;
 	
@@ -217,17 +211,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	public void setDockerExecutable(String dockerExecutable) {
 		this.dockerExecutable = dockerExecutable;
 	}
-
-	@Editable(order=50150, group="More Settings", description = "Optionally maps a docker image to a different " +
-			"image. The first matching entry will take effect, or image will remain unchanged if no matching " +
-			"entries found")
-	public List<ImageMapping> getImageMappings() {
-		return imageMappings;
-	}
-
-	public void setImageMappings(List<ImageMapping> imageMappings) {
-		this.imageMappings = imageMappings;
-	}
 	
 	private Commandline newDocker() {
 		Commandline docker;
@@ -300,9 +283,9 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 							var docker = newDocker();
 							var registryLogins = merge(jobService.getRegistryLogins(), getRegistryLogins(jobToken));
 							callWithDockerConfig(docker, registryLogins, () -> {
-								startService(docker, network, jobService, osInfo, getImageMappingFacades(),
+								startService(docker, network, jobService, osInfo, 
 										getCpuLimit(), getMemoryLimit(), jobLogger);
-									return null;
+								return null;
 							});
 						}
 
@@ -339,7 +322,6 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 															 @Nullable String entrypoint, List<String> arguments, 
 															 Map<String, String> environments, @Nullable String workingDir, 
 															 Map<String, String> volumeMounts, List<Integer> position, boolean useTTY) {
-									image = mapImage(image);
 									containerName = network + "-step-" + stringifyStepPosition(position);
 									try {
 										var useProcessIsolation = isUseProcessIsolation(docker, image, osInfo, jobLogger);
@@ -662,20 +644,10 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 		}
 		return hostInstallPath + path.substring(installPath.length());
 	}
-
-	private List<ImageMappingFacade> getImageMappingFacades() {
-		if (imageMappingFacades == null)
-			imageMappingFacades = getImageMappings().stream().map(it->it.getFacade()).collect(toList());
-		return imageMappingFacades;
-	}
 	
 	@Override
 	public List<RegistryLoginFacade> getRegistryLogins(String jobToken) {
 		return getRegistryLogins().stream().map(it->it.getFacade(jobToken)).collect(toList());		
-	}
-
-	private String mapImage(String image) {
-		return ImageMappingFacade.map(getImageMappingFacades(), image);
 	}
 	
 	@Override

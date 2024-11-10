@@ -174,9 +174,14 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return find(criteria);
 	}
 	
-	@Transactional
 	@Override
 	public void open(Issue issue) {
+		open(issue, new ArrayList<>());
+	}
+	
+	@Transactional
+	@Override
+	public void open(Issue issue, Collection<String> notifiedEmailAddresses) {
 		Preconditions.checkArgument(issue.isNew());
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
@@ -195,13 +200,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (IssueSchedule schedule: issue.getSchedules())
 			dao.persist(schedule);
 		
-		IssueAuthorization authorization = new IssueAuthorization();
-		authorization.setIssue(issue);
-		authorization.setUser(issue.getSubmitter());
-		issue.getAuthorizations().add(authorization);
-		authorizationManager.createOrUpdate(authorization);
+		if (!SecurityUtils.isAdministrator(issue.getSubmitter().asSubject())) {
+			IssueAuthorization authorization = new IssueAuthorization();
+			authorization.setIssue(issue);
+			authorization.setUser(issue.getSubmitter());
+			issue.getAuthorizations().add(authorization);
+			authorizationManager.createOrUpdate(authorization);
+		}
 		
-		listenerRegistry.post(new IssueOpened(issue));
+		listenerRegistry.post(new IssueOpened(issue, notifiedEmailAddresses));
 	}
 
 	@Transactional

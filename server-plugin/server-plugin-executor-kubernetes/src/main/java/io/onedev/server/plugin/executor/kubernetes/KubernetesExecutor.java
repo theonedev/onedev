@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.agent.job.ImageMappingFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
@@ -24,7 +23,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
-import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.administration.jobexecutor.*;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
@@ -111,11 +109,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	
 	private boolean alwaysPullImage = true;
 	
-	private List<ImageMapping> imageMappings = new ArrayList<>();
-	
 	private transient volatile String containerName;
-	
-	private transient List<ImageMappingFacade> imageMappingFacades;
 	
 	@Editable(order=200, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
@@ -275,19 +269,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 
 	public void setKubeCtlPath(String kubeCtlPath) {
 		this.kubeCtlPath = kubeCtlPath;
-	}
-
-	@Editable(order=28000, group="More Settings", description = "Optionally maps a docker image to a different " +
-			"image. The first matching entry will take effect, or image will remain unchanged if no matching entries " +
-			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper:(.*)</code>, " +
-			"and <code>To</code> specified as <code>my-local-registry/k8s-helper:$1</code> will map the " +
-			"k8s helper image from official docker registry to local registry, with repository and tag unchanged")
-	public List<ImageMapping> getImageMappings() {
-		return imageMappings;
-	}
-
-	public void setImageMappings(List<ImageMapping> imageMappings) {
-		this.imageMappings = imageMappings;
 	}
 
 	@Override
@@ -701,7 +682,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		Map<String, Object> podSpec = new LinkedHashMap<>();
 		Map<Object, Object> containerSpec = newLinkedHashMap(
 				"name", "default", 
-				"image", mapImage(jobService.getImage()));
+				"image", jobService.getImage());
 		if (isAlwaysPullImage())
 			containerSpec.put("imagePullPolicy", "Always");
 		Map<Object, Object> resourcesSpec = newLinkedHashMap(
@@ -963,7 +944,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				
 				List<String> containerNames = newArrayList("init");
 				
-				String helperImage = mapImage(IMAGE_REPO + ":" + KubernetesHelper.getVersion());
+				String helperImage = IMAGE_REPO + ":" + KubernetesHelper.getVersion();
 				
 				ArrayList<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(newLinkedHashMap(
@@ -991,7 +972,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 						
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
-								"image", mapImage(commandFacade.getImage()));
+								"image", commandFacade.getImage());
 						if (isAlwaysPullImage())
 							stepContainerSpec.put("imagePullPolicy", "Always");
 						if (commandFacade.isUseTTY())
@@ -1524,16 +1505,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 				}
 			}
 		}
-	}
-	
-	private List<ImageMappingFacade> getImageMappingFacades() {
-		if (imageMappingFacades == null)
-			imageMappingFacades = getImageMappings().stream().map(it->it.getFacade()).collect(toList());
-		return imageMappingFacades;
-	}
-	
-	private String mapImage(String image) {
-		return ImageMappingFacade.map(getImageMappingFacades(), image);
 	}
 	
 	private static interface AbortChecker {

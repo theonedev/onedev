@@ -47,7 +47,7 @@ public class IssueCommentResource {
 				|| !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
 		}
-		commentManager.create(comment, new ArrayList<>());
+		commentManager.create(comment);
 		return comment.getId();
 	}
 

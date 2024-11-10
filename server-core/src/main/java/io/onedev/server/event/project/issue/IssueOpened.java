@@ -23,8 +23,11 @@ public class IssueOpened extends IssueEvent implements CommitAware {
 
 	private static final long serialVersionUID = 1L;
 
-	public IssueOpened(Issue issue) {
+	private final Collection<String> notifiedEmailAddresses;
+	
+	public IssueOpened(Issue issue, Collection<String> notifiedEmailAddresses) {
 		super(issue.getSubmitter(), issue.getSubmitDate(), issue);
+		this.notifiedEmailAddresses = notifiedEmailAddresses;
 	}
 
 	@Override
@@ -37,6 +40,10 @@ public class IssueOpened extends IssueEvent implements CommitAware {
 		return true;
 	}
 
+	public Collection<String> getNotifiedEmailAddresses() {
+		return notifiedEmailAddresses;
+	}
+	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		Map<String, Collection<User>> newUsers = new HashMap<>();

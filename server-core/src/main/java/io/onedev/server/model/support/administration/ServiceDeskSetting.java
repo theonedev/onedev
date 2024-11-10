@@ -32,34 +32,20 @@ public class ServiceDeskSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private List<SenderAuthorization> senderAuthorizations = new ArrayList<>(); 
-	
-	private List<ProjectDesignation> projectDesignations = new ArrayList<>();
+	private List<DefaultProjectSetting> defaultProjectSettings = new ArrayList<>();
 	
 	private List<IssueCreationSetting> issueCreationSettings = new ArrayList<>();
-	
-	@Editable(order=100, description="When sender email address can not be mapped to an existing user, "
-			+ "OneDev will use entries defined here to determine if the sender has permission to "
-			+ "create issues. For a particular sender, the first matching entry will take "
-			+ "effect")
-	public List<SenderAuthorization> getSenderAuthorizations() {
-		return senderAuthorizations;
-	}
-
-	public void setSenderAuthorizations(List<SenderAuthorization> senderAuthorizations) {
-		this.senderAuthorizations = senderAuthorizations;
-	}
 
 	@Editable(order=200, name="Default Projects", description="When email is sent to system email " +
 			"address without specifying project information, OneDev will use entries defined here " +
 			"to decide in which project to create issues. For a particular sender, the first " +
 			"matching entry will take effect")
-	public List<ProjectDesignation> getProjectDesignations() {
-		return projectDesignations;
+	public List<DefaultProjectSetting> getDefaultProjectSettings() {
+		return defaultProjectSettings;
 	}
 
-	public void setProjectDesignations(List<ProjectDesignation> projectDesignations) {
-		this.projectDesignations = projectDesignations;
+	public void setDefaultProjectSettings(List<DefaultProjectSetting> defaultProjectSettings) {
+		this.defaultProjectSettings = defaultProjectSettings;
 	}
 
 	@SuppressWarnings("unused")
@@ -70,8 +56,9 @@ public class ServiceDeskSetting implements Serializable {
 		return projectPaths;
 	}
 	
-	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, "
-			+ "the first matching entry will take effect")
+	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, " +
+			"the first matching entry will take effect. Issue creation will be disallowed if no matching " +
+			"entry found")
 	public List<IssueCreationSetting> getIssueCreationSettings() {
 		return issueCreationSettings;
 	}
@@ -81,29 +68,15 @@ public class ServiceDeskSetting implements Serializable {
 	}
 	
 	@Nullable
-	public SenderAuthorization getSenderAuthorization(String senderAddress) {
+	public String getDefaultProject(String senderAddress) {
 		Matcher matcher = new StringMatcher();
-		for (SenderAuthorization authorization: senderAuthorizations) {
-			String patterns = authorization.getSenderEmails();
+		for (DefaultProjectSetting setting: defaultProjectSettings) {
+			String patterns = setting.getSenderEmails();
 			if (patterns == null)
 				patterns = "*";
 			PatternSet patternSet = PatternSet.parse(patterns);
 			if (patternSet.matches(matcher, senderAddress))
-				return authorization;
-		}
-		return null;
-	}
-	
-	@Nullable
-	public String getDesignatedProject(String senderAddress) {
-		Matcher matcher = new StringMatcher();
-		for (ProjectDesignation designation: projectDesignations) {
-			String patterns = designation.getSenderEmails();
-			if (patterns == null)
-				patterns = "*";
-			PatternSet patternSet = PatternSet.parse(patterns);
-			if (patternSet.matches(matcher, senderAddress))
-				return designation.getProject();
+				return setting.getProject();
 		}
 		return null;
 	}
@@ -125,37 +98,15 @@ public class ServiceDeskSetting implements Serializable {
 				return setting;
 			}
 		}
-		String errorMessage = String.format("No issue creation setting (sender: %s, project: %s)", 
+		String errorMessage = String.format("Not authorized to create issue (sender: %s, project: %s)", 
 				senderAddress, project.getPath());
 		throw new ExplicitException(errorMessage);
 	}
 	
-	public void onRenameRole(String oldName, String newName) {
-		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			if (authorization.getAuthorizedRoleName().equals(oldName))
-				authorization.setAuthorizedRoleName(newName);
-		}
-	}
-	
-	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
-		int index = 1;
-		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			if (authorization.getAuthorizedRoleName().equals(roleName))
-				usage.add("sender authorization #" + index + ": authorized role");
-			index++;
-		}
-		return usage;
-	}
-	
 	public void onMoveProject(String oldPath, String newPath) {
-		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			authorization.setAuthorizedProjects(Project.substitutePath(
-					authorization.getAuthorizedProjects(), oldPath, newPath));
-		}
-		for (ProjectDesignation designation: getProjectDesignations()) {
-			designation.setProject(PathUtils.substituteSelfOrAncestor(
-					designation.getProject(), oldPath, newPath));
+		for (DefaultProjectSetting setting: getDefaultProjectSettings()) {
+			setting.setProject(PathUtils.substituteSelfOrAncestor(
+					setting.getProject(), oldPath, newPath));
 		}
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
 			setting.setApplicableProjects(Project.substitutePath(
@@ -167,16 +118,9 @@ public class ServiceDeskSetting implements Serializable {
 		Usage usage = new Usage();
 		
 		int index = 1;
-		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			if (Project.containsPath(authorization.getAuthorizedProjects(), projectPath))
-				usage.add("sender authorization #" + index + ": authorized projects");
-			index++;
-		}
-		
-		index = 1;
-		for (ProjectDesignation senderProject: getProjectDesignations()) {
-			if (PathUtils.isSelfOrAncestor(projectPath, senderProject.getProject()))
-				usage.add("sender project #" + index + ": project");
+		for (DefaultProjectSetting setting: getDefaultProjectSettings()) {
+			if (PathUtils.isSelfOrAncestor(projectPath, setting.getProject()))
+				usage.add("default project setting #" + index + ": project");
 			index++;
 		}
 		

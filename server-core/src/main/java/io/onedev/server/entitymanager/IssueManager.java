@@ -35,6 +35,8 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue);
 	
+	void open(Issue issue, Collection<String> notifiedEmailAddresses);
+	
 	void togglePin(Issue issue);
 	
 	Long getNextNumber(Project numberScope);

@@ -58,6 +58,21 @@
 			</div>
 		</div>
 		<div wicket:id="watches" class="watches"></div>
+		<div wicket:id="externalParticipants" class="external-participants">
+			<div class="head">External Participants</div>
+			<ul class="body list-unstyled mb-0">
+				<li wicket:id="externalParticipants" class="pb-2">
+					<div class="d-flex">
+						<span wicket:id="label" class="mr-2"></span>
+						<a wicket:id="delete" class="flex-shrink-0 ml-auto" title="Remove this external participant from issue"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
+					</div>
+				</li>
+				<span class="form-text font-size-sm text-muted">
+					<wicket:svg href="bulb" class="icon"></wicket:svg>
+ 					External participants do not have accounts and involve in the issue via email
+				</span>
+			</ul>
+		</div>
 		<div wicket:id="reference"></div>
 		<wicket:enclosure child="delete">
 			<div>

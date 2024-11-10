@@ -1,17 +1,20 @@
 package io.onedev.server.web.component.issue.side;
 
 import com.google.common.collect.Lists;
+import com.hazelcast.shaded.org.snakeyaml.engine.v2.api.Load;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.Similarities;
@@ -76,12 +79,15 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.parse;
 import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
+import static io.onedev.server.util.EmailAddressUtils.describe;
+import static java.util.Comparator.comparing;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
@@ -138,6 +144,7 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		});
+		addOrReplace(newExternalParticipantsContainer());
 		
 		addOrReplace(new EntityReferencePanel("reference") {
 
@@ -857,6 +864,60 @@ public abstract class IssueSidePanel extends Panel {
 		};
 		container.add(voteLink);
 		
+		return container;
+	}
+
+	private Component newExternalParticipantsContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("externalParticipants") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getIssue().getExternalParticipants().isEmpty());
+			}
+			
+		};
+		container.setOutputMarkupId(true);
+
+		container.add(new ListView<>("externalParticipants", new LoadableDetachableModel<List<InternetAddress>>() {
+
+			@Override
+			protected List<InternetAddress> load() {
+				var addresses = new ArrayList<>(getIssue().getExternalParticipants());
+				addresses.sort(comparing(EmailAddressUtils::describe));
+				return addresses;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<InternetAddress> item) {
+				item.add(new Label("label", describe(item.getModelObject())));
+				item.add(new AjaxLink<Void>("delete") {
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("'" + describe(item.getModelObject()) + "' will not be able to participate in this issue. Do you want to continue?"));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
+					}
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						OneDev.getInstance(TransactionManager.class).run(() -> {
+							getIssue().getExternalParticipants().remove(item.getModelObject());
+						});		
+						target.add(container);
+					}
+				});
+			}
+			
+		});
+
 		return container;
 	}
 	
