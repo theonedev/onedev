@@ -652,6 +652,6 @@
 		<groovy.version>3.0.19</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.14.0-rc1</jackson.version>
-		<tika.version>1.28.3</tika.version>
+		<tika.version>1.28.5</tika.version>
 	</properties>
 </project>
