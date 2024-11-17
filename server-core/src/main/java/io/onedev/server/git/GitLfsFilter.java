@@ -42,11 +42,13 @@ import java.util.function.BooleanSupplier;
 
 import static com.google.common.hash.Hashing.sha256;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.servlet.http.HttpServletResponse.*;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 import static org.apache.tika.mime.MimeTypes.OCTET_STREAM;
 import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
 
@@ -115,10 +117,10 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getProjectPath(String pathInfo) {
-		String projectPath =  StringUtils.substringBeforeLast(pathInfo, ".git/");
+		String projectPath =  substringBeforeLast(pathInfo, ".git/");
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
-		return projectPath;
+		return decodeFullRepoNameAsPath(projectPath);
 	}
 	
 	@Override
@@ -411,7 +413,7 @@ public class GitLfsFilter implements Filter {
 						} else if (pathInfo.endsWith("/unlock")) {
 							if (SecurityUtils.canWriteCode(project)) {
 								Long id = Long.valueOf(StringUtils.substringAfterLast(
-										StringUtils.substringBeforeLast(pathInfo, "/"), "/"));
+										substringBeforeLast(pathInfo, "/"), "/"));
 								
 								JsonNode lockDeleteNode;
 								try (InputStream is = httpRequest.getInputStream()) {

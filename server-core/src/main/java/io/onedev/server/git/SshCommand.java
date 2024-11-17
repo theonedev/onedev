@@ -37,7 +37,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.security.SecurityUtils.*;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 class SshCommand implements Command, ServerSessionAware {
 	
@@ -81,7 +83,7 @@ class SshCommand implements Command, ServerSessionAware {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 
 		var tempStr = StringUtils.substringAfter(commandString, "'/");   
-		var projectPath = StringUtils.substringBefore(tempStr, "'");
+		var projectPath = decodeFullRepoNameAsPath(substringBefore(tempStr, "'"));
 		var projectFacade = projectManager.findFacadeByPath(projectPath);
 		if (projectFacade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");

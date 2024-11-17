@@ -98,8 +98,6 @@ public class PullRequest extends ProjectBelonging
 	public static final String PROP_DESCRIPTION = "description";
 	
 	public static final String NAME_COMMENT = "Comment";
-
-	public static final String PROP_COMMENTS = "comments";
 	
 	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
@@ -126,12 +124,6 @@ public class PullRequest extends ProjectBelonging
 	public static final String PROP_STATUS = "status";
 	
 	public static final String PROP_MERGE_PREVIEW = "mergePreview";
-	
-	public static final String PROP_REVIEWS = "reviews";
-	
-	public static final String PROP_BUILDS = "builds";
-	
-	public static final String PROP_ASSIGNMENTS = "assignments";
 	
 	public static final String PROP_UUID = "uuid";
 	
@@ -576,9 +568,7 @@ public class PullRequest extends ProjectBelonging
 	 * 
 	 * @return
 	 * 			update to date merge preview of this pull request, or <tt>null</tt> if 
-	 * 			the merge preview has not been calculated or outdated. In both cases, 
-	 * 			it will trigger a re-calculation, and client should call this method later 
-	 * 			to get the calculated result 
+	 * 			the merge preview has not been calculated or outdated
 	 */
 	@Nullable
 	public MergePreview checkMergePreview() {
@@ -995,10 +985,6 @@ public class PullRequest extends ProjectBelonging
 			}
 			return null;
 		}
-	}
-	
-	public String getNumberAndTitle() {
-		return "#" + getNumber() + " - " + getTitle();
 	}
 	
 	public BuildRequirement getBuildRequirement() {

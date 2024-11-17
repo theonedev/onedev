@@ -18,6 +18,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -120,6 +121,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 			private final Map<String, StyleBuilder> styleBuilders = new ConcurrentHashMap<>();
 			
 			private void doLog(String message, StyleBuilder styleBuilder) {
+				message = Project.decodeFullRepoNameAsPath(message);
 				for (String maskSecret: secretValuesToMask)
 					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
 				

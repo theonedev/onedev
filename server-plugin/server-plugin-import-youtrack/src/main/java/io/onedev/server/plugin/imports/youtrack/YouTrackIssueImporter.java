@@ -2,11 +2,7 @@ package io.onedev.server.plugin.imports.youtrack;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.IssueImporter;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 

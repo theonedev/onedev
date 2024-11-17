@@ -251,7 +251,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				request.setMergeStrategy(target.getProject().findDefaultMergeStrategy());
 			}
 			
-			requestModel = new LoadableDetachableModel<PullRequest>() {
+			requestModel = new LoadableDetachableModel<>() {
 
 				@Override
 				protected PullRequest load() {
@@ -262,17 +262,17 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 					}
 					return pullRequestRef.get();
 				}
-				
+
 			};
 		} else {
 			Long requestId = pullRequestRef.get().getId();
-			requestModel = new LoadableDetachableModel<PullRequest>() {
+			requestModel = new LoadableDetachableModel<>() {
 
 				@Override
 				protected PullRequest load() {
 					return getPullRequestManager().load(requestId);
 				}
-				
+
 			};
 		}
 		requestModel.setObject(pullRequestRef.get());

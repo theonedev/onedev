@@ -173,14 +173,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		ORDER_FIELDS.put(NAME_STATE, new SortField<>(PROP_STATE_ORDINAL, comparingInt(Issue::getStateOrdinal)));
 		ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<>(PROP_SUBMIT_DATE, comparing(Issue::getSubmitDate)));
 		ORDER_FIELDS.put(NAME_PROJECT, new SortField<>(PROP_PROJECT, comparing(o -> o.getProject().getId())));
-		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, new Comparator<Issue>() {
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				return o1.getLastActivity().getDate().compareTo(o2.getLastActivity().getDate());
-			}
-			
-		}));
+		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, comparing(o -> o.getLastActivity().getDate())));
 		ORDER_FIELDS.put(NAME_ESTIMATED_TIME, new SortField<>(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
 		ORDER_FIELDS.put(NAME_SPENT_TIME, new SortField<>(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
 		ORDER_FIELDS.put(NAME_PROGRESS, new SortField<>(PROP_PROGRESS, comparingInt(Issue::getProgress)));

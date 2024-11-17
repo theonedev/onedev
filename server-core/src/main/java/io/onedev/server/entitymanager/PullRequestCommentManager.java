@@ -7,6 +7,8 @@ import java.util.Collection;
 
 public interface PullRequestCommentManager extends EntityManager<PullRequestComment> {
 
+	void create(PullRequestComment comment);
+
 	void create(PullRequestComment comment, Collection<String> notifiedEmailAddresses);
 
 	void update(PullRequestComment comment);

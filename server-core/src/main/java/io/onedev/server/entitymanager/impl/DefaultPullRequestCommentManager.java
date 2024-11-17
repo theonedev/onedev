@@ -16,6 +16,7 @@ import io.onedev.server.security.SecurityUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -47,6 +48,12 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 		changeManager.create(change, null);
 	}
 
+	@Transactional
+	@Override
+	public void create(PullRequestComment comment) {
+		create(comment, new ArrayList<>());
+	}
+	
 	@Transactional
 	@Override
 	public void create(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {

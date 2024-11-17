@@ -56,7 +56,7 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfRegister = enableSelfRegister;
 	}
 
-	@Editable(order=225, name="Allowed Self Sign-Up Email Domain", description = "Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match")
+	@Editable(order=225, name="Allowed Self Sign-Up Email Domain", placeholder = "Any domain", description = "Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match")
 	@Patterns
 	@ShowCondition("isEnableSelfRegisterEnabled")
 	public String getAllowedSelfRegisterEmailDomain() {

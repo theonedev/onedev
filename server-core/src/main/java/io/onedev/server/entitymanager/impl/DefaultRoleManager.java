@@ -157,7 +157,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
 		codeWriter.setCodePrivilege(CodePrivilege.WRITE);
-		codeWriter.setPackPrivilege(PackPrivilege.READ);
+		codeWriter.setPackPrivilege(PackPrivilege.WRITE);
 		codeWriter.setScheduleIssues(true);
 		codeWriter.setAccessConfidentialIssues(true);
 		codeWriter.setEditableIssueFields(new AllIssueFields());

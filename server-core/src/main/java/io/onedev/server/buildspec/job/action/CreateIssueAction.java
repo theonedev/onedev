@@ -100,7 +100,7 @@ public class CreateIssueAction extends PostBuildAction {
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
-	@Editable(order=1000, name="Title", group="Issue Detail", description="Specify title of the issue")
+	@Editable(order=1000, name="Title", group="Issue Details", description="Specify title of the issue")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getIssueTitle() {
@@ -111,7 +111,7 @@ public class CreateIssueAction extends PostBuildAction {
 		this.issueTitle = issueTitle;
 	}
 	
-	@Editable(order=1050, name="Description", group="Issue Detail", description="Optionally specify description of the issue")
+	@Editable(order=1050, name="Description", group="Issue Details", description="Optionally specify description of the issue")
 	@Multiline
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getIssueDescription() {
@@ -122,7 +122,7 @@ public class CreateIssueAction extends PostBuildAction {
 		this.issueDescription = issueDescription;
 	}
 
-	@Editable(order=1060, name="Confidential", group="Issue Detail", description="Whether or not the issue should be confidential")
+	@Editable(order=1060, name="Confidential", group="Issue Details", description="Whether or not the issue should be confidential")
 	public boolean isIssueConfidential() {
 		return issueConfidential;
 	}
@@ -136,7 +136,7 @@ public class CreateIssueAction extends PostBuildAction {
 		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 	
-	@Editable(order=1100, group="Issue Detail")
+	@Editable(order=1100, group="Issue Details")
 	@FieldNamesProvider("getFieldNames")
 	@OmitName
 	@Valid

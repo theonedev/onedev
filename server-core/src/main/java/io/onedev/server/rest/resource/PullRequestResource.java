@@ -208,12 +208,12 @@ public class PullRequestResource {
 		
 		PullRequest request = pullRequestManager.findOpen(target, source);
 		if (request != null)
-			throw new InvalidParamException("Another pull request already open for this change");
+			throw new InvalidParamException("Another pull request already opened for this change");
 		
 		request = pullRequestManager.findEffective(target, source);
 		if (request != null) { 
 			if (request.isOpen())
-				throw new InvalidParamException("Another pull request already open for this change");
+				throw new InvalidParamException("Another pull request already opened for this change");
 			else
 				throw new InvalidParamException("Change already merged");
 		}

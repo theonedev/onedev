@@ -29,7 +29,7 @@ public class BasicAuthenticationFilter extends ExceptionHandleFilter {
 	
 	@Sessional
     @Override
-	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
+	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) {
 		HttpServletRequest httpRequest = WebUtils.toHttp(request);
 
     	Subject subject = SecurityUtils.getSubject();
@@ -42,12 +42,23 @@ public class BasicAuthenticationFilter extends ExceptionHandleFilter {
                 String decoded = Base64.decodeToString(authValue);
                 String userName = StringUtils.substringBefore(decoded, ":").trim();
                 String password = StringUtils.substringAfter(decoded, ":").trim();
-				if (userName.length() != 0 && password.length() != 0) {
-					var accessToken = accessTokenManager.findByValue(password);
-					if (accessToken != null)
+				if (userName.length() != 0) {
+					var accessToken = accessTokenManager.findByValue(userName);
+					if (accessToken != null) {
 						ThreadContext.bind(accessToken.asSubject());
-					else
-						subject.login(new UsernamePasswordToken(userName, password));
+						return true;
+					}
+				}
+				if (password.length() != 0) {
+					var accessToken = accessTokenManager.findByValue(password);
+					if (accessToken != null) {
+						ThreadContext.bind(accessToken.asSubject());
+						return true;
+					}
+				}
+				if (userName.length() != 0 && password.length() != 0) {
+					subject.login(new UsernamePasswordToken(userName, password));
+					return true;
 				}
 	        }
 		}

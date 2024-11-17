@@ -49,69 +49,6 @@ public class NodeJobSuggestion implements JobSuggestion {
 			logger.error("Error parsing package.json", e);
 			return jobs;
 		}
-
-		if (content.indexOf("angular/core") != -1) { // Recognize angular projects
-			Job job = new Job();
-			job.setName("angular ci");
-
-			CheckoutStep checkout = new CheckoutStep();
-			checkout.setName("checkout code");
-			job.getSteps().add(checkout);
-			
-			job.getSteps().addAll(newCacheSteps());
-			
-			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
-			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
-			job.getSteps().add(setBuildVersion);
-			
-			CommandStep runCommands = new CommandStep();
-			runCommands.setName("build & test");
-			runCommands.setImage("1dev/buildspec-node:10.16-alpine-chrome");
-			var commandsBuilder = new StringBuilder();
-			commandsBuilder.append("npm install\n");
-			commandsBuilder.append("npm install @@angular/cli\n");
-
-			if (jsonNode.has("scripts")) {
-				JsonNode jsonScripts = jsonNode.get("scripts");
-				Iterator<String> iterator = jsonScripts.fieldNames();
-				int length = jsonScripts.size();
-				String[] valueArray = new String[length];
-				int valueIndex = 0;
-
-				while (iterator.hasNext()) {
-					String key = (String) iterator.next();
-					if (key.indexOf("lint") != -1 || key.indexOf("build") != -1) {
-						String value = jsonScripts.findValue(key).asText();
-						valueArray[valueIndex] = value;
-						valueIndex++;
-					} else if (key.indexOf("test") != -1) {
-						String value = jsonScripts.findValue(key).asText();
-						valueArray[valueIndex] = value + " --watch=false --browsers=ChromeHeadless";
-						valueIndex++;
-					}
-				}
-
-				if (valueArray[0] != null) {
-					for (int i = 0; i < valueIndex; i++) 
-						commandsBuilder.append("npx ").append(valueArray[i]).append("\n");
-				} else {
-					commandsBuilder.append("npx ng lint\n");
-					commandsBuilder.append("npx ng test --watch=false --browsers=ChromeHeadless\n");
-					commandsBuilder.append("npx ng build\n");
-				}
-			} else {
-				commandsBuilder.append("npx ng lint\n");
-				commandsBuilder.append("npx ng test --watch=false --browsers=ChromeHeadless\n");
-				commandsBuilder.append("npx ng build\n");
-			}
-
-			runCommands.getInterpreter().setCommands(commandsBuilder.toString());
-			job.getSteps().add(runCommands);
-			
-			setupTriggers(job);
-			jobs.add(job);
-		} 
 		
 		if (content.indexOf("react") != -1) { // Recognize react projects
 			Job job = new Job();

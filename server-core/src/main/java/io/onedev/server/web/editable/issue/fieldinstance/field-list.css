@@ -1,4 +1,10 @@
 .issue-fields-edit>.issue-field>* {
     margin-bottom: 12px;
 }
-
+.editable .name+.value>.issue-fields-edit {
+	padding-left: 1rem;
+	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .editable .name+.value>.issue-fields-edit {
+	border-color: var(--dark-mode-light-dark) !important;
+}

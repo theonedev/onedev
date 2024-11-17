@@ -48,25 +48,25 @@ public class MavenJobSuggestion implements JobSuggestion {
 			setupCache.getLoadKeys().add("maven_repository");
 			job.getSteps().add(setupCache);
 			
-			CommandStep detectBuildVersion = new CommandStep();
-			detectBuildVersion.setName("detect build version");
-			detectBuildVersion.setImage("maven");
-			detectBuildVersion.getInterpreter().setCommands("" +
-					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n" +
-					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion\n");
-			job.getSteps().add(detectBuildVersion);
-			
-			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
-			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@file:buildVersion@");
-			job.getSteps().add(setBuildVersion);
-			
 			CommandStep runTests = new CommandStep();
 			runTests.setName("run tests");
 			runTests.setImage("maven");
 			runTests.getInterpreter().setCommands("mvn clean test\n");
 			job.getSteps().add(runTests);
 
+			CommandStep detectBuildVersion = new CommandStep();
+			detectBuildVersion.setName("detect build version");
+			detectBuildVersion.setImage("maven");
+			detectBuildVersion.getInterpreter().setCommands("" +
+					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n" +
+					"mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout > buildVersion || { cat buildVersion; exit 1; }");
+			job.getSteps().add(detectBuildVersion);
+
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@file:buildVersion@");
+			job.getSteps().add(setBuildVersion);
+			
 			var publishUnitTestReportStep = new PublishJUnitReportStep();
 			publishUnitTestReportStep.setName("publish unit test report");
 			publishUnitTestReportStep.setReportName("Unit Test");

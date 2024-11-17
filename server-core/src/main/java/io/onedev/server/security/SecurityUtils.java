@@ -545,10 +545,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		String authHeader = request.getHeader(KubernetesHelper.AUTHORIZATION);
 		if (authHeader == null)
 			authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (authHeader != null && authHeader.startsWith(KubernetesHelper.BEARER + " "))
-			return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
-		else
-			return null;
+		if (authHeader != null) {
+			if (authHeader.startsWith(KubernetesHelper.BEARER + " "))
+				return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
+			else if (authHeader.startsWith("token "))
+				return authHeader.substring("token".length() + 1);
+		} 
+		return null;
 	}
 
 	private static void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,

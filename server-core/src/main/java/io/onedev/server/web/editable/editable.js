@@ -9,6 +9,7 @@ onedev.server.editable = {
 			$parent.find(".select2-container-multi+input").each(function() {
 				$(this).data("select2").clearSearch();				
 			});
+			$parent.find(".visible-aware").trigger("visible");
         });
         $groups.each(function() {
         	var $group = $(this);
@@ -21,7 +22,7 @@ onedev.server.editable = {
 		var $container = $("#" + containerId);
         var $groups = $container.children(".group");
         $groups.children("a").click(function() {
-            $(this).parent().toggleClass("expanded"); 
+			$(this).parent().toggleClass("expanded").find(".visible-aware").trigger("visible");
         });
         $groups.each(function() {
         	var $group = $(this);

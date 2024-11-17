@@ -83,6 +83,7 @@ import java.util.stream.Collectors;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 @Entity
 @Table(
@@ -161,6 +162,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NULL_KEY_PREFIX = "<$NullKey$>";
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
+	
+	private static final String FAKED_GITHUB_REPO_PATH_SEPARATOR = "-path.separator.of.onedev.project-";
+
+	private static final String FAKED_GITHUB_REPO_OWNER = "faked-owner-of-onedev-project";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
@@ -1941,6 +1946,22 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public File getDir() {
 		return OneDev.getInstance(ProjectManager.class).getProjectDir(getId());
+	}
+	
+	public static String encodePathAsRepoName(String projectPath) {
+		return projectPath.replace("/", FAKED_GITHUB_REPO_PATH_SEPARATOR);
+	}
+	
+	public static String decodeRepoNameAsPath(String text) {
+		return text.replace(FAKED_GITHUB_REPO_PATH_SEPARATOR, "/"); 
+	}
+
+	public static String encodePathAsFullRepoName(String projectPath) {
+		return FAKED_GITHUB_REPO_OWNER + "/" + encodePathAsRepoName(projectPath);
+	}
+	
+	public static String decodeFullRepoNameAsPath(String text) {
+		return decodeRepoNameAsPath(replace(text, FAKED_GITHUB_REPO_OWNER + "/", ""));
 	}
 	
 }

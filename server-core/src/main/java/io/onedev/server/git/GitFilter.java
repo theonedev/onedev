@@ -39,7 +39,9 @@ import java.io.*;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static org.apache.commons.lang3.StringUtils.strip;
 
 @Singleton
 public class GitFilter implements Filter {
@@ -78,7 +80,7 @@ public class GitFilter implements Filter {
 	}
 	
 	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) {
-		var projectPath = StringUtils.strip(projectInfo, "/");
+		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
 		var facade = projectManager.findFacadeByPath(projectPath);
 		if (facade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");

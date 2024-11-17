@@ -4,7 +4,7 @@ onedev.server.codeSupport = {
 		var minHeight = $input.parent().data("minHeight");
 		
 		var height = $input.next().find(".CodeMirror-sizer").outerHeight();
-		
+		console.log(height);
 		if (height > maxHeight)
 			height = maxHeight;
 		if (height < minHeight)
@@ -77,6 +77,10 @@ onedev.server.codeSupport = {
 		$input.on("beforeDelete", function() {
 			cm.toTextArea();
 		});
+		$input.closest(".visible-aware").on("visible", function() {
+			cm.refresh();
+			onedev.server.codeSupport.adjustHeight($input);
+		});
     },
     showVariables: function(inputId, variables, line, start) {
     	var $input = $("#" + inputId);
@@ -138,7 +142,12 @@ onedev.server.codeSupport = {
         });
 
         onedev.server.codemirror.setModeByName(cm, modeName);
-		onedev.server.codeSupport.adjustHeight($("#" + inputId));
+		var $input = $("#" + inputId);
+		onedev.server.codeSupport.adjustHeight($input);
 		cm.refresh();
+		$input.closest(".visible-aware").on("visible", function() {
+			cm.refresh();
+			onedev.server.codeSupport.adjustHeight($input);
+		});
 	}
 }

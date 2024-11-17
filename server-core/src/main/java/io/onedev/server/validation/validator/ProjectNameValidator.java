@@ -11,7 +11,7 @@ import io.onedev.server.annotation.ProjectName;
 
 public class ProjectNameValidator implements ConstraintValidator<ProjectName, String> {
 
-	private static final Pattern PATTERN = Pattern.compile("\\w[\\w-\\.]*");
+	private static final Pattern PATTERN = Pattern.compile("\\w[\\w-.]*");
 	
 	private String message;
 	

@@ -58,7 +58,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
 			boolean loadLabelsAndReviewsAndBuilds, int firstResult, int maxResults);
 	
-	int count(@Nullable Project targetProject, Criteria<PullRequest> requestCriteria);
+	int count(@Nullable Project targetProject, @Nullable Criteria<PullRequest> requestCriteria);
 	
 	List<PullRequest> query(Project targetProject, String fuzzyQuery, int count);
 

@@ -1,16 +1,12 @@
 package io.onedev.server.web.editable;
 
-import org.apache.wicket.Component;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
-
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
 
 @SuppressWarnings("serial")
 public abstract class ValueEditor<T> extends FormComponentPanel<T> {

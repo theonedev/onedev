@@ -23,7 +23,7 @@ public class PullRequestChange extends AbstractEntity {
 	private Date date = new Date();
 	
 	@Lob
-	@Column(length=65535, nullable=false)
+	@Column(length=1048576, nullable=false)
 	private PullRequestChangeData data;
 
 	public PullRequest getRequest() {

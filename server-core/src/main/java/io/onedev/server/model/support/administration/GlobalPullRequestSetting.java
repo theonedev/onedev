@@ -28,6 +28,8 @@ public class GlobalPullRequestSetting implements Serializable {
 		namedQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedPullRequestQuery("Mentioned me", "mentioned me"));
 		namedQueries.add(new NamedPullRequestQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
+		namedQueries.add(new NamedPullRequestQuery("Merged", "merged"));
+		namedQueries.add(new NamedPullRequestQuery("Discarded", "discarded"));
 		namedQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
 		namedQueries.add(new NamedPullRequestQuery("All", null));
 	}

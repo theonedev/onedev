@@ -78,9 +78,9 @@ public class PullRepository extends SyncRepository {
 		this.targetProject = targetProject;
 	}
 
-	@Editable(order=650, name="Access Token for Target Project", description = "Specify a secret whose value is " +
-			"an access token with management permission for above project. Note that this property is not " +
-			"required is not required if sync to current or child project and build commit is reachable from " +
+	@Editable(order=650, name="Access Token for Target Project", description = "Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> " +
+			"whose value is an access token with management permission for above project. Note that access token " +
+			"is not required if sync to current or child project and build commit is reachable from " +
 			"default branch")
 	@ChoiceProvider("getSecretChoices")
 	public String getAccessTokenSecret() {
