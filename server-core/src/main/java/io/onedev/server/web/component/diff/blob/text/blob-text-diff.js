@@ -1,10 +1,13 @@
 onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
-	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
-			markRange, openComment, annotationInfo, commentContainerId) {
+	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
+						 callback, blameMessageCallback, markRange, openComment, 
+						 annotationInfo, commentContainerId) {
 		var $container = $("#" + containerId);
 		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
+		$container.data("oldPath", oldPath);
+		$container.data("newPath", newPath);
 		$container.data("blameMessageCallback", blameMessageCallback);
 		$container.data("symbolHover", function() {
 			var revision;
@@ -487,8 +490,8 @@ onedev.server.blobTextDiff = {
 		if (!$scrollParent.data("onTextDiffScrollInstalled"))	{
 			$scrollParent.data("onTextDiffScrollInstalled", true);
 			$scrollParent.doneEvents("scroll", function() {
-				$(".text-diff").each(function() {
-					onedev.server.blobTextDiff.highlightSyntax($(this).parent());
+				$(".blob-text-diff").each(function() {
+					onedev.server.blobTextDiff.highlightSyntax($(this));
 				}, 100);
 			});
 		}		
@@ -496,8 +499,8 @@ onedev.server.blobTextDiff = {
 		onedev.server.blobTextDiff.highlightSyntax($container);
 	},
 	highlightSyntax($container) {
-		var oldBlobPath = $container.find(".diff-title>span:first-child").text();
-		var newBlobPath = $container.find(".diff-title>span:last-child").text();
+		var oldBlobPath = $container.data("oldPath");
+		var newBlobPath = $container.data("newPath");
 		
 		$container.find("tbody, tr.expander").each(function() {
 			var $this = $(this);

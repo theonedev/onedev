@@ -64,6 +64,7 @@ import java.util.*;
 import static io.onedev.server.codequality.BlobTarget.groupByLine;
 import static io.onedev.server.util.diff.DiffRenderer.toHtml;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 @SuppressWarnings("serial")
 public class BlobTextDiffPanel extends Panel {
@@ -259,7 +260,7 @@ public class BlobTextDiffPanel extends Panel {
 						
 						String expanded = StringUtils.replace(builder.toString(), "\n", "");
 						String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
-								getMarkupId(), index, JavaScriptEscape.escapeJavaScript(expanded));
+								getMarkupId(), index, escapeJavaScript(expanded));
 						target.appendJavaScript(script);
 						break;
 					case "openSelectionPopover":
@@ -272,7 +273,7 @@ public class BlobTextDiffPanel extends Panel {
 						if (getAnnotationSupport() != null) {
 							markUrl = getAnnotationSupport().getMarkUrl(commentRange);
 							if (markUrl != null) 
-								markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
+								markUrl = "'" + escapeJavaScript(markUrl) + "'";
 							else 
 								markUrl = "undefined";
 						} else {
@@ -280,7 +281,7 @@ public class BlobTextDiffPanel extends Panel {
 						}
 						script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
 								getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
-								JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
+								escapeJavaScript(getMarkedText(commentRange)),
 								SecurityUtils.getAuthUser()!=null);
 						target.appendJavaScript(script);
 						break;
@@ -347,10 +348,12 @@ public class BlobTextDiffPanel extends Panel {
 		add(symbolTooltip);
 		
 		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+			
 			@Override
 			public String getObject() {
 				return blameInfo!=null? "blob-text-diff need-width": "blob-text-diff";
 			}
+			
 		}));
 		setOutputMarkupId(true);
 	}
@@ -398,8 +401,12 @@ public class BlobTextDiffPanel extends Panel {
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 		
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s);", getMarkupId(), symbolTooltip.getMarkupId(), 
-				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s);", 
+				getMarkupId(), symbolTooltip.getMarkupId(), 
+				change.getOldBlobIdent().revision, 
+				change.getNewBlobIdent().revision,
+				change.getOldBlobIdent().path!=null? escapeJavaScript(change.getOldBlobIdent().path):"",
+				change.getNewBlobIdent().path!=null? escapeJavaScript(change.getNewBlobIdent().path):"",
 				callback, blameMessageBehavior.getCallback(),
 				convertToJson(markRange), convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
