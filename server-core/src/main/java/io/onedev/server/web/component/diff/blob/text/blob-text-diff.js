@@ -906,7 +906,7 @@ onedev.server.blobTextDiff = {
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
 			var $scrollParent = $startTd.scrollParent();
-			var marginTop = $startTd.closest(".text-diff").prev().height() + 120;
+			var marginTop = $startTd.closest(".text-diff").parent().prev().height() + 120;
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-marginTop);
 		}
 	},
