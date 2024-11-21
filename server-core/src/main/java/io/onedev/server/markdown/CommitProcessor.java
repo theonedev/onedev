@@ -27,7 +27,7 @@ import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
-public class CommitProcessor implements MarkdownProcessor {
+public class CommitProcessor implements HtmlProcessor {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 
@@ -35,10 +35,10 @@ public class CommitProcessor implements MarkdownProcessor {
 			"(^|\\W+)((" + ProjectPathValidator.PATTERN.pattern() + "):)?([a-z0-9]{40})($|[^a-z0-9])");
 	
 	@Override
-	public void process(Document document, @Nullable Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, @Nullable Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
 			@Override

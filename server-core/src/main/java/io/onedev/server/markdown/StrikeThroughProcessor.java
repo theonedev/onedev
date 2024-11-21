@@ -18,17 +18,17 @@ import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
-public class StrikeThroughProcessor implements MarkdownProcessor {
+public class StrikeThroughProcessor implements HtmlProcessor {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 	
 	private static final Pattern PATTERN = Pattern.compile("~~(.*?)~~");
 
 	@Override
-	public void process(Document document, Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
 			@Override

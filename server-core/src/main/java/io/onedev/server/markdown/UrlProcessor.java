@@ -32,15 +32,15 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
-public class UrlProcessor implements MarkdownProcessor {
+public class UrlProcessor implements HtmlProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(UrlProcessor.class);
 	
 	@Override
-	public void process(Document document, Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		if (RequestCycle.get() != null && blobRenderContext != null && project != null) {
 			GitService gitService = OneDev.getInstance(GitService.class);
 			ObjectId revId;

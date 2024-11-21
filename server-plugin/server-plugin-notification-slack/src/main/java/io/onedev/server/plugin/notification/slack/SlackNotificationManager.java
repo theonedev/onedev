@@ -50,7 +50,7 @@ public class SlackNotificationManager extends ChannelNotificationManager<SlackNo
 	private void renderInlineLink(@NotNull InlineLinkNode node, @NotNull NodeFormatterContext context,
 			@NotNull MarkdownWriter markdown) {
 		markdown.append("<");
-		markdown.append(markdownManager.toExternalUrl(node.getUrl().toString()));
+		markdown.append(markdownManager.toExternal(node.getUrl().toString()));
 		markdown.append("|");
 		context.renderChildren(node);
 		markdown.append(">");

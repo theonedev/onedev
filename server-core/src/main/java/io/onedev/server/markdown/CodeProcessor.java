@@ -23,13 +23,13 @@ import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
-public class CodeProcessor implements MarkdownProcessor {
+public class CodeProcessor implements HtmlProcessor {
 	
 	@Override
-	public void process(Document document, @Nullable Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, @Nullable Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		Collection<Element> codeElements = new ArrayList<>();
 		NodeTraversor.traverse(new NodeVisitor() {
 

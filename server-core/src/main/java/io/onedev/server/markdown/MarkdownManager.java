@@ -1,17 +1,12 @@
 package io.onedev.server.markdown;
 
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.jsoup.nodes.Document;
-
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
-import com.vladsch.flexmark.util.ast.Node;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 public interface MarkdownManager {
 	
@@ -26,19 +21,12 @@ public interface MarkdownManager {
 	 */
 	String render(String markdown);
 	
-	Node parse(String markdown);
+	String process(String html, @Nullable Project project,
+				   @Nullable BlobRenderContext blobRenderContext,
+				   @Nullable SuggestionSupport suggestionSupport,
+				   boolean forExternal);
 	
-	Document process(Document document, @Nullable Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal);
-
-	String process(String html, @Nullable Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal);
-	
-	String toExternalUrl(String url);
+	String toExternal(String url);
 	
 	String format(String markdown, Set<NodeFormattingHandler<?>> handlers);
 	

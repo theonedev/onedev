@@ -59,7 +59,7 @@ import io.onedev.server.mail.DefaultMailManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.DefaultMarkdownManager;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.markdown.MarkdownProcessor;
+import io.onedev.server.markdown.HtmlProcessor;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.notification.*;
@@ -407,7 +407,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(Extension.class, new EmojiExtension());
 		contribute(Extension.class, new SourcePositionTrackExtension());
 		
-		contributeFromPackage(MarkdownProcessor.class, MarkdownProcessor.class);
+		contributeFromPackage(HtmlProcessor.class, HtmlProcessor.class);
 
 		contribute(ResourcePackScopeContribution.class, () -> newArrayList(WebApplication.class));
 		

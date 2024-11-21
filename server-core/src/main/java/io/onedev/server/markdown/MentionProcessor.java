@@ -11,13 +11,13 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
-public class MentionProcessor extends MentionParser implements MarkdownProcessor {
+public class MentionProcessor extends MentionParser implements HtmlProcessor {
 	
 	@Override
-	public void process(Document document, Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		parseMentions(document);
 	}
 

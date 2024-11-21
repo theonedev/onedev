@@ -11,12 +11,9 @@ import com.vladsch.flexmark.formatter.Formatter;
 import com.vladsch.flexmark.formatter.Formatter.Builder;
 import com.vladsch.flexmark.formatter.Formatter.FormatterExtension;
 import com.vladsch.flexmark.formatter.NodeFormatter;
-import com.vladsch.flexmark.formatter.NodeFormatterFactory;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.vladsch.flexmark.util.misc.Extension;
@@ -26,8 +23,6 @@ import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.resource.AttachmentResource;
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import javax.annotation.Nullable;
@@ -45,11 +40,11 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	
 	private final Set<Extension> contributedExtensions;
 	
-	private final Set<MarkdownProcessor> htmlTransformers;
+	private final Set<HtmlProcessor> htmlTransformers;
 	
 	@Inject
 	public DefaultMarkdownManager(SettingManager settingManager, Set<Extension> contributedExtensions, 
-			Set<MarkdownProcessor> htmlTransformers) {
+			Set<HtmlProcessor> htmlTransformers) {
 		this.settingManager = settingManager;
 		this.contributedExtensions = contributedExtensions;
 		this.htmlTransformers = htmlTransformers;
@@ -82,50 +77,39 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	
 	@Override
 	public String render(String markdown) {
-		Node node = parse(markdown);
-		return HtmlRenderer.builder(setupOptions()).build().render(node);
+		var options = setupOptions();
+		Parser parser = Parser.builder(options).build();
+		return HtmlRenderer.builder(options).build().render(parser.parse(markdown));
 	}
-
+	
 	@Override
-	public Document process(Document document, @Nullable Project project, @Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, boolean forExternal) {
-		document = HtmlUtils.sanitize(document);
-		for (MarkdownProcessor htmlTransformer: htmlTransformers)
-			htmlTransformer.process(document, project, blobRenderContext, suggestionSupport, forExternal);
-		
+	public String process(String html, Project project,
+						  @Nullable BlobRenderContext blobRenderContext,
+						  @Nullable SuggestionSupport suggestionSupport,
+						  boolean forExternal) {
+		var doc = HtmlUtils.parse(html);
+		doc = HtmlUtils.sanitize(doc);
+		for (var htmlTransformer: htmlTransformers)
+			htmlTransformer.process(doc, project, blobRenderContext, suggestionSupport, forExternal);
+
 		if (forExternal) {
-			for (Element element: document.body().getElementsByTag("img")) {
-				element.attr("src", toExternalUrl(element.attr("src")));
+			for (Element element: doc.body().getElementsByTag("img")) {
+				element.attr("src", toExternal(element.attr("src")));
 				String style = element.attr("style");
 				if (!style.endsWith(";"))
 					style += ";";
 				style += "max-width:100%";
 				element.attr("style", style);
 			}
-			for (Element element: document.body().getElementsByTag("a")) 
-				element.attr("href", toExternalUrl(element.attr("href")));
+			for (Element element: doc.body().getElementsByTag("a"))
+				element.attr("href", toExternal(element.attr("href")));
 		}
-		document.outputSettings().prettyPrint(false);
-		return document;
-	}
-	
-	@Override
-	public String process(String html, Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
-		return process(HtmlUtils.parse(html), project, blobRenderContext, suggestionSupport, forExternal).body().html();
+		doc.outputSettings().prettyPrint(false);
+		return doc.body().html();
 	}
 
 	@Override
-	public Node parse(String markdown) {
-		MutableDataHolder options = setupOptions();
-		Parser parser = Parser.builder(options).build();
-		return parser.parse(markdown);
-	}
-
-	@Override
-	public String toExternalUrl(String url) {
+	public String toExternal(String url) {
 		if (url.startsWith("/")) 
 			return AttachmentResource.authorizeGroup(settingManager.getSystemSetting().getServerUrl() + url);
 		else
@@ -134,9 +118,6 @@ public class DefaultMarkdownManager implements MarkdownManager {
 
 	@Override
 	public String format(String markdown, Set<NodeFormattingHandler<?>> handlers) {
-		Parser parser = Parser.builder().build();
-		Node node = parser.parse(markdown);
-
 		Collection<FormatterExtension> extensions = new ArrayList<>();
 		extensions.add(new FormatterExtension() {
 
@@ -146,30 +127,24 @@ public class DefaultMarkdownManager implements MarkdownManager {
 
 			@Override
 			public void extend(Builder formatterBuilder) {
-				formatterBuilder.nodeFormatterFactory(new NodeFormatterFactory() {
+				formatterBuilder.nodeFormatterFactory(options -> new NodeFormatter() {
 
 					@Override
-					public @NotNull NodeFormatter create(@NotNull DataHolder options) {
-						return new NodeFormatter() {
+					public @Nullable Set<NodeFormattingHandler<?>> getNodeFormattingHandlers() {
+						return handlers;
+					}
 
-							@Override
-							public @Nullable Set<NodeFormattingHandler<?>> getNodeFormattingHandlers() {
-								return handlers;
-							}
-
-							@Override
-							public @Nullable Set<Class<?>> getNodeClasses() {
-								return null;
-							}
-							
-						};
+					@Override
+					public @Nullable Set<Class<?>> getNodeClasses() {
+						return null;
 					}
 					
 				});
 			}
 			
-		});		
-		return Formatter.builder().extensions(extensions).build().render(node);	
+		});
+		var parser = Parser.builder().build();
+		return Formatter.builder().extensions(extensions).build().render(parser.parse(markdown));	
 	}
 	
 }

@@ -15,17 +15,16 @@ import org.jsoup.nodes.Document;
 import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
-import java.util.function.BiFunction;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-public class ReferenceProcessor implements MarkdownProcessor {
+public class ReferenceProcessor implements HtmlProcessor {
 
 	@Override
-	public void process(Document document, @Nullable Project project, 
-			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport, 
-			boolean forExternal) {
+	public void process(Document document, @Nullable Project project,
+						@Nullable BlobRenderContext blobRenderContext,
+						@Nullable SuggestionSupport suggestionSupport,
+						boolean forExternal) {
 		transformReferences(document, project, (reference, text) -> {
 			text = HtmlEscape.escapeHtml5(text);
 			if (reference instanceof IssueReference) {

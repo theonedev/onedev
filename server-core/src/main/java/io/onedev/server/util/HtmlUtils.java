@@ -14,7 +14,8 @@ public class HtmlUtils {
 	private static final String[] SAFE_TAGS = new String[] { "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "br", "b",
 			"i", "strong", "em", "a", "pre", "code", "img", "tt", "div", "ins", "del", "sup", "sub", "p", "ol", "ul",
 			"li", "table", "thead", "tbody", "tfoot", "th", "tr", "td", "rt", "rp", "blockquote", "dl", "dt", "dd",
-			"kbd", "q", "hr", "strike", "caption", "cite", "col", "colgroup", "small", "span", "u", "input", "video", "source"};
+			"kbd", "q", "hr", "strike", "caption", "cite", "col", "colgroup", "small", "span", "u", "input", "video", 
+			"source", "details", "summary"};
 
 	private static final String[] SAFE_ATTRIBUTES = new String[] { "abbr", "accept", "accept-charset", "accesskey",
 			"action", "align", "alt", "axis", "border", "cellpadding", "cellspacing", "char", "charoff", "charset",

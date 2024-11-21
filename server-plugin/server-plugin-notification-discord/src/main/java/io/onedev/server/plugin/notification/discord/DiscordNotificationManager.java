@@ -54,8 +54,8 @@ public class DiscordNotificationManager extends ChannelNotificationManager<Disco
 			String markdown = commentText.getPlainContent();
 
 			Set<NodeFormattingHandler<?>> handlers = new HashSet<>();
-			handlers.add(new NodeFormattingHandler<>(Link.class, new ExternalLinkFormatter<Link>()));
-			handlers.add(new NodeFormattingHandler<>(Image.class, new ExternalLinkFormatter<Image>()));
+			handlers.add(new NodeFormattingHandler<>(Link.class, new ExternalLinkFormatter<>()));
+			handlers.add(new NodeFormattingHandler<>(Image.class, new ExternalLinkFormatter<>()));
 
 			sections.add(markdownManager.format(markdown, handlers));
 		} else if (commentText instanceof PlainText) {
