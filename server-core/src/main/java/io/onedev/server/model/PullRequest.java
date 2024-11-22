@@ -919,13 +919,13 @@ public class PullRequest extends ProjectBelonging
 					|| mergePreview.getMergeCommitHash() == null
 					|| !mergePreview.getMergeCommitHash().equals(getBuildCommitHash());
 		} else {
-			return mergePreview != null || mergePreview.getMergeCommitHash() != null;
+			return mergePreview != null && mergePreview.getMergeCommitHash() != null;
 		}
 	}
 	
 	public boolean isBuildRequirementSatisfied() {
 		BuildRequirement requirement = getBuildRequirement();
-		if (requirement.isStictMode() && !requirement.getRequiredJobs().isEmpty() && isBuildCommitOutdated())
+		if (requirement.isStrictMode() && !requirement.getRequiredJobs().isEmpty() && isBuildCommitOutdated())
 			return false;
 		
 		for (Build build: getCurrentBuilds()) {

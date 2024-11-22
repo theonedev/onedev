@@ -93,11 +93,8 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		String description;
 		switch (suggestedLiteral) {
-		case "all":
-			description = "require reviews from all members of the group"; 
-			break;
 		case ":":
-			description = "number of required reviews from the group";
+			description = "number of required reviewers from the group";
 			break;
 		case " ":
 			description = "space";

@@ -59,6 +59,7 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -121,6 +122,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private String blameFile;
 	
 	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
+	
+	private Component assignToMeLink;
+	
+	private Component assigneesContainer;
 	
 	public static PageParameters paramsOf(Project project, ProjectAndBranch target, ProjectAndBranch source) {
 		PageParameters params = paramsOf(project);
@@ -232,23 +237,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 				getPullRequestManager().checkReviews(request, false);
 
-				if (SecurityUtils.canWriteCode(target.getProject())) {
+				for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
 					assignment.setRequest(request);
-					assignment.setUser(SecurityUtils.getAuthUser());
+					assignment.setUser(assignee);
 					request.getAssignments().add(assignment);
-				} else {
-					for (UserAuthorization authorization: target.getProject().getUserAuthorizations()) {
-						if (authorization.getRole().isOwner()) {
-							PullRequestAssignment assignment = new PullRequestAssignment();
-							assignment.setRequest(request);
-							assignment.setUser(authorization.getUser());
-							request.getAssignments().add(assignment);
-						}
-					}
 				}
 				
-				request.setMergeStrategy(target.getProject().findDefaultMergeStrategy());
+				request.setMergeStrategy(target.getProject().findDefaultPullRequestMergeStrategy());
 			}
 			
 			requestModel = new LoadableDetachableModel<>() {
@@ -755,14 +751,39 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 			
 		});
-		form.add(new AssignmentListPanel("assignees") {
+		form.add(assigneesContainer = new AssignmentListPanel("assignees") {
 
 			@Override
 			protected PullRequest getPullRequest() {
 				return NewPullRequestPage.this.getPullRequest();
 			}
-			
+
+			@Override
+			protected void onAssignmentsChanged(AjaxRequestTarget target) {
+				super.onAssignmentsChanged(target);
+				target.add(assignToMeLink);
+			}
 		});
+		form.add(assignToMeLink = new AjaxLink<Void>("assignToMe") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				var assignment = new PullRequestAssignment();
+				assignment.setUser(SecurityUtils.getUser());
+				assignment.setRequest(getPullRequest());
+				getPullRequest().getAssignments().add(assignment);
+				target.add(this);
+				target.add(assigneesContainer);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().getAssignees().contains(SecurityUtils.getUser())
+						&& SecurityUtils.canWriteCode(getProject()));
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		return fragment;
 	}

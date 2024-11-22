@@ -105,6 +105,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 						protection.onRenameUser(oldName, user.getName());
 					project.getIssueSetting().onRenameUser(oldName, user.getName());
 					project.getBuildSetting().onRenameUser(oldName, user.getName());
+					project.getPullRequestSetting().onRenameUser(oldName, user.getName());
 				} catch (Exception e) {
 					throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
 				}
@@ -153,6 +154,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 					usageInProject.add(protection.onDeleteUser(user.getName()));
 				usageInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
 				usageInProject.add(project.getBuildSetting().onDeleteUser(user.getName()));
+				usageInProject.add(project.getPullRequestSetting().onDeleteUser(user.getName()));
 				usageInProject.prefix("project '" + project.getPath() + "': settings");
 				usage.add(usageInProject);
 			} catch (Exception e) {

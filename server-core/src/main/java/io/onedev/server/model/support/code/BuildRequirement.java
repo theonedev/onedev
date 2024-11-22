@@ -6,19 +6,19 @@ public class BuildRequirement {
 	
 	private final Collection<String> requiredJobs;
 	
-	private final boolean stictMode;
+	private final boolean strictMode;
 	
 	public BuildRequirement(Collection<String> requiredJobs, boolean strictMode) {
 		this.requiredJobs = requiredJobs;
-		this.stictMode = strictMode;
+		this.strictMode = strictMode;
 	}
 
 	public Collection<String> getRequiredJobs() {
 		return requiredJobs;
 	}
 
-	public boolean isStictMode() {
-		return stictMode;
+	public boolean isStrictMode() {
+		return strictMode;
 	}
 	
 }

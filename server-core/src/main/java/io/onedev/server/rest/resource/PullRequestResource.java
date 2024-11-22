@@ -259,11 +259,20 @@ public class PullRequestResource {
 			}
 		}
 
-		for (Long assigneeId: data.getAssigneeIds()) {
-			PullRequestAssignment assignment = new PullRequestAssignment();
-			assignment.setRequest(request);
-			assignment.setUser(userManager.load(assigneeId));
-			request.getAssignments().add(assignment);
+		if (!data.getAssigneeIds().isEmpty()) {
+			for (Long assigneeId : data.getAssigneeIds()) {
+				PullRequestAssignment assignment = new PullRequestAssignment();
+				assignment.setRequest(request);
+				assignment.setUser(userManager.load(assigneeId));
+				request.getAssignments().add(assignment);
+			}
+		} else {
+			for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
+				PullRequestAssignment assignment = new PullRequestAssignment();
+				assignment.setRequest(request);
+				assignment.setUser(assignee);
+				request.getAssignments().add(assignment);
+			}
 		}
 				
 		pullRequestManager.open(request);

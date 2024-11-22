@@ -7186,7 +7186,30 @@ public class DataMigrator {
 		}		
 	}
 
-	private void migrate182(File dataDir, Stack<Integer> versions) {
+	private void migrate182_reviewRequirement(@Nullable Element reviewRequirementElement) {
+		if (reviewRequirementElement != null) {
+			String reviewRequirement = reviewRequirementElement.getText();
+			reviewRequirement = reviewRequirement.replaceAll("\\)\\s+and\\s+(user|group)", ") $1");
+			reviewRequirementElement.setText(reviewRequirement);
+		}
 	}
+
+	private void migrate182(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("pullRequestSetting").addElement("defaultAssignees");
+					for (var branchProtectionElement : element.element("branchProtections").elements()) {
+						migrate182_reviewRequirement(branchProtectionElement.element("reviewRequirement"));
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
+							migrate182_reviewRequirement(fileProtectionElement.element("reviewRequirement"));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 	
 }

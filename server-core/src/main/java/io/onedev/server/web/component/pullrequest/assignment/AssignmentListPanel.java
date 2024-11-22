@@ -106,6 +106,7 @@ public abstract class AssignmentListPanel extends Panel {
 									PullRequest.getChangeObservable(getPullRequest().getId()));
 						}
 						assignmentsModel.detach();
+						onAssignmentsChanged(target);
 					}
 
 					@Override
@@ -129,11 +130,12 @@ public abstract class AssignmentListPanel extends Panel {
 				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 			}
 
-			@Override
+			@Override 
 			protected void onSelect(AjaxRequestTarget target, User user) {
 				super.onSelect(target, user);
 				if (getPullRequest().isNew())
 					target.add(AssignmentListPanel.this);
+				onAssignmentsChanged(target);
 			}
 
 			@Override
@@ -153,6 +155,10 @@ public abstract class AssignmentListPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	protected void onAssignmentsChanged(AjaxRequestTarget target) {
+		
 	}
 
 	@Override

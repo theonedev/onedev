@@ -329,7 +329,7 @@ public class BranchProtection implements Serializable {
 				break;
 			}
 		}
-		return usage.prefix("code: branch protection '" + getBranches() + "'");
+		return usage.prefix("branch protection '" + getBranches() + "'").prefix("code");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -355,7 +355,7 @@ public class BranchProtection implements Serializable {
 				break;
 			}
 		}
-		return usage.prefix("code: branch protection '" + getBranches() + "'");
+		return usage.prefix("branch protection '" + getBranches() + "'").prefix("code");
 	}
 	
 	/**

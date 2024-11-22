@@ -1,6 +1,6 @@
 grammar ReviewRequirement;
 
-requirement: WS* criteria (WS+ 'and' WS+ criteria)* WS* EOF;
+requirement: WS* criteria (WS+ criteria)* WS* EOF;
 
 criteria: userCriteria | groupCriteria;
 

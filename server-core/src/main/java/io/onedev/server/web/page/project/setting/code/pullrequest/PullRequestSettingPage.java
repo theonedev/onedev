@@ -48,7 +48,7 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Pull Request Setting</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>Pull Request Settings</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

@@ -100,13 +100,13 @@
 					</div>
 				</div>
 				<div wicket:id="requestOperations" class="operations">
-					<a wicket:id="merge" class="btn btn-sm btn-light btn-hover-primary">Merge</a>
-					<a wicket:id="discard" class="btn btn-sm btn-light btn-hover-primary">Discard</a>
-					<a wicket:id="approve" class="btn btn-sm btn-light btn-hover-primary">Approve</a>
-					<a wicket:id="requestForChanges" class="btn btn-sm btn-light btn-hover-primary">Request For Changes</a>
-					<a wicket:id="reopen" class="btn btn-sm btn-light btn-hover-primary">Reopen</a>
-					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light btn-hover-primary">Delete Source Branch</a>
-					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light btn-hover-primary">Restore Source Branch</a>
+					<a wicket:id="merge" class="btn btn-sm btn-light-success btn-hover-success">Merge</a>
+					<a wicket:id="discard" class="btn btn-sm btn-light-info btn-hover-info">Discard</a>
+					<a wicket:id="approve" class="btn btn-sm btn-light-success btn-hover-success">Approve</a>
+					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-warning btn-hover-warning">Request For Changes</a>
+					<a wicket:id="reopen" class="btn btn-sm btn-light-primary btn-hover-primary">Reopen</a>
+					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Delete Source Branch</a>
+					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Restore Source Branch</a>
 				</div>
 				<ul wicket:id="requestTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5 mt-3 align-items-center"></ul>
 				<wicket:child></wicket:child>
@@ -158,7 +158,7 @@
 		</wicket:enclosure>
 		<wicket:enclosure child="assignments">
 		<div class="assignments">
-			<div class="head">Assignees</div>
+			<div class="head d-flex"><span class="mr-2">Assignees</span> <a wicket:id="assignToMe" class="ml-auto font-size-sm font-weight-normal">assign to me</a></div>
 			<div wicket:id="assignments" class="body"></div>
 			<div wicket:id="assigneeHelp" class="font-size-sm text-muted form-text">Assignees are expected to merge the pull request</div>
 		</div>

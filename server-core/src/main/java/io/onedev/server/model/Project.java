@@ -691,6 +691,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 		return forkAncestors;
 	}
+
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
+	}
 	
 	private ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
@@ -1905,7 +1909,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return "**";
 	}
 
-	public MergeStrategy findDefaultMergeStrategy() {
+	public MergeStrategy findDefaultPullRequestMergeStrategy() {
 		Project current = this;
 		do {
 			if (current.getPullRequestSetting().getDefaultMergeStrategy() != null)
@@ -1914,6 +1918,27 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null);
 
 		return MergeStrategy.CREATE_MERGE_COMMIT;
+	}
+	
+	public List<User> findDefaultPullRequestAssignees() {
+		Project current = this;
+		do {
+			if (!current.getPullRequestSetting().getDefaultAssignees().isEmpty()) {
+				var users = new ArrayList<User>();
+				for (var userName: current.getPullRequestSetting().getDefaultAssignees()) {
+					var user = getUserManager().findByName(userName);
+					if (user == null)
+						throw new ExplicitException("Pull request default assignee not found: " + userName);
+					else if (!SecurityUtils.canWriteCode(user.asSubject(), this))
+						throw new ExplicitException("Pull request default assignee does not have code write permission over the target project: " + userName);
+					users.add(user);
+				}
+				return users;
+			}
+			current = current.getParent();
+		} while (current != null);
+
+		return new ArrayList<>();
 	}
 	
 	public String getSiteLockName() {

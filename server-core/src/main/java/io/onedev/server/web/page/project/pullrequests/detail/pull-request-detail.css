@@ -62,7 +62,7 @@ ul>li>a.code-comments.new .icon {
 	margin-bottom: 0;
 }
 
-@media(min-width: 1200px) {
+@media(min-width: 992px) {
 	.pull-request-detail>.card-body>.main>.summary .more-info,
 	.pull-request-detail>.card-body>.main>.summary .more-info:hover,
 	.pull-request-detail>.card-body>.main>.summary .more-info:focus {

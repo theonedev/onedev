@@ -176,6 +176,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return OneDev.getInstance(PullRequestReviewManager.class);
 	}
 	
+	private PullRequestAssignmentManager getPullRequestAssignmentManager() {
+		return OneDev.getInstance(PullRequestAssignmentManager.class);
+	}
+	
 	private WebMarkupContainer newRequestHead() {
 		WebMarkupContainer requestHead = new WebMarkupContainer("requestHeader");
 		requestHead.setOutputMarkupId(true);
@@ -551,7 +555,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					BuildRequirement buildRequirement = request.getBuildRequirement();
-					if (buildRequirement.isStictMode() && request.isBuildCommitOutdated()) {
+					if (buildRequirement.isStrictMode() && request.isBuildCommitOutdated()) {
 						setVisible(false);
 					} else {
 						var requiredJobs = buildRequirement.getRequiredJobs();
@@ -573,7 +577,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					BuildRequirement buildRequirement = request.getBuildRequirement();
-					if (buildRequirement.isStictMode() && request.isBuildCommitOutdated()) {
+					if (buildRequirement.isStrictMode() && request.isBuildCommitOutdated()) {
 						setVisible(false);
 					} else {
 						var requiredJobs = buildRequirement.getRequiredJobs();
@@ -616,7 +620,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		summaryContainer.add(new Label("requiredJobsMessage", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
-				if (getPullRequest().getBuildRequirement().isStictMode())
+				if (getPullRequest().getBuildRequirement().isStrictMode())
 					return "Jobs required to be successful on merge commit: ";
 				else 
 					return "Jobs required to be successful: ";
@@ -628,7 +632,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				BuildRequirement buildRequirement = request.getBuildRequirement();
 				List<String> requiredJobs = new ArrayList<>(buildRequirement.getRequiredJobs());
-				if (!buildRequirement.isStictMode() || !request.isBuildCommitOutdated()) {
+				if (!buildRequirement.isStrictMode() || !request.isBuildCommitOutdated()) {
 					for (Build build: request.getCurrentBuilds())
 						requiredJobs.remove(build.getJobName());
 				}
@@ -644,7 +648,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				
 				PullRequest request = getPullRequest();
 				String commitHash;
-				if (request.getBuildRequirement().isStictMode() || request.getBuildCommitHash() == null)
+				if (request.getBuildRequirement().isStrictMode() || request.getBuildCommitHash() == null)
 					commitHash = request.checkMergePreview().getMergeCommitHash();
 				else 
 					commitHash = request.getBuildCommitHash();
@@ -949,6 +953,28 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						setVisible(hasVisibleRequiredJobs);
 					}
 					
+				});
+				fragment.add(new AjaxLink<Void>("assignToMe") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						var assignment = new PullRequestAssignment();
+						assignment.setRequest(getPullRequest());
+						assignment.setUser(SecurityUtils.getUser());
+						OneDev.getInstance(PullRequestAssignmentManager.class).create(assignment);
+						((BasePage)getPage()).notifyObservableChange(target,
+								PullRequest.getChangeObservable(getPullRequest().getId()));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getPullRequest().isMerged()
+								&& SecurityUtils.getUser() != null
+								&& !getPullRequest().getAssignees().contains(SecurityUtils.getUser())		
+								&& SecurityUtils.canWriteCode(getProject()) 
+								&& SecurityUtils.canModifyPullRequest(getPullRequest()));
+					}
 				});
 				fragment.add(new AssignmentListPanel("assignments") {
 

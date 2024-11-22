@@ -50,7 +50,7 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Code Analysis Setting</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>Code Analysis Settings</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

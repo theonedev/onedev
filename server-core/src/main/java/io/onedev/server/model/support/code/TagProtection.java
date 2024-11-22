@@ -125,7 +125,7 @@ public class TagProtection implements Serializable {
 		Usage usage = new Usage();
 		if (UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
-		return usage.prefix("code: tag protection '" + getTags() + "'");
+		return usage.prefix("tag protection '" + getTags() + "'").prefix("code");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -136,7 +136,7 @@ public class TagProtection implements Serializable {
 		Usage usage = new Usage();
 		if (UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
-		return usage.prefix("code: tag protection '" + getTags() + "'");
+		return usage.prefix("tag protection '" + getTags() + "'").prefix("code");
 	}
 
 	public Usage getTagUsage(String tagName) {

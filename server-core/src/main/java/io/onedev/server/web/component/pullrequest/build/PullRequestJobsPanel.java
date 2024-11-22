@@ -34,6 +34,7 @@ import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.util.criteria.Criteria.quote;
+import static java.util.Comparator.*;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInfo>> {
@@ -44,28 +45,22 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 
 			@Override
 			protected List<JobBuildInfo> load() {
-				List<JobBuildInfo> listOfJobBuildInfo = new ArrayList<>();
-				PullRequest request = getPullRequest();
-				Map<String, List<Build>> map = new HashMap<>();
-				for (Build build : request.getCurrentBuilds()) {
-					String jobName = build.getJobName();
-					List<Build> list = map.get(jobName);
-					if (list == null) {
-						list = new ArrayList<>();
-						map.put(jobName, list);
-					}
-					list.add(build);
-				}
-				for (Map.Entry<String, List<Build>> entry : map.entrySet()) {
-					String jobName = entry.getKey();
+				var listOfJobBuildInfo = new ArrayList<JobBuildInfo>();
+				var request = getPullRequest();
+				
+				var map = new HashMap<String, List<Build>>();
+				for (var build : request.getCurrentBuilds()) 
+					map.computeIfAbsent(build.getJobName(), k -> new ArrayList<>()).add(build);
+				for (var entry : map.entrySet()) {
+					var jobName = entry.getKey();
 					if (SecurityUtils.canAccessJob(getPullRequest().getTargetProject(), jobName)) {
-						List<Build> builds = new ArrayList<>(entry.getValue());
+						var builds = new ArrayList<>(entry.getValue());
 						Collections.sort(builds);
-						boolean required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);
+						var required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);
 						listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
 					}
 				}
-				Collections.sort(listOfJobBuildInfo, (Comparator<JobBuildInfo>) (o1, o2) -> o1.getBuilds().iterator().next().getId().compareTo(o2.getBuilds().iterator().next().getId()));
+				Collections.sort(listOfJobBuildInfo, comparing((JobBuildInfo o) -> o.getBuilds().iterator().next().getId()));
 				return listOfJobBuildInfo;
 			}
 
