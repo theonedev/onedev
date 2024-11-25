@@ -171,6 +171,21 @@
 				<div wicket:id="help" class="font-size-sm text-muted form-text"></div>
 			</div>
 		</div>
+		<div wicket:id="autoMerge" class="auto-merge">
+			<div class="head d-flex">
+				<span class="mr-2">Auto Merge <span wicket:id="badge" class="ml-2 badge badge-sm badge-info"/></span>
+				<wicket:enclosure child="toggle">
+					<div class="switch switch-sm switch-primary ml-auto">
+						<label>
+							<input wicket:id="toggle" type="checkbox">
+						</label>
+					</div>
+				</wicket:enclosure>
+			</div>
+			<div class="body">
+				<div wicket:id="tips" class="font-size-sm text-muted form-text"></div>
+			</div>
+		</div>
         <div wicket:id="labels" class="labels">
 			<div wicket:id="head" class="d-flex align-items-center justify-content-between mb-3">
 		        <span class="font-weight-bolder">Labels</span>
@@ -215,5 +230,12 @@
 			</div>
 			</wicket:enclosure>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="autoMergeEnabledFrag">
+		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> once all reviewers have approved and all required jobs have passed. 
+		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch. 
+	</wicket:fragment>
+	<wicket:fragment wicket:id="autoMergeDisabledFrag">
+		Enable this option to automatically merge the pull request once all reviewers have approved and all required jobs have passed.  
 	</wicket:fragment>
 </wicket:extend>

@@ -16,6 +16,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -263,6 +264,9 @@ public class PullRequest extends ProjectBelonging
 	@Embedded
 	private LastActivity lastActivity;
 
+	@Embedded
+	private AutoMerge autoMerge = new AutoMerge();
+	
 	@Column(name="CODE_COMMENTS_UPDT")
 	private Date codeCommentsUpdateDate;
 	
@@ -740,6 +744,14 @@ public class PullRequest extends ProjectBelonging
 		this.lastActivity = lastActivity;
 	}
 
+	public AutoMerge getAutoMerge() {
+		return autoMerge;
+	}
+
+	public void setAutoMerge(AutoMerge autoMerge) {
+		this.autoMerge = autoMerge;
+	}
+
 	@Nullable
 	public Date getCodeCommentsUpdateDate() {
 		return codeCommentsUpdateDate;
@@ -1030,6 +1042,17 @@ public class PullRequest extends ProjectBelonging
 			return commitMessageError.toString();
 		
 		return null;
+	}
+	
+	public String getDefaultCommitMessage() {
+		if (autoMerge.getCommitMessage() != null) {
+			return autoMerge.getCommitMessage();
+		} else {
+			var commitMessage = "Merges pull request #" + getNumber() + "\n\n" + getTitle();
+			if (getDescription() != null)
+				commitMessage += "\n\n" + getDescription();
+			return commitMessage;
+		}
 	}
 
 	@Nullable

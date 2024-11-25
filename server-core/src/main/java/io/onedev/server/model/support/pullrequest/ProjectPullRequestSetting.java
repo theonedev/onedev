@@ -27,6 +27,8 @@ public class ProjectPullRequestSetting implements Serializable {
 	
 	private List<String> defaultAssignees = new ArrayList<>();
 	
+	private Boolean deleteSourceBranchAfterMerge;
+	
 	@Nullable
 	public List<NamedPullRequestQuery> getNamedQueries() {
 		return namedQueries;
@@ -71,6 +73,17 @@ public class ProjectPullRequestSetting implements Serializable {
 		var choices = new ArrayList<>(SecurityUtils.getAuthorizedUsers(Project.get(), new WriteCode()));
 		Collections.sort(choices, Comparator.comparing(User::getDisplayName));
 		return choices;
+	}
+
+	@Editable(order=400, placeholder = "Inherit from parent", rootPlaceholder = "No", description = "" +
+			"If enabled, source branch will be deleted automatically after merge the pull request if " +
+			"user has permission to do that")
+	public Boolean getDeleteSourceBranchAfterMerge() {
+		return deleteSourceBranchAfterMerge;
+	}
+
+	public void setDeleteSourceBranchAfterMerge(Boolean deleteSourceBranchAfterMerge) {
+		this.deleteSourceBranchAfterMerge = deleteSourceBranchAfterMerge;
 	}
 
 	public void onRenameUser(String oldName, String newName) {

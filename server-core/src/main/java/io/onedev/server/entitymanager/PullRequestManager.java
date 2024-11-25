@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
@@ -42,7 +43,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     void checkAsync(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit);
     
-    void merge(PullRequest request, @Nullable String commitMessage);
+    void merge(User user, PullRequest request, @Nullable String commitMessage);
     
     void open(PullRequest request);
     

@@ -7208,6 +7208,11 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.addElement("autoMerge").addElement("enabled").setText("false");
+				dom.writeToFile(file, false);
 			}
 		}
 	}	

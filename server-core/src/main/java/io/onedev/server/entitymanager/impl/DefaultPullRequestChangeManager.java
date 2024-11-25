@@ -9,11 +9,9 @@ import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.*;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -72,6 +70,21 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		request.setMergeStrategy(mergeStrategy);
 	}
 
+	@Transactional
+	@Override
+	public void changeAutoMerge(PullRequest request, AutoMerge autoMerge) {
+		if (request.getAutoMerge().isEnabled() && !autoMerge.isEnabled() 
+				|| !request.getAutoMerge().isEnabled() && autoMerge.isEnabled()) {
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setRequest(request);
+			change.setData(new PullRequestAutoMergeChangeData(autoMerge.isEnabled()));
+			change.setUser(SecurityUtils.getUser());
+			create(change, null);
+		}
+		request.setAutoMerge(autoMerge);
+	}
+	
 	@Transactional
 	@Override
 	public void changeTitle(PullRequest request, String title) {

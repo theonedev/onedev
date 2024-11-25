@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
+package io.onedev.server.web.page.project.pullrequests.detail;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;

@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
 
@@ -12,6 +13,8 @@ public interface PullRequestChangeManager extends EntityManager<PullRequestChang
 	void create(PullRequestChange change, @Nullable String note);
 	
 	void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy);
+	
+	void changeAutoMerge(PullRequest request, AutoMerge autoMerge);
 	
 	void changeTitle(PullRequest request, String title);
 

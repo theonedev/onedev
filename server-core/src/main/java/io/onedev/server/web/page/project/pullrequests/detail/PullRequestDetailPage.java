@@ -11,6 +11,7 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.code.BuildRequirement;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityQuery;
@@ -24,6 +25,8 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -73,6 +76,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -84,6 +88,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -106,6 +111,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
@@ -176,8 +182,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return OneDev.getInstance(PullRequestReviewManager.class);
 	}
 	
-	private PullRequestAssignmentManager getPullRequestAssignmentManager() {
-		return OneDev.getInstance(PullRequestAssignmentManager.class);
+	private PullRequestChangeManager getPullRequestChangeManager() {
+		return OneDev.getInstance(PullRequestChangeManager.class);
 	}
 	
 	private WebMarkupContainer newRequestHead() {
@@ -893,6 +899,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				}
 				
 				fragment.add(newMergeStrategyContainer());
+				fragment.add(newAutoMergeContainer());
 				fragment.add(new ReviewListPanel("reviews") {
 
 					@Override
@@ -1245,6 +1252,170 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		return mergeStrategyContainer;
 	}
+
+	private WebMarkupContainer newAutoMergeContainer() {
+		WebMarkupContainer autoMergeContainer = new WebMarkupContainer("autoMerge") {
+			@Override
+			protected void onBeforeRender() {
+				Fragment tipsContainer;
+				var autoMerge = getPullRequest().getAutoMerge();
+				if (autoMerge.isEnabled()) {
+					tipsContainer = new Fragment("tips", "autoMergeEnabledFrag", PullRequestDetailPage.this);
+					WebMarkupContainer link;
+					if (getPullRequest().getMergeStrategy() != REBASE_SOURCE_BRANCH_COMMITS) {
+						if (SecurityUtils.canManagePullRequests(getProject()) 
+								|| autoMerge.getUser() != null && autoMerge.getUser().equals(SecurityUtils.getUser())) {
+							link = new AjaxLink<Void>("commitMessage") {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									var bean = new CommitMessageBean();
+									bean.setCommitMessage(autoMerge.getCommitMessage());
+									new BeanEditModalPanel<>(target, bean, "Preset Commit Message") {
+
+										@Override
+										protected void onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+											autoMerge.setCommitMessage(bean.getCommitMessage());
+											getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
+											Session.get().success("Preset commit message updated");
+											close();
+										}
+									};
+								}
+								
+							};
+						} else {
+							link = new DropdownLink("commitMessage") {
+
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown) {
+									return new MultilineLabel(id, autoMerge.getCommitMessage())
+											.add(AttributeAppender.append("class", "p-3"));
+								}
+								
+							};
+						}
+					} else {
+						link = new WebMarkupContainer("commitMessage");
+						link.setVisible(false);
+					}
+					tipsContainer.add(link);
+				} else {
+					tipsContainer = new Fragment("tips", "autoMergeDisabledFrag", PullRequestDetailPage.this);
+				}
+				addOrReplace(tipsContainer);
+				
+				super.onBeforeRender();
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				var request = getPullRequest();
+				setVisible(request.isOpen() && request.checkMerge() != null);
+			}
+			
+		};
+		
+		var autoMergeEnabled = new AtomicBoolean();
+		var toggleCheck = new CheckBox("toggle", new IModel<>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Boolean getObject() {
+				return getPullRequest().getAutoMerge().isEnabled();
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				autoMergeEnabled.set(object);
+			}
+
+		}) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				if (getPullRequest().getAutoMerge().isEnabled())
+					setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()));	
+				else 
+					setVisible(SecurityUtils.canWriteCode(getProject()));
+			}
+			
+		};
+		toggleCheck.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				var request = getPullRequest();
+				if (autoMergeEnabled.get()) {
+					 if (request.getMergeStrategy() != REBASE_SOURCE_BRANCH_COMMITS) {
+						 var bean = new CommitMessageBean();
+						 bean.setCommitMessage(request.getDefaultCommitMessage());
+						 new BeanEditModalPanel<>(target, bean, "Preset Commit Message") {
+
+							 @Override
+							 protected void onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+								 var autoMerge = new AutoMerge();
+								 autoMerge.setEnabled(true);
+								 autoMerge.setUser(SecurityUtils.getUser());
+								 autoMerge.setCommitMessage(bean.getCommitMessage());
+								 getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
+								 target.add(autoMergeContainer);
+								 close();
+							 }
+
+							 @Override
+							 protected void onCancel(AjaxRequestTarget target) {
+								 super.onCancel(target);
+								 target.add(autoMergeContainer);
+							 }
+
+							 @Override
+							 protected boolean isDirtyAware() {
+								 return false;
+							 }
+						 };
+					 } else {
+						 var autoMerge = new AutoMerge();
+						 autoMerge.setEnabled(true);
+						 autoMerge.setUser(SecurityUtils.getUser());
+						 autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+						 getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+						 target.add(autoMergeContainer);
+					 }
+				} else {
+					var autoMerge = new AutoMerge();
+					autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+					getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+					target.add(autoMergeContainer);
+				}
+			}
+
+		});
+		autoMergeContainer.add(toggleCheck);
+
+		autoMergeContainer.add(new Label("badge", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				return getPullRequest().getAutoMerge().isEnabled()? "ON": "OFF";
+			}
+
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				toggleCheck.configure();
+				setVisible(!toggleCheck.isVisible());
+			}
+		});
+		
+		autoMergeContainer.setOutputMarkupId(true);
+		return autoMergeContainer;
+	}	
 	
 	private WebMarkupContainer newStatusBarContainer() {
 		WebMarkupContainer statusBarContainer = new WebMarkupContainer("statusBar");
@@ -1485,13 +1656,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						if (canOperate()) {
 							var request = getPullRequest();
 							var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-							if (getCommitMessage() != null) {
-								var errorMessage = branchProtection.checkCommitMessage(getCommitMessage(),
+							var commitMessage = getCommitMessage();
+							if (commitMessage != null) {
+								var errorMessage = branchProtection.checkCommitMessage(commitMessage,
 										request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
 								if (errorMessage != null) 
 									return errorMessage;
 							}
-							getPullRequestManager().merge(getPullRequest(), getCommitMessage());
+							getPullRequestManager().merge(SecurityUtils.getUser(), getPullRequest(), commitMessage);
 							notifyPullRequestChange(target);
 							return null;
 						} else {

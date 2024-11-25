@@ -4,6 +4,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
+import io.onedev.server.web.page.project.pullrequests.detail.CommitMessageBean;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
@@ -32,22 +33,14 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 		String description = null;
 		MergeStrategy mergeStrategy = request.getMergeStrategy();
 		MergePreview mergePreview = request.checkMergePreview();
-		if (mergeStrategy == CREATE_MERGE_COMMIT) {
-			commitMessage = "Merges pull request #" + request.getNumber();
-			commitMessage += "\n\n" + request.getTitle();
-		} else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
-			commitMessage = request.getTitle();
-			if (request.getDescription() != null)
-				commitMessage += "\n\n" + request.getDescription();
-			commitMessage += "\n\nMerges pull request #" + request.getNumber();
-		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
+		if (mergeStrategy == CREATE_MERGE_COMMIT || mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) 
+			commitMessage = request.getDefaultCommitMessage();
+		else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) 
 			description = "Source branch commits will be rebased onto target branch";
-		} else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) {
+		else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) 
 			description = "Source branch commits will be fast-forwarded to target branch";
-		} else {
-			commitMessage = "Merges pull request #" + request.getNumber();
-			commitMessage += "\n\n" + request.getTitle();
-		}
+		else 
+			commitMessage = request.getDefaultCommitMessage();
 		
 		getForm().add(new Label("description", description).setVisible(description != null));
 

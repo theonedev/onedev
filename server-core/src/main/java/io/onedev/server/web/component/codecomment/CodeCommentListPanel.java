@@ -846,7 +846,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				cellItem.add(fragment);
 			}
 
-		});
+		});  
 		
 		body.add(commentsTable = new DefaultDataTable<>("comments", columns, dataProvider,
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {

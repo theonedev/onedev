@@ -1919,6 +1919,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 		return MergeStrategy.CREATE_MERGE_COMMIT;
 	}
+
+	public boolean findDeleteBranchAfterPullRequestMerge() {
+		Project current = this;
+		do {
+			if (current.getPullRequestSetting().getDeleteSourceBranchAfterMerge() != null)
+				return current.getPullRequestSetting().getDeleteSourceBranchAfterMerge();
+			current = current.getParent();
+		} while (current != null);
+
+		return false;
+	}
 	
 	public List<User> findDefaultPullRequestAssignees() {
 		Project current = this;

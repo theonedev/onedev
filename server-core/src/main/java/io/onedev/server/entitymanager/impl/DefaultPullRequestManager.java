@@ -258,10 +258,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	@Transactional
 	@Override
-	public void merge(PullRequest request, String commitMessage) {
+	public void merge(User user, PullRequest request, String commitMessage) {
 		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
 		ObjectId mergeCommitId = ObjectId.fromString(checkNotNull(mergePreview.getMergeCommitHash()));
-		User user = SecurityUtils.getUser();
         PersonIdent person = user.asPerson();
         
 		Project project = request.getTargetProject();
@@ -276,6 +275,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				author = person;
 			else
 				author = null;
+			if (commitMessage == null)
+				commitMessage = request.getDefaultCommitMessage();
 			mergeCommitId = getGitService().amendCommit(project, mergeCommitId, 
 					author, person, commitMessage);
 		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
@@ -297,10 +298,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 					ObjectId.fromString(request.getMergePreview().getMergeCommitHash()), null);
 		}
 		
-		closeAsMerged(request, false);
+		closeAsMerged(user, request, false);
 
 		gitService.updateRef(project, request.getTargetRef(), mergeCommitId, 
 				ObjectId.fromString(mergePreview.getTargetHeadCommitHash()));
+		
+		if (project.findDeleteBranchAfterPullRequestMerge() 
+				&& request.checkDeleteSourceBranch() == null
+				&& SecurityUtils.canDeleteBranch(user.asSubject(), request.getSourceProject(), request.getSourceBranch())) {
+			gitService.deleteBranch(request.getSourceProject(), request.getSourceBranch());
+		}
 	}
 	
 	@Transactional
@@ -346,7 +353,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		listenerRegistry.post(new PullRequestOpened(request));
 	}
 	
-	private void closeAsMerged(PullRequest request, boolean dueToMerged) {
+	private void closeAsMerged(User user, PullRequest request, boolean dueToMerged) {
 		request.setStatus(MERGED);
 		request.setCloseDate(new Date());
 		
@@ -362,7 +369,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 			reason = null;
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setUser(SecurityUtils.getUser());
+		change.setUser(user);
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
@@ -452,7 +459,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				} else {
 					updateManager.checkUpdate(request);
 					if (request.isMergedIntoTarget()) {
-						closeAsMerged(request, true);
+						closeAsMerged(SecurityUtils.getUser(), request, true);
 					} else {
 						checkReviews(request, sourceUpdated);
 						
@@ -462,38 +469,43 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 						}
 
 						Project targetProject = request.getTargetProject();
-						if (request.isOpen() && !request.isMergedIntoTarget()) {
-							MergePreview mergePreview = request.checkMergePreview();
-							if (mergePreview == null) {
-								mergePreview = new MergePreview();
-								mergePreview.setTargetHeadCommitHash(request.getTarget().getObjectName());
-								mergePreview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
-								mergePreview.setMergeStrategy(request.getMergeStrategy());
-								logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
-										request.getNumber(), targetProject.getPath());
-								ObjectId merged = mergePreview.getMergeStrategy()
-										.merge(request, "Merge preview of pull request #" + request.getNumber());
-								if (merged != null)
-									mergePreview.setMergeCommitHash(merged.name());
-								
-								request.setMergePreview(mergePreview);
+						MergePreview mergePreview = request.checkMergePreview();
+						if (mergePreview == null) {
+							mergePreview = new MergePreview();
+							mergePreview.setTargetHeadCommitHash(request.getTarget().getObjectName());
+							mergePreview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
+							mergePreview.setMergeStrategy(request.getMergeStrategy());
+							logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
+									request.getNumber(), targetProject.getPath());
+							ObjectId merged = mergePreview.getMergeStrategy()
+									.merge(request, "Merge preview of pull request #" + request.getNumber());
+							if (merged != null)
+								mergePreview.setMergeCommitHash(merged.name());
+							
+							request.setMergePreview(mergePreview);
 
-								if (updateBuildCommit) {
-									request.setBuildCommitHash(mergePreview.getMergeCommitHash());
-									updateBuildCommitRef(request);
-									listenerRegistry.post(new PullRequestBuildCommitUpdated((request)));
-								}
-								dao.persist(request);
-								updateMergePreviewRef(request);
-								listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
-							} else if (updateBuildCommit && 
-									!Objects.equals(mergePreview.getMergeCommitHash(), request.getBuildCommitHash())) {
+							if (updateBuildCommit) {
 								request.setBuildCommitHash(mergePreview.getMergeCommitHash());
-								dao.persist(request);
 								updateBuildCommitRef(request);
-								listenerRegistry.post(new PullRequestBuildCommitUpdated(request));
+								listenerRegistry.post(new PullRequestBuildCommitUpdated((request)));
 							}
-						} 
+							dao.persist(request);
+							updateMergePreviewRef(request);
+							listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
+						} else if (updateBuildCommit && 
+								!Objects.equals(mergePreview.getMergeCommitHash(), request.getBuildCommitHash())) {
+							request.setBuildCommitHash(mergePreview.getMergeCommitHash());
+							dao.persist(request);
+							updateBuildCommitRef(request);
+							listenerRegistry.post(new PullRequestBuildCommitUpdated(request));
+						}
+						var autoMerge = request.getAutoMerge();
+						if (autoMerge.isEnabled() && request.checkMerge() == null) {
+							if (autoMerge.getUser() != null)
+								merge(autoMerge.getUser(), request, null);
+							else 
+								throw new ExplicitException("Auto merge user not specified");
+						}
 					}
 				}
 			}
@@ -618,10 +630,18 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				lastActivity.setDate(event.getDate());
 				event.getRequest().setLastActivity(lastActivity);
 			}
+			event.getRequest().getAutoMerge().setEnabled(false);
 		} else if (!event.isMinor()) {
 			event.getRequest().setLastActivity(event.getLastUpdate());
-			if (event instanceof PullRequestCodeCommentEvent)
+			if (event instanceof PullRequestCodeCommentEvent) {
 				event.getRequest().setCodeCommentsUpdateDate(event.getDate());
+			} else if (event instanceof PullRequestChanged) {
+				var data = ((PullRequestChanged) event).getChange().getData();
+				if (data instanceof PullRequestMergeStrategyChangeData 
+						|| data instanceof PullRequestTargetBranchChangeData) {
+					event.getRequest().getAutoMerge().setEnabled(false);
+				}
+			}
 		}
 	}
 	

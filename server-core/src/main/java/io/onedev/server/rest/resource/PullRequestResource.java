@@ -7,6 +7,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.InvalidParamException;
@@ -311,6 +312,39 @@ public class PullRequestResource {
 		pullRequestChangeManager.changeMergeStrategy(request, mergeStrategy);
 		return Response.ok().build();
     }
+
+	@Api(order=1550)
+	@Path("/{requestId}/auto-merge")
+	@POST
+	public Response setAutoMerge(@PathParam("requestId") Long requestId, @NotNull AutoMergeData data) {
+		PullRequest request = pullRequestManager.load(requestId);
+		if (request.getAutoMerge().isEnabled()) {
+			var authUser = SecurityUtils.getAuthUser();
+			if (SecurityUtils.canManagePullRequests(request.getProject()) 
+					|| authUser != null && authUser.equals(request.getAutoMerge().getUser())) {
+				var autoMerge = new AutoMerge();
+				autoMerge.setEnabled(data.isEnabled());
+				autoMerge.setUser(SecurityUtils.getUser());
+				autoMerge.setCommitMessage(data.getCommitMessage());
+				pullRequestChangeManager.changeAutoMerge(request, autoMerge);																
+			} else {
+				throw new UnauthorizedException();
+			}
+		} else if (SecurityUtils.canWriteCode(request.getProject())) {
+			if (data.isEnabled()) {
+				var autoMerge = new AutoMerge();
+				autoMerge.setEnabled(true);
+				autoMerge.setUser(SecurityUtils.getUser());
+				autoMerge.setCommitMessage(data.getCommitMessage());
+				pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+			} else {
+				throw new UnsupportedOperationException();
+			}
+		} else {
+			throw new UnauthorizedException();
+		}
+		return Response.ok().build();
+	}
 	
 	@Api(order=1600)
 	@Path("/{requestId}/reopen")
@@ -346,13 +380,14 @@ public class PullRequestResource {
     @POST
     public Response merge(@PathParam("requestId") Long requestId, String note) {
 		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canWriteCode(request.getProject()))
+		var user = SecurityUtils.getUser();
+    	if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
 			throw new UnauthorizedException();
     	String errorMessage = request.checkMerge();
     	if (errorMessage != null)
     		throw new ExplicitException(errorMessage);
 		
-		pullRequestManager.merge(request, note);
+		pullRequestManager.merge(user, request, note);
 		return Response.ok().build();
     }
 	
@@ -509,4 +544,28 @@ public class PullRequestResource {
 		}
 
 	}
+	
+	public static class AutoMergeData implements Serializable {
+		
+		private boolean enabled;
+		
+		private String commitMessage;
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public String getCommitMessage() {
+			return commitMessage;
+		}
+
+		public void setCommitMessage(String commitMessage) {
+			this.commitMessage = commitMessage;
+		}
+	}
+	
 }
