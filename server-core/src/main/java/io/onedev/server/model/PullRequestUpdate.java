@@ -110,24 +110,6 @@ public class PullRequestUpdate extends AbstractEntity {
 		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
-	/**
-	 * Base commit represents head commit of last update, or base commit of the request 
-	 * for the first update. Base commit is used to calculate commits belonging to 
-	 * current update.
-	 * 
-	 * @return
-	 * 			base commit of this update
-	 */
-	public RevCommit getBaseCommit() {
-		PullRequest request = getRequest();
-
-		int index = request.getSortedUpdates().indexOf(this);
-		if (index > 0)
-			return request.getSortedUpdates().get(index-1).getHeadCommit();
-		else
-			return request.getBaseCommit();
-	}
-	
 	public List<RevCommit> getCommits() {
 		if (commits == null) {
 			Collection<ObjectId> uninterestingCommitIds = Lists.newArrayList(

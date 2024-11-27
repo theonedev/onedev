@@ -298,7 +298,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 					ObjectId.fromString(request.getMergePreview().getMergeCommitHash()), null);
 		}
 		
-		closeAsMerged(user, request, false);
+		closeAsMerged(request, false);
 
 		gitService.updateRef(project, request.getTargetRef(), mergeCommitId, 
 				ObjectId.fromString(mergePreview.getTargetHeadCommitHash()));
@@ -353,7 +353,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		listenerRegistry.post(new PullRequestOpened(request));
 	}
 	
-	private void closeAsMerged(User user, PullRequest request, boolean dueToMerged) {
+	private void closeAsMerged(PullRequest request, boolean dueToMerged) {
 		request.setStatus(MERGED);
 		request.setCloseDate(new Date());
 		
@@ -369,7 +369,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 			reason = null;
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setUser(user);
+		change.setUser(SecurityUtils.getUser());
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
@@ -413,16 +413,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		var gitDir = projectManager.getRepository(projectId).getDirectory();
 		projectManager.directoryModified(projectId, gitDir);	
 	}
-	
-	@Listen
-	public void on(PullRequestOpened event) {
-		gitDirModified(event.getProject().getId());
-	}
-
-	@Listen
-	public void on(PullRequestUpdated event) {
-		gitDirModified(event.getProject().getId());
-	}
 
 	@Listen
 	public void on(PullRequestDeleted event) {
@@ -433,19 +423,21 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public void on(PullRequestsDeleted event) {
 		gitDirModified(event.getProject().getId());
 	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestMergePreviewUpdated event) {
-		gitDirModified(event.getProject().getId());
+	
+	@Transactional
+	@Override
+	public void checkAutoMerge(PullRequest request) {
+		if (request.isOpen()) {
+			var autoMerge = request.getAutoMerge();
+			if (autoMerge.isEnabled() && request.checkMerge() == null) {
+				if (autoMerge.getUser() != null)
+					merge(autoMerge.getUser(), request, null);
+				else
+					throw new ExplicitException("Auto merge user not specified");
+			}
+		}
 	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestBuildCommitUpdated event) {
-		gitDirModified(event.getProject().getId());
-	}
-
+	 
 	private void check(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit) {
 		try {
 			request.setCheckError(null);
@@ -459,7 +451,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				} else {
 					updateManager.checkUpdate(request);
 					if (request.isMergedIntoTarget()) {
-						closeAsMerged(SecurityUtils.getUser(), request, true);
+						closeAsMerged(request, true);
 					} else {
 						checkReviews(request, sourceUpdated);
 						
@@ -499,13 +491,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 							updateBuildCommitRef(request);
 							listenerRegistry.post(new PullRequestBuildCommitUpdated(request));
 						}
-						var autoMerge = request.getAutoMerge();
-						if (autoMerge.isEnabled() && request.checkMerge() == null) {
-							if (autoMerge.getUser() != null)
-								merge(autoMerge.getUser(), request, null);
-							else 
-								throw new ExplicitException("Auto merge user not specified");
-						}
+						checkAutoMerge(request);
 					}
 				}
 			}
@@ -600,48 +586,38 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
 		return query(criteria);
 	}
-
-	@Transactional
-	@Listen
-	public void on(PullRequestChanged event) {
-		PullRequestChangeData data = event.getChange().getData();
-		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData) {
-			check(event.getRequest(), false, false);
-		} else if (data instanceof PullRequestMergeStrategyChangeData
-				|| data instanceof PullRequestTargetBranchChangeData) {
-			check(event.getRequest(), false, true);
-		}
-	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (event instanceof PullRequestUpdated) {
-			Collection<User> committers = ((PullRequestUpdated) event).getCommitters();
-			if (committers.size() == 1) {
-				LastActivity lastActivity = new LastActivity();
-				lastActivity.setUser(committers.iterator().next());
-				lastActivity.setDescription("added commits");
-				lastActivity.setDate(event.getDate());
-				event.getRequest().setLastActivity(lastActivity);
-			} else {
-				LastActivity lastActivity = new LastActivity();
-				lastActivity.setDescription("Commits added");
-				lastActivity.setDate(event.getDate());
-				event.getRequest().setLastActivity(lastActivity);
+		if (event instanceof PullRequestOpened 
+				|| event instanceof PullRequestBuildCommitUpdated) {
+			gitDirModified(event.getProject().getId());
+		} else if (event instanceof PullRequestMergePreviewUpdated) {
+			gitDirModified(event.getProject().getId());
+			checkAutoMerge(event.getRequest());				
+		} if (event instanceof PullRequestChanged) {
+			PullRequestChangeData data = ((PullRequestChanged) event).getChange().getData();
+			if (data instanceof PullRequestApproveData) {
+				checkAutoMerge(event.getRequest());
+			} else if (data instanceof PullRequestMergeStrategyChangeData
+					|| data instanceof PullRequestTargetBranchChangeData) {
+				check(event.getRequest(), false, true);
 			}
-			event.getRequest().getAutoMerge().setEnabled(false);
-		} else if (!event.isMinor()) {
+		} else if (event instanceof PullRequestBuildEvent) {
+			var build = ((PullRequestBuildEvent) event).getBuild();
+			if (build.isSuccessful())
+				checkAutoMerge(event.getRequest());
+		} else if (event instanceof PullRequestReviewerRemoved) {
+			checkAutoMerge(event.getRequest());
+		} else if (event instanceof PullRequestUpdated) {
+			gitDirModified(event.getProject().getId());
+		} 
+		
+		if (!(event instanceof PullRequestOpened) && !event.isMinor()) {
 			event.getRequest().setLastActivity(event.getLastUpdate());
-			if (event instanceof PullRequestCodeCommentEvent) {
+			if (event instanceof PullRequestCodeCommentEvent) 
 				event.getRequest().setCodeCommentsUpdateDate(event.getDate());
-			} else if (event instanceof PullRequestChanged) {
-				var data = ((PullRequestChanged) event).getChange().getData();
-				if (data instanceof PullRequestMergeStrategyChangeData 
-						|| data instanceof PullRequestTargetBranchChangeData) {
-					event.getRequest().getAutoMerge().setEnabled(false);
-				}
-			}
 		}
 	}
 	
@@ -649,15 +625,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Sessional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		if (build.getRequest() != null) {
-			if (build.getRequest().isDiscarded()) {
-				if (build.getRequest().getLatestUpdate().getTargetHeadCommitHash().equals(build.getCommitHash()))
-					listenerRegistry.post(new PullRequestBuildEvent(build));
-			} else {
-				MergePreview mergePreview = build.getRequest().checkMergePreview();
-				if (mergePreview != null && build.getCommitHash().equals(mergePreview.getMergeCommitHash()))
-					listenerRegistry.post(new PullRequestBuildEvent(build));
-			}
+		if (build.getRequest() != null && build.getRequest().isOpen()) {
+			if (build.getCommitHash().equals(build.getRequest().getBuildCommitHash()))
+				listenerRegistry.post(new PullRequestBuildEvent(build));
 		}
 	}
 	
@@ -716,27 +686,29 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Transactional
 	@Override
 	public void checkReviews(PullRequest request, boolean sourceUpdated) {
-		BranchProtection branchProtection = request.getTargetProject()
-				.getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-		Collection<String> changedFiles;
-		if (sourceUpdated) {
-			changedFiles = request.getLatestUpdate().getChangedFiles();
-		} else {
-			changedFiles = new HashSet<>();
-			for (PullRequestUpdate update: request.getUpdates())
-				changedFiles.addAll(update.getChangedFiles());
-		}
-		checkReviews(branchProtection.getParsedReviewRequirement(), 
-				request, changedFiles, sourceUpdated);
-		
-		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null);
-		
-		for (String file: changedFiles) {
-			FileProtection fileProtection = branchProtection.getFileProtection(file);
-			if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
-				checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
-				checkReviews(fileProtection.getParsedReviewRequirement(), 
-						request, Sets.newHashSet(file), sourceUpdated);
+		if (request.isOpen()) {
+			BranchProtection branchProtection = request.getTargetProject()
+					.getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+			Collection<String> changedFiles;
+			if (sourceUpdated) {
+				changedFiles = request.getLatestUpdate().getChangedFiles();
+			} else {
+				changedFiles = new HashSet<>();
+				for (PullRequestUpdate update : request.getUpdates())
+					changedFiles.addAll(update.getChangedFiles());
+			}
+			checkReviews(branchProtection.getParsedReviewRequirement(),
+					request, changedFiles, sourceUpdated);
+
+			ReviewRequirement checkedRequirement = ReviewRequirement.parse(null);
+
+			for (String file : changedFiles) {
+				FileProtection fileProtection = branchProtection.getFileProtection(file);
+				if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
+					checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
+					checkReviews(fileProtection.getParsedReviewRequirement(),
+							request, Sets.newHashSet(file), sourceUpdated);
+				}
 			}
 		}
 	}

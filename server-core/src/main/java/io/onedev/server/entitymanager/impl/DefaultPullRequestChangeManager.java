@@ -67,6 +67,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		change.setData(new PullRequestMergeStrategyChangeData(request.getMergeStrategy(), mergeStrategy));
 		change.setUser(SecurityUtils.getUser());
 		create(change, null);
+		request.getAutoMerge().setEnabled(false);
 		request.setMergeStrategy(mergeStrategy);
 	}
 
@@ -128,6 +129,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		String prevTargetBranch = request.getTargetBranch();
 		if (!targetBranch.equals(prevTargetBranch)) {
 			request.setTargetBranch(targetBranch);
+			request.getAutoMerge().setEnabled(false);
 			
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());

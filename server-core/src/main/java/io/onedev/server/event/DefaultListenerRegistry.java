@@ -11,6 +11,7 @@ import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +111,7 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 			ProjectEvent projectEvent = (ProjectEvent) event;
 			Long projectId = projectEvent.getProject().getId();
 			transactionManager.runAfterCommit(() -> projectManager.submitToActiveServer(projectId, () -> {
+				SecurityUtils.bindAsSystem();
 				try {
 					String lockName = projectEvent.getLockName();
 					if (lockName != null) {

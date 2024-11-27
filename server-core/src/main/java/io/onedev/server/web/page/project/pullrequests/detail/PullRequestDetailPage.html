@@ -232,10 +232,10 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeEnabledFrag">
-		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> once all reviewers have approved and all required jobs have passed. 
-		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch. 
+		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> when ready. 
+		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch 
 	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeDisabledFrag">
-		Enable this option to automatically merge the pull request once all reviewers have approved and all required jobs have passed.  
+		Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)  
 	</wicket:fragment>
 </wicket:extend>

@@ -27,7 +27,7 @@ public class AutoMerge implements Serializable {
 	@OptimisticLock(excluded=true)
 	private User user;
 	
-	@Column(name= COLUMN_COMMIT_MESSAGE)
+	@Column(length=1048576, name=COLUMN_COMMIT_MESSAGE)
 	@OptimisticLock(excluded=true)
 	private String commitMessage;
 

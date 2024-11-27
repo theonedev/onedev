@@ -63,7 +63,7 @@ public abstract class ReviewListPanel extends Panel {
 		super.onConfigure();
 		
 		PullRequest request = getPullRequest();
-		setVisible(!reviewsModel.getObject().isEmpty() || SecurityUtils.canModifyPullRequest(request) && !request.isMerged());
+		setVisible(!reviewsModel.getObject().isEmpty() || SecurityUtils.canModifyPullRequest(request) && request.isOpen());
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public abstract class ReviewListPanel extends Panel {
 						PullRequestReview review = item.getModelObject();
 						User currentUser = SecurityUtils.getAuthUser();
 						setVisible(!request.isNew()
-								&& !request.isMerged()
+								&& request.isOpen()
 								&& review.getStatus() != PullRequestReview.Status.PENDING
 								&& (SecurityUtils.canModifyPullRequest(getPullRequest()) || review.getUser().equals(currentUser)));
 					}
@@ -177,8 +177,7 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-
-						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && !request.isMerged());
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && request.isOpen());
 					}
 
 				});
@@ -191,7 +190,7 @@ public abstract class ReviewListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
+				setVisible(getPullRequest().isOpen() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 			}
 
 			@Override

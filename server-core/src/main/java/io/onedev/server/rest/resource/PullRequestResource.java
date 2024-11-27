@@ -233,7 +233,11 @@ public class PullRequestResource {
 		request.setSubmitter(user);
 		request.setBaseCommitHash(baseCommitId.name());
 		request.setDescription(data.getDescription());
-		request.setMergeStrategy(data.getMergeStrategy());
+		
+		if (data.getMergeStrategy() != null)
+			request.setMergeStrategy(data.getMergeStrategy());
+		else
+			request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
 		
 		if (request.getBaseCommitHash().equals(source.getObjectName())) 
 			throw new InvalidParamException("Change already merged");
@@ -317,33 +321,45 @@ public class PullRequestResource {
 	@Path("/{requestId}/auto-merge")
 	@POST
 	public Response setAutoMerge(@PathParam("requestId") Long requestId, @NotNull AutoMergeData data) {
+		var user = SecurityUtils.getUser();
 		PullRequest request = pullRequestManager.load(requestId);
-		if (request.getAutoMerge().isEnabled()) {
-			var authUser = SecurityUtils.getAuthUser();
-			if (SecurityUtils.canManagePullRequests(request.getProject()) 
-					|| authUser != null && authUser.equals(request.getAutoMerge().getUser())) {
-				var autoMerge = new AutoMerge();
-				autoMerge.setEnabled(data.isEnabled());
-				autoMerge.setUser(SecurityUtils.getUser());
-				autoMerge.setCommitMessage(data.getCommitMessage());
-				pullRequestChangeManager.changeAutoMerge(request, autoMerge);																
+		if (request.isOpen()) {
+			if (request.getAutoMerge().isEnabled()) {
+				if (SecurityUtils.canManagePullRequests(request.getProject())
+						|| user != null && user.equals(request.getAutoMerge().getUser())) {
+					var autoMerge = new AutoMerge();
+					autoMerge.setEnabled(data.isEnabled());
+					autoMerge.setUser(user);
+					if (data.getCommitMessage() != null)
+						autoMerge.setCommitMessage(data.getCommitMessage());
+					pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+				} else {
+					throw new UnauthorizedException();
+				}
+			} else if (SecurityUtils.canWriteCode(request.getProject())) {
+				if (data.isEnabled()) {
+					if (request.checkMerge() == null) {
+						pullRequestManager.merge(user, request, data.getCommitMessage());
+					} else {
+						var autoMerge = new AutoMerge();
+						autoMerge.setEnabled(true);
+						autoMerge.setUser(user);
+						if (data.getCommitMessage() != null)
+							autoMerge.setCommitMessage(data.getCommitMessage());
+						else
+							autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+						pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+					}
+				} else {
+					throw new UnsupportedOperationException("Auto merge already disabled");
+				}
 			} else {
 				throw new UnauthorizedException();
 			}
-		} else if (SecurityUtils.canWriteCode(request.getProject())) {
-			if (data.isEnabled()) {
-				var autoMerge = new AutoMerge();
-				autoMerge.setEnabled(true);
-				autoMerge.setUser(SecurityUtils.getUser());
-				autoMerge.setCommitMessage(data.getCommitMessage());
-				pullRequestChangeManager.changeAutoMerge(request, autoMerge);
-			} else {
-				throw new UnsupportedOperationException();
-			}
+			return Response.ok().build();
 		} else {
-			throw new UnauthorizedException();
+			throw new UnsupportedOperationException("Pull request is closed");
 		}
-		return Response.ok().build();
 	}
 	
 	@Api(order=1600)
@@ -516,7 +532,6 @@ public class PullRequestResource {
 			this.description = description;
 		}
 
-		@NotNull
 		public MergeStrategy getMergeStrategy() {
 			return mergeStrategy;
 		}

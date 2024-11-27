@@ -913,7 +913,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
+						setVisible(getPullRequest().isOpen() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 					}
 					
 				});
@@ -976,7 +976,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().isMerged()
+						setVisible(getPullRequest().isOpen()
 								&& SecurityUtils.getUser() != null
 								&& !getPullRequest().getAssignees().contains(SecurityUtils.getUser())		
 								&& SecurityUtils.canWriteCode(getProject()) 
@@ -996,7 +996,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));
+						setVisible(getPullRequest().isOpen() && SecurityUtils.canModifyPullRequest(getPullRequest()));
 					}
 					
 				});
@@ -1198,8 +1198,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				
-				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));						
+				setVisible(getPullRequest().isOpen() && SecurityUtils.canModifyPullRequest(getPullRequest()));						
 			}
 			
 		};
@@ -1227,7 +1226,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(getPullRequest().isMerged() || !SecurityUtils.canModifyPullRequest(getPullRequest()));						
+				setVisible(!getPullRequest().isOpen() || !SecurityUtils.canModifyPullRequest(getPullRequest()));						
 			}
 			
 		});
@@ -1245,7 +1244,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModifyPullRequest(getPullRequest()));						
+				setVisible(getPullRequest().isOpen() && SecurityUtils.canModifyPullRequest(getPullRequest()));						
 			}
 			
 		});

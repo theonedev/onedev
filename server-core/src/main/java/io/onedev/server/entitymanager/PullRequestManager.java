@@ -56,6 +56,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void checkReviews(PullRequest request, boolean sourceUpdated);
 	
+	void checkAutoMerge(PullRequest request);
+	
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
 			boolean loadLabelsAndReviewsAndBuilds, int firstResult, int maxResults);
 	

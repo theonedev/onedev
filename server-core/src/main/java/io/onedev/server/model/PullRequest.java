@@ -1001,20 +1001,13 @@ public class PullRequest extends ProjectBelonging
 	
 	public BuildRequirement getBuildRequirement() {
 		if (buildRequirement == null) {
-			MergePreview preview = checkMergePreview();
-			if (preview != null && preview.getMergeCommitHash() != null) {
-				BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
-				ObjectId targetCommitId = getTarget().getObjectId(false);
-				ObjectId mergeCommitId = getTargetProject().getObjectId(preview.getMergeCommitHash(), false);
-				if (targetCommitId != null && mergeCommitId != null) {
-					buildRequirement = protection.getBuildRequirement(getTargetProject(), targetCommitId, 
-							mergeCommitId, new HashMap<>());
-				} else {
-					buildRequirement = new BuildRequirement(new HashSet<>(), false);
-				}
-			} else {
-				buildRequirement = new BuildRequirement(new HashSet<>(), false);
-			}
+			BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
+			ObjectId requestHeadId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
+			var mergeBaseId = getGitService().getMergeBase(
+					getProject(), ObjectId.fromString(getLatestUpdate().getTargetHeadCommitHash()),
+					getProject(), requestHeadId);
+			buildRequirement = protection.getBuildRequirement(getTargetProject(), mergeBaseId,
+					requestHeadId, new HashMap<>());
 		}
 		return buildRequirement;
 	}
@@ -1040,7 +1033,6 @@ public class PullRequest extends ProjectBelonging
 		var commitMessageError = checkCommitMessages();
 		if (commitMessageError != null)
 			return commitMessageError.toString();
-		
 		return null;
 	}
 	

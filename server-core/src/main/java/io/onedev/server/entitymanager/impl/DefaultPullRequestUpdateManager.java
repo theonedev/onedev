@@ -67,6 +67,7 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 	@Override
 	public void checkUpdate(PullRequest request) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
+			request.getAutoMerge().setEnabled(false);
 			ObjectId mergeBase = gitService.getMergeBase(
 					request.getTargetProject(), request.getTarget().getObjectId(), 
 					request.getSourceProject(), request.getSource().getObjectId());
@@ -80,7 +81,6 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 
 				gitService.updateRef(request.getTargetProject(), request.getHeadRef(), 
 						ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
-				
 				listenerRegistry.post(new PullRequestUpdated(update));
 			}
 		}
