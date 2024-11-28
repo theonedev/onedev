@@ -90,13 +90,11 @@ Generate URL string based on the database type
 {{- define "getConnectionURL" -}}
 {{- $connectionURL := "" -}}
 {{- if eq $.Values.database.type "mysql" }}
-{{- $connectionURL = printf "jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- $connectionURL = printf "jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false" $.Values.database.host ($.Values.database.port|toString) $.Values.database.name -}}
 {{- else if eq $.Values.database.type "postgresql" }}
-{{- $connectionURL = printf "jdbc:postgresql://%s:%s/%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- $connectionURL = printf "jdbc:postgresql://%s:%s/%s" $.Values.database.host ($.Values.database.port|toString) $.Values.database.name -}}
 {{- else if eq $.Values.database.type "mariadb" }}
-{{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
-{{- else if eq $.Values.database.type "mssql" }}
-{{- $connectionURL = printf "sqlserver://%s:%s;databaseName=%s" $.Values.database.host $.Values.database.port $.Values.database.name -}}
+{{- $connectionURL = printf "jdbc:mariadb://%s:%s/%s" $.Values.database.host ($.Values.database.port|toString) $.Values.database.name -}}
 {{- else -}}
 Invalid database type
 {{- end -}}
