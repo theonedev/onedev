@@ -530,8 +530,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			protected boolean isContextDifferent(CompareContext compareContext) {
-				return !compareContext.getOldCommitHash().equals(getPullRequest().getBaseCommitHash()) 
-						|| !compareContext.getNewCommitHash().equals(getPullRequest().getLatestUpdate().getHeadCommitHash());
+				var request = NewPullRequestPage.this.getPullRequest();
+				return !compareContext.getOldCommitHash().equals(request.getBaseCommitHash())
+						|| !compareContext.getNewCommitHash().equals(request.getLatestUpdate().getHeadCommitHash());
 			}
 			
 		};
