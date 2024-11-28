@@ -158,10 +158,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
 	
 	public static final String PROP_PENDING_DELETE = "pendingDelete";
-
-	public static final String NULL_KEY_PREFIX = "<$NullKey$>";
-	
-	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	private static final String FAKED_GITHUB_REPO_PATH_SEPARATOR = "-path.separator.of.onedev.project-";
 
@@ -231,8 +227,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
 	@JsonIgnore
-	@Column(unique=true, nullable=false)
-	private String key = NULL_KEY_PREFIX + UUID.randomUUID();
+	@Column(unique=true)
+	private String key;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	@Api(description = "May be null")
@@ -359,8 +355,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
-	@Column(unique=true, nullable=false)
-	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
+	@Column(unique=true)
+	private String serviceDeskName;
 	
 	@JsonIgnore
 	@Lob
@@ -447,17 +443,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@ProjectKey
 	@Nullable
 	public String getKey() {
-		if (key.startsWith(NULL_KEY_PREFIX))
-			return null;
-		else
-			return key;
+		return key;
 	}
 	
 	public void setKey(@Nullable String key) {
-		if (key != null)
-			this.key = key;
-		else if (!this.key.startsWith(NULL_KEY_PREFIX))
-			this.key = NULL_KEY_PREFIX + UUID.randomUUID();
+		this.key = key;
 	}
 	
 	public String getPath() {
@@ -1054,17 +1044,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	@JsonProperty
 	public String getServiceDeskName() {
-		if (serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
-			return null;
-		else
-			return serviceDeskName;
+		return serviceDeskName;
 	}
 
 	public void setServiceDeskName(@Nullable String serviceDeskName) {
-		if (serviceDeskName != null)
-			this.serviceDeskName = serviceDeskName;
-		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
-			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID();
+		this.serviceDeskName = serviceDeskName;
 	}
 	
 	public GitPackConfig getGitPackConfig() {

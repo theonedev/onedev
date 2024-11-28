@@ -1,3 +1,8 @@
+# 11.6.0
+
+SQL Server support is removed due to added complexity and inability to test with full version. 
+If you are using SQL Server, please [switch to use MySQL/PostgreSQL/MariaDB](https://docs.onedev.io/administration-guide/switch-database)
+
 # 11.5.0
 
 Guest concept is removed as administrator can create read-only roles achieving same purpose. 

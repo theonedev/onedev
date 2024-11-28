@@ -22,9 +22,7 @@ public class KeyCriteria extends Criteria<Project> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Project.PROP_KEY);
-		var predicate = builder.and(
-				builder.like(attribute, value.replace("*", "%")), 
-				builder.not(builder.like(attribute, Project.NULL_KEY_PREFIX + "%")));
+		var predicate = builder.like(attribute, value.replace("*", "%"));
 		if (operator == ProjectQueryLexer.IsNot)
 			predicate = builder.not(predicate);
 		return predicate;

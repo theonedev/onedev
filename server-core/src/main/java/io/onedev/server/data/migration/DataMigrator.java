@@ -3739,7 +3739,7 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					if (element.element("serviceDeskName") == null)
-						element.addElement("serviceDeskName").setText(Project.NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString());
+						element.addElement("serviceDeskName").setText("<$NullServiceDesk$>" + UUID.randomUUID().toString());
 				}
 				dom.writeToFile(file, false);
 			}
@@ -6374,7 +6374,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					element.addElement("key").setText(Project.NULL_KEY_PREFIX + UUID.randomUUID());
+					element.addElement("key").setText("<$NullKey$>" + UUID.randomUUID());
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Dashboards.xml")) {
@@ -7206,6 +7206,12 @@ public class DataMigrator {
 							migrate182_reviewRequirement(fileProtectionElement.element("reviewRequirement"));
 						}
 					}
+					var serviceDeskNameElement = element.element("serviceDeskName");
+					if (serviceDeskNameElement.getText().trim().startsWith("<$NullServiceDesk$>"))
+						serviceDeskNameElement.detach();
+					var keyElement = element.element("key");
+					if (keyElement.getText().trim().startsWith("<$NullKey$>"))
+						keyElement.detach();
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequests.xml")) {
