@@ -1,15 +1,15 @@
 package io.onedev.server.xodus;
 
-import java.io.File;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStopped;
 import jetbrains.exodus.backup.BackupStrategy;
 import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.Environment;
+
+import java.io.File;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractMultiEnvironmentManager extends AbstractEnvironmentManager {
 	

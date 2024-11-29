@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.issue.side;
 
 import com.google.common.collect.Lists;
-import com.hazelcast.shaded.org.snakeyaml.engine.v2.api.Load;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReference;
@@ -589,12 +588,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 			return fragment;
 		} else {
-			Fragment fragment = new Fragment(componentId, "unauthorizedLinkedIssueFrag", IssueSidePanel.this);
-			if (getProject().equals(linkedIssue.getProject()))
-				fragment.add(new Label("number", "#" + linkedIssue.getNumber()));
-			else
-				fragment.add(new Label("number", linkedIssue.getProject().getPath() + "#" + linkedIssue.getNumber()));
-			return fragment;
+			return new WebMarkupContainer(componentId).setVisible(false);
 		}
 	}
 	

@@ -1075,7 +1075,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			collect(projectId);
 		}
 	}
-
+	
 	@Sessional
 	@Listen
 	public void on(ActiveServerChanged event) {
