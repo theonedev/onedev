@@ -38,7 +38,7 @@ import java.util.List;
 import static java.lang.Long.valueOf;
 
 @Singleton
-public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManager 
+public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager 
 		implements PullRequestInfoManager, Serializable {
 
 	private static final int INFO_VERSION = 7;

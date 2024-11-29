@@ -42,7 +42,7 @@ import static java.lang.Long.valueOf;
  *
  */
 @Singleton
-public class DefaultVisitInfoManager extends AbstractMultiEnvironmentManager 
+public class DefaultVisitInfoManager extends AbstractEnvironmentManager 
 		implements VisitInfoManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultVisitInfoManager.class);

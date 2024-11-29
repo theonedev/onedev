@@ -1,8 +1,12 @@
 package io.onedev.server.xodus;
 
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStopped;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.backup.BackupStrategy;
+import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.*;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -13,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.nio.charset.Charset.defaultCharset;
 
@@ -23,6 +29,8 @@ public abstract class AbstractEnvironmentManager {
 	private static final long DEFAULT_LOG_FILE_SIZE = 8192;
 	
 	private static final int MEMORY_USAGE_PERCENT = 25;
+	
+	private final Map<String, Environment> envs = new ConcurrentHashMap<>();
 	
 	protected void checkVersion(File envDir) {
 		File versionFile = getVersionFile(envDir);
@@ -66,6 +74,7 @@ public abstract class AbstractEnvironmentManager {
 		config.setEnvCloseForcedly(true);
 		config.setLogAllowRamDisk(true);
 		config.setLogAllowRemote(true);
+		
 		config.setLogAllowRemovable(true);
 		config.setMemoryUsagePercentage(MEMORY_USAGE_PERCENT);
 		config.setLogFileSize(getLogFileSize());
@@ -73,12 +82,7 @@ public abstract class AbstractEnvironmentManager {
 	}
 	
 	protected Store getStore(Environment env, String storeName) {
-		return env.computeInTransaction(new TransactionalComputable<Store>() {
-		    @Override
-		    public Store compute(Transaction txn) {
-		        return env.openStore(storeName, StoreConfig.WITHOUT_DUPLICATES, txn);
-		    }
-		});		
+		return env.computeInTransaction(txn -> env.openStore(storeName, StoreConfig.WITHOUT_DUPLICATES, txn));		
 	}
 
 	@Nullable 
@@ -208,6 +212,54 @@ public abstract class AbstractEnvironmentManager {
 				index += Long.SIZE;
 			}
 			return buffer.array();
+		}
+	}
+
+	protected abstract File getEnvDir(String envKey);
+
+	protected Environment getEnv(String envKey) {
+		Environment env = envs.get(envKey);
+		if (env == null) synchronized (envs) {
+			env = envs.get(envKey);
+			if (env == null) {
+				env = newEnv(getEnvDir(envKey));
+				envs.put(envKey, env);
+			}
+		}
+		return env;
+	}
+
+	protected void removeEnv(String envKey) {
+		synchronized (envs) {
+			Environment env = envs.remove(envKey);
+			if (env != null)
+				env.close();
+		}
+	}
+
+	@Listen
+	public void on(SystemStopped event) {
+		synchronized (envs) {
+			for (Environment env: envs.values())
+				env.close();
+			envs.clear();
+		}
+	}
+
+	public void export(String envKey, File targetDir) {
+		BackupStrategy backupStrategy = getEnv(envKey).getBackupStrategy();
+		try {
+			backupStrategy.beforeBackup();
+			try {
+				for (VirtualFileDescriptor descriptor : backupStrategy.getContents()) {
+					FileUtils.copyFileToDirectory(((BackupStrategy.FileDescriptor) descriptor).getFile(), targetDir);
+				}
+			} finally {
+				backupStrategy.afterBackup();
+			}
+			writeVersion(targetDir);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

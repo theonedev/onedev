@@ -43,7 +43,7 @@ import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.lang.Long.valueOf;
 
 @Singleton
-public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
+public class DefaultIssueInfoManager extends AbstractEnvironmentManager 
 		implements IssueInfoManager, Serializable {
 
 	private static final int INFO_VERSION = 4;

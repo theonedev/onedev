@@ -72,7 +72,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 @Singleton
-public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
+public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		implements CommitInfoManager, Serializable {
 
 	private static final long serialVersionUID = 1L;
