@@ -3,6 +3,7 @@ package io.onedev.server.web.component.issue.link;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.security.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
@@ -34,15 +35,13 @@ public abstract class IssueLinksPanel extends Panel {
 			int count = 0;
 			for (IssueLink link: getIssue().getTargetLinks()) {
 				LinkSpec spec = link.getSpec();
-				if (spec.getName().equals(linkName))
+				if (spec.getName().equals(linkName) && SecurityUtils.canAccessIssue(link.getTarget()))
 					count++;
 			}
 			for (IssueLink link: getIssue().getSourceLinks()) {
 				LinkSpec spec = link.getSpec();
-				if (spec.getOpposite() == null && spec.getName().equals(linkName) 
-						|| spec.getOpposite() != null && spec.getOpposite().getName().equals(linkName)) {
+				if (SecurityUtils.canAccessIssue(link.getSource()) && (spec.getOpposite() == null && spec.getName().equals(linkName) || spec.getOpposite() != null && spec.getOpposite().getName().equals(linkName))) 
 					count++;
-				}
 			}
 			if (count != 0) {
 				AjaxLink<Void> link = new AjaxLink<Void>(linksView.newChildId()) {

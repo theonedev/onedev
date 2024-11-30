@@ -84,6 +84,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.parse;
+import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
 import static io.onedev.server.util.EmailAddressUtils.describe;
 import static java.util.Comparator.comparing;
@@ -139,7 +140,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected boolean isAuthorized(User user) {
-				return SecurityUtils.canAccessIssue(user.asSubject(), getIssue());
+				return canAccessIssue(user.asSubject(), getIssue());
 			}
 			
 		});
@@ -320,7 +321,7 @@ public abstract class IssueSidePanel extends Panel {
 				List<LinkSide> links = new ArrayList<>();
 				for (LinkSpec spec : linkSpecsModel.getObject()) {
 					if (canEditIssueLink(getProject(), spec) && (spec.isShowAlways() || showAllLinks)
-							|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec))) {
+							|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec) && (it.getSource().equals(getIssue()) || canAccessIssue(it.getSource())) && (it.getTarget().equals(getIssue()) || canAccessIssue(it.getTarget())))) {
 						if (spec.getOpposite() != null) {
 							IssueQuery query = spec.getOpposite().getParsedIssueQuery(getProject());
 							if (query.matches(getIssue()))
@@ -537,7 +538,7 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
 			@Nullable LinkDeleteListener deleteListener) {
-		if (SecurityUtils.canAccessIssue(linkedIssue)) {
+		if (canAccessIssue(linkedIssue)) {
 			Long linkedIssueId = linkedIssue.getId();
 			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
 			Link<Void> link = new BookmarkablePageLink<Void>("reference", IssueActivitiesPage.class, 

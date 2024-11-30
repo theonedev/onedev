@@ -155,6 +155,10 @@ public abstract class IssueListPanel extends Panel {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
+	private IssueLinkManager getIssueLinkManager() {
+		return OneDev.getInstance(IssueLinkManager.class);
+	}
+	
 	@Override
 	protected void onDetach() {
 		queryStringModel.detach();
@@ -1750,9 +1754,9 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected List<Issue> load() {
 						Issue issue = (Issue) fragment.getDefaultModelObject();
-						OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+						getIssueLinkManager().loadDeepLinks(issue);
 						LinkSide side = new LinkSide(linksPanel.getExpandedLink());
-						return issue.findLinkedIssues(side.getSpec(), side.isOpposite());
+						return issue.findLinkedIssues(side.getSpec(), side.isOpposite()).stream().filter(SecurityUtils::canAccessIssue).collect(toList());
 					}
 
 				}) {
