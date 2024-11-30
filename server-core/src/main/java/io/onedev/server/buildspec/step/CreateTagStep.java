@@ -65,7 +65,6 @@ public class CreateTagStep extends ServerSideStep {
 	@Editable(order=1060, description="For build commit not reachable from default branch, " +
 			"a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with create tag permission")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@NotEmpty
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;
 	}
