@@ -1,9 +1,10 @@
 package io.onedev.server.web.editable.issue.fieldinstance;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.model.support.issue.field.instance.IgnoreValue;
+import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
+import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
+import io.onedev.server.web.editable.PropertyContext;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -11,10 +12,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.server.model.support.issue.field.instance.FieldInstance;
-import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
-import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
-import io.onedev.server.web.editable.PropertyContext;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class FieldListViewPanel extends Panel {
@@ -34,6 +34,8 @@ class FieldListViewPanel extends Panel {
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (FieldInstance field: fields) {
+			if (field.getValueProvider() instanceof IgnoreValue)
+				continue;
 			WebMarkupContainer container = new WebMarkupContainer(fieldsView.newChildId());
 			container.add(new Label("name", field.getName()));
 			
@@ -49,14 +51,12 @@ class FieldListViewPanel extends Panel {
 					container.add(new Label("value", value.iterator().next()));
 				else 
 					container.add(new Label("value", value.toString()));
-			} else if (field.getValueProvider() instanceof ScriptingValue) {
+			} else {
 				if (field.isSecret())
 					container.add(new Label("valueProvider", ScriptingValue.SECRET_DISPLAY_NAME));
 				else
 					container.add(new Label("valueProvider", ScriptingValue.DISPLAY_NAME));
 				container.add(PropertyContext.view("value", field.getValueProvider(), "scriptName"));
-			} else {
-				container.add(new WebMarkupContainer("value"));
 			}
 			fieldsView.add(container);
 		}
