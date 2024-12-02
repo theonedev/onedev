@@ -24,13 +24,13 @@ Fast code search with regular expression.
 
 ![code search and navigation](./doc/images/code-navigation.gif)
 
-## 👮‍ Flexible security and compliance scan
+## 📦 Renovate integration to update project dependencies
 
-Scan code dependencies, built binaries, or container images to find security
-vulnerabilities, license violations, or secret exposures.
-[**Tutorial**] (https://docs.onedev.io/category/security-and-compliance-scan)
+Integrate with Renovate to update project dependencies via pull requests. 
+Merge pull requests automatically when approved by required reviewers, or pass required tests.
+[**Tutorial**](https://docs.onedev.io/tutorials/cicd/dependency-update)
 
-![vulnerabilities](./doc/images/vulnerabilities.png)
+![vulnerabilities](./doc/images/renovate-integration.png)
 
 ## 🚦 Annotate code with coverage and problems
 

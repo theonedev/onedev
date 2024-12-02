@@ -1,6 +1,5 @@
 package io.onedev.server.git;
 
-import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
@@ -18,7 +17,6 @@ import io.onedev.server.ssh.SshManager;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.sshd.common.channel.ChannelOutputStream;
 import org.apache.sshd.server.Environment;
@@ -92,23 +90,8 @@ class SshCommand implements Command, ServerSessionAware {
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
         if (projectFacade == null) {
-        	if (clusterAccess || upload) {
-	            onExit(-1, "Unable to find project '" + projectPath + "'");
-	            return;
-        	} else {
-        		try {
-					Project project = projectManager.setup(projectPath);
-					Preconditions.checkState(project.isNew());
-					projectManager.create(project);
-					projectFacade = project.getFacade();
-        		} catch (UnauthorizedException e) {
-        			if (e.getMessage() != null)
-        				onExit(-1, e.getMessage());
-        			else
-        				onExit(-1, "Permission denied");
-    	            return;
-        		}
-        	}
+			onExit(-1, "Unable to find project '" + projectPath + "'");
+			return;
         } 
 		
 		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);

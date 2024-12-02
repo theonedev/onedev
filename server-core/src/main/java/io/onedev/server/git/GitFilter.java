@@ -1,6 +1,5 @@
 package io.onedev.server.git;
 
-import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -88,16 +87,8 @@ public class GitFilter implements Filter {
 		}
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
-		if (facade == null) {
-			if (clusterAccess || upload) { 
-				throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));
-			} else {
-				Project project = projectManager.setup(projectPath);
-				Preconditions.checkState(project.isNew());
-				projectManager.create(project);
-				facade = project.getFacade();
-			}
-		}
+		if (facade == null) 
+			throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));
 		return facade.getId();
 	}
 	
