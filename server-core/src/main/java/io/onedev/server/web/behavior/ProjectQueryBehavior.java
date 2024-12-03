@@ -41,13 +41,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean childQuery;
 	
-	public ProjectQueryBehavior(boolean childQuery, boolean hideIfBlank) {
-		super(ProjectQueryParser.class, "query", false, hideIfBlank);
-		this.childQuery = childQuery;
-	}
-
 	public ProjectQueryBehavior(boolean childQuery) {
-		this(childQuery, false);
+		super(ProjectQueryParser.class, "query", false);
+		this.childQuery = childQuery;
 	}
 	
 	@Override

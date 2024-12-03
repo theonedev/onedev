@@ -37,7 +37,7 @@ import static io.onedev.server.model.Build.*;
 public class ActionConditionBehavior extends ANTLRAssistBehavior {
 
 	public ActionConditionBehavior() {
-		super(ActionConditionParser.class, "condition", false, false);
+		super(ActionConditionParser.class, "condition", false);
 	}
 
 	@Override

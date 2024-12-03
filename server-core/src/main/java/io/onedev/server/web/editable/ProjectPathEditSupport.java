@@ -32,7 +32,7 @@ public class ProjectPathEditSupport implements EditSupport {
 
     				@Override
     				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						InputAssistBehavior behavior = new InputAssistBehavior(false) {
+						InputAssistBehavior behavior = new InputAssistBehavior() {
 							@Override
 							protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 								List<InputCompletion> suggestions = new ArrayList<>();

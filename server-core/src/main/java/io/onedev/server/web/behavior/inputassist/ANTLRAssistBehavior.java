@@ -1,36 +1,19 @@
 package io.onedev.server.web.behavior.inputassist;
 
+import com.google.common.base.Optional;
+import io.onedev.commons.codeassist.*;
+import io.onedev.commons.codeassist.parser.ParseExpect;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.StringUtils;
+import org.antlr.v4.runtime.*;
+
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenStream;
-
-import com.google.common.base.Optional;
-
-import io.onedev.commons.codeassist.AntlrUtils;
-import io.onedev.commons.codeassist.CodeAssist;
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.ParseExpect;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
@@ -49,23 +32,19 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	protected final String ruleName;
 	
-	protected final boolean hideIfBlank;
-	
-	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
-		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName, findAllPaths, hideIfBlank);
+	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName, boolean findAllPaths) {
+		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName, findAllPaths);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, 
-			Class<? extends Lexer> lexerClass, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
+			Class<? extends Lexer> lexerClass, String ruleName, boolean findAllPaths) {
 		this(parserClass, lexerClass, 
 				new String[]{AntlrUtils.getDefaultGrammarFile(lexerClass)}, 
-				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName, findAllPaths, hideIfBlank);
+				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName, findAllPaths);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, 
-			String grammarFiles[], String tokenFile, String ruleName, boolean findAllPaths, boolean hideIfBlank) {
-		super(hideIfBlank);
-		
+			String grammarFiles[], String tokenFile, String ruleName, boolean findAllPaths) {
 		this.lexerClass = lexerClass;
 		this.parserClass = parserClass;
 		
@@ -93,7 +72,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 		};
 		this.ruleName = ruleName;
-		this.hideIfBlank = hideIfBlank;
 	}
 	
 	protected void validate(String value) {

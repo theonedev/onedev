@@ -44,17 +44,12 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 	private final boolean withOrder;
 	
 	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, 
-							 boolean withOrder, boolean withCurrentUserCriteria, boolean hideIfBlank) {
-		super(PackQueryParser.class, "query", false, hideIfBlank);
+							 boolean withOrder, boolean withCurrentUserCriteria) {
+		super(PackQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.packType = packType;
 		this.withOrder = withOrder;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
-	}
-
-	public PackQueryBehavior(IModel<Project> projectModel, @Nullable String packType, boolean withOrder,
-							 boolean withCurrentUserCriteria) {
-		this(projectModel, packType, withOrder, withCurrentUserCriteria, false);
 	}
 	
 	@Override

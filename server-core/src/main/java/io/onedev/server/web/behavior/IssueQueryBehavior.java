@@ -55,14 +55,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final IssueQueryParseOption option;
 	
-	public IssueQueryBehavior(IModel<Project> projectModel, IssueQueryParseOption option, boolean hideIfBlank) {
-		super(IssueQueryParser.class, "query", false, hideIfBlank);
+	public IssueQueryBehavior(IModel<Project> projectModel, IssueQueryParseOption option) {
+		super(IssueQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.option = option;
-	}
-
-	public IssueQueryBehavior(IModel<Project> projectModel, IssueQueryParseOption option) {
-		this(projectModel, option, false);
 	}
 	
 	@Override

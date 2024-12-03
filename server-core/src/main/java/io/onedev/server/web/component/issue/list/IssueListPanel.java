@@ -386,7 +386,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, option, true) {
+		}, option) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

@@ -26,7 +26,7 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistBehavior {
 
 	public InterpolativePatternSetAssistBehavior() {
-		super(InterpolativePatternSetParser.class, "interpolative", false, false);
+		super(InterpolativePatternSetParser.class, "interpolative", false);
 	}
 
 	@Override

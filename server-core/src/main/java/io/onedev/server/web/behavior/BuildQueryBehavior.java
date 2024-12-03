@@ -44,17 +44,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	private final boolean withUnfinishedCriteria;
 	
 	public BuildQueryBehavior(IModel<Project> projectModel, boolean withOrder, boolean withCurrentUserCriteria, 
-							  boolean withUnfinishedCriteria, boolean hideIfBlank) {
-		super(BuildQueryParser.class, "query", false, hideIfBlank);
+							  boolean withUnfinishedCriteria) {
+		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.withOrder = withOrder;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 		this.withUnfinishedCriteria = withUnfinishedCriteria;
-	}
-
-	public BuildQueryBehavior(IModel<Project> projectModel, boolean withOrder, boolean withCurrentUserCriteria,
-							  boolean withUnfinishedCriteria) {
-		this(projectModel, withOrder, withCurrentUserCriteria, withUnfinishedCriteria, false);
 	}
 	
 	@Override

@@ -26,7 +26,7 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 	private final IModel<Project> projectModel;
 	
 	public ReviewRequirementBehavior(IModel<Project> projectModel) {
-		super(ReviewRequirementParser.class, "requirement", false, false);
+		super(ReviewRequirementParser.class, "requirement", false);
 		this.projectModel = projectModel;
 	}
 

@@ -34,13 +34,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
-	private final boolean hideIfBlank;
-	
 	private FloatingPanel dropdown;
-	
-	public InputAssistBehavior(boolean hideIfBlank) {
-		this.hideIfBlank = hideIfBlank;
-	}
 	
 	@Override
 	protected void onBind() {
@@ -145,7 +139,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 				} finally {
 					ComponentContext.pop();
 				}
-				if (!suggestions.isEmpty() && (inputContent.length() != 0 || !hideIfBlank)) {
+				if (!suggestions.isEmpty()) {
 					boolean hasOtherSuggestions = false;
 					boolean hasAppendSpaceSuggestions = false;
 					if ("assist".equals(params.getParameterValue("event").toString()) 

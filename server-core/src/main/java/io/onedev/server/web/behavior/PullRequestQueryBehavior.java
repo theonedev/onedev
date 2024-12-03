@@ -42,17 +42,11 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean withOrder;
 	
-	public PullRequestQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, 
-									boolean withOrder, boolean hideIfBlank) {
-		super(PullRequestQueryParser.class, "query", false, hideIfBlank);
+	public PullRequestQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, boolean withOrder) {
+		super(PullRequestQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 		this.withOrder = withOrder;
-	}
-
-	public PullRequestQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria,
-									boolean withOrder) {
-		this(projectModel, withCurrentUserCriteria, withOrder, false);
 	}
 	
 	@Override

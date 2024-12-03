@@ -35,13 +35,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean forExecutor;
 	
-	public AgentQueryBehavior(boolean forExecutor, boolean hideIfBlank) {
-		super(AgentQueryParser.class, "query", false, hideIfBlank);
-		this.forExecutor = forExecutor;
-	}
-
 	public AgentQueryBehavior(boolean forExecutor) {
-		this(forExecutor, false);
+		super(AgentQueryParser.class, "query", false);
+		this.forExecutor = forExecutor;
 	}
 	
 	@Override

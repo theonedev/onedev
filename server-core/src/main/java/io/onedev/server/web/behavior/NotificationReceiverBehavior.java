@@ -23,7 +23,7 @@ public class NotificationReceiverBehavior extends ANTLRAssistBehavior {
 	private final IModel<Project> projectModel;
 	
 	public NotificationReceiverBehavior(IModel<Project> projectModel) {
-		super(NotificationReceiverParser.class, "receiver", false, false);
+		super(NotificationReceiverParser.class, "receiver", false);
 		this.projectModel = projectModel;
 	}
 

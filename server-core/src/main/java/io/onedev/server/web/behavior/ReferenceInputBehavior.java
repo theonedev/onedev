@@ -29,10 +29,6 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 	private static final Pattern REFERENCE_PATTERN = Pattern.compile(
  			format("(^|\\W+)((?<type>pull\\s*request|pr|issue|build)\\s+)?(?<query>((%s)?#|(%s)-)\\S*)$", ProjectPathValidator.PATTERN.pattern(), ProjectKeyValidator.PATTERN.pattern()), 
 			Pattern.CASE_INSENSITIVE);
-	
-	public ReferenceInputBehavior() {
-		super(false);
-	}
 
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {

@@ -428,7 +428,7 @@ public abstract class PackListPanel extends Panel {
 				return getProject();
 			}
 
-		}, getPackType(), true, true, true) {
+		}, getPackType(), true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

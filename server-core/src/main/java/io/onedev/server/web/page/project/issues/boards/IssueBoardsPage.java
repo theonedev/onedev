@@ -719,7 +719,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			
 			IssueQueryParseOption option = new IssueQueryParseOption()
 					.withCurrentUserCriteria(true).withCurrentProjectCriteria(true).forBoard(true);
-			queryInput.add(new IssueQueryBehavior(projectModel, option, true));
+			queryInput.add(new IssueQueryBehavior(projectModel, option));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				
@@ -731,9 +731,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues. Hit space to show syntax helper"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter issues. Hit space to show syntax helper"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter issues"));
 				
 			form.add(queryInput);
 			
