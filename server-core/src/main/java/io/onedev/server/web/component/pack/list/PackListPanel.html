@@ -24,16 +24,15 @@
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
+				<a wicket:id="help" class="help text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="question-circle" class="icon"></wicket:svg> How to Publish
+				</a>
 				<span wicket:id="count" class="float-right text-gray"></span>
 			</div>
 			<div wicket:id="body">
 				<div wicket:id="feedback"></div>
 				<table wicket:id="packs" class="table"></table>
-				<div wicket:id="help">
-					<div class="alert alert-notice alert-light-info">No packages found. Follow below instructions to publish packages</div>
-					<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
-					<div wicket:id="content"></div>
-				</div>
+				<div wicket:id="help"></div>
 			</div>
 		</div>
 	</div>
@@ -43,5 +42,10 @@
 			<span wicket:id="label"></span>
 		</a>
 		<span wicket:id="labels"></span>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="helpFrag">
+		<div class="alert alert-notice alert-light-info">Follow below instructions to publish packages into this project</div>
+		<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
+		<div wicket:id="content"></div>
 	</wicket:fragment>
 </wicket:panel>

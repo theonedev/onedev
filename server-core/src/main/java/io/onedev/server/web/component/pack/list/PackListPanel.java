@@ -45,6 +45,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -101,6 +102,8 @@ public abstract class PackListPanel extends Panel {
 	private WebMarkupContainer body;
 	
 	private Component saveQueryLink;
+	
+	private Component helpLink;
 	
 	private boolean querySubmitted = true;
 	
@@ -166,6 +169,7 @@ public abstract class PackListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		packsTable.setCurrentPage(0);
+		target.add(helpLink);
 		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
@@ -420,6 +424,23 @@ public abstract class PackListPanel extends Panel {
 			
 		});	
 		
+		add(helpLink = new DropdownLink("help") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				var help = newHelpPanel(id);
+				help.add(AttributeAppender.append("class", "pack-publish-help"));
+				return help;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!shouldShowHelp());
+			}
+			
+		});
+		helpLink.setOutputMarkupPlaceholderTag(true);
+		
 		queryInput = new TextField<>("input", queryStringModel);
 		queryInput.add(new PackQueryBehavior(new AbstractReadOnlyModel<>() {
 
@@ -520,7 +541,16 @@ public abstract class PackListPanel extends Panel {
 
 		};
 		
-		body = new WebMarkupContainer("body");
+		body = new WebMarkupContainer("body") {
+			@Override
+			protected void onBeforeRender() {
+				if (shouldShowHelp())
+					addOrReplace(newHelpPanel("help"));
+				else 
+					addOrReplace(new WebMarkupContainer("help").setVisible(false));
+				super.onBeforeRender();
+			}
+		};
 		add(body.setOutputMarkupId(true));
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
@@ -622,42 +652,34 @@ public abstract class PackListPanel extends Panel {
 				setVisible(!shouldShowHelp());
 			}
 		});
-		
-		body.add(new WebMarkupContainer("help") {
-			@Override
-			protected void onBeforeRender() {
-				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
-				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
-				List<Tab> tabs = new ArrayList<>();
-				for (var packSupport: packSupports) {
-					tabs.add(new AjaxActionTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon())) {
-						@Override
-						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							var helpContent = packSupport.renderHelp("content", getProject())	;
-							helpContent.setOutputMarkupId(true);
-							replace(helpContent);
-							target.add(helpContent);
-						}
 
-					});
-				}
-				addOrReplace(new Tabbable("tabs", tabs));
-				
-				var helpContent = packSupports.iterator().next().renderHelp("content", getProject());
-				helpContent.setOutputMarkupId(true);
-				addOrReplace(helpContent);
-
-				super.onBeforeRender();
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(shouldShowHelp());
-			}
-		});
-		
 		setOutputMarkupId(true);
+	}
+	
+	private WebMarkupContainer newHelpPanel(String componentId) {
+		var fragment = new Fragment(componentId, "helpFrag", this);
+		var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+		packSupports.sort(Comparator.comparing(PackSupport::getOrder));
+		List<Tab> tabs = new ArrayList<>();
+		for (var packSupport: packSupports) {
+			tabs.add(new AjaxActionTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon())) {
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					var helpContent = packSupport.renderHelp("content", getProject())	;
+					helpContent.setOutputMarkupId(true);
+					fragment.replace(helpContent);
+					target.add(helpContent);
+				}
+
+			});
+		}
+		fragment.add(new Tabbable("tabs", tabs));
+
+		var helpContent = packSupports.iterator().next().renderHelp("content", getProject());
+		helpContent.setOutputMarkupId(true);
+		fragment.add(helpContent);
+		
+		return fragment;
 	}
 	
 	private boolean shouldShowHelp() {
