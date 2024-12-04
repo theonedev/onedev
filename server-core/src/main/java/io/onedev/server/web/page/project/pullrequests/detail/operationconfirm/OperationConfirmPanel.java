@@ -1,19 +1,5 @@
 package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.feedback.FeedbackMessage;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.cycle.RequestCycle;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.model.PullRequest;
@@ -21,6 +7,17 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FeedbackMessage;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
@@ -134,12 +131,6 @@ public abstract class OperationConfirmPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new OperationConfirmCssResourceReference()));
 	}
 
 	@Nullable

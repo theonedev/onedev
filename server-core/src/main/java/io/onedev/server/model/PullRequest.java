@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.*;
 import static io.onedev.server.model.support.TimeGroups.*;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 import static java.lang.ThreadLocal.withInitial;
 
 @Entity
@@ -322,7 +322,7 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Collection<User> assignees;
 	
-	private transient Optional<CommitMessageError> commitMessageCheckError;
+	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 	
 	public String getTitle() {
 		return title;
@@ -1036,13 +1036,14 @@ public class PullRequest extends ProjectBelonging
 		return null;
 	}
 	
-	public String getDefaultCommitMessage() {
-		if (autoMerge.getCommitMessage() != null) {
-			return autoMerge.getCommitMessage();
+	public String getDefaultMergeCommitMessage() {
+		if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
+			return "Merges pull request #" + getNumber() + "\n\n" + getTitle();
 		} else {
-			var commitMessage = "Merges pull request #" + getNumber() + "\n\n" + getTitle();
+			var commitMessage = getTitle();
 			if (getDescription() != null)
 				commitMessage += "\n\n" + getDescription();
+			commitMessage += "\n\n" + "Merges pull request #" + getNumber();
 			return commitMessage;
 		}
 	}
@@ -1105,18 +1106,43 @@ public class PullRequest extends ProjectBelonging
 			return "Source branch already exists";
 		return null;
 	}
-	
-	@Nullable
-	public CommitMessageError checkCommitMessages() {
-		if (commitMessageCheckError == null) {
-			if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
-				commitMessageCheckError = Optional.ofNullable(getProject().checkCommitMessages(getTargetBranch(), getSubmitter(), 
-						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>()));
+
+	public boolean isMergeCommitMessageRequired() {
+		if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS || mergeStrategy == CREATE_MERGE_COMMIT)
+			return true;
+		if (mergeStrategy == CREATE_MERGE_COMMIT_IF_NECESSARY) {
+			var preview = checkMergePreview();
+			if (preview != null && preview.getMergeCommitHash() != null) {
+				return !preview.getMergeCommitHash().equals(preview.getHeadCommitHash());
 			} else {
-				commitMessageCheckError = Optional.empty();
+				ObjectId requestHead = getLatestUpdate().getHeadCommit().copy();
+				ObjectId targetHead = getTarget().getObjectId();
+				return !getGitService().isMergedInto(getProject(), null, targetHead, requestHead);
 			}
 		}
-		return commitMessageCheckError.orElse(null);
+		return false;
+	}
+
+	@Nullable
+	public CommitMessageError checkCommitMessages() {
+		if (commitMessageErrorOpt == null) {
+			CommitMessageError error = null;
+			if (mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS) {
+				error = getProject().checkCommitMessages(getTargetBranch(), getSubmitter(),
+						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
+			}
+			if (error == null && autoMerge.isEnabled() && isMergeCommitMessageRequired()) {
+				var branchProtection = getProject().getBranchProtection(getTargetBranch(), autoMerge.getUser());
+				var commitMessage = autoMerge.getCommitMessage();
+				if (commitMessage == null)
+					commitMessage = getDefaultMergeCommitMessage();
+				var errorMessage = branchProtection.checkCommitMessage(commitMessage, mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS);
+				if (errorMessage != null)
+					error = new CommitMessageError(null, errorMessage);
+			}
+			commitMessageErrorOpt = Optional.ofNullable(error);
+		}
+		return commitMessageErrorOpt.orElse(null);
 	}
 
 	public static String getSerialLockName(Long requestId) {

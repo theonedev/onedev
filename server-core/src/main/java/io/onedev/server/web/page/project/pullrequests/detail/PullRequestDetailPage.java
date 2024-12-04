@@ -602,11 +602,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected String load() {
 				var commitMessageError = getPullRequest().checkCommitMessages();
 				if (commitMessageError != null) {
-					var params = CommitDetailPage.paramsOf(getProject(), commitMessageError.getCommitId().name());
-					return String.format("Error validating commit message of <a href='%s' class='text-monospace font-size-sm'>%s</a>: %s",
-							RequestCycle.get().urlFor(CommitDetailPage.class, params),								
-							GitUtils.abbreviateSHA(commitMessageError.getCommitId().name()),
-							escapeHtml5(commitMessageError.getErrorMessage()));
+					if (commitMessageError.getCommitId() != null) {
+						var params = CommitDetailPage.paramsOf(getProject(), commitMessageError.getCommitId().name());
+						return String.format("Error validating commit message of <a href='%s' class='text-monospace font-size-sm'>%s</a>: %s",
+								RequestCycle.get().urlFor(CommitDetailPage.class, params),
+								GitUtils.abbreviateSHA(commitMessageError.getCommitId().name()),
+								escapeHtml5(commitMessageError.getErrorMessage()));
+					} else {
+						return String.format("Error validating auto merge commit message: %s",
+								escapeHtml5(commitMessageError.getErrorMessage()));
+					}
 				} else {
 					return null;
 				}
@@ -1257,11 +1262,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onBeforeRender() {
 				Fragment tipsContainer;
-				var autoMerge = getPullRequest().getAutoMerge();
+				var request = getPullRequest();
+				var autoMerge = request.getAutoMerge();
 				if (autoMerge.isEnabled()) {
 					tipsContainer = new Fragment("tips", "autoMergeEnabledFrag", PullRequestDetailPage.this);
 					WebMarkupContainer link;
-					if (getPullRequest().getMergeStrategy() != REBASE_SOURCE_BRANCH_COMMITS) {
+					if (request.isMergeCommitMessageRequired()) {
 						if (SecurityUtils.canManagePullRequests(getProject()) 
 								|| autoMerge.getUser() != null && autoMerge.getUser().equals(SecurityUtils.getUser())) {
 							link = new AjaxLink<Void>("commitMessage") {
@@ -1271,13 +1277,27 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 									var bean = new CommitMessageBean();
 									bean.setCommitMessage(autoMerge.getCommitMessage());
 									new BeanEditModalPanel<>(target, bean, "Preset Commit Message") {
+										@Override
+										protected String getCssClass() {
+											return "modal-lg commit-message no-autosize";
+										}
 
 										@Override
-										protected void onSave(AjaxRequestTarget target, CommitMessageBean bean) {
-											autoMerge.setCommitMessage(bean.getCommitMessage());
-											getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
-											Session.get().success("Preset commit message updated");
-											close();
+										protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+											var request = getPullRequest();
+											var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), autoMerge.getUser());
+											var errorMessage = branchProtection.checkCommitMessage(bean.getCommitMessage(),
+													request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+											if (errorMessage != null) {
+												return errorMessage;
+											} else {
+												autoMerge.setCommitMessage(bean.getCommitMessage());
+												getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+												Session.get().success("Preset commit message updated");
+												close();
+												getPullRequestManager().checkAutoMerge(request);
+												return null;
+											}
 										}
 									};
 								}
@@ -1351,41 +1371,58 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onUpdate(AjaxRequestTarget target) {
 				var request = getPullRequest();
 				if (autoMergeEnabled.get()) {
-					 if (request.getMergeStrategy() != REBASE_SOURCE_BRANCH_COMMITS) {
-						 var bean = new CommitMessageBean();
-						 bean.setCommitMessage(request.getDefaultCommitMessage());
-						 new BeanEditModalPanel<>(target, bean, "Preset Commit Message") {
+					if (request.isMergeCommitMessageRequired()) {
+						var bean = new CommitMessageBean();
+						bean.setCommitMessage(request.getAutoMerge().getCommitMessage());
+						if (bean.getCommitMessage() == null)
+							bean.setCommitMessage(request.getDefaultMergeCommitMessage());
+						new BeanEditModalPanel<>(target, bean, "Preset Commit Message") {
 
-							 @Override
-							 protected void onSave(AjaxRequestTarget target, CommitMessageBean bean) {
-								 var autoMerge = new AutoMerge();
-								 autoMerge.setEnabled(true);
-								 autoMerge.setUser(SecurityUtils.getUser());
-								 autoMerge.setCommitMessage(bean.getCommitMessage());
-								 getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
-								 target.add(autoMergeContainer);
-								 close();
-							 }
-
-							 @Override
-							 protected void onCancel(AjaxRequestTarget target) {
-								 super.onCancel(target);
-								 target.add(autoMergeContainer);
-							 }
-
-							 @Override
-							 protected boolean isDirtyAware() {
-								 return false;
-							 }
-						 };
-					 } else {
-						 var autoMerge = new AutoMerge();
-						 autoMerge.setEnabled(true);
-						 autoMerge.setUser(SecurityUtils.getUser());
-						 autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
-						 getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
-						 target.add(autoMergeContainer);
-					 }
+							@Override
+							protected String getCssClass() {
+								return "modal-lg commit-message no-autosize";
+							}
+							
+							@Override
+							protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+								var request = getPullRequest();
+								var user = SecurityUtils.getUser();
+								var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), user);
+								var errorMessage = branchProtection.checkCommitMessage(bean.getCommitMessage(),
+										request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+								if (errorMessage != null) {
+									return errorMessage;
+								} else {
+									var autoMerge = new AutoMerge();
+									autoMerge.setEnabled(true);
+									autoMerge.setUser(user);
+									autoMerge.setCommitMessage(bean.getCommitMessage());
+									getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
+									target.add(autoMergeContainer);
+									close();
+									return null;
+								}
+							}
+							
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								super.onCancel(target);
+								target.add(autoMergeContainer);
+							}
+						
+							@Override
+							protected boolean isDirtyAware() {
+							 return false;
+							}
+						};
+					} else {
+					 var autoMerge = new AutoMerge();
+					 autoMerge.setEnabled(true);
+					 autoMerge.setUser(SecurityUtils.getUser());
+					 autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+					 getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+					 target.add(autoMergeContainer);
+					}
 				} else {
 					var autoMerge = new AutoMerge();
 					autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());

@@ -449,7 +449,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											}
 
 											@Override
-											protected void onSave(AjaxRequestTarget target, SuggestionBatchApplyBean bean) {
+											protected String onSave(AjaxRequestTarget target, SuggestionBatchApplyBean bean) {
 												String commitMessage = bean.getCommitMessage(); 
 												PullRequest request = getPullRequest();
 												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
@@ -477,6 +477,7 @@ public abstract class RevisionDiffPanel extends Panel {
 														throw ExceptionUtils.unchecked(e);
 													}
 												}
+												return null;
 											}
 										};
 										dropdown.close();

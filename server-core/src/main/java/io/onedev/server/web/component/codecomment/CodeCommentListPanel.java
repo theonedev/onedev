@@ -206,7 +206,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, StatusChangeOptionBean bean) {
+					protected String onSave(AjaxRequestTarget target, StatusChangeOptionBean bean) {
 						Collection<CodeCommentStatusChange> changes = new ArrayList<>();
 						
 						for (CodeComment comment: commentsProvider.get()) {
@@ -228,6 +228,8 @@ public abstract class CodeCommentListPanel extends Panel {
 						target.add(body);
 						
 						close();
+						
+						return null;
 					}
 					
 				};

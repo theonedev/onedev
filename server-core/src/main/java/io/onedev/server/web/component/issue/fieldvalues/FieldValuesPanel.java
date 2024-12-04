@@ -147,13 +147,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						}
 
 						@Override
-						protected void onSave(AjaxRequestTarget target, Serializable bean) {
+						protected String onSave(AjaxRequestTarget target, Serializable bean) {
 							fieldValues.putAll(FieldUtils.getFieldValues(
 									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 									bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
 							OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
 							notifyObservablesChange(target);
 							close();
+							return null;
 						}
 						
 					}

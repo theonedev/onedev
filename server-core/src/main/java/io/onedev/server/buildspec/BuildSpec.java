@@ -2206,5 +2206,27 @@ public class BuildSpec implements Serializable, Validatable {
 				migrate37_registryLogins((MappingNode)stepNode);
 		});
 	}
+
+	private void migrate38(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNode: stepsNode.getValue()) {
+				if (stepNode.getTag().getValue().equals("!RenovateStep")) {
+					for (var itStepTuple = ((MappingNode)stepNode).getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
+						var keyNode = (ScalarNode) stepTuple.getKeyNode();
+						if (keyNode.getValue().equals("createDependencyDashboardIssue") 
+								|| keyNode.getValue().equals("dashboardIssueConfidential") 
+								|| keyNode.getValue().equals("closeDashboardIssueWhenDone")) {
+							itStepTuple.remove();
+						} else if (keyNode.getValue().equals("dashboardIssueFields")) {
+							keyNode.setValue("issueFields");
+						} else if (keyNode.getValue().equals("dashboardIssueCloseStates")) {
+							keyNode.setValue("issueCloseStates");
+						}
+					}
+				}
+			}
+		});
+	}
 	
 }

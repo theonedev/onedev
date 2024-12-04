@@ -276,7 +276,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 			else
 				author = null;
 			if (commitMessage == null)
-				commitMessage = request.getDefaultCommitMessage();
+				commitMessage = request.getDefaultMergeCommitMessage();
 			mergeCommitId = getGitService().amendCommit(project, mergeCommitId, 
 					author, person, commitMessage);
 		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
@@ -431,7 +431,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 			var autoMerge = request.getAutoMerge();
 			if (autoMerge.isEnabled() && request.checkMerge() == null) {
 				if (autoMerge.getUser() != null)
-					merge(autoMerge.getUser(), request, null);
+					merge(autoMerge.getUser(), request, autoMerge.getCommitMessage());
 				else
 					throw new ExplicitException("Auto merge user not specified");
 			}

@@ -479,7 +479,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								}
 
 								@Override
-								protected void onSave(AjaxRequestTarget target, Serializable bean) {
+								protected String onSave(AjaxRequestTarget target, Serializable bean) {
 									fieldValues.putAll(FieldUtils.getFieldValues(
 											FieldUtils.newBeanComponentContext(beanDescriptor, bean),
 											bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
@@ -487,6 +487,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 									Issue issue = getIssueManager().load(issueId);
 									getIssueChangeManager().changeFields(issue, fieldValues);
 									cardListPanel.onCardDropped(target, issueId, cardIndex, true);
+									return null;
 								}
 
 								@Override

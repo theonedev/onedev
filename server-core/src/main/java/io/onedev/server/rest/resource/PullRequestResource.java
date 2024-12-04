@@ -1,6 +1,5 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -21,6 +20,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 @Api(order=3000, description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -195,7 +198,7 @@ public class PullRequestResource {
 
 	@Api(order=1200)
 	@POST
-    public Long create(@NotNull PullRequestOpenData data) {
+    public Response create(@NotNull PullRequestOpenData data) {
 		User user = SecurityUtils.getUser();
 		
 		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
@@ -253,8 +256,8 @@ public class PullRequestResource {
 		
 		for (Long reviewerId: data.getReviewerIds()) {
 			User reviewer = userManager.load(reviewerId);
-			if (reviewer.equals(request.getSubmitter()))
-				throw new ExplicitException("Pull request submitter can not be reviewer");
+			if (reviewer.equals(request.getSubmitter())) 
+				return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
 			
 			if (request.getReview(reviewer) == null) {
 				PullRequestReview review = new PullRequestReview();
@@ -281,7 +284,7 @@ public class PullRequestResource {
 		}
 				
 		pullRequestManager.open(request);
-		return request.getId();
+		return Response.ok(request.getId()).build();
     }
 	
 	@Api(order=1300)
@@ -316,6 +319,17 @@ public class PullRequestResource {
 		pullRequestChangeManager.changeMergeStrategy(request, mergeStrategy);
 		return Response.ok().build();
     }
+	
+	@Nullable
+	private Response checkAutoMergeCommitMessage(User user, PullRequest request,AutoMergeData data) {
+		if (request.isMergeCommitMessageRequired()) {
+			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
+			var errorMessage = branchProtection.checkCommitMessage(data.getCommitMessage(), request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+			if (errorMessage != null)
+				return Response.status(NOT_ACCEPTABLE).entity("Error validating auto merge commit message: " + errorMessage).build();
+		}
+		return null;		
+	}
 
 	@Api(order=1550)
 	@Path("/{requestId}/auto-merge")
@@ -330,8 +344,10 @@ public class PullRequestResource {
 					var autoMerge = new AutoMerge();
 					autoMerge.setEnabled(data.isEnabled());
 					autoMerge.setUser(user);
-					if (data.getCommitMessage() != null)
-						autoMerge.setCommitMessage(data.getCommitMessage());
+					var response = checkAutoMergeCommitMessage(user, request, data);
+					if (response != null)
+						return response;
+					autoMerge.setCommitMessage(data.getCommitMessage());
 					pullRequestChangeManager.changeAutoMerge(request, autoMerge);
 				} else {
 					throw new UnauthorizedException();
@@ -344,21 +360,21 @@ public class PullRequestResource {
 						var autoMerge = new AutoMerge();
 						autoMerge.setEnabled(true);
 						autoMerge.setUser(user);
-						if (data.getCommitMessage() != null)
-							autoMerge.setCommitMessage(data.getCommitMessage());
-						else
-							autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+						var response = checkAutoMergeCommitMessage(user, request, data);
+						if (response != null)
+							return response;
+						autoMerge.setCommitMessage(data.getCommitMessage());
 						pullRequestChangeManager.changeAutoMerge(request, autoMerge);
 					}
 				} else {
-					throw new UnsupportedOperationException("Auto merge already disabled");
+					return Response.status(NOT_ACCEPTABLE).entity("Auto merge already disabled").build();
 				}
 			} else {
 				throw new UnauthorizedException();
 			}
 			return Response.ok().build();
 		} else {
-			throw new UnsupportedOperationException("Pull request is closed");
+			return Response.status(NOT_ACCEPTABLE).entity("Pull request is closed").build();
 		}
 	}
 	
@@ -371,7 +387,7 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
     	String errorMessage = request.checkReopen();
     	if (errorMessage != null)
-    		throw new ExplicitException(errorMessage);
+    		return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
     	
 		pullRequestManager.reopen(request, note);
 		return Response.ok().build();
@@ -385,7 +401,7 @@ public class PullRequestResource {
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
     	if (!request.isOpen())
-    		throw new ExplicitException("Pull request already closed");
+			return Response.status(NOT_ACCEPTABLE).entity("Pull request already closed").build();
     	
 		pullRequestManager.discard(request, note);
 		return Response.ok().build();
@@ -401,7 +417,14 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
     	String errorMessage = request.checkMerge();
     	if (errorMessage != null)
-    		throw new ExplicitException(errorMessage);
+			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
+
+		if (request.isMergeCommitMessageRequired()) {
+			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
+			errorMessage = branchProtection.checkCommitMessage(note, request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+			if (errorMessage != null)
+				return Response.status(NOT_ACCEPTABLE).entity("Error validating merge commit message: " + errorMessage).build();
+		}
 		
 		pullRequestManager.merge(user, request, note);
 		return Response.ok().build();
@@ -420,7 +443,7 @@ public class PullRequestResource {
 		
     	String errorMessage = request.checkDeleteSourceBranch();
     	if (errorMessage != null)
-    		throw new ExplicitException(errorMessage);
+			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build(); 		
 		
 		pullRequestManager.deleteSourceBranch(request, note);
 		return Response.ok().build();
@@ -439,7 +462,7 @@ public class PullRequestResource {
 		
     	String errorMessage = request.checkRestoreSourceBranch();
     	if (errorMessage != null)
-    		throw new ExplicitException(errorMessage);
+			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
 		
 		pullRequestManager.restoreSourceBranch(request, note);
 		return Response.ok().build();

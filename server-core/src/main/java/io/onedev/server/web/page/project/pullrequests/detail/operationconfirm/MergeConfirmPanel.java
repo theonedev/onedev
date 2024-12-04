@@ -33,14 +33,17 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 		String description = null;
 		MergeStrategy mergeStrategy = request.getMergeStrategy();
 		MergePreview mergePreview = request.checkMergePreview();
-		if (mergeStrategy == CREATE_MERGE_COMMIT || mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) 
-			commitMessage = request.getDefaultCommitMessage();
-		else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) 
+		if (mergeStrategy == CREATE_MERGE_COMMIT || mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
+			commitMessage = request.getAutoMerge().getCommitMessage();
+			if (commitMessage == null)
+				commitMessage = request.getDefaultMergeCommitMessage();
+		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
 			description = "Source branch commits will be rebased onto target branch";
-		else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) 
+		} else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) {
 			description = "Source branch commits will be fast-forwarded to target branch";
-		else 
-			commitMessage = request.getDefaultCommitMessage();
+		} else {
+			commitMessage = request.getDefaultMergeCommitMessage();
+		}
 		
 		getForm().add(new Label("description", description).setVisible(description != null));
 

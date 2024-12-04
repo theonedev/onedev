@@ -107,3 +107,6 @@ ul>li>a.code-comments.new .icon {
 .pull-request-detail .more-info .submission tr:last-child td {
 	padding-bottom: 0;
 }
+.modal-dialog.commit-message textarea, .modal-dialog .commit-message textarea {
+	height: 360px;
+}

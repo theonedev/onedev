@@ -49,8 +49,8 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 			}
 
 			@Override
-			protected void onSave(AjaxRequestTarget target) {
-				BeanEditModalPanel.this.onSave(target, bean);
+			protected String onSave(AjaxRequestTarget target) {
+				return BeanEditModalPanel.this.onSave(target, bean);
 			}
 			
 			@Override
@@ -86,7 +86,7 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 		return true;
 	}
 
-	protected abstract void onSave(AjaxRequestTarget target, T bean);
+	protected abstract String onSave(AjaxRequestTarget target, T bean);
 	
 	protected void onCancel(AjaxRequestTarget target) {
 	}

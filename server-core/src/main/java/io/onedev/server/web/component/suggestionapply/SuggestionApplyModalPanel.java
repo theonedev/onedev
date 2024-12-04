@@ -42,7 +42,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 	}
 
 	@Override
-	protected void onSave(AjaxRequestTarget target, SuggestionApplyBean bean) {
+	protected String onSave(AjaxRequestTarget target, SuggestionApplyBean bean) {
 		CodeComment comment = getComment();
 		BlobEdits blobEdits = new BlobEdits();
 		
@@ -116,6 +116,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 			Session.get().error("Suggestion apply disallowed by branch protection rule");
 			close();
 		}		
+		return null;
 	}
 	
 	@Nullable

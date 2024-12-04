@@ -124,7 +124,7 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 					new BeanEditModalPanel<>(target, bean) {
 
 						@Override
-						protected void onSave(AjaxRequestTarget target, AddToIterationBean bean) {
+						protected String onSave(AjaxRequestTarget target, AddToIterationBean bean) {
 							BasePage page = (BasePage) getPage();
 							close();
 							var issues = getIssueManager().query(getProjectScope(), getQuery(),
@@ -138,6 +138,7 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 							getIssueChangeManager().changeSchedule(issues, addIteration, removeIteration, bean.isSendNotifications());
 							for (var issue : issues)
 								page.notifyObservablesChange(target, issue.getChangeObservables(true));
+							return null;
 						}
 
 					};

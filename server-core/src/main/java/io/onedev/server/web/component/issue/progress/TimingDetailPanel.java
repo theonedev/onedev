@@ -96,10 +96,11 @@ abstract class TimingDetailPanel extends Panel {
 				new BeanEditModalPanel<>(target, bean) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, EstimatedTimeEditBean bean) {
+					protected String onSave(AjaxRequestTarget target, EstimatedTimeEditBean bean) {
 						getIssueChangeManager().changeOwnEstimatedTime(getIssue(), bean.getEstimatedTime());
 						notifyObservablesChange(target);
 						close();
+						return null;
 					}
 				};
 			}
@@ -121,7 +122,7 @@ abstract class TimingDetailPanel extends Panel {
 				new BeanEditModalPanel<>(target, bean) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, IssueWorkBean bean) {
+					protected String onSave(AjaxRequestTarget target, IssueWorkBean bean) {
 						IssueWork work = new IssueWork();
 						work.setIssue(getIssue());
 						work.setUser(SecurityUtils.getAuthUser());
@@ -132,6 +133,7 @@ abstract class TimingDetailPanel extends Panel {
 						OneDev.getInstance(IssueWorkManager.class).createOrUpdate(work);
 						notifyObservablesChange(target);
 						close();
+						return null;
 					}
 
 					@Override

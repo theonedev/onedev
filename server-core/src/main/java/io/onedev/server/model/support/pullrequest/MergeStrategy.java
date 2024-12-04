@@ -30,7 +30,7 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
+			ObjectId requestHead = request.getLatestUpdate().getHeadCommit().copy();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			Project project = request.getTargetProject();
 			if (getGitService().isMergedInto(project, null, targetHead, requestHead)) {

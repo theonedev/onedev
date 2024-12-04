@@ -572,13 +572,14 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										new BeanEditModalPanel<>(target, bean, "Edit Iteration") {
 
 											@Override
-											protected void onSave(AjaxRequestTarget target, IterationEditBean bean) {
+											protected String onSave(AjaxRequestTarget target, IterationEditBean bean) {
 												var iteration = item.getModelObject();
 												bean.update(iteration);
 												getIterationManager().createOrUpdate(iteration);
 												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 														getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 														backlog, queryString, backlogQueryString));
+												return null;
 											}
 										};
 									}
@@ -666,7 +667,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							new BeanEditModalPanel<>(target, bean, "Create Iteration") {
 
 								@Override
-								protected void onSave(AjaxRequestTarget target, IterationEditBean bean) {
+								protected String onSave(AjaxRequestTarget target, IterationEditBean bean) {
 									var iteration = new Iteration();
 									iteration.setProject(getProject());
 									bean.update(iteration);
@@ -674,6 +675,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 											getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 											backlog, queryString, backlogQueryString));
+									return null;
 								}
 
 								@Override

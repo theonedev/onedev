@@ -294,12 +294,13 @@ public abstract class BuildDetailPage extends ProjectPage
 						new BeanEditModalPanel<Serializable>(target, bean) {
 
 							@Override
-							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+							protected String onSave(AjaxRequestTarget target, Serializable bean) {
 								getBuild().setDescription(((DescriptionBean)bean).getValue());
 								OneDev.getInstance(BuildManager.class).update(getBuild());
 								OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
 								((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());
 								close();
+								return null;
 							}
 
 						};
