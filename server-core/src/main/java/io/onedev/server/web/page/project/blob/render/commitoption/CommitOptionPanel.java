@@ -90,8 +90,9 @@ public class CommitOptionPanel extends Panel {
 		else
 			oldName = oldPath;
 		
+		String commitMessage;
 		if (newContentProvider == null) { 
-			return "Delete " + oldName;
+			commitMessage = "Delete " + oldName;
 		} else {
 			String newPath = context.getNewPath();
 
@@ -103,16 +104,18 @@ public class CommitOptionPanel extends Panel {
 			
 			if (oldPath == null) {
 				if (newName != null)
-					return "Add " + newName;
+					commitMessage = "Add " + newName;
 				else
-					return "Add new file";
+					commitMessage = "Add new file";
 			} else if (oldPath.equals(newPath)) {
-				return "Edit " + oldName;
+				commitMessage = "Edit " + oldName;
 			} else {
-				return "Rename " + oldName;
+				commitMessage = "Rename " + oldName;
 			}
 		}
-			
+		if (context.getProject().getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser()).isEnforceConventionalCommits())
+			commitMessage = "chore: " + commitMessage;
+		return commitMessage;
 	}
 	
 	private GitService getGitService() {
