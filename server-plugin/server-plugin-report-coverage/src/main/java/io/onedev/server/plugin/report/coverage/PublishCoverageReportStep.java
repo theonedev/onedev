@@ -83,7 +83,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 			File reportDir = new File(build.getDir(), CoverageStats.CATEGORY + "/" + getReportName());
 			File lineCoverageFile = new File(reportDir, CoverageStats.FILES + "/" + blobPath);
 			FileUtils.createDir(lineCoverageFile.getParentFile());
-			try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
+			try (var os = new BufferedOutputStream(new FileOutputStream(lineCoverageFile))) {
 				SerializationUtils.serialize((Serializable) lineStatuses, os);
 			} catch (IOException e) {
 				throw new RuntimeException(e);

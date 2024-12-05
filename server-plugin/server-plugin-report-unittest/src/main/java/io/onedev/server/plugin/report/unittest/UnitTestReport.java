@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.util.stream.Collectors.toList;
 
 public class UnitTestReport implements Serializable {
@@ -24,7 +25,7 @@ public class UnitTestReport implements Serializable {
 	
 	private static final String REPORT = "report.ser";
 	
-	public static enum Status {
+	public enum Status {
 
 		NOT_PASSED("#F64E60"), OTHER("#FFA800"), NOT_RUN("#8950FC"), PASSED("#1BC5BD");
 		
@@ -104,7 +105,7 @@ public class UnitTestReport implements Serializable {
 	
 	public void writeTo(File reportDir) {
 		File reportFile = new File(reportDir, REPORT);
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile))) {
+		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile), BUFFER_SIZE)) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

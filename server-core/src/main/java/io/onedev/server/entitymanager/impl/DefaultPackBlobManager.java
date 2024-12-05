@@ -285,7 +285,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	public long uploadBlob(Long projectId, String uuid, InputStream is) {
 		var activeServer = projectManager.getActiveServer(projectId, true);
 		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			try (var os = new FileOutputStream(getUploadFile(projectId, uuid), true)) {
+			try (var os = new BufferedOutputStream(new FileOutputStream(getUploadFile(projectId, uuid), true), BUFFER_SIZE)) {
 				return copy(is, os, BUFFER_SIZE);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -510,7 +510,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 					FileUtils.createDir(newBlobFile.getParentFile());
 					var tempFile = new File(newBlobFile.getParentFile(), UUID.randomUUID().toString() + TEMP_BLOB_SUFFIX);
 					try {
-						try (var os = new FileOutputStream(tempFile)) {
+						try (var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
 							downloadBlob(projectId, hash, os);
 						}
 						write(getFileLockName(newProjectId, hash), () -> {

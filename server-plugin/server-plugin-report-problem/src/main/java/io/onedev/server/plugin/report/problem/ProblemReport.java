@@ -8,6 +8,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import java.io.*;
 import java.util.*;
 
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
 public class ProblemReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -57,7 +59,7 @@ public class ProblemReport implements Serializable {
 	
 	public void writeTo(File reportDir) {
 		File dataFile = new File(reportDir, REPORT);
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(dataFile))) {
+		try (var os = new BufferedOutputStream(new FileOutputStream(dataFile), BUFFER_SIZE)) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

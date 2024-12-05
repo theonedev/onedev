@@ -32,10 +32,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
@@ -114,8 +111,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 									String filePath = getArtifactPath(item);
 									File file = new File(artifactsDir, filePath);
 									FileUtils.createDir(file.getParentFile());
-									try (InputStream is = item.getInputStream();
-										 OutputStream os = new FileOutputStream(file)) {
+									try (var is = item.getInputStream();
+										 var os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
 										IOUtils.copy(is, os, BUFFER_SIZE);
 									}
 								}

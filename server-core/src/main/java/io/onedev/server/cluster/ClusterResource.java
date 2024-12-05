@@ -420,7 +420,7 @@ public class ClusterResource {
 			var artifactsDir = storageManager.initArtifactsDir(projectId, buildNumber);
 			File artifactFile = new File(artifactsDir, artifactPath);
 			FileUtils.createDir(artifactFile.getParentFile());
-			try (input; OutputStream os = new FileOutputStream(artifactFile)) {
+			try (input; var os = new BufferedOutputStream(new FileOutputStream(artifactFile), BUFFER_SIZE)) {
 				IOUtils.copy(input, os, BUFFER_SIZE);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -440,7 +440,7 @@ public class ClusterResource {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		var uploadFile = packBlobManager.getUploadFile(projectId, uuid);
-		try (input; var os = new FileOutputStream(uploadFile, true)) {
+		try (input; var os = new BufferedOutputStream(new FileOutputStream(uploadFile, true), BUFFER_SIZE)) {
 			return IOUtils.copy(input, os, BUFFER_SIZE);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

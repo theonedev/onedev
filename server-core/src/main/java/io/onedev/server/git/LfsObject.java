@@ -1,15 +1,6 @@
 package io.onedev.server.git;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -22,6 +13,8 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.util.ContentDetector;
 import org.jetbrains.annotations.NotNull;
+
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 public class LfsObject implements Serializable {
 	
@@ -110,7 +103,7 @@ public class LfsObject implements Serializable {
 		Lock writeLock = getLock().writeLock();
 		writeLock.lock();
 		try {
-			return new FilterOutputStream(new FileOutputStream(getFile())) {
+			return new FilterOutputStream(new BufferedOutputStream(new FileOutputStream(getFile()), BUFFER_SIZE)) {
 				@Override
 				public void write(@NotNull byte[] b, int off, int len) throws IOException {
 					out.write(b, off, len);

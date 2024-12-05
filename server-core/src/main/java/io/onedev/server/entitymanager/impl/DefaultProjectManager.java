@@ -1622,8 +1622,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					FileUtils.createDir(file.getParentFile());
 					KubernetesHelper.checkStatus(response);
 					try (
-							InputStream is = response.readEntity(InputStream.class);
-							OutputStream os = new FileOutputStream(file)) {
+							var is = response.readEntity(InputStream.class);
+							var os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
 						IOUtils.copy(is, os, BUFFER_SIZE);
 					} catch (IOException e) {
 						throw new RuntimeException(e);

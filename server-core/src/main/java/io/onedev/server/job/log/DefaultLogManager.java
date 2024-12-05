@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import static io.onedev.commons.utils.LockUtils.*;
 import static io.onedev.server.model.Build.getLogLockName;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 @Singleton
 public class DefaultLogManager implements LogManager, Serializable {
@@ -395,7 +396,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 	private ObjectOutputStream newOutputStream(File logFile) {
 		try {
 			if (logFile.exists()) {
-				return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(logFile, true))) {
+				return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(logFile, true), BUFFER_SIZE)) {
 
 					@Override
 					protected void writeStreamHeader() throws IOException {
@@ -404,7 +405,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 					
 				};
 			} else {
-				return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(logFile)));
+				return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(logFile), BUFFER_SIZE));
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

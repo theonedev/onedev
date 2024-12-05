@@ -114,7 +114,7 @@ public class GemPackService implements PackService {
 			});
 			var tempFile = FileUtils.createTempFile("upload", "nuget");
 			try {
-				try (var os = new FileOutputStream(tempFile)) {
+				try (var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
 					IOUtils.copy(request.getInputStream(), os);
 				} catch (IOException e) {
 					throw new RuntimeException(e);

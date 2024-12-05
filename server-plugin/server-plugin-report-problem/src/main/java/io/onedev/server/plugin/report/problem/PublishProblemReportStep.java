@@ -116,7 +116,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		File violationsFile = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());
-		try (OutputStream os = new FileOutputStream(violationsFile)) {
+		try (var os = new BufferedOutputStream(new FileOutputStream(violationsFile))) {
 			SerializationUtils.serialize((Serializable) problemsOfFile, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

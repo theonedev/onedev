@@ -192,7 +192,7 @@ public class NugetPackService implements PackService {
 						try {
 							try (
 									var is = item.openStream();
-									var os = new FileOutputStream(tempFile)) {
+									var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
 								IOUtils.copy(is, os, BUFFER_SIZE);
 							}
 

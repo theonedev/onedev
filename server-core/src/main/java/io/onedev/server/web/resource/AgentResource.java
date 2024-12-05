@@ -15,7 +15,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Properties;
@@ -64,7 +67,7 @@ public class AgentResource extends AbstractResource {
 					OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 					props.setProperty("agentToken", token.getValue());
 					
-					try (var os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
+					try (var os = new BufferedOutputStream(new FileOutputStream(new File(agentDir, "agent/conf/agent.properties")))) {
 						String comment = "For a list of supported agent properties, please visit:\n" 
 								+ "https://docs.onedev.io/administration-guide/agent-management#agent-propertiesenvironments";
 						props.store(os, comment);
@@ -72,7 +75,7 @@ public class AgentResource extends AbstractResource {
 					
 					try (
 							var is = Agent.class.getClassLoader().getResourceAsStream("agent/conf/logback.xml");
-							var os = new FileOutputStream(new File(agentDir, "agent/conf/logback.xml"));) {
+							var os = new BufferedOutputStream(new FileOutputStream(new File(agentDir, "agent/conf/logback.xml")))) {
 						IOUtils.copy(is, os);
 					}
 					FileUtils.touchFile(new File(agentDir, "agent/conf/attributes.properties"));

@@ -14,6 +14,8 @@ import java.util.List;
 import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
 
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
 public class CoverageStats implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -52,7 +54,7 @@ public class CoverageStats implements Serializable {
 	
 	public void writeTo(File reportDir) {
 		File reportFile = new File(reportDir, REPORT);
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile))) {
+		try (var os = new BufferedOutputStream(new FileOutputStream(reportFile), BUFFER_SIZE)) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

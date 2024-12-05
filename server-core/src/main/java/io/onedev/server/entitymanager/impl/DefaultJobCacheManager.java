@@ -232,7 +232,7 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		var cacheDir = new File(cacheHome, String.valueOf(cacheId));
 		FileUtils.cleanDir(cacheDir);
 		try {
-			return new ImmutablePair<>(cacheDir, new FilterOutputStream(new FileOutputStream(new File(cacheDir, "data"))) {
+			return new ImmutablePair<>(cacheDir, new FilterOutputStream(new BufferedOutputStream(new FileOutputStream(new File(cacheDir, "data")), BUFFER_SIZE)) {
 
 				private final byte[] buffer = new byte[CacheHelper.MARK_BUFFER_SIZE];
 				

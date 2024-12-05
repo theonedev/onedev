@@ -1,15 +1,6 @@
 package io.onedev.server.data.migration;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Externalizable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -54,6 +45,8 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 public final class VersionedXmlDoc implements Document, Externalizable {
 
@@ -391,7 +384,7 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	}
 	
 	public void writeToFile(File file, boolean pretty) {
-		try (OutputStream os = new FileOutputStream(file)){
+		try (var os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)){
 			OutputFormat format = new OutputFormat();
 			format.setIndent(pretty);
 			format.setNewlines(pretty);

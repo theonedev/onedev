@@ -9,6 +9,9 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.build.BuildSubmitted;
@@ -23,9 +26,6 @@ import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
@@ -52,12 +52,12 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.util.*;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.model.Project.ATTACHMENT_DIR;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 @Singleton
@@ -565,10 +565,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 			Exception ex = null;
 			File file = new File(attachmentDir, attachmentName);
-			try (OutputStream os = new FileOutputStream(file)) {
-				byte[] buffer = new byte[io.onedev.server.util.IOUtils.BUFFER_SIZE];
+			try (var os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
+				byte[] buffer = new byte[BUFFER_SIZE];
 				long count = 0;
-				int n = 0;
+				int n;
 				while (-1 != (n = attachmentStream.read(buffer))) {
 					count += n;
 					if (count > maxUploadFileSize) {
