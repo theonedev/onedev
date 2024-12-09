@@ -93,16 +93,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 			@Override
 			public boolean run(TaskLogger jobLogger) {
 				notifyJobRunning(jobContext.getBuildId(), null);
+				checkApplicable();
 				
-				if (OneDev.getK8sService() != null) {
-					throw new ExplicitException(""
-							+ "OneDev running inside kubernetes cluster does not support server shell executor. "
-							+ "Please use kubernetes executor instead");
-				} else if (Bootstrap.isInDocker()) {
-					throw new ExplicitException("Server shell executor is only supported when OneDev is installed "
-							+ "directly on bare metal/virtual machine");
-				}
-
 				buildHome = new File(Bootstrap.getTempDir(),
 						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
 				FileUtils.createDir(buildHome);
@@ -289,9 +281,22 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 		return getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(), 
 				1, runnable);
 	}
+	
+	private void checkApplicable() {
+		if (OneDev.getK8sService() != null) {
+			throw new ExplicitException(""
+					+ "OneDev running inside kubernetes cluster does not support server shell executor. "
+					+ "Please use kubernetes executor instead");
+		} else if (Bootstrap.isInDocker()) {
+			throw new ExplicitException("Server shell executor is only supported when OneDev is installed "
+					+ "directly on bare metal/virtual machine");
+		}
+	}
 
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
+		checkApplicable();
+		
 		Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 		testCommands(git, testData.getCommands(), jobLogger);
 	}

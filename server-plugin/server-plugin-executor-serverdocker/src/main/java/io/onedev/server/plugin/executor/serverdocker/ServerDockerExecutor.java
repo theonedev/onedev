@@ -247,6 +247,14 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 			return 0;
 	}
 	
+	private void checkApplicable() {
+		if (OneDev.getK8sService() != null) {
+			throw new ExplicitException(""
+					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
+					+ "Please use kubernetes executor instead");
+		}
+	}
+	
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterTask<Boolean> runnable = () -> getJobManager().runJob(jobContext, new JobRunnable() {
@@ -256,12 +264,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 			@Override
 			public boolean run(TaskLogger jobLogger) {
 				notifyJobRunning(jobContext.getBuildId(), null);
-				
-				if (OneDev.getK8sService() != null) {
-					throw new ExplicitException(""
-							+ "OneDev running inside kubernetes cluster does not support server docker executor. "
-							+ "Please use kubernetes executor instead");
-				}
+				checkApplicable();
 
 				hostBuildHome = new File(Bootstrap.getTempDir(),
 						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
@@ -652,6 +655,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
+		checkApplicable();
 		var docker = newDocker();
 		callWithDockerConfig(docker, getRegistryLogins(UUID.randomUUID().toString()), () -> {
 			File workspaceDir = null;
