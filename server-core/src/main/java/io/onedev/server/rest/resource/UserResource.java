@@ -251,6 +251,17 @@ public class UserResource {
     	return userManager.query(term, offset, count);
     }
 	
+	@Api(order=1850)
+	@Path("/ids/{name}")
+	@GET
+	public Long getId(@PathParam("name") @Api(description = "Login name of user") String name) {
+		var user = userManager.findByName(name);
+		if (user != null)
+			return user.getId();
+		else 
+			throw new NotFoundException();
+	}
+	
 	@Api(order=1900, description="Create new user")
     @POST
     public Long create(@NotNull @Valid UserCreateData data) {

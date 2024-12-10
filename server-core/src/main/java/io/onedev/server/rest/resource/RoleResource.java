@@ -7,14 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -76,6 +69,17 @@ public class RoleResource {
 		
     	return roleManager.query(criteria, offset, count);
     }
+
+	@Api(order=250)
+	@Path("/ids/{name}")
+	@GET
+	public Long getId(@PathParam("name") String name) {
+		var role = roleManager.find(name);
+		if (role != null)
+			return role.getId();
+		else
+			throw new NotFoundException();
+	}
 	
 	@Api(order=300, description="Create new role")
     @POST
