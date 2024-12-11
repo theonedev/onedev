@@ -1,6 +1,5 @@
 package io.onedev.server.job;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -106,6 +105,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.onedev.commons.utils.ExceptionUtils.find;
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
@@ -117,10 +117,12 @@ import static org.eclipse.jgit.lib.Constants.R_HEADS;
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
+	
+	private static final String TIMEOUT_MESSAGE = "Job execution timed out";
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobManager.class);
 
-	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
+	private final Map<Long, Future<Boolean>> jobFutures = new ConcurrentHashMap<>();
 
 	private final Map<String, Collection<Thread>> serverStepThreads = new ConcurrentHashMap<>();
 
@@ -514,7 +516,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 
-	private JobExecution execute(Build build) {
+	private Future<Boolean> execute(Build build) {
 		String jobToken = build.getJobToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
@@ -557,7 +559,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				services.add(interpolator.interpolateProperties(service).getFacade(build, jobToken));
 			}
 			
-			timeout = job.getTimeout();
+			timeout = job.getTimeout() * 1000L;
 		} finally {
 			Build.pop();
 			JobAuthorizationContext.pop();
@@ -567,52 +569,76 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				projectId, projectPath, projectGitDir, buildId, buildNumber, actions, 
 				refName, commitId, services, timeout);
 		
-		return new JobExecution(executorService.submit(() -> {
-			if (sequentialKey != null) {
-				jobLogger.log("Locking sequential group...");
-				while (sequentialKeys.putIfAbsent(sequentialKey, new Date(), timeout, TimeUnit.SECONDS) != null) {
-					Thread.sleep(1000);
-				}
-			}
-			try {
-				while (true) {
-					// Store original job actions as the copy in job context will be fetched from cluster and 
-					// some transient fields (such as step object in ServerSideFacade) will not be preserved 
-					jobActions.put(jobToken, actions);
-					logManager.addJobLogger(jobToken, jobLogger);
-					serverStepThreads.put(jobToken, new ArrayList<>());
-					try {
-						if (jobExecutor.execute(jobContext, jobLogger))
-							return true;
-						if (!retryJob(job, jobContext, jobLogger, null))
-							return false;
-					} catch (Throwable e) {
-						if (!retryJob(job, jobContext, jobLogger, e))
-							throw e;
-					} finally {
-						Collection<Thread> threads = serverStepThreads.remove(jobToken);
-						synchronized (threads) {
-							for (Thread thread : threads)
-								thread.interrupt();
-						}
-						logManager.removeJobLogger(jobToken);
-						jobActions.remove(jobToken);
+		return executorService.submit(() -> {
+			while (true) {
+				long beginTime = System.currentTimeMillis();
+				if (sequentialKey != null) {
+					jobLogger.log("Locking sequential group...");
+					while (true) {
+						var waitTime = timeout - (System.currentTimeMillis() - beginTime);
+						if (waitTime <= 0)
+							throw new TimeoutException();
+						if (sequentialKeys.putIfAbsent(sequentialKey, new Date(), waitTime, TimeUnit.MILLISECONDS) != null)
+							Thread.sleep(1000);
+						else
+							break;
 					}
 				}
-			} finally {
-				if (sequentialKey != null) 
-					sequentialKeys.remove(sequentialKey);
+				// Store original job actions as the copy in job context will be fetched from cluster and 
+				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
+				jobActions.put(jobToken, actions);
+				logManager.addJobLogger(jobToken, jobLogger);
+				serverStepThreads.put(jobToken, new ArrayList<>());
+				try {
+					var future = executorService.submit(() -> jobExecutor.execute(jobContext, jobLogger));
+					Throwable throwable = null;
+					try {
+						var waitTime = timeout - (System.currentTimeMillis() - beginTime);
+						if (waitTime > 0) {
+							if (future.get(waitTime, TimeUnit.MILLISECONDS))
+								return true;
+						} else {
+							future.cancel(true);
+							throwable = new TimeoutException();
+						}
+					} catch (Throwable t) {
+						if (!future.isDone())
+							future.cancel(true);
+						if (t instanceof InterruptedException)
+							throw t;
+						else
+							throwable = t;
+					}
+					
+					if (!checkRetry(job, jobContext, jobLogger, throwable)) {
+						if (throwable != null)
+							throw ExceptionUtils.unchecked(throwable);
+						else
+							return false;
+					}
+				} finally {
+					Collection<Thread> threads = serverStepThreads.remove(jobToken);
+					synchronized (threads) {
+						for (Thread thread : threads)
+							thread.interrupt();
+					}
+					logManager.removeJobLogger(jobToken);
+					jobActions.remove(jobToken);
+					
+					if (sequentialKey != null)
+						sequentialKeys.remove(sequentialKey);
+				}
 			}
-		}), job.getTimeout() * 1000L);
+		});
 	}
 	
-	private boolean retryJob(Job job, JobContext jobContext, TaskLogger jobLogger, @Nullable Throwable e) {
+	private boolean checkRetry(Job job, JobContext jobContext, TaskLogger jobLogger, @Nullable Throwable throwable) {
 		int retried = jobContext.getRetried();
 		if (retried < job.getMaxRetries() && sessionManager.call(() -> {
 			RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
 			AtomicReference<String> errorMessage = new AtomicReference<>(null);
-			if (e != null) {
-				log(e, new TaskLogger() {
+			if (throwable != null) {
+				log(throwable, new TaskLogger() {
 
 					@Override
 					public void log(String message, String sessionId) {
@@ -623,31 +649,22 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 			return retryCondition.matches(new RetryContext(buildManager.load(jobContext.getBuildId()), errorMessage.get()));
 		})) {
-			if (e != null)
-				log(e, jobLogger);
+			if (throwable != null)
+				log(throwable, jobLogger);
 			jobLogger.warning("Job will be retried after a while...");
-			transactionManager.run(() -> {
-				Build innerBuild = buildManager.load(jobContext.getBuildId());
-				innerBuild.setRunningDate(null);
-				innerBuild.setPendingDate(null);
-				innerBuild.setRetryDate(new Date());
-				innerBuild.setStatus(Status.WAITING);
-				listenerRegistry.post(new BuildRetrying(innerBuild));
-				buildManager.update(innerBuild);
-			});
 			try {
 				Thread.sleep(job.getRetryDelay() * (long) (Math.pow(2, retried)) * 1000L);
 			} catch (InterruptedException e2) {
 				throw new RuntimeException(e2);
 			}
 			transactionManager.run(() -> {
-				var jobExecution = jobExecutions.get(jobContext.getBuildId());
-				if (jobExecution != null)
-					jobExecution.updateBeginTime();
 				Build innerBuild = buildManager.load(jobContext.getBuildId());
+				innerBuild.setRunningDate(null);
 				innerBuild.setPendingDate(new Date());
+				innerBuild.setRetryDate(new Date());
 				innerBuild.setStatus(Status.PENDING);
-				listenerRegistry.post(new BuildPending(innerBuild));
+				innerBuild.getCheckoutPaths().clear();
+				listenerRegistry.post(new BuildRetrying(innerBuild));
 				buildManager.update(innerBuild);
 			});
 			jobContext.setRetried(retried+1);
@@ -658,10 +675,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private void log(Throwable e, TaskLogger logger) {
-		if (e instanceof ExplicitException)
-			logger.error(e.getMessage());
-		else
-			logger.error("Exception caught", e);
+		if (find(e, TimeoutException.class) != null) {
+			logger.error(TIMEOUT_MESSAGE);
+		} else {
+			var explicitException = find(e, ExplicitException.class);
+			if (explicitException != null)
+				logger.error(explicitException.getMessage());
+			else
+				logger.error("Error executing job", e);
+		}
 	}
 
 	@Override
@@ -969,19 +991,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long buildId = build.getId();
 		Long userId = User.idOf(SecurityUtils.getUser());
 		projectManager.runOnActiveServer(projectId, () -> {
-			JobExecution execution = jobExecutions.get(buildId);
-			if (execution != null) {
-				execution.cancel(userId);
-			} else {
+			var future = jobFutures.get(buildId);
+			if (future != null) {
+				future.cancel(true);
 				transactionManager.run(() -> {
 					Build innerBuild = buildManager.load(buildId);
-					if (!innerBuild.isFinished()) {
-						innerBuild.setStatus(Status.CANCELLED);
-						innerBuild.setFinishDate(new Date());
-						innerBuild.setCanceller(userManager.load(userId));
-						buildManager.update(innerBuild);
-						listenerRegistry.post(new BuildFinished(innerBuild));
-					}
+					innerBuild.setCanceller(userManager.load(userId));
+					buildManager.update(innerBuild);
 				});
 			}
 			return null;
@@ -1140,13 +1156,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public void run() {
-		while (!jobExecutions.isEmpty() || thread != null) {
+		while (!jobFutures.isEmpty() || thread != null) {
 			if (thread == null) {
-				if (!jobExecutions.isEmpty())
+				if (!jobFutures.isEmpty())
 					logger.info("Waiting for jobs to finish...");
-				for (var execution: jobExecutions.values()) {
-					if (!execution.isDone() && !execution.isCancelled())
-						execution.cancel(User.SYSTEM_ID);
+				for (var execution: jobFutures.values()) {
+					if (!execution.isDone())
+						execution.cancel(true);
 				}
 			}
 			try {
@@ -1168,17 +1184,25 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						var buildIdsOfServer = entry.getValue();
 						futures.add(clusterManager.submitToServer(server, () -> {
 							transactionManager.run(() -> {
-								for (Long buildId : buildIdsOfServer) {
-									Build build = buildManager.load(buildId);
-									if (build.getStatus() == Status.PENDING) {
-										JobExecution execution = jobExecutions.get(build.getId());
-										if (execution != null) {
-											execution.updateBeginTime();
-										} else if (thread != null) {
+								for (var buildId : buildIdsOfServer) {
+									var build = buildManager.load(buildId);
+									if (build.getStatus() == Status.WAITING) {
+										if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
+												&& it.getDependency().isFinished()
+												&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
+											markBuildError(build, "Some dependencies are required to be successful but failed");
+										} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
+											build.setStatus(Status.PENDING);
+											build.setPendingDate(new Date());
+											listenerRegistry.post(new BuildPending(build));
+										}
+									} else if (build.getStatus() == Status.PENDING) {
+										var future = jobFutures.get(build.getId());
+										if (future == null && thread != null) {
 											try {
-												jobExecutions.put(build.getId(), execute(build));
+												jobFutures.put(build.getId(), execute(build));
 											} catch (Throwable t) {
-												ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
+												ExplicitException explicitException = find(t, ExplicitException.class);
 												if (explicitException != null)
 													markBuildError(build, explicitException.getMessage());
 												else
@@ -1186,28 +1210,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											}
 										}
 									} else if (build.getStatus() == Status.RUNNING) {
-										JobExecution execution = jobExecutions.get(build.getId());
-										if (execution != null) {
-											if (execution.isTimedout())
-												execution.cancel(null);
-										} else {
-											build.setStatus(Status.PENDING);
-										}
-									} else if (build.getStatus() == Status.WAITING) {
-										if (build.getRetryDate() != null) {
-											JobExecution execution = jobExecutions.get(build.getId());
-											if (execution == null && thread != null) {
-												build.setStatus(Status.PENDING);
-												build.setPendingDate(new Date());
-												listenerRegistry.post(new BuildPending(build));
-											}
-										} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
-												&& it.getDependency().isFinished()
-												&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
-											markBuildError(build, "Some dependencies are required to be successful but failed");
-										} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
-											build.setStatus(Status.PENDING);
+										if (jobFutures.get(build.getId()) == null) {
+											build.setRunningDate(null);
 											build.setPendingDate(new Date());
+											build.setRetryDate(null);
+											build.getCheckoutPaths().clear();
+											build.setStatus(Status.PENDING);
 											listenerRegistry.post(new BuildPending(build));
 										}
 									}
@@ -1224,41 +1232,32 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						}
 					}
 				}
-
+				
 				sessionManager.run(() -> {
-					for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
-						Map.Entry<Long, JobExecution> entry = it.next();
+					for (var it = jobFutures.entrySet().iterator(); it.hasNext(); ) {
+						Map.Entry<Long, Future<Boolean>> entry = it.next();
 						Build build = buildManager.get(entry.getKey());
-						JobExecution execution = entry.getValue();
+						var future = entry.getValue();
 						if (build == null || build.isFinished()) {
 							it.remove();
-							execution.cancel(null);
-						} else if (execution.isDone()) {
+							future.cancel(true);
+						} else if (future.isDone()) {
 							it.remove();
-							TaskLogger jobLogger = logManager.newLogger(build);
+							var jobLogger = logManager.newLogger(build);
 							try {
-								if (execution.check())
+								if (future.get())
 									build.setStatus(Status.SUCCESSFUL);
 								else
 									build.setStatus(Status.FAILED);
 								jobLogger.log("Job finished");
-							} catch (TimeoutException e) {
-								build.setStatus(Status.TIMED_OUT);
-							} catch (java.util.concurrent.CancellationException e) {
-								if (e instanceof CancellationException) {
-									Long cancellerId = ((CancellationException) e).getCancellerId();
-									if (cancellerId != null)
-										build.setCanceller(userManager.load(cancellerId));
-								}
+							} catch (CancellationException e) {
 								build.setStatus(Status.CANCELLED);
-							} catch (ExecutionException e) {
-								build.setStatus(Status.FAILED);
-								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
-								if (explicitException != null)
-									jobLogger.error(explicitException.getMessage());
+							} catch (Throwable t) {
+								if (find(t, TimeoutException.class) != null) 
+									build.setStatus(Status.TIMED_OUT);
 								else 
-									jobLogger.error("Error running job", e);
-							} catch (InterruptedException ignored) {
+									build.setStatus(Status.FAILED);
+								log(t, jobLogger);
 							} finally {
 								build.setFinishDate(new Date());
 								buildManager.update(build);

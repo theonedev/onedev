@@ -3,7 +3,6 @@ package io.onedev.server.rest.resource;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -25,17 +24,13 @@ import static io.onedev.server.security.SecurityUtils.getAuthUser;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class EmailAddressResource {
-
-	private final UserManager userManager;
 	
 	private final EmailAddressManager emailAddressManager;
 	
 	private final SettingManager settingManager;
 
 	@Inject
-	public EmailAddressResource(UserManager userManager, EmailAddressManager emailAddressManager, 
-			SettingManager settingManager) {
-		this.userManager = userManager;
+	public EmailAddressResource(EmailAddressManager emailAddressManager, SettingManager settingManager) {
 		this.emailAddressManager = emailAddressManager;
 		this.settingManager = settingManager;
 	}

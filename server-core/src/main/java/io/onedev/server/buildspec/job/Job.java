@@ -277,9 +277,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.maxRetries = maxRetries;
 	}
 
-	@Editable(order=9420, group="More Settings", description="Delay for the first retry in seconds. "
-			+ "Delay of subsequent retries will be calculated using an exponential back-off "
-			+ "based on this delay")
+	@Editable(order=9420, group="More Settings", description="Delay for the first retry in seconds. " +
+			"Delay of subsequent retries will be calculated using an exponential back-off based on " +
+			"this value")
 	@Min(value=1, message="This value should not be less than 1")
 	public int getRetryDelay() {
 		return retryDelay;
