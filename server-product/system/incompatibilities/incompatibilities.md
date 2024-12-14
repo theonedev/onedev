@@ -1,3 +1,8 @@
+# 11.6.6
+
+Incoming box settings of various mail services removed additional target addresses for simplicity reason. 
+Configure mail relay/forward at mail server side if you are using this feature previously     
+
 # 11.6.0
 
 SQL Server support is removed due to added complexity and inability to test with full version. 
