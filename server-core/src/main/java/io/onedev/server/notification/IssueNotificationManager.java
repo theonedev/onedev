@@ -159,10 +159,10 @@ public class IssueNotificationManager {
 		IssueComment comment;
 		if (event instanceof IssueOpened && issue.getOnBehalfOf() != null) {
 			senderName = getSenderName(issue.getOnBehalfOf());
-			summary = describe(issue.getOnBehalfOf()) + " " + event.getActivity();
+			summary = describe(issue.getOnBehalfOf(), false) + " " + event.getActivity();
 		} else if (event instanceof IssueCommentCreated && (comment = ((IssueCommentCreated) event).getComment()).getOnBehalfOf() != null) {
 			senderName = getSenderName(comment.getOnBehalfOf());
-			summary = describe(comment.getOnBehalfOf()) + " " + event.getActivity();
+			summary = describe(comment.getOnBehalfOf(), false) + " " + event.getActivity();
 		} else if (user != null) {
 			senderName = user.getDisplayName();
 			summary = senderName + " " + event.getActivity();

@@ -13,7 +13,6 @@ import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.Similarities;
@@ -84,10 +83,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.parse;
-import static io.onedev.server.security.SecurityUtils.canAccessIssue;
-import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
+import static io.onedev.server.security.SecurityUtils.*;
 import static io.onedev.server.util.EmailAddressUtils.describe;
-import static java.util.Comparator.comparing;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
@@ -879,7 +876,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected List<InternetAddress> load() {
 				var addresses = new ArrayList<>(getIssue().getExternalParticipants());
-				addresses.sort(comparing(EmailAddressUtils::describe));
+				addresses.sort((o1, o2) -> describe(o1, canManageIssues(getProject())).compareTo(describe(o2, canManageIssues(getProject()))));
 				return addresses;
 			}
 			
@@ -887,12 +884,12 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<InternetAddress> item) {
-				item.add(new Label("label", describe(item.getModelObject())));
+				item.add(new Label("label", describe(item.getModelObject(), canManageIssues(getProject()))));
 				item.add(new AjaxLink<Void>("delete") {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("'" + describe(item.getModelObject()) + "' will not be able to participate in this issue. Do you want to continue?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("'" + describe(item.getModelObject(), canManageIssues(getProject())) + "' will not be able to participate in this issue. Do you want to continue?"));
 					}
 
 					@Override

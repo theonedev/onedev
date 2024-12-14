@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.util.EmailAddressUtils.describe;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -46,7 +47,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		if (getComment().getOnBehalfOf() != null)
-			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(getComment().getOnBehalfOf())) + "</b>").setEscapeModelStrings(false));
+			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(getComment().getOnBehalfOf(), canManageIssues(getComment().getIssue().getProject()))) + "</b>").setEscapeModelStrings(false));
 		else
 			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		
@@ -91,7 +92,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			protected AttachmentSupport getAttachmentSupport() {
 				return new ProjectAttachmentSupport(getProject(), 
 						IssueCommentedPanel.this.getComment().getIssue().getUUID(), 
-						SecurityUtils.canManageIssues(getProject()));
+						canManageIssues(getProject()));
 			}
 
 			@Override

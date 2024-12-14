@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.util.EmailAddressUtils.describe;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -43,7 +44,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 
 		if (issue.getOnBehalfOf() != null)
-			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(issue.getOnBehalfOf())) + "</b>").setEscapeModelStrings(false));
+			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(issue.getOnBehalfOf(), canManageIssues(getIssue().getProject()))) + "</b>").setEscapeModelStrings(false));
 		else 
 			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		
