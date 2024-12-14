@@ -72,7 +72,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.Validator;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -153,9 +155,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public static final String PROP_TIME_TRACKING = "timeTracking";
 	
-	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
+	public static final String NAME_SERVICE_DESK_EMAIL_ADDRESS = "Service Desk Email Address";
 	
-	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
+	public static final String PROP_SERVICE_DESK_EMAIL_ADDRESS = "serviceDeskEmailAddress";
 	
 	public static final String PROP_PENDING_DELETE = "pendingDelete";
 	
@@ -164,14 +166,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private static final String FAKED_GITHUB_REPO_OWNER = "faked-owner-of-onedev-project";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
+			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_EMAIL_ADDRESS, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
 			NAME_ID, PROP_ID,
 			NAME_NAME, PROP_NAME, 
 			NAME_KEY, PROP_KEY,
-			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
+			NAME_SERVICE_DESK_EMAIL_ADDRESS, PROP_SERVICE_DESK_EMAIL_ADDRESS,
 			NAME_LAST_ACTIVITY_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY,
 			NAME_LAST_COMMIT_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT);
 	
@@ -356,7 +358,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
 	@Column(unique=true)
-	private String serviceDeskName;
+	private String serviceDeskEmailAddress;
 	
 	@JsonIgnore
 	@Lob
@@ -726,7 +728,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Override
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskName(), 
+		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
 				lastEventDate.getId(), idOf(getDefaultRole()), isPendingDelete(), idOf(getParent()));
 	}
@@ -1041,14 +1043,20 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.pendingDelete = pendingDelete;
 	}
 
+	@Editable(order=500, placeholder="Default", description="Specify an email address sharing same inbox as " +
+			"the system email address in mail setting definition. Emails sent to this address will be " +
+			"created as issues in this project. The default value takes form of "
+			+ "<tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>")
 	@Nullable
 	@JsonProperty
-	public String getServiceDeskName() {
-		return serviceDeskName;
+	@Email
+	@Pattern(regexp = "[^~]+@.+", message = "character '~' not allowed in name part")
+	public String getServiceDeskEmailAddress() {
+		return serviceDeskEmailAddress;
 	}
 
-	public void setServiceDeskName(@Nullable String serviceDeskName) {
-		this.serviceDeskName = serviceDeskName;
+	public void setServiceDeskEmailAddress(@Nullable String serviceDeskEmailAddress) {
+		this.serviceDeskEmailAddress = serviceDeskEmailAddress;
 	}
 	
 	public GitPackConfig getGitPackConfig() {

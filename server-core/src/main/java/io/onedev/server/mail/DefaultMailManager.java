@@ -1,7 +1,6 @@
 package io.onedev.server.mail;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.ibm.icu.impl.locale.XCldrStub.Splitter;
@@ -22,7 +21,6 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
-import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.persistence.TransactionManager;
@@ -92,8 +90,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private final ProjectManager projectManager;
 	
-	private final UserAuthorizationManager authorizationManager;
-	
 	private final IssueManager issueManager;
 	
 	private final IssueCommentManager issueCommentManager;
@@ -121,9 +117,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@Inject
 	public DefaultMailManager(TransactionManager transactionManager, SettingManager settingManager, 
 							  UserManager userManager, ProjectManager projectManager, 
-							  UserAuthorizationManager authorizationManager, IssueManager issueManager, 
-							  IssueCommentManager issueCommentManager, IssueWatchManager issueWatchManager, 
-							  PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
+							  IssueManager issueManager, IssueCommentManager issueCommentManager, 
+							  IssueWatchManager issueWatchManager, PullRequestManager pullRequestManager, 
+							  PullRequestCommentManager pullRequestCommentManager, 
 							  PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 							  EmailAddressManager emailAddressManager, IssueAuthorizationManager issueAuthorizationManager, 
 							  ClusterManager clusterManager) {
@@ -131,7 +127,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.settingManager = settingManager;
 		this.userManager = userManager;
 		this.projectManager = projectManager;
-		this.authorizationManager = authorizationManager;
 		this.issueManager = issueManager;
 		this.issueCommentManager = issueCommentManager;
 		this.issueWatchManager = issueWatchManager;
@@ -201,6 +196,18 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
         return inetAddress;
     }
+	
+	@Nullable
+	private Project findProject(String systemAddress, ParsedEmailAddress receiverEmailAddress) {
+		var project = projectManager.findByServiceDeskEmailAddress(receiverEmailAddress.toString());
+		if (project == null 
+				&& receiverEmailAddress.isSubaddress() 
+				&& receiverEmailAddress.getOriginalAddress().equalsIgnoreCase(systemAddress)) {
+			String subAddress = StringUtils.substringAfter(receiverEmailAddress.getName(), "+");
+			project = projectManager.findByPath(subAddress);			
+		}
+		return project;
+	}
     
 	@Override
 	public void sendMail(SmtpSetting smtpSetting, Collection<String> toList, Collection<String> ccList,
@@ -331,14 +338,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
-	public void handleMessage(Message message, String systemAddress, List<String> additionalTargetAddresses) {
+	public void handleMessage(Message message, String systemAddress) {
 		var fromInternetAddresses = getAddresses(message, "From");
 		var toInternetAddresses = getAddresses(message, "To");
 		if (fromInternetAddresses.length != 0 && toInternetAddresses.length != 0) {
-			Set<String> targetAddresses = Sets.newHashSet(systemAddress.toLowerCase());
-			for (var additionalTargetAddress: additionalTargetAddresses) 
-				targetAddresses.add(additionalTargetAddress.toLowerCase());
-			
 			var fromInternetAddress = fromInternetAddresses[0];
 			var fromAddress = fromInternetAddress.getAddress();
 			if (!fromAddress.equalsIgnoreCase(systemAddress)) {
@@ -346,10 +349,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 				User fromUser = null;
 				if (fromAddressEntity != null && fromAddressEntity.isVerified())
 					fromUser = fromAddressEntity.getOwner();
-				String defaultProject = null;
-				ServiceDeskSetting serviceDeskSetting = settingManager.getServiceDeskSetting();
-				if (serviceDeskSetting != null) 
-					defaultProject = serviceDeskSetting.getDefaultProject(fromAddress);
 				
 				var parsedSystemAddress = ParsedEmailAddress.parse(systemAddress);
 				
@@ -362,24 +361,20 @@ public class DefaultMailManager implements MailManager, Serializable {
 				receiverInternetAddresses.addAll(asList(getAddresses(message, "Cc")));
 				for (InternetAddress receiverInternetAddress : receiverInternetAddresses) {
 					ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiverInternetAddress.getAddress());
-					if (targetAddresses.contains(parsedReceiverAddress.toString().toLowerCase())) {
-						if (involvedIssue == null && involvedPullRequest == null) {
-							if (isOriginatedFromOneDev(message)) {
-								logger.warn("Ignored opening issue from message as it is originated from OneDev");
-							} else if (serviceDeskSetting != null) {
-								if (defaultProject == null)
-									throw new ExplicitException("No default project for sender: " + fromInternetAddress.getAddress());
-								Project project = projectManager.findByPath(defaultProject);
-								if (project == null) 
-									throw new ExplicitException("Project not found: %s" + defaultProject);
+					var project = findProject(systemAddress, parsedReceiverAddress);
+					if (project != null) {
+						if (isOriginatedFromOneDev(message)) {
+							logger.warn("Ignored opening issue from message as it is originated from OneDev");
+						} else {
+							var serviceDeskSetting = settingManager.getServiceDeskSetting();
+							if (serviceDeskSetting != null) {
+								logger.debug("Creating issue via email (project: {})...", project.getPath());
 								involvedIssue = openIssue(message, project, fromInternetAddress, fromUser, parsedSystemAddress, receiverInternetAddresses);
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
-						} else {
-							logger.warn("Ignored recipient '" + parsedReceiverAddress + "' as issue or pull request is processed");
 						}
-					} else if (parsedReceiverAddress.isSubaddress() && targetAddresses.contains(parsedReceiverAddress.getOriginalAddress().toLowerCase())) {
+					} else if (parsedReceiverAddress.isSubaddress() && systemAddress.equalsIgnoreCase(parsedReceiverAddress.getOriginalAddress())) {
 						if (involvedIssue == null && involvedPullRequest == null) {
 							String subAddress = StringUtils.substringAfter(parsedReceiverAddress.getName(), "+");
 							if (subAddress.equals(MailManager.TEST_SUB_ADDRESS)) {
@@ -461,23 +456,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 									}
 								} else {
 									throw new ExplicitException("Invalid recipient address: " + parsedReceiverAddress);
-								}
-							} else {
-								if (isOriginatedFromOneDev(message)) {
-									logger.warn("Ignored opening issue from message as it is originated from OneDev");
-								} else {
-									Project project = projectManager.findByServiceDeskName(subAddress);
-									if (project == null)
-										project = projectManager.findByPath(subAddress);
-
-									if (project == null)
-										throw new ExplicitException("Non-existent project specified in receipient address: " + parsedReceiverAddress);
-									if (serviceDeskSetting != null) {
-										logger.debug("Creating issue via email (project: {})...", project.getPath());
-										involvedIssue = openIssue(message, project, fromInternetAddress, fromUser, parsedSystemAddress, receiverInternetAddresses);
-									} else {
-										throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
-									}
 								}
 							}
 						} else {
@@ -680,8 +658,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 		issue.setState(issueSetting.getInitialStateSpec().getName());
 		
-		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting()
-				.getIssueCreationSetting(submitterInternetAddress.getAddress(), project);
+		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting().getIssueCreationSetting(project);
 		issue.setConfidential(issueCreationSetting.isConfidential());
 		for (FieldInstance instance: issueCreationSetting.getIssueFields()) {
 			Object fieldValue = issueSetting.getFieldSpec(instance.getName())
@@ -739,7 +716,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 						var systemAddress = mailService.getSystemAddress();
 						while (thread != null) {
 							Future<?> future = inboxMonitor.monitor(message -> {
-								handleMessage(message, systemAddress, inboxMonitor.getAdditionalTargetAddresses());
+								handleMessage(message, systemAddress);
 							}, false);
 							try {
 								future.get();

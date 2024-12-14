@@ -446,10 +446,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Sessional
 	@Override
-	public Project findByServiceDeskName(String serviceDeskName) {
+	public Project findByServiceDeskEmailAddress(String serviceDeskEmailAddress) {
 		Long projectId = null;
 		for (ProjectFacade facade : cache.values()) {
-			if (serviceDeskName.equalsIgnoreCase(facade.getServiceDeskName())) {
+			if (serviceDeskEmailAddress.equalsIgnoreCase(facade.getServiceDeskEmailAddress())) {
 				projectId = facade.getId();
 				break;
 			}

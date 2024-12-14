@@ -19,7 +19,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -211,11 +210,6 @@ public class GmailMailService implements MailService {
 						mailPosition = new MailPosition();
 					return getMailManager().monitorInbox(imapSetting, getSystemAddress(),
 							messageConsumer, mailPosition, testMode);
-				}
-
-				@Override
-				public List<String> getAdditionalTargetAddresses() {
-					return inboxPollSetting.getAdditionalTargetAddresses();
 				}
 			};
 		} else {

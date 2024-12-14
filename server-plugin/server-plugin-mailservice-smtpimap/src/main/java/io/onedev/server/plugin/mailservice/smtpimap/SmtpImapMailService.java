@@ -15,7 +15,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -145,11 +144,6 @@ public class SmtpImapMailService implements MailService {
 						mailPosition = new MailPosition();
 					return getMailManager().monitorInbox(imapSetting, getSystemAddress(),
 							messageConsumer, mailPosition, testMode);
-				}
-
-				@Override
-				public List<String> getAdditionalTargetAddresses() {
-					return inboxPollSetting.getAdditionalTargetAddresses();
 				}
 			};
 		} else {

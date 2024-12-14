@@ -61,12 +61,12 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							if (childQuery)
 								candidates.remove(Project.NAME_PATH);
 							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
-								candidates.remove(Project.NAME_SERVICE_DESK_NAME);
+								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Project.ORDER_FIELDS.keySet());
 							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
-								candidates.remove(Project.NAME_SERVICE_DESK_NAME);
+								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
 							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -107,13 +107,13 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return null;
 									} else if (fieldName.equals(Project.NAME_LABEL)) {
 										return SuggestionUtils.suggestLabels(matchWith);
-									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
+									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)) {
 										if (!matchWith.contains("*")) {
 											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 											ProjectCache cache = projectManager.cloneCache();
 											Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 											List<String> serviceDeskNames = projects.stream()
-													.map(it->cache.get(it.getId()).getServiceDeskName())
+													.map(it->cache.get(it.getId()).getServiceDeskEmailAddress())
 													.filter(it-> it != null)
 													.sorted()
 													.collect(Collectors.toList());
@@ -198,7 +198,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Project.NAME_NAME)
 							|| fieldName.equals(Project.NAME_KEY) 
-							|| fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
+							|| fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)) {
 						hints.add("Use '*' for wildcard match");
 					} else if (fieldName.equals(Project.NAME_DESCRIPTION)) {
 						hints.add("Use '*' for wildcard match");

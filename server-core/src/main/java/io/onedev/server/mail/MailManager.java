@@ -49,6 +49,6 @@ public interface MailManager {
 						   Consumer<Message> messageConsumer, 
 						   MailPosition lastPosition, boolean testMode);
 
-	void handleMessage(Message message, String systemAddress, List<String> additionalTargetAddresses);
+	void handleMessage(Message message, String systemAddress);
 	
 }

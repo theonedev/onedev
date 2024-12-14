@@ -137,26 +137,26 @@ public abstract class ProjectInfoPanel extends Panel {
         		&& settingManager.getMailService().getInboxMonitor() != null
         		&& getProject().isIssueManagement()) {
         	
-        	String subAddressed;
-        	
-			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
-			if (getProject().getServiceDeskName() != null)
-				subAddressed = checkAddress.getSubaddress(getProject().getServiceDeskName());
-			else
-				subAddressed = checkAddress.getSubaddress(getProject().getPath());
-        	
+			String serviceDeskEmailAddress;
+			if (getProject().getServiceDeskEmailAddress() != null) {
+				serviceDeskEmailAddress = getProject().getServiceDeskEmailAddress();
+			} else {
+				ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
+				serviceDeskEmailAddress = systemAddress.getSubaddress(getProject().getPath());
+			}
+			
         	add(new WebMarkupContainer("serviceDesk") {
 
 				@Override
 				protected void onInitialize() {
 					super.onInitialize();
-					add(new Label("label", subAddressed));
+					add(new Label("label", serviceDeskEmailAddress));
 				}
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
-					tag.put("href", "mailto:" + subAddressed);
+					tag.put("href", "mailto:" + serviceDeskEmailAddress);
 				}
         		
         	});

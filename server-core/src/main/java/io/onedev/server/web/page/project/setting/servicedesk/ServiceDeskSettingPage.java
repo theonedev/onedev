@@ -1,25 +1,28 @@
 package io.onedev.server.web.page.project.setting.servicedesk;
 
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import com.google.common.collect.Sets;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.io.Serializable;
+
+import static io.onedev.server.model.Project.PROP_SERVICE_DESK_EMAIL_ADDRESS;
 
 @SuppressWarnings("serial")
 public class ServiceDeskSettingPage extends ProjectSettingPage {
@@ -34,32 +37,45 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		ServiceDeskSettingBean bean = new ServiceDeskSettingBean();
-		bean.setServiceDeskName(getProject().getServiceDeskName());
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				if (bean.getServiceDeskName() != null) {
-					Project projectWithSameServiceDeskName = projectManager.findByServiceDeskName(bean.getServiceDeskName());
-					if (projectWithSameServiceDeskName != null && !projectWithSameServiceDeskName.equals(getProject())) {
-						editor.error(new Path(new PathNode.Named(ServiceDeskSettingBean.PROP_SERVICE_DESK_NAME)),
-								"This service desk name has already been used by another project");
+				var project = getProject();
+				if (project.getServiceDeskEmailAddress() != null) {
+					Project projectWithSameServiceDeskEmailAddress = getProjectManager().findByServiceDeskEmailAddress(project.getServiceDeskEmailAddress());
+					if (projectWithSameServiceDeskEmailAddress != null && !projectWithSameServiceDeskEmailAddress.equals(getProject())) {
+						editor.error(new Path(new PathNode.Named(PROP_SERVICE_DESK_EMAIL_ADDRESS)),
+								"This address has already been used by another project");
 					} 
 				} 
 				if (editor.isValid()) {
-					getProject().setServiceDeskName(bean.getServiceDeskName());
-					projectManager.update(getProject());
+					getProjectManager().update(getProject());
 					setResponsePage(ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject()));
 					Session.get().success("Service desk settings updated");
 				}
 			}
 			
 		};
-		form.add(editor = BeanContext.edit("editor", bean));
+		form.add(editor = BeanContext.editModel("editor", new IModel<>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return getProject();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				editor.getDescriptor().copyProperties(object, getProject());
+			}
+
+		}, Sets.newHashSet(PROP_SERVICE_DESK_EMAIL_ADDRESS), false));
 		
 		add(form);
 	}

@@ -15,6 +15,7 @@ import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Pair;
+import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -7221,6 +7222,59 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate183(File dataDir, Stack<Integer> versions) {
+		ParsedEmailAddress systemAddress = null;
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL_SERVICE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							systemAddress = ParsedEmailAddress.parse(valueElement.elementText("systemAddress").trim());
+							var inboxPollSettingElement = valueElement.element("inboxPollSetting");
+							if (inboxPollSettingElement == null)
+								inboxPollSettingElement = valueElement.element("webhookSetting");
+							if (inboxPollSettingElement != null) {
+								var additionalTargetAddressesElement = inboxPollSettingElement.element("additionalTargetAddresses");
+								if (additionalTargetAddressesElement != null)
+									additionalTargetAddressesElement.detach();
+							}
+						}
+					} else if (key.equals("SERVICE_DESK_SETTING")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var defaultProjectSettingsElement = valueElement.element("defaultProjectSettings");
+							if (defaultProjectSettingsElement != null)
+								defaultProjectSettingsElement.detach();
+							for (var issueCreationSettingElement: valueElement.element("issueCreationSettings").elements()) {
+								var senderEmailsElement = issueCreationSettingElement.element("senderEmails");								
+								if (senderEmailsElement != null)
+									senderEmailsElement.detach();
+							}
+						}						
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var serviceDeskNameElement = element.element("serviceDeskName"); 
+					if (serviceDeskNameElement != null) {
+						if (systemAddress != null)
+							element.addElement("serviceDeskEmailAddress").setText(systemAddress.getSubaddress(serviceDeskNameElement.getText().trim()));
+						serviceDeskNameElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

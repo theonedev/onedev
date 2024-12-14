@@ -11,6 +11,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.util.TextUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -74,7 +75,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 		
 		List<IColumn<IssueCreationSetting, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
@@ -86,30 +87,18 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 						tag.setName("svg");
 						tag.put("class", "icon drag-indicator");
 					}
-					
+
 				});
 			}
-			
+
 			@Override
 			public String getCssClass() {
 				return "minimum actions";
 			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Sender Emails")) {
 
-			@Override
-			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
-				IssueCreationSetting setting = rowModel.getObject();
-				if (setting.getSenderEmails() != null)
-					cellItem.add(new Label(componentId, setting.getSenderEmails()));
-				else
-					cellItem.add(new Label(componentId, "<i>Any sender</i>").setEscapeModelStrings(false));
-			}
 		});		
 		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Applicable Projects")) {
+		columns.add(new AbstractColumn<>(Model.of("Applicable Projects")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
@@ -119,9 +108,17 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 				else
 					cellItem.add(new Label(componentId, "<i>Any project</i>").setEscapeModelStrings(false));
 			}
-		});		
-		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("")) {
+		});
+
+		columns.add(new AbstractColumn<>(Model.of("Confidential")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
+				cellItem.add(new Label(componentId, TextUtils.getDisplayValue(rowModel.getObject().isConfidential())));
+			}
+		});
+
+		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
@@ -147,7 +144,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 
 						};
 					}
-					
+
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -158,7 +155,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 						onPropertyUpdating(target);
 						target.add(IssueCreationSettingListEditPanel.this);
 					}
-					
+
 				});
 				cellItem.add(fragment);
 			}
@@ -167,7 +164,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 			public String getCssClass() {
 				return "actions minimum";
 			}
-			
+
 		});		
 		
 		IDataProvider<IssueCreationSetting> dataProvider = new ListDataProvider<IssueCreationSetting>() {
@@ -180,8 +177,8 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 		};
 		
 		DataTable<IssueCreationSetting, Void> dataTable;
-		add(dataTable = new DataTable<IssueCreationSetting, Void>("settings", columns, dataProvider, Integer.MAX_VALUE));
-		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
+		add(dataTable = new DataTable<>("settings", columns, dataProvider, Integer.MAX_VALUE));
+		dataTable.addTopToolbar(new HeadersToolbar<>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
 		dataTable.add(new NoRecordsBehavior());
 		dataTable.add(new SortBehavior() {

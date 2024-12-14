@@ -1,58 +1,36 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.validation.Valid;
-
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.FieldNamesProvider;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.util.SuggestionUtils;
+
+import javax.validation.Valid;
+import java.io.Serializable;
+import java.util.*;
 
 @Editable
 public class IssueCreationSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	private String senderEmails;
 	
 	private String applicableProjects;
 	
 	private boolean confidential = true;
 	
 	private List<FieldInstance> issueFields = new ArrayList<>();
-
-	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", 
-			description="Specify space-separated sender email addresses applicable for this entry. "
-					+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
-					+ "Leave empty to match all senders")
-	@Patterns
-	public String getSenderEmails() {
-		return senderEmails;
-	}
-
-	public void setSenderEmails(String senderEmails) {
-		this.senderEmails = senderEmails;
-	}
-
+	
 	@Editable(order=150, placeholder="Any project", description="Specify space-separated projects applicable for this entry. "
 			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to "
 			+ "match all projects")

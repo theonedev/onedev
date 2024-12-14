@@ -236,11 +236,6 @@ public class Office365MailService implements MailService {
 					return getMailManager().monitorInbox(imapSetting, getSystemAddress(),
 							messageConsumer, mailPosition, testMode);
 				}
-
-				@Override
-				public List<String> getAdditionalTargetAddresses() {
-					return inboxPollSetting.getAdditionalTargetAddresses();
-				}
 			};
 		} else {
 			return null;

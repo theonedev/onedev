@@ -14,7 +14,7 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final String path;
 	
-	private final String serviceDeskName;
+	private final String serviceDeskEmailAddress;
 	
 	private final boolean codeManagement;
 	
@@ -31,15 +31,15 @@ public class ProjectFacade extends EntityFacade {
 	private final Long parentId;
 	
 	public ProjectFacade(Long id, String name, @Nullable String key, String path,
-						 @Nullable String serviceDeskName, boolean codeManagement, 
+						 @Nullable String serviceDeskEmailAddress, boolean codeManagement,
 						 boolean issueManagement, GitPackConfig gitPackConfig,
-						 Long lastEventDateId, @Nullable Long defaultRoleId, 
+						 Long lastEventDateId, @Nullable Long defaultRoleId,
 						 boolean pendingDelete, @Nullable Long parentId) {
 		super(id);
 		this.name = name;
 		this.key = key;
 		this.path = path;
-		this.serviceDeskName = serviceDeskName;
+		this.serviceDeskEmailAddress = serviceDeskEmailAddress;
 		this.codeManagement = codeManagement;
 		this.issueManagement = issueManagement;
 		this.gitPackConfig = gitPackConfig;
@@ -75,8 +75,8 @@ public class ProjectFacade extends EntityFacade {
 	}
 
 	@Nullable
-	public String getServiceDeskName() {
-		return serviceDeskName;
+	public String getServiceDeskEmailAddress() {
+		return serviceDeskEmailAddress;
 	}
 
 	public GitPackConfig getGitPackConfig() {

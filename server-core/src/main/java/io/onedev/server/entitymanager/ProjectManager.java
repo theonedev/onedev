@@ -43,7 +43,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	ProjectFacade findFacadeByPath(String path);
 	
 	@Nullable
-	Project findByServiceDeskName(String serviceDeskName);
+	Project findByServiceDeskEmailAddress(String serviceDeskEmailAddress);
 	
 	Project setup(String path);
 	

@@ -144,8 +144,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 										case Project.NAME_KEY:
 											criterias.add(new KeyCriteria(value, operator));
 											break;
-										case Project.NAME_SERVICE_DESK_NAME:
-											criterias.add(new ServiceDeskNameCriteria(value, operator));
+										case Project.NAME_SERVICE_DESK_EMAIL_ADDRESS:
+											criterias.add(new ServiceDeskEmailAddressCriteria(value, operator));
 											break;
 										case Project.NAME_PATH:
 											criterias.add(new PathCriteria(value, operator));
@@ -236,7 +236,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						&& !fieldName.equals(Project.NAME_ID)
 						&& !fieldName.equals(Project.NAME_KEY)
 						&& !fieldName.equals(Project.NAME_LABEL)
-						&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME)
+						&& !fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)
 						&& !fieldName.equals(Project.NAME_PATH)) {
 					throw newOperatorException(fieldName, operator);
 				}
