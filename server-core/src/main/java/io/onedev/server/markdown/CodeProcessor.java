@@ -41,19 +41,19 @@ public class CodeProcessor implements HtmlProcessor {
 			public void tail(Node node, int depth) {
 				if (node instanceof Element) {
 					Element element = (Element) node;
-					if (element.tagName().equals("code") 
+					if (element.tagName().equals("code")
 							&& element.parent() != null 
 							&& element.parent().tagName().equals("pre")
 							&& (element.parent().parent() == null || !element.parent().parent().attr("class").equals("pre-outer"))) {
-						element.parent().wrap("<div class='pre-outer'></div>");
 						codeElements.add(element);
 					}
 				}
 			}
 			
 		}, document);
-		
+
 		for (Element codeElement: codeElements) {
+			codeElement.parent().wrap("<div class='pre-outer'></div>");
 			String language = null;
 			String cssClasses = codeElement.attr("class");
 			for (String cssClass: Splitter.on(" ").trimResults().omitEmptyStrings().split(cssClasses)) {
