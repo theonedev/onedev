@@ -37,8 +37,7 @@ public class DefaultSessionFactoryManager implements SessionFactoryManager {
 	
 	@Inject
 	public DefaultSessionFactoryManager(HibernateConfig hibernateConfig, ClusterManager clusterManager, 
-			PhysicalNamingStrategy physicalNamingStrategy, Interceptor interceptor, 
-			ExecutorService executorService, TransactionManager transactionManager) {
+			PhysicalNamingStrategy physicalNamingStrategy, Interceptor interceptor) {
 		this.hibernateConfig = hibernateConfig;
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.clusterManager = clusterManager;
