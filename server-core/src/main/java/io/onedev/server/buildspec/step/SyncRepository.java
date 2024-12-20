@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.step;
 
+import com.google.common.base.Preconditions;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -124,6 +125,10 @@ public abstract class SyncRepository extends ServerSideStep {
 		}
 
 		String protocol = StringUtils.substringBefore(getRemoteUrl(), "//");
+
+		// Fix OD-2221
+		Preconditions.checkState(protocol.equals("http:") || protocol.equals("https:"));
+
 		String hostAndPath = StringUtils.substringAfter(getRemoteUrl(), "//");
 		
 		String remoteUrlWithCredentials = protocol + "//";
