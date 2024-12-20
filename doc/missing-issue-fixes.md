@@ -38,3 +38,4 @@ issue #1722
 issue #1729 
 issue OD-2063 
 Able to reset 2FA of a user (OD-2122)
+OD-2223 
