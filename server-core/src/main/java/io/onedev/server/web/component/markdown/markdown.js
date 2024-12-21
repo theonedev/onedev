@@ -539,8 +539,15 @@ onedev.server.markdown = {
 				$input.focus();
 				var match = matchReference(atChar);
 				if (match) {
-					$input.range(match.index, $input.caret());
-					document.execCommand("insertText", false, "");
+					var content = $input.val();
+					if ($input.caret() != content.length) {
+						$input.range(match.index, $input.caret());
+						document.execCommand("insertText", false, "");
+					} else {
+						// Fix OD-2225
+						$input.val(content.substring(0, match.index));
+						$input.caret(content.length-1);
+					}
 				}
 			}
 		    $input.atwho({

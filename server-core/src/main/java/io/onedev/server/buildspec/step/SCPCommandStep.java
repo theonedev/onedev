@@ -30,7 +30,8 @@ public class SCPCommandStep extends CommandStep {
 	
 	private String options;
 
-	@Editable(order=200, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key for SSH authentication")
+	@Editable(order=200, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key for SSH authentication. " +
+			"<b class='text-warning'>WARNING:</b> Private key with passphrase is not supported")
 	@ChoiceProvider("getPrivateKeySecretChoices")
 	@NotEmpty
 	public String getPrivateKeySecret() {
