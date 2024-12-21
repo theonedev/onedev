@@ -126,7 +126,7 @@ public abstract class SyncRepository extends ServerSideStep {
 
 		String protocol = StringUtils.substringBefore(getRemoteUrl(), "//");
 
-		// Fix OD-2221
+		// Fix OD-2221 and OD-2224
 		Preconditions.checkState(protocol.equals("http:") || protocol.equals("https:"));
 
 		String hostAndPath = StringUtils.substringAfter(getRemoteUrl(), "//");
