@@ -59,8 +59,9 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 						"Define job secrets to be used in build spec. Secrets with <b>same name</b> " +
 						"can be defined. For a particular name, the first " +
 						"authorized secret with that name will be used (search in current " +
-						"project first, then search in parent projects). Note that secret value " +
-						"less than <b>%d</b> characters will not be masked in build log", 
+						"project first, then search in parent projects). Note that secret " +
+						"value containing line breaks or less than <b>%d</b> characters will " +
+						"not be masked in build log",
 				SpriteImage.getVersionedHref("bulb"), SecretInput.MASK.length());
 		add(new Label("secretsNote", note).setEscapeModelStrings(false));
 
