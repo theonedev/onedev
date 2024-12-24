@@ -11,7 +11,7 @@ import static io.onedev.server.model.ReviewedDiff.*;
 				@Index(columnList= PROP_OLD_COMMIT_HASH), @Index(columnList= PROP_NEW_COMMIT_HASH),
 				@Index(columnList= PROP_BLOB_PATH), @Index(columnList = PROP_DATE)
 		}, uniqueConstraints = {
-				@UniqueConstraint(columnNames={PROP_OLD_COMMIT_HASH, PROP_NEW_COMMIT_HASH, PROP_BLOB_PATH})
+				@UniqueConstraint(columnNames={"o_user_id", PROP_OLD_COMMIT_HASH, PROP_NEW_COMMIT_HASH, PROP_BLOB_PATH})
 		}
 )
 public class ReviewedDiff extends AbstractEntity {
