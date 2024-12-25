@@ -1609,7 +1609,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return SecurityUtils.canWriteCode(request.getProject()) && request.checkMerge() == null;
+				return SecurityUtils.canWriteCode(request.getProject());
 			}
 
 			@Override
