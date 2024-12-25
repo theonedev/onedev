@@ -18,6 +18,7 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.AheadBehind;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
@@ -254,6 +255,41 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		changeManager.create(change, note);
 		
 		pendingSuggestionApplyManager.discard(null, request);
+	}
+
+	@Transactional
+	@Override
+	public Map<ObjectId, AheadBehind> getAheadBehind(PullRequest request) {
+		ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
+		ObjectId targetHead = request.getTarget().getObjectId();
+		List<ObjectId> compareIds = new ArrayList<>();
+		compareIds.add(requestHead);
+		return gitService.getAheadBehinds(request.getProject(), targetHead, compareIds);
+	}
+	
+	@Transactional
+	@Override
+	public void synchronize(PullRequest request) {
+		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
+		User user = SecurityUtils.getUser();
+		PersonIdent person = user.asPerson();
+		ObjectId targetHead = request.getLatestUpdate().getHeadCommit();
+		ObjectId requestHead = request.getTarget().getObjectId();
+		String commitMessage = "Merge branch '" + request.getTargetBranch() + "' into '" + request.getSourceBranch() + "'";
+		ObjectId mergeCommitId = gitService.merge(request.getTargetProject(), targetHead, requestHead, 
+			false, person, person, commitMessage, false);
+		mergeCommitId = getGitService().amendCommit(request.getTargetProject(), mergeCommitId,
+			person, person, commitMessage);
+		gitService.updateRef(request.getTargetProject(), request.getSourceRef(), mergeCommitId, null);
+		checkAsync(request, true, true);
+		
+		request.setBuildCommitHash(mergePreview.getMergeCommitHash());
+		updateBuildCommitRef(request);
+		listenerRegistry.post(new PullRequestBuildCommitUpdated((request)));
+		
+		dao.persist(request);
+		updateMergePreviewRef(request);
+		listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
 	}
 	
 	@Transactional

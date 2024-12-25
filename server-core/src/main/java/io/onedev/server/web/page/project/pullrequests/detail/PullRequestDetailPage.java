@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.AheadBehind;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
@@ -105,6 +107,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.EntityNotFoundException;
@@ -522,8 +525,26 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						&& preview.getMergeCommitHash() != null);
 			}
 
-		});		
-		
+		});
+		summaryContainer.add(new Label("aheadBehind", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
+				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
+				return "Source branch is " + ab.getAhead() + " commit(s) ahead of target branch, " + ab.getBehind() + " commit(s) behind of target branch";
+			}
+
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().isMerged());
+			}
+
+		});
 		summaryContainer.add(new WebMarkupContainer("noValidCommitSignature") {
 
 			@Override
@@ -1583,6 +1604,31 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		operationsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null);
+
+		operationsContainer.add(new AjaxLink<Void>("updateSourceBranch") {
+
+			private boolean canOperate() {
+				PullRequest request = getPullRequest();
+				return SecurityUtils.canWriteCode(request.getProject()) && request.checkMerge() == null;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
+				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
+				setVisible(canOperate() && ab.getBehind() > 0);
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (canOperate()) {
+					getPullRequestManager().synchronize(getPullRequest());
+					notifyPullRequestChange(target);
+				}
+			}
+		});
 		
 		operationsContainer.add(new ModalLink("approve") {
 
