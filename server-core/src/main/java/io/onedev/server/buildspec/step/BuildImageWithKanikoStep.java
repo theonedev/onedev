@@ -174,9 +174,10 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		
 		private String destinations;
 
-		@Editable(order=300, description="Specify destinations, for instance <tt>myorg/myrepo:latest</tt>, "
-				+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>myregistry:5000/myorg/myrepo:1.0.0</tt>. "
-				+ "Multiple destinations should be separated with space.<br>")
+		@Editable(order=300, description="Specify destinations, for instance <tt>registry-server:5000/myorg/myrepo:latest</tt>. " +
+				"Make sure to use <b>same host</b> as specified in server url of system settings if you want to push to " +
+				"built-in registry, or simply use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>. Multiple " +
+				"destinations should be separated with space")
 		@Interpolative(variableSuggester="suggestVariables")
 		@NotEmpty
 		public String getDestinations() {

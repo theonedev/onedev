@@ -24,8 +24,10 @@ public class PullImageStep extends CraneStep {
 	
 	private String moreOptions;
 	
-	@Editable(order=100, name="Source Docker Image", description="Specify full tag of source docker image to pull from, " +
-			"for instance <tt>registry-server/org/repo:tag</tt>")
+	@Editable(order=100, name="Source Docker Image", description="Specify image tag to pull from, for instance " +
+			"<tt>registry-server:5000/myorg/myrepo:latest</tt>. Make sure to use <b>same host</b> as " +
+			"specified in server url of system settings if you want to pull from built-in registry, or simply " +
+			"use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getSrcImage() {

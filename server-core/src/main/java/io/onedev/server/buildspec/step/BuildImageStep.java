@@ -133,9 +133,10 @@ public class BuildImageStep extends Step {
 
 		private String tags;
 
-		@Editable(description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, " +
-				"<tt>myorg/myrepo:1.0.0</tt>, or <tt>onedev.example.com/myproject/myrepo:1.0.0</tt>. " +
-				"Multiple tags should be separated with space")
+		@Editable(description="Specify image tags to push, for instance <tt>registry-server:5000/myorg/myrepo:latest</tt>. " +
+				"Make sure to use <b>same host</b> as specified in server url of system settings if you want to push to " +
+				"built-in registry, or simply use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>. Multiple " +
+				"tags should be separated with space")
 		@Interpolative(variableSuggester="suggestVariables")
 		@NotEmpty
 		public String getTags() {
