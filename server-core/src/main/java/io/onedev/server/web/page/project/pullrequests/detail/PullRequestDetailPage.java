@@ -453,6 +453,25 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!getPullRequest().isMerged());
+				add(new Label("aheadBehind", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
+						RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+						AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
+						return "Source branch is " + ab.getAhead() + " commit(s) ahead of target branch, " + ab.getBehind() + " commit(s) behind of target branch";
+					}
+
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getPullRequest().isMerged());
+					}
+
+				});
 			}
 		});
 		summaryContainer.add(new WebMarkupContainer("hasMergeConflict") {
@@ -534,25 +553,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 		});
-		summaryContainer.add(new Label("aheadBehind", new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public String getObject() {
-				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
-				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
-				return "Source branch is " + ab.getAhead() + " commit(s) ahead of target branch, " + ab.getBehind() + " commit(s) behind of target branch";
-			}
-
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getPullRequest().isMerged());
-			}
-
-		});
 		summaryContainer.add(new WebMarkupContainer("noValidCommitSignature") {
 
 			@Override
