@@ -49,7 +49,6 @@ public class SshSignatureVerifier implements SignatureVerifier {
 			var publicKeyBytes = signatureBlobReader.readByteString();
 			var keyType = new TypesReader(publicKeyBytes).readString();
 			var fingerprint = getFingerPrint(BuiltinDigests.sha256, publicKeyBytes);
-			var publicKey = parsePublicKey(publicKeyBytes);
 			var keyInfo = new SshKeyInfo(keyType, fingerprint);
 			
 			var sshKey = sshKeyManager.findByFingerprint(fingerprint);
@@ -102,7 +101,8 @@ public class SshSignatureVerifier implements SignatureVerifier {
 				default:
 					return new SshVerificationFailed(keyInfo, "Unsupported ssh signature algorithm: " + signatureAlgorithm);
 			}
-			
+
+			var publicKey = parsePublicKey(publicKeyBytes);
 			signer.init(false, publicKey);
 			var signBytes = writer.getBytes();
 			signer.update(signBytes, 0, signBytes.length);
