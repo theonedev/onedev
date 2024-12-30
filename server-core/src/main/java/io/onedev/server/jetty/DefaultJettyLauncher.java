@@ -24,9 +24,7 @@ import java.util.*;
 public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletContextHandler> {
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
-	
-	private final ClusterManager clusterManager;
-	
+
 	private final SessionDataStoreFactory sessionDataStoreFactory;
 	
 	private Server jettyServer;
@@ -47,10 +45,9 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 	 */
 	@Inject
 	public DefaultJettyLauncher(
-			ClusterManager clusterManager, SessionDataStoreFactory sessionDataStoreFactory,
+			SessionDataStoreFactory sessionDataStoreFactory,
 			Provider<Set<ServerConfigurator>> serverConfiguratorsProvider, 
 			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider) {
-		this.clusterManager = clusterManager;
 		this.sessionDataStoreFactory = sessionDataStoreFactory;
 		this.serverConfiguratorsProvider = serverConfiguratorsProvider;
 		this.servletConfiguratorsProvider = servletConfiguratorsProvider;
@@ -72,8 +69,8 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
         
         servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
         servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
-        servletContextHandler.getSessionHandler().setHttpOnly(true);  
-        
+        servletContextHandler.getSessionHandler().setHttpOnly(true);
+
         /*
          * By default contributions is in reverse dependency order. We reverse the order so that 
          * servlet and filter contributions in dependency plugins comes first. 

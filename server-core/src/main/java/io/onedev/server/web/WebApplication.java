@@ -107,9 +107,9 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 		
 		/*
-		 * We disabled session store of pages to reduce memory usage at peak time. However when 
-		 * an user visits the page, the page instance may not get written to disk timely due to 
-		 * page synchronous writing. So adding a in-memory cache is important to compensate the 
+		 * We disabled session store of pages to reduce memory usage at peak time. However, when
+		 * a user visits the page, the page instance may not get written to disk timely due to
+		 * page synchronous writing. So adding an in-memory cache is important to compensate the
 		 * page written latency; otherwise, user may experience odd exceptions such as 
 		 * ComponentNotFound when visit a page instance again after it is being created
 		 */
