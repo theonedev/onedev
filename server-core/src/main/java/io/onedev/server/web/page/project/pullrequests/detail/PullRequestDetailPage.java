@@ -12,6 +12,7 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -66,6 +67,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.UpdateSourceBranchConfirmPanel;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
@@ -90,10 +92,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.*;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -450,9 +449,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		summaryContainer.add(new WebMarkupContainer("aheadBehindContainer") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getPullRequest().isMerged());
+			protected void onInitialize() {
+				super.onInitialize();
 				add(new Label("aheadBehind", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -473,7 +471,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				});
 			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getPullRequest().isMerged());
+			}
 		});
+
 		summaryContainer.add(new WebMarkupContainer("hasMergeConflict") {
 
 			@Override
@@ -1593,6 +1598,42 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
+	private String updateSourceBranch(PullRequest request, String commitMessage){
+		var project	= request.getProject();
+		var user = SecurityUtils.getAuthUser();
+		Map<String, String> gitEnvs = new HashMap<>();
+		var branchProtection = project.getBranchProtection(request.getSourceBranch(), request.getSubmitter());
+
+		String branchName = request.getSourceBranch();
+		BranchProtection protection = project.getBranchProtection(branchName, SecurityUtils.getAuthUser());
+
+		ObjectId oldObjectId = request.getBaseCommit().copy();
+		ObjectId newObjectId = request.getLatestUpdate().getHeadCommit().copy();
+		String errorMessage;
+
+		if (protection.isPreventForcedPush()
+				&& !GitUtils.isMergedInto(OneDev.getInstance(ProjectManager.class).getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
+			errorMessage = "Can not force-push to this branch according to branch protection setting";
+			return errorMessage;
+		} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
+			errorMessage = "Review required for your change. Please submit pull request instead";
+			return errorMessage;
+		} else if (!newObjectId.equals(ObjectId.zeroId())) {
+			if (commitMessage != null) {
+				errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
+				if (errorMessage != null)
+					return errorMessage;
+			}
+		} else if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())
+				&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
+			errorMessage = "Build required for your change. Please submit pull request instead";
+			return errorMessage;
+		}
+
+		getPullRequestManager().updateSourceBranch(getPullRequest(), commitMessage);
+		return null;
+	}
+
 	private WebMarkupContainer newOperationsContainer() {
 		WebMarkupContainer operationsContainer = new WebMarkupContainer("requestOperations");
 		operationsContainer.add(new ChangeObserver() {
@@ -1614,10 +1655,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null);
 
-		operationsContainer.add(new AjaxLink<Void>("updateSourceBranch") {
+		operationsContainer.add(new Button("updateSourceBranch") {
 
 			private boolean canOperate() {
-				PullRequest request = getPullRequest();
+				var request = getPullRequest();
 				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
 			}
 
@@ -1629,13 +1670,70 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
 				setVisible(canOperate() && ab.getBehind() > 0);
 			}
+		});
+
+
+		operationsContainer.add(new ModalLink("updateSourceBranchMerge") {
+
+			private boolean canOperate() {
+				var request = getPullRequest();
+				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
+			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (canOperate()) {
-					getPullRequestManager().synchronize(getPullRequest());
-					notifyPullRequestChange(target);
-				}
+			protected Component newContent(String id, ModalPanel modal) {
+
+				getPullRequest().setUpdateSourceBranchStrategy(CREATE_MERGE_COMMIT);
+
+				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
+
+					@Override
+					protected String getTitle() {
+						return "Update Source Branch by Merge";
+					}
+
+					@Override
+					protected String operate(AjaxRequestTarget target) {
+						if (canOperate()) {
+							return updateSourceBranch(getPullRequest(), getCommitMessage());
+						} else {
+							return "Can not perform this operation now";
+						}
+					}
+
+				};
+			}
+		});
+
+		operationsContainer.add(new ModalLink("updateSourceBranchRebase") {
+
+			private boolean canOperate() {
+				var request = getPullRequest();
+				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
+			}
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+
+				getPullRequest().setUpdateSourceBranchStrategy(REBASE_SOURCE_BRANCH_COMMITS);
+
+				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
+
+					@Override
+					protected String getTitle() {
+						return "Update Source Branch by Rebase";
+					}
+
+					@Override
+					protected String operate(AjaxRequestTarget target) {
+						if (canOperate()) {
+							return updateSourceBranch(getPullRequest(), getCommitMessage());
+						} else {
+							return "Can not perform this operation now";
+						}
+					}
+
+				};
 			}
 		});
 

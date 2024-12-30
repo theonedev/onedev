@@ -324,6 +324,8 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 	
+	private transient MergeStrategy updateSourceBranchStrategy;
+
 	public String getTitle() {
 		return title;
 	}
@@ -614,6 +616,14 @@ public class PullRequest extends ProjectBelonging
 		return sortedReviews;
 	}
 
+	public MergeStrategy getUpdateSourceBranchStrategy() {
+		return updateSourceBranchStrategy;
+	}
+
+	public void setUpdateSourceBranchStrategy(MergeStrategy updateSourceBranchStrategy) {
+		this.updateSourceBranchStrategy = updateSourceBranchStrategy;
+	}
+	
 	public MergeStrategy getMergeStrategy() {
 		return mergeStrategy;
 	}
@@ -1048,6 +1058,14 @@ public class PullRequest extends ProjectBelonging
 		}
 	}
 
+	public String getDefaultUpdateSourceBranchCommitMessage() {
+		if (getUpdateSourceBranchStrategy() == CREATE_MERGE_COMMIT) {
+			return "Merge branch '" + getTargetBranch() +"' into '" + getSourceBranch() + "'";
+		} else {
+			return "Rebase branch '" + getSourceBranch() +"' onto '" + getTargetBranch() + "'";
+		}
+	}
+	
 	@Nullable
 	public String checkReopen() {
 		if (isOpen())

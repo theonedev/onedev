@@ -50,7 +50,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     Map<ObjectId, AheadBehind> getAheadBehind(PullRequest request);
 
-    void synchronize(PullRequest request);
+    void updateSourceBranch(PullRequest request, @Nullable String commitMessage);
 
     @Override
     void delete(PullRequest request);

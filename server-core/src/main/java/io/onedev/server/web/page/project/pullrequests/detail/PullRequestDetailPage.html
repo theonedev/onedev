@@ -103,7 +103,11 @@
 					</div>
 				</div>
 				<div wicket:id="requestOperations" class="operations">
-					<a wicket:id="updateSourceBranch" class="btn btn-sm btn-light-danger">Update Source Branch</a>
+					<a wicket:id="updateSourceBranch" type="button" class="btn btn-sm btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Update Source Branch</a>
+					<div class="dropdown-menu">
+						<a wicket:id="updateSourceBranchMerge" class="dropdown-item">Merge</a>
+						<a wicket:id="updateSourceBranchRebase" class="dropdown-item">Rebase</a>
+					</div>
 					<a wicket:id="merge" class="btn btn-sm btn-light-success btn-hover-success">Merge</a>
 					<a wicket:id="discard" class="btn btn-sm btn-light-info btn-hover-info">Discard</a>
 					<a wicket:id="approve" class="btn btn-sm btn-light-success btn-hover-success">Approve</a>

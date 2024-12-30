@@ -113,7 +113,7 @@
 				<module>server-product</module>
 			</modules>
 		</profile>
-	</profiles>	
+	</profiles>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
