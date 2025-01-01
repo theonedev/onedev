@@ -67,7 +67,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
-import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.UpdateSourceBranchConfirmPanel;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
@@ -1598,7 +1597,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
-	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
+	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy){
 		var project	= request.getProject();
 		var user = SecurityUtils.getAuthUser();
 		Map<String, String> gitEnvs = new HashMap<>();
@@ -1619,18 +1618,18 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			errorMessage = "Review required for your change. Please submit pull request instead";
 			return errorMessage;
 		} else if (!newObjectId.equals(ObjectId.zeroId())) {
-			if (commitMessage != null) {
-				errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
-				if (errorMessage != null)
-					return errorMessage;
-			}
+//			if (commitMessage != null) {
+//				errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
+//				if (errorMessage != null)
+//					return errorMessage;
+//			}
 		} else if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())
 				&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
 			errorMessage = "Build required for your change. Please submit pull request instead";
 			return errorMessage;
 		}
 
-		getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy, commitMessage);
+		getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy);
 		return null;
 	}
 
@@ -1682,24 +1681,44 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-
-				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
-
-					@Override
-					protected String getTitle() {
-						return "Update Source Branch by Merge";
-					}
+				Fragment fragment = new Fragment(id, "confirmUpdateSourceBranchFrag", PullRequestDetailPage.this);
+				fragment.add(new Label("body", "You selected to update source branch by Merge"));
+				fragment.add(new AjaxLink<Void>("confirm") {
 
 					@Override
-					protected String operate(AjaxRequestTarget target) {
-						if (canOperate()) {
-							return updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
+					public void onClick(AjaxRequestTarget target) {
+						if (!canOperate()) {
+							getSession().error("Can not perform this operation now");
 						} else {
-							return "Can not perform this operation now";
+							String message = updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT);
+							if (message == null) {
+								getSession().success("Source branch updated successfully");
+							} else {
+								getSession().error(message);
+							}
 						}
+						modal.close();
 					}
 
-				};
+				});
+				fragment.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				});
+				fragment.add(new AjaxLink<Void>("close") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				});
+				fragment.setOutputMarkupId(true);
+				return fragment;
 			}
 		});
 
@@ -1713,23 +1732,44 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 
-				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
+				Fragment fragment = new Fragment(id, "confirmUpdateSourceBranchFrag", PullRequestDetailPage.this);
+				fragment.add(new Label("body", "You selected to update source branch by Rebase"));
+				fragment.add(new AjaxLink<Void>("confirm") {
 
 					@Override
-					protected String getTitle() {
-						return "Update Source Branch by Rebase";
-					}
-
-					@Override
-					protected String operate(AjaxRequestTarget target) {
-						if (canOperate()) {
-							return updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getCommitMessage());
+					public void onClick(AjaxRequestTarget target) {
+						if (!canOperate()) {
+							getSession().error("Can not perform this operation now");
 						} else {
-							return "Can not perform this operation now";
+							String message = updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS);
+							if (message == null) {
+								getSession().success("Source branch updated successfully");
+							} else {
+								getSession().error(message);
+							}
 						}
+						modal.close();
 					}
 
-				};
+				});
+				fragment.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				});
+				fragment.add(new AjaxLink<Void>("close") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				});
+				fragment.setOutputMarkupId(true);
+				return fragment;
 			}
 		});
 

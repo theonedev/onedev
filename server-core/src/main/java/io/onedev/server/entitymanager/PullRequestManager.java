@@ -51,7 +51,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     Map<ObjectId, AheadBehind> getAheadBehind(PullRequest request);
 
-    void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, @Nullable String commitMessage);
+    void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy);
 
     @Override
     void delete(PullRequest request);

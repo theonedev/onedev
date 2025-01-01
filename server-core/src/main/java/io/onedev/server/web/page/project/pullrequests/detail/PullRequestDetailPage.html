@@ -239,6 +239,19 @@
 			</wicket:enclosure>
 		</div>
 	</wicket:fragment>
+	<wicket:fragment wicket:id="confirmUpdateSourceBranchFrag">
+		<div class="confirm-delete-branch">
+			<div class="modal-header">
+				<h5 class="modal-title">Please confirm</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div wicket:id="body" class="modal-body"></div>
+			<div class="modal-footer">
+				<a wicket:id="confirm" class="btn btn-danger">Confirm</a>
+				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+			</div>
+		</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeEnabledFrag">
 		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> when ready.
 		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch
