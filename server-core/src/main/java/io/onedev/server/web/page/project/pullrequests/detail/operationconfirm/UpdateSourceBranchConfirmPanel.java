@@ -21,13 +21,13 @@ public abstract class UpdateSourceBranchConfirmPanel extends OperationConfirmPan
 		super.onInitialize();
 
 		PullRequest request = getPullRequest();
-		String commitMessage = request.getDefaultUpdateSourceBranchCommitMessage();
-		if (commitMessage != null) {
-			bean.setCommitMessage(commitMessage);
-			getForm().add(BeanContext.edit("commitMessage", bean));
-		} else {
-			getForm().add(new WebMarkupContainer("commitMessage").setVisible(false));
-		}
+		// String commitMessage = request.getDefaultUpdateSourceBranchCommitMessage();
+		//if (commitMessage != null) {
+//			bean.setCommitMessage(commitMessage);
+//			getForm().add(BeanContext.edit("commitMessage", bean));
+//		} else {
+//			getForm().add(new WebMarkupContainer("commitMessage").setVisible(false));
+//		}
 	}
 
 

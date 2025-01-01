@@ -1598,7 +1598,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
-	private String updateSourceBranch(PullRequest request, String commitMessage){
+	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
 		var project	= request.getProject();
 		var user = SecurityUtils.getAuthUser();
 		Map<String, String> gitEnvs = new HashMap<>();
@@ -1630,7 +1630,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			return errorMessage;
 		}
 
-		getPullRequestManager().updateSourceBranch(getPullRequest(), commitMessage);
+		getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy, commitMessage);
 		return null;
 	}
 
@@ -1683,8 +1683,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 
-				getPullRequest().setUpdateSourceBranchStrategy(CREATE_MERGE_COMMIT);
-
 				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
 
 					@Override
@@ -1695,7 +1693,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							return updateSourceBranch(getPullRequest(), getCommitMessage());
+							return updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
 						} else {
 							return "Can not perform this operation now";
 						}
@@ -1715,8 +1713,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 
-				getPullRequest().setUpdateSourceBranchStrategy(REBASE_SOURCE_BRANCH_COMMITS);
-
 				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
 
 					@Override
@@ -1727,7 +1723,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							return updateSourceBranch(getPullRequest(), getCommitMessage());
+							return updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getCommitMessage());
 						} else {
 							return "Can not perform this operation now";
 						}
