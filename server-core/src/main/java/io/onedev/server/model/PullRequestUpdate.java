@@ -119,6 +119,8 @@ public class PullRequestUpdate extends AbstractEntity {
 					getRequest().getWorkProject(), 
 					Lists.newArrayList(ObjectId.fromString(getHeadCommitHash())), 
 					uninterestingCommitIds);
+			if (commits.isEmpty()) // in case source branch reverted to a previous update
+				commits.add(getGitService().getCommit(getRequest().getWorkProject(), ObjectId.fromString(getHeadCommitHash())));
 			Collections.reverse(commits);
 		}
 		return commits;
