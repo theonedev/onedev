@@ -1669,6 +1669,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
 			errorMessage = "Build required for your change. Please submit pull request instead";
 			return errorMessage;
+		} else if (protection.isCommitSignatureRequired()) {
+			project.isCommitSignatureRequirementSatisfied(user, branchName, request.getBaseCommit());
 		}
 
 		getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy);
