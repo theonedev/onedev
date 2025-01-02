@@ -1639,8 +1639,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		PullRequest updateSourceBranchPr = new PullRequest();
 		updateSourceBranchPr.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
-		updateSourceBranchPr.setTarget(source);
-		updateSourceBranchPr.setSource(target);
+		updateSourceBranchPr.setTarget(target);
+		updateSourceBranchPr.setSource(source);
 		updateSourceBranchPr.setSubmitter(SecurityUtils.getAuthUser());
 
 		ObjectId baseCommitId = OneDev.getInstance(GitService.class).getMergeBase(
@@ -1662,6 +1662,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		getPullRequestManager().checkReviews(updateSourceBranchPr, false);
 
 		updateSourceBranchPr.setMergeStrategy(mergeStrategy);
+		MergePreview mergePreview = new MergePreview();
+		mergePreview.setTargetHeadCommitHash(updateSourceBranchPr.getTarget().getObjectName());
+		mergePreview.setHeadCommitHash(updateSourceBranchPr.getLatestUpdate().getHeadCommitHash());
+		mergePreview.setMergeStrategy(updateSourceBranchPr.getMergeStrategy());
+		ObjectId merged = mergePreview.getMergeStrategy().merge(updateSourceBranchPr, "Pull request update source branch preview");
+		if (merged != null)
+			mergePreview.setMergeCommitHash(merged.name());
+		updateSourceBranchPr.setMergePreview(mergePreview);
 
 		var branchProtection = getProject().getBranchProtection(updateSourceBranchPr.getTargetBranch(), updateSourceBranchPr.getSubmitter());
 		var commitMessage = updateSourceBranchPr.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
@@ -1671,13 +1679,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			if (errorMessage != null)
 				return errorMessage;
 		}
-		String checkMerge = request.checkMerge();
-		if (!SecurityUtils.canWriteCode(request.getProject())){
+		String checkMerge = updateSourceBranchPr.checkMerge();
+		if (!SecurityUtils.canWriteCode(updateSourceBranchPr.getProject())){
 			return "You don't have permission to do this operation";
 		} else if (checkMerge != null){
 			return checkMerge;
 		} else {
-			getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy);
+			getPullRequestManager().updateSourceBranch(request, mergeStrategy);
 			return null;
 		}
 	}
