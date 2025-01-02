@@ -22,6 +22,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -58,6 +59,7 @@ import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
@@ -450,31 +452,63 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("aheadBehind", new AbstractReadOnlyModel<String>() {
+				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
+				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
+
+				add(new Label("description", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
-						RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-						AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
-						return "Source branch is " + ab.getAhead() + " commit(s) ahead of target branch, " + ab.getBehind() + " commit(s) behind of target branch";
+						return "Source branch is ";
 					}
 
-				}) {
+				}).setEscapeModelStrings(false));
+
+				add(new Link<Void>("link") {
 
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!getPullRequest().isMerged());
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return ab.getBehind() + " commit(s)";
+							}
+
+						}));
+					}
+
+					@Override
+					public void onClick() {
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						state.leftSide = new ProjectAndBranch(getProject(), getPullRequest().getSourceBranch());
+						state.rightSide = new ProjectAndBranch(getProject(), getPullRequest().getTargetBranch());
+						PageParameters params = RevisionComparePage.paramsOf(getProject(), state);
+						setResponsePage(RevisionComparePage.class, params);
 					}
 
 				});
+
+				add(new Label("description_suffix", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return " behind of target branch";
+					}
+
+				}).setEscapeModelStrings(false));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getPullRequest().isMerged());
+
+				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
+				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
+				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
+				setVisible(!getPullRequest().isMerged() && ab.getBehind() > 0);
 			}
 		});
 
