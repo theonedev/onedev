@@ -8,6 +8,7 @@ import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.AheadBehind;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
@@ -17,6 +18,7 @@ import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -1632,49 +1634,52 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 
 	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy){
-		var project	= request.getProject();
-		var user = SecurityUtils.getAuthUser();
-		Map<String, String> gitEnvs = new HashMap<>();
-		String branchName = request.getSourceBranch();
-		BranchProtection protection = project.getBranchProtection(branchName, user);
+		ProjectAndBranch source = new ProjectAndBranch(request.getTargetProject(), request.getTargetBranch());
+		ProjectAndBranch target = new ProjectAndBranch(request.getSourceProject(), request.getSourceBranch());
 
-		ObjectId oldObjectId = request.getLatestUpdate().getHeadCommit().copy();
-		ObjectId newObjectId = request.getBaseCommit().copy();
-		String errorMessage;
+		PullRequest updateSourceBranchPr = new PullRequest();
+		updateSourceBranchPr.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
+		updateSourceBranchPr.setTarget(source);
+		updateSourceBranchPr.setSource(target);
+		updateSourceBranchPr.setSubmitter(SecurityUtils.getAuthUser());
 
-		if (protection.isPreventForcedPush()
-				&& !GitUtils.isMergedInto(OneDev.getInstance(ProjectManager.class).getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
-			errorMessage = "Can not force-push to this branch according to branch protection setting";
-			return errorMessage;
-		} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
-			errorMessage = "Review required for your change. Please submit pull request instead";
-			return errorMessage;
-		} else if (!newObjectId.equals(ObjectId.zeroId())) {
-			var commitMessageError = request.checkUpdateSourceBranchCommitMessages(mergeStrategy, oldObjectId, newObjectId);
-			if (commitMessageError != null) {
-				if (commitMessageError.getCommitId() != null) {
-					var params = CommitDetailPage.paramsOf(getProject(), commitMessageError.getCommitId().name());
-					return String.format("Error validating commit message of <a href='%s' class='text-monospace font-size-sm'>%s</a>: %s",
-							RequestCycle.get().urlFor(CommitDetailPage.class, params),
-							GitUtils.abbreviateSHA(commitMessageError.getCommitId().name()),
-							escapeHtml5(commitMessageError.getErrorMessage()));
-				} else {
-					return String.format("Error validating auto merge commit message: %s",
-							escapeHtml5(commitMessageError.getErrorMessage()));
-				}
-			} else {
-				return null;
-			}
-		} else if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())
-				&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
-			errorMessage = "Build required for your change. Please submit pull request instead";
-			return errorMessage;
-		} else if (protection.isCommitSignatureRequired()) {
-			project.isCommitSignatureRequirementSatisfied(user, branchName, request.getBaseCommit());
+		ObjectId baseCommitId = OneDev.getInstance(GitService.class).getMergeBase(
+				target.getProject(), target.getObjectId(),
+				source.getProject(), source.getObjectId());
+
+		if (baseCommitId == null)
+			throw new InvalidParamException("No common base for target and source");
+
+		updateSourceBranchPr.setBaseCommitHash(baseCommitId.name());
+
+		PullRequestUpdate update = new PullRequestUpdate();
+		updateSourceBranchPr.getUpdates().add(update);
+		updateSourceBranchPr.setUpdates(updateSourceBranchPr.getUpdates());
+		update.setRequest(updateSourceBranchPr);
+		update.setHeadCommitHash(source.getObjectName());
+		update.setTargetHeadCommitHash(updateSourceBranchPr.getTarget().getObjectName());
+
+		getPullRequestManager().checkReviews(updateSourceBranchPr, false);
+
+		updateSourceBranchPr.setMergeStrategy(mergeStrategy);
+
+		var branchProtection = getProject().getBranchProtection(updateSourceBranchPr.getTargetBranch(), updateSourceBranchPr.getSubmitter());
+		var commitMessage = updateSourceBranchPr.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
+		if (commitMessage != null) {
+			var errorMessage = branchProtection.checkCommitMessage(commitMessage,
+					updateSourceBranchPr.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+			if (errorMessage != null)
+				return errorMessage;
 		}
-
-		getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy);
-		return null;
+		String checkMerge = request.checkMerge();
+		if (!SecurityUtils.canWriteCode(request.getProject())){
+			return "You don't have permission to do this operation";
+		} else if (checkMerge != null){
+			return checkMerge;
+		} else {
+			getPullRequestManager().updateSourceBranch(getPullRequest(), mergeStrategy);
+			return null;
+		}
 	}
 
 	private WebMarkupContainer newOperationsContainer() {
