@@ -1635,13 +1635,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		var project	= request.getProject();
 		var user = SecurityUtils.getAuthUser();
 		Map<String, String> gitEnvs = new HashMap<>();
-		var branchProtection = project.getBranchProtection(request.getSourceBranch(), request.getSubmitter());
-
 		String branchName = request.getSourceBranch();
-		BranchProtection protection = project.getBranchProtection(branchName, SecurityUtils.getAuthUser());
+		BranchProtection protection = project.getBranchProtection(branchName, user);
 
-		ObjectId oldObjectId = request.getBaseCommit().copy();
-		ObjectId newObjectId = request.getLatestUpdate().getHeadCommit().copy();
+		ObjectId oldObjectId = request.getLatestUpdate().getHeadCommit().copy();
+		ObjectId newObjectId = request.getBaseCommit().copy();
 		String errorMessage;
 
 		if (protection.isPreventForcedPush()
@@ -1652,11 +1650,21 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			errorMessage = "Review required for your change. Please submit pull request instead";
 			return errorMessage;
 		} else if (!newObjectId.equals(ObjectId.zeroId())) {
-//			if (commitMessage != null) {
-//				errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
-//				if (errorMessage != null)
-//					return errorMessage;
-//			}
+			var commitMessageError = request.checkUpdateSourceBranchCommitMessages(mergeStrategy, oldObjectId, newObjectId);
+			if (commitMessageError != null) {
+				if (commitMessageError.getCommitId() != null) {
+					var params = CommitDetailPage.paramsOf(getProject(), commitMessageError.getCommitId().name());
+					return String.format("Error validating commit message of <a href='%s' class='text-monospace font-size-sm'>%s</a>: %s",
+							RequestCycle.get().urlFor(CommitDetailPage.class, params),
+							GitUtils.abbreviateSHA(commitMessageError.getCommitId().name()),
+							escapeHtml5(commitMessageError.getErrorMessage()));
+				} else {
+					return String.format("Error validating auto merge commit message: %s",
+							escapeHtml5(commitMessageError.getErrorMessage()));
+				}
+			} else {
+				return null;
+			}
 		} else if (!oldObjectId.equals(ObjectId.zeroId()) && !newObjectId.equals(ObjectId.zeroId())
 				&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
 			errorMessage = "Build required for your change. Please submit pull request instead";

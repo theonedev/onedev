@@ -1153,6 +1153,26 @@ public class PullRequest extends ProjectBelonging
 		return commitMessageErrorOpt.orElse(null);
 	}
 
+	@Nullable
+	public CommitMessageError checkUpdateSourceBranchCommitMessages(MergeStrategy mergeStrategy, ObjectId oldObjectId, ObjectId newObjectId) {
+		if (commitMessageErrorOpt.isEmpty()) {
+
+			CommitMessageError error = null;
+			if (mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS) {
+				error = getProject().checkCommitMessages(getSourceBranch(), getSubmitter(), oldObjectId, newObjectId, new HashMap<>());
+			}
+			if (error == null && autoMerge.isEnabled() && isMergeCommitMessageRequired()) {
+				var branchProtection = getProject().getBranchProtection(getSourceBranch(), autoMerge.getUser());
+				var commitMessage = getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
+				var errorMessage = branchProtection.checkCommitMessage(commitMessage, mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS);
+				if (errorMessage != null)
+					error = new CommitMessageError(null, errorMessage);
+			}
+			commitMessageErrorOpt = Optional.ofNullable(error);
+		}
+		return commitMessageErrorOpt.orElse(null);
+	}
+
 	public static String getSerialLockName(Long requestId) {
 		return "pull-request-" + requestId + "-serial";
 	}
