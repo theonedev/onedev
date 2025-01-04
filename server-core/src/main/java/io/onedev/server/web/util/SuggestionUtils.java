@@ -507,7 +507,7 @@ public class SuggestionUtils {
 
 		var exts = new TreeSet<String>();
 		for (var path: paths) {
-			var ext = StringUtils.substringAfter(Paths.get(path).getFileName().toFile().getName(), ".");
+			var ext = StringUtils.substringAfterLast(Paths.get(path).getFileName().toFile().getName(), ".");
 			if (ext.length() != 0)
 				exts.add(ext);
 		}
