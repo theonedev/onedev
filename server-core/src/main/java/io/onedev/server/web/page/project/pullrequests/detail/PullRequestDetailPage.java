@@ -71,6 +71,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.UpdateSourceBranchConfirmPanel;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
@@ -1633,7 +1634,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
-	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy){
+	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
 		ProjectAndBranch source = new ProjectAndBranch(request.getTargetProject(), request.getTargetBranch());
 		ProjectAndBranch target = new ProjectAndBranch(request.getSourceProject(), request.getSourceBranch());
 
@@ -1672,7 +1673,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		updateSourceBranchPr.setMergePreview(mergePreview);
 
 		var branchProtection = getProject().getBranchProtection(updateSourceBranchPr.getTargetBranch(), updateSourceBranchPr.getSubmitter());
-		var commitMessage = updateSourceBranchPr.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
+//		var commitMessage = updateSourceBranchPr.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
 		if (commitMessage != null) {
 			var errorMessage = branchProtection.checkCommitMessage(commitMessage,
 					updateSourceBranchPr.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
@@ -1685,7 +1686,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		} else if (checkMerge != null){
 			return checkMerge;
 		} else {
-			getPullRequestManager().updateSourceBranch(request, mergeStrategy);
+			getPullRequestManager().updateSourceBranch(request, mergeStrategy, commitMessage);
 			return null;
 		}
 	}
@@ -1738,44 +1739,29 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "confirmUpdateSourceBranchFrag", PullRequestDetailPage.this);
-				fragment.add(new Label("body", "You selected to update source branch by Merge"));
-				fragment.add(new AjaxLink<Void>("confirm") {
+
+				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						if (!canOperate()) {
-							getSession().error("Can not perform this operation now");
-						} else {
-							String message = updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT);
+					protected String getTitle() {
+						return "Update Source Branch by Merge";
+					}
+
+					@Override
+					protected String operate(AjaxRequestTarget target) {
+						if (canOperate()) {
+							String message = updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
 							if (message == null) {
-								getSession().success("Source branch updated successfully");
+								return "Source branch updated successfully";
 							} else {
-								getSession().error(message);
+								return message;
 							}
+						} else {
+							return "Can not perform this operation now";
 						}
-						modal.close();
 					}
 
-				});
-				fragment.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-				});
-				fragment.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-				});
-				fragment.setOutputMarkupId(true);
-				return fragment;
+				};
 			}
 		});
 
@@ -1798,7 +1784,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						if (!canOperate()) {
 							getSession().error("Can not perform this operation now");
 						} else {
-							String message = updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS);
+							String message = updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, null);
 							if (message == null) {
 								getSession().success("Source branch updated successfully");
 							} else {

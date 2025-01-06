@@ -269,14 +269,13 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Transactional
 	@Override
-	public void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy) {
+	public void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage) {
 		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
 		User user = SecurityUtils.getUser();
 		PersonIdent person = user.asPerson();
 		ObjectId targetHead = request.getLatestUpdate().getHeadCommit();
 		ObjectId requestHead = request.getTarget().getObjectId();
 		ObjectId mergeCommitId;
-		String commitMessage = request.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
 		if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
 			mergeCommitId = gitService.rebase(request.getTargetProject(), requestHead, targetHead, person);
 		} else if (mergeStrategy == CREATE_MERGE_COMMIT) {
