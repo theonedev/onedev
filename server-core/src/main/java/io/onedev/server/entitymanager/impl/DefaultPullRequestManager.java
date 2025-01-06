@@ -272,20 +272,25 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage) {
 		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
 		User user = SecurityUtils.getUser();
-		PersonIdent person = user.asPerson();
+		PersonIdent person;
 		ObjectId targetHead = request.getLatestUpdate().getHeadCommit();
 		ObjectId requestHead = request.getTarget().getObjectId();
 		ObjectId mergeCommitId;
 		if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
-			mergeCommitId = gitService.rebase(request.getTargetProject(), requestHead, targetHead, person);
+			person = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
+			mergeCommitId = gitService.rebase(request.getSourceProject(), requestHead, targetHead, person);
+			ObjectId targetHeadCommitId = ObjectId.fromString(request.getSource().getObjectName());
+			mergeCommitId = gitService.amendCommits(request.getSourceProject(), mergeCommitId, targetHeadCommitId,
+					User.SYSTEM_NAME, person);
 		} else if (mergeStrategy == CREATE_MERGE_COMMIT) {
-			mergeCommitId = gitService.merge(request.getTargetProject(), targetHead, requestHead, false,
+			person = user.asPerson();
+			mergeCommitId = gitService.merge(request.getSourceProject(), targetHead, requestHead, false,
 					person, person, commitMessage, false);
+			mergeCommitId = gitService.amendCommit(request.getSourceProject(), mergeCommitId, person, person, commitMessage);
 		} else {
 			return;
 		}
-		mergeCommitId = gitService.amendCommit(request.getTargetProject(), mergeCommitId, person, person, commitMessage);
-		gitService.updateRef(request.getTargetProject(), request.getSourceRef(), mergeCommitId, null);
+		gitService.updateRef(request.getSourceProject(), request.getSourceRef(), mergeCommitId, null);
 		checkAsync(request, true, true);
 
 		request.setBuildCommitHash(mergePreview.getMergeCommitHash());

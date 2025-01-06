@@ -13,7 +13,6 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -1634,7 +1633,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
-	private String updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
+	private String checkUpdateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
 		ProjectAndBranch source = new ProjectAndBranch(request.getTargetProject(), request.getTargetBranch());
 		ProjectAndBranch target = new ProjectAndBranch(request.getSourceProject(), request.getSourceBranch());
 
@@ -1686,7 +1685,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		} else if (checkMerge != null){
 			return checkMerge;
 		} else {
-			getPullRequestManager().updateSourceBranch(request, mergeStrategy, commitMessage);
 			return null;
 		}
 	}
@@ -1738,6 +1736,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			@Override
+			public void onClick(AjaxRequestTarget target) {
+				String message = checkUpdateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, null);
+				if (message == null) {
+					super.onClick(target);
+				} else {
+					getSession().error(message);
+				}
+			}
+
+			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 
 				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
@@ -1750,9 +1758,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							String message = updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
+							String message = checkUpdateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
 							if (message == null) {
-								return "Source branch updated successfully";
+								getPullRequestManager().updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
+								getSession().success("Source branch updated successfully");
+								return null;
 							} else {
 								return message;
 							}
@@ -1773,8 +1783,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			@Override
-			protected Component newContent(String id, ModalPanel modal) {
+			public void onClick(AjaxRequestTarget target) {
+				String message = checkUpdateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
+				if (message == null) {
+					super.onClick(target);
+				} else {
+					getSession().error(message);
+				}
+			}
 
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "confirmUpdateSourceBranchFrag", PullRequestDetailPage.this);
 				fragment.add(new Label("body", "You selected to update source branch by Rebase"));
 				fragment.add(new AjaxLink<Void>("confirm") {
@@ -1784,8 +1803,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						if (!canOperate()) {
 							getSession().error("Can not perform this operation now");
 						} else {
-							String message = updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, null);
+							String message = checkUpdateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
 							if (message == null) {
+								getPullRequestManager().updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
 								getSession().success("Source branch updated successfully");
 							} else {
 								getSession().error(message);
