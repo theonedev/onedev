@@ -9,7 +9,10 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Numeric;
+import io.onedev.server.annotation.OmitName;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.git.location.GitLocation;
@@ -42,7 +45,6 @@ import static io.onedev.k8shelper.KubernetesHelper.*;
 		"<b class='text-danger'>WARNING</b>: Jobs running with this executor has same " +
 		"permission as OneDev server process. Make sure it can only be used by trusted " +
 		"jobs via job requirement setting")
-@Horizontal
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;

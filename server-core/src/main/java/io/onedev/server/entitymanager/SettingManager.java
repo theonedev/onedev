@@ -164,8 +164,9 @@ public interface SettingManager extends EntityManager<Setting> {
     @Nullable
     <T extends ContributedAdministrationSetting> T getContributedSetting(Class<T> settingClass);
     
-    void saveContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass, 
-    		@Nullable ContributedAdministrationSetting setting);
+    void saveContributedSetting(ContributedAdministrationSetting setting);
+
+	void removeContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass);
     
 	Collection<String> getUndefinedIssueFields();
 

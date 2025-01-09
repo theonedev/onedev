@@ -20,8 +20,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(order=10000)
 @Path("/settings")
@@ -175,10 +174,10 @@ public class SettingResource {
 	@Api(order=1450)
 	@Path("/contributed-settings")
     @GET
-    public Map<String, ContributedAdministrationSetting> getContributedSettings() {
+    public List<ContributedAdministrationSetting> getContributedSettings() {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return settingManager.getContributedSettings();
+    	return new ArrayList<>(settingManager.getContributedSettings().values());
     }
 	
 	@Api(order=1500)
@@ -339,10 +338,13 @@ public class SettingResource {
 	@Api(order=2800)
 	@Path("/contributed-settings")
 	@POST
-    public Response setContributedSettings(@NotNull Map<String, ContributedAdministrationSetting> contributedSettings) {
+    public Response setContributedSettings(@NotNull List<ContributedAdministrationSetting> contributedSettings) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	settingManager.saveContributedSettings(contributedSettings);
+		var settingMap = new HashMap<String, ContributedAdministrationSetting>();
+		for (var setting: contributedSettings)
+			settingMap.put(setting.getClass().getName(), setting);
+    	settingManager.saveContributedSettings(settingMap);
     	return Response.ok().build();
     }
 	

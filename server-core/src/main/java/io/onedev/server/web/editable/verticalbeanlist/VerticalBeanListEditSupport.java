@@ -1,32 +1,26 @@
-package io.onedev.server.web.editable.beanlist;
+package io.onedev.server.web.editable.verticalbeanlist;
+
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Vertical;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.*;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-import io.onedev.server.annotation.Vertical;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.annotation.Editable;
-
 @SuppressWarnings("serial")
-public class BeanListEditSupport implements EditSupport {
+public class VerticalBeanListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass != null && ClassUtils.isConcrete(elementClass) 
-					&& descriptor.getPropertyGetter().getAnnotation(Vertical.class) == null
+			if (elementClass != null && ClassUtils.isConcrete(elementClass)
+					&& descriptor.getPropertyGetter().getAnnotation(Vertical.class) != null
 					&& elementClass.getAnnotation(Editable.class) != null) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
@@ -37,7 +31,7 @@ public class BeanListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new BeanListPropertyViewer(id, propertyDescriptor, model.getObject());
+									return new VerticalBeanListPropertyViewer(id, propertyDescriptor, model.getObject());
 								} else {
 									return new EmptyValueLabel(id) {
 
@@ -55,12 +49,12 @@ public class BeanListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new BeanListPropertyEditor(componentId, descriptor, model);
+						return new VerticalBeanListPropertyEditor(componentId, descriptor, model);
 					}
 					
 				};
 			}
-		}
+		}		
 		return null;
 	}
 

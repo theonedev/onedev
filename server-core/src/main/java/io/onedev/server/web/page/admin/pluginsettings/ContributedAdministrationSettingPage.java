@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.admin.pluginsettings;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.annotation.Nullable;
-import javax.validation.Validator;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -16,14 +18,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
-import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import javax.annotation.Nullable;
+import javax.validation.Validator;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("serial")
 public class ContributedAdministrationSettingPage extends AdministrationPage {
@@ -75,9 +73,9 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 				
 				Component editor = get("editor");
 				if (editor instanceof BeanEditor && editor.isVisible())
-					getSettingManager().saveContributedSetting(settingClass, (ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject());
+					getSettingManager().saveContributedSetting((ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject());
 				else
-					getSettingManager().saveContributedSetting(settingClass, null);
+					getSettingManager().removeContributedSetting(settingClass);
 				
 				getSession().success("Setting has been saved");
 				

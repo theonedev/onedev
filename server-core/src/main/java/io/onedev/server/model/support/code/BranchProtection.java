@@ -5,7 +5,10 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobChoice;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
@@ -35,7 +38,6 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 
 @Editable
-@Horizontal
 public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;

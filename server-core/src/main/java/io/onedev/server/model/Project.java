@@ -1650,7 +1650,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {
 		return contributedSettings;
 	}
-	
+
+	public void setContributedSettings(LinkedHashMap<String, ContributedProjectSetting> contributedSettings) {
+		this.contributedSettings = contributedSettings;
+	}
+
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends ContributedProjectSetting> T getContributedSetting(Class<T> settingClass) {
@@ -1671,7 +1675,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setContributedSetting(Class<? extends ContributedProjectSetting> settingClass, 
 			@Nullable ContributedProjectSetting setting) {
-		contributedSettings.put(settingClass.getName(), setting);
+		if (setting != null)
+			contributedSettings.put(settingClass.getName(), setting);
+		else
+			contributedSettings.remove(settingClass.getName());
 	}
 	
 	public String calcPath() {

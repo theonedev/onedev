@@ -7280,4 +7280,30 @@ public class DataMigrator {
 	private void migrate184(File dataDir, Stack<Integer> versions) {
 	}
 
+	private void migrate185(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var contributedSettingElement: element.element("contributedSettings").elements()) {
+						var className = contributedSettingElement.elementText("string").trim();
+						if (className.contains("NtfyNotificationSetting") || className.contains("SlackNotificationSetting")
+								|| className.contains("DiscordNotificationSetting")) {
+							for (var wrapperElement: contributedSettingElement.elements().get(1).element("notifications").elements()) {
+								wrapperElement.setName(wrapperElement.getName().replace("ChannelNotificationWrapper", "ChannelNotification"));
+								var notificationElement = wrapperElement.element("channelNotification");
+								for (var childElement: notificationElement.elements()) {
+									childElement.detach();
+									wrapperElement.add(childElement);
+								}
+								notificationElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

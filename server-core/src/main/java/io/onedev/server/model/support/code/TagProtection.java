@@ -1,14 +1,13 @@
 package io.onedev.server.model.support.code;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 import javax.validation.constraints.NotEmpty;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Editable
-@Horizontal
 public class TagProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;

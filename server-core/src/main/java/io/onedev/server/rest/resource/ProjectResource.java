@@ -109,7 +109,7 @@ public class ProjectResource {
 		setting.namedCommitQueries = project.getNamedCommitQueries();
 		setting.pullRequestSetting = project.getPullRequestSetting();
 		setting.webHooks = project.getWebHooks();
-		setting.contributedSettings = project.getContributedSettings();
+		setting.contributedSettings.addAll(project.getContributedSettings().values());
 		return setting;
     }
 	
@@ -314,6 +314,10 @@ public class ProjectResource {
 		project.setNamedCommitQueries(setting.namedCommitQueries);
 		project.setPullRequestSetting(setting.pullRequestSetting);
 		project.setWebHooks(setting.webHooks);
+		var contributedSettings = new LinkedHashMap<String, ContributedProjectSetting>();
+		for (var contributedSetting: setting.getContributedSettings())
+			contributedSettings.put(contributedSetting.getClass().getName(), contributedSetting);
+		project.setContributedSettings(contributedSettings);
 		projectManager.update(project);
 		return Response.ok().build();
     }
@@ -377,7 +381,7 @@ public class ProjectResource {
 		
 		private ArrayList<WebHook> webHooks = new ArrayList<>();
 		
-		private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
+		private ArrayList<ContributedProjectSetting> contributedSettings = new ArrayList<>();
 
 		public ArrayList<BranchProtection> getBranchProtections() {
 			return branchProtections;
@@ -451,11 +455,11 @@ public class ProjectResource {
 			this.webHooks = webHooks;
 		}
 
-		public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {
+		public ArrayList<ContributedProjectSetting> getContributedSettings() {
 			return contributedSettings;
 		}
 
-		public void setContributedSettings(LinkedHashMap<String, ContributedProjectSetting> contributedSettings) {
+		public void setContributedSettings(ArrayList<ContributedProjectSetting> contributedSettings) {
 			this.contributedSettings = contributedSettings;
 		}
 		

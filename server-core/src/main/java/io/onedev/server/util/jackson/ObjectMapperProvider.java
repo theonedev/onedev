@@ -1,9 +1,7 @@
 package io.onedev.server.util.jackson;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,16 +27,29 @@ import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 	private final Set<ObjectMapperConfigurator> configurators;
-	
+
+	private final Set<ProjectSettingContribution> projectSettingContributions;
+
+	private final Set<AdministrationSettingContribution> administrationSettingContributions;
+
 	private final ImplementationRegistry implementationRegistry;
 	
 	@Inject
-	public ObjectMapperProvider(ImplementationRegistry implementationRegistry, Set<ObjectMapperConfigurator> configurators) {
+	public ObjectMapperProvider(Set<ProjectSettingContribution> projectSettingContributions,
+								Set<AdministrationSettingContribution> administrationSettingContributions,
+								ImplementationRegistry implementationRegistry,
+								Set<ObjectMapperConfigurator> configurators) {
+		this.projectSettingContributions = projectSettingContributions;
+		this.administrationSettingContributions = administrationSettingContributions;
 		this.implementationRegistry = implementationRegistry;
 		this.configurators = configurators;
 	}
@@ -58,6 +69,21 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
             }
 
             private Collection<NamedType> getSubTypes(JavaType baseType) {
+				if (baseType.getRawClass() == ContributedProjectSetting.class) {
+					List<NamedType> subTypes = new ArrayList<>();
+					for (var contribution: projectSettingContributions) {
+						for (var settingClass: contribution.getSettingClasses())
+							subTypes.add(new NamedType(settingClass));
+					}
+					return subTypes;
+				} else if (baseType.getRawClass() == ContributedAdministrationSetting.class) {
+					List<NamedType> subTypes = new ArrayList<>();
+					for (var contribution: administrationSettingContributions) {
+						for (var settingClass: contribution.getSettingClasses())
+							subTypes.add(new NamedType(settingClass));
+					}
+					return subTypes;
+				}
             	return implementationRegistry.getImplementations(baseType.getRawClass())
             			.stream()
             			.map(it->new NamedType(it))

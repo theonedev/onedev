@@ -378,25 +378,31 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends ContributedAdministrationSetting> T getContributedSetting(Class<T> settingClass) {
-		T contributedSetting = (T) getContributedSettings().get(settingClass.getName());
-		if (contributedSetting == null) {
+		T setting = (T) getContributedSettings().get(settingClass.getName());
+		if (setting == null) {
 			try {
 				T value = settingClass.getDeclaredConstructor().newInstance();
 				if (OneDev.getInstance(Validator.class).validate(value).isEmpty()) 
-					contributedSetting = value;
+					setting = value;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		
-		return contributedSetting;
+		return setting;
 	}
 
-	public void saveContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass, 
-			@Nullable ContributedAdministrationSetting setting) {
-		Map<String, ContributedAdministrationSetting> contributedSettings = getContributedSettings();
-		contributedSettings.put(settingClass.getName(), setting);
+	@Override
+	public void saveContributedSetting(ContributedAdministrationSetting setting) {
+		var contributedSettings = getContributedSettings();
+		contributedSettings.put(setting.getClass().getName(), setting);
+		saveSetting(Key.CONTRIBUTED_SETTINGS, (Serializable) contributedSettings);
+	}
+
+	@Override
+	public void removeContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass) {
+		var contributedSettings = getContributedSettings();
+		contributedSettings.remove(settingClass.getName());
 		saveSetting(Key.CONTRIBUTED_SETTINGS, (Serializable) contributedSettings);
 	}
 

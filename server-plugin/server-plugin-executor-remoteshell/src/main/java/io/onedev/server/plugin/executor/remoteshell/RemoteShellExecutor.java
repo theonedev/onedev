@@ -8,7 +8,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
 import io.onedev.server.annotation.Numeric;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
@@ -32,7 +31,6 @@ import static io.onedev.agent.WebsocketUtils.call;
 		+ "This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br>"
 		+ "<b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission "
 		+ "as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting")
-@Horizontal
 public class RemoteShellExecutor extends ServerShellExecutor {
 
 	private static final long serialVersionUID = 1L;

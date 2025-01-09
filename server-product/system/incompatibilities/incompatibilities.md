@@ -1,3 +1,12 @@
+# 11.6.10
+
+### RESTful API
+
+1. Format of contributed project settings inside project settings (refer to endpoint to [get](/~help/api/io.onedev.server.rest.resource.ProjectResource/getSetting) and [set](/~help/api/io.onedev.server.rest.resource.ProjectResource/updateSetting)
+project settings) has been changed
+1. Format of contributed administration settings (refer to endpoint to [get](/~help/api/io.onedev.server.rest.resource.SettingResource/getContributedSettings) and [set](/~help/api/io.onedev.server.rest.resource.SettingResource/setContributedSettings)
+   contributed administration settings) has been changed
+
 # 11.6.6
 
 Incoming box settings of various mail services removed additional target addresses for simplicity reason. 

@@ -14,7 +14,6 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
@@ -66,7 +65,6 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 		+ "No any agents are required."
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "settings as job pods need to access it to download source and artifacts")
-@Horizontal
 public class KubernetesExecutor extends JobExecutor implements RegistryLoginAware, Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;

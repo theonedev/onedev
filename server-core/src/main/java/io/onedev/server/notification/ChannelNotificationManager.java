@@ -14,7 +14,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.channelnotification.ChannelNotification;
 import io.onedev.server.model.support.channelnotification.ChannelNotificationSetting;
-import io.onedev.server.model.support.channelnotification.ChannelNotificationWrapper;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.ReflectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -147,8 +146,8 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		Map<String, ChannelNotification> notifications = new HashMap<>();
 		do {
 			T setting = project.getContributedSetting(settingClass);
-			for (ChannelNotificationWrapper wrapper : setting.getNotifications())
-				notifications.putIfAbsent(wrapper.getChannelNotification().getWebhookUrl(), wrapper.getChannelNotification());
+			for (var notification : setting.getNotifications())
+				notifications.putIfAbsent(notification.getWebhookUrl(), notification);
 			project = project.getParent();
 		} while (project != null);
 

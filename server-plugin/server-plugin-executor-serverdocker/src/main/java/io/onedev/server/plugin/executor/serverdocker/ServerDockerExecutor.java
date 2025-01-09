@@ -47,7 +47,6 @@ import static java.util.stream.Collectors.toList;
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
 		description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
-@Horizontal
 public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAware, Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
