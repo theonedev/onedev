@@ -137,6 +137,8 @@ public class ActionCondition extends Criteria<Build> {
 					checkField(job, fieldName, operator);
 					
 					switch (fieldName) {
+						case NAME_PROJECT:
+							return new ProjectCriteria(fieldValue, operator);
 						case NAME_BRANCH:
 							return new BranchCriteria(fieldValue, operator);
 						case NAME_TAG:
@@ -181,7 +183,10 @@ public class ActionCondition extends Criteria<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG)) {
+		if (fieldName.equals(NAME_PROJECT)) {
+			if (operator != Is && operator != IsNot)
+				throw newOperatorException(fieldName, operator);
+		} else if (fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG)) {
 			if (operator != Is && operator != IsNot && operator != IsEmpty && operator != IsNotEmpty)
 				throw newOperatorException(fieldName, operator);
 		} else if (fieldName.equals(NAME_PULL_REQUEST)) {

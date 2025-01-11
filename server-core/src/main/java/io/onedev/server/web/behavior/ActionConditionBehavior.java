@@ -51,6 +51,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							Map<String, String> fields = new LinkedHashMap<>();
+							fields.put(NAME_PROJECT, "project of the running job");
 							fields.put(NAME_BRANCH, "branch the job is running against");
 							fields.put(NAME_TAG, "tag the job is running against");
 							fields.put(NAME_PULL_REQUEST, null);
@@ -71,7 +72,9 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = ActionCondition.getValue(fieldElements.get(0).getMatchedText());
-								if (fieldName.equals(NAME_BRANCH)) {
+								if (fieldName.equals(NAME_PROJECT)) {
+									return SuggestionUtils.suggestProjectPaths(matchWith);
+								} else if (fieldName.equals(NAME_BRANCH)) {
 									return SuggestionUtils.suggestBranches(Project.get(), matchWith);	
 								} else if (fieldName.equals(NAME_TAG)) {
 									return SuggestionUtils.suggestTags(Project.get(), matchWith);
@@ -128,7 +131,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG))
+					if (fieldName.equals(NAME_PROJECT) || fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG))
 						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					else if (fieldName.equals(Build.NAME_LOG))
 						hints.add("Use '*' for wildcard match");
