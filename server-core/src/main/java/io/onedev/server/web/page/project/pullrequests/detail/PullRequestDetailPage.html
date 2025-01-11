@@ -49,6 +49,9 @@
 					<div wicket:id="rebased" class="rebased text-success">
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were rebased onto target branch
 					</div>
+					<div wicket:id="aheadBehindContainer" class="ahead-behind text-success">
+						<wicket:svg href="tick-circle" class="icon"></wicket:svg><span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a><span wicket:id="description_suffix"></span>
+					</div>
 					<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-warning d-flex align-items-center">
 						<wicket:svg href="loading" class="icon spin mr-2"></wicket:svg> Calculating merge preview...
 					</div>
@@ -56,16 +59,16 @@
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Able to merge without conflicts
 					</div>
 					<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
-						<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> There are merge conflicts. 
+						<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> There are merge conflicts.
 						<wicket:enclosure child="resolveInstructions">
 							Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts
 						</wicket:enclosure>
 					</div>
 					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit   
+						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit
 					</div>
 					<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
-						<wicket:svg href="diff" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
+						<wicket:svg href="diff" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a>
 					</div>
 					<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
@@ -83,8 +86,8 @@
 					</wicket:enclosure>
 					<wicket:enclosure child="requiredJobs">
 					<div class="required-jobs text-warning">
-						<wicket:svg href="warning" class="icon"></wicket:svg> 
-						<span wicket:id="requiredJobsMessage"></span> 
+						<wicket:svg href="warning" class="icon"></wicket:svg>
+						<span wicket:id="requiredJobsMessage"></span>
 						<span wicket:id="requiredJobs" class="d-inline-block mr-2">
 							<span wicket:id="jobName"></span>
 							<a wicket:id="runJob" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
@@ -105,6 +108,11 @@
 					<a wicket:id="approve" class="btn btn-sm btn-light-success btn-hover-success">Approve</a>
 					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-warning btn-hover-warning">Request For Changes</a>
 					<a wicket:id="reopen" class="btn btn-sm btn-light-primary btn-hover-primary">Reopen</a>
+					<a wicket:id="updateSourceBranch" type="button" class="btn btn-sm btn-light-primary btn-hover-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Update Source Branch</a>
+					<div class="dropdown-menu">
+						<a wicket:id="updateSourceBranchMerge" class="dropdown-item">Merge</a>
+						<a wicket:id="updateSourceBranchRebase" class="dropdown-item">Rebase</a>
+					</div>
 					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Delete Source Branch</a>
 					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Restore Source Branch</a>
 				</div>
@@ -147,11 +155,11 @@
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
 			<div class="head">
-				Jobs 
+				Jobs
 				<span wicket:id="hiddenJobsNote" class="warning ml-2" title="Some jobs are hidden due to permission policy">
 					<wicket:svg href="exclamation-circle-o" class="icon"/>
 				</span>
-			</div> 
+			</div>
 			<div wicket:id="jobs" class="body"></div>
 			<div wicket:id="jobsHelp" class="font-size-sm text-muted form-text">Jobs marked with <span class="text-danger">*</span> are required to be successful</div>
 		</div>
@@ -166,7 +174,7 @@
 		<div wicket:id="mergeStrategy" class="merge-strategy">
 			<div class="head">Merge Strategy</div>
 			<div class="body">
-				<select wicket:id="editor" class="form-control custom-select"></select> 
+				<select wicket:id="editor" class="form-control custom-select"></select>
 				<span wicket:id="viewer"></span>
 				<div wicket:id="help" class="font-size-sm text-muted form-text"></div>
 			</div>
@@ -210,7 +218,7 @@
     </wicket:fragment>
 	<wicket:fragment wicket:id="projectTitleFrag">
 		<span class="d-flex align-items-center">
-			<a wicket:id="pullRequests" class="text-nowrap">Pull Requests</a> 
+			<a wicket:id="pullRequests" class="text-nowrap">Pull Requests</a>
 			<span class="dot"></span>
 			<span wicket:id="pullRequestNumber"></span>
 		</span>
@@ -218,24 +226,37 @@
 	<wicket:fragment wicket:id="cloneFrag">
 		<div class="p-4">
 			<div class="font-weight-bolder font-size-lg mb-2">Checkout Pull Request Head</div>
-			<div class="code font-size-sm">  
+			<div class="code font-size-sm">
 				<div>git fetch origin <span wicket:id="headRef"></span></div>
 				<div>git checkout FETCH_HEAD</div>
 			</div>
 			<wicket:enclosure child="mergeRef">
 			<div class="font-weight-bolder font-size-lg mt-4 mb-2">Checkout Pull Request Merge Preview</div>
-			<div class="code font-size-sm">  
+			<div class="code font-size-sm">
 				<div>git fetch origin <span wicket:id="mergeRef"></span></div>
 				<div>git checkout FETCH_HEAD</div>
 			</div>
 			</wicket:enclosure>
 		</div>
 	</wicket:fragment>
+	<wicket:fragment wicket:id="confirmUpdateSourceBranchFrag">
+		<div class="confirm-delete-branch">
+			<div class="modal-header">
+				<h5 class="modal-title">Please confirm</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div wicket:id="body" class="modal-body"></div>
+			<div class="modal-footer">
+				<a wicket:id="confirm" class="btn btn-danger">Confirm</a>
+				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+			</div>
+		</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeEnabledFrag">
-		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> when ready. 
-		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch 
+		Pull request will be merged automatically<wicket:enclosure> with a preset <a wicket:id="commitMessage">commit message</a></wicket:enclosure> when ready.
+		This option will be disabled upon adding new commits, changing merge strategy, or switching target branch
 	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeDisabledFrag">
-		Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)  
+		Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)
 	</wicket:fragment>
 </wicket:extend>
