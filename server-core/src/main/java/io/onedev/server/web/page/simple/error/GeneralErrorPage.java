@@ -2,7 +2,7 @@ package io.onedev.server.web.page.simple.error;
 
 import com.google.common.base.Throwables;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ServerNotFoundException;
+import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.security.SecurityUtils;

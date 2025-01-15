@@ -1,13 +1,11 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.AheadBehind;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.*;
@@ -17,13 +15,11 @@ import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -45,6 +41,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
@@ -68,9 +65,8 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
-import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.CommentableOperationConfirmPanel;
-import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.MergeConfirmPanel;
-import io.onedev.server.web.page.project.pullrequests.detail.operationconfirm.UpdateSourceBranchConfirmPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.MergePullRequestOptionPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.OperationCommentPanel;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
@@ -95,7 +91,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.*;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -109,7 +108,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.EntityNotFoundException;
@@ -177,6 +175,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		}
 
 		latestUpdateId = requestModel.getObject().getLatestUpdate().getId();
+	}
+
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 
 	private PullRequestManager getPullRequestManager() {
@@ -449,68 +451,32 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 		});
-		summaryContainer.add(new WebMarkupContainer("aheadBehindContainer") {
+		summaryContainer.add(new WebMarkupContainer("sourceBranchOutdated") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
-				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
-
-				add(new Label("description", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return "Source branch is ";
-					}
-
-				}).setEscapeModelStrings(false));
-
-				add(new Link<Void>("link") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-							@Override
-							public String getObject() {
-								return ab.getBehind() + " commit(s)";
-							}
-
-						}));
-					}
+				add(new Link<Void>("detail") {
 
 					@Override
 					public void onClick() {
 						RevisionComparePage.State state = new RevisionComparePage.State();
-						state.leftSide = new ProjectAndBranch(getProject(), getPullRequest().getSourceBranch());
-						state.rightSide = new ProjectAndBranch(getProject(), getPullRequest().getTargetBranch());
+						var request = getPullRequest();
+						state.leftSide = request.getSource();
+						state.rightSide = request.getTarget();
 						PageParameters params = RevisionComparePage.paramsOf(getProject(), state);
 						setResponsePage(RevisionComparePage.class, params);
 					}
 
 				});
-
-				add(new Label("description_suffix", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return " behind of target branch";
-					}
-
-				}).setEscapeModelStrings(false));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-
-				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
-				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
-				setVisible(!getPullRequest().isMerged() && ab.getBehind() > 0);
+				setVisible(getPullRequest().isOpen()
+						&& getPullRequest().getSourceHead() != null
+						&& getPullRequest().isSourceOutdated());
 			}
 		});
 
@@ -1633,62 +1599,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		};
 	}
 
-	private String checkUpdateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage){
-		ProjectAndBranch source = new ProjectAndBranch(request.getTargetProject(), request.getTargetBranch());
-		ProjectAndBranch target = new ProjectAndBranch(request.getSourceProject(), request.getSourceBranch());
-
-		PullRequest updateSourceBranchPr = new PullRequest();
-		updateSourceBranchPr.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
-		updateSourceBranchPr.setTarget(target);
-		updateSourceBranchPr.setSource(source);
-		updateSourceBranchPr.setSubmitter(SecurityUtils.getAuthUser());
-
-		ObjectId baseCommitId = OneDev.getInstance(GitService.class).getMergeBase(
-				target.getProject(), target.getObjectId(),
-				source.getProject(), source.getObjectId());
-
-		if (baseCommitId == null)
-			throw new InvalidParamException("No common base for target and source");
-
-		updateSourceBranchPr.setBaseCommitHash(baseCommitId.name());
-
-		PullRequestUpdate update = new PullRequestUpdate();
-		updateSourceBranchPr.getUpdates().add(update);
-		updateSourceBranchPr.setUpdates(updateSourceBranchPr.getUpdates());
-		update.setRequest(updateSourceBranchPr);
-		update.setHeadCommitHash(source.getObjectName());
-		update.setTargetHeadCommitHash(updateSourceBranchPr.getTarget().getObjectName());
-
-		getPullRequestManager().checkReviews(updateSourceBranchPr, false);
-
-		updateSourceBranchPr.setMergeStrategy(mergeStrategy);
-		MergePreview mergePreview = new MergePreview();
-		mergePreview.setTargetHeadCommitHash(updateSourceBranchPr.getTarget().getObjectName());
-		mergePreview.setHeadCommitHash(updateSourceBranchPr.getLatestUpdate().getHeadCommitHash());
-		mergePreview.setMergeStrategy(updateSourceBranchPr.getMergeStrategy());
-		ObjectId merged = mergePreview.getMergeStrategy().merge(updateSourceBranchPr, "Pull request update source branch preview");
-		if (merged != null)
-			mergePreview.setMergeCommitHash(merged.name());
-		updateSourceBranchPr.setMergePreview(mergePreview);
-
-		var branchProtection = getProject().getBranchProtection(updateSourceBranchPr.getTargetBranch(), updateSourceBranchPr.getSubmitter());
-//		var commitMessage = updateSourceBranchPr.getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
-		if (commitMessage != null) {
-			var errorMessage = branchProtection.checkCommitMessage(commitMessage,
-					updateSourceBranchPr.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
-			if (errorMessage != null)
-				return errorMessage;
-		}
-		String checkMerge = updateSourceBranchPr.checkMerge();
-		if (!SecurityUtils.canWriteCode(updateSourceBranchPr.getProject())){
-			return "You don't have permission to do this operation";
-		} else if (checkMerge != null){
-			return checkMerge;
-		} else {
-			return null;
-		}
-	}
-
 	private WebMarkupContainer newOperationsContainer() {
 		WebMarkupContainer operationsContainer = new WebMarkupContainer("requestOperations");
 		operationsContainer.add(new ChangeObserver() {
@@ -1707,132 +1617,139 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		operationsContainer.setOutputMarkupPlaceholderTag(true);
-
 		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null);
 
-		operationsContainer.add(new Button("updateSourceBranch") {
+		operationsContainer.add(new MenuLink("updateSourceBranch") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				var menuItems = new ArrayList<MenuItem>();
+				menuItems.add(new MenuItem() {
+					@Override
+					public String getLabel() {
+						return "Merge";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								var request = getPullRequest();
+								var targetHead = request.getTarget().getObjectId();
+								var sourceHead = request.getSourceHead();
+								var result = checkUpdateSourceBranch(true);
+								if (result instanceof ObjectId) {
+									var mergeCommit = getProject().getRevCommit((ObjectId) result, true);
+									var bean = new CommitMessageBean();
+									bean.setCommitMessage(mergeCommit.getFullMessage());
+									new BeanEditModalPanel<>(target, bean, "Merge Target Branch into Source Branch") {
+										@Override
+										protected String getCssClass() {
+											return "modal-lg commit-message no-autosize";
+										}
+
+										@Override
+										protected boolean isDirtyAware() {
+											return false;
+										}
+
+										@Override
+										protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+											var request = getPullRequest();
+											var user = SecurityUtils.getAuthUser();
+											var protection = request.getSourceProject().getBranchProtection(request.getSourceBranch(), user);
+											var errorMessage = protection.checkCommitMessage(bean.getCommitMessage(), true);
+											if (errorMessage != null)
+												return errorMessage;
+											if (targetHead.equals(request.getTarget().getObjectId())
+													&& sourceHead.equals(request.getSourceHead())) {
+												var gitService = OneDev.getInstance(GitService.class);
+												var amendedCommitId = gitService.amendCommit(request.getProject(), mergeCommit.copy(),
+														mergeCommit.getAuthorIdent(), mergeCommit.getCommitterIdent(),
+														bean.getCommitMessage());
+												updateSourceBranch(amendedCommitId);
+												getSession().success("Source branch updated successfully");
+											} else {
+												getSession().warn("Target or source branch is updated. Please try again");
+											}
+											close();
+											return null;
+										}
+
+									};
+								} else {
+									getSession().error((String)result);
+								}
+							}
+						};
+					}
+				});
+				menuItems.add(new MenuItem() {
+					@Override
+					public String getLabel() {
+						return "Rebase";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								var request = getPullRequest();
+								var targetHead = request.getTarget().getObjectId();
+								var sourceHead = request.getSourceHead();
+								var result = checkUpdateSourceBranch(false);
+								if (result instanceof ObjectId) {
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											var request = getPullRequest();
+											if (targetHead.equals(request.getTarget().getObjectId())
+													&& sourceHead.equals(request.getSourceHead())) {
+												updateSourceBranch((ObjectId)result);
+												getSession().success("Source branch updated successfully");
+											} else {
+												getSession().warn("Target or source branch is updated. Please try again");
+											}
+										}
+
+										@Override
+										protected String getConfirmInput() {
+											return null;
+										}
+
+										@Override
+										protected String getConfirmMessage() {
+											return "You are rebasing source branch on top of target branch";
+										}
+									};
+								} else {
+									getSession().error((String)result);
+								}
+							}
+						};
+					}
+				});
+				return menuItems;
+			}
 
 			private boolean canOperate() {
-				var request = getPullRequest();
-				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
+				return SecurityUtils.canWriteCode(getPullRequest().getProject())
+						&& getPullRequest().isOpen()
+						&& getPullRequest().getSourceHead() != null
+						&& getPullRequest().isSourceOutdated();
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				Map<ObjectId, AheadBehind> abs = getPullRequestManager().getAheadBehind(getPullRequest());
-				RevCommit lastCommit = getPullRequest().getLatestUpdate().getHeadCommit();
-				AheadBehind ab = Preconditions.checkNotNull(abs.get(lastCommit));
-				setVisible(canOperate() && ab.getBehind() > 0);
-			}
-		});
-
-
-		operationsContainer.add(new ModalLink("updateSourceBranchMerge") {
-
-			private boolean canOperate() {
-				var request = getPullRequest();
-				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				String message = checkUpdateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, null);
-				if (message == null) {
-					super.onClick(target);
-				} else {
-					getSession().error(message);
-				}
-			}
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-
-				return new UpdateSourceBranchConfirmPanel(id, modal, latestUpdateId) {
-
-					@Override
-					protected String getTitle() {
-						return "Update Source Branch by Merge";
-					}
-
-					@Override
-					protected String operate(AjaxRequestTarget target) {
-						if (canOperate()) {
-							String message = checkUpdateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
-							if (message == null) {
-								getPullRequestManager().updateSourceBranch(getPullRequest(), CREATE_MERGE_COMMIT, getCommitMessage());
-								getSession().success("Source branch updated successfully");
-								return null;
-							} else {
-								return message;
-							}
-						} else {
-							return "Can not perform this operation now";
-						}
-					}
-
-				};
-			}
-		});
-
-		operationsContainer.add(new ModalLink("updateSourceBranchRebase") {
-
-			private boolean canOperate() {
-				var request = getPullRequest();
-				return SecurityUtils.canWriteCode(request.getProject()) && !request.isMerged();
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				String message = checkUpdateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
-				if (message == null) {
-					super.onClick(target);
-				} else {
-					getSession().error(message);
-				}
-			}
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "confirmUpdateSourceBranchFrag", PullRequestDetailPage.this);
-				fragment.add(new Label("body", "You selected to update source branch by Rebase"));
-				fragment.add(new AjaxLink<Void>("confirm") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						if (!canOperate()) {
-							getSession().error("Can not perform this operation now");
-						} else {
-							String message = checkUpdateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
-							if (message == null) {
-								getPullRequestManager().updateSourceBranch(getPullRequest(), REBASE_SOURCE_BRANCH_COMMITS, getPullRequest().getDefaultUpdateSourceBranchCommitMessage(REBASE_SOURCE_BRANCH_COMMITS));
-								getSession().success("Source branch updated successfully");
-							} else {
-								getSession().error(message);
-							}
-						}
-						modal.close();
-					}
-
-				});
-				fragment.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-				});
-				fragment.add(new AjaxLink<Void>("close") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-				});
-				fragment.setOutputMarkupId(true);
-				return fragment;
+				setVisible(canOperate());
 			}
 		});
 
@@ -1856,7 +1773,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -1899,7 +1816,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -1937,7 +1854,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new MergeConfirmPanel(id, modal, latestUpdateId) {
+				return new MergePullRequestOptionPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -1978,7 +1895,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -2015,7 +1932,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -2054,7 +1971,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -2094,7 +2011,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+				return new OperationCommentPanel(id, modal, latestUpdateId) {
 
 					@Override
 					protected String operate(AjaxRequestTarget target) {
@@ -2118,6 +2035,63 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		return operationsContainer;
+	}
+
+	/**
+	 * @return String type representing error message if check failed; otherwise ObjectId type
+	 * representing merge commit id
+	 */
+	private Object checkUpdateSourceBranch(boolean updateByMerge) {
+		var request = getPullRequest();
+		var user = SecurityUtils.getAuthUser();
+		var project = request.getProject();
+		var protection = request.getSourceProject().getBranchProtection(request.getSourceBranch(), user);
+
+		ObjectId sourceHead = request.getSourceHead();
+		ObjectId targetHead = request.getTarget().getObjectId();
+		ObjectId mergeCommitId;
+
+		var gitService = getGitService();
+		if (updateByMerge) {
+			var commitMessage = "Merge branch '" + request.getTargetBranch() +"'";
+			if (!request.getSourceProject().equals(project))
+				commitMessage += " of project '" + project.getPath() + "' ";
+			commitMessage += " into branch '" + request.getSourceBranch() + "'";
+			mergeCommitId = gitService.merge(project, targetHead, sourceHead,
+					false, user.asPerson(), user.asPerson(), commitMessage, false);
+		} else {
+			mergeCommitId = gitService.rebase(project, sourceHead, targetHead, user.asPerson());
+		}
+		if (mergeCommitId == null)
+			return "There are merge conflicts";
+		if (protection.isReviewRequiredForPush(project, sourceHead, mergeCommitId, new HashMap<>()))
+			return "Review required for this change. Submit pull request instead";
+		var buildRequirement = protection.getBuildRequirement(project, sourceHead, mergeCommitId, new HashMap<>());
+		if (!buildRequirement.getRequiredJobs().isEmpty())
+			return "This change needs to be verified by some jobs. Submit pull request instead";
+		if (protection.isCommitSignatureRequired()
+				&& !project.hasValidCommitSignature(project.getRevCommit(targetHead, true))) {
+			return "No valid signature for head commit of target branch";
+		}
+		if (updateByMerge
+				&& protection.isCommitSignatureRequired()
+				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
+			return "Commit signature required but no GPG signing key specified";
+		}
+		var error = gitService.checkCommitMessages(protection, project, sourceHead, mergeCommitId, new HashMap<>());
+		if (error != null)
+			return "Error validating commit message of '" + error.getCommitId().name() + "': " + error.getErrorMessage();
+
+		return mergeCommitId;
+	}
+
+	private void updateSourceBranch(ObjectId commitId) {
+		var request = getPullRequest();
+		var gitService = getGitService();
+		if (!request.getSourceProject().equals(request.getTargetProject()))
+			gitService.fetch(request.getSourceProject(), request.getTargetProject(), commitId.name());
+		var oldCommitId = request.getSourceHead();
+		getGitService().updateRef(request.getSourceProject(), request.getSourceRef(), commitId, oldCommitId);
 	}
 
 	@Override

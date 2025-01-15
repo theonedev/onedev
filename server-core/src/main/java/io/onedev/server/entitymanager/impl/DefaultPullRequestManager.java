@@ -18,7 +18,6 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.AheadBehind;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
@@ -255,51 +254,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		changeManager.create(change, note);
 
 		pendingSuggestionApplyManager.discard(null, request);
-	}
-
-	@Transactional
-	@Override
-	public Map<ObjectId, AheadBehind> getAheadBehind(PullRequest request) {
-		ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
-		ObjectId targetHead = request.getTarget().getObjectId();
-		List<ObjectId> compareIds = new ArrayList<>();
-		compareIds.add(requestHead);
-		return gitService.getAheadBehinds(request.getProject(), targetHead, compareIds);
-	}
-
-	@Transactional
-	@Override
-	public void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, String commitMessage) {
-		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
-		User user = SecurityUtils.getUser();
-		PersonIdent person;
-		ObjectId targetHead = request.getLatestUpdate().getHeadCommit();
-		ObjectId requestHead = request.getTarget().getObjectId();
-		ObjectId mergeCommitId;
-		if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
-			person = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
-			mergeCommitId = gitService.rebase(request.getSourceProject(), requestHead, targetHead, person);
-			ObjectId targetHeadCommitId = ObjectId.fromString(request.getSource().getObjectName());
-			mergeCommitId = gitService.amendCommits(request.getSourceProject(), mergeCommitId, targetHeadCommitId,
-					User.SYSTEM_NAME, person);
-		} else if (mergeStrategy == CREATE_MERGE_COMMIT) {
-			person = user.asPerson();
-			mergeCommitId = gitService.merge(request.getSourceProject(), targetHead, requestHead, false,
-					person, person, commitMessage, false);
-			mergeCommitId = gitService.amendCommit(request.getSourceProject(), mergeCommitId, person, person, commitMessage);
-		} else {
-			return;
-		}
-		gitService.updateRef(request.getSourceProject(), request.getSourceRef(), mergeCommitId, null);
-		checkAsync(request, true, true);
-
-		request.setBuildCommitHash(mergePreview.getMergeCommitHash());
-		updateBuildCommitRef(request);
-		listenerRegistry.post(new PullRequestBuildCommitUpdated((request)));
-
-		dao.persist(request);
-		updateMergePreviewRef(request);
-		listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
 	}
 
 	@Transactional

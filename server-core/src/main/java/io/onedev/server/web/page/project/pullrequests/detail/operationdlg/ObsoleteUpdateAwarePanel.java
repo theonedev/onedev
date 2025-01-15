@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
+package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
@@ -23,7 +23,7 @@ import org.unbescape.html.HtmlEscape;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
-public abstract class OperationConfirmPanel extends Panel {
+public abstract class ObsoleteUpdateAwarePanel extends Panel {
 
 	private final ModalPanel modal;
 	
@@ -31,7 +31,7 @@ public abstract class OperationConfirmPanel extends Panel {
 	
 	private Long latestUpdateId;
 	
-	public OperationConfirmPanel(String componentId, ModalPanel modal, Long latestUpdateId) {
+	public ObsoleteUpdateAwarePanel(String componentId, ModalPanel modal, Long latestUpdateId) {
 		super(componentId);
 		this.modal = modal;
 		this.latestUpdateId = latestUpdateId;
@@ -115,11 +115,11 @@ public abstract class OperationConfirmPanel extends Panel {
 				}
 				
 				target.prependJavaScript(String.format("$('#%s').data('dirty', $('#%s').hasClass('dirty'))", 
-						OperationConfirmPanel.this.getMarkupId(), form.getMarkupId()));
+						ObsoleteUpdateAwarePanel.this.getMarkupId(), form.getMarkupId()));
 				target.appendJavaScript(String.format(""
 						+ "if ($('#%s').data('dirty')) "
 						+ "  onedev.server.form.markDirty($('#%s'))", 
-						OperationConfirmPanel.this.getMarkupId(), form.getMarkupId()));
+						ObsoleteUpdateAwarePanel.this.getMarkupId(), form.getMarkupId()));
 			}
 
 			@Override

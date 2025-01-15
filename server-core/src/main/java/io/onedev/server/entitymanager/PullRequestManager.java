@@ -1,10 +1,8 @@
 package io.onedev.server.entitymanager;
 
-import io.onedev.server.git.service.AheadBehind;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
@@ -49,14 +47,10 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     void open(PullRequest request);
 
-    Map<ObjectId, AheadBehind> getAheadBehind(PullRequest request);
-
-    void updateSourceBranch(PullRequest request, MergeStrategy mergeStrategy, @Nullable String commitMessage);
-
     @Override
     void delete(PullRequest request);
 
-	void deleteSourceBranch(PullRequest request, @Nullable String note);
+    void deleteSourceBranch(PullRequest request, @Nullable String note);
 
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
 

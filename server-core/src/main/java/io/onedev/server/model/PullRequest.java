@@ -308,6 +308,8 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Boolean mergedIntoTarget;
 
+	private transient Boolean sourceOutdated;
+
 	private transient Collection<ObjectId> missingCommits;
 	
 	private transient Collection<Long> fixedIssueIds;
@@ -808,6 +810,15 @@ public class PullRequest extends ProjectBelonging
 		}
 		return mergedIntoTarget;
 	}
+
+	public boolean isSourceOutdated() {
+		if (sourceOutdated == null) {
+			var sourceHead = Preconditions.checkNotNull(getSourceHead());
+			sourceOutdated = !getGitService().isMergedInto(getTargetProject(),
+					null, getTarget().getObjectId(), sourceHead);
+		}
+		return sourceOutdated;
+	}
 	
 	@Nullable
 	public ObjectId getSourceHead() {
@@ -1048,14 +1059,6 @@ public class PullRequest extends ProjectBelonging
 		}
 	}
 
-	public String getDefaultUpdateSourceBranchCommitMessage(MergeStrategy mergeStrategy) {
-		if (mergeStrategy == CREATE_MERGE_COMMIT) {
-			return "Merge branch '" + getTargetBranch() +"' into '" + getSourceBranch() + "'";
-		} else {
-			return "Rebase branch '" + getSourceBranch() +"' onto '" + getTargetBranch() + "'";
-		}
-	}
-	
 	@Nullable
 	public String checkReopen() {
 		if (isOpen())
@@ -1144,26 +1147,6 @@ public class PullRequest extends ProjectBelonging
 				var commitMessage = autoMerge.getCommitMessage();
 				if (commitMessage == null)
 					commitMessage = getDefaultMergeCommitMessage();
-				var errorMessage = branchProtection.checkCommitMessage(commitMessage, mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS);
-				if (errorMessage != null)
-					error = new CommitMessageError(null, errorMessage);
-			}
-			commitMessageErrorOpt = Optional.ofNullable(error);
-		}
-		return commitMessageErrorOpt.orElse(null);
-	}
-
-	@Nullable
-	public CommitMessageError checkUpdateSourceBranchCommitMessages(MergeStrategy mergeStrategy, ObjectId oldObjectId, ObjectId newObjectId) {
-		if (commitMessageErrorOpt.isEmpty()) {
-
-			CommitMessageError error = null;
-			if (mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS) {
-				error = getProject().checkCommitMessages(getSourceBranch(), getSubmitter(), oldObjectId, newObjectId, new HashMap<>());
-			}
-			if (error == null && autoMerge.isEnabled() && isMergeCommitMessageRequired()) {
-				var branchProtection = getProject().getBranchProtection(getSourceBranch(), autoMerge.getUser());
-				var commitMessage = getDefaultUpdateSourceBranchCommitMessage(mergeStrategy);
 				var errorMessage = branchProtection.checkCommitMessage(commitMessage, mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS);
 				if (errorMessage != null)
 					error = new CommitMessageError(null, errorMessage);

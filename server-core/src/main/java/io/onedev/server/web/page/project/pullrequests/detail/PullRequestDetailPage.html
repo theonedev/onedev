@@ -49,8 +49,8 @@
 					<div wicket:id="rebased" class="rebased text-success">
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were rebased onto target branch
 					</div>
-					<div wicket:id="aheadBehindContainer" class="ahead-behind text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg><span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a><span wicket:id="description_suffix"></span>
+					<div wicket:id="sourceBranchOutdated" class="source-branch-outdated text-primary">
+						<wicket:svg href="info-circle" class="icon"></wicket:svg> Source branch is outdated <a wicket:id="detail" class="link-primary" title="Show changes"><wicket:svg href="diff2" class="icon"/></a>
 					</div>
 					<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-warning d-flex align-items-center">
 						<wicket:svg href="loading" class="icon spin mr-2"></wicket:svg> Calculating merge preview...
@@ -108,11 +108,7 @@
 					<a wicket:id="approve" class="btn btn-sm btn-light-success btn-hover-success">Approve</a>
 					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-warning btn-hover-warning">Request For Changes</a>
 					<a wicket:id="reopen" class="btn btn-sm btn-light-primary btn-hover-primary">Reopen</a>
-					<a wicket:id="updateSourceBranch" type="button" class="btn btn-sm btn-light-primary btn-hover-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Update Source Branch</a>
-					<div class="dropdown-menu">
-						<a wicket:id="updateSourceBranchMerge" class="dropdown-item">Merge</a>
-						<a wicket:id="updateSourceBranchRebase" class="dropdown-item">Rebase</a>
-					</div>
+					<a wicket:id="updateSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Update Source Branch <wicket:svg href="arrow" class="icon rotate-90"/></a>
 					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Delete Source Branch</a>
 					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary">Restore Source Branch</a>
 				</div>
@@ -237,19 +233,6 @@
 				<div>git checkout FETCH_HEAD</div>
 			</div>
 			</wicket:enclosure>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="confirmUpdateSourceBranchFrag">
-		<div class="confirm-delete-branch">
-			<div class="modal-header">
-				<h5 class="modal-title">Please confirm</h5>
-				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
-			</div>
-			<div wicket:id="body" class="modal-body"></div>
-			<div class="modal-footer">
-				<a wicket:id="confirm" class="btn btn-danger">Confirm</a>
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
-			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="autoMergeEnabledFrag">

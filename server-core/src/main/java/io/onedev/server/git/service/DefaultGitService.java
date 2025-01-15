@@ -22,6 +22,7 @@ import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.commons.lang3.SerializationUtils;
@@ -1342,13 +1343,12 @@ public class DefaultGitService implements GitService, Serializable {
 
 	@Nullable
 	@Override
-	public CommitMessageError checkCommitMessages(Project project, String branch, User user,
-									  ObjectId oldId, ObjectId newId, 
-									  Map<String, String> envs) {
+	public CommitMessageError checkCommitMessages(BranchProtection protection, Project project,
+												  ObjectId oldId, ObjectId newId,
+												  Map<String, String> envs) {
 		Long projectId = project.getId();
-		var branchProtection = project.getBranchProtection(branch, user);
-		if (branchProtection.getMaxCommitMessageLineLength() != null
-				|| branchProtection.isEnforceConventionalCommits()) {
+		if (protection.getMaxCommitMessageLineLength() != null
+				|| protection.isEnforceConventionalCommits()) {
 			return runOnProjectServer(projectId, () -> {
 				Map<ObjectId, String> commitMessages = new LinkedHashMap<>();
 				Set<ObjectId> mergeCommits = new HashSet<>();
@@ -1396,7 +1396,7 @@ public class DefaultGitService implements GitService, Serializable {
 					}
 				}
 				for (var entry: commitMessages.entrySet()) {
-					var errorMessage = branchProtection.checkCommitMessage(
+					var errorMessage = protection.checkCommitMessage(
 							entry.getValue(), mergeCommits.contains(entry.getKey()));
 					if (errorMessage != null) {
 						return new CommitMessageError(entry.getKey(), errorMessage);

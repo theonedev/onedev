@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
+package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -15,11 +15,11 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 
 @SuppressWarnings("serial")
-public abstract class MergeConfirmPanel extends OperationConfirmPanel {
+public abstract class MergePullRequestOptionPanel extends ObsoleteUpdateAwarePanel {
 
 	private CommitMessageBean bean = new CommitMessageBean();
 	
-	public MergeConfirmPanel(String componentId, ModalPanel modal, Long latestUpdateId) {
+	public MergePullRequestOptionPanel(String componentId, ModalPanel modal, Long latestUpdateId) {
 		super(componentId, modal, latestUpdateId);
 	}
 	

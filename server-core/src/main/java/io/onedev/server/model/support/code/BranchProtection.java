@@ -156,7 +156,8 @@ public class BranchProtection implements Serializable {
 		this.commitSignatureRequired = commitSignatureRequired;
 	}
 
-	@Editable(order=370, description = "Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>")
+	@Editable(order=370, description = "Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>. " +
+			"Note this is applicable for non-merge commits")
 	public boolean isEnforceConventionalCommits() {
 		return enforceConventionalCommits;
 	}

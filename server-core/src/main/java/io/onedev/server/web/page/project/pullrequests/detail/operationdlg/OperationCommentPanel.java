@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.detail.operationconfirm;
+package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -16,11 +16,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public abstract class CommentableOperationConfirmPanel extends OperationConfirmPanel {
+public abstract class OperationCommentPanel extends ObsoleteUpdateAwarePanel {
 
 	private String comment;
 	
-	public CommentableOperationConfirmPanel(String componentId, ModalPanel modal, Long latestUpdateId) {
+	public OperationCommentPanel(String componentId, ModalPanel modal, Long latestUpdateId) {
 		super(componentId, modal, latestUpdateId);
 	}
 

@@ -1603,7 +1603,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Nullable
 	public CommitMessageError checkCommitMessages(String branch, User user, ObjectId oldCommitId, ObjectId newCommitId,
 												  Map<String, String> gitEnvs) {
-		return getGitService().checkCommitMessages(this, branch, user, oldCommitId, newCommitId, gitEnvs);
+		var protection = getBranchProtection(branch, user);
+		return getGitService().checkCommitMessages(protection, this, oldCommitId, newCommitId, gitEnvs);
 	}
 	
 	@Nullable

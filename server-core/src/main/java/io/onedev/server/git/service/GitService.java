@@ -2,11 +2,11 @@ package io.onedev.server.git.service;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.git.*;
-import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.LogCommand;
+import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+import io.onedev.server.model.support.code.BranchProtection;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -140,8 +140,8 @@ public interface GitService {
 	byte[] getRawCommit(Project project, ObjectId revId, Map<String, String> envs);
 	
 	@Nullable
-	CommitMessageError checkCommitMessages(Project project, String branch, User user,
-							   ObjectId oldId, ObjectId newId, Map<String, String> envs);
+	CommitMessageError checkCommitMessages(BranchProtection protection, Project project,
+										   ObjectId oldId, ObjectId newId, Map<String, String> envs);
 	
 	@Nullable
 	byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs);

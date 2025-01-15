@@ -1,4 +1,4 @@
-package io.onedev.server.cluster;
+package io.onedev.server.exception;
 
 import io.onedev.commons.utils.ExplicitException;
 
