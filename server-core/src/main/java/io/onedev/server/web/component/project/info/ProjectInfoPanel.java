@@ -134,7 +134,7 @@ public abstract class ProjectInfoPanel extends Panel {
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         if (settingManager.getServiceDeskSetting() != null
         		&& settingManager.getMailService() != null 
-        		&& settingManager.getMailService().getInboxMonitor() != null
+        		&& settingManager.getMailService().getInboxMonitor(false) != null
         		&& getProject().isIssueManagement()) {
         	
 			String serviceDeskEmailAddress;

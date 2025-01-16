@@ -104,7 +104,7 @@ public class MailServicePage extends AdministrationPage {
 			protected TaskResult runTask(TaskLogger logger) {
 				return OneDev.getInstance(SessionManager.class).call(() -> {
 					var mailService = bean.getMailService();
-					var inboxMonitor = mailService.getInboxMonitor();
+					var inboxMonitor = mailService.getInboxMonitor(true);
 					if (inboxMonitor != null) {
 						String uuid = UUID.randomUUID().toString();
 						var futureRef = new AtomicReference<Future<?>>(null);
@@ -131,7 +131,7 @@ public class MailServicePage extends AdministrationPage {
 						mailService.sendMail(Sets.newHashSet(subAddressed), Sets.newHashSet(), 
 								Sets.newHashSet(), uuid, "[Test] Test Email From OneDev", 
 								"This is a test email from OneDev", null, 
-								null, null);
+								null, null, true);
 
 						logger.log("Waiting for test mail to come back...");
 
@@ -154,7 +154,7 @@ public class MailServicePage extends AdministrationPage {
 							String body = "Great, your mail service configuration is working!";
 							mailService.sendMail(Sets.newHashSet(emailAddress.getValue()),
 									Sets.newHashSet(), Sets.newHashSet(), "[Test] Test Email From OneDev",
-									body, body, null, null, null);
+									body, body, null, null, null, true);
 							return new TaskResult(true, new PlainMessage("Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box"));
 						} else {
 							return new TaskResult(false, new PlainMessage("Primary email address of your account is not specified yet"));

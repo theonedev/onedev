@@ -125,13 +125,13 @@ public class SmtpImapMailService implements MailService {
 	@Override
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 						 String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
-						 @Nullable String senderName, @Nullable String references) {
+						 @Nullable String senderName, @Nullable String references, boolean testMode) {
 		getMailManager().sendMail(getSmtpSetting(), toList, ccList, bccList, subject, htmlBody, textBody, 
 				replyAddress, senderName, getSystemAddress(), references);
 	}
 
 	@Override
-	public InboxMonitor getInboxMonitor() {
+	public InboxMonitor getInboxMonitor(boolean testMode) {
 		if (inboxPollSetting != null) {
 			var imapUser = inboxPollSetting.getImapUser();
 			var imapCredential = new BasicAuthPassword(inboxPollSetting.getImapPassword());

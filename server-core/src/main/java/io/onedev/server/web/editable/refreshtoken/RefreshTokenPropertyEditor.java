@@ -36,7 +36,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.OAuthUtils;
+import io.onedev.server.util.oauth.OAuthUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;

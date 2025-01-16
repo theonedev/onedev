@@ -306,7 +306,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		var mailService = settingManager.getMailService();
 		if (mailService != null) {
 			mailService.sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress,
-					senderName, references);
+					senderName, references, false);
 		} else {
 			logger.warn("Unable to send mail as mail service is not configured");
 		}
@@ -711,7 +711,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			while (thread != null) {
 				try {
 					var mailService = settingManager.getMailService();
-					var inboxMonitor = mailService != null? mailService.getInboxMonitor(): null;
+					var inboxMonitor = mailService != null? mailService.getInboxMonitor(false): null;
 					if (inboxMonitor != null && clusterManager.isLeaderServer()) {
 						var systemAddress = mailService.getSystemAddress();
 						while (thread != null) {
@@ -891,7 +891,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 
 	private String getFeedbackAddress(String subAddress) {
 		var mailService = settingManager.getMailService();
-		if (mailService != null && mailService.getInboxMonitor() != null) 
+		if (mailService != null && mailService.getInboxMonitor(false) != null)
 			return ParsedEmailAddress.parse(mailService.getSystemAddress()).getSubaddress(subAddress);
 		else 
 			return null;

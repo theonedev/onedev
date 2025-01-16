@@ -6,11 +6,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.RefreshToken;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.mail.*;
 import io.onedev.server.model.support.administration.mailservice.ImapImplicitSsl;
 import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.mailservice.SmtpExplicitSsl;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.oauth.RefreshTokenAccessor;
 import org.jetbrains.annotations.Nullable;
 
 import javax.mail.Message;
@@ -170,9 +172,20 @@ public class GmailMailService implements MailService {
 		};
 	}
 	
-	private SmtpSetting getSmtpSetting() {
-		MailCredential smtpCredential = new OAuthAccessToken(
-				TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
+	private SmtpSetting getSmtpSetting(boolean testMode) {
+		MailCredential smtpCredential = new OAuthAccessToken(TOKEN_ENDPOINT, clientId, clientSecret, new RefreshTokenAccessor() {
+			@Override
+			public String getRefreshToken() {
+				return refreshToken;
+			}
+
+			@Override
+			public void setRefreshToken(String refreshToken) {
+				if (!testMode)
+					updateRefreshToken(refreshToken);
+			}
+
+		});
 		return new SmtpSetting("smtp.gmail.com", new SmtpExplicitSsl(), accountName, smtpCredential,
 				getTimeout());
 	}
@@ -190,16 +203,31 @@ public class GmailMailService implements MailService {
 	@Override
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 						 String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
-						 @Nullable String senderName, @Nullable String references) {
-		getMailManager().sendMail(getSmtpSetting(), toList, ccList, bccList, subject, htmlBody, textBody, 
+						 @Nullable String senderName, @Nullable String references, boolean testMode) {
+		getMailManager().sendMail(getSmtpSetting(testMode), toList, ccList, bccList, subject, htmlBody, textBody,
 				replyAddress, senderName, getSystemAddress(), references);
 	}
 
+	private void updateRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+		OneDev.getInstance(SettingManager.class).saveMailService(this);
+	}
+
 	@Override
-	public InboxMonitor getInboxMonitor() {
+	public InboxMonitor getInboxMonitor(boolean testMode) {
 		if (inboxPollSetting != null) {
-			var imapCredential = new OAuthAccessToken(
-					TOKEN_ENDPOINT, clientId, clientSecret, refreshToken);
+			var imapCredential = new OAuthAccessToken(TOKEN_ENDPOINT, clientId, clientSecret, new RefreshTokenAccessor() {
+				@Override
+				public String getRefreshToken() {
+					return refreshToken;
+				}
+
+				@Override
+				public void setRefreshToken(String refreshToken) {
+					if (!testMode)
+						updateRefreshToken(refreshToken);
+				}
+			});
 			var imapSetting = new ImapSetting("imap.gmail.com",
 					new ImapImplicitSsl(), accountName, imapCredential,
 					inboxPollSetting.getPollInterval(), getTimeout());

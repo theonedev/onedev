@@ -15,9 +15,9 @@ public interface MailService extends Serializable {
 	
 	void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList,
 				  String subject, String htmlBody, String textBody, @Nullable String replyAddress,
-				  @Nullable String senderName, @Nullable String references);
-	
+				  @Nullable String senderName, @Nullable String references, boolean testMode);
+
 	@Nullable
-	InboxMonitor getInboxMonitor();
-	
+	InboxMonitor getInboxMonitor(boolean testMode);
+
 }

@@ -23,7 +23,7 @@ import io.onedev.server.annotation.UrlSegment;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.util.OAuthUtils;
+import io.onedev.server.util.oauth.OAuthUtils;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;

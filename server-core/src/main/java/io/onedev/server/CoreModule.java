@@ -97,6 +97,8 @@ import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
+import io.onedev.server.util.oauth.DefaultOAuthTokenManager;
+import io.onedev.server.util.oauth.OAuthTokenManager;
 import io.onedev.server.util.xstream.*;
 import io.onedev.server.validation.ValidatorProvider;
 import io.onedev.server.web.*;
@@ -296,6 +298,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AccessTokenManager.class).to(DefaultAccessTokenManager.class);
 		bind(AccessTokenAuthorizationManager.class).to(DefaultAccessTokenAuthorizationManager.class);
 		bind(ReviewedDiffManager.class).to(DefaultReviewedDiffManager.class);
+		bind(OAuthTokenManager.class).to(DefaultOAuthTokenManager.class);
 		
 		bind(WebHookManager.class);
 		
