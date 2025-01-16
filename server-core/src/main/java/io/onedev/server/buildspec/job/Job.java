@@ -289,7 +289,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.retryDelay = retryDelay;
 	}
 	
-	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds")
+	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds. It counts from " +
+			"the time when job is submitted")
 	public long getTimeout() {
 		return timeout;
 	}

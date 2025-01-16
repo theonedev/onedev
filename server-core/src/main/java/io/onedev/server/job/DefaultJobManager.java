@@ -575,10 +575,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (sequentialKey != null) {
 					jobLogger.log("Locking sequential group...");
 					while (true) {
-						var waitTime = timeout - (System.currentTimeMillis() - beginTime);
-						if (waitTime <= 0)
-							throw new TimeoutException();
-						if (sequentialKeys.putIfAbsent(sequentialKey, new Date(), waitTime, TimeUnit.MILLISECONDS) != null)
+						if (sequentialKeys.putIfAbsent(sequentialKey, new Date(), timeout, TimeUnit.MILLISECONDS) != null)
 							Thread.sleep(1000);
 						else
 							break;

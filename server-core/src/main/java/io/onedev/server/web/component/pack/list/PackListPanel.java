@@ -427,8 +427,14 @@ public abstract class PackListPanel extends Panel {
 		add(helpLink = new DropdownLink("help") {
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				var help = newHelpPanel(id);
-				help.add(AttributeAppender.append("class", "pack-publish-help"));
+				Component help;
+				if (getPage() instanceof ProjectPacksPage) {
+					help = newHelpPanel(id);
+					help.add(AttributeAppender.append("class", "pack-publish-help"));
+				} else {
+					help = new Label(id, "Please switch to packages page of a particular project for the instructions");
+					help.add(AttributeAppender.append("class", "p-3"));
+				}
 				return help;
 			}
 
