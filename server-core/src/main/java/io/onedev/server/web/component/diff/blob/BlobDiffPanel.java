@@ -65,7 +65,9 @@ public class BlobDiffPanel extends Panel {
 		var reviewSupport = getReviewSupport();
 		if (reviewSupport != null)
 			reviewed = reviewSupport.isReviewed();
-		collapsed = reviewed;
+		var annotationSupport = getAnnotationSupport();
+		if (annotationSupport == null || annotationSupport.getMarkRange() == null)
+			collapsed = reviewed;
 	}
 	
 	private Fragment newMessageFragment(String message, boolean warning) {
@@ -342,6 +344,7 @@ public class BlobDiffPanel extends Panel {
 				return collapsed ? "blob-diff collapsed": "blob-diff";
 			}
 		}));
+
 		setOutputMarkupId(true);
 	}
 
