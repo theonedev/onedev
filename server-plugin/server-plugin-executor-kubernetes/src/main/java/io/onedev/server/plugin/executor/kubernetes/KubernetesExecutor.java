@@ -359,11 +359,6 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 			return getName() + "-executor-test";
 		}
 	}
-	
-	@Override
-	public boolean isPlaceholderAllowed() {
-		return false;
-	}
 
 	@Override
 	public List<RegistryLoginFacade> getRegistryLogins(String jobToken) {

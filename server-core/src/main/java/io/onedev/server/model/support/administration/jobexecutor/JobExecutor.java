@@ -96,11 +96,7 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	public abstract boolean execute(JobContext jobContext, TaskLogger jobLogger);
-	
-	public boolean isPlaceholderAllowed() {
-		return true;
-	}
-	
+
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
 		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingProject(projectPath)) {
