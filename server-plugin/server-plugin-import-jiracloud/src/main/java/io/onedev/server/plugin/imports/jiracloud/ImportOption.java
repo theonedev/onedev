@@ -19,7 +19,7 @@ public class ImportOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String assigneeIssueField;
+	private String assigneesIssueField;
 	
 	private String dueDateIssueField;
 	
@@ -37,16 +37,16 @@ public class ImportOption implements Serializable {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	@Editable(order=350, description="Specify a user field to hold assignee information.<br>"
+	@Editable(order=350, description="Specify a multi-value user field to hold assignees information.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getAssigneesIssueFieldChoices")
 	@NotEmpty
-	public String getAssigneeIssueField() {
-		return assigneeIssueField;
+	public String getAssigneesIssueField() {
+		return assigneesIssueField;
 	}
 
-	public void setAssigneeIssueField(String assigneeIssueField) {
-		this.assigneeIssueField = assigneeIssueField;
+	public void setAssigneesIssueField(String assigneesIssueField) {
+		this.assigneesIssueField = assigneesIssueField;
 	}
 	
 	@SuppressWarnings("unused")

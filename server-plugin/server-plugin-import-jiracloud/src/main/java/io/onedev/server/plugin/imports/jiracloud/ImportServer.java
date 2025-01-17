@@ -157,13 +157,20 @@ public class ImportServer implements Serializable, Validatable {
 		String accountId = userNode.get("accountId").asText();
 		Optional<Long> userIdOpt = userIds.get(accountId);
 		if (userIdOpt == null) {
-			String displayName = null;
-			if (userNode.hasNonNull("displayName"))
-				displayName = userNode.get("displayName").asText(null);
-			if (displayName != null)
-				userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserManager.class).findByFullName(displayName)));
-			else
-				userIdOpt = Optional.empty();
+			String emailAddress = null;
+			if (userNode.hasNonNull("emailAddress"))
+				emailAddress = userNode.get("emailAddress").asText(null);
+			if (emailAddress != null) {
+				userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(emailAddress)));
+			} else {
+				String displayName = null;
+				if (userNode.hasNonNull("displayName"))
+					displayName = userNode.get("displayName").asText(null);
+				if (displayName != null)
+					userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserManager.class).findByFullName(displayName)));
+				else
+					userIdOpt = Optional.empty();
+			}
 			userIds.put(accountId, userIdOpt);
 		}
 		return userIdOpt.orElse(null);
@@ -608,7 +615,7 @@ public class ImportServer implements Serializable, Validatable {
 							JsonNode assigneeNode = fieldsNode.get("assignee");
 							IssueField assigneeField = new IssueField();
 							assigneeField.setIssue(issue);
-							assigneeField.setName(option.getAssigneeIssueField());
+							assigneeField.setName(option.getAssigneesIssueField());
 							assigneeField.setType(InputSpec.USER);
 							
 							Long userId = getUserId(userIds, assigneeNode, logger);
