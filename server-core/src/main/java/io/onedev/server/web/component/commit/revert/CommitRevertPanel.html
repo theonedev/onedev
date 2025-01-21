@@ -1,0 +1,17 @@
+<wicket:panel>
+	<form wicket:id="form" class="create-branch">
+		<div class="modal-header">
+			<h5 class="modal-title">Revert Commit</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div class="title">Target Branch: <input wicket:id="baseBranch" type="hidden" class="form-control"></div>
+			<div wicket:id="feedback"></div>
+			<div wicket:id="editor"></div>
+		</div>
+		<div class="modal-footer">
+			<button wicket:id="create" class="btn btn-primary">Create</button>
+			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+		</div>
+	</form>
+</wicket:panel>

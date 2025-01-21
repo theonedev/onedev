@@ -41,7 +41,11 @@ public interface GitService {
 	
 	TaggingResult createTag(Project project, String tagName, String tagRevision, 
 			PersonIdent taggerIdent, @Nullable String tagMessage, boolean signRequired);
-	
+
+	RevertResult revert(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author);
+
+	RevertResult cherryPick(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author);
+
 	int countRefs(Long projectId, String prefix);
 
 	@Nullable

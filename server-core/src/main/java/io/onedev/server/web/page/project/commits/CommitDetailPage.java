@@ -30,6 +30,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
+import io.onedev.server.web.component.commit.revert.CommitRevertLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
@@ -55,6 +56,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -199,7 +201,20 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			}
 			
 		});
-		
+
+		add(new Button("commitOperations") {
+
+			private boolean canOperate() {
+				return SecurityUtils.canWriteCode(projectModel.getObject());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(canOperate());
+			}
+		});
+
 		add(new CreateTagLink("createTag", projectModel, state.revision) {
 
 			@Override
@@ -208,7 +223,25 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			}
 			
 		});
-		
+
+		add(new CommitRevertLink("revert", projectModel, state.revision, 0) {
+
+			@Override
+			protected void onCreated(AjaxRequestTarget target, String tag) {
+				target.add(refsContainer);
+			}
+
+		});
+
+		add(new CommitRevertLink("cherryPick", projectModel, state.revision, 1) {
+
+			@Override
+			protected void onCreated(AjaxRequestTarget target, String tag) {
+				target.add(refsContainer);
+			}
+
+		});
+
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
 			transformed = transformReferences(

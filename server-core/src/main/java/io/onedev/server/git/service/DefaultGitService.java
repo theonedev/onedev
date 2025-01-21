@@ -254,6 +254,96 @@ public class DefaultGitService implements GitService, Serializable {
 		return tagAndCommitId;
 	}
 
+	@Sessional
+	@Override
+	public RevertResult revert(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author) {
+		Long projectId = project.getId();
+
+		RevertResult revertResult = runOnProjectServer(projectId, () -> {
+			Repository repository = getRepository(projectId);
+			ObjectId revId = project.getObjectId(revertRevision, true);
+
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				RevCommit commitToRevert = revWalk.parseCommit(revId);
+				RevCommit parentCommit = revWalk.parseCommit(commitToRevert.getParent(0).getId());
+				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToRevert);
+				Set<String> oldPaths = new HashSet<>();
+				Map<String, BlobContent> newBlobs = new HashMap<>();
+
+				for (DiffEntry diff : diffs) {
+					if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
+						oldPaths.add(diff.getNewPath());
+						newBlobs.put(diff.getOldPath(), null);
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.DELETE
+							|| diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
+								.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+						oldPaths.add(diff.getNewPath());
+						newBlobs.put(diff.getOldPath(), blobContent);
+					}
+				}
+				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
+				ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
+						commitToRevert, commitToRevert, author, commitMessage, false);
+				return new RevertResult(newCommitId, commitToRevert.copy());
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		project.cacheObjectId(revertRevision, revertResult.getRevertedCommitId());
+		listenerRegistry.post(new RefUpdated(project,
+				"refs/heads/" + branchName, ObjectId.zeroId(), revertResult.getRevertedCommitId()));
+
+		return revertResult;
+	}
+
+	@Sessional
+	@Override
+	public RevertResult cherryPick(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author) {
+		Long projectId = project.getId();
+
+		RevertResult revertResult = runOnProjectServer(projectId, () -> {
+			Repository repository = getRepository(projectId);
+			ObjectId revId = project.getObjectId(revertRevision, true);
+
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				RevCommit commitToRevert = revWalk.parseCommit(revId);
+				RevCommit parentCommit = revWalk.parseCommit(commitToRevert.getParent(0).getId());
+				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToRevert);
+				Set<String> oldPaths = new HashSet<>();
+				Map<String, BlobContent> newBlobs = new HashMap<>();
+
+				for (DiffEntry diff : diffs) {
+					BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
+							.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+					if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
+						oldPaths.add(diff.getNewPath());
+						newBlobs.put(diff.getNewPath(), null);
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.ADD
+							|| diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+						oldPaths.add(diff.getNewPath());
+						newBlobs.put(diff.getNewPath(), blobContent);
+					}
+				}
+				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
+				ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
+						commitToRevert, commitToRevert, author, commitMessage, false);
+				return new RevertResult(newCommitId, commitToRevert.copy());
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		project.cacheObjectId(revertRevision, revertResult.getRevertedCommitId());
+		listenerRegistry.post(new RefUpdated(project,
+				"refs/heads/" + branchName, ObjectId.zeroId(), revertResult.getRevertedCommitId()));
+
+		return revertResult;
+	}
+
 	@Override
 	public int countRefs(Long projectId, String prefix) {
 		return runOnProjectServer(projectId, () -> getRepository(projectId).getRefDatabase().getRefsByPrefix(prefix).size());
