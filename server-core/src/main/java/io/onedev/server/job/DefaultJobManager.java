@@ -179,7 +179,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private volatile IMap<String, String> jobServers;
 	
 	private volatile IMap<String, Date> sequentialKeys;
-	
+
 	private volatile Map<String, List<JobSchedule>> branchSchedules;
 	
 	private volatile String maintenanceTaskId;
@@ -535,6 +535,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String projectGitDir = projectManager.getGitDir(build.getProject().getId()).getAbsolutePath();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
+		Long buildSequence = build.getSubmitSequence();
 		String refName = build.getRefName();
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 		BuildSpec buildSpec = build.getSpec();
@@ -565,11 +566,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
-		JobContext jobContext = new JobContext(jobToken, jobExecutor, sequentialGroup, 
-				projectId, projectPath, projectGitDir, buildId, buildNumber, actions, 
-				refName, commitId, services, timeout);
+		JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
+				projectGitDir, buildId, buildNumber, buildSequence, actions, refName, commitId,
+				services, timeout);
 		
 		return executorService.submit(() -> {
+			int retried = 0;
 			while (true) {
 				long beginTime = System.currentTimeMillis();
 				if (sequentialKey != null) {
@@ -607,11 +609,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							throwable = t;
 					}
 					
-					if (!checkRetry(job, jobContext, jobLogger, throwable)) {
+					if (!checkRetry(job, jobContext, jobLogger, throwable, retried)) {
 						if (throwable != null)
 							throw ExceptionUtils.unchecked(throwable);
 						else
 							return false;
+					} else {
+						retried++;
 					}
 				} finally {
 					Collection<Thread> threads = serverStepThreads.remove(jobToken);
@@ -629,8 +633,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		});
 	}
 	
-	private boolean checkRetry(Job job, JobContext jobContext, TaskLogger jobLogger, @Nullable Throwable throwable) {
-		int retried = jobContext.getRetried();
+	private boolean checkRetry(Job job, JobContext jobContext, TaskLogger jobLogger,
+							   @Nullable Throwable throwable, int retried) {
 		if (retried < job.getMaxRetries() && sessionManager.call(() -> {
 			RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
 			AtomicReference<String> errorMessage = new AtomicReference<>(null);
@@ -664,7 +668,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				listenerRegistry.post(new BuildRetrying(innerBuild));
 				buildManager.update(innerBuild);
 			});
-			jobContext.setRetried(retried+1);
 			return true;
 		} else {
 			return false;
@@ -799,6 +802,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 
 				build.setStatus(Build.Status.WAITING);
+				build.setSubmitSequence(build.getSubmitSequence()+1);
 				build.setJobToken(UUID.randomUUID().toString());
 				build.setFinishDate(null);
 				build.setPendingDate(null);

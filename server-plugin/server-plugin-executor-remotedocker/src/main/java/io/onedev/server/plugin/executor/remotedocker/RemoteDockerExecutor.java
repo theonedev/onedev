@@ -105,7 +105,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
-							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
+							jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(),
 							jobContext.getServices(), registryLogins, isMountDockerSock(), getDockerSockPath(), 
 							getDockerBuilder(), getCpuLimit(), getMemoryLimit(), getRunOptions(), 
 							getNetworkOptions(), isAlwaysPullImage());

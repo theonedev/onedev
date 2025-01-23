@@ -7306,4 +7306,15 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate186(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("submitSequence").setText("1");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

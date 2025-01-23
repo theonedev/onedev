@@ -348,6 +348,8 @@ public class Build extends ProjectBelonging
 	private String uuid = UUID.randomUUID().toString();
 	
 	private long number;
+
+	private long submitSequence = 1L;
 	
 	@Column(nullable=false)
 	private String commitHash;
@@ -535,6 +537,14 @@ public class Build extends ProjectBelonging
 
 	public void setNumber(long number) {
 		this.number = number;
+	}
+
+	public long getSubmitSequence() {
+		return submitSequence;
+	}
+
+	public void setSubmitSequence(long submitSequence) {
+		this.submitSequence = submitSequence;
 	}
 
 	public String getUUID() {

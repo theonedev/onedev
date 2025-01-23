@@ -266,11 +266,11 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 				checkApplicable();
 
 				hostBuildHome = new File(Bootstrap.getTempDir(),
-						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber() + "-"	+ jobContext.getSubmitSequence());
 				FileUtils.createDir(hostBuildHome);					
 				try {
 					String network = getName() + "-" + jobContext.getProjectId() + "-"
-							+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
+							+ jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence();
 
 					String localServer = getClusterManager().getLocalServerAddress();
 					jobLogger.log(String.format("Executing job (executor: %s, server: %s, network: %s)...", 
