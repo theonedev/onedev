@@ -5,13 +5,17 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.pullrequests.detail.CommitMessageBean;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
@@ -22,12 +26,13 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-abstract class CommitRevertPanel extends Panel {
+abstract class CommitRevertCherryPickPanel extends Panel {
 
 	private final IModel<Project> projectModel;
 
@@ -41,7 +46,7 @@ abstract class CommitRevertPanel extends Panel {
 
 	private String baseBranch;
 
-	public CommitRevertPanel(String id, IModel<Project> projectModel, String revision, Integer type) {
+	public CommitRevertCherryPickPanel(String id, IModel<Project> projectModel, String revision, Integer type) {
 		super(id);
 		this.projectModel = projectModel;
 		this.revision = revision;
@@ -51,18 +56,23 @@ abstract class CommitRevertPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		String oldCommitMessage = projectModel.getObject().getRevCommit(revision, true).getShortMessage();
 
+		String oldCommitMessage = projectModel.getObject().getRevCommit(revision, true).getShortMessage();
 		if (type == 0) {
 			helperBean.setCommitMessage("Revert \"" + oldCommitMessage + "\"" + "\n\nThis reverts commit " + revision);
 		} else if (type == 1) {
 			helperBean.setCommitMessage("Cherry Pick \"" + oldCommitMessage + "\"" + "\n\nThis cherry-pick commit " + revision);
 		}
 		baseBranch = projectModel.getObject().getDefaultBranch();
+
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		form.add(new FencedFeedbackPanel("feedback", form));
-
+		if (type == 0) {
+			form.add(new Label("title", "Revert Commit"));
+		} else if (type == 1) {
+			form.add(new Label("title", "Cherry-Pick Commit"));
+		}
 		BeanEditor editor;
 		form.add(editor = BeanContext.edit("editor", helperBean));
 

@@ -30,7 +30,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.commit.revert.CommitRevertLink;
+import io.onedev.server.web.component.commit.revert.CommitRevertCherryPickLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
@@ -44,7 +44,6 @@ import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.AnnotationSupport;
 import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -224,7 +223,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			
 		});
 
-		add(new CommitRevertLink("revert", projectModel, state.revision, 0) {
+		add(new CommitRevertCherryPickLink("revert", projectModel, state.revision, 0) {
 
 			@Override
 			protected void onCreated(AjaxRequestTarget target, String tag) {
@@ -233,7 +232,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 		});
 
-		add(new CommitRevertLink("cherryPick", projectModel, state.revision, 1) {
+		add(new CommitRevertCherryPickLink("cherryPick", projectModel, state.revision, 1) {
 
 			@Override
 			protected void onCreated(AjaxRequestTarget target, String tag) {

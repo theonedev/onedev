@@ -271,13 +271,15 @@ public class DefaultGitService implements GitService, Serializable {
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 
 				for (DiffEntry diff : diffs) {
+					BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
+							.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+
 					if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
 						oldPaths.add(diff.getNewPath());
 						newBlobs.put(diff.getOldPath(), null);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.DELETE
-							|| diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-								.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
+						newBlobs.put(diff.getOldPath(), blobContent);
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
 						oldPaths.add(diff.getNewPath());
 						newBlobs.put(diff.getOldPath(), blobContent);
 					}
@@ -301,43 +303,45 @@ public class DefaultGitService implements GitService, Serializable {
 
 	@Sessional
 	@Override
-	public RevertResult cherryPick(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author) {
+	public RevertResult cherryPick(Project project, String branchName, String cherryPickRevision, String commitMessage, PersonIdent author) {
 		Long projectId = project.getId();
 
 		RevertResult revertResult = runOnProjectServer(projectId, () -> {
 			Repository repository = getRepository(projectId);
-			ObjectId revId = project.getObjectId(revertRevision, true);
+			ObjectId revId = project.getObjectId(cherryPickRevision, true);
 
 			try (RevWalk revWalk = new RevWalk(repository)) {
-				RevCommit commitToRevert = revWalk.parseCommit(revId);
-				RevCommit parentCommit = revWalk.parseCommit(commitToRevert.getParent(0).getId());
-				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToRevert);
+				RevCommit commitToCherryPick = revWalk.parseCommit(revId);
+				RevCommit parentCommit = revWalk.parseCommit(commitToCherryPick.getParent(0).getId());
+				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToCherryPick);
 				Set<String> oldPaths = new HashSet<>();
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 
 				for (DiffEntry diff : diffs) {
 					BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-							.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+							.open(diff.getNewId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
 					if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-						oldPaths.add(diff.getNewPath());
+						oldPaths.add(diff.getOldPath());
 						newBlobs.put(diff.getNewPath(), null);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.ADD
-							|| diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-						oldPaths.add(diff.getNewPath());
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
+						newBlobs.put(diff.getNewPath(), blobContent);
+					} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+						oldPaths.add(diff.getOldPath());
 						newBlobs.put(diff.getNewPath(), blobContent);
 					}
 				}
 				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
-				ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
-						commitToRevert, commitToRevert, author, commitMessage, false);
-				return new RevertResult(newCommitId, commitToRevert.copy());
+				RevCommit commitToAppend = (RevCommit) project.getBranchRef("refs/heads/" + branchName).getObj();
+                ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
+						commitToAppend, commitToAppend, author, commitMessage, false);
+				return new RevertResult(newCommitId, commitToAppend.copy());
 
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		});
 
-		project.cacheObjectId(revertRevision, revertResult.getRevertedCommitId());
+		project.cacheObjectId(cherryPickRevision, revertResult.getRevertedCommitId());
 		listenerRegistry.post(new RefUpdated(project,
 				"refs/heads/" + branchName, ObjectId.zeroId(), revertResult.getRevertedCommitId()));
 

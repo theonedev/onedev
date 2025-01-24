@@ -11,7 +11,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
-public abstract class CommitRevertLink extends ModalLink {
+public abstract class CommitRevertCherryPickLink extends ModalLink {
 
 	private final IModel<Project> projectModel;
 	
@@ -19,7 +19,7 @@ public abstract class CommitRevertLink extends ModalLink {
 
 	private final Integer type;
 	
-	public CommitRevertLink(String id, IModel<Project> projectModel, String revision, Integer type) {
+	public CommitRevertCherryPickLink(String id, IModel<Project> projectModel, String revision, Integer type) {
 		super(id);
 		this.projectModel = projectModel;
 		this.revision = revision;
@@ -33,12 +33,12 @@ public abstract class CommitRevertLink extends ModalLink {
 	
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		return new CommitRevertPanel(id, projectModel, revision, type) {
+		return new CommitRevertCherryPickPanel(id, projectModel, revision, type) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
 				modal.close();
-				CommitRevertLink.this.onCreated(target, branch);
+				CommitRevertCherryPickLink.this.onCreated(target, branch);
 			}
 
 			@Override
