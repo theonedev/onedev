@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.model.UserAuthorization;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
@@ -38,37 +39,29 @@ public class GroupAuthorizationResource {
 	@Path("/{authorizationId}")
 	@GET
 	public GroupAuthorization get(@PathParam("authorizationId") Long authorizationId) {
-		if (!SecurityUtils.isAdministrator())
+		var authorization = authorizationManager.load(authorizationId);
+		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		return authorizationManager.load(authorizationId);
+		return authorization;
 	}
 	
 	@Api(order=200, description="Create new group authorization")
 	@POST
 	public Long create(@NotNull GroupAuthorization authorization) {
-		if (!SecurityUtils.isAdministrator())
+		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
 		authorizationManager.createOrUpdate(authorization);
 		return authorization.getId();
 	}
 
-	@Api(order=250, description="Update group authorization of specified id")
-	@Path("/{authorizationId}")
-	@POST
-	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull GroupAuthorization authorization) {
-		if (!SecurityUtils.isAdministrator())
-			throw new UnauthorizedException();
-		authorizationManager.createOrUpdate(authorization);
-		return Response.ok().build();
-	}
-	
 	@Api(order=300, description = "Delete group authorization of specified id")
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response delete(@PathParam("authorizationId") Long authorizationId) {
-		if (!SecurityUtils.isAdministrator())
+		var authorization = authorizationManager.load(authorizationId);
+		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.delete(authorizationManager.load(authorizationId));
+		authorizationManager.delete(authorization);
 		return Response.ok().build();
 	}
 	
