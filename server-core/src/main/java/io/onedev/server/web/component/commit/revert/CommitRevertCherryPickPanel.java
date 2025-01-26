@@ -38,7 +38,7 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 
 	private final String revision;
 
-	private final Integer type;
+	private final CommitRevertCherryPickType type;
 
 	private CommitMessageBean helperBean = new CommitMessageBean();
 
@@ -46,7 +46,7 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 
 	private String baseBranch;
 
-	public CommitRevertCherryPickPanel(String id, IModel<Project> projectModel, String revision, Integer type) {
+	public CommitRevertCherryPickPanel(String id, IModel<Project> projectModel, String revision, CommitRevertCherryPickType type) {
 		super(id);
 		this.projectModel = projectModel;
 		this.revision = revision;
@@ -58,9 +58,9 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 		super.onInitialize();
 
 		String oldCommitMessage = projectModel.getObject().getRevCommit(revision, true).getShortMessage();
-		if (type == 0) {
+		if (type == CommitRevertCherryPickType.REVERT) {
 			helperBean.setCommitMessage("Revert \"" + oldCommitMessage + "\"" + "\n\nThis reverts commit " + revision);
-		} else if (type == 1) {
+		} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
 			helperBean.setCommitMessage("Cherry Pick \"" + oldCommitMessage + "\"" + "\n\nThis cherry-pick commit " + revision);
 		}
 		baseBranch = projectModel.getObject().getDefaultBranch();
@@ -68,9 +68,9 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		form.add(new FencedFeedbackPanel("feedback", form));
-		if (type == 0) {
+		if (type == CommitRevertCherryPickType.REVERT) {
 			form.add(new Label("title", "Revert Commit"));
-		} else if (type == 1) {
+		} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
 			form.add(new Label("title", "Cherry-Pick Commit"));
 		}
 		BeanEditor editor;
@@ -128,11 +128,11 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 					getSession().error("Valid signature required for head commit of this branch per branch protection rule");
 				} else {
 					try {
-						if (type == 0) {
+						if (type == CommitRevertCherryPickType.REVERT) {
 							OneDev.getInstance(GitService.class).revert(project, branch, revision, commitMessage, user.asPerson());
 							onCreate(target, branch);
 							getSession().success("Revert successfully");
-						} else if (type == 1) {
+						} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
 							OneDev.getInstance(GitService.class).cherryPick(project, branch, revision, commitMessage, user.asPerson());
 							onCreate(target, branch);
 							getSession().success("Cherry Pick successfully");

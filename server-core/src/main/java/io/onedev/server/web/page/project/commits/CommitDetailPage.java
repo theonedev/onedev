@@ -31,6 +31,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.commit.revert.CommitRevertCherryPickLink;
+import io.onedev.server.web.component.commit.revert.CommitRevertCherryPickType;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
@@ -223,7 +224,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			
 		});
 
-		add(new CommitRevertCherryPickLink("revert", projectModel, state.revision, 0) {
+		add(new CommitRevertCherryPickLink("revert", projectModel, state.revision, CommitRevertCherryPickType.REVERT) {
 
 			@Override
 			protected void onCreated(AjaxRequestTarget target, String tag) {
@@ -232,7 +233,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 		});
 
-		add(new CommitRevertCherryPickLink("cherryPick", projectModel, state.revision, 1) {
+		add(new CommitRevertCherryPickLink("cherryPick", projectModel, state.revision, CommitRevertCherryPickType.CHERRY_PICK) {
 
 			@Override
 			protected void onCreated(AjaxRequestTarget target, String tag) {

@@ -17,9 +17,10 @@ public abstract class CommitRevertCherryPickLink extends ModalLink {
 	
 	private final String revision;
 
-	private final Integer type;
-	
-	public CommitRevertCherryPickLink(String id, IModel<Project> projectModel, String revision, Integer type) {
+	private final CommitRevertCherryPickType type;
+
+	public CommitRevertCherryPickLink(String id, IModel<Project> projectModel, String revision,
+									  CommitRevertCherryPickType type) {
 		super(id);
 		this.projectModel = projectModel;
 		this.revision = revision;
