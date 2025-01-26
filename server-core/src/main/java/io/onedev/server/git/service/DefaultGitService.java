@@ -271,17 +271,19 @@ public class DefaultGitService implements GitService, Serializable {
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 
 				for (DiffEntry diff : diffs) {
-					BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-							.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
 
 					if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
 						oldPaths.add(diff.getNewPath());
-						newBlobs.put(diff.getOldPath(), null);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-						newBlobs.put(diff.getOldPath(), blobContent);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-						oldPaths.add(diff.getNewPath());
-						newBlobs.put(diff.getOldPath(), blobContent);
+						newBlobs.put(diff.getNewPath(), null);
+					} else {
+						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
+								.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+						if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
+							newBlobs.put(diff.getOldPath(), blobContent);
+						} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+							oldPaths.add(diff.getNewPath());
+							newBlobs.put(diff.getOldPath(), blobContent);
+						}
 					}
 				}
 				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
@@ -318,16 +320,18 @@ public class DefaultGitService implements GitService, Serializable {
 				Map<String, BlobContent> newBlobs = new HashMap<>();
 
 				for (DiffEntry diff : diffs) {
-					BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-							.open(diff.getNewId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
 					if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
 						oldPaths.add(diff.getOldPath());
-						newBlobs.put(diff.getNewPath(), null);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
-						newBlobs.put(diff.getNewPath(), blobContent);
-					} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-						oldPaths.add(diff.getOldPath());
-						newBlobs.put(diff.getNewPath(), blobContent);
+						newBlobs.put(diff.getOldPath(), null);
+					} else {
+						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
+								.open(diff.getNewId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
+						if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
+							newBlobs.put(diff.getNewPath(), blobContent);
+						} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+							oldPaths.add(diff.getOldPath());
+							newBlobs.put(diff.getNewPath(), blobContent);
+						}
 					}
 				}
 				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
