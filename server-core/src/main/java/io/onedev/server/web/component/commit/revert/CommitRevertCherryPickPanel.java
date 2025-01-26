@@ -2,6 +2,7 @@ package io.onedev.server.web.component.commit.revert;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
@@ -27,7 +28,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.revwalk.RevCommit;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -120,30 +123,55 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				Project project = projectModel.getObject();
-				String branch = baseChoice.getModel().getObject();
-				User user = SecurityUtils.getAuthUser();
-				String commitMessage = helperBean.getCommitMessage();
-				if (!project.isCommitSignatureRequirementSatisfied(user, branch, project.getRevCommit(revision, true))) {
-					getSession().error("Valid signature required for head commit of this branch per branch protection rule");
-				} else {
-					try {
-						if (type == CommitRevertCherryPickType.REVERT) {
-							OneDev.getInstance(GitService.class).revert(project, branch, revision, commitMessage, user.asPerson());
-							onCreate(target, branch);
-							getSession().success("Revert successfully");
-						} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
-							OneDev.getInstance(GitService.class).cherryPick(project, branch, revision, commitMessage, user.asPerson());
-							onCreate(target, branch);
-							getSession().success("Cherry Pick successfully");
-						}
-					} catch (Exception e) {
-						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
-						if (explicitException != null) {
-							getSession().error(explicitException.getMessage());
-						} else {
-							throw ExceptionUtils.unchecked(e);
-						}
+				var project = projectModel.getObject();
+				var branch = baseChoice.getModel().getObject();
+				var user = SecurityUtils.getAuthUser();
+				var commitMessage = helperBean.getCommitMessage();
+				var protection = project.getBranchProtection(branch, user);
+				RevCommit sourceHead = (RevCommit) project.getBranchRef("refs/heads/" + branch).getObj();
+				RevCommit commitId = project.getRevCommit(revision, true);
+
+				if (protection.isReviewRequiredForPush(project, sourceHead, commitId, new HashMap<>())){
+					getSession().error("Review required for this change. Submit pull request instead");
+					return;
+				}
+				var buildRequirement = protection.getBuildRequirement(project, sourceHead, commitId, new HashMap<>());
+				if (!buildRequirement.getRequiredJobs().isEmpty()) {
+					getSession().error("This change needs to be verified by some jobs. Submit pull request instead");
+					return;
+				}
+
+				if (!project.isCommitSignatureRequirementSatisfied(user, branch, commitId)) {
+					getSession().error("No valid signature for head commit of target branch");
+					return;
+				}
+
+				if (protection.isCommitSignatureRequired()
+						&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
+					getSession().error("Commit signature required but no GPG signing key specified");
+					return;
+				}
+				var error = OneDev.getInstance(GitService.class).checkCommitMessages(protection, project, sourceHead, commitId, new HashMap<>());
+				if (error != null) {
+					getSession().error("Error validating commit message of '" + error.getCommitId().name() + "': " + error.getErrorMessage());
+					return;
+				}
+				try {
+					if (type == CommitRevertCherryPickType.REVERT) {
+						OneDev.getInstance(GitService.class).revert(project, branch, revision, commitMessage, user.asPerson());
+						onCreate(target, branch);
+						getSession().success("Revert successfully");
+					} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
+						OneDev.getInstance(GitService.class).cherryPick(project, branch, revision, commitMessage, user.asPerson());
+						onCreate(target, branch);
+						getSession().success("Cherry Pick successfully");
+					}
+				} catch (Exception e) {
+					ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null) {
+						getSession().error(explicitException.getMessage());
+					} else {
+						throw ExceptionUtils.unchecked(e);
 					}
 				}
 			}
