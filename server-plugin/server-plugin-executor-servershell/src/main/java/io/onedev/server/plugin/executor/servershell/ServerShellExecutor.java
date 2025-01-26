@@ -98,7 +98,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 				checkApplicable();
 				
 				buildHome = new File(Bootstrap.getTempDir(),
-						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber());
+						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence());
 				FileUtils.createDir(buildHome);
 				File workspaceDir = new File(buildHome, "workspace");
 				try {
@@ -125,7 +125,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					getJobManager().reportJobWorkspace(jobContext, workspaceDir.getAbsolutePath());
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 
-					OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 					var successful = entryFacade.execute(new LeafHandler() {
 
 						@Override

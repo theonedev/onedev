@@ -1,24 +1,17 @@
 package io.onedev.server.rest.resource;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Api(order=8000)
 @Path("/user-authorizations")
@@ -53,16 +46,6 @@ public class UserAuthorizationResource {
 		return authorization.getId();
 	}
 
-	@Api(order=250, description="Update user authorization of specified id")
-	@Path("/{authorizationId}")
-	@POST
-	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull UserAuthorization authorization) {
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
-		authorizationManager.createOrUpdate(authorization);
-		return Response.ok().build();
-	}
-	
 	@Api(order=300, description = "Delete user authorization of specified id")
 	@Path("/{authorizationId}")
 	@DELETE

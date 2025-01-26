@@ -127,9 +127,10 @@ public class ProjectResource {
 	@Path("/{projectId}/group-authorizations")
     @GET
     public Collection<GroupAuthorization> getGroupAuthorizations(@PathParam("projectId") Long projectId) {
-    	if (!SecurityUtils.isAdministrator()) 
+		var project = projectManager.load(projectId);
+		if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
-    	return projectManager.load(projectId).getGroupAuthorizations();
+    	return project.getGroupAuthorizations();
     }
 	
 	@Api(order=500)

@@ -1,4 +1,4 @@
-version: 35
+version: 38
 imports:
 - projectPath: onedev
   revision: main
@@ -70,10 +70,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/docker/app
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifacts
@@ -287,10 +287,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
@@ -335,10 +335,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
@@ -387,6 +387,7 @@ stepTemplates:
     scanPath: '@param:Scan Path@'
     failThreshold: HIGH
     reportName: Vulnerabilities
+    ignorePath: .trivyignore
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   paramSpecs:
   - !TextParam

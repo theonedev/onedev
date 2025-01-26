@@ -1,3 +1,10 @@
+# 11.6.12
+
+### RESTful API
+
+The ability to edit existing user authorization is removed as any project owner can use it to remove authorization of 
+other projects
+
 # 11.6.10
 
 ### RESTful API

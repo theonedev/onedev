@@ -9,7 +9,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
@@ -20,9 +19,7 @@ public class JobContext implements Serializable {
 	private final String jobToken;
 	
 	private final JobExecutor jobExecutor;
-	
-	private final String sequentialGroup;
-	
+
 	private final Long projectId;
 	
 	private final String projectPath;
@@ -32,6 +29,8 @@ public class JobContext implements Serializable {
 	private final Long buildId;
 	
 	private final Long buildNumber;
+
+	private final Long submitSequence;
 	
 	private final List<Action> actions;
 	
@@ -42,21 +41,19 @@ public class JobContext implements Serializable {
 	private final List<ServiceFacade> services;
 	
 	private final long timeout;
-	
-	private volatile int retried;
-	
-	public JobContext(String jobToken, JobExecutor jobExecutor, @Nullable String sequentialGroup, 
-					  Long projectId, String projectPath, String projectGitDir, Long buildId, 
-					  Long buildNumber, List<Action> actions, String refName, ObjectId commitId, 
-					  List<ServiceFacade> services, long timeout) {
+
+	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath,
+					  String projectGitDir, Long buildId, Long buildNumber, Long submitSequence,
+					  List<Action> actions, String refName, ObjectId commitId, List<ServiceFacade> services,
+					  long timeout) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
-		this.sequentialGroup = sequentialGroup;
 		this.projectId = projectId;
 		this.projectPath = projectPath;
 		this.projectGitDir = projectGitDir;
 		this.buildId = buildId;
 		this.buildNumber = buildNumber;
+		this.submitSequence = submitSequence;
 		this.actions = actions;
 		this.refName = refName;
 		this.commitId = commitId;
@@ -70,11 +67,6 @@ public class JobContext implements Serializable {
 
 	public JobExecutor getJobExecutor() {
 		return jobExecutor;
-	}
-
-	@Nullable
-	public String getSequentialGroup() {
-		return sequentialGroup;
 	}
 
 	public Long getBuildId() {
@@ -113,16 +105,12 @@ public class JobContext implements Serializable {
 		return buildNumber;
 	}
 
+	public Long getSubmitSequence() {
+		return submitSequence;
+	}
+
 	public long getTimeout() {
 		return timeout;
-	}
-
-	public int getRetried() {
-		return retried;
-	}
-
-	public void setRetried(int retried) {
-		this.retried = retried;
 	}
 
 	public LeafFacade getStep(List<Integer> stepPosition) {

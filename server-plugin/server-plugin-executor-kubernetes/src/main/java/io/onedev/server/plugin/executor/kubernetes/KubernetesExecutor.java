@@ -354,7 +354,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 	private String getNamespace(@Nullable JobContext jobContext) {
 		if (jobContext != null) {
 			return getName() + "-" + jobContext.getProjectId() + "-" 
-					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
+					+ jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence();
 		} else {
 			return getName() + "-executor-test";
 		}

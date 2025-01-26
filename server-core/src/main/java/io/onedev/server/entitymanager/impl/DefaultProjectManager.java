@@ -714,8 +714,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("projectCacheInited");		
 		clusterManager.init(cacheInited, () -> {
 			for (Project project : query()) {
-				String path = project.getPath();
-				if (!path.equals(project.calcPath()))
+				String path = project.calcPath();
+				if (!path.equals(project.getPath()))
 					project.setPath(path);
 				cache.put(project.getId(), project.getFacade());
 			}
