@@ -151,19 +151,19 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 				var user = SecurityUtils.getAuthUser();
 				var protection = project.getBranchProtection(branch, user);
 				RevCommit sourceHead = (RevCommit) project.getBranchRef("refs/heads/" + branch).getObj();
-				RevCommit commitId = project.getRevCommit(mergeCommitId, false);
+				RevCommit mergeCommit = project.getRevCommit(mergeCommitId, true);
 
-				if (protection.isReviewRequiredForPush(project, sourceHead, commitId, new HashMap<>())){
+				if (protection.isReviewRequiredForPush(project, sourceHead, mergeCommit, new HashMap<>())){
 					getSession().error("Review required for this change. Submit pull request instead");
 					return;
 				}
-				var buildRequirement = protection.getBuildRequirement(project, sourceHead, commitId, new HashMap<>());
+				var buildRequirement = protection.getBuildRequirement(project, sourceHead, mergeCommit, new HashMap<>());
 				if (!buildRequirement.getRequiredJobs().isEmpty()) {
 					getSession().error("This change needs to be verified by some jobs. Submit pull request instead");
 					return;
 				}
 
-				if (!project.isCommitSignatureRequirementSatisfied(user, branch, commitId)) {
+				if (!project.isCommitSignatureRequirementSatisfied(user, branch, mergeCommit)) {
 					getSession().error("No valid signature for head commit of target branch");
 					return;
 				}
@@ -193,24 +193,19 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 				var project = projectModel.getObject();
 				var branch = baseChoice.getModel().getObject();
 				var user = SecurityUtils.getAuthUser();
-				var commitMessage = helperBean.getCommitMessage();
 				var protection = project.getBranchProtection(branch, user);
 				RevCommit sourceHead = (RevCommit) project.getBranchRef("refs/heads/" + branch).getObj();
-				RevCommit commitId = project.getRevCommit(revision, true);
 
+				var mergeCommit = project.getRevCommit(mergeCommitId, true);
+				var amendedCommitId = OneDev.getInstance(GitService.class).amendCommit(project, mergeCommit.copy(),
+						mergeCommit.getAuthorIdent(), mergeCommit.getCommitterIdent(), helperBean.getCommitMessage());
 				try {
-					if (type == CommitRevertCherryPickType.REVERT) {
-						mergeCommitId = OneDev.getInstance(GitService.class).revert(project, revision, branch, commitMessage, user.asPerson());
-					} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
-						mergeCommitId = OneDev.getInstance(GitService.class).cherryPick(project, revision, branch, commitMessage, user.asPerson());
-					}
-					var error = OneDev.getInstance(GitService.class).checkCommitMessages(protection, project, sourceHead, commitId, new HashMap<>());
+					var error = OneDev.getInstance(GitService.class).checkCommitMessages(protection, project, sourceHead, amendedCommitId, new HashMap<>());
 					if (error != null) {
 						getSession().error("Error validating commit message of '" + error.getCommitId().name() + "': " + error.getErrorMessage());
 						return;
 					}
-					OneDev.getInstance(GitService.class).updateRef(project, "refs/heads/" + branch,
-							mergeCommitId, sourceHead);
+					OneDev.getInstance(GitService.class).updateRef(project, "refs/heads/" + branch, amendedCommitId, sourceHead);
 					onCreate(target, branch);
 					if (type == CommitRevertCherryPickType.REVERT) {
 						getSession().success("Revert successfully");
