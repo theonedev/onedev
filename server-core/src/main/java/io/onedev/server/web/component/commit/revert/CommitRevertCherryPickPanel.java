@@ -6,28 +6,27 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.pullrequests.detail.CommitMessageBean;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.HashMap;
@@ -47,7 +46,11 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 
 	private BranchSingleChoice baseChoice;
 
+	private AjaxButton confirmButton;
+
 	private String baseBranch;
+
+	private ObjectId mergeCommitId;
 
 	public CommitRevertCherryPickPanel(String id, IModel<Project> projectModel, String revision, CommitRevertCherryPickType type) {
 		super(id);
@@ -66,7 +69,7 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 		} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
 			helperBean.setCommitMessage("Cherry Pick \"" + oldCommitMessage + "\"" + "\n\nThis cherry-pick commit " + revision);
 		}
-		baseBranch = projectModel.getObject().getDefaultBranch();
+		// baseBranch = projectModel.getObject().getDefaultBranch();
 
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
@@ -117,19 +120,38 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 
 		});
 
-		form.add(new AjaxButton("create") {
+		baseChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onUpdate(AjaxRequestTarget target) {
+				var branch = baseChoice.getModel().getObject();
+				projectModel.getObject().getObjectId(revision, true);
+				if (type == CommitRevertCherryPickType.REVERT) {
+					mergeCommitId = OneDev.getInstance(GitService.class)
+							.revert(projectModel.getObject(), revision, branch, helperBean.getCommitMessage(),
+									SecurityUtils.getAuthUser().asPerson());
+				} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
+					mergeCommitId = OneDev.getInstance(GitService.class)
+							.cherryPick(projectModel.getObject(), revision, branch, helperBean.getCommitMessage(),
+									SecurityUtils.getAuthUser().asPerson());
+				}
+				if (mergeCommitId == null) {
+					confirmButton.add(AttributeAppender.append("disabled", "disabled"));
+					confirmButton.setEnabled(false);
+					target.add(confirmButton);
+					getSession().error("There are merge conflicts. Submit pull request instead");
+					return;
+				} else {
+					confirmButton.add(AttributeAppender.remove("disabled"));
+					confirmButton.setEnabled(true);
+					target.add(confirmButton);
+				}
 
 				var project = projectModel.getObject();
-				var branch = baseChoice.getModel().getObject();
 				var user = SecurityUtils.getAuthUser();
-				var commitMessage = helperBean.getCommitMessage();
 				var protection = project.getBranchProtection(branch, user);
 				RevCommit sourceHead = (RevCommit) project.getBranchRef("refs/heads/" + branch).getObj();
-				RevCommit commitId = project.getRevCommit(revision, true);
+				RevCommit commitId = project.getRevCommit(mergeCommitId, false);
 
 				if (protection.isReviewRequiredForPush(project, sourceHead, commitId, new HashMap<>())){
 					getSession().error("Review required for this change. Submit pull request instead");
@@ -151,19 +173,48 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 					getSession().error("Commit signature required but no GPG signing key specified");
 					return;
 				}
-				var error = OneDev.getInstance(GitService.class).checkCommitMessages(protection, project, sourceHead, commitId, new HashMap<>());
-				if (error != null) {
-					getSession().error("Error validating commit message of '" + error.getCommitId().name() + "': " + error.getErrorMessage());
-					return;
-				}
+			}
+
+		});
+
+		confirmButton = new AjaxButton("create") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				confirmButton.add(AttributeAppender.append("disabled", "disabled"));
+				confirmButton.setEnabled(false);
+			}
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				var project = projectModel.getObject();
+				var branch = baseChoice.getModel().getObject();
+				var user = SecurityUtils.getAuthUser();
+				var commitMessage = helperBean.getCommitMessage();
+				var protection = project.getBranchProtection(branch, user);
+				RevCommit sourceHead = (RevCommit) project.getBranchRef("refs/heads/" + branch).getObj();
+				RevCommit commitId = project.getRevCommit(revision, true);
+
 				try {
 					if (type == CommitRevertCherryPickType.REVERT) {
-						OneDev.getInstance(GitService.class).revert(project, branch, revision, commitMessage, user.asPerson());
-						onCreate(target, branch);
-						getSession().success("Revert successfully");
+						mergeCommitId = OneDev.getInstance(GitService.class).revert(project, revision, branch, commitMessage, user.asPerson());
 					} else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
-						OneDev.getInstance(GitService.class).cherryPick(project, branch, revision, commitMessage, user.asPerson());
-						onCreate(target, branch);
+						mergeCommitId = OneDev.getInstance(GitService.class).cherryPick(project, revision, branch, commitMessage, user.asPerson());
+					}
+					var error = OneDev.getInstance(GitService.class).checkCommitMessages(protection, project, sourceHead, commitId, new HashMap<>());
+					if (error != null) {
+						getSession().error("Error validating commit message of '" + error.getCommitId().name() + "': " + error.getErrorMessage());
+						return;
+					}
+					OneDev.getInstance(GitService.class).updateRef(project, "refs/heads/" + branch,
+							mergeCommitId, sourceHead);
+					onCreate(target, branch);
+					if (type == CommitRevertCherryPickType.REVERT) {
+						getSession().success("Revert successfully");
+					}  else if (type == CommitRevertCherryPickType.CHERRY_PICK) {
 						getSession().success("Cherry Pick successfully");
 					}
 				} catch (Exception e) {
@@ -182,7 +233,10 @@ abstract class CommitRevertCherryPickPanel extends Panel {
 				target.add(form);
 			}
 
-		});
+		};
+		confirmButton.setOutputMarkupId(true);
+		form.add(confirmButton);
+
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override

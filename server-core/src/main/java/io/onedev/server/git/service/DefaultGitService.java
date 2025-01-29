@@ -254,102 +254,18 @@ public class DefaultGitService implements GitService, Serializable {
 		return tagAndCommitId;
 	}
 
-	@Sessional
 	@Override
-	public RevertResult revert(Project project, String branchName, String revertRevision, String commitMessage, PersonIdent author) {
+	public ObjectId revert(Project project, String revertCommit, String targetBranch, String commitMessage, PersonIdent committer) {
 		Long projectId = project.getId();
-
-		RevertResult revertResult = runOnProjectServer(projectId, () -> {
-			Repository repository = getRepository(projectId);
-			ObjectId revId = project.getObjectId(revertRevision, true);
-
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				RevCommit commitToRevert = revWalk.parseCommit(revId);
-				RevCommit parentCommit = revWalk.parseCommit(commitToRevert.getParent(0).getId());
-				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToRevert);
-				Set<String> oldPaths = new HashSet<>();
-				Map<String, BlobContent> newBlobs = new HashMap<>();
-
-				for (DiffEntry diff : diffs) {
-
-					if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
-						oldPaths.add(diff.getNewPath());
-						newBlobs.put(diff.getNewPath(), null);
-					} else {
-						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-								.open(diff.getOldId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
-						if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-							newBlobs.put(diff.getOldPath(), blobContent);
-						} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-							oldPaths.add(diff.getNewPath());
-							newBlobs.put(diff.getOldPath(), blobContent);
-						}
-					}
-				}
-				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
-				ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
-						commitToRevert, commitToRevert, author, commitMessage, false);
-				return new RevertResult(newCommitId, commitToRevert.copy());
-
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-
-		project.cacheObjectId(revertRevision, revertResult.getRevertedCommitId());
-		listenerRegistry.post(new RefUpdated(project,
-				"refs/heads/" + branchName, ObjectId.zeroId(), revertResult.getRevertedCommitId()));
-
-		return revertResult;
+		return runOnProjectServer(projectId, () -> GitUtils.revert(getRepository(projectId),
+				project.getObjectId(revertCommit, true), targetBranch, commitMessage, committer));
 	}
 
-	@Sessional
 	@Override
-	public RevertResult cherryPick(Project project, String branchName, String cherryPickRevision, String commitMessage, PersonIdent author) {
+	public ObjectId cherryPick(Project project, String cherryPickCommit, String targetBranch, String commitMessage, PersonIdent committer) {
 		Long projectId = project.getId();
-
-		RevertResult revertResult = runOnProjectServer(projectId, () -> {
-			Repository repository = getRepository(projectId);
-			ObjectId revId = project.getObjectId(cherryPickRevision, true);
-
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				RevCommit commitToCherryPick = revWalk.parseCommit(revId);
-				RevCommit parentCommit = revWalk.parseCommit(commitToCherryPick.getParent(0).getId());
-				List<DiffEntry> diffs =  GitUtils.diff(repository, parentCommit, commitToCherryPick);
-				Set<String> oldPaths = new HashSet<>();
-				Map<String, BlobContent> newBlobs = new HashMap<>();
-
-				for (DiffEntry diff : diffs) {
-					if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-						oldPaths.add(diff.getOldPath());
-						newBlobs.put(diff.getOldPath(), null);
-					} else {
-						BlobContent blobContent = new BlobContent(revWalk.getObjectReader()
-								.open(diff.getNewId().toObjectId()).getBytes(), FileMode.REGULAR_FILE.getBits());
-						if (diff.getChangeType() == DiffEntry.ChangeType.ADD) {
-							newBlobs.put(diff.getNewPath(), blobContent);
-						} else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-							oldPaths.add(diff.getOldPath());
-							newBlobs.put(diff.getNewPath(), blobContent);
-						}
-					}
-				}
-				BlobEdits blobEdits = new BlobEdits(oldPaths, newBlobs);
-				RevCommit commitToAppend = (RevCommit) project.getBranchRef("refs/heads/" + branchName).getObj();
-                ObjectId newCommitId = this.commit(project, blobEdits, "refs/heads/" + branchName,
-						commitToAppend, commitToAppend, author, commitMessage, false);
-				return new RevertResult(newCommitId, commitToAppend.copy());
-
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-
-		project.cacheObjectId(cherryPickRevision, revertResult.getRevertedCommitId());
-		listenerRegistry.post(new RefUpdated(project,
-				"refs/heads/" + branchName, ObjectId.zeroId(), revertResult.getRevertedCommitId()));
-
-		return revertResult;
+		return runOnProjectServer(projectId, () -> GitUtils.cherryPick(getRepository(projectId),
+				project.getObjectId(cherryPickCommit, true), targetBranch, commitMessage, committer));
 	}
 
 	@Override
