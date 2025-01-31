@@ -255,6 +255,20 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
+	public ObjectId revert(Project project, String revertCommit, String targetBranch, String commitMessage, PersonIdent committer) {
+		Long projectId = project.getId();
+		return runOnProjectServer(projectId, () -> GitUtils.revert(getRepository(projectId),
+				project.getObjectId(revertCommit, true), targetBranch, commitMessage, committer));
+	}
+
+	@Override
+	public ObjectId cherryPick(Project project, String cherryPickCommit, String targetBranch, String commitMessage, PersonIdent committer) {
+		Long projectId = project.getId();
+		return runOnProjectServer(projectId, () -> GitUtils.cherryPick(getRepository(projectId),
+				project.getObjectId(cherryPickCommit, true), targetBranch, commitMessage, committer));
+	}
+
+	@Override
 	public int countRefs(Long projectId, String prefix) {
 		return runOnProjectServer(projectId, () -> getRepository(projectId).getRefDatabase().getRefsByPrefix(prefix).size());
 	}

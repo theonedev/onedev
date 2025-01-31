@@ -408,6 +408,62 @@ public class GitUtils {
 	}
 
 	@Nullable
+	public static ObjectId revert(Repository repository, ObjectId revertCommit, String targetBranch, String commitMessage, PersonIdent committer) {
+		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
+			Ref targetBranchRef = repository.findRef("refs/heads/" + targetBranch);
+			RevCommit targetHeadCommit = repository.parseCommit(targetBranchRef.getObjectId());
+			RevCommit sourceCommit = revWalk.parseCommit(revertCommit).getParent(0);
+
+			revWalk.setRevFilter(RevFilter.NO_MERGES);
+            ResolveMerger merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+			merger.setBase(revWalk.parseCommit(revertCommit));
+			if (merger.merge(targetHeadCommit, sourceCommit)) {
+				CommitBuilder commitBuilder = new CommitBuilder();
+				commitBuilder.setAuthor(committer);
+				commitBuilder.setCommitter(committer);
+				commitBuilder.setParentId(targetHeadCommit);
+				commitBuilder.setMessage(commitMessage);
+				commitBuilder.setTreeId(merger.getResultTreeId());
+				ObjectId mergedCommitId = inserter.insert(commitBuilder);
+				inserter.flush();
+				return mergedCommitId;
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Nullable
+	public static ObjectId cherryPick(Repository repository, ObjectId cherryPickCommit, String targetBranch, String commitMessage, PersonIdent committer) {
+		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
+			Ref targetBranchRef = repository.findRef("refs/heads/" + targetBranch);
+			RevCommit targetHeadCommit = repository.parseCommit(targetBranchRef.getObjectId());
+			RevCommit commitToPick = revWalk.parseCommit(cherryPickCommit);
+
+			revWalk.setRevFilter(RevFilter.NO_MERGES);
+            ResolveMerger merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+			merger.setBase(commitToPick.getParent(0));
+			if (merger.merge(targetHeadCommit, commitToPick)) {
+				CommitBuilder commitBuilder = new CommitBuilder();
+				commitBuilder.setAuthor(commitToPick.getAuthorIdent());
+				commitBuilder.setCommitter(committer);
+				commitBuilder.setParentId(targetHeadCommit);
+				commitBuilder.setMessage(commitMessage);
+				commitBuilder.setTreeId(merger.getResultTreeId());
+				ObjectId mergedCommitId = inserter.insert(commitBuilder);
+				inserter.flush();
+				return mergedCommitId;
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Nullable
 	public static ObjectId rebase(Repository repository, ObjectId source, ObjectId target, PersonIdent committer) {
 		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
 			RevCommit sourceCommit = revWalk.parseCommit(source);
