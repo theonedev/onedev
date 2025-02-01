@@ -23,6 +23,7 @@ import io.onedev.server.annotation.UrlSegment;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.TrustCertsSSLSocketFactory;
 import io.onedev.server.util.oauth.OAuthUtils;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
@@ -155,6 +156,7 @@ public class OpenIdConnector extends SsoConnector {
 						new URI(getCachedProviderMetadata().getTokenEndpoint()), clientAuth, codeGrant);
 				
 				HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
+				httpRequest.setSSLSocketFactory(TrustCertsSSLSocketFactory.getDefault());
 				httpRequest.setAccept(ContentType.APPLICATION_JSON.toString());
 				HTTPResponse httpResponse = httpRequest.send();
 				TokenResponse tokenResponse = parseOIDCTokenResponse(httpResponse);
@@ -229,7 +231,9 @@ public class OpenIdConnector extends SsoConnector {
 
 				UserInfoRequest userInfoRequest = new UserInfoRequest(
 						new URI(getCachedProviderMetadata().getUserInfoEndpoint()), accessToken);
-				HTTPResponse httpResponse = userInfoRequest.toHTTPRequest().send();
+				var httpRequest = userInfoRequest.toHTTPRequest();
+				httpRequest.setSSLSocketFactory(TrustCertsSSLSocketFactory.getDefault());
+				var httpResponse = httpRequest.send();
 
 				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
 					JSONObject json = httpResponse.getContentAsJSONObject();
