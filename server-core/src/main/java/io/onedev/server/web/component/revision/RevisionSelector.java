@@ -1,15 +1,28 @@
 package io.onedev.server.web.component.revision;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import io.onedev.server.web.component.createtag.CreateTagPanel;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -29,26 +42,9 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.InputChangeBehavior;
-import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.server.web.component.createtag.CreateTagPanel;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.tabbable.AjaxActionTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.onedev.server.git.GitUtils.branch2ref;
 import static io.onedev.server.git.GitUtils.tag2ref;
@@ -326,11 +322,7 @@ public abstract class RevisionSelector extends Panel {
 	protected void onModalOpened(AjaxRequestTarget target, ModalPanel modal) {
 		
 	}
-	
-	protected void updateSelectLinkAjaxAttributes(AjaxRequestAttributes attributes) {
-		
-	}
-	
+
 	private Component newItem(String itemId, String itemValue) {
 		String ref;
 		if (itemValue.startsWith(COMMIT_FLAG))

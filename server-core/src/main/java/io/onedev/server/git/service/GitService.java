@@ -42,9 +42,11 @@ public interface GitService {
 	TaggingResult createTag(Project project, String tagName, String tagRevision, 
 			PersonIdent taggerIdent, @Nullable String tagMessage, boolean signRequired);
 
-	ObjectId revert(Project project, String revertCommit, String targetBranch, String commitMessage, PersonIdent committer);
+	ObjectId revert(Project project, ObjectId revertCommitId, ObjectId targetCommitId,
+					String commitMessage, PersonIdent committer);
 
-	ObjectId cherryPick(Project project, String cherryPickCommit, String targetBranch, String commitMessage, PersonIdent committer);
+	ObjectId cherryPick(Project project, ObjectId cherryPickCommitId, ObjectId targetCommitId,
+						String commitMessage, PersonIdent committer);
 
 	int countRefs(Long projectId, String prefix);
 

@@ -71,6 +71,7 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.PullRequestAware;
+import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;
@@ -2073,8 +2074,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				&& !project.hasValidCommitSignature(project.getRevCommit(targetHead, true))) {
 			return "No valid signature for head commit of target branch";
 		}
-		if (updateByMerge
-				&& protection.isCommitSignatureRequired()
+		if (protection.isCommitSignatureRequired()
 				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
 			return "Commit signature required but no GPG signing key specified";
 		}

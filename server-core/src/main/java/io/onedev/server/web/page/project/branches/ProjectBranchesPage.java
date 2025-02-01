@@ -335,7 +335,7 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 		add(new ModalLink("createBranch") {
 
-			private BranchBeanWithRevision helperBean = new BranchBeanWithRevision();
+			private CreateBranchBeanWithRevision helperBean = new CreateBranchBeanWithRevision();
 			
 			@Override
 			protected void onConfigure() {

@@ -12,42 +12,47 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.AjaxLazyLoadPanel;
-import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.commit.revert.CommitRevertCherryPickLink;
-import io.onedev.server.web.component.commit.revert.CommitRevertCherryPickType;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.branch.create.CreateBranchPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.createtag.CreateTagLink;
+import io.onedev.server.web.component.createtag.CreateTagPanel;
 import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -56,7 +61,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -67,6 +71,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -77,15 +82,15 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
-	
+
 	public static final String PARAM_COMMIT = "commit";
 	
 	// make sure to use a different value from wicket:id according to wicket bug:
@@ -109,18 +114,31 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	private ObjectId resolvedRevision;
 	
 	private ObjectId resolvedCompareWith;
-	
-	private final IModel<Collection<CodeComment>> commentsModel = 
-			new LoadableDetachableModel<Collection<CodeComment>>() {
 
+	private List<String> operateBranches;
+
+	private final IModel<List<RefFacade>> refsModel = new LoadableDetachableModel<List<RefFacade>>() {
 		@Override
-		protected Collection<CodeComment> load() {
-			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
-			return manager.query(projectModel.getObject(), getCompareWith(), resolvedRevision);
+		protected List<RefFacade> load() {
+			Collection<ObjectId> descendants = getDescendants();
+			List<RefFacade> refs = new ArrayList<>();
+			refs.addAll(getProject().getBranchRefs());
+			refs.addAll(getProject().getTagRefs());
+			return refs.stream().filter(ref -> descendants.contains(ref.getPeeledObj())).collect(toList());
 		}
-		
 	};
-	
+
+	private final IModel<Collection<CodeComment>> commentsModel =
+			new LoadableDetachableModel<>() {
+
+				@Override
+				protected Collection<CodeComment> load() {
+					CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+					return manager.query(projectModel.getObject(), getCompareWith(), resolvedRevision);
+				}
+
+			};
+
 	private WebMarkupContainer refsContainer;
 	
 	private WebMarkupContainer revisionDiff;
@@ -177,7 +195,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	protected String getRobotsMeta() {
 		return "noindex,nofollow";
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -193,51 +211,160 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		PageParameters params = ProjectBlobPage.paramsOf(projectModel.getObject(), browseState);
 		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 		
-		add(new CreateBranchLink("createBranch", projectModel, state.revision) {
+		add(new MenuLink("commitOperations") {
 
 			@Override
-			protected void onCreated(AjaxRequestTarget target, String branch) {
-				target.add(refsContainer);
-			}
-			
-		});
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				var menuItems = new ArrayList<MenuItem>();
+				if (SecurityUtils.canCreateBranch(getProject(), Constants.R_HEADS)) {
+					menuItems.add(new MenuItem() {
+						@Override
+						public String getLabel() {
+							return "Create Branch";
+						}
 
-		add(new Button("commitOperations") {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ModalLink(id) {
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									dropdown.close();
+									return new CreateBranchPanel(id, projectModel, state.revision) {
 
-			private boolean canOperate() {
-				return SecurityUtils.canWriteCode(projectModel.getObject());
+										@Override
+										protected void onCreate(AjaxRequestTarget target, String branch) {
+											modal.close();
+											target.add(refsContainer);
+										}
+
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
+
+									};
+								}
+							};
+						}
+					});
+				}
+				if (SecurityUtils.canCreateTag(getProject(), Constants.R_TAGS)) {
+					menuItems.add(new MenuItem() {
+						@Override
+						public String getLabel() {
+							return "Create Tag";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ModalLink(id) {
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									dropdown.close();
+									return new CreateTagPanel(id, projectModel, null, state.revision) {
+
+										@Override
+										protected void onCreate(AjaxRequestTarget target, String tag) {
+											modal.close();
+											target.add(refsContainer);
+										}
+
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
+
+									};
+								}
+
+							};
+						}
+					});
+				}
+
+				if (getCommit().getParentCount() == 1) {
+					menuItems.add(new MenuItem() {
+						@Override
+						public String getLabel() {
+							return "Cherry-Pick";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									operateBranches = getProject().getBranchRefs().stream()
+											.filter(it -> !getDescendants().contains(it.getPeeledObj()))
+											.map(it -> GitUtils.ref2branch(it.getName()))
+											.collect(toList());
+									if (operateBranches.isEmpty()) {
+										Session.get().error("No branch to cherry-pick to");
+									} else if (operateBranches.size() == 1) {
+										var branch = operateBranches.get(0);
+										cherryPickOrRevert(target, branch, true);
+									} else {
+										new BeanEditModalPanel<>(target, new BranchChoiceBean(), "Select Branch to Cherry Pick to") {
+
+											@Override
+											protected String onSave(AjaxRequestTarget target, BranchChoiceBean bean) {
+												close();
+												cherryPickOrRevert(target, bean.getBranch(), true);
+												return null;
+											}
+										};
+									}
+								}
+							};
+						}
+					});
+					menuItems.add(new MenuItem() {
+						@Override
+						public String getLabel() {
+							return "Revert";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									operateBranches = getProject().getBranchRefs().stream()
+											.filter(it -> getDescendants().contains(it.getPeeledObj()))
+											.map(it -> GitUtils.ref2branch(it.getName()))
+											.collect(toList());
+									if (operateBranches.isEmpty()) {
+										Session.get().error("No branch to revert on");
+									} else if (operateBranches.size() == 1) {
+										var branch = operateBranches.get(0);
+										cherryPickOrRevert(target, branch, false);
+									} else {
+										new BeanEditModalPanel<>(target, new BranchChoiceBean(), "Select Branch to Revert on") {
+
+											@Override
+											protected String onSave(AjaxRequestTarget target, BranchChoiceBean bean) {
+												close();
+												cherryPickOrRevert(target, bean.getBranch(), false);
+												return null;
+											}
+										};
+									}
+								}
+							};
+						}
+					});
+				}
+				return menuItems;
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(canOperate());
-			}
-		});
-
-		add(new CreateTagLink("createTag", projectModel, state.revision) {
-
-			@Override
-			protected void onCreated(AjaxRequestTarget target, String tag) {
-				target.add(refsContainer);
-			}
-			
-		});
-
-		add(new CommitRevertCherryPickLink("revert", projectModel, state.revision, CommitRevertCherryPickType.REVERT) {
-
-			@Override
-			protected void onCreated(AjaxRequestTarget target, String tag) {
-				target.add(refsContainer);
-			}
-
-		});
-
-		add(new CommitRevertCherryPickLink("cherryPick", projectModel, state.revision, CommitRevertCherryPickType.CHERRY_PICK) {
-
-			@Override
-			protected void onCreated(AjaxRequestTarget target, String tag) {
-				target.add(refsContainer);
+				setVisible(SecurityUtils.canWriteCode(getProject()));
 			}
 
 		});
@@ -250,7 +377,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		} else { 
 			add(new WebMarkupContainer("detail").setVisible(false));
 		}
-		
+
 		add(refsContainer = new AjaxLazyLoadPanel("refs") {
 
 			@Override
@@ -265,30 +392,16 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					}
 					
 				};
-				fragment.add(new ListView<RefFacade>("refs", new LoadableDetachableModel<List<RefFacade>>() {
-
-					@Override
-					protected List<RefFacade> load() {
-						Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
-								.getDescendants(getProject().getId(), Sets.newHashSet(getCommit().getId()));
-						descendants.add(getCommit().getId());
-					
-						List<RefFacade> refs = new ArrayList<>();
-						refs.addAll(getProject().getBranchRefs());
-						refs.addAll(getProject().getTagRefs());
-						return refs.stream().filter(ref->descendants.contains(ref.getPeeledObj())).collect(Collectors.toList());
-					}
-					
-				}) {
+				fragment.add(new ListView<>("refs", refsModel) {
 
 					@Override
 					protected void populateItem(ListItem<RefFacade> item) {
 						String refName = item.getModelObject().getName();
-						String branch = GitUtils.ref2branch(refName); 
+						String branch = GitUtils.ref2branch(refName);
 						if (branch != null) {
 							BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
 							ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class, 
+							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class,
 									ProjectBlobPage.paramsOf(projectModel.getObject(), state));
 							link.add(new SpriteImage("icon", "branch"));
 							link.add(new Label("label", branch));
@@ -298,7 +411,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
 							BlobIdent blobIdent = new BlobIdent(tag, null, FileMode.TREE.getBits());
 							ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class, 
+							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class,
 									ProjectBlobPage.paramsOf(projectModel.getObject(), state));
 							link.add(new SpriteImage("icon", "tag"));
 							link.add(new Label("label", tag));
@@ -306,12 +419,19 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 							item.add(AttributeAppender.append("class", "tag ref"));
 						}
 					}
-					
+
 				});
 				return fragment;
 			}
-			
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!refsModel.getObject().isEmpty());
+			}
+
 		});
+		refsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
@@ -408,13 +528,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			parents = new Fragment("parents", "multiParentsFrag", this);
 			parents.add(new WebMarkupContainer("parent").setVisible(false));
 			parents.add(new Label("count", getParents().size() + " parents"));
-			parents.add(new ListView<RevCommit>("parents", new LoadableDetachableModel<List<RevCommit>>() {
+			parents.add(new ListView<>("parents", new LoadableDetachableModel<List<RevCommit>>() {
 
 				@Override
 				protected List<RevCommit> load() {
 					return getParents();
 				}
-				
+
 			}) {
 
 				@Override
@@ -425,19 +545,19 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					newState.revision = parent.name();
 					newState.whitespaceOption = state.whitespaceOption;
 					newState.pathFilter = state.pathFilter;
-					
-					Link<Void> link = new ViewStateAwarePageLink<Void>("link", CommitDetailPage.class, 
+
+					Link<Void> link = new ViewStateAwarePageLink<Void>("link", CommitDetailPage.class,
 							paramsOf(projectModel.getObject(), newState));
 					link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
 					item.add(link);
-					
+
 					item.add(new AjaxLink<Void>("diff") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							state.compareWith = item.getModelObject().name();
 							resolvedCompareWith = item.getModelObject().copy();
-							
+
 							target.add(parents);
 							newRevisionDiff(target);
 							pushState(target);
@@ -446,13 +566,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							if (item.getModelObject().equals(getCompareWith())) 
+							if (item.getModelObject().equals(getCompareWith()))
 								add(AttributeAppender.append("class", "active"));
-						}	
-						
+						}
+
 					});
 				}
-				
+
 			});
 		}		
 		parents.setOutputMarkupId(true);
@@ -479,7 +599,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	}
 	
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
-		IModel<String> blameModel = new IModel<String>() {
+		IModel<String> blameModel = new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -495,9 +615,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 				state.blameFile = object;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 			}
-			
+
 		};
-		IModel<String> pathFilterModel = new IModel<String>() {
+		IModel<String> pathFilterModel = new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -513,9 +633,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 				state.pathFilter = object;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 			}
-			
+
 		};
-		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
+		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -533,7 +653,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 				newParentsContainer(target);
 				pushState(target);
 			}
-			
+
 		};
 		revisionDiff = new RevisionDiffPanel("revisionDiff", getCompareWith().name(), 
 				state.revision, pathFilterModel, whitespaceOptionModel, 
@@ -673,6 +793,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		return urlFor(CommitDetailPage.class, paramsOf(getProject(), markState)).toString();
 	}
 
+	private Collection<ObjectId> getDescendants() {
+		Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
+				.getDescendants(getProject().getId(), Sets.newHashSet(getCommit().getId()));
+		descendants.add(getCommit().getId());
+		return descendants;
+	}
+
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
@@ -716,6 +843,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	
 	@Override
 	protected void onDetach() {
+		refsModel.detach();
 		commentsModel.detach();
 		super.onDetach();
 	}
@@ -861,5 +989,88 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public JobAuthorizationContext getJobAuthorizationContext() {
 		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getAuthUser(), getPullRequest());
 	}
-	
+
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+
+	@Nullable
+	private String checkUpdateBranch(BranchProtection protection, ObjectId oldCommitId, ObjectId newCommitId) {
+		var project = getProject();
+		if (protection.isReviewRequiredForPush(project, oldCommitId, newCommitId, new HashMap<>()))
+			return "Review required for this change. Submit pull request instead";
+		var buildRequirement = protection.getBuildRequirement(project, oldCommitId, newCommitId, new HashMap<>());
+		if (!buildRequirement.getRequiredJobs().isEmpty())
+			return "This change needs to be verified by some jobs. Submit pull request instead";
+		if (protection.isCommitSignatureRequired()
+				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
+			return "Commit signature required but no GPG signing key specified";
+		}
+		return null;
+	}
+
+	public void cherryPickOrRevert(AjaxRequestTarget target, String branch, boolean cherryPick) {
+		var user = getLoginUser();
+		var targetCommit = getProject().getRevCommit(GitUtils.branch2ref(branch), true);
+		ObjectId resultCommitId;
+		var bean = new CommitMessageBean();
+		if (cherryPick) {
+			bean.setCommitMessage(getCommit().getFullMessage());
+			resultCommitId = getGitService().cherryPick(getProject(), getCommit().copy(),
+					targetCommit.copy(), bean.getCommitMessage(), user.asPerson());
+		} else {
+			bean.setCommitMessage("Revert \"" + getCommit().getShortMessage() + "\"\n\nThis reverts commit " + getCommit().name());
+			resultCommitId = getGitService().revert(getProject(), getCommit().copy(),
+					targetCommit.copy(), bean.getCommitMessage(), user.asPerson());
+		}
+		if (resultCommitId != null) {
+			var protection = getProject().getBranchProtection(branch, user);
+			var errorMessage = checkUpdateBranch(protection, targetCommit.copy(), resultCommitId);
+			if (errorMessage != null) {
+				if (cherryPick)
+					Session.get().error("Error cherry-picking to " + branch + ": " + errorMessage);
+				else
+					Session.get().error("Error reverting on " + branch + ": " + errorMessage);
+			} else {
+				new BeanEditModalPanel<>(target, bean, "Specify Commit Message") {
+					@Override
+					protected boolean isDirtyAware() {
+						return false;
+					}
+
+					@Override
+					protected String getCssClass() {
+						return "modal-lg commit-message no-autosize";
+					}
+
+					@Override
+					protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
+						var errorMessage = protection.checkCommitMessage(bean.getCommitMessage(), false);
+						if (errorMessage != null)
+							return errorMessage;
+						var amendedCommitId = getGitService().amendCommit(getProject(), resultCommitId,
+								getCommit().getAuthorIdent(), getLoginUser().asPerson(), bean.getCommitMessage());
+						getGitService().updateRef(getProject(), GitUtils.branch2ref(branch), amendedCommitId, targetCommit.copy());
+						target.add(refsContainer);
+						close();
+						if (cherryPick)
+							getSession().success("Cherry-picked successfully");
+						else
+							getSession().success("Reverted successfully");
+						return null;
+					}
+				};
+			}
+		} else {
+			if (cherryPick)
+				Session.get().error("Error cherry-picking to " + branch + ": Merge conflicts detected");
+			else
+				Session.get().error("Error reverting on " + branch + ": Merge conflicts detected");
+		}
+	}
+
+	public List<String> getOperateBranches() {
+		return operateBranches;
+	}
+
 }

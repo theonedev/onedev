@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.detail;
+package io.onedev.server.web.util.editbean;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;

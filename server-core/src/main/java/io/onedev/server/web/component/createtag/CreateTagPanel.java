@@ -30,7 +30,7 @@ public abstract class CreateTagPanel extends Panel {
 	
 	private final String revision;
 	
-	private TagBean helperBean = new TagBean();
+	private CreateTagBean helperBean = new CreateTagBean();
 	
 	public CreateTagPanel(String id, IModel<Project> projectModel, @Nullable String tagName, String revision) {
 		super(id);

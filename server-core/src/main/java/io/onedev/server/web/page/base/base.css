@@ -850,3 +850,6 @@ span.keycap {
 	background: #C9F7F5;
 	color: #1BC5BD;
 }
+.modal-dialog.commit-message textarea, .modal-dialog .commit-message textarea {
+	height: 360px;
+}

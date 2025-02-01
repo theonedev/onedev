@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.createtag;
+package io.onedev.server.web.component.branch.create;
 
 import java.io.Serializable;
 
@@ -11,20 +11,17 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.OmitName;
 
 @Editable
 @ClassValidating
-public class TagBean implements Validatable, Serializable {
+public class CreateBranchBean implements Validatable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String name;
 	
-	private String message;
-	
-	@Editable(order=100, name="Tag Name")
+	@Editable(order=100, name="Branch Name")
 	@NotEmpty
 	@OmitName
 	public String getName() {
@@ -35,21 +32,10 @@ public class TagBean implements Validatable, Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, name="Tag Message")
-	@Multiline
-	@OmitName
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
-		if (!Repository.isValidRefName(Constants.R_TAGS + getName())) {
-            context.buildConstraintViolationWithTemplate("Invalid tag name")
+		if (!Repository.isValidRefName(Constants.R_HEADS + getName())) {
+            context.buildConstraintViolationWithTemplate("Invalid branch name")
 		            .addPropertyNode("name").addConstraintViolation()
 		            .disableDefaultConstraintViolation();
             return false;

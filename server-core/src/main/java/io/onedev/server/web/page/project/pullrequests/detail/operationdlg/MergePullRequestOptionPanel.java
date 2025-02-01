@@ -4,7 +4,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
-import io.onedev.server.web.page.project.pullrequests.detail.CommitMessageBean;
+import io.onedev.server.web.util.editbean.CommitMessageBean;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 

@@ -202,7 +202,7 @@ public class ProjectTagsPage extends ProjectPage {
 		
 		add(new ModalLink("createTag") {
 
-			private TagBeanWithRevision helperBean = new TagBeanWithRevision();
+			private CreateTagBeanWithRevision helperBean = new CreateTagBeanWithRevision();
 			
 			@Override
 			protected void onConfigure() {

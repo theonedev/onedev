@@ -20,13 +20,13 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-abstract class CreateBranchPanel extends Panel {
+public abstract class CreateBranchPanel extends Panel {
 
 	private final IModel<Project> projectModel;
 	
 	private final String revision;
 	
-	private BranchBean helperBean = new BranchBean();
+	private CreateBranchBean helperBean = new CreateBranchBean();
 	
 	public CreateBranchPanel(String id, IModel<Project> projectModel, String revision) {
 		super(id);
