@@ -1,5 +1,6 @@
 package io.onedev.server.persistence;
 
+import io.onedev.commons.utils.ExplicitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,14 @@ public class PersistenceUtils {
 			if (password != null)
 				connectProps.put("password", password);
 
-			return driver.connect(hibernateConfig.getUrl(), connectProps);
+			var conn = driver.connect(hibernateConfig.getUrl(), connectProps);
+			if (conn == null) {
+				var errorMessage = String.format(
+						"Failed to create database connection (driver: %s, url: %s)",
+						hibernateConfig.getDriver(), hibernateConfig.getUrl());
+				throw new ExplicitException(errorMessage);
+			}
+			return conn;
 		} catch (Exception e) {
 			throw unchecked(e);
 		}
