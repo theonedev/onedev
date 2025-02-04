@@ -173,10 +173,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
 				throw new ExplicitException("Can not find issue board: " + boardName);
-		} else if (!boards.isEmpty()) {
-			boardIndex = 0;
 		} else {
-			boardIndex = -1;
+			boardIndex = 0;
 		}
 
 		var iterationParam = params.get(PARAM_ITERATION).toString();
@@ -230,7 +228,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 	@Nullable
 	public BoardSpec getBoard() {
-		if (boardIndex != -1)
+		if (boardIndex < boards.size())
 			return boards.get(boardIndex);
 		else
 			return null;
@@ -347,6 +345,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 								@Override
 								public void onClick() {
+									var iterationSelection = getIterationSelection();
 									BoardSpec boardToRemove = item.getModelObject();
 									BoardSpec currentBoard = getBoard();
 									boards.remove(boardToRemove);
@@ -359,7 +358,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									else
 										nextBoard = currentBoard;
 									PageParameters params = IssueBoardsPage.paramsOf(getProject(), 
-											nextBoard, getIterationSelection(), backlog, queryString, 
+											nextBoard, iterationSelection, backlog, queryString,
 											backlogQueryString);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
@@ -882,17 +881,17 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board,
-										  IterationSelection iterationSelectionSelection, boolean backlog,
+										  IterationSelection iterationSelection, boolean backlog,
 										  @Nullable String query, @Nullable String backlogQuery) {
 		PageParameters params = paramsOf(project);
 		if (board != null)
 			params.add(PARAM_BOARD, board.getName());
-		if (iterationSelectionSelection instanceof IterationSelection.All)
+		if (iterationSelection instanceof IterationSelection.All)
 			params.add(PARAM_ITERATION, ITERATION_ALL);
-		else if (iterationSelectionSelection instanceof IterationSelection.Unscheduled)
+		else if (iterationSelection instanceof IterationSelection.Unscheduled)
 			params.add(PARAM_ITERATION, ITERATION_UNSCHEDULED);
 		else
-			params.add(PARAM_ITERATION, iterationSelectionSelection.getIteration().getId());
+			params.add(PARAM_ITERATION, iterationSelection.getIteration().getId());
 		params.add(PARAM_BACKLOG, backlog);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
