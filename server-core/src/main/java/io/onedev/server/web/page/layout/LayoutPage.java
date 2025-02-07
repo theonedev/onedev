@@ -484,7 +484,8 @@ public abstract class LayoutPage extends BasePage {
 			throw new RuntimeException(e);
 		}
 
-		var checkUpdateUrl = "https://onedev.io/check-update/" + commitHash;
+		var checkUpdateUrl = "https://onedev.io/check-update/" + commitHash + "-"
+				+ (WicketUtils.isSubscriptionActive()? "1": "0");
 		sidebar.add(new AjaxLink<Void>("checkUpdate") {
 
 			@Override
