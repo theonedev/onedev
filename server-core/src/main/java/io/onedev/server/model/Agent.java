@@ -9,6 +9,8 @@ import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.util.CollectionUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -18,6 +20,7 @@ import java.util.*;
 
 import static io.onedev.server.model.Agent.*;
 import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(indexes={
@@ -66,13 +69,15 @@ public class Agent extends AbstractEntity {
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_NAME, NAME_IP_ADDRESS, NAME_OS_NAME, NAME_OS_VERSION, NAME_OS_ARCH);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_NAME, PROP_NAME,
-			NAME_IP_ADDRESS, PROP_IP_ADDRESS,
-			NAME_OS_NAME, PROP_OS_NAME,
-			NAME_OS_VERSION, PROP_OS_VERSION,
-			NAME_OS_ARCH, PROP_OS_ARCH,
-			NAME_LAST_USED_DATE, PROP_LAST_USED_DATE + "." + PROP_VALUE);	
+	public static final Map<String, SortField<Agent>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_NAME, new SortField<>(PROP_NAME));
+		SORT_FIELDS.put(NAME_IP_ADDRESS, new SortField<>(PROP_IP_ADDRESS));
+		SORT_FIELDS.put(NAME_OS_NAME, new SortField<>(PROP_OS_NAME));
+		SORT_FIELDS.put(NAME_OS_VERSION, new SortField<>(PROP_OS_VERSION));
+		SORT_FIELDS.put(NAME_OS_ARCH, new SortField<>(PROP_OS_ARCH));
+		SORT_FIELDS.put(NAME_LAST_USED_DATE, new SortField<>(PROP_LAST_USED_DATE + "." + PROP_VALUE, DESCENDING));
+	}
 	
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable = false, unique = true)

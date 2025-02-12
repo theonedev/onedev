@@ -28,6 +28,8 @@ import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -60,6 +62,7 @@ import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.Project.BUILDS_DIR;
 import static io.onedev.server.model.support.TimeGroups.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(
@@ -181,16 +184,18 @@ public class Build extends ProjectBelonging
 	public static final List<String> METRIC_QUERY_FIELDS = Lists.newArrayList(
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
 	
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_JOB, PROP_JOB_NAME,
-			NAME_STATUS, PROP_STATUS,
-			NAME_NUMBER, PROP_NUMBER,
-			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			NAME_PENDING_DATE, PROP_PENDING_DATE,
-			NAME_RUNNING_DATE, PROP_RUNNING_DATE,
-			NAME_FINISH_DATE, PROP_FINISH_DATE,
-			NAME_PROJECT, PROP_PROJECT,
-			NAME_COMMIT, PROP_COMMIT_HASH);	
+	public static final Map<String, SortField<Build>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_JOB, new SortField<>(PROP_JOB_NAME));
+		SORT_FIELDS.put(NAME_STATUS, new SortField<>(PROP_STATUS));
+		SORT_FIELDS.put(NAME_NUMBER, new SortField<>(PROP_NUMBER));
+		SORT_FIELDS.put(NAME_SUBMIT_DATE, new SortField<>(PROP_SUBMIT_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_PENDING_DATE, new SortField<>(PROP_PENDING_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_RUNNING_DATE, new SortField<>(PROP_RUNNING_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_FINISH_DATE, new SortField<>(PROP_FINISH_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_PROJECT, new SortField<>(PROP_PROJECT));
+		SORT_FIELDS.put(NAME_COMMIT, new SortField<>(PROP_COMMIT_HASH));
+	}
 	
 	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
 

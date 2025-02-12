@@ -7,6 +7,7 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pack.FuzzyCriteria;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
@@ -25,7 +26,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -385,11 +386,13 @@ public abstract class PackListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(Pack.ORDER_FIELDS.keySet());
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: Pack.SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
 				if (getProject() != null)
-					orderFields.remove(Pack.NAME_PROJECT);
+					sortFields.remove(Pack.NAME_PROJECT);
 				
-				return new OrderEditPanel<Pack>(id, orderFields, new IModel<>() {
+				return new SortEditPanel<Pack>(id, sortFields, new IModel<>() {
 
 					@Override
 					public void detach() {

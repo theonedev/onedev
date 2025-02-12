@@ -8,6 +8,7 @@ import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
 import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
@@ -27,7 +28,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -73,6 +74,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.model.CodeComment.SORT_FIELDS;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
@@ -609,9 +612,11 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(CodeComment.ORDER_FIELDS.keySet());
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
 				
-				return new OrderEditPanel<CodeComment>(id, orderFields, new IModel<List<EntitySort>> () {
+				return new SortEditPanel<CodeComment>(id, sortFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

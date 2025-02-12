@@ -59,7 +59,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 							fields.addAll(attributeNames);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Agent.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(Agent.SORT_FIELDS.keySet());
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
 							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);

@@ -20,8 +20,8 @@ import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -42,6 +42,7 @@ import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.*;
 import static io.onedev.server.model.support.TimeGroups.*;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static java.lang.ThreadLocal.withInitial;
 
 @Entity
@@ -158,17 +159,19 @@ public class PullRequest extends ProjectBelonging
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_CLOSE_DATE, 
 			NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			NAME_CLOSE_DATE, PROP_CLOSE_DATE,
-			NAME_LAST_ACTIVITY_DATE, PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE,
-			NAME_NUMBER, PROP_NUMBER,
-			NAME_STATUS, PROP_STATUS,
-			NAME_TARGET_PROJECT, PROP_TARGET_PROJECT,
-			NAME_TARGET_BRANCH, PROP_TARGET_BRANCH,
-			NAME_SOURCE_PROJECT, PROP_SOURCE_PROJECT,
-			NAME_SOURCE_BRANCH, PROP_SOURCE_BRANCH,
-			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT);
+	public static final Map<String, SortField<PullRequest>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_SUBMIT_DATE, new SortField<>(PROP_SUBMIT_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_CLOSE_DATE, new SortField<>(PROP_CLOSE_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_NUMBER, new SortField<>(PROP_NUMBER));
+		SORT_FIELDS.put(NAME_STATUS, new SortField<>(PROP_STATUS));
+		SORT_FIELDS.put(NAME_TARGET_PROJECT, new SortField<>(PROP_TARGET_PROJECT));
+		SORT_FIELDS.put(NAME_TARGET_BRANCH, new SortField<>(PROP_TARGET_BRANCH));
+		SORT_FIELDS.put(NAME_SOURCE_PROJECT, new SortField<>(PROP_SOURCE_PROJECT));
+		SORT_FIELDS.put(NAME_SOURCE_BRANCH, new SortField<>(PROP_SOURCE_BRANCH));
+		SORT_FIELDS.put(NAME_COMMENT_COUNT, new SortField<>(PROP_COMMENT_COUNT, DESCENDING));
+	}
 	
 	private static ThreadLocal<Stack<PullRequest>> stack = withInitial(Stack::new);
 	

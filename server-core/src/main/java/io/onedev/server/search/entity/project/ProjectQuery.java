@@ -5,7 +5,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -16,6 +15,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.server.model.Project.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 public class ProjectQuery extends EntityQuery<Project> {
@@ -199,16 +201,21 @@ public class ProjectQuery extends EntityQuery<Project> {
 
 			List<EntitySort> projectSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (!Project.ORDER_FIELDS.containsKey(fieldName)) 
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 				
 				EntitySort projectSort = new EntitySort();
 				projectSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					projectSort.setDirection(Direction.DESCENDING);
-				else
-					projectSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						projectSort.setDirection(DESCENDING);
+					else
+						projectSort.setDirection(ASCENDING);
+				} else {
+					projectSort.setDirection(sortField.getDefaultDirection());
+				}
 				projectSorts.add(projectSort);
 			}
 			

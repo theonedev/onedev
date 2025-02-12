@@ -64,7 +64,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Project.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(Project.SORT_FIELDS.keySet());
 							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
 								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);

@@ -70,7 +70,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 						if ("criteriaField".equals(spec.getLabel())) {
 							return SuggestionUtils.suggest(CodeComment.QUERY_FIELDS, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							return SuggestionUtils.suggest(new ArrayList<>(CodeComment.ORDER_FIELDS.keySet()), matchWith);
+							return SuggestionUtils.suggest(new ArrayList<>(CodeComment.SORT_FIELDS.keySet()), matchWith);
 						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
 							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);

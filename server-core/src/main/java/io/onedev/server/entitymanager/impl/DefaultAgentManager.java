@@ -11,16 +11,16 @@ import io.onedev.agent.job.LogRequest;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentLastUsedDateManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentLastUsedDateManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.model.AgentLastUsedDate;
@@ -33,7 +33,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.validation.validator.AttributeNameValidator;
@@ -58,6 +57,9 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+
+import static io.onedev.server.model.Agent.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
 @Singleton
 public class DefaultAgentManager extends BaseEntityManager<Agent> implements AgentManager, Serializable {
@@ -303,10 +305,10 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: agentQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(AgentQuery.getPath(root, Agent.ORDER_FIELDS.get(sort.getField()))));
+			if (sort.getDirection() == ASCENDING)
+				orders.add(builder.asc(AgentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(AgentQuery.getPath(root, Agent.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(AgentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty())

@@ -5,15 +5,15 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.pack.PackSupport;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.search.entity.SortField;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Pack.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(
@@ -59,12 +59,14 @@ public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_TYPE, NAME_NAME, NAME_VERSION, NAME_LABEL, NAME_PUBLISH_DATE);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_TYPE, PROP_TYPE,
-			NAME_NAME, PROP_NAME,
-			NAME_VERSION, PROP_VERSION,
-			NAME_PUBLISH_DATE, PROP_PUBLISH_DATE,
-			NAME_PROJECT, PROP_PROJECT);
+	public static final Map<String, SortField<Pack>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_TYPE, new SortField<>(PROP_TYPE));
+		SORT_FIELDS.put(NAME_NAME, new SortField<>(PROP_NAME));
+		SORT_FIELDS.put(NAME_VERSION, new SortField<>(PROP_VERSION));
+		SORT_FIELDS.put(NAME_PUBLISH_DATE, new SortField<>(PROP_PUBLISH_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_PROJECT, new SortField<>(PROP_PROJECT));
+	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

@@ -840,10 +840,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING) {
 				orders.add(builder.asc(PullRequestQuery.getPath(
-						root, PullRequest.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty())));
 			} else {
 				orders.add(builder.desc(PullRequestQuery.getPath(
-						root, PullRequest.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty())));
 			}
 		}
 

@@ -80,7 +80,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequest.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(PullRequest.SORT_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);

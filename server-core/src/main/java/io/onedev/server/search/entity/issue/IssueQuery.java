@@ -13,7 +13,6 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -31,6 +30,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static io.onedev.server.model.Issue.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
@@ -378,8 +379,9 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 
 			List<EntitySort> issueSorts = new ArrayList<>();
 			for (OrderContext order : queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (validate && sortField == null) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField)
 							&& !(fieldSpec instanceof DateTimeField) && !(fieldSpec instanceof IntegerField)
@@ -390,10 +392,16 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 
 				EntitySort issueSort = new EntitySort();
 				issueSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					issueSort.setDirection(Direction.DESCENDING);
-				else
-					issueSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						issueSort.setDirection(DESCENDING);
+					else
+						issueSort.setDirection(ASCENDING);
+				} else if (sortField != null) {
+					issueSort.setDirection(sortField.getDefaultDirection());
+				} else {
+					issueSort.setDirection(ASCENDING);
+				}
 				issueSorts.add(issueSort);
 			}
 
@@ -602,13 +610,13 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 	@Override
 	public int compare(Issue o1, Issue o2) {
 		for (EntitySort sort : getSorts()) {
-			int result = Issue.ORDER_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
-			if (sort.getDirection() == Direction.DESCENDING)
+			int result = SORT_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
+			if (sort.getDirection() == DESCENDING)
 				result *= -1;
 			if (result != 0)
 				return result;
 		}
 		return 0;
 	}
-	
+
 }

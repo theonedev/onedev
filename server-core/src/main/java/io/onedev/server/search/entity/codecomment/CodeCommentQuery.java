@@ -6,7 +6,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -20,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 import static io.onedev.server.model.CodeComment.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.*;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
@@ -209,16 +210,21 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
 			List<EntitySort> commentSorts = new ArrayList<>();
 			for (OrderContext order : queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (!ORDER_FIELDS.containsKey(fieldName))
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 
 				EntitySort commentSort = new EntitySort();
 				commentSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					commentSort.setDirection(Direction.DESCENDING);
-				else
-					commentSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						commentSort.setDirection(DESCENDING);
+					else
+						commentSort.setDirection(ASCENDING);
+				} else {
+					commentSort.setDirection(sortField.getDefaultDirection());
+				}
 				commentSorts.add(commentSort);
 			}
 

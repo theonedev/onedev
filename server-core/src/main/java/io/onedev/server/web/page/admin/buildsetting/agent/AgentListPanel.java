@@ -5,6 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -18,7 +19,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -56,9 +57,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 class AgentListPanel extends Panel {
@@ -196,8 +195,10 @@ class AgentListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(Agent.ORDER_FIELDS.keySet());
-				return new OrderEditPanel<Agent>(id, orderFields, new IModel<List<EntitySort>> () {
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: Agent.SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
+				return new SortEditPanel<Agent>(id, sortFields, new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -207,7 +208,7 @@ class AgentListPanel extends Panel {
 					public List<EntitySort> getObject() {
 						AgentQuery query = queryModel.getObject();
 						AgentListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
+						if (query != null)
 							return query.getSorts();
 						else
 							return new ArrayList<>();
@@ -223,11 +224,11 @@ class AgentListPanel extends Panel {
 						query.getSorts().addAll(object);
 						queryModel.setObject(query);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}
-					
+
 				});
 			}
 			

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.server.model.Pack.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.pack.PackQueryParser.*;
 
 public class PackQuery extends EntityQuery<Pack> {
@@ -177,17 +179,22 @@ public class PackQuery extends EntityQuery<Pack> {
 
 			List<EntitySort> buildSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (!ORDER_FIELDS.containsKey(fieldName)) 
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 				
-				EntitySort buildSort = new EntitySort();
-				buildSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					buildSort.setDirection(Direction.DESCENDING);
-				else
-					buildSort.setDirection(Direction.ASCENDING);
-				buildSorts.add(buildSort);
+				EntitySort packSort = new EntitySort();
+				packSort.setField(fieldName);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						packSort.setDirection(DESCENDING);
+					else
+						packSort.setDirection(ASCENDING);
+				} else {
+					packSort.setDirection(sortField.getDefaultDirection());
+				}
+				buildSorts.add(packSort);
 			}
 			
 			return new PackQuery(packCriteria, buildSorts);

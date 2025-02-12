@@ -7,7 +7,6 @@ import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -19,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.server.model.Agent.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.agent.AgentQueryParser.*;
 
 public class AgentQuery extends EntityQuery<Agent> {
@@ -181,16 +182,21 @@ public class AgentQuery extends EntityQuery<Agent> {
 
 			List<EntitySort> agentSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (!ORDER_FIELDS.containsKey(fieldName)) 
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 				
 				EntitySort agentSort = new EntitySort();
 				agentSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					agentSort.setDirection(Direction.DESCENDING);
-				else
-					agentSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						agentSort.setDirection(DESCENDING);
+					else
+						agentSort.setDirection(ASCENDING);
+				} else {
+					agentSort.setDirection(sortField.getDefaultDirection());
+				}
 				agentSorts.add(agentSort);
 			}
 			

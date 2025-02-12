@@ -1,19 +1,5 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
@@ -21,22 +7,21 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AndCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrderContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.QueryContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
+import org.antlr.v4.runtime.*;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.onedev.server.model.PullRequest.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasUnsuccessfulBuilds;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.*;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
@@ -349,15 +334,20 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			List<EntitySort> requestSorts = new ArrayList<>();
 			for (OrderContext order : queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!PullRequest.ORDER_FIELDS.containsKey(fieldName))
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 
 				EntitySort requestSort = new EntitySort();
 				requestSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					requestSort.setDirection(Direction.DESCENDING);
-				else
-					requestSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						requestSort.setDirection(DESCENDING);
+					else
+						requestSort.setDirection(ASCENDING);
+				} else {
+					requestSort.setDirection(sortField.getDefaultDirection());
+				}
 				requestSorts.add(requestSort);
 			}
 

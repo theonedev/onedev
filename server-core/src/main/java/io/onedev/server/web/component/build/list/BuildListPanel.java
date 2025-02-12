@@ -15,6 +15,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -43,7 +44,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.revision.RevisionSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
@@ -96,6 +97,8 @@ import org.eclipse.jgit.lib.FileMode;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static io.onedev.server.model.Build.SORT_FIELDS;
 
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
@@ -803,11 +806,13 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(Build.ORDER_FIELDS.keySet());
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
 				if (getProject() != null)
-					orderFields.remove(Build.NAME_PROJECT);
+					sortFields.remove(Build.NAME_PROJECT);
 				
-				return new OrderEditPanel<Build>(id, orderFields, new IModel<List<EntitySort>> () {
+				return new SortEditPanel<Build>(id, sortFields, new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -817,7 +822,7 @@ public abstract class BuildListPanel extends Panel {
 					public List<EntitySort> getObject() {
 						BuildQuery query = parse(queryStringModel.getObject(), new BuildQuery());
 						BuildListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
+						if (query != null)
 							return query.getSorts();
 						else
 							return new ArrayList<>();
@@ -832,11 +837,11 @@ public abstract class BuildListPanel extends Panel {
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}
-					
+
 				});
 			}
 			

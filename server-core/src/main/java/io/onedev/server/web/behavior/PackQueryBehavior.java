@@ -82,7 +82,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 								fields.remove(NAME_TYPE);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Pack.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(Pack.SORT_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(Pack.NAME_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);

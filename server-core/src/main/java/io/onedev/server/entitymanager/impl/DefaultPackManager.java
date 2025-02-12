@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Pack.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.lang.Math.min;
 
 @Singleton
@@ -82,10 +83,10 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 							 List<EntitySort> sorts) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
-			if (sort.getDirection() == EntitySort.Direction.ASCENDING)
-				orders.add(builder.asc(PackQuery.getPath(root, Pack.ORDER_FIELDS.get(sort.getField()))));
+			if (sort.getDirection() == ASCENDING)
+				orders.add(builder.asc(PackQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(PackQuery.getPath(root, Pack.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(PackQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty())

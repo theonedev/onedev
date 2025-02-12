@@ -88,7 +88,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Build.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(Build.SORT_FIELDS.keySet());
 							if (getProject() != null)
 								candidates.remove(Build.NAME_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);

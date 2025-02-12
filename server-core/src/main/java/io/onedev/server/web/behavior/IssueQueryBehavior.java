@@ -2,7 +2,6 @@ package io.onedev.server.web.behavior;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -124,7 +123,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							Map<String, String> candidates = getFieldCandidates(ORDER_FIELDS.keySet());
+							Map<String, String> candidates = getFieldCandidates(SORT_FIELDS.keySet());
 							if (option.forBoard())
 								candidates.remove(NAME_BOARD_POSITION);
 							if (getProject() != null)

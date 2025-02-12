@@ -15,6 +15,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.FuzzyCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -36,7 +37,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
@@ -89,10 +90,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static java.util.stream.Collectors.toList;
@@ -699,11 +697,13 @@ public abstract class PullRequestListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(PullRequest.ORDER_FIELDS.keySet());
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: PullRequest.SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
 				if (getProject() != null)
-					orderFields.remove(PullRequest.NAME_TARGET_PROJECT);
+					sortFields.remove(PullRequest.NAME_TARGET_PROJECT);
 				
-				return new OrderEditPanel<PullRequest>(id, orderFields, new IModel<List<EntitySort>> () {
+				return new SortEditPanel<PullRequest>(id, sortFields, new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -713,7 +713,7 @@ public abstract class PullRequestListPanel extends Panel {
 					public List<EntitySort> getObject() {
 						var query = parse(queryStringModel.getObject(), new PullRequestQuery());
 						PullRequestListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
+						if (query != null)
 							return query.getSorts();
 						else
 							return new ArrayList<>();
@@ -728,11 +728,11 @@ public abstract class PullRequestListPanel extends Panel {
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}
-					
+
 				});
 			}
 			
@@ -744,13 +744,13 @@ public abstract class PullRequestListPanel extends Panel {
 			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
-		queryInput.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		queryInput.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<>() {
 
 			@Override
 			public Project getObject() {
 				return getProject();
 			}
-			
+
 		}, true, true) {
 			
 			@Override
@@ -785,9 +785,8 @@ public abstract class PullRequestListPanel extends Panel {
 		});
 		add(queryForm);
 
-		Component newPullRequestLink;
 		if (getProject() == null) {
-			add(newPullRequestLink = new DropdownLink("newPullRequest") {
+			add(new DropdownLink("newPullRequest") {
 	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
@@ -817,7 +816,7 @@ public abstract class PullRequestListPanel extends Panel {
 				
 			});
 		} else {
-			add(newPullRequestLink = new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class,
 					NewPullRequestPage.paramsOf(getProject())));		
 		}
 		body = new WebMarkupContainer("body");

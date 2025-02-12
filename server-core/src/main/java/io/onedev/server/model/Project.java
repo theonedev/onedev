@@ -40,6 +40,8 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -85,6 +87,7 @@ import java.util.stream.Collectors;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static org.apache.commons.lang3.StringUtils.replace;
 
 @Entity
@@ -168,23 +171,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_EMAIL_ADDRESS, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_PATH, PROP_PATH,
-			NAME_ID, PROP_ID,
-			NAME_NAME, PROP_NAME, 
-			NAME_KEY, PROP_KEY,
-			NAME_SERVICE_DESK_EMAIL_ADDRESS, PROP_SERVICE_DESK_EMAIL_ADDRESS,
-			NAME_LAST_ACTIVITY_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY,
-			NAME_LAST_COMMIT_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT);
+	public static final Map<String, SortField<Project>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_PATH, new SortField<>(PROP_PATH));
+		SORT_FIELDS.put(NAME_ID, new SortField<>(PROP_ID));
+		SORT_FIELDS.put(NAME_NAME, new SortField<>(PROP_NAME));
+		SORT_FIELDS.put(NAME_KEY, new SortField<>(PROP_KEY));
+		SORT_FIELDS.put(NAME_SERVICE_DESK_EMAIL_ADDRESS, new SortField<>(PROP_SERVICE_DESK_EMAIL_ADDRESS));
+		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY, DESCENDING));
+		SORT_FIELDS.put(NAME_LAST_COMMIT_DATE, new SortField<>(PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT, DESCENDING));
+	}
 	
-	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
-
-		@Override
-		protected Stack<Project> initialValue() {
-			return new Stack<Project>();
-		}
-	
-	};
+	static ThreadLocal<Stack<Project>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
 	public static void push(Project project) {
 		stack.get().push(project);

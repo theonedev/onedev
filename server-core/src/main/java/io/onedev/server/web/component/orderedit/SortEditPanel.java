@@ -2,6 +2,7 @@ package io.onedev.server.web.component.orderedit;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -21,24 +22,35 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
-public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<EntitySort>> {
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
-	private final List<String> available;
+@SuppressWarnings("serial")
+public class SortEditPanel<T extends AbstractEntity> extends GenericPanel<List<EntitySort>> {
+
+	private final Map<String, Direction> available;
 	
-	public OrderEditPanel(String id, List<String> available, IModel<List<EntitySort>> selectedModel) {
+	public SortEditPanel(String id, Map<String, Direction> available, IModel<List<EntitySort>> selectedModel) {
 		super(id, selectedModel);
 		this.available = available;
+	}
+
+	public SortEditPanel(String id, List<String> available, IModel<List<EntitySort>> selectedModel) {
+		super(id, selectedModel);
+		this.available = new LinkedHashMap<>();
+		for (var each: available)
+			this.available.put(each, ASCENDING);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getParent().add(AttributeAppender.append("class", "order-edit"));
+		getParent().add(AttributeAppender.append("class", "sort-edit"));
 		
 		WebMarkupContainer selectedContainer = new WebMarkupContainer("selected") {
 
@@ -55,7 +67,7 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				List<EntitySort> selected = new ArrayList<>(getSelected());
 				CollectionUtils.move(selected, from.getItemIndex(), to.getItemIndex());
-				OrderEditPanel.this.setModelObject(selected);
+				SortEditPanel.this.setModelObject(selected);
 				target.add(selectedContainer);
 			}
 			
@@ -63,44 +75,44 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 		
 		add(selectedContainer.setOutputMarkupId(true));
 		
-		selectedContainer.add(new ListView<EntitySort>("selectedItems", getModel()) {
+		selectedContainer.add(new ListView<>("selectedItems", getModel()) {
 
 			@Override
 			protected void populateItem(ListItem<EntitySort> item) {
-				item.add(new Label("index", String.valueOf(item.getIndex()+1) + "."));
-				
+				item.add(new Label("index", item.getIndex() + 1 + "."));
+
 				EntitySort sort = item.getModelObject();
 				item.add(new Label("name", sort.getField()));
-				
-				boolean descending = sort.getDirection() == EntitySort.Direction.DESCENDING;
+
+				boolean descending = sort.getDirection() == Direction.DESCENDING;
 				item.add(new AjaxCheckBox("descending", Model.of(descending)) {
-					
+
 					@Override
 					protected void onUpdate(AjaxRequestTarget target) {
 						List<EntitySort> selected = new ArrayList<>(getSelected());
 						if (getModelObject())
-							sort.setDirection(EntitySort.Direction.DESCENDING);
+							sort.setDirection(Direction.DESCENDING);
 						else
-							sort.setDirection(EntitySort.Direction.ASCENDING);
+							sort.setDirection(ASCENDING);
 						selected.set(item.getIndex(), sort);
-						OrderEditPanel.this.setModelObject(selected);
+						SortEditPanel.this.setModelObject(selected);
 					}
-					
+
 				});
-				
+
 				item.add(new AjaxLink<Void>("remove") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						List<EntitySort> selected = new ArrayList<>(getSelected());
 						selected.remove(item.getIndex());
-						OrderEditPanel.this.setModelObject(selected);
-						target.add(OrderEditPanel.this);
+						SortEditPanel.this.setModelObject(selected);
+						target.add(SortEditPanel.this);
 					}
-					
+
 				});
 			}
-			
+
 		});
 		
 		WebMarkupContainer availableContainer = new WebMarkupContainer("available") {
@@ -114,22 +126,22 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 		};
 		add(availableContainer);
 		
-		availableContainer.add(new ListView<String>("availableItems", 
+		availableContainer.add(new ListView<>("availableItems",
 				new LoadableDetachableModel<List<String>>() {
 
-			@Override
-			protected List<String> load() {
-				List<String> available = new ArrayList<>(OrderEditPanel.this.available);
-				available.removeAll(getSelected().stream().map(it->it.getField()).collect(Collectors.toSet()));
-				return available;
-			}
-			
-		}) {
+					@Override
+					protected List<String> load() {
+						List<String> available = new ArrayList<>(SortEditPanel.this.available.keySet());
+						available.removeAll(getSelected().stream().map(it -> it.getField()).collect(Collectors.toSet()));
+						return available;
+					}
+
+				}) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
 				String field = item.getModelObject();
-				
+
 				item.add(new AjaxLink<Void>("add") {
 
 					@Override
@@ -142,16 +154,16 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 					public void onClick(AjaxRequestTarget target) {
 						EntitySort sort = new EntitySort();
 						sort.setField(field);
-						sort.setDirection(EntitySort.Direction.ASCENDING);
+						sort.setDirection(available.get(field));
 						List<EntitySort> selected = new ArrayList<>(getSelected());
 						selected.add(sort);
-						OrderEditPanel.this.setModelObject(selected);
-						target.add(OrderEditPanel.this);
+						SortEditPanel.this.setModelObject(selected);
+						target.add(SortEditPanel.this);
 					}
-					
+
 				});
 			}
-			
+
 		});
 		
 		setOutputMarkupId(true);
@@ -164,7 +176,7 @@ public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new OrderEditCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new SortEditCssResourceReference()));
 	}
 
 }

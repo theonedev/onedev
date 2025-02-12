@@ -68,14 +68,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_NOTIFY_OWN_EVENTS = "notifyOwnEvents";
 	
-	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
-
-		@Override
-		protected Stack<User> initialValue() {
-			return new Stack<User>();
-		}
-	
-	};
+	private static ThreadLocal<Stack<User>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
 	@Column(unique=true, nullable=false)
     private String name;

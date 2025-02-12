@@ -1,35 +1,35 @@
-.order-edit {
+.sort-edit {
 	padding: 1rem 0;
 }
-.order-edit .selected .drag-indicator {
+.sort-edit .selected .drag-indicator {
 	padding-right: 0.2rem;
 	text-align: right;
 	width: 1px;
 }
-.order-edit .selected .index {
+.sort-edit .selected .index {
 	padding-left: 0;
 	padding-right: 0.4rem;
 	text-align: right;
 	width: 1px;
 }
-.order-edit .selected td.name {
+.sort-edit .selected td.name {
 	width: 1px;
 	padding-left: 0;
 	white-space: nowrap;
 }
 
-.order-edit .available a {
+.sort-edit .available a {
 	display: block;
 	padding: 0.6rem 0.8rem;
 } 
-.order-edit .available a .icon {
+.sort-edit .available a .icon {
 	margin-right: 0.4rem;
 } 
-.order-edit .available a:hover, .order-edit .available a:focus {
+.sort-edit .available a:hover, .sort-edit .available a:focus {
 	background: var(--light);
 } 
-.dark-mode .order-edit .available a:hover, 
-.dark-mode .order-edit .available a:focus {
+.dark-mode .sort-edit .available a:hover,
+.dark-mode .sort-edit .available a:focus {
 	color: var(--primary) !important;
 	background-color: var(--dark-mode-light-primary);
 } 

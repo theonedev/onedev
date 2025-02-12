@@ -948,9 +948,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort : projectQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(ProjectQuery.getPath(root, ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.asc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(ProjectQuery.getPath(root, ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty())

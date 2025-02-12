@@ -10,6 +10,8 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.xodus.VisitInfoManager;
@@ -21,6 +23,7 @@ import javax.persistence.*;
 import java.util.*;
 
 import static io.onedev.server.model.CodeComment.PROP_CREATE_DATE;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(indexes={
@@ -71,12 +74,14 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_LAST_ACTIVITY_DATE, NAME_REPLY_COUNT);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_RESOLVED, PROP_RESOLVED, 
-			NAME_CREATE_DATE, PROP_CREATE_DATE,
-			NAME_LAST_ACTIVITY_DATE, PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE,
-			NAME_REPLY_COUNT, PROP_REPLY_COUNT);
-	
+	public static final Map<String, SortField<CodeComment>> SORT_FIELDS = new LinkedHashMap<>();
+	static {
+		SORT_FIELDS.put(NAME_RESOLVED, new SortField<>(PROP_RESOLVED));
+		SORT_FIELDS.put(NAME_CREATE_DATE, new SortField<>(PROP_CREATE_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, DESCENDING));
+		SORT_FIELDS.put(NAME_REPLY_COUNT, new SortField<>(PROP_REPLY_COUNT, DESCENDING));
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;

@@ -21,7 +21,7 @@ import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.search.entity.SortField;
+import io.onedev.server.search.entity.IssueSortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.*;
 import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 
@@ -164,30 +165,22 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_ITERATION);
 
-	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
-	
+	public static final Map<String, IssueSortField> SORT_FIELDS = new LinkedHashMap<>();
 	static {
-		ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<>(PROP_VOTE_COUNT, comparingInt(Issue::getVoteCount)));
-		ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<>(PROP_COMMENT_COUNT, comparingInt(Issue::getCommentCount)));
-		ORDER_FIELDS.put(NAME_NUMBER, new SortField<>(PROP_NUMBER, (o1, o2) -> (int)(o1.getNumber() - o2.getNumber())));
-		ORDER_FIELDS.put(NAME_STATE, new SortField<>(PROP_STATE_ORDINAL, comparingInt(Issue::getStateOrdinal)));
-		ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<>(PROP_SUBMIT_DATE, comparing(Issue::getSubmitDate)));
-		ORDER_FIELDS.put(NAME_PROJECT, new SortField<>(PROP_PROJECT, comparing(o -> o.getProject().getId())));
-		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, comparing(o -> o.getLastActivity().getDate())));
-		ORDER_FIELDS.put(NAME_ESTIMATED_TIME, new SortField<>(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
-		ORDER_FIELDS.put(NAME_SPENT_TIME, new SortField<>(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
-		ORDER_FIELDS.put(NAME_PROGRESS, new SortField<>(PROP_PROGRESS, comparingInt(Issue::getProgress)));
-		ORDER_FIELDS.put(NAME_BOARD_POSITION, new SortField<>(PROP_BOARD_POSITION, comparingInt(Issue::getBoardPosition)));
+		SORT_FIELDS.put(NAME_VOTE_COUNT, new IssueSortField(PROP_VOTE_COUNT, DESCENDING, comparingInt(Issue::getVoteCount)));
+		SORT_FIELDS.put(NAME_COMMENT_COUNT, new IssueSortField(PROP_COMMENT_COUNT, DESCENDING, comparingInt(Issue::getCommentCount)));
+		SORT_FIELDS.put(NAME_NUMBER, new IssueSortField(PROP_NUMBER, (o1, o2) -> (int)(o1.getNumber() - o2.getNumber())));
+		SORT_FIELDS.put(NAME_STATE, new IssueSortField(PROP_STATE_ORDINAL, comparingInt(Issue::getStateOrdinal)));
+		SORT_FIELDS.put(NAME_SUBMIT_DATE, new IssueSortField(PROP_SUBMIT_DATE, DESCENDING, comparing(Issue::getSubmitDate)));
+		SORT_FIELDS.put(NAME_PROJECT, new IssueSortField(PROP_PROJECT, comparing(o -> o.getProject().getId())));
+		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new IssueSortField(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, DESCENDING, comparing(o -> o.getLastActivity().getDate())));
+		SORT_FIELDS.put(NAME_ESTIMATED_TIME, new IssueSortField(PROP_TOTAL_ESTIMATED_TIME, comparingInt(Issue::getTotalEstimatedTime)));
+		SORT_FIELDS.put(NAME_SPENT_TIME, new IssueSortField(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
+		SORT_FIELDS.put(NAME_PROGRESS, new IssueSortField(PROP_PROGRESS, comparingInt(Issue::getProgress)));
+		SORT_FIELDS.put(NAME_BOARD_POSITION, new IssueSortField(PROP_BOARD_POSITION, comparingInt(Issue::getBoardPosition)));
 	}
 	
-	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {
-
-		@Override
-		protected Stack<Issue> initialValue() {
-			return new Stack<Issue>();
-		}
-	
-	};
+	private static ThreadLocal<Stack<Issue>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
 	@Column(nullable=false)
 	private String state;

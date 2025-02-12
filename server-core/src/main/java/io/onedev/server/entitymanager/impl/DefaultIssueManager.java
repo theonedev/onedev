@@ -226,11 +226,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 															  From<Issue, Issue> issue) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
-			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
+			if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(issue, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
+					orders.add(builder.asc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty())));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(issue, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
+					orders.add(builder.desc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty())));
 			} else {
 				Join<Issue, IssueField> join = issue.join(Issue.PROP_FIELDS, JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));

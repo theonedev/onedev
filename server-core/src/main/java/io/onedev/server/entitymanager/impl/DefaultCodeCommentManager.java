@@ -13,7 +13,6 @@ import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -27,12 +26,12 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.xodus.CommitInfoManager;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -49,6 +48,9 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
 @Singleton
 public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> implements CodeCommentManager {
@@ -253,10 +255,10 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: commentQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeComment.ORDER_FIELDS.get(sort.getField()))));
+			if (sort.getDirection() == ASCENDING)
+				orders.add(builder.asc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty()) 

@@ -17,6 +17,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.issue.FuzzyCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -52,7 +53,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
@@ -106,12 +107,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -279,15 +278,17 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: Issue.SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
 				if (getProject() != null)
-					orderFields.remove(Issue.NAME_PROJECT);
+					sortFields.remove(Issue.NAME_PROJECT);
 				for (FieldSpec field: getGlobalIssueSetting().getFieldSpecs()) {
 					if (field instanceof IntegerField || field instanceof ChoiceField || field instanceof DateField) 
-						orderFields.add(field.getName());
+						sortFields.put(field.getName(), ASCENDING);
 				}
 				
-				return new OrderEditPanel<Issue>(id, orderFields, new IModel<List<EntitySort>> () {
+				return new SortEditPanel<Issue>(id, sortFields, new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -297,7 +298,7 @@ public abstract class IssueListPanel extends Panel {
 					public List<EntitySort> getObject() {
 						var query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
+						if (query != null)
 							return query.getSorts();
 						else
 							return new ArrayList<>();
@@ -312,11 +313,11 @@ public abstract class IssueListPanel extends Panel {
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}
-					
+
 				});
 			}
 			
@@ -560,7 +561,7 @@ public abstract class IssueListPanel extends Panel {
 			private String getQueryAfterCopyOrMove() {
 				EntitySort sort = new EntitySort();
 				sort.setField(Issue.NAME_NUMBER);
-				sort.setDirection(EntitySort.Direction.DESCENDING);
+				sort.setDirection(Direction.DESCENDING);
 				IssueQuery query = new IssueQuery(null, newArrayList(sort));
 				return query.toString();
 			}

@@ -76,6 +76,7 @@ import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.Build.Status.SUCCESSFUL;
 import static io.onedev.server.model.Project.BUILDS_DIR;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 import static java.lang.Long.valueOf;
 
@@ -581,10 +582,10 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			EntityQuery<Build> buildQuery) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: buildQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(BuildQuery.getPath(root, Build.ORDER_FIELDS.get(sort.getField()))));
+			if (sort.getDirection() == ASCENDING)
+				orders.add(builder.asc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(BuildQuery.getPath(root, Build.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 		addOrderByIdIfNecessary(builder, root, orders);
 		criteriaQuery.orderBy(orders);

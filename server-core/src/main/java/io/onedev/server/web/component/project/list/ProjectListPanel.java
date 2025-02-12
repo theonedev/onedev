@@ -10,6 +10,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.FuzzyCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -33,7 +34,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.project.DeleteStatusLabel;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
@@ -89,6 +90,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static io.onedev.server.model.Project.SORT_FIELDS;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
@@ -279,8 +282,10 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				List<String> orderFields = new ArrayList<>(Project.ORDER_FIELDS.keySet());
-				return new OrderEditPanel<Project>(id, orderFields, new IModel<List<EntitySort>> () {
+				Map<String, Direction> sortFields = new LinkedHashMap<>();
+				for (var entry: SORT_FIELDS.entrySet())
+					sortFields.put(entry.getKey(), entry.getValue().getDefaultDirection());
+				return new SortEditPanel<Project>(id, sortFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

@@ -8,7 +8,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -23,6 +22,8 @@ import java.util.List;
 
 import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.model.Build.*;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.build.BuildQueryParser.*;
 
 public class BuildQuery extends EntityQuery<Build> {
@@ -278,16 +279,21 @@ public class BuildQuery extends EntityQuery<Build> {
 
 			List<EntitySort> buildSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
-				String fieldName = getValue(order.Quoted().getText());
-				if (!ORDER_FIELDS.containsKey(fieldName)) 
+				var fieldName = getValue(order.Quoted().getText());
+				var sortField = SORT_FIELDS.get(fieldName);
+				if (sortField == null)
 					throw new ExplicitException("Can not order by field: " + fieldName);
 				
 				EntitySort buildSort = new EntitySort();
 				buildSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("desc"))
-					buildSort.setDirection(Direction.DESCENDING);
-				else
-					buildSort.setDirection(Direction.ASCENDING);
+				if (order.direction != null) {
+					if (order.direction.getText().equals("desc"))
+						buildSort.setDirection(DESCENDING);
+					else
+						buildSort.setDirection(ASCENDING);
+				} else {
+					buildSort.setDirection(sortField.getDefaultDirection());
+				}
 				buildSorts.add(buildSort);
 			}
 			
