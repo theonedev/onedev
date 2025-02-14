@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -32,7 +33,7 @@ import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.NamedBuildQueriesBean;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
@@ -123,7 +124,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

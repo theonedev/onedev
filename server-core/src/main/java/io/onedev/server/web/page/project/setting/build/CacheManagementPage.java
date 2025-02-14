@@ -9,7 +9,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -164,7 +165,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 
 		};
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

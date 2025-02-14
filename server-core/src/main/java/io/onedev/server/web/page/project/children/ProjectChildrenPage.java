@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -16,7 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class ProjectChildrenPage extends ProjectPage {
@@ -68,7 +69,7 @@ public class ProjectChildrenPage extends ProjectPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

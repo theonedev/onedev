@@ -1,8 +1,10 @@
 package io.onedev.server.web.component.pagenavigator;
 
-import javax.annotation.Nullable;
-
+import io.onedev.server.web.util.paginghistory.AjaxPagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationLink;
@@ -20,7 +22,7 @@ import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 
-import io.onedev.server.web.util.PagingHistorySupport;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
 public class OnePagingNavigator extends AjaxPagingNavigator {
@@ -60,11 +62,20 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 
 			@Override
 			protected Link<?> newPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
-				if (pagingHistorySupport != null) {
+				if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 					return new BookmarkablePageLink<Void>(id, getPage().getClass(),
-							pagingHistorySupport.newPageParameters((int) pageIndex));
+							((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters((int) pageIndex));
 				} else {
-					return super.newPagingNavigationLink(id, pageable, pageIndex);
+					return new AjaxPagingNavigationLink(id, pageable, pageIndex) {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							super.onClick(target);
+							if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
+								((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, (int) pageIndex);
+						}
+
+					};
 				}
 			}
 
@@ -81,10 +92,10 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 	@Override
 	protected AbstractLink newPagingNavigationIncrementLink(String id, IPageable pageable, int increment) {
 		AbstractLink link;
-		if (pagingHistorySupport != null) {
-			int pageNumber = (int) pageable.getCurrentPage() + increment;
+		int pageNumber = (int) pageable.getCurrentPage() + increment;
+		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					pagingHistorySupport.newPageParameters(pageNumber)) {
+					((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters(pageNumber)) {
 
 				@Override
 				protected void onConfigure() {
@@ -95,7 +106,14 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
-			link = new AjaxPagingNavigationIncrementLink(id, pageable, increment);
+			link = new AjaxPagingNavigationIncrementLink(id, pageable, increment) {
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					super.onClick(target);
+					if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
+						((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, pageNumber);
+				}
+			};
 		}
 		return link;
 	}
@@ -108,9 +126,9 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			absolutePageNumber = (int) (getPageable().getPageCount()-1);
 		else
 			absolutePageNumber = pageNumber;
-		if (pagingHistorySupport != null) {
+		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					pagingHistorySupport.newPageParameters(absolutePageNumber)) {
+					((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters(absolutePageNumber)) {
 				
 				@Override
 				protected void onConfigure() {
@@ -121,7 +139,14 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
-			link = new AjaxPagingNavigationLink(id, pageable, pageNumber);
+			link = new AjaxPagingNavigationLink(id, pageable, pageNumber) {
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					super.onClick(target);
+					if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
+						((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, pageNumber);
+				}
+			};
 		}
 		return link;
 	}

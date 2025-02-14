@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -15,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.RanOnCriteria;
 import io.onedev.server.web.component.build.list.BuildListPanel;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class AgentBuildsPage extends AgentDetailPage {
@@ -67,7 +68,7 @@ public class AgentBuildsPage extends AgentDetailPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 					
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

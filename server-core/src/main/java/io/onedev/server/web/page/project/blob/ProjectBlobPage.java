@@ -150,7 +150,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProjectBlobPage.class);
 	
-	private State state = new State();
+	private State state;
 	
 	private ObjectId resolvedRevision;
 	

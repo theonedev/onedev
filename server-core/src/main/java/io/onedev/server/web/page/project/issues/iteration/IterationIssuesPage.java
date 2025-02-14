@@ -1,18 +1,5 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -21,7 +8,19 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
 
@@ -94,7 +93,7 @@ public class IterationIssuesPage extends IterationDetailPage {
 	
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 					
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

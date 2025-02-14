@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.iteration;
 import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -14,7 +15,7 @@ import io.onedev.server.util.IterationSort;
 import io.onedev.server.web.component.iteration.list.IterationListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class IterationListPage extends ProjectPage {
@@ -49,7 +50,7 @@ public class IterationListPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

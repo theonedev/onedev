@@ -22,8 +22,9 @@ import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.NamedPackQueriesBean;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -136,7 +137,7 @@ public class ProjectPacksPage extends ProjectPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

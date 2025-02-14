@@ -1,21 +1,5 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.NamedAgentQuery;
@@ -28,8 +12,23 @@ import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.NamedAgentQueriesBean;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class AgentListPage extends AdministrationPage {
@@ -113,7 +112,7 @@ public class AgentListPage extends AdministrationPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

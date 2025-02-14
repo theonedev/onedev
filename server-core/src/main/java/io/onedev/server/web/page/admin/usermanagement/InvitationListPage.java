@@ -11,7 +11,8 @@ import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -231,7 +232,7 @@ public class InvitationListPage extends AdministrationPage {
 			}
 		};
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

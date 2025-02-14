@@ -13,7 +13,8 @@ import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
 import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -240,7 +241,7 @@ public class GroupListPage extends AdministrationPage {
 			}
 		};
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

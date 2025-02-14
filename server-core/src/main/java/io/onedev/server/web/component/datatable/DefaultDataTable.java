@@ -18,7 +18,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class DefaultDataTable<T, S> extends DataTable<T, S> {

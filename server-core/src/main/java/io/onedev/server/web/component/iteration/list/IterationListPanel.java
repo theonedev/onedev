@@ -27,7 +27,7 @@ import io.onedev.server.web.component.iteration.actions.IterationActionsPanel;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;

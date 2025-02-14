@@ -66,6 +66,7 @@ import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.*;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;

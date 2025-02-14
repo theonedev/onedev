@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @Editable
-public abstract class WidgetTab implements Serializable {
+public abstract class WidgetTab<T extends TabState> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,6 +23,6 @@ public abstract class WidgetTab implements Serializable {
 		this.title = title;
 	}
 	
-	public abstract Component render(String componentId);
+	public abstract Component render(String componentId, TabStateSupport<T> tabStateSupport);
 	
 }

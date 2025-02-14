@@ -52,7 +52,7 @@ import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;

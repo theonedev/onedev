@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.codecomments;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -9,7 +10,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestHandler;
@@ -47,7 +48,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

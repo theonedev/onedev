@@ -7323,8 +7323,16 @@ public class DataMigrator {
 			if (file.getName().startsWith("Dashboards.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					for (var widgetElement : element.element("widgets").elements())
+					for (var widgetElement : element.element("widgets").elements()) {
 						widgetElement.element("autoHeight").detach();
+						for (var tabElement: widgetElement.element("tabs").elements()) {
+							if (tabElement.getName().endsWith("CompositeWidget")) {
+								tabElement.element("tabs").detach();
+								tabElement.setName("io.onedev.server.ee.dashboard.widgets.markdown.MarkdownWidget");
+								tabElement.addElement("markdown").setText("Composite widget is removed, please add child tabs to top level instead");
+							}
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}

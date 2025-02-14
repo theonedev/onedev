@@ -12,7 +12,7 @@ public class Widget implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private List<WidgetTab> tabs = new ArrayList<>();
+	private List<WidgetTab<TabState>> tabs = new ArrayList<>();
 	
 	private int left;
 	
@@ -24,11 +24,11 @@ public class Widget implements Serializable {
 
 	@Editable(order=100, name="Tabs")
 	@Size(min=1, message = "At least one tab should be added")
-	public List<WidgetTab> getTabs() {
+	public List<WidgetTab<TabState>> getTabs() {
 		return tabs;
 	}
 
-	public void setTabs(List<WidgetTab> tabs) {
+	public void setTabs(List<WidgetTab<TabState>> tabs) {
 		this.tabs = tabs;
 	}
 

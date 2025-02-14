@@ -23,7 +23,7 @@ import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;

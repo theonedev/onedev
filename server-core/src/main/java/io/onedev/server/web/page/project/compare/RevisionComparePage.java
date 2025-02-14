@@ -104,17 +104,17 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<Collection<CodeComment>> commentsModel = 
-			new LoadableDetachableModel<Collection<CodeComment>>() {
+	private final IModel<Collection<CodeComment>> commentsModel =
+			new LoadableDetachableModel<>() {
 
-		@Override
-		protected Collection<CodeComment> load() {
-			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
-			return manager.query(projectModel.getObject(), 
-					state.compareWithMergeBase?mergeBase:leftCommitId, rightCommitId);
-		}
-		
-	};
+				@Override
+				protected Collection<CodeComment> load() {
+					CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+					return manager.query(projectModel.getObject(),
+							state.compareWithMergeBase ? mergeBase : leftCommitId, rightCommitId);
+				}
+
+			};
 	
 	private ObjectId mergeBase;
 

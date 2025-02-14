@@ -39,7 +39,8 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -119,7 +120,7 @@ public class ProjectTagsPage extends ProjectPage {
 		
 		query = params.get(PARAM_QUERY).toString();
 		
-		pagingHistorySupport = new PagingHistorySupport() {
+		pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

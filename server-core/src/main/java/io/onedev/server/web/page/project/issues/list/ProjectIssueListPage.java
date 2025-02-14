@@ -21,10 +21,10 @@ import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
 import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.list.IssuePinStatusChanged;
-import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -40,8 +40,9 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.NamedIssueQueriesBean;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -389,7 +390,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

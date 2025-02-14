@@ -57,7 +57,7 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;

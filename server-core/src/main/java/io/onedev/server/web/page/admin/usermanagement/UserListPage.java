@@ -24,7 +24,8 @@ import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -492,7 +493,7 @@ public class UserListPage extends AdministrationPage {
 			}
 		};
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

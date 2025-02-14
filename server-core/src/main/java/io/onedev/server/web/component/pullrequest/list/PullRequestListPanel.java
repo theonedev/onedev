@@ -52,7 +52,7 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.xodus.VisitInfoManager;
 import org.apache.commons.lang3.StringUtils;

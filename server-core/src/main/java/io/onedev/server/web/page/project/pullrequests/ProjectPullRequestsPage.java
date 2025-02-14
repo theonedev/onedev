@@ -1,20 +1,5 @@
 package io.onedev.server.web.page.project.pullrequests;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
@@ -27,6 +12,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -36,8 +22,21 @@ import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.NamedPullRequestQueriesBean;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class ProjectPullRequestsPage extends ProjectPage {
@@ -133,7 +132,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
+				return new ParamPagingHistorySupport() {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {

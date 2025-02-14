@@ -41,7 +41,8 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -209,7 +210,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			baseBranch = getProject().getDefaultBranch();
 		query = params.get(PARAM_QUERY).toString();
 		
-		pagingHistorySupport = new PagingHistorySupport() {
+		pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -39,7 +40,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class RoleListPage extends AdministrationPage {
@@ -240,7 +241,7 @@ public class RoleListPage extends AdministrationPage {
 			}
 		};
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		PagingHistorySupport pagingHistorySupport = new ParamPagingHistorySupport() {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {

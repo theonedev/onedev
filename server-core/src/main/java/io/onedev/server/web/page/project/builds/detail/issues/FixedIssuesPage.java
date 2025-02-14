@@ -1,23 +1,22 @@
 package io.onedev.server.web.page.project.builds.detail.issues;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class FixedIssuesPage extends BuildDetailPage {
@@ -72,7 +71,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 				
 				@Override
 				protected PagingHistorySupport getPagingHistorySupport() {
-					return new PagingHistorySupport() {
+					return new ParamPagingHistorySupport() {
 						
 						@Override
 						public PageParameters newPageParameters(int currentPage) {

@@ -37,9 +37,7 @@ public class Dashboard extends AbstractEntity {
 	public static final String PROP_FOR_EVERYONE = "forEveryone";
 	
 	public static final int COLUMNS = 16;
-	
-	public static final int CELL_HEIGHT = 50; 
-	
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User owner;
