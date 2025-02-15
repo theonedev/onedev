@@ -1,7 +1,7 @@
 <wicket:panel>
-	<div wicket:id="content" class="burndown"></div>
+	<div wicket:id="content" class="burndown d-flex flex-column flex-grow-1"></div>
 	<wicket:fragment wicket:id="chartFrag">
-		<div wicket:id="chart"></div>
+		<div wicket:id="chart" class="d-flex flex-column flex-grow-1"></div>
 		<wicket:enclosure child="message">
 			<div class="mt-4 text-muted font-size-sm"><wicket:svg href="bulb" class="icon"/> <span wicket:id="message"/></div>
 		</wicket:enclosure>

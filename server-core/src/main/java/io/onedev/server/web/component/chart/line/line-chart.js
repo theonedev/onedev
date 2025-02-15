@@ -131,7 +131,7 @@ onedev.server.lineChart = {
 			chart.setOption(option);
 			
 			$chart.on("resized", function() {
-				setTimeout(function(){
+				setTimeout(function() {
 					chart.resize();
 				});
 			});	
