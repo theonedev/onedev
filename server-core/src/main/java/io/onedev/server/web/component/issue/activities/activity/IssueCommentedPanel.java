@@ -1,19 +1,12 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.comment.CommentPanel;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.DeleteCallback;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.util.EmailAddressUtils.describe;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -23,11 +16,22 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.util.EmailAddressUtils.describe;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueCommentReactionManager;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
 class IssueCommentedPanel extends GenericPanel<IssueComment> {
@@ -123,6 +127,19 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			protected String getAutosaveKey() {
 				return "issue-comment:" + IssueCommentedPanel.this.getComment().getId();
 			}
+
+			@Override
+			protected Collection<? extends EntityReaction> getReactions() {
+				return IssueCommentedPanel.this.getComment().getReactions();
+			}
+
+			@Override
+			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+				var user = SecurityUtils.getUser();
+				var comment = IssueCommentedPanel.this.getComment();
+				OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(user, comment, emoji);
+			}
+
 		});
 
 		setOutputMarkupId(true);

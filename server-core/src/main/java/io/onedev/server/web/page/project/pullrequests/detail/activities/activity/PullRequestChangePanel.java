@@ -14,7 +14,6 @@ import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
 
-@SuppressWarnings("serial")
 class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 
 	public PullRequestChangePanel(String id, IModel<PullRequestChange> model) {

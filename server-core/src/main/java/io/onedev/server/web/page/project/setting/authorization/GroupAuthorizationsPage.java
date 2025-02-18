@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public class GroupAuthorizationsPage extends ProjectSettingPage {
 
 	public GroupAuthorizationsPage(PageParameters params) {

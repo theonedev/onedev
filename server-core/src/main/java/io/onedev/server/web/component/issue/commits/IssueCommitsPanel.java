@@ -14,7 +14,6 @@ import org.apache.wicket.model.IModel;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class IssueCommitsPanel extends GenericPanel<Issue> {
 
 	public IssueCommitsPanel(String id, IModel<Issue> model) {

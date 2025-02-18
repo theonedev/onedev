@@ -1,19 +1,11 @@
 package io.onedev.server.web.component.comment;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.component.markdown.ContentQuoted;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.util.DeleteCallback;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,9 +24,19 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.StaleStateException;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.markdown.ContentQuoted;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.reaction.ReactionListPanel;
+import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
 public abstract class CommentPanel extends Panel {
@@ -231,6 +233,20 @@ public abstract class CommentPanel extends Panel {
 			}
 			
 		});
+
+		viewer.add(new ReactionListPanel("reactions") {
+			
+			@Override
+			protected Collection<? extends EntityReaction> getReactions() {
+				return CommentPanel.this.getReactions();
+			}
+
+			@Override
+			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+				CommentPanel.this.onToggleEmoji(target, emoji);
+			}
+			
+		});
 		
 		viewer.setOutputMarkupId(true);
 		return viewer;
@@ -274,5 +290,9 @@ public abstract class CommentPanel extends Panel {
 	protected String getAutosaveKey() {
 		return null;
 	}
+	
+	protected abstract Collection<? extends EntityReaction> getReactions();
+	
+	protected abstract void onToggleEmoji(AjaxRequestTarget target, String emoji);
 	
 }

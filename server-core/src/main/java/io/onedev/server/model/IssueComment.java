@@ -1,11 +1,21 @@
 package io.onedev.server.model;
 
-import io.onedev.server.model.support.EntityComment;
-import io.onedev.server.rest.annotation.Immutable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import io.onedev.server.model.support.EntityComment;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(indexes={
@@ -21,6 +31,9 @@ public class IssueComment extends EntityComment {
 	@Immutable
 	private Issue issue;
 	
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<IssueCommentReaction> reactions = new ArrayList<>();
+
 	@Lob
 	private InternetAddress onBehalfOf;
 
@@ -44,6 +57,14 @@ public class IssueComment extends EntityComment {
 	@Override
 	public AbstractEntity getEntity() {
 		return getIssue();
+	}
+
+	public Collection<IssueCommentReaction> getReactions() {
+		return reactions;
+	}
+
+	public void setReactions(Collection<IssueCommentReaction> reactions) {
+		this.reactions = reactions;
 	}
 	
 }

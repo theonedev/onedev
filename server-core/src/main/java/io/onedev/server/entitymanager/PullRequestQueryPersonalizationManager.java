@@ -11,4 +11,5 @@ public interface PullRequestQueryPersonalizationManager extends EntityManager<Pu
 
     void createOrUpdate(PullRequestQueryPersonalization personalization);
 	
+    void delete(PullRequestQueryPersonalization personalization);
 }

@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.select2.SelectToActChoice;
 
-@SuppressWarnings("serial")
 public abstract class IssueAddChoice extends SelectToActChoice<Issue> {
 
 	public IssueAddChoice(String id, IssueChoiceProvider choiceProvider) {

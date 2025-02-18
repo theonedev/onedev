@@ -115,7 +115,39 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
+
+	public static final String NAME_THUMBS_UP_COUNT = "Reaction: Thumbs Up Count";
 	
+	public static final String PROP_THUMBS_UP_COUNT = "thumbsUpCount";
+	
+	public static final String NAME_THUMBS_DOWN_COUNT = "Reaction: Thumbs Down Count";
+	
+	public static final String PROP_THUMBS_DOWN_COUNT = "thumbsDownCount";
+	
+	public static final String NAME_SMILE_COUNT = "Reaction: Smile Count";
+	
+	public static final String PROP_SMILE_COUNT = "smileCount";
+	
+	public static final String NAME_TADA_COUNT = "Reaction: Tada Count";
+	
+	public static final String PROP_TADA_COUNT = "tadaCount";
+	
+	public static final String NAME_CONFUSED_COUNT = "Reaction: Confused Count";
+	
+	public static final String PROP_CONFUSED_COUNT = "confusedCount";
+	
+	public static final String NAME_HEART_COUNT = "Reaction: Heart Count";
+	
+	public static final String PROP_HEART_COUNT = "heartCount";
+	
+	public static final String NAME_ROCKET_COUNT = "Reaction: Rocket Count";
+	
+	public static final String PROP_ROCKET_COUNT = "rocketCount";
+	
+	public static final String NAME_EYES_COUNT = "Reaction: Eyes Count";
+	
+	public static final String PROP_EYES_COUNT = "eyesCount";
+
 	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
 	
 	public static final String PROP_LAST_ACTIVITY = "lastActivity";
@@ -156,6 +188,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
 			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_ITERATION,
+			NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, NAME_SMILE_COUNT, NAME_TADA_COUNT, 
+			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_ROCKET_COUNT, NAME_EYES_COUNT,
 			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			BurndownIndicators.ISSUE_COUNT, BurndownIndicators.REMAINING_TIME);
 	
@@ -163,7 +197,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION,
 			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
-			NAME_COMMENT_COUNT, NAME_ITERATION);
+			NAME_COMMENT_COUNT, NAME_ITERATION,
+			NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, NAME_SMILE_COUNT, NAME_TADA_COUNT, 
+			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_ROCKET_COUNT, NAME_EYES_COUNT);
 
 	public static final Map<String, IssueSortField> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -178,6 +214,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		SORT_FIELDS.put(NAME_SPENT_TIME, new IssueSortField(PROP_TOTAL_SPENT_TIME, comparingInt(Issue::getTotalSpentTime)));
 		SORT_FIELDS.put(NAME_PROGRESS, new IssueSortField(PROP_PROGRESS, comparingInt(Issue::getProgress)));
 		SORT_FIELDS.put(NAME_BOARD_POSITION, new IssueSortField(PROP_BOARD_POSITION, comparingInt(Issue::getBoardPosition)));
+		SORT_FIELDS.put(NAME_THUMBS_UP_COUNT, new IssueSortField(PROP_THUMBS_UP_COUNT, DESCENDING, comparingInt(Issue::getThumbsUpCount)));
+		SORT_FIELDS.put(NAME_THUMBS_DOWN_COUNT, new IssueSortField(PROP_THUMBS_DOWN_COUNT, DESCENDING, comparingInt(Issue::getThumbsDownCount)));
+		SORT_FIELDS.put(NAME_SMILE_COUNT, new IssueSortField(PROP_SMILE_COUNT, DESCENDING, comparingInt(Issue::getSmileCount)));
+		SORT_FIELDS.put(NAME_TADA_COUNT, new IssueSortField(PROP_TADA_COUNT, DESCENDING, comparingInt(Issue::getTadaCount)));
+		SORT_FIELDS.put(NAME_CONFUSED_COUNT, new IssueSortField(PROP_CONFUSED_COUNT, DESCENDING, comparingInt(Issue::getConfusedCount)));
+		SORT_FIELDS.put(NAME_HEART_COUNT, new IssueSortField(PROP_HEART_COUNT, DESCENDING, comparingInt(Issue::getHeartCount)));
+		SORT_FIELDS.put(NAME_ROCKET_COUNT, new IssueSortField(PROP_ROCKET_COUNT, DESCENDING, comparingInt(Issue::getRocketCount)));
+		SORT_FIELDS.put(NAME_EYES_COUNT, new IssueSortField(PROP_EYES_COUNT, DESCENDING, comparingInt(Issue::getEyesCount)));
 	}
 	
 	private static ThreadLocal<Stack<Issue>> stack = ThreadLocal.withInitial(() -> new Stack<>());
@@ -222,6 +266,22 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private int voteCount;
 	
 	private int commentCount;
+
+	private int thumbsUpCount;
+
+	private int thumbsDownCount;
+
+	private int smileCount;
+
+	private int tadaCount;
+
+	private int confusedCount;
+	
+	private int heartCount;
+	
+	private int rocketCount;
+
+	private int eyesCount;
 	
 	private int totalEstimatedTime;
 	
@@ -294,6 +354,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> targetLinks = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueReaction> reactions = new ArrayList<>();
 	
 	private transient List<ProjectScopedCommit> headFixCommits;
 
@@ -468,6 +531,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public void setComments(Collection<IssueComment> comments) {
 		this.comments = comments;
 	}
+	public Collection<IssueReaction> getReactions() {
+		return reactions;
+	}
+
+	public void setReactions(Collection<IssueReaction> reactions) {
+		this.reactions = reactions;
+	}
 
 	public Collection<IssueChange> getChanges() {
 		return changes;
@@ -562,6 +632,70 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setCommentCount(int commentCount) {
 		this.commentCount = commentCount;
+	}
+
+	public int getThumbsUpCount() {
+		return thumbsUpCount;
+	}
+
+	public void setThumbsUpCount(int thumbsUpCount) {
+		this.thumbsUpCount = thumbsUpCount;
+	}
+
+	public int getThumbsDownCount() {
+		return thumbsDownCount;
+	}
+
+	public void setThumbsDownCount(int thumbsDownCount) {
+		this.thumbsDownCount = thumbsDownCount;
+	}
+
+	public int getSmileCount() {
+		return smileCount;
+	}
+
+	public void setSmileCount(int smileCount) {
+		this.smileCount = smileCount;
+	}
+
+	public int getTadaCount() {
+		return tadaCount;
+	}
+
+	public void setTadaCount(int tadaCount) {
+		this.tadaCount = tadaCount;
+	}
+
+	public int getConfusedCount() {
+		return confusedCount;
+	}
+
+	public void setConfusedCount(int confusedCount) {
+		this.confusedCount = confusedCount;
+	}
+
+	public int getHeartCount() {
+		return heartCount;
+	}
+
+	public void setHeartCount(int heartCount) {
+		this.heartCount = heartCount;
+	}
+
+	public int getRocketCount() {
+		return rocketCount;
+	}
+
+	public void setRocketCount(int rocketCount) {
+		this.rocketCount = rocketCount;
+	}
+
+	public int getEyesCount() {
+		return eyesCount;
+	}
+
+	public void setEyesCount(int eyesCount) {
+		this.eyesCount = eyesCount;
 	}
 
 	public int getTotalEstimatedTime() {

@@ -1,22 +1,87 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.Issue.PROP_OWN_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.PROP_OWN_SPENT_TIME;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.entitymanager.IssueScheduleManager;
+import io.onedev.server.entitymanager.IssueTouchManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.issue.*;
+import io.onedev.server.event.project.issue.IssueDeleted;
+import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.issue.IssueOpened;
+import io.onedev.server.event.project.issue.IssuesCopied;
+import io.onedev.server.event.project.issue.IssuesDeleted;
+import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.model.*;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueAuthorization;
+import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueQueryPersonalization;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
@@ -47,24 +112,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.*;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.*;
-
-import static io.onedev.server.model.Issue.PROP_OWN_ESTIMATED_TIME;
-import static io.onedev.server.model.Issue.PROP_OWN_SPENT_TIME;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultIssueManager extends BaseEntityManager<Issue> implements IssueManager, Serializable {

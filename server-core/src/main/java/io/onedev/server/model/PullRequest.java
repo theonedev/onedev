@@ -105,6 +105,38 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
 
+	public static final String NAME_THUMBS_UP_COUNT = "Reaction: Thumbs Up Count";
+
+	public static final String PROP_THUMBS_UP_COUNT = "thumbsUpCount";
+
+	public static final String NAME_THUMBS_DOWN_COUNT = "Reaction: Thumbs Down Count";
+
+	public static final String PROP_THUMBS_DOWN_COUNT = "thumbsDownCount";
+
+	public static final String NAME_SMILE_COUNT = "Reaction: Smile Count";
+
+	public static final String PROP_SMILE_COUNT = "smileCount";
+
+	public static final String NAME_TADA_COUNT = "Reaction: Tada Count";
+
+	public static final String PROP_TADA_COUNT = "tadaCount";
+
+	public static final String NAME_CONFUSED_COUNT = "Reaction: Confused Count";
+
+	public static final String PROP_CONFUSED_COUNT = "confusedCount";
+
+	public static final String NAME_HEART_COUNT = "Reaction: Heart Count";
+
+	public static final String PROP_HEART_COUNT = "heartCount";
+
+	public static final String NAME_ROCKET_COUNT = "Reaction: Rocket Count";
+
+	public static final String PROP_ROCKET_COUNT = "rocketCount";
+
+	public static final String NAME_EYES_COUNT = "Reaction: Eyes Count";
+	
+	public static final String PROP_EYES_COUNT = "eyesCount";
+
 	public static final String PROP_SUBMITTER = "submitter";
 	
 	public static final String NAME_SUBMIT_DATE = "Submit Date";
@@ -157,7 +189,9 @@ public class PullRequest extends ProjectBelonging
 			NAME_NUMBER, NAME_STATUS, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
 			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_LABEL, NAME_DESCRIPTION, 
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_CLOSE_DATE, 
-			NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
+			NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT, NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, 
+			NAME_SMILE_COUNT, NAME_TADA_COUNT, NAME_CONFUSED_COUNT, NAME_HEART_COUNT, 
+			NAME_ROCKET_COUNT, NAME_EYES_COUNT);
 
 	public static final Map<String, SortField<PullRequest>> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -171,6 +205,14 @@ public class PullRequest extends ProjectBelonging
 		SORT_FIELDS.put(NAME_SOURCE_PROJECT, new SortField<>(PROP_SOURCE_PROJECT));
 		SORT_FIELDS.put(NAME_SOURCE_BRANCH, new SortField<>(PROP_SOURCE_BRANCH));
 		SORT_FIELDS.put(NAME_COMMENT_COUNT, new SortField<>(PROP_COMMENT_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_THUMBS_UP_COUNT, new SortField<>(PROP_THUMBS_UP_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_THUMBS_DOWN_COUNT, new SortField<>(PROP_THUMBS_DOWN_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_SMILE_COUNT, new SortField<>(PROP_SMILE_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_TADA_COUNT, new SortField<>(PROP_TADA_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_CONFUSED_COUNT, new SortField<>(PROP_CONFUSED_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_HEART_COUNT, new SortField<>(PROP_HEART_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_ROCKET_COUNT, new SortField<>(PROP_ROCKET_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_EYES_COUNT, new SortField<>(PROP_EYES_COUNT, DESCENDING));
 	}
 	
 	private static ThreadLocal<Stack<PullRequest>> stack = withInitial(Stack::new);
@@ -309,6 +351,9 @@ public class PullRequest extends ProjectBelonging
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PendingSuggestionApply> pendingSuggestionApplies = new ArrayList<>();
 	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestReaction> reactions = new ArrayList<>();
+
 	private transient Boolean mergedIntoTarget;
 
 	private transient Boolean sourceOutdated;
@@ -328,6 +373,15 @@ public class PullRequest extends ProjectBelonging
 	private transient Collection<User> assignees;
 	
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
+
+	private int thumbsUpCount;
+	private int thumbsDownCount;
+	private int smileCount;
+	private int tadaCount;
+	private int confusedCount;
+	private int heartCount;
+	private int rocketCount;
+	private int eyesCount;
 
 	public String getTitle() {
 		return title;
@@ -493,6 +547,13 @@ public class PullRequest extends ProjectBelonging
 		this.changes = changes;
 	}
 
+	public Collection<PullRequestReaction> getReactions() {
+		return reactions;
+	}
+
+	public void setReactions(Collection<PullRequestReaction> reactions) {
+		this.reactions = reactions;
+	}
 	public Collection<PullRequestMention> getMentions() {
 		return mentions;
 	}
@@ -1165,6 +1226,70 @@ public class PullRequest extends ProjectBelonging
 	
 	public String getSummary(@Nullable Project currentProject) {
 		return Emojis.getInstance().apply(getTitle()) + " (" + getReference().toString(currentProject)+ ")";
+	}
+	
+	public int getThumbsUpCount() {
+		return thumbsUpCount;
+	}
+
+	public void setThumbsUpCount(int thumbsUpCount) {
+		this.thumbsUpCount = thumbsUpCount;
+	}
+
+	public int getThumbsDownCount() {
+		return thumbsDownCount;
+	}
+
+	public void setThumbsDownCount(int thumbsDownCount) {
+		this.thumbsDownCount = thumbsDownCount;
+	}
+
+	public int getSmileCount() {
+		return smileCount;
+	}
+
+	public void setSmileCount(int smileCount) {
+		this.smileCount = smileCount;
+	}
+
+	public int getTadaCount() {
+		return tadaCount;
+	}
+
+	public void setTadaCount(int tadaCount) {
+		this.tadaCount = tadaCount;
+	}
+
+	public int getConfusedCount() {
+		return confusedCount;
+	}
+
+	public void setConfusedCount(int confusedCount) {
+		this.confusedCount = confusedCount;
+	}
+
+	public int getHeartCount() {
+		return heartCount;
+	}
+
+	public void setHeartCount(int heartCount) {
+		this.heartCount = heartCount;
+	}
+
+	public int getRocketCount() {
+		return rocketCount;
+	}
+
+	public void setRocketCount(int rocketCount) {
+		this.rocketCount = rocketCount;
+	}
+
+	public int getEyesCount() {
+		return eyesCount;
+	}
+
+	public void setEyesCount(int eyesCount) {
+		this.eyesCount = eyesCount;
 	}
 	
 }

@@ -12,7 +12,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 public class PullRequestChangeActivity implements PullRequestActivity {
 
 	private final Long changeId;

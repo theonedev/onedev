@@ -17,7 +17,6 @@ import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
-@SuppressWarnings("serial")
 public class AvatarEditPage extends ProjectSettingPage {
 	
 	private String uploadedAvatarData;

@@ -19,7 +19,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 public abstract class BoardEditPanel extends Panel {
 
 	private final List<BoardSpec> boards;

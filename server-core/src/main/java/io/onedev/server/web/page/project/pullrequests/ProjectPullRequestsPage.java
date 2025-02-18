@@ -38,7 +38,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class ProjectPullRequestsPage extends ProjectPage {
 
 	private static final String PARAM_PAGE = "page";

@@ -25,13 +25,13 @@ import org.apache.wicket.model.IModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.*;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
 
-@SuppressWarnings("serial")
 public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
@@ -75,14 +75,24 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequest.QUERY_FIELDS);
+							List<String> candidates = new ArrayList<>(PullRequest.QUERY_FIELDS.stream()
+									.filter(it -> !it.startsWith("Reaction: "))
+									.collect(Collectors.toList()));						
 							if (getProject() != null)
 								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
+							candidates.addAll(PullRequest.QUERY_FIELDS.stream()
+									.filter(it -> it.startsWith("Reaction: "))
+									.collect(Collectors.toList()));
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequest.SORT_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(PullRequest.SORT_FIELDS.keySet().stream()
+									.filter(it -> !it.startsWith("Reaction: "))
+									.collect(Collectors.toList()));
 							if (getProject() != null)
 								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
+							candidates.addAll(PullRequest.SORT_FIELDS.keySet().stream()
+									.filter(it -> it.startsWith("Reaction: "))
+									.collect(Collectors.toList()));
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
 							List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -139,6 +149,14 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										case PullRequest.NAME_DESCRIPTION:
 										case PullRequest.NAME_COMMENT_COUNT:
 										case PullRequest.NAME_COMMENT:
+										case PullRequest.NAME_THUMBS_UP_COUNT:
+										case PullRequest.NAME_THUMBS_DOWN_COUNT:
+										case PullRequest.NAME_SMILE_COUNT:
+										case PullRequest.NAME_TADA_COUNT:
+										case PullRequest.NAME_CONFUSED_COUNT:
+										case PullRequest.NAME_HEART_COUNT:
+										case PullRequest.NAME_ROCKET_COUNT:
+										case PullRequest.NAME_EYES_COUNT:
 											return null;
 									}
 								} catch (ExplicitException ignored) {

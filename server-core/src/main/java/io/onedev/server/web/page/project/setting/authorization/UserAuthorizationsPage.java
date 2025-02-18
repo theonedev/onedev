@@ -25,7 +25,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
-@SuppressWarnings("serial")
 public class UserAuthorizationsPage extends ProjectSettingPage {
 
 	public UserAuthorizationsPage(PageParameters params) {

@@ -49,7 +49,6 @@ import java.util.*;
 
 import static io.onedev.server.security.SecurityUtils.canAccessTimeTracking;
 
-@SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {
 
 	private static final String COOKIE_SHOW_COMMENTS = "onedev.server.issue.showComments";

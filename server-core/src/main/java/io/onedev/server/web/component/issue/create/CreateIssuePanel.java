@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class CreateIssuePanel extends Panel {
 
 	public CreateIssuePanel(String id) {

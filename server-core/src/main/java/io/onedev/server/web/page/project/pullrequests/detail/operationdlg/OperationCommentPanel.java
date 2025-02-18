@@ -15,7 +15,6 @@ import org.apache.wicket.model.PropertyModel;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class OperationCommentPanel extends ObsoleteUpdateAwarePanel {
 
 	private String comment;

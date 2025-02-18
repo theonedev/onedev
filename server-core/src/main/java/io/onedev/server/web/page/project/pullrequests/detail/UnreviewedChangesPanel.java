@@ -7,7 +7,6 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
-@SuppressWarnings("serial")
 public class UnreviewedChangesPanel extends GenericPanel<PullRequestUpdate> {
 
 	public UnreviewedChangesPanel(String id, IModel<PullRequestUpdate> model) {

@@ -6,7 +6,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import com.hazelcast.internal.monitor.impl.GlobalPerIndexStats;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.criteria.Criteria;
 

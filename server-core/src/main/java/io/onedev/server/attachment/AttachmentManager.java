@@ -1,11 +1,10 @@
 package io.onedev.server.attachment;
 
-import io.onedev.server.util.artifact.FileInfo;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
+
+import io.onedev.server.util.artifact.FileInfo;
 
 public interface AttachmentManager {
 

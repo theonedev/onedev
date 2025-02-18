@@ -1,0 +1,19 @@
+<wicket:panel>
+    <a wicket:id="addReaction" class="btn btn-icon btn-sm link-muted btn-hover-light">
+        <wicket:svg href="smile" class="icon"/>
+    </a>
+    <wicket:container wicket:id="reactions">
+        <a wicket:id="link" class="btn btn-icon btn-sm btn-hover-light">
+            <span wicket:id="emoji"></span>
+            <span wicket:id="count" class="ml-1 text-muted text-monospace"></span>
+        </a>
+    </wicket:container>
+    <wicket:fragment wicket:id="emojiSelectFrag">
+        <div class="px-3 py-2">
+            <a wicket:id="emojis" class="mr-2 mr-last-child-0 btn btn-icon btn-xs btn-hover-light"><span wicket:id="emoji"></span></a>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="usersFrag">
+        <div wicket:id="users" class="px-3 py-2"></div>
+    </wicket:fragment>
+</wicket:panel>

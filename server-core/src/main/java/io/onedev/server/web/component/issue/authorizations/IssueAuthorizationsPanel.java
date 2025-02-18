@@ -57,7 +57,6 @@ import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 
-@SuppressWarnings("serial")
 public abstract class IssueAuthorizationsPanel extends Panel {
 
 	private String query;

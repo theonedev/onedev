@@ -1,7 +1,68 @@
 package io.onedev.server.web.behavior;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
+import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
+import static io.onedev.server.model.Issue.NAME_COMMENT;
+import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
+import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
+import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
+import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
+import static io.onedev.server.model.Issue.NAME_LAST_ACTIVITY_DATE;
+import static io.onedev.server.model.Issue.NAME_PROGRESS;
+import static io.onedev.server.model.Issue.NAME_PROJECT;
+import static io.onedev.server.model.Issue.NAME_ROCKET_COUNT;
+import static io.onedev.server.model.Issue.NAME_SMILE_COUNT;
+import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
+import static io.onedev.server.model.Issue.NAME_STATE;
+import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.NAME_TADA_COUNT;
+import static io.onedev.server.model.Issue.NAME_THUMBS_DOWN_COUNT;
+import static io.onedev.server.model.Issue.NAME_THUMBS_UP_COUNT;
+import static io.onedev.server.model.Issue.NAME_TITLE;
+import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
+import static io.onedev.server.model.Issue.QUERY_FIELDS;
+import static io.onedev.server.model.Issue.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
+import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.CommentedBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.CommentedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.CurrentIssue;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.HasAny;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Mentioned;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.MentionedMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -19,7 +80,18 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.*;
+import io.onedev.server.model.support.issue.field.spec.BooleanField;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
+import io.onedev.server.model.support.issue.field.spec.CommitField;
+import io.onedev.server.model.support.issue.field.spec.DateField;
+import io.onedev.server.model.support.issue.field.spec.DateTimeField;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
+import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
+import io.onedev.server.model.support.issue.field.spec.IterationChoiceField;
+import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
+import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -31,21 +103,7 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
 
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static io.onedev.server.model.Issue.*;
-import static io.onedev.server.search.entity.EntityQuery.getValue;
-import static io.onedev.server.search.entity.issue.IssueQuery.*;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
-
-@SuppressWarnings("serial")
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
@@ -109,7 +167,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
-							Map<String, String> candidates = getFieldCandidates(QUERY_FIELDS);
+							var candidates = getFieldCandidates(QUERY_FIELDS.stream().filter(it -> !it.startsWith("Reaction: ")).collect(toList()));
+
 							if (!option.withProjectCriteria())
 								candidates.remove(NAME_PROJECT);
 							if (!option.withStateCriteria())
@@ -121,9 +180,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(NAME_SPENT_TIME);
 								candidates.remove(NAME_PROGRESS);
 							}
+							candidates.putAll(getFieldCandidates(QUERY_FIELDS.stream().filter(it -> it.startsWith("Reaction: ")).collect(toList())));
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							Map<String, String> candidates = getFieldCandidates(SORT_FIELDS.keySet());
+							var candidates = getFieldCandidates(SORT_FIELDS.keySet().stream().filter(it -> !it.startsWith("Reaction: ")).collect(toList()));
 							if (option.forBoard())
 								candidates.remove(NAME_BOARD_POSITION);
 							if (getProject() != null)
@@ -140,6 +200,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									candidates.put(field.getName(), null);
 								}
 							}
+							candidates.putAll(getFieldCandidates(SORT_FIELDS.keySet().stream().filter(it -> it.startsWith("Reaction: ")).collect(toList())));
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("revisionValue".equals(spec.getLabel())) {
 							String revisionType = terminalExpect.getState()
@@ -244,9 +305,20 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											if ("0.5".contains(matchWith.toLowerCase()))
 												suggestions.add(new InputSuggestion("0.5", "specify decimal number, modify as necessary", null));
 											return !suggestions.isEmpty() ? suggestions : null;
-										} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
-												|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
-												|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 
+										} else if (fieldName.equals(NAME_TITLE) 
+												|| fieldName.equals(NAME_DESCRIPTION) 
+												|| fieldName.equals(NAME_COMMENT) 
+												|| fieldName.equals(NAME_VOTE_COUNT)
+												|| fieldName.equals(NAME_COMMENT_COUNT)
+												|| fieldName.equals(NAME_THUMBS_UP_COUNT) 
+												|| fieldName.equals(NAME_THUMBS_DOWN_COUNT) 
+												|| fieldName.equals(NAME_SMILE_COUNT)
+												|| fieldName.equals(NAME_TADA_COUNT) 
+												|| fieldName.equals(NAME_CONFUSED_COUNT)
+												|| fieldName.equals(NAME_HEART_COUNT) 
+												|| fieldName.equals(NAME_ROCKET_COUNT)
+												|| fieldName.equals(NAME_EYES_COUNT) 
+												|| fieldSpec instanceof IntegerField
 												|| fieldSpec instanceof TextField) {
 											return null;
 										}

@@ -1,21 +1,8 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.comment.CommentPanel;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
-import io.onedev.server.web.util.DeleteCallback;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -26,9 +13,25 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.PullRequestCommentReactionManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
+import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 
 	private final DeleteCallback deleteCallback;
@@ -126,6 +129,19 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 					notifyPullRequestChange(target);
 					deleteCallback.onDelete(target);
 				};
+			}
+
+			@Override
+			protected Collection<? extends EntityReaction> getReactions() {
+				return PullRequestCommentedPanel.this.getComment().getReactions();
+			}
+
+			@Override
+			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+				OneDev.getInstance(PullRequestCommentReactionManager.class).toggleEmoji(
+						SecurityUtils.getUser(), 
+						PullRequestCommentedPanel.this.getComment(), 
+						emoji);
 			}
 			
 		});

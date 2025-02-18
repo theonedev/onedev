@@ -1,5 +1,71 @@
 package io.onedev.server.search.entity.issue;
 
+import static io.onedev.server.model.Issue.NAME_COMMENT;
+import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
+import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.NAME_LAST_ACTIVITY_DATE;
+import static io.onedev.server.model.Issue.NAME_PROGRESS;
+import static io.onedev.server.model.Issue.NAME_PROJECT;
+import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
+import static io.onedev.server.model.Issue.NAME_STATE;
+import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.NAME_TITLE;
+import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
+import static io.onedev.server.model.Issue.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.CommentedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.Confidential;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.Contains;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.CurrentIssue;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.FixedInCurrentBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.FixedInCurrentCommit;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.FixedInCurrentPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.Is;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsAfter;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsBefore;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsLessThan;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsNot;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsNotEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsNotMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsPrevious;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsSince;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IsUntil;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.MentionedMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.SubmittedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.WatchedByMe;
+import static io.onedev.server.model.Issue.NAME_THUMBS_UP_COUNT;
+import static io.onedev.server.model.Issue.NAME_THUMBS_DOWN_COUNT;
+import static io.onedev.server.model.Issue.NAME_SMILE_COUNT;
+import static io.onedev.server.model.Issue.NAME_TADA_COUNT;
+import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
+import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
+import static io.onedev.server.model.Issue.NAME_ROCKET_COUNT;
+import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -8,11 +74,38 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.*;
+import io.onedev.server.model.support.issue.field.spec.BooleanField;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
+import io.onedev.server.model.support.issue.field.spec.CommitField;
+import io.onedev.server.model.support.issue.field.spec.DateField;
+import io.onedev.server.model.support.issue.field.spec.DateTimeField;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
+import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
+import io.onedev.server.model.support.issue.field.spec.IterationChoiceField;
+import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
+import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.issue.IssueQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.FixedBetweenCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.LinkMatchCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.ReferenceCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -24,15 +117,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.*;
-
-import static io.onedev.server.model.Issue.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.issue.IssueQueryParser.*;
 
 public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
@@ -267,6 +351,22 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 										criterias.add(new VoteCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_COMMENT_COUNT)) {
 										criterias.add(new CommentCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_THUMBS_UP_COUNT)) {
+										criterias.add(new ThumbsUpCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_THUMBS_DOWN_COUNT)) {
+										criterias.add(new ThumbsDownCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_SMILE_COUNT)) {
+										criterias.add(new SmileCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_TADA_COUNT)) {
+										criterias.add(new TadaCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_CONFUSED_COUNT)) {
+										criterias.add(new ConfusedCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_HEART_COUNT)) {
+										criterias.add(new HeartCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_ROCKET_COUNT)) {
+										criterias.add(new RocketCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_EYES_COUNT)) {
+										criterias.add(new EyesCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 										criterias.add(new ReferenceCriteria(project, value, operator));
 									} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
@@ -311,8 +411,29 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 										case NAME_COMMENT_COUNT:
 											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
 											break;
-										case Issue.NAME_NUMBER:
-											criterias.add(new ReferenceCriteria(project, value, operator));
+										case NAME_THUMBS_UP_COUNT:
+											criterias.add(new ThumbsUpCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_THUMBS_DOWN_COUNT:
+											criterias.add(new ThumbsDownCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_SMILE_COUNT:
+											criterias.add(new SmileCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_TADA_COUNT:
+											criterias.add(new TadaCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_CONFUSED_COUNT:
+											criterias.add(new ConfusedCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_HEART_COUNT:
+											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_ROCKET_COUNT:
+											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_EYES_COUNT:
+											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
 											break;
 										case NAME_ESTIMATED_TIME: 
 											int intValue = value.equals(NAME_SPENT_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
@@ -475,6 +596,14 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						&& !fieldName.equals(Issue.NAME_STATE)
 						&& !fieldName.equals(Issue.NAME_VOTE_COUNT)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
+						&& !fieldName.equals(Issue.NAME_THUMBS_UP_COUNT)
+						&& !fieldName.equals(Issue.NAME_THUMBS_DOWN_COUNT)
+						&& !fieldName.equals(Issue.NAME_SMILE_COUNT)
+						&& !fieldName.equals(Issue.NAME_TADA_COUNT)
+						&& !fieldName.equals(Issue.NAME_CONFUSED_COUNT)
+						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
+						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
+						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
 						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)
 						&& !(fieldSpec instanceof IssueChoiceField)
@@ -503,6 +632,14 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						&& !fieldName.equals(NAME_SPENT_TIME)
 						&& !fieldName.equals(NAME_PROGRESS)
 						&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
+						&& !fieldName.equals(Issue.NAME_THUMBS_UP_COUNT)
+						&& !fieldName.equals(Issue.NAME_THUMBS_DOWN_COUNT)
+						&& !fieldName.equals(Issue.NAME_SMILE_COUNT)
+						&& !fieldName.equals(Issue.NAME_TADA_COUNT)
+						&& !fieldName.equals(Issue.NAME_CONFUSED_COUNT)
+						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
+						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
+						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
 						&& !fieldName.equals(Issue.NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)
 						&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))

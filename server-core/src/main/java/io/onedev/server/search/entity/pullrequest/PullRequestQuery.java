@@ -281,6 +281,30 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										case PullRequest.NAME_COMMENT_COUNT:
 											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
 											break;
+										case PullRequest.NAME_THUMBS_UP_COUNT:
+											criterias.add(new ThumbsUpCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_THUMBS_DOWN_COUNT:
+											criterias.add(new ThumbsDownCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_SMILE_COUNT:
+											criterias.add(new SmileCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_TADA_COUNT:
+											criterias.add(new TadaCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_CONFUSED_COUNT:
+											criterias.add(new ConfusedCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_HEART_COUNT:
+											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_ROCKET_COUNT:
+											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_EYES_COUNT:
+											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+											break;
 										default:
 											throw new IllegalStateException();
 									}
@@ -294,8 +318,30 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										case PullRequest.NAME_COMMENT_COUNT:
 											criterias.add(new CommentCountCriteria(getIntValue(value), operator));
 											break;
-										default:
-											throw new IllegalStateException();
+										case PullRequest.NAME_THUMBS_UP_COUNT:
+											criterias.add(new ThumbsUpCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_THUMBS_DOWN_COUNT:
+											criterias.add(new ThumbsDownCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_SMILE_COUNT:
+											criterias.add(new SmileCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_TADA_COUNT:
+											criterias.add(new TadaCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_CONFUSED_COUNT:
+											criterias.add(new ConfusedCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_HEART_COUNT:
+											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_ROCKET_COUNT:
+											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_EYES_COUNT:
+											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+											break;
 									}
 									break;
 								default:
@@ -386,14 +432,30 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						&& !fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)
 						&& !fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)
 						&& !fieldName.equals(PullRequest.NAME_LABEL)
-						&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
+						&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_THUMBS_UP_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_THUMBS_DOWN_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_SMILE_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_TADA_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_CONFUSED_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_HEART_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_ROCKET_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
 			case IsLessThan:
 			case IsGreaterThan:
 				if (!fieldName.equals(PullRequest.NAME_NUMBER)
-						&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
+						&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_THUMBS_UP_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_THUMBS_DOWN_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_SMILE_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_TADA_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_CONFUSED_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_HEART_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_ROCKET_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;

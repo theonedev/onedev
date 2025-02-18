@@ -7339,4 +7339,36 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate188(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("thumbsUpCount").setText("0");
+					element.addElement("thumbsDownCount").setText("0");
+					element.addElement("smileCount").setText("0");
+					element.addElement("tadaCount").setText("0");
+					element.addElement("confusedCount").setText("0");
+					element.addElement("heartCount").setText("0");
+					element.addElement("rocketCount").setText("0");
+					element.addElement("eyesCount").setText("0");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("thumbsUpCount").setText("0");
+					element.addElement("thumbsDownCount").setText("0");
+					element.addElement("smileCount").setText("0");
+					element.addElement("tadaCount").setText("0");
+					element.addElement("confusedCount").setText("0");
+					element.addElement("heartCount").setText("0");
+					element.addElement("rocketCount").setText("0");
+					element.addElement("eyesCount").setText("0");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
