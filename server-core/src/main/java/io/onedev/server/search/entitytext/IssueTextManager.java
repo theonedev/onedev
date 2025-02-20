@@ -9,9 +9,8 @@ import io.onedev.server.util.ProjectScope;
 
 public interface IssueTextManager {
 
-	long count(@Nullable ProjectScope projectScope, String queryString);
-	
-	List<Issue> query(@Nullable ProjectScope projectScope, String queryString, 
-			boolean loadFieldsAndLinks, int firstResult, int maxResults);
-	
+	List<Long> query(@Nullable ProjectScope projectScope, String queryString, int count);
+			
+	boolean matches(Issue issue, String queryString);
+
 }

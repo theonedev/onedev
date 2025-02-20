@@ -11,6 +11,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class PullRequestCriteria extends Criteria<Build> {
@@ -30,7 +31,7 @@ public class PullRequestCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<PullRequest> attribute = from.get(Build.PROP_PULL_REQUEST);
 		var predicate = builder.equal(attribute, request);
 		if (operator == BuildQueryLexer.IsNot)

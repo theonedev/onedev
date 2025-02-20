@@ -1,14 +1,16 @@
 package io.onedev.server.search.entity.agent;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.model.Agent;
-import io.onedev.server.util.criteria.Criteria;
 import io.onedev.commons.utils.match.WildcardUtils;
+import io.onedev.server.model.Agent;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class OsVersionCriteria extends Criteria<Agent> {
 
@@ -24,7 +26,7 @@ public class OsVersionCriteria extends Criteria<Agent> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Agent.PROP_OS_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
 		var predicate = builder.like(builder.lower(attribute), normalized);

@@ -24,6 +24,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -81,7 +82,7 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Set<Long> fixedIssueIds = new HashSet<>();
 		
 		Project project = getProjectAndCommitIds().project;

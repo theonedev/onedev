@@ -1,13 +1,15 @@
 package io.onedev.server.job.match;
 
-import io.onedev.server.util.criteria.Criteria;
+import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class OnBranchCriteria extends Criteria<JobMatchContext> {
 
@@ -35,7 +37,7 @@ public class OnBranchCriteria extends Criteria<JobMatchContext> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<JobMatchContext, JobMatchContext> from,
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<JobMatchContext, JobMatchContext> from,
 			CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}

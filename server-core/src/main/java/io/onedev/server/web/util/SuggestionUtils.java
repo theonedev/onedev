@@ -1,6 +1,29 @@
 package io.onedev.server.web.util;
 
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
+
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
 import com.google.common.base.Preconditions;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
@@ -11,16 +34,34 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.*;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.pack.PackSupport;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
@@ -30,17 +71,6 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
-import javax.annotation.Nullable;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static java.util.Collections.sort;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 
 public class SuggestionUtils {
 	
@@ -359,12 +389,12 @@ public class SuggestionUtils {
 	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith, int count) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', '-');
-		if (scopedQuery != null) {
-			if (SecurityUtils.canAccessProject(scopedQuery.getProject())) {
-				for (Issue issue : OneDev.getInstance(IssueManager.class).query(null, scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
-					String title = Emojis.getInstance().apply(issue.getTitle());
-					suggestions.add(new InputSuggestion(issue.getReference().toString(project), title, null));
-				}
+		if (scopedQuery != null && SecurityUtils.canAccessProject(scopedQuery.getProject())) {
+			var projectScope = new ProjectScope(scopedQuery.getProject(), false, false);
+			var issueQuery = new IssueQuery(new io.onedev.server.search.entity.issue.FuzzyCriteria(scopedQuery.getQuery()));
+			for (var issue : OneDev.getInstance(IssueManager.class).query(projectScope, issueQuery, false, 0, count)) {
+				var title = Emojis.getInstance().apply(issue.getTitle());
+				suggestions.add(new InputSuggestion(issue.getReference().toString(project), title, null));	
 			}
 		}
 		if (suggestions.isEmpty() && matchWith.length() == 0) {
@@ -379,13 +409,12 @@ public class SuggestionUtils {
 	public static List<InputSuggestion> suggestPullRequests(@Nullable Project project, String matchWith, int count) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', '-');
-		if (scopedQuery != null) {
-			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
-				PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-				for (PullRequest request: pullRequestManager.query(scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
-					String title = Emojis.getInstance().apply(request.getTitle());
-					suggestions.add(new InputSuggestion(request.getReference().toString(project), title, null));
-				}
+		if (scopedQuery != null && SecurityUtils.canReadCode(scopedQuery.getProject())) {
+			PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
+			var requestQuery = new PullRequestQuery(new io.onedev.server.search.entity.pullrequest.FuzzyCriteria(scopedQuery.getQuery()));
+			for (var request: pullRequestManager.query(scopedQuery.getProject(), requestQuery, false, 0, count)) {
+				var title = Emojis.getInstance().apply(request.getTitle());
+				suggestions.add(new InputSuggestion(request.getReference().toString(project), title, null));
 			}
 		}
 		if (suggestions.isEmpty() && matchWith.length() == 0) {

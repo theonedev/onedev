@@ -1,23 +1,36 @@
 package io.onedev.server.util.criteria;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.RangeBuilder;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 
-import javax.annotation.Nullable;
-import javax.persistence.criteria.*;
-import java.io.Serializable;
-import java.util.*;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
+
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.RangeBuilder;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public abstract class Criteria<T> implements Serializable {
 
@@ -98,9 +111,13 @@ public abstract class Criteria<T> implements Serializable {
 			builder.forDiscretes(inClause);
 	}
 	
-	public abstract Predicate getPredicate(CriteriaQuery<?> query, From<T, T> from, CriteriaBuilder builder);
+	public abstract Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<T, T> from, CriteriaBuilder builder);
 
 	public abstract boolean matches(T t);
+
+	public List<Order> getPreferOrders(CriteriaBuilder builder, From<T, T> from) {
+		return new ArrayList<>();
+	}
 	
 	public Criteria<T> withParens(boolean withParens) {
 		this.withParens = withParens;

@@ -1,15 +1,17 @@
 package io.onedev.server.search.entity.codecomment;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.commons.utils.match.WildcardUtils;
 
 public class PathCriteria extends Criteria<CodeComment>  {
 
@@ -25,7 +27,7 @@ public class PathCriteria extends Criteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
 		Path<String> attribute = CodeCommentQuery.getPath(from, CodeComment.PROP_MARK + "." + Mark.PROP_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))

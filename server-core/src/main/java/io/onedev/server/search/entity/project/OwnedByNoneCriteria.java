@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.project;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -11,6 +12,7 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class OwnedByNoneCriteria extends Criteria<Project> {
@@ -18,7 +20,7 @@ public class OwnedByNoneCriteria extends Criteria<Project> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Join<?, ?> userAuthorizationJoin = from.join(Project.PROP_USER_AUTHORIZATIONS, JoinType.LEFT);
 		Join<?, ?> groupAuthorizationJoin = from.join(Project.PROP_GROUP_AUTHORIZATIONS, JoinType.LEFT);
 

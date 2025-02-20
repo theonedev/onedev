@@ -1,5 +1,28 @@
 package io.onedev.server.job.match;
 
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
+import static io.onedev.server.job.match.JobMatchParser.IsNot;
+import static io.onedev.server.job.match.JobMatchParser.OnBranch;
+import static io.onedev.server.job.match.JobMatchParser.SubmittedByGroup;
+import static io.onedev.server.job.match.JobMatchParser.SubmittedByUser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -7,21 +30,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
-import static io.onedev.server.job.match.JobMatchParser.*;
 
 public class JobMatch extends Criteria<JobMatchContext> {
 
@@ -155,7 +168,7 @@ public class JobMatch extends Criteria<JobMatchContext> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<JobMatchContext, JobMatchContext> from,
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<JobMatchContext, JobMatchContext> from,
 			CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}

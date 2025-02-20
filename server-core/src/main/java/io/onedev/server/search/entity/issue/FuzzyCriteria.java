@@ -1,48 +1,67 @@
 package io.onedev.server.search.entity.issue;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.Issue;
-import io.onedev.server.util.criteria.AndCriteria;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Issue;
+import io.onedev.server.search.entitytext.IssueTextManager;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class FuzzyCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final int MAX_TEXT_QUERY_COUNT = 1000;
+
 	private final String value;
+
+	private transient List<Long> issueIds;
 	
 	public FuzzyCriteria(String value) {
 		this.value = value;
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		return parse(value).getPredicate(query, from, builder);
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+		if (value.length() == 0)
+			return builder.conjunction();
+		issueIds = OneDev.getInstance(IssueTextManager.class).query(projectScope, value, MAX_TEXT_QUERY_COUNT);
+		if (issueIds.isEmpty())
+			return builder.disjunction();
+		else
+			return builder.in(from.get(Issue.PROP_ID)).value(issueIds);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return parse(value).matches(issue);
+		if (value.length() == 0)
+			return true;
+		else
+			return OneDev.getInstance(IssueTextManager.class).matches(issue, value);
 	}
-	
-	private Criteria<Issue> parse(String value) {
-		var terms = normalizeFuzzyQuery(value);
-		var titleCriterias = new ArrayList<Criteria<Issue>>(); 
-		var descriptionCriterias = new ArrayList<Criteria<Issue>>();
-		var commentCriterias = new ArrayList<Criteria<Issue>>();
-		for (var term: terms) {
-			titleCriterias.add(new TitleCriteria(term));
-			descriptionCriterias.add(new DescriptionCriteria(term));
-			commentCriterias.add(new CommentCriteria(term));
+
+	@Override
+	public List<Order> getPreferOrders(CriteriaBuilder builder, From<Issue, Issue> from) {
+		if (issueIds != null && !issueIds.isEmpty()) {
+			var orders = new ArrayList<Order>();
+			var orderCase = builder.selectCase();
+			for (int i = 0; i < issueIds.size(); i++) 
+				orderCase.when(builder.equal(from.get(Issue.PROP_ID), issueIds.get(i)), i);
+			orders.add(builder.asc(orderCase.otherwise(issueIds.size())));
+			return orders;
+		} else {
+			return new ArrayList<>();
 		}
-		return new OrCriteria<>(new AndCriteria<>(titleCriterias), new AndCriteria<>(descriptionCriterias), new AndCriteria<>(commentCriterias));
 	}
 
 	@Override

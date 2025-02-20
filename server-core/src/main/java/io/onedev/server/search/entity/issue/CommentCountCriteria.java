@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -7,6 +8,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class CommentCountCriteria extends Criteria<Issue> {
@@ -23,7 +25,7 @@ public class CommentCountCriteria extends Criteria<Issue> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Path<Integer> attribute = from.get(Issue.PROP_COMMENT_COUNT);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);

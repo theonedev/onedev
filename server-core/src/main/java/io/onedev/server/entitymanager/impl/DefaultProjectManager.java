@@ -975,7 +975,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			}
 		}
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(query, from, builder));
+			predicates.add(criteria.getPredicate(null, query, from, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 

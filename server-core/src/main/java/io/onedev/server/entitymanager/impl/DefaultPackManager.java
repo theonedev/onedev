@@ -1,12 +1,58 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.AbstractEntity.PROP_ID;
+import static io.onedev.server.model.Pack.PROP_BUILD;
+import static io.onedev.server.model.Pack.PROP_NAME;
+import static io.onedev.server.model.Pack.PROP_PRERELEASE;
+import static io.onedev.server.model.Pack.PROP_PROJECT;
+import static io.onedev.server.model.Pack.PROP_TYPE;
+import static io.onedev.server.model.Pack.PROP_VERSION;
+import static io.onedev.server.model.Pack.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static java.lang.Math.min;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
+import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.entitymanager.PackBlobReferenceManager;
+import io.onedev.server.entitymanager.PackLabelManager;
+import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.PackBlobReference;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -18,22 +64,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.util.ProjectPackTypeStat;
 import io.onedev.server.util.criteria.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.*;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.Pack.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static java.lang.Math.min;
 
 @Singleton
 public class DefaultPackManager extends BaseEntityManager<Pack> 
@@ -207,8 +237,8 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	private Predicate[] getPredicates(@Nullable Project project, @Nullable Criteria<Pack> criteria,
 									  CriteriaQuery<?> query, From<Pack, Pack> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
-		if (criteria != null)
-			predicates.add(criteria.getPredicate(query, root, builder));
+		if (criteria != null) 
+			predicates.add(criteria.getPredicate(null, query, root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 

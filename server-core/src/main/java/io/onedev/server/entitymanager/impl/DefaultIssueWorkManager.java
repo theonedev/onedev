@@ -71,7 +71,10 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		predicates.add(builder.le(root.get(PROP_DAY), toDay));
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
-		criteriaQuery.orderBy(issueManager.buildOrders(issueQuery.getSorts(), builder, issue));
+		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
+		if (issueQuery.getCriteria() != null) 
+			preferOrders.addAll(issueQuery.getCriteria().getPreferOrders(builder, issue));
+		criteriaQuery.orderBy(issueManager.buildOrders(issueQuery.getSorts(), builder, issue, preferOrders));
 
 		Query<IssueWork> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(0);

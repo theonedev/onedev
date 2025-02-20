@@ -12,13 +12,14 @@ import javax.persistence.criteria.Predicate;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.xodus.PullRequestInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.PullRequestInfoManager;
 
 public class IncludesIssueCriteria extends Criteria<PullRequest> {
 
@@ -39,7 +40,7 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, 
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, 
 			CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = new HashSet<>();
 		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {

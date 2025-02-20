@@ -1,18 +1,22 @@
 package io.onedev.server.search.entity.project;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.criteria.Criteria;
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
-import javax.persistence.criteria.*;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class PendingDeleteCriteria extends Criteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Project.PROP_PENDING_DELETE);
 		return builder.equal(attribute, true);
 	}

@@ -1,14 +1,22 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.util.criteria.Criteria;
+import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
-import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.commons.utils.match.WildcardUtils.matchString;
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class CommentCriteria extends Criteria<PullRequest> {
 
@@ -21,7 +29,7 @@ public class CommentCriteria extends Criteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Subquery<PullRequestComment> commentQuery = query.subquery(PullRequestComment.class);
 		Root<PullRequestComment> commentRoot = commentQuery.from(PullRequestComment.class);
 		commentQuery.select(commentRoot);

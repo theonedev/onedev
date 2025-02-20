@@ -1,23 +1,25 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.criteria.AndCriteria;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.NotCriteria;
-import io.onedev.server.util.criteria.OrCriteria;
-
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class ReadyToMergeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		return getCriteria().getPredicate(query, from, builder);
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		return getCriteria().getPredicate(projectScope, query, from, builder);
 	}
 
 	@Override

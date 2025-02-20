@@ -1,14 +1,20 @@
 package io.onedev.server.search.entity.issue;
 
+import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
+import static io.onedev.server.model.Issue.PROP_TOTAL_SPENT_TIME;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-
-import javax.persistence.criteria.*;
-
-import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
-import static io.onedev.server.model.Issue.PROP_TOTAL_SPENT_TIME;
 
 
 public class SpentTimeCriteria extends Criteria<Issue> {
@@ -25,7 +31,7 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Path<Integer> spentTimeAttribute = from.get(PROP_TOTAL_SPENT_TIME);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(spentTimeAttribute, value);

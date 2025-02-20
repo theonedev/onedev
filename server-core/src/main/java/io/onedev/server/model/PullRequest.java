@@ -49,14 +49,18 @@ import static java.lang.ThreadLocal.withInitial;
 @Table(
 		indexes={
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_UUID), 
-				@Index(columnList=PROP_NO_SPACE_TITLE), @Index(columnList=PROP_NUMBER), 
-				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
-				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH),
-				@Index(columnList=PROP_SUBMIT_MONTH), @Index(columnList=PROP_SUBMIT_WEEK),
-				@Index(columnList=PROP_SUBMIT_DAY), @Index(columnList=PROP_CLOSE_MONTH), 
-				@Index(columnList=PROP_CLOSE_WEEK), @Index(columnList=PROP_CLOSE_DAY),
-				@Index(columnList=PROP_STATUS), @Index(columnList="o_numberScope_id")},
+				@Index(columnList=PROP_NUMBER), @Index(columnList="o_targetProject_id"), 
+				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList= LastActivity.COLUMN_DATE), 
+				@Index(columnList="o_sourceProject_id"), @Index(columnList="o_submitter_id"), 
+				@Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), @Index(columnList=PROP_SUBMIT_MONTH), 
+				@Index(columnList=PROP_SUBMIT_WEEK), @Index(columnList=PROP_SUBMIT_DAY), 
+				@Index(columnList=PROP_CLOSE_MONTH), @Index(columnList=PROP_CLOSE_WEEK), 
+				@Index(columnList=PROP_CLOSE_DAY), @Index(columnList=PROP_STATUS), 
+				@Index(columnList=PROP_THUMBS_UP_COUNT), @Index(columnList=PROP_THUMBS_DOWN_COUNT),
+				@Index(columnList=PROP_SMILE_COUNT), @Index(columnList=PROP_TADA_COUNT),
+				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
+				@Index(columnList=PROP_ROCKET_COUNT), @Index(columnList=PROP_EYES_COUNT),
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -161,8 +165,6 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final String PROP_UUID = "uuid";
 	
-	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
-	
 	public static final String PROP_DURATION = "duration";
 
 	public static final String PROP_SUBMIT_TIME_GROUPS = "submitTimeGroups";
@@ -265,12 +267,7 @@ public class PullRequest extends ProjectBelonging
 	
 	@Column
 	private String buildCommitHash;
-	
-	// used for title search in markdown editor
-	@Column(nullable=false)
-	@JsonIgnore
-	private String noSpaceTitle;
-	
+		
 	@JsonIgnore
 	@Embedded
 	private MergePreview mergePreview;
@@ -306,6 +303,22 @@ public class PullRequest extends ProjectBelonging
 	
 	private int commentCount;
 	
+	private int thumbsUpCount;
+
+	private int thumbsDownCount;
+	
+	private int smileCount;
+	
+	private int tadaCount;
+	
+	private int confusedCount;
+	
+	private int heartCount;
+	
+	private int rocketCount;
+	
+	private int eyesCount;
+
 	@Embedded
 	private LastActivity lastActivity;
 
@@ -374,22 +387,12 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 
-	private int thumbsUpCount;
-	private int thumbsDownCount;
-	private int smileCount;
-	private int tadaCount;
-	private int confusedCount;
-	private int heartCount;
-	private int rocketCount;
-	private int eyesCount;
-
 	public String getTitle() {
 		return title;
 	}
 
 	public void setTitle(String title) {
 		this.title = StringUtils.abbreviate(title, MAX_TITLE_LEN);
-		noSpaceTitle = StringUtils.deleteWhitespace(this.title);
 	}
 
 	public String getDescription() {

@@ -1,32 +1,28 @@
 package io.onedev.server.search.entitytext;
 
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.ActiveServerChanged;
-import io.onedev.server.event.project.ProjectDeleted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.event.system.SystemStopped;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.support.EntityTouch;
-import io.onedev.server.model.support.ProjectBelonging;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.concurrent.BatchWorker;
-import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.lucene.BooleanQueryBuilder;
-import io.onedev.server.util.lucene.LuceneUtils;
+import static com.google.common.collect.Lists.partition;
+import static io.onedev.server.util.criteria.Criteria.forManyValues;
+import static java.lang.Long.valueOf;
+import static java.lang.Math.min;
+import static java.util.stream.Collectors.toList;
+import static org.apache.lucene.document.Field.Store.YES;
+import static org.apache.lucene.document.LongPoint.newExactQuery;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.WordlistLoader;
@@ -50,39 +46,56 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.*;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.IOUtils;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Function;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.event.system.SystemStopped;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.support.EntityTouch;
+import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.lucene.BooleanQueryBuilder;
+import io.onedev.server.util.lucene.LuceneUtils;
 
-import static com.google.common.collect.Lists.partition;
-import static io.onedev.server.util.criteria.Criteria.forManyValues;
-import static java.lang.Long.valueOf;
-import static java.lang.Math.min;
-import static java.util.stream.Collectors.toList;
-import static org.apache.lucene.document.Field.Store.YES;
-import static org.apache.lucene.document.LongPoint.newExactQuery;
-import static org.apache.lucene.search.BooleanClause.Occur.MUST;
-
-public abstract class ProjectTextManager<T extends ProjectBelonging> implements Serializable {
+public abstract class EntityTextManager<T extends ProjectBelonging> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(ProjectTextManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(EntityTextManager.class);
 
 	private static final String FIELD_TYPE = "type";
 	
@@ -92,7 +105,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	private static final String FIELD_TOUCH_ID = "touchId";
 	
-	private static final String FIELD_ENTITY_ID = "entityId";
+	protected static final String FIELD_ENTITY_ID = "entityId";
 
 	protected static final String FIELD_PROJECT_ID = "projectId";
 	
@@ -121,7 +134,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			STOP_WORDS.addAll(WordlistLoader.getSnowballWordSet(IOUtils.getDecodingReader(
 					SnowballFilter.class, "english_stop.txt", StandardCharsets.UTF_8)));
 		    STOP_WORDS.addAll(WordlistLoader.getWordSet(IOUtils.getDecodingReader(
-		    		ProjectTextManager.class, "chinese_stop.txt", StandardCharsets.UTF_8)));
+		    		EntityTextManager.class, "chinese_stop.txt", StandardCharsets.UTF_8)));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -144,10 +157,10 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	private volatile SearcherManager searcherManager;
 	
 	@SuppressWarnings("unchecked")
-	public ProjectTextManager(Dao dao, BatchWorkManager batchWorkManager, 
+	public EntityTextManager(Dao dao, BatchWorkManager batchWorkManager, 
 							  TransactionManager transactionManager, ProjectManager projectManager, 
 							  ClusterManager clusterManager, SessionManager sessionManager) {
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ProjectTextManager.class, getClass());
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(EntityTextManager.class, getClass());
 		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
 			entityClass = (Class<T>) typeArguments.get(0);
 		} else {
@@ -345,87 +358,41 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		return queryBuilder.build();
 	}
 	
-	protected long count(@Nullable EntityTextQuery query) {
-		if (query != null) {
-			String contentQueryString = query.getContentQuery().toString();
-			var projectIdsByServer = projectManager.groupByActiveServers(query.getApplicableProjectIds());
-			return clusterManager.runOnServers(projectIdsByServer.keySet(), () -> {
-				if (searcherManager != null) {
+	protected List<Long> search(EntityTextQuery query, int count) {
+		String contentQueryString = query.getContentQuery().toString();
+		var projectIdsByServer = projectManager.groupByActiveServers(query.getApplicableProjectIds());
+		Map<Long, Float> entityScores = new HashMap<>();
+		for (var entry : clusterManager.runOnServers(projectIdsByServer.keySet(), (ClusterTask<Map<Long, Float>>) () -> {
+			if (searcherManager != null) {
+				try {
+					IndexSearcher searcher = searcherManager.acquire();
 					try {
-						IndexSearcher indexSearcher = searcherManager.acquire();
-						try {
-							TotalHitCountCollector collector = new TotalHitCountCollector();
-							indexSearcher.search(buildQuery(projectIdsByServer, contentQueryString), collector);
-							return (long) collector.getTotalHits();
-						} finally {
-							searcherManager.release(indexSearcher);
+						Map<Long, Float> innerEntityScores = new HashMap<>();
+						TopDocs topDocs = searcher.search(buildQuery(projectIdsByServer, contentQueryString), count);
+						for (var scoreDoc : topDocs.scoreDocs) {
+							Document doc = searcher.doc(scoreDoc.doc);
+							innerEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
 						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+						return innerEntityScores;
+					} finally {
+						searcherManager.release(searcher);
 					}
-				} else {
-					return 0L;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-			}).values().stream().reduce(0L, Long::sum);
-		} else {
-			return 0;
-		}
-	}
-
-	protected List<T> search(@Nullable EntityTextQuery query, int firstResult, int maxResults) {
-		if (query != null) {
-			String contentQueryString = query.getContentQuery().toString();
-			var projectIdsByServer = projectManager.groupByActiveServers(query.getApplicableProjectIds());
-			Map<Long, Float> entityScores = new HashMap<>();
-			for (var entry : clusterManager.runOnServers(projectIdsByServer.keySet(), (ClusterTask<Map<Long, Float>>) () -> {
-				if (searcherManager != null) {
-					try {
-						IndexSearcher searcher = searcherManager.acquire();
-						try {
-							Map<Long, Float> innerEntityScores = new HashMap<>();
-							TopDocs topDocs = searcher.search(buildQuery(projectIdsByServer, contentQueryString), firstResult + maxResults);
-							for (var scoreDoc : topDocs.scoreDocs) {
-								Document doc = searcher.doc(scoreDoc.doc);
-								innerEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
-							}
-							return innerEntityScores;
-						} finally {
-							searcherManager.release(searcher);
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				} else {
-					return new HashMap<>();
-				}
-			}).entrySet()) {
-				entityScores.putAll(entry.getValue());
-			}
-
-			List<Map.Entry<Long, Float>> entries = new ArrayList<>(entityScores.entrySet());
-			entries.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-			
-			if (firstResult < entries.size()) {
-				entries = entries.subList(firstResult, min(firstResult + maxResults, entries.size()));
-				EntityCriteria<T> criteria = EntityCriteria.of(entityClass);
-				criteria.add(Restrictions.in(
-						AbstractEntity.PROP_ID,
-						entries.stream().map(Map.Entry::getKey).collect(toList())));
-				
-				var mapOfEntities = new HashMap<Long, T>();
-				for (var entity: dao.query(criteria))
-					mapOfEntities.put(entity.getId(), entity);
-				
-				var entities = new ArrayList<T>();
-				for (var entry: entries) {
-					var entity = mapOfEntities.get(entry.getKey());
-					if (entity != null)
-						entities.add(entity);
-				}
-				return entities;
 			} else {
-				return new ArrayList<>();
+				return new HashMap<>();
 			}
+		}).entrySet()) {
+			entityScores.putAll(entry.getValue());
+		}
+
+		List<Map.Entry<Long, Float>> entries = new ArrayList<>(entityScores.entrySet());
+		entries.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+		
+		if (!entries.isEmpty()) {
+			entries = entries.subList(0, min(count, entries.size()));
+			return entries.stream().map(Map.Entry::getKey).collect(toList());
 		} else {
 			return new ArrayList<>();
 		}
@@ -484,7 +451,6 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	protected abstract int getIndexVersion();
 	
-	@Nullable
 	protected abstract List<? extends EntityTouch> queryTouchesAfter(Long projectId, Long touchId);
 	
 	protected abstract void addFields(Document entityDoc, T entity);

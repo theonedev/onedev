@@ -1,8 +1,20 @@
 package io.onedev.server.buildspec.job.action.condition;
 
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.Contains;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.Is;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.IsEmpty;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.IsNot;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.IsNotEmpty;
+import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_LOG;
+import static io.onedev.server.model.Build.NAME_PROJECT;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.model.Build.NAME_TAG;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -32,13 +44,11 @@ import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.Ope
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.OrCriteriaContext;
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-
-import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.*;
-import static io.onedev.server.model.Build.*;
 
 public class ActionCondition extends Criteria<Build> {
 
@@ -218,7 +228,7 @@ public class ActionCondition extends Criteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
 	

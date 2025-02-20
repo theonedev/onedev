@@ -1,13 +1,17 @@
 package io.onedev.server.util.criteria;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -24,13 +28,18 @@ public class NotCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
-		return builder.not(criteria.getPredicate(query, root, builder));
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
+		return builder.not(criteria.getPredicate(projectScope, query, root, builder));
 	}
 	
 	@Override
 	public boolean matches(T entity) {
 		return !criteria.matches(entity);
+	}
+
+	@Override
+	public List<Order> getPreferOrders(CriteriaBuilder builder, From<T, T> from) {
+		return criteria.getPreferOrders(builder, from);
 	}
 
 	@Override

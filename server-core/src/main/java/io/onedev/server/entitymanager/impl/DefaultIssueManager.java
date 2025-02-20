@@ -8,7 +8,6 @@ import static java.util.stream.Collectors.toSet;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -270,8 +269,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Override
 	public List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
-															  From<Issue, Issue> issue) {
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+															  From<Issue, Issue> issue, 
+															  List<javax.persistence.criteria.Order> preferOrders) {
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>(preferOrders);
 		for (EntitySort sort: sorts) {
 			if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
@@ -287,7 +287,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 					orders.add(builder.desc(join.get(IssueField.PROP_ORDINAL)));
 			}
 		}
-
 		if (orders.isEmpty())
 			orders.add(builder.desc(IssueQuery.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
@@ -309,7 +308,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
 		criteriaQuery.where(buildPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
-		criteriaQuery.orderBy(buildOrders(issueQuery.getSorts(), builder, root));
+		var criteria = issueQuery.getCriteria();
+		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
+		if (criteria != null)
+			preferOrders.addAll(criteria.getPreferOrders(builder, root));
+		criteriaQuery.orderBy(buildOrders(issueQuery.getSorts(), builder, root, preferOrders));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -399,7 +402,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 		}
 		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(query, issue, builder));
+			predicates.add(issueCriteria.getPredicate(projectScope, query, issue, builder));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
@@ -867,53 +870,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return resolutions;
 	}
 
-	@Sessional
-	@Override
-	public List<Issue> query(EntityQuery<Issue> scope, Project project, String fuzzyQuery, int count) {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		
-		if (scope != null)
-			predicates.addAll(Arrays.asList(buildPredicates(null, scope.getCriteria(), criteriaQuery, builder, root)));		
-		
-		List<Predicate> projectPredicates = new ArrayList<>();
-		if (SecurityUtils.canAccessConfidentialIssues(project)) {
-			projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
-		} else { 
-			projectPredicates.add(buildNonConfidentialPredicate(builder, root, project));
-			projectPredicates.add(buildAuthorizationPredicate(criteriaQuery, builder, root, project));
-		}
-		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
-		
-		if (fuzzyQuery.length() != 0) {
-			try {
-				long buildNumber = Long.parseLong(fuzzyQuery);
-				predicates.add(builder.equal(root.get(Issue.PROP_NUMBER), buildNumber));
-			} catch (NumberFormatException e) {
-				predicates.add(builder.or(
-						builder.like(builder.lower(root.get(Issue.PROP_TITLE)), "%" + fuzzyQuery.toLowerCase() + "%"),
-						builder.like(builder.lower(root.get(Issue.PROP_NO_SPACE_TITLE)), "%" + fuzzyQuery.toLowerCase() + "%")));
-			}
-		}
-
-		criteriaQuery.where(predicates.toArray(new Predicate[0]));
-		
-		if (scope != null && !scope.getSorts().isEmpty()) {
-			criteriaQuery.orderBy(buildOrders(scope.getSorts(), builder, root));
-		} else {
-			criteriaQuery.orderBy(
-					builder.desc(root.get(Issue.PROP_PROJECT)), 
-					builder.desc(root.get(Issue.PROP_NUMBER)));
-		}
-		
-		Query<Issue> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(0);
-		query.setMaxResults(count);
-		return query.getResultList();
-	}
 	
 	@Transactional
 	@Override
@@ -1285,6 +1241,26 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				it.remove();
 		}
 		return issues;
+	}
+
+	@Sessional
+	@Override
+	public List<Issue> loadIssues(List<Long> issueIds) {
+		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.add(Restrictions.in("id", issueIds));
+		var issues = query(criteria);
+
+		Map<Long, Issue> issueMap = new HashMap<>();
+		for (Issue issue: issues)
+			issueMap.put(issue.getId(), issue);
+		
+		List<Issue> orderedIssues = new ArrayList<>();
+		for (Long issueId: issueIds) {
+			Issue issue = issueMap.get(issueId);
+			if (issue != null)
+				orderedIssues.add(issue);
+		}
+		return orderedIssues;
 	}
 	
 }

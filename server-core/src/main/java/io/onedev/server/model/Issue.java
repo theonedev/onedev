@@ -1,8 +1,68 @@
 package io.onedev.server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.Issue.PROP_BOARD_POSITION;
+import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.PROP_CONFUSED_COUNT;
+import static io.onedev.server.model.Issue.PROP_EYES_COUNT;
+import static io.onedev.server.model.Issue.PROP_HEART_COUNT;
+import static io.onedev.server.model.Issue.PROP_ROCKET_COUNT;
+import static io.onedev.server.model.Issue.PROP_SMILE_COUNT;
+import static io.onedev.server.model.Issue.PROP_STATE;
+import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.PROP_TADA_COUNT;
+import static io.onedev.server.model.Issue.PROP_THUMBS_DOWN_COUNT;
+import static io.onedev.server.model.Issue.PROP_THUMBS_UP_COUNT;
+import static io.onedev.server.model.Issue.PROP_TITLE;
+import static io.onedev.server.model.Issue.PROP_UUID;
+import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
+import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -37,37 +97,20 @@ import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.PullRequestInfoManager;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
-
-import javax.annotation.Nullable;
-import javax.mail.internet.InternetAddress;
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.Issue.*;
-import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.comparingInt;
 
 @Entity
 @Table(
 		indexes={
 				@Index(columnList="o_project_id"), @Index(columnList=PROP_STATE), 
 				@Index(columnList=PROP_UUID), @Index(columnList = PROP_BOARD_POSITION),
-				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
-				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
-				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList= LastActivity.COLUMN_DATE), 
-				@Index(columnList="o_numberScope_id")}, 
+				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NUMBER), 
+				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList="o_submitter_id"), 
+				@Index(columnList=PROP_VOTE_COUNT), @Index(columnList=PROP_COMMENT_COUNT), 
+				@Index(columnList=PROP_THUMBS_UP_COUNT), @Index(columnList=PROP_THUMBS_DOWN_COUNT),
+				@Index(columnList=PROP_SMILE_COUNT), @Index(columnList=PROP_TADA_COUNT),
+				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
+				@Index(columnList=PROP_ROCKET_COUNT), @Index(columnList=PROP_EYES_COUNT),
+				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -157,9 +200,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String PROP_SCHEDULES = "schedules";
 	
 	public static final String PROP_UUID = "uuid";
-	
-	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
-	
+		
 	public static final String PROP_CONFIDENTIAL = "confidential";
 	
 	public static final String PROP_PIN_DATE = "pinDate";
@@ -302,12 +343,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	@Embedded
 	private LastActivity lastActivity;
-	
-	// used for title search in markdown editor
-	@Column(nullable=false)
-	@JsonIgnore
-	private String noSpaceTitle;
-	
+		
 	private boolean confidential;
 	
 	private Date pinDate;
@@ -395,7 +431,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setTitle(String title) {
 		this.title = StringUtils.abbreviate(title, MAX_TITLE_LEN);
-		noSpaceTitle = StringUtils.deleteWhitespace(this.title);
 	}
 
 	public String getDescription() {

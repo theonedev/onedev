@@ -301,7 +301,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		query.select(root);
 
 		if (agentQuery.getCriteria() != null)
-			query.where(agentQuery.getCriteria().getPredicate(query, root, builder));
+			query.where(agentQuery.getCriteria().getPredicate(null, query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: agentQuery.getSorts()) {
@@ -337,7 +337,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		Root<Agent> root = criteriaQuery.from(Agent.class);
 		
 		if (agentCriteria != null)
-			criteriaQuery.where(agentCriteria.getPredicate(criteriaQuery, root, builder));
+			criteriaQuery.where(agentCriteria.getPredicate(null, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

@@ -1,11 +1,47 @@
 package io.onedev.server.web.component.issue.create;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.CallbackParameter;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.convert.ConversionException;
+import org.apache.wicket.validation.IValidationError;
+import org.apache.wicket.validation.IValidator;
+import org.unbescape.javascript.JavaScriptEscape;
+
 import com.google.common.base.Objects;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -34,40 +70,10 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.form.FormComponentPanel;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.util.convert.ConversionException;
-import org.apache.wicket.validation.IErrorMessageSource;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidationError;
-import org.apache.wicket.validation.IValidator;
-import org.unbescape.javascript.JavaScriptEscape;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
-
-@SuppressWarnings("serial")
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {
 
+	private static final int MAX_SIMILAR_ISSUES = 5;
 	private String uuid = UUID.randomUUID().toString();
 	
 	private TextField<String> titleInput;
@@ -132,9 +138,11 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			protected List<Issue> load() {
 				if (StringUtils.isNotBlank(editingTitle)) {
 					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
-					return issueTextManager.query(
-							new ProjectScope(getProject(), true, true),
-							editingTitle, false, 0, 5);
+					var projectScope = new ProjectScope(getProject(), true, true);
+					var issueIds = issueTextManager.query(projectScope, editingTitle, MAX_SIMILAR_ISSUES);
+					var issues = OneDev.getInstance(IssueManager.class).loadIssues(issueIds);
+					projectScope.filter(issues);
+					return issues;
 				} else {
 					return new ArrayList<>();
 				}

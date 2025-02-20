@@ -1,30 +1,47 @@
 package io.onedev.server.buildspec.job.retrycondition;
 
-import io.onedev.commons.codeassist.AntlrUtils;
-import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.*;
-import io.onedev.server.util.criteria.AndCriteria;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.NotCriteria;
-import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.Contains;
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.Is;
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.IsEmpty;
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.IsNot;
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.IsNotEmpty;
 import static io.onedev.server.model.Build.NAME_LOG;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
+import io.onedev.commons.codeassist.AntlrUtils;
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.AndCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.ConditionContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.CriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.FieldOperatorCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.NotCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.OrCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.ParensCriteriaContext;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class RetryCondition extends Criteria<RetryContext> {
 
@@ -41,7 +58,7 @@ public class RetryCondition extends Criteria<RetryContext> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<RetryContext, RetryContext> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<RetryContext, RetryContext> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
 	

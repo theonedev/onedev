@@ -1,8 +1,12 @@
 package io.onedev.server.util.lucene;
 
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.WriterCallable;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -15,11 +19,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.bouncycastle.util.Arrays;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 
 public class LuceneUtils {
 

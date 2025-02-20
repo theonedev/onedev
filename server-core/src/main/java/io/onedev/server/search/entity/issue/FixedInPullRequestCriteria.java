@@ -12,6 +12,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class FixedInPullRequestCriteria extends Criteria<Issue> {
@@ -42,7 +43,7 @@ public class FixedInPullRequestCriteria extends Criteria<Issue> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Collection<Long> fixedIssueIds = getRequest().getFixedIssueIds();
 		if (!fixedIssueIds.isEmpty()) 
 			return from.get(Issue.PROP_ID).in(fixedIssueIds);

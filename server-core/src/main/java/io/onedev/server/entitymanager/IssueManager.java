@@ -49,7 +49,8 @@ public interface IssueManager extends EntityManager<Issue> {
 								CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue);
 	
 	List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
-													   From<Issue, Issue> issue);
+													   From<Issue, Issue> issue, 
+													   List<javax.persistence.criteria.Order> preferOrders);
 	
 	List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
 			boolean loadExtraInfo, int firstResult, int maxResults);
@@ -58,8 +59,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	IssueTimes queryTimes(ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
 	
-	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String fuzzyQuery, int count);
-
 	Collection<String> getUndefinedStates();
 	
 	void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions);
@@ -95,4 +94,6 @@ public interface IssueManager extends EntityManager<Issue> {
 
 	Collection<Long> parseFixedIssueIds(Project project, String commitMessage);
 	
+	List<Issue> loadIssues(List<Long> issueIds);
+
 }

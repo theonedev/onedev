@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -8,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class HasMergeConflictsCriteria extends Criteria<PullRequest> {
@@ -15,7 +17,7 @@ public class HasMergeConflictsCriteria extends Criteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Path<?> requestHead = PullRequestQuery.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH);
 		Path<?> merged = PullRequestQuery.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
 		return builder.and(

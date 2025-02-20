@@ -1,19 +1,26 @@
 package io.onedev.server.search.entity.codecomment;
 
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.User;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-
-import javax.persistence.criteria.*;
 
 public class RepliedByMeCriteria extends Criteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
 		if (User.get() != null) {
 			Subquery<CodeCommentReply> replyQuery = query.subquery(CodeCommentReply.class);
 			Root<CodeCommentReply> reply = replyQuery.from(CodeCommentReply.class);

@@ -17,12 +17,13 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.xodus.CommitInfoManager;
 
 public class FixedIssueCriteria extends Criteria<Build> {
 
@@ -47,7 +48,7 @@ public class FixedIssueCriteria extends Criteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		Path<Long> attribute = from.get(Build.PROP_NUMBER);
 		List<Predicate> predicates = new ArrayList<>();

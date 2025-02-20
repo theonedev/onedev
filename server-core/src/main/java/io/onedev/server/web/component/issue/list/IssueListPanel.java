@@ -116,7 +116,6 @@ import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;

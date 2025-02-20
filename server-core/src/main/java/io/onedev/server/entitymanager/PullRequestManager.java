@@ -1,5 +1,14 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -9,13 +18,6 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.util.StatsGroup;
-import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
 
@@ -59,11 +61,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void checkAutoMerge(PullRequest request);
 
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery,
-			boolean loadLabelsAndReviewsAndBuilds, int firstResult, int maxResults);
+			boolean loadExtraInfo, int firstResult, int maxResults);
 
 	int count(@Nullable Project targetProject, @Nullable Criteria<PullRequest> requestCriteria);
-
-	List<PullRequest> query(Project targetProject, String fuzzyQuery, int count);
 
 	void delete(Collection<PullRequest> requests, Project project);
 

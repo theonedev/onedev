@@ -1,5 +1,11 @@
 package io.onedev.server.web.mapper;
 
+import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.markup.html.pages.BrowserInfoPage;
+import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.mapper.CompoundRequestMapper;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
@@ -11,7 +17,20 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
-import io.onedev.server.web.page.admin.emailtemplates.*;
+import io.onedev.server.web.page.admin.emailtemplates.AlertTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.BuildNotificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.CommitNotificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.EmailVerificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.IssueNotificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.IssueNotificationUnsubscribedTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.PackNotificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.PasswordResetTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.PullRequestNotificationTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.PullRequestNotificationUnsubscribedTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.ServiceDeskIssueOpenFailedTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.ServiceDeskIssueOpenedTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.StopwatchOverdueTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.UserInvitationTemplatePage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -97,9 +116,17 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.*;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueAuthorizationsPage;
+import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
+import io.onedev.server.web.page.project.issues.detail.IssueCommitsPage;
+import io.onedev.server.web.page.project.issues.detail.IssuePullRequestsPage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
-import io.onedev.server.web.page.project.issues.iteration.*;
+import io.onedev.server.web.page.project.issues.iteration.IterationBurndownPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
+import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
+import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
@@ -110,7 +137,11 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequ
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.build.*;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.CacheManagementPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
+import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
+import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
@@ -125,14 +156,26 @@ import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
-import io.onedev.server.web.page.simple.security.*;
+import io.onedev.server.web.page.simple.security.CreateUserFromInvitationPage;
+import io.onedev.server.web.page.simple.security.EmailAddressVerificationPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LogoutPage;
+import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
+import io.onedev.server.web.page.simple.security.PasswordResetPage;
+import io.onedev.server.web.page.simple.security.SignUpPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
-import io.onedev.server.web.resource.*;
-import org.apache.wicket.core.request.mapper.ResourceMapper;
-import org.apache.wicket.markup.html.pages.BrowserInfoPage;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.mapper.CompoundRequestMapper;
+import io.onedev.server.web.page.test.TestPage;
+import io.onedev.server.web.resource.AgentLibResourceReference;
+import io.onedev.server.web.resource.AgentLogResourceReference;
+import io.onedev.server.web.resource.AgentResourceReference;
+import io.onedev.server.web.resource.ArchiveResourceReference;
+import io.onedev.server.web.resource.ArtifactResourceReference;
+import io.onedev.server.web.resource.AttachmentResourceReference;
+import io.onedev.server.web.resource.BuildLogResourceReference;
+import io.onedev.server.web.resource.RawBlobResourceReference;
+import io.onedev.server.web.resource.ServerLogResourceReference;
+import io.onedev.server.web.resource.SiteFileResourceReference;
+import io.onedev.server.web.resource.SpriteResourceReference;
 
 public class BaseUrlMapper extends CompoundRequestMapper {
 
@@ -157,6 +200,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		addResources();
 		addHelpPages();
 		addErrorPages();
+		add(new BasePageMapper("~test", TestPage.class));
 	}
 
 	private void addHelpPages() {

@@ -15,13 +15,15 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
 
-@SuppressWarnings("serial")
 public abstract class CommentInput extends MarkdownEditor {
 
 	public CommentInput(String id, IModel<String> model, boolean compactMode) {
@@ -81,18 +83,23 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<PullRequest> queryPullRequests(Project project, String query, int count) {
-				if (SecurityUtils.canReadCode(project))
-					return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
-				else
+				if (SecurityUtils.canReadCode(project)) {
+					var requestQuery = new PullRequestQuery(new io.onedev.server.search.entity.pullrequest.FuzzyCriteria(query));
+					return OneDev.getInstance(PullRequestManager.class).query(project, requestQuery, false, 0, count);
+				} else {
 					return new ArrayList<>();
+				}
 			}
 
 			@Override
 			public List<Issue> queryIssues(Project project, String query, int count) {
-				if (SecurityUtils.canAccessProject(project)) 
-					return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
-				else
+				if (SecurityUtils.canAccessProject(project)) {
+					var projectScope = new ProjectScope(project, false, false);
+					var issueQuery = new IssueQuery(new io.onedev.server.search.entity.issue.FuzzyCriteria(query));
+					return OneDev.getInstance(IssueManager.class).query(projectScope, issueQuery, false, 0, count);
+				} else {
 					return new ArrayList<>();
+				}
 			}
 
 			@Override

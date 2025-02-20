@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.build;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -9,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class TagEmptyCriteria extends Criteria<Build> {
@@ -22,7 +24,7 @@ public class TagEmptyCriteria extends Criteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_REF_NAME);
 		var predicate = builder.or(
 				builder.isNull(attribute), 

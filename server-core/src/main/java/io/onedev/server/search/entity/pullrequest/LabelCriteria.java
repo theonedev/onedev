@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -8,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestLabel;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LabelCriteria extends Criteria<PullRequest> {
@@ -24,7 +26,7 @@ public class LabelCriteria extends Criteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		var labelQuery = query.subquery(PullRequestLabel.class);
 		var labelRoot = labelQuery.from(PullRequestLabel.class);
 		labelQuery.select(labelRoot);

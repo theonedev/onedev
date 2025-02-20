@@ -1,11 +1,17 @@
 package io.onedev.server.search.entity.pack;
 
-import io.onedev.server.model.Pack;
-import io.onedev.server.util.criteria.Criteria;
-
-import javax.persistence.criteria.*;
-
 import static io.onedev.commons.utils.match.WildcardUtils.matchString;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
+import io.onedev.server.model.Pack;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
 
 public class VersionCriteria extends Criteria<Pack> {
 
@@ -21,7 +27,7 @@ public class VersionCriteria extends Criteria<Pack> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Pack.PROP_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
 		var predicate = builder.like(builder.lower(attribute), normalized);

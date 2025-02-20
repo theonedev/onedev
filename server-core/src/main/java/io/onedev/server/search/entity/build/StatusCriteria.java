@@ -1,13 +1,13 @@
 package io.onedev.server.search.entity.build;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import com.hazelcast.internal.monitor.impl.GlobalPerIndexStats;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 public class StatusCriteria extends Criteria<Build> {
@@ -24,7 +24,7 @@ public class StatusCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		var predicate = builder.equal(from.get(Build.PROP_STATUS), status);
 		if (operator == BuildQueryLexer.IsNot)
 			predicate = builder.not(predicate);

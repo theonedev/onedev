@@ -1,8 +1,41 @@
 package io.onedev.server.search.entitytext;
 
+import static io.onedev.server.util.criteria.Criteria.forManyValues;
+import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.lucene.document.Field.Store.NO;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
+import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
+
+import java.io.ObjectStreamException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.PrefixQuery;
+import org.apache.lucene.search.Query;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.IssueTouchManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssuesTouched;
 import io.onedev.server.model.AbstractEntity;
@@ -19,35 +52,9 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.lucene.BooleanQueryBuilder;
 import io.onedev.server.util.lucene.LuceneUtils;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.BoostQuery;
-import org.apache.lucene.search.PrefixQuery;
-import org.apache.lucene.search.Query;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.ObjectStreamException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import static io.onedev.server.util.criteria.Criteria.forManyValues;
-import static java.lang.String.valueOf;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.lucene.document.Field.Store.NO;
-import static org.apache.lucene.search.BooleanClause.Occur.MUST;
-import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 @Singleton
-public class DefaultIssueTextManager extends ProjectTextManager<Issue> implements IssueTextManager {
+public class DefaultIssueTextManager extends EntityTextManager<Issue> implements IssueTextManager {
 	
 	private static final String FIELD_NUMBER = "number";
 	
@@ -58,11 +65,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	private static final String FIELD_DESCRIPTION = "description";
 	
 	private static final String FIELD_COMMENT = "comments";
-	
-	private final IssueFieldManager fieldManager;
-	
-	private final IssueLinkManager linkManager;
-	
+		
 	private final UserManager userManager;
 	
 	private final IssueTouchManager touchManager;
@@ -70,13 +73,10 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	@Inject
 	public DefaultIssueTextManager(Dao dao, BatchWorkManager batchWorkManager, UserManager userManager,
 								   TransactionManager transactionManager, ProjectManager projectManager,
-								   IssueFieldManager fieldManager, IssueLinkManager linkManager,
 								   ClusterManager clusterManager, SessionManager sessionManager, 
 								   IssueTouchManager touchManager) {
 		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager, sessionManager);
 		this.userManager = userManager;
-		this.fieldManager = fieldManager;
-		this.linkManager = linkManager;
 		this.touchManager = touchManager;
 	}
 
@@ -86,7 +86,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	@Override
 	protected int getIndexVersion() {
-		return 8;
+		return 9;
 	}
 
 	@Override
@@ -114,11 +114,42 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	}
 	
 	@Nullable
-	private EntityTextQuery buildQuery(@Nullable ProjectScope projectScope, String queryString) {
+	private Query buildContentQuery(String escapedQueryString) {
+		BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
+
+		String numberString = escapedQueryString;
+		if (numberString.startsWith("#"))
+			numberString = numberString.substring(1);
+		try {
+			long number = Long.parseLong(numberString);
+			contentQueryBuilder.add(new BoostQuery(getTermQuery(FIELD_NUMBER, valueOf(number)), 1f), SHOULD);
+		} catch (NumberFormatException ignored) {
+		}
+
+		try (Analyzer analyzer = newAnalyzer()) {
+			Map<String, Float> boosts = new HashMap<>();
+			boosts.put(FIELD_TITLE, 0.75f);
+			boosts.put(FIELD_DESCRIPTION, 0.5f);
+			boosts.put(FIELD_COMMENT, 0.25f);
+			MultiFieldQueryParser parser = new MultiFieldQueryParser(
+					new String[]{FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT}, analyzer, boosts) {
+				@Override
+				protected Query newTermQuery(Term term, float boost) {
+					return new BoostQuery(new PrefixQuery(term), boost);
+				}
+			};
+			contentQueryBuilder.add(parser.parse(escapedQueryString), SHOULD);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
+		}
+		return contentQueryBuilder.build();
+	}
+
+	@Override
+	public List<Long> query(@Nullable ProjectScope projectScope, String queryString, int count) {
 		var escaped = LuceneUtils.escape(queryString);
 		if (escaped != null) {
 			var applicableProjectIds = new HashSet<Long>();
-			BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
 			if (projectScope != null) {
 				var project = projectScope.getProject();
 				applicableProjectIds.add(project.getId());
@@ -137,6 +168,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 						.collect(toSet()));
 			}
 			
+			var queryBuilder = new BooleanQueryBuilder();
 			if (!SecurityUtils.isAdministrator()) {
 				var permittedProjectIds = SecurityUtils.getAuthorizedProjects(new AccessConfidentialIssues())
 						.stream()
@@ -150,68 +182,27 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 				confidentialQueryBuilder.add(getTermQuery(FIELD_CONFIDENTIAL, valueOf(false)), SHOULD);
 				queryBuilder.add(confidentialQueryBuilder.build(), MUST);
 			}
-
-			BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
-
-			String numberString = queryString;
-			if (numberString.startsWith("#"))
-				numberString = numberString.substring(1);
-			try {
-				long number = Long.parseLong(numberString);
-				contentQueryBuilder.add(new BoostQuery(getTermQuery(FIELD_NUMBER, valueOf(number)), 1f), SHOULD);
-			} catch (NumberFormatException ignored) {
-			}
-
-			try (Analyzer analyzer = newAnalyzer()) {
-				Map<String, Float> boosts = new HashMap<>();
-				boosts.put(FIELD_TITLE, 0.75f);
-				boosts.put(FIELD_DESCRIPTION, 0.5f);
-				boosts.put(FIELD_COMMENT, 0.25f);
-				MultiFieldQueryParser parser = new MultiFieldQueryParser(
-						new String[]{FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT}, analyzer, boosts) {
-					@Override
-					protected Query newTermQuery(Term term, float boost) {
-						return new BoostQuery(new PrefixQuery(term), boost);
-					}
-				};
-				contentQueryBuilder.add(parser.parse(escaped), SHOULD);
-			} catch (ParseException e) {
-				throw new RuntimeException(e);
-			}
-			queryBuilder.add(contentQueryBuilder.build(), MUST);
-			
+			queryBuilder.add(buildContentQuery(escaped), MUST);			
 			var query = queryBuilder.build();
 			if (query != null)
-				return new EntityTextQuery(query, applicableProjectIds);
+				return search(new EntityTextQuery(query, applicableProjectIds), count);
 		}
-		return null;
-	}
-	
-	@Override
-	public List<Issue> query(@Nullable ProjectScope projectScope, String queryString, 
-			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
-		var issues = search(buildQuery(projectScope, queryString), firstResult, maxResults);
-		if (projectScope != null) {
-			for (var it = issues.iterator(); it.hasNext(); ) {
-				var issue = it.next();
-				if (!issue.getProject().equals(projectScope.getProject())
-						&& (!projectScope.isInherited() || !issue.getProject().isSelfOrAncestorOf(projectScope.getProject())					
-						&& (!projectScope.isRecursive() || !projectScope.getProject().isSelfOrAncestorOf(issue.getProject())))) {
-					it.remove();
-				}
-			}
-		}
-		if (loadFieldsAndLinks && !issues.isEmpty()) {
-			fieldManager.populateFields(issues);
-			linkManager.populateLinks(issues);
-		}
-
-		return issues;
+		return new ArrayList<>();
 	}
 
 	@Override
-	public long count(@Nullable ProjectScope projectScope, String queryString) {
-		return count(buildQuery(projectScope, queryString));
+	public boolean matches(Issue issue, String queryString) {
+		var escaped = LuceneUtils.escape(queryString);
+		if (escaped != null) {
+			BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
+			queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, issue.getProject().getId()), MUST);
+			queryBuilder.add(getTermQuery(FIELD_ENTITY_ID, String.valueOf(issue.getId())), MUST);											
+			queryBuilder.add(buildContentQuery(escaped), MUST);			
+			var query = queryBuilder.build();
+			if (query != null)
+				return !search(new EntityTextQuery(query, Collections.singleton(issue.getProject().getId())), 1).isEmpty();
+		} 
+		return false;
 	}
 	
 }

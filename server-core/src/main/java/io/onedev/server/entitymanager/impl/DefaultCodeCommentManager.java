@@ -1,14 +1,52 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.codecomment.*;
+import io.onedev.server.event.project.codecomment.CodeCommentCreated;
+import io.onedev.server.event.project.codecomment.CodeCommentDeleted;
+import io.onedev.server.event.project.codecomment.CodeCommentEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
+import io.onedev.server.event.project.codecomment.CodeCommentsDeleted;
 import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.command.RevListOptions;
@@ -28,29 +66,11 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.commons.lang3.time.DateUtils;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.CodeComment.SORT_FIELDS;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
 @Singleton
 public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> implements CodeCommentManager {
@@ -240,8 +260,10 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
 		else 
 			predicates.add(builder.equal(root.get(CodeComment.PROP_PROJECT), project));
-		if (criteria != null) 
-			predicates.add(criteria.getPredicate(query, root, builder));
+		if (criteria != null) {
+			var projectScope = new ProjectScope(project, false, false);
+			predicates.add(criteria.getPredicate(projectScope, query, root, builder));
+		}
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -254,6 +276,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		query.where(getPredicates(project, commentQuery.getCriteria(), request, query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		if (commentQuery.getCriteria() != null)
+			orders.addAll(commentQuery.getCriteria().getPreferOrders(builder, root));
 		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));

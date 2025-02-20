@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -26,6 +27,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -51,7 +53,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Subquery<IssueLink> linkQuery = query.subquery(IssueLink.class);
 		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
 		linkQuery.select(linkRoot);
@@ -66,46 +68,46 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 			if (opposite) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
-				predicates.add(builder.not(criteria.getPredicate(query, linkSourceJoin, builder)));
+				predicates.add(builder.not(criteria.getPredicate(projectScope, query, linkSourceJoin, builder)));
 			} else if (spec.getOpposite() != null) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
-				predicates.add(builder.not(criteria.getPredicate(query, linkTargetJoin, builder)));
+				predicates.add(builder.not(criteria.getPredicate(projectScope, query, linkTargetJoin, builder)));
 			} else {
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
 				predicates.add(builder.or(
 						builder.and(
 								builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from), 
-								builder.not(criteria.getPredicate(query, linkTargetJoin, builder))),
+								builder.not(criteria.getPredicate(projectScope, query, linkTargetJoin, builder))),
 						builder.and(
 								builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from),
-								builder.not(criteria.getPredicate(query, linkSourceJoin, builder)))
+								builder.not(criteria.getPredicate(projectScope, query, linkSourceJoin, builder)))
 				));
 			}
 
 			return builder.and(
 					builder.not(builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))))),
-					new HasLinkCriteria(getLinkSide()).getPredicate(query, from, builder));
+					new HasLinkCriteria(getLinkSide()).getPredicate(projectScope, query, from, builder));
 		} else {
 			if (opposite) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
-				predicates.add(criteria.getPredicate(query, linkSourceJoin, builder));
+				predicates.add(criteria.getPredicate(projectScope, query, linkSourceJoin, builder));
 			} else if (spec.getOpposite() != null) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
-				predicates.add(criteria.getPredicate(query, linkTargetJoin, builder));
+				predicates.add(criteria.getPredicate(projectScope, query, linkTargetJoin, builder));
 			} else {
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
 				predicates.add(builder.or(
 						builder.and(
 								builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from), 
-								criteria.getPredicate(query, linkTargetJoin, builder)),
+								criteria.getPredicate(projectScope, query, linkTargetJoin, builder)),
 						builder.and(
 								builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from),
-								criteria.getPredicate(query, linkSourceJoin, builder))
+								criteria.getPredicate(projectScope, query, linkSourceJoin, builder))
 				));
 			}
 

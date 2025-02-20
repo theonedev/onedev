@@ -1,23 +1,10 @@
 package io.onedev.server.web.page.project.blob.render.renderers.markdown;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.*;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ContentDetector;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
-import io.onedev.server.web.component.markdown.MarkdownEditor;
-import io.onedev.server.web.component.markdown.UserMentionSupport;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -25,12 +12,33 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Sets;
 
-@SuppressWarnings("serial")
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ContentDetector;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
+import io.onedev.server.web.component.markdown.MarkdownEditor;
+import io.onedev.server.web.component.markdown.UserMentionSupport;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+
 class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 	private final BlobRenderContext context;
@@ -108,15 +116,23 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 					@Override
 					public List<PullRequest> queryPullRequests(Project project, String query, int count) {
-						return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
+						if (SecurityUtils.canReadCode(project)) {
+							var requestQuery = new PullRequestQuery(new io.onedev.server.search.entity.pullrequest.FuzzyCriteria(query));
+							return OneDev.getInstance(PullRequestManager.class).query(project, requestQuery, false, 0, count);
+						} else {
+							return new ArrayList<>();
+						}
 					}
-
+					
 					@Override
 					public List<Issue> queryIssues(Project project, String query, int count) {
-						if (SecurityUtils.canAccessProject(project))
-							return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
-						else
+						if (SecurityUtils.canAccessProject(project)) {
+							var projectScope = new ProjectScope(project, false, false);
+							var issueQuery = new IssueQuery(new io.onedev.server.search.entity.issue.FuzzyCriteria(query));
+							return OneDev.getInstance(IssueManager.class).query(projectScope, issueQuery, false, 0, count);
+						} else {
 							return new ArrayList<>();
+						}
 					}
 
 					@Override

@@ -7371,4 +7371,61 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate189(File dataDir, Stack<Integer> versions) {
+		Map<String, String> pullRequestIdToProjectId = new HashMap<>();
+		Map<String, String> codeCommentIdToProjectId = new HashMap<>();
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					pullRequestIdToProjectId.put(element.elementTextTrim("id"), element.elementTextTrim("targetProject"));
+					element.element("noSpaceTitle").detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					codeCommentIdToProjectId.put(element.elementTextTrim("id"), element.elementTextTrim("project")); 
+				}
+			} else if (file.getName().startsWith("Issues.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("noSpaceTitle").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+
+		VersionedXmlDoc pullRequestTouchsDom;
+		File pullRequestTouchsDomFile = new File(dataDir, "PullRequestTouchs.xml");
+		pullRequestTouchsDom = new VersionedXmlDoc();
+		Element listElement = pullRequestTouchsDom.addElement("list");
+
+		long touchId = 1;
+		for (var entry : pullRequestIdToProjectId.entrySet()) {
+			var pullRequestTouchElement = listElement.addElement("io.onedev.server.model.PullRequestTouch");
+			pullRequestTouchElement.addAttribute("revision", "0.0.0");
+			pullRequestTouchElement.addElement("project").setText(entry.getValue());
+			pullRequestTouchElement.addElement("requestId").setText(entry.getKey());
+			pullRequestTouchElement.addElement("id").setText(String.valueOf(touchId++));
+		}
+		pullRequestTouchsDom.writeToFile(pullRequestTouchsDomFile, true);
+
+		VersionedXmlDoc codeCommentTouchsDom;
+		File codeCommentTouchsDomFile = new File(dataDir, "CodeCommentTouchs.xml");
+		codeCommentTouchsDom = new VersionedXmlDoc();
+		listElement = codeCommentTouchsDom.addElement("list");
+
+		touchId = 1;
+		for (var entry : codeCommentIdToProjectId.entrySet()) {
+			var codeCommentTouchElement = listElement.addElement("io.onedev.server.model.CodeCommentTouch");
+			codeCommentTouchElement.addAttribute("revision", "0.0.0");
+			codeCommentTouchElement.addElement("project").setText(entry.getValue());
+			codeCommentTouchElement.addElement("commentId").setText(entry.getKey());
+			codeCommentTouchElement.addElement("id").setText(String.valueOf(touchId++));
+		}
+		codeCommentTouchsDom.writeToFile(codeCommentTouchsDomFile, true);
+
+	}
+
 }
