@@ -1,35 +1,57 @@
 package io.onedev.server.mail;
 
-import com.google.common.base.Joiner;
-import com.hazelcast.cluster.MembershipEvent;
-import com.hazelcast.cluster.MembershipListener;
-import com.ibm.icu.impl.locale.XCldrStub.Splitter;
-import com.sun.mail.imap.IMAPFolder;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentManager;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.administration.IssueCreationSetting;
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.issue.field.instance.FieldInstance;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.HtmlUtils;
-import io.onedev.server.util.ParsedEmailAddress;
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.model.Setting.Key.MAIL_SERVICE;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.mail.Authenticator;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -46,32 +68,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.internet.MimeMessage.RecipientType;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.attribute.FileTime;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import com.google.common.base.Joiner;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
+import com.ibm.icu.impl.locale.XCldrStub.Splitter;
+import com.sun.mail.imap.IMAPFolder;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static io.onedev.server.model.Setting.Key.MAIL_SERVICE;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toSet;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
+import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.Setting;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.BrandingSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueCreationSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.util.ParsedEmailAddress;
 
 @Singleton
 public class DefaultMailManager implements MailManager, Serializable {
@@ -111,6 +156,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 	private final EmailAddressManager emailAddressManager;
 	
 	private final ClusterManager clusterManager;
+
+	private volatile Boolean prodTest;
 	
 	private volatile Thread thread;
 	
@@ -137,6 +184,14 @@ public class DefaultMailManager implements MailManager, Serializable {
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.clusterManager = clusterManager;
+	}
+
+	private boolean isProdTest() {
+		if (prodTest == null) {
+			prodTest = settingManager.getSystemSetting().getServerUrl().equals("https://code.onedev.io") 
+					&& !new File("/home/onedev/website").exists();
+		}
+		return prodTest;
 	}
 	
 	private String getQuoteMark() {
@@ -216,6 +271,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 						 @Nullable String references) {
 		if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 			return;
+
+		if (isProdTest()) {
+			logger.warn("Ignore sending mail as in prod test mode");
+			return;
+		}
 
 		Properties properties = new Properties();
 		properties.setProperty("mail.smtp.host", smtpSetting.getSmtpHost());
@@ -335,7 +395,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 		return threadingReferences;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
 	public void handleMessage(Message message, String systemAddress) {
