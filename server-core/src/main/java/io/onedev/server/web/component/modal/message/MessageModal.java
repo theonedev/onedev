@@ -5,7 +5,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.web.component.modal.ModalPanel;
 
-@SuppressWarnings("serial")
 public abstract class MessageModal extends ModalPanel {
 
 	public MessageModal(AjaxRequestTarget target) {

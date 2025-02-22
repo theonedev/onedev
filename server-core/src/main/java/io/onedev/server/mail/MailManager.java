@@ -1,14 +1,14 @@
 package io.onedev.server.mail;
 
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.PullRequest;
+import java.util.Collection;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 import javax.mail.Message;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
+
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.PullRequest;
 
 public interface MailManager {
 	

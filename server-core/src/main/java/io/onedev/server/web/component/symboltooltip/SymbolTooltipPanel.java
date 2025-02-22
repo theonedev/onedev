@@ -45,7 +45,6 @@ import java.util.List;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 20;

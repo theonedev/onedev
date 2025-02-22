@@ -10,7 +10,6 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public abstract class SubscriptionStatusLink extends AjaxLink<Void> {
 
 	public SubscriptionStatusLink(String id) {

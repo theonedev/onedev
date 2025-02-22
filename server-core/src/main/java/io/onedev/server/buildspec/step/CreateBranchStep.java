@@ -65,6 +65,7 @@ public class CreateBranchStep extends ServerSideStep {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestRevisions(String matchWith) {
 		Project project = Project.get();
 		if (project != null)

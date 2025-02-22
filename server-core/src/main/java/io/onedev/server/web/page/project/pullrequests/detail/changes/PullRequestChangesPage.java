@@ -60,7 +60,6 @@ import java.util.*;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionAnnotationSupport, EditParamsAware {
 
 	public static final String PARAM_OLD_COMMIT = "old-commit";

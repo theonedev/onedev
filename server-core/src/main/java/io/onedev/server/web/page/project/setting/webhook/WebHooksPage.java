@@ -14,7 +14,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
-@SuppressWarnings("serial")
 public class WebHooksPage extends ProjectSettingPage {
 
 	public WebHooksPage(PageParameters params) {

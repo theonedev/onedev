@@ -22,7 +22,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 abstract class BuildOptionContentPanel extends Panel {
 
 	private final List<String> refNames;

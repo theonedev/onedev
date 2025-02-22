@@ -10,7 +10,6 @@ import io.onedev.server.web.asset.dropzone.DropzoneResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-@SuppressWarnings("serial")
 public class DropzoneFieldResourceReference extends BaseDependentResourceReference {
 
 	public DropzoneFieldResourceReference() {

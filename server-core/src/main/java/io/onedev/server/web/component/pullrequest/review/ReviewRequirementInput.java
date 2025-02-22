@@ -5,7 +5,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 
-@SuppressWarnings("serial")
 public class ReviewRequirementInput extends TextField<String> {
 
 	private final IModel<Project> projectModel;

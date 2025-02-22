@@ -27,7 +27,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class StepListViewPanel extends Panel {
 
 	private final List<Step> steps = new ArrayList<>();

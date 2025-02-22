@@ -98,7 +98,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected final IModel<Project> projectModel;

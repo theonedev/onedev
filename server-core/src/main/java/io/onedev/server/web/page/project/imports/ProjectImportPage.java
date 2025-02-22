@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class ProjectImportPage extends LayoutPage {
 
 	private static final String PARAM_IMPORTER = "importer";

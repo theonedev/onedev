@@ -1,12 +1,22 @@
 package io.onedev.server.plugin.report.cppcheck;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
@@ -16,15 +26,6 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Cppcheck Report")
 public class PublishCppcheckReportStep extends PublishProblemReportStep {

@@ -1,9 +1,17 @@
 package io.onedev.server.jetty;
 
-import com.google.inject.servlet.GuiceFilter;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.cluster.ClusterManager;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.tika.mime.MimeTypes;
 import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpMethod;
@@ -13,12 +21,10 @@ import org.eclipse.jetty.server.session.SessionDataStoreFactory;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import com.google.inject.servlet.GuiceFilter;
+
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletContextHandler> {

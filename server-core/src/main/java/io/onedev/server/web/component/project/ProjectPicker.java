@@ -15,7 +15,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public abstract class ProjectPicker extends DropdownLink {
 
 	private final IModel<List<Project>> projectsModel; 

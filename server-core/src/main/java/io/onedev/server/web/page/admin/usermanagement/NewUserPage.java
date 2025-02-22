@@ -29,7 +29,6 @@ import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 
-@SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {
 
 	private NewUserBean bean = new NewUserBean();

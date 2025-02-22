@@ -28,7 +28,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class FieldEditPanel extends Panel implements InputContext {
 
 	private final int fieldIndex;

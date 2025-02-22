@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class JobSecretEditPanel extends Panel {
 	
 	private final int index;

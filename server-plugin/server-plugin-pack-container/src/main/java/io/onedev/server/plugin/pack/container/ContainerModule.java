@@ -1,17 +1,12 @@
 package io.onedev.server.plugin.pack.container;
 
-import java.util.Collection;
-
-import com.google.common.collect.Sets;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.security.FilterChainConfigurator;
-import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

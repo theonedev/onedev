@@ -86,7 +86,6 @@ import java.util.*;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);

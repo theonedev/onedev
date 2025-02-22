@@ -12,7 +12,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  *
  * @param <T>
  */
-@SuppressWarnings("serial")
 public class ViewStateAwarePageLink<T> extends BookmarkablePageLink<T> {
 
 	public <C extends Page> ViewStateAwarePageLink(String id, final Class<C> pageClass) {

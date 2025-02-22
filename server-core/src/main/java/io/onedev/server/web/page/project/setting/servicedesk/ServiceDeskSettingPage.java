@@ -24,7 +24,6 @@ import java.io.Serializable;
 
 import static io.onedev.server.model.Project.PROP_SERVICE_DESK_EMAIL_ADDRESS;
 
-@SuppressWarnings("serial")
 public class ServiceDeskSettingPage extends ProjectSettingPage {
 
 	private BeanEditor editor;

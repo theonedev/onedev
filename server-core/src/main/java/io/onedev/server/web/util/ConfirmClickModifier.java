@@ -3,7 +3,6 @@ package io.onedev.server.web.util;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.AttributeModifier;
 
-@SuppressWarnings("serial")
 public class ConfirmClickModifier extends AttributeModifier {
 
 	public ConfirmClickModifier(String message) {

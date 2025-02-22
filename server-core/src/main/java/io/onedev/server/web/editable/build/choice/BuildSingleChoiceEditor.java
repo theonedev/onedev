@@ -17,7 +17,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 
 	private BuildSingleChoice input;

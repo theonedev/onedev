@@ -18,7 +18,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.IssueQueryAware;
 import io.onedev.server.web.util.ProjectAware;
 
-@SuppressWarnings("serial")
 public class IssueChoiceEditor extends PropertyEditor<Long> {
 
 	private IssueChoice input;

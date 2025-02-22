@@ -1,17 +1,14 @@
 package io.onedev.server.exception.handler;
 
-import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.HttpResponseBody;
-import org.apache.shiro.authz.UnauthenticatedException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import java.util.HashMap;
-import java.util.Map;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import org.apache.shiro.authz.UnauthenticatedException;
+
+import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.HttpResponseBody;
 
 public class UnauthenticatedExceptionHandler extends AbstractExceptionHandler<UnauthenticatedException> {
 	

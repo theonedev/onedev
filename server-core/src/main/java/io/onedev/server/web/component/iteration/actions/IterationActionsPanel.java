@@ -13,7 +13,6 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
 
-@SuppressWarnings("serial")
 public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 
 	public IterationActionsPanel(String id, IModel<Iteration> model) {

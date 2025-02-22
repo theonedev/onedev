@@ -38,6 +38,7 @@ public class RegistryLogin implements Serializable {
 		this.registryUrl = registryUrl;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestRegistryUrlVariables(String matchWith) {
 		return SuggestionUtils.suggest(Lists.newArrayList(JobVariable.SERVER_URL.name().toLowerCase()), matchWith);
 	}
@@ -53,6 +54,7 @@ public class RegistryLogin implements Serializable {
 		this.userName = userName;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestUserNameVariables(String matchWith) {
 		return SuggestionUtils.suggest(Lists.newArrayList(JobVariable.JOB_TOKEN.name().toLowerCase()), matchWith);
 	}

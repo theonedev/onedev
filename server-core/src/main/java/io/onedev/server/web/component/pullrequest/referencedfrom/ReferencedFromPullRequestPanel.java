@@ -15,7 +15,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
-@SuppressWarnings("serial")
 public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 
 	public ReferencedFromPullRequestPanel(String id, Long requestId) {

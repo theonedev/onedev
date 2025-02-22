@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.blob.render.noname;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 
-@SuppressWarnings("serial")
 public class NoNameCssResourceReference extends BaseDependentCssResourceReference {
 
 	public NoNameCssResourceReference() {

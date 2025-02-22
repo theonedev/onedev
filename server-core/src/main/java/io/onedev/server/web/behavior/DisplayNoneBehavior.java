@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public class DisplayNoneBehavior extends AttributeAppender {
 	
 	public DisplayNoneBehavior() {

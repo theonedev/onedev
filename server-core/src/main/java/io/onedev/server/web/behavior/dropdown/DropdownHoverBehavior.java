@@ -15,7 +15,6 @@ import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 
-@SuppressWarnings("serial")
 public abstract class DropdownHoverBehavior extends AbstractPostAjaxBehavior {
 
 	private static final int DEFAULT_HOVER_DELAY = 350;

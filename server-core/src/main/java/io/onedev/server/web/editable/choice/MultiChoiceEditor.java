@@ -23,7 +23,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 
-@SuppressWarnings("serial")
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	private Select2MultiChoice<String> input;

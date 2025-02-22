@@ -2,7 +2,6 @@ package io.onedev.server.web.util;
 
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 
-@SuppressWarnings("serial")
 public abstract class LoadableDetachableDataProvider<T, S> extends SortableDataProvider<T, S> {
 	
 	private Long size;

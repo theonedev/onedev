@@ -26,7 +26,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;
 import io.onedev.server.annotation.ExcludedProperties;
 
-@SuppressWarnings("serial")
 public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 
 	private final String BEAN_EDITOR_ID = "beanEditor";

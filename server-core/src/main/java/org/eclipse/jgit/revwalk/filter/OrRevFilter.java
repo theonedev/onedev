@@ -112,7 +112,6 @@ public abstract class OrRevFilter extends RevFilter {
 			return new Binary(a.clone(), b.clone());
 		}
 
-		@SuppressWarnings("nls")
 		@Override
 		public String toString() {
 			return "(" + a.toString() + " OR " + b.toString() + ")";

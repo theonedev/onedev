@@ -1,5 +1,44 @@
 package io.onedev.server.git;
 
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static org.apache.commons.lang3.StringUtils.strip;
+
+import java.io.File;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.http.server.GitSmartHttpTools;
+import org.eclipse.jgit.http.server.ServletUtils;
+import org.eclipse.jgit.transport.PacketLineOut;
+import org.glassfish.jersey.client.ClientProperties;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -13,34 +52,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.http.server.GitSmartHttpTools;
-import org.eclipse.jgit.http.server.ServletUtils;
-import org.eclipse.jgit.transport.PacketLineOut;
-import org.glassfish.jersey.client.ClientProperties;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static org.apache.commons.lang3.StringUtils.strip;
 
 @Singleton
 public class GitFilter implements Filter {

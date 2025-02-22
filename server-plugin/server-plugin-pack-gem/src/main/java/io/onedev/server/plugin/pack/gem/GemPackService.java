@@ -96,6 +96,7 @@ public class GemPackService implements PackService {
 		return "update-pack:" + projectId + ":" + TYPE + ":" + name;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {

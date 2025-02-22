@@ -6,7 +6,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.annotation.DataDirectory;
 
 public class DataDirectoryValidator implements ConstraintValidator<DataDirectory, String> {

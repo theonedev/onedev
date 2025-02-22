@@ -61,7 +61,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class RevisionComparePage extends ProjectPage implements RevisionAnnotationSupport, EditParamsAware {
 
 	public enum TabPanel {

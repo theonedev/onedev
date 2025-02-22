@@ -34,6 +34,7 @@ public class FuzzyCriteria extends Criteria<Agent> {
 		return parse(value).matches(agent);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Criteria<Agent> parse(String value) {
 		return new OrCriteria<>(
 				new NameCriteria("*" + value + "*", Is),

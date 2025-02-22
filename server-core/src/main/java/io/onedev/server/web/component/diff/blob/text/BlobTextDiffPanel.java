@@ -1,8 +1,41 @@
 package io.onedev.server.web.component.diff.blob.text;
 
+import static io.onedev.server.codequality.BlobTarget.groupByLine;
+import static io.onedev.server.util.diff.DiffRenderer.toHtml;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.unbescape.html.HtmlEscape;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -28,7 +61,6 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.diff.blob.BlobAnnotationSupport;
-import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
@@ -38,35 +70,7 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.unbescape.html.HtmlEscape;
-import org.unbescape.javascript.JavaScriptEscape;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
-
-import static io.onedev.server.codequality.BlobTarget.groupByLine;
-import static io.onedev.server.util.diff.DiffRenderer.toHtml;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
-
-@SuppressWarnings("serial")
 public class BlobTextDiffPanel extends Panel {
 
 	private final BlobChange change;

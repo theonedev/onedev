@@ -1,5 +1,43 @@
 package io.onedev.server.attachment;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.model.Project.ATTACHMENT_DIR;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.glassfish.jersey.client.ClientProperties;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
@@ -19,7 +57,13 @@ import io.onedev.server.event.project.codecomment.CodeCommentCreated;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentReplyCreated;
 import io.onedev.server.event.project.codecomment.CodeCommentReplyEdited;
-import io.onedev.server.event.project.issue.*;
+import io.onedev.server.event.project.issue.IssueChanged;
+import io.onedev.server.event.project.issue.IssueCommentCreated;
+import io.onedev.server.event.project.issue.IssueCommentEdited;
+import io.onedev.server.event.project.issue.IssueOpened;
+import io.onedev.server.event.project.issue.IssuesCopied;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
@@ -35,30 +79,8 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.artifact.FileInfo;
-import org.apache.commons.compress.utils.IOUtils;
-import org.glassfish.jersey.client.ClientProperties;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.util.*;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
-import static io.onedev.server.model.Project.ATTACHMENT_DIR;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 @Singleton
 public class DefaultAttachmentManager implements AttachmentManager, SchedulableTask, Serializable {

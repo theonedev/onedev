@@ -19,7 +19,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class ParamSpecEditPanel extends Panel implements InputContext {
 
 	private final List<ParamSpec> paramSpecs;

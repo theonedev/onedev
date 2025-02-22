@@ -10,7 +10,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import java.lang.reflect.InvocationTargetException;
 
-@SuppressWarnings("serial")
 abstract class StepEditModalPanel extends ModalPanel implements BuildSpecAware, ParamSpecAware {
 
 	private Step step;

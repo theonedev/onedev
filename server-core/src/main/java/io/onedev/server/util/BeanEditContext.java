@@ -1,14 +1,6 @@
 package io.onedev.server.util;
 
 import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.util.WicketUtils;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
 
 public class BeanEditContext implements EditContext {
 	

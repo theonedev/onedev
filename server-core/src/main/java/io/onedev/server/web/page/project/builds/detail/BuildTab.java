@@ -9,7 +9,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.List;
 
 @ExtensionPoint
-@SuppressWarnings("serial")
 public class BuildTab extends PageTab {
 
 

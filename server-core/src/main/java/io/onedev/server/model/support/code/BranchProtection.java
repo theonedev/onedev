@@ -166,6 +166,7 @@ public class BranchProtection implements Serializable {
 		this.enforceConventionalCommits = enforceConventionalCommits;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isEnforceConventionalCommitsEnabled() {
 		return (boolean) EditContext.get().getInputValue("enforceConventionalCommits");
 	}
@@ -202,6 +203,7 @@ public class BranchProtection implements Serializable {
 		this.checkCommitMessageFooter = checkCommitMessageFooter;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isCheckCommitMessageFooterEnabled() {
 		return (boolean) EditContext.get().getInputValue("checkCommitMessageFooter");
 	}

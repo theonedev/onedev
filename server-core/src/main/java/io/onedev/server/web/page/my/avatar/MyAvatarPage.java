@@ -9,7 +9,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.avataredit.AvatarEditPanel;
 import io.onedev.server.web.page.my.MyPage;
 
-@SuppressWarnings("serial")
 public class MyAvatarPage extends MyPage {
 	
 	public MyAvatarPage(PageParameters params) {

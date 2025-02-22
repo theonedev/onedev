@@ -11,7 +11,6 @@ import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class ProjectQueryEditor extends PropertyEditor<String> {
 	
 	private TextField<String> input;

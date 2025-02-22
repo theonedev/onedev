@@ -20,7 +20,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {
 
 	private final IModel<Project> projectModel;

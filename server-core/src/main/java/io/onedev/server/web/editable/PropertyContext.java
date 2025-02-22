@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public abstract class PropertyContext<T> implements Serializable {
 
 	private final PropertyDescriptor descriptor;

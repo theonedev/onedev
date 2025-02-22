@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
-@SuppressWarnings("serial")
 abstract class MessagePanel extends Panel {
 	
 	public MessagePanel(String id) {

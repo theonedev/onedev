@@ -7,7 +7,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.Agent;
 
-@SuppressWarnings("serial")
 public class AgentStatusBadge extends Label {
 
 	private final IModel<Agent> agentModel;

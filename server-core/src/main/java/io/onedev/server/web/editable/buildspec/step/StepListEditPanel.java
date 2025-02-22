@@ -46,7 +46,6 @@ import java.util.List;
 
 import static io.onedev.server.web.component.floating.AlignPlacement.bottom;
 
-@SuppressWarnings("serial")
 class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<Step> steps;

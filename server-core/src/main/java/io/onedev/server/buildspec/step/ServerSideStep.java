@@ -3,22 +3,20 @@ package io.onedev.server.buildspec.step;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.ServerStepResult;
-import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.k8shelper.ServerStepResult;
+import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringVisitor;
-import io.onedev.server.annotation.Interpolative;
 
 public abstract class ServerSideStep extends Step {
 

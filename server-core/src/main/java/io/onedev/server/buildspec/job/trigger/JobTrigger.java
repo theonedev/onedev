@@ -85,6 +85,7 @@ public abstract class JobTrigger implements Serializable {
 		this.excludeParamMaps = excludeParamMaps;
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
 		var componentContext = ComponentContext.get();
 		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
@@ -106,7 +107,6 @@ public abstract class JobTrigger implements Serializable {
 		return new ArrayList<>();
 	}
 
-	@SuppressWarnings("unused")
 	@Nullable
 	public TriggerMatch matches(ProjectEvent event, Job job) {
 		String projectPath = event.getProject().getPath();

@@ -13,7 +13,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import java.util.Collection;
 
-@SuppressWarnings("serial")
 public abstract class IssueOperationsPanel extends Panel {
 	
 	public IssueOperationsPanel(String id) {

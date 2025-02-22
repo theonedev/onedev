@@ -38,7 +38,6 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.reaction.ReactionListPanel;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 public abstract class CommentPanel extends Panel {
 
 	private static final String COMMENT_ID = "comment";

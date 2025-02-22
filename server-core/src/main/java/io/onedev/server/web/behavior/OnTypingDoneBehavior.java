@@ -9,7 +9,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 
-@SuppressWarnings("serial")
 public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBehavior {
 
 	private int timeout;

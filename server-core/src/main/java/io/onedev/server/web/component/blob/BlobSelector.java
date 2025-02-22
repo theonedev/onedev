@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public abstract class BlobSelector extends Panel {
 
 	private final IModel<Project> projectModel;

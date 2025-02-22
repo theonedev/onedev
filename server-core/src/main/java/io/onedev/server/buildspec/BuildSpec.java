@@ -1490,6 +1490,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate19(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1517,6 +1518,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate20(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specTupleKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1550,6 +1552,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void migrate21(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1590,6 +1593,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate22(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1627,6 +1631,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate23(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1667,6 +1672,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate24(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1704,6 +1710,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate25(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1753,6 +1760,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void migrate26(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1804,6 +1812,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate27(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
@@ -1821,6 +1830,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate28(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
@@ -1882,6 +1892,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate29(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -1937,6 +1948,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate30(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -1964,6 +1976,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate31(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2000,6 +2013,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate32(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2056,6 +2070,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate33(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2105,6 +2120,7 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate34(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2124,6 +2140,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate35(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2149,6 +2166,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate36(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
@@ -2162,7 +2180,7 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		});
 	}
-	
+
 	private void migrate37_registryLogins(MappingNode node) {
 		String accessTokenSecret = null;
 		for (var itTuple = node.getValue().iterator(); itTuple.hasNext();) {
@@ -2190,7 +2208,8 @@ public class BuildSpec implements Serializable, Validatable {
 			node.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "registryLogins"), logins));
 		}
 	}
-	
+
+	@SuppressWarnings("unused")
 	private void migrate37(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
@@ -2207,6 +2226,7 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
 	private void migrate38(VersionedYamlDoc doc, Stack<Integer> versions) {
 		migrateSteps(doc, versions, stepsNode -> {
 			for (var stepNode: stepsNode.getValue()) {

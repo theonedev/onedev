@@ -1,10 +1,40 @@
 package io.onedev.server.buildspec.job;
 
+import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.model.Build.NAME_TAG;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.wicket.Component;
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.RetryCondition;
+import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.NamedElement;
@@ -29,25 +59,10 @@ import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.Component;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.Build.*;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.*;
 
 @Editable
 @ClassValidating
-public class Job implements NamedElement, Serializable, Validatable {
+public class Job implements NamedElement, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -132,6 +147,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.jobExecutor = jobExecutor;
 	}
 
+	@SuppressWarnings("unused")
 	private static String getJobExecutorPlaceholder() {
 		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
 			return "Auto-discovered executor";
@@ -323,9 +339,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 		
-		Set<String> keys = new HashSet<>();
-		Set<String> paths = new HashSet<>();
-
 		Set<String> dependencyJobNames = new HashSet<>();
 		for (JobDependency dependency: jobDependencies) {
 			if (!dependencyJobNames.add(dependency.getJobName())) {

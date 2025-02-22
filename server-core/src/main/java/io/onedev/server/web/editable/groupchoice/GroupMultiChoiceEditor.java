@@ -23,7 +23,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.GroupChoice;
 
-@SuppressWarnings("serial")
 public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	
 	private GroupMultiChoice input;

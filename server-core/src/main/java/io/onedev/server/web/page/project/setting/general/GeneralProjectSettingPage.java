@@ -33,7 +33,6 @@ import java.util.Collection;
 
 import static io.onedev.server.model.Project.*;
 
-@SuppressWarnings("serial")
 public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 	private BeanEditor editor;

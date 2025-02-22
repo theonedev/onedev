@@ -6,7 +6,6 @@ import java.util.HashSet;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class ManualConfig implements Serializable {
 
 	private final String title;

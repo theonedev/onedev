@@ -15,7 +15,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
-@SuppressWarnings("serial")
 public class BuildStatusIcon extends SpriteImage {
 
 	private final IModel<Status> model;

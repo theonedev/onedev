@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 	protected final Class<? extends Lexer> lexerClass;

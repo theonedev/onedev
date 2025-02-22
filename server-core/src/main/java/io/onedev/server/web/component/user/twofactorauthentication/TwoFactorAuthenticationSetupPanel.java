@@ -32,7 +32,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
 
 	private static final int QR_CODE_SIZE = 160;

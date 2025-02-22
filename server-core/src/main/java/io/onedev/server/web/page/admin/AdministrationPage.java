@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public abstract class AdministrationPage extends LayoutPage {
 
 	public AdministrationPage(PageParameters params) {

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_COMMIT_NOTIFICATION;
 
-@SuppressWarnings("serial")
 public class CommitNotificationTemplatePage extends AbstractSimpleNotificationTemplatePage {
 
 	public CommitNotificationTemplatePage(PageParameters params) {

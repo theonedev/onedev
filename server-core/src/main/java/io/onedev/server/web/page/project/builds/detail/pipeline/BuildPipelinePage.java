@@ -13,7 +13,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class BuildPipelinePage extends BuildDetailPage {
 
 	public BuildPipelinePage(PageParameters params) {

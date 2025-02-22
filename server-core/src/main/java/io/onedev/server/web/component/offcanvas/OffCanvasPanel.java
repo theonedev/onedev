@@ -10,7 +10,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.util.Animation;
 
-@SuppressWarnings("serial")
 public abstract class OffCanvasPanel extends FloatingPanel {
 
 	public enum Placement {LEFT, RIGHT}

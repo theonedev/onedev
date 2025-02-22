@@ -235,7 +235,6 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 
 					private LeafReaderContext context;
 
-					@SuppressWarnings("unchecked")
 					@Override
 					public void collect(int doc) throws IOException {
 						Document document = searcher.doc(context.docBase+doc);

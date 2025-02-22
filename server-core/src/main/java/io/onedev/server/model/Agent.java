@@ -1,26 +1,46 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Agent.PROP_IP_ADDRESS;
+import static io.onedev.server.model.Agent.PROP_NAME;
+import static io.onedev.server.model.Agent.PROP_OS_ARCH;
+import static io.onedev.server.model.Agent.PROP_OS_NAME;
+import static io.onedev.server.model.Agent.PROP_OS_VERSION;
+import static io.onedev.server.model.Agent.PROP_PAUSED;
+import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.SortField;
-import io.onedev.server.util.CollectionUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import java.util.*;
-
-import static io.onedev.server.model.Agent.*;
-import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(indexes={

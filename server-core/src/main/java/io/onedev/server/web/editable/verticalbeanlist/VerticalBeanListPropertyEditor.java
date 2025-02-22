@@ -27,7 +27,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-@SuppressWarnings("serial")
 public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	private Class<?> elementClass;
@@ -63,6 +62,7 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -91,7 +91,6 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 
 		add(new AjaxButton("addElement") {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
@@ -136,7 +135,6 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 
 		add(new SortBehavior() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				markFormDirty(target);
@@ -223,7 +221,6 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		return row;
 	}
 
-	@SuppressWarnings("unchecked")
 	private BeanEditor getElementEditorAtRow(int index) {
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();
@@ -234,6 +231,7 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		return (BeanEditor) row.get("elementEditor");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		int index = ((PathNode.Indexed) propertyNode).getIndex();

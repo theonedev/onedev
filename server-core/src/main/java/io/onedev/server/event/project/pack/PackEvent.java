@@ -1,15 +1,12 @@
 package io.onedev.server.event.project.pack;
 
+import java.util.Date;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Pack;
-import io.onedev.server.model.User;
 import io.onedev.server.web.UrlManager;
-
-import java.util.Date;
 
 public abstract class PackEvent extends ProjectEvent {
 

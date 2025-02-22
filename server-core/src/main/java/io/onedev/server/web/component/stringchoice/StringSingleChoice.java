@@ -6,7 +6,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.component.select2.Select2Choice;
 
-@SuppressWarnings("serial")
 public class StringSingleChoice extends Select2Choice<String> {
 
 	public StringSingleChoice(String id, IModel<String> selectionModel, 

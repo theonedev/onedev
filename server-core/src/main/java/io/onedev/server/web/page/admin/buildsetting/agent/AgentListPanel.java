@@ -59,7 +59,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 class AgentListPanel extends Panel {
 	
 	private final IModel<String> queryStringModel;

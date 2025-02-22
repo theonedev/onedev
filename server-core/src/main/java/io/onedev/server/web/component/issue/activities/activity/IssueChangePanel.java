@@ -11,7 +11,6 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.DateUtils;
 
-@SuppressWarnings("serial")
 class IssueChangePanel extends GenericPanel<IssueChange> {
 
 	public IssueChangePanel(String id, IModel<IssueChange> model) {

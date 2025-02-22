@@ -16,7 +16,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.web.util.IssueQueryAware;
 import io.onedev.server.web.util.ProjectAware;
 
-@SuppressWarnings("serial")
 public abstract class InplacePropertyEditPanel extends Panel implements EditContext, IssueQueryAware, ProjectAware {
 
 	private final Serializable bean;

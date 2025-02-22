@@ -8,7 +8,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class MyTwoFactorAuthenticationPage extends MyPage {
 
 	public MyTwoFactorAuthenticationPage(PageParameters params) {

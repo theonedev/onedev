@@ -49,7 +49,6 @@ import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
 import static java.util.Comparator.comparingInt;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
-@SuppressWarnings("serial")
 public abstract class ProjectInfoPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectInfoPanel.class);

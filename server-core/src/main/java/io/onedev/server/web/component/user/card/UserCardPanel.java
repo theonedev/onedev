@@ -13,7 +13,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
 
-@SuppressWarnings("serial")
 public class UserCardPanel extends GenericPanel<User> {
 
 	public UserCardPanel(String id, User user) {

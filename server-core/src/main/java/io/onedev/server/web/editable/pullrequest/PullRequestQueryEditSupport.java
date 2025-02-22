@@ -19,7 +19,6 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.PullRequestQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
-@SuppressWarnings("serial")
 public class PullRequestQueryEditSupport implements EditSupport {
 
 	@Override

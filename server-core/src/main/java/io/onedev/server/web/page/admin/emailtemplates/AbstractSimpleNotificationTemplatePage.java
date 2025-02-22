@@ -6,7 +6,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public abstract class AbstractSimpleNotificationTemplatePage extends AbstractTemplatePage {
 	
 	public AbstractSimpleNotificationTemplatePage(PageParameters params) {

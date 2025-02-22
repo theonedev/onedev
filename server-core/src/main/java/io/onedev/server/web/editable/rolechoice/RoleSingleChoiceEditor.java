@@ -16,7 +16,6 @@ import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 
 	private StringSingleChoice input;

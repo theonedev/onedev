@@ -43,7 +43,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
-@SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
 
 	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};

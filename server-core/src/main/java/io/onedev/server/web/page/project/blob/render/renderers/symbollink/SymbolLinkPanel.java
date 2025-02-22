@@ -19,7 +19,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
-@SuppressWarnings("serial")
 public class SymbolLinkPanel extends BlobViewPanel {
 
 	public SymbolLinkPanel(String id, BlobRenderContext context) {

@@ -35,7 +35,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class EmailAddressesPanel extends GenericPanel<User> {
 
 	private String emailAddressValue;

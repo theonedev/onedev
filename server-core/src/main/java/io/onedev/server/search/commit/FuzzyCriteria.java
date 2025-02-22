@@ -1,19 +1,18 @@
 package io.onedev.server.search.commit;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
-import org.eclipse.jgit.revwalk.RevCommit;
+import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static io.onedev.commons.utils.match.WildcardUtils.matchString;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.model.Project;
 
 public class FuzzyCriteria extends CommitCriteria {
 

@@ -30,7 +30,6 @@ import java.io.Serializable;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-@SuppressWarnings("serial")
 public class GeneralErrorPage extends SimplePage {
 
 	private static final Logger logger = LoggerFactory.getLogger(GeneralErrorPage.class);

@@ -12,7 +12,6 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.annotation.ReferenceAware;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
-@SuppressWarnings("serial")
 public class ReferenceAwareEditSupport implements EditSupport {
 
 	@Override

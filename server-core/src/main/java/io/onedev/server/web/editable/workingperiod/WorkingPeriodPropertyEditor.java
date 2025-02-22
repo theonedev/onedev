@@ -15,7 +15,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import javax.validation.ValidationException;
 
-@SuppressWarnings("serial")
 public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 
 	private TextField<String> input;

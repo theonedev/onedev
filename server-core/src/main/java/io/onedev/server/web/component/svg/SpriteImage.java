@@ -24,7 +24,6 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.resource.SpriteResourceReference;
 
-@SuppressWarnings("serial")
 public class SpriteImage extends WebComponent {
 
 	private static final Map<String, Class<?>> spriteScopes = new ConcurrentHashMap<>();

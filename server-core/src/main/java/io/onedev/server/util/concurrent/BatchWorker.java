@@ -1,7 +1,6 @@
 package io.onedev.server.util.concurrent;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;

@@ -1,10 +1,12 @@
 package io.onedev.server.web.editable.polymorphiclist;
 
-import io.onedev.server.annotation.ExcludedProperties;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.PropertyDescriptor;
+import static java.util.Arrays.asList;
+
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -13,15 +15,12 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import io.onedev.server.annotation.ExcludedProperties;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyDescriptor;
 
-import static java.util.Arrays.asList;
-
-@SuppressWarnings("serial")
 public class PolymorphicListPropertyViewer extends Panel {
 
 	private final List<Serializable> elements;

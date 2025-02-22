@@ -75,6 +75,7 @@ public class TimesheetSetting implements Serializable {
 		this.groupBy = groupBy;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<String> getGroupByChoices() {
 		var choices = Lists.newArrayList(NAME_PROJECT);
 		for (var fieldSpec: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) {

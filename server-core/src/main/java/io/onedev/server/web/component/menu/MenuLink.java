@@ -11,7 +11,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class MenuLink extends DropdownLink {
 
 	public MenuLink(String id) {

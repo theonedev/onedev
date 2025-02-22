@@ -19,7 +19,6 @@ import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.layout.LayoutPage;
 
-@SuppressWarnings("serial")
 public class IncompatibilitiesPage extends LayoutPage {
 
 	private final IModel<String> incompatibilitiesSinceUpgradedVersionModel = new LoadableDetachableModel<String>() {

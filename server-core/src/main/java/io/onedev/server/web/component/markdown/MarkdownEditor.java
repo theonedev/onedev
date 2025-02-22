@@ -76,7 +76,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import org.unbescape.javascript.JavaScriptEscape;
 
-@SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
 	
 	protected static final int ATWHO_LIMIT = 10;

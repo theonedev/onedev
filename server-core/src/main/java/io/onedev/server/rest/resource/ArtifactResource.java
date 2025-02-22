@@ -32,7 +32,7 @@ import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.Response.ok;
-import static org.apache.commons.compress.utils.IOUtils.copy;
+import static io.onedev.server.util.IOUtils.copy;
 
 @Api(order=4100, description="In most cases, artifact resource is operated with build id, which is different from build number. "
 		+ "To get build id of a particular build number, use the <a href='/~help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "

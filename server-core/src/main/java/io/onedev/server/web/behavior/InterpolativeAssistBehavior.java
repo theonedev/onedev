@@ -13,11 +13,9 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.Input;
 import io.onedev.server.util.interpolative.InterpolativeParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 
-@SuppressWarnings("serial")
 public abstract class InterpolativeAssistBehavior extends ANTLRAssistBehavior {
 
 	public InterpolativeAssistBehavior() {

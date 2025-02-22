@@ -1,14 +1,16 @@
 package io.onedev.server.web.component.tabbable;
 
-import io.onedev.server.web.util.WicketUtils;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.web.util.WicketUtils;
 
 public class PageTab extends Tab {
 	
@@ -102,30 +104,6 @@ public class PageTab extends Tab {
 		pageClasses.add(pageClass1);
 		pageClasses.add(pageClass2);
 		pageClasses.add(pageClass3);
-		return pageClasses;
-	}
-
-	private static List<Class<? extends Page>> asList(
-			Class<? extends Page> pageClass1, Class<? extends Page> pageClass2, 
-			Class<? extends Page> pageClass3, Class<? extends Page> pageClass4) {
-		List<Class<? extends Page>> pageClasses = new ArrayList<>();
-		pageClasses.add(pageClass1);
-		pageClasses.add(pageClass2);
-		pageClasses.add(pageClass3);
-		pageClasses.add(pageClass4);
-		return pageClasses;
-	}
-	
-	private static List<Class<? extends Page>> asList(
-			Class<? extends Page> pageClass1, Class<? extends Page> pageClass2, 
-			Class<? extends Page> pageClass3, Class<? extends Page> pageClass4, 
-			Class<? extends Page> pageClass5) {
-		List<Class<? extends Page>> pageClasses = new ArrayList<>();
-		pageClasses.add(pageClass1);
-		pageClasses.add(pageClass2);
-		pageClasses.add(pageClass3);
-		pageClasses.add(pageClass4);
-		pageClasses.add(pageClass5);
 		return pageClasses;
 	}
 	

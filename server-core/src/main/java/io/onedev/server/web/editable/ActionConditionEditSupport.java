@@ -11,7 +11,6 @@ import io.onedev.server.web.behavior.ActionConditionBehavior;
 import io.onedev.server.annotation.ActionCondition;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
-@SuppressWarnings("serial")
 public class ActionConditionEditSupport implements EditSupport {
 
 	@Override

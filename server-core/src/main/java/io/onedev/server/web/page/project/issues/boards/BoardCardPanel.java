@@ -50,7 +50,6 @@ import java.util.List;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 
-@SuppressWarnings("serial")
 public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	
 	private final Long issueId;

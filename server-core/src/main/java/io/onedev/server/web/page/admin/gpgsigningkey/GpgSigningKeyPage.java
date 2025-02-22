@@ -25,7 +25,6 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-@SuppressWarnings("serial")
 public class GpgSigningKeyPage extends AdministrationPage {
 
 	public GpgSigningKeyPage(PageParameters params) {

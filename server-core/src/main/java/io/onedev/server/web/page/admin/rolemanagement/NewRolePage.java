@@ -22,7 +22,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-@SuppressWarnings("serial")
 public class NewRolePage extends AdministrationPage {
 
 	private Role role = new Role();

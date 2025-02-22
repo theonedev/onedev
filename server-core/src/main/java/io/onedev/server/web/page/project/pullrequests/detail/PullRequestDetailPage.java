@@ -1,15 +1,92 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ValidationException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestLabelManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.*;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestLabel;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
@@ -74,55 +151,7 @@ import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.*;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-import org.jetbrains.annotations.Nullable;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
-
-@SuppressWarnings("serial")
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
 	public static final String PARAM_REQUEST = "request";
@@ -1562,7 +1591,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		});
 
-		var user = SecurityUtils.getAuthUser();
 		statusBarContainer.add(new BookmarkablePageLink<Void>(
 				"newPullRequest",
 				NewPullRequestPage.class,

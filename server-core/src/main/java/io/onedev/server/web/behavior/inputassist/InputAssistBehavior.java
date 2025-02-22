@@ -29,7 +29,6 @@ import java.util.List;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;

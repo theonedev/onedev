@@ -6,7 +6,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 
-@SuppressWarnings("serial")
 class TestStatusBadge extends Label {
 	
 	private final Status status;

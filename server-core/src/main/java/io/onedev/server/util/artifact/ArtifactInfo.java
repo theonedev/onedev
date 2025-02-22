@@ -23,6 +23,7 @@ public abstract class ArtifactInfo implements Serializable {
 		this.lastModified = lastModified;
 	}
 	
+	@SuppressWarnings("unused")
 	private static ArtifactInfo getExample() {
 		List<ArtifactInfo> children = new ArrayList<>();
 		children.add(new DirectoryInfo("directory/sub-directory", 1, null));

@@ -1,13 +1,13 @@
 package io.onedev.server.plugin.pack.gem;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
-import org.apache.wicket.markup.html.basic.Label;
+import static io.onedev.server.plugin.pack.gem.GemPackService.SERVICE_ID;
+
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import static io.onedev.server.plugin.pack.gem.GemPackService.SERVICE_ID;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class GemHelpPanel extends Panel {
 	

@@ -36,7 +36,6 @@ import io.onedev.server.web.util.NamedBuildQueriesBean;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
-@SuppressWarnings("serial")
 public class BuildListPage extends LayoutPage {
 
 	private static final String PARAM_PAGE = "page";

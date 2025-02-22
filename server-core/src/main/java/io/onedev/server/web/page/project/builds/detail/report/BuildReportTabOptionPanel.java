@@ -10,7 +10,6 @@ import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.stats.buildmetric.BuildMetricStatsPage;
 
-@SuppressWarnings("serial")
 class BuildReportTabOptionPanel extends Panel {
 
 	private final Class<? extends BuildMetricStatsPage<?>> statsPageClass;

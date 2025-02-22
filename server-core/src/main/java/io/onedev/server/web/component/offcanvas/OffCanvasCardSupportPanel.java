@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
 abstract class OffCanvasCardSupportPanel extends Panel {
 
 	public OffCanvasCardSupportPanel(String id) {

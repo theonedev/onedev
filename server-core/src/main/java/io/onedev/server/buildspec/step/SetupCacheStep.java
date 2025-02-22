@@ -68,6 +68,7 @@ public class SetupCacheStep extends Step {
 		this.loadKeys = loadKeys;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
@@ -111,6 +112,7 @@ public class SetupCacheStep extends Step {
 		this.changeDetectionExcludes = changeDetectionExcludes;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isUploadIfChanged() {
 		return UPLOAD_IF_CHANGED == EditContext.get().getInputValue("uploadStrategy");	
 	}
@@ -126,6 +128,7 @@ public class SetupCacheStep extends Step {
 		this.uploadProjectPath = uploadProjectPath;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestStaticVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
@@ -142,6 +145,7 @@ public class SetupCacheStep extends Step {
 		this.uploadAccessTokenSecret = uploadAccessTokenSecret;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).distinct().collect(toList());

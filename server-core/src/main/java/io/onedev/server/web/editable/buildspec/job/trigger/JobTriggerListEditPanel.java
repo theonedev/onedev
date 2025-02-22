@@ -34,7 +34,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<JobTrigger> triggers;

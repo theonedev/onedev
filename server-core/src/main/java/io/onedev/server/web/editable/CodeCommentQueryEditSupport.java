@@ -16,7 +16,6 @@ import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
 
-@SuppressWarnings("serial")
 public class CodeCommentQueryEditSupport implements EditSupport {
 
 	@Override

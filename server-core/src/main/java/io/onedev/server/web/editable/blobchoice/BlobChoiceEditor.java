@@ -17,7 +17,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.BlobChoice;
 
-@SuppressWarnings("serial")
 public class BlobChoiceEditor extends PropertyEditor<String> {
 
 	private final IModel<ProjectScopedCommit> commitModel = new LoadableDetachableModel<ProjectScopedCommit>() {

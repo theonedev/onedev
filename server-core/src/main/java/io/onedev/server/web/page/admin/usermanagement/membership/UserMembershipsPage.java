@@ -56,7 +56,6 @@ import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 
-@SuppressWarnings("serial")
 public class UserMembershipsPage extends UserPage {
 
 	private String query;

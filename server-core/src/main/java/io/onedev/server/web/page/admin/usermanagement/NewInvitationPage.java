@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class NewInvitationPage extends AdministrationPage {
 
 	public NewInvitationPage(PageParameters params) {

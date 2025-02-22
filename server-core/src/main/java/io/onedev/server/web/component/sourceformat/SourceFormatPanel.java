@@ -17,7 +17,6 @@ import org.apache.wicket.request.http.WebResponse;
 
 import com.google.common.collect.Lists;
 
-@SuppressWarnings("serial")
 public class SourceFormatPanel extends Panel {
 
 	private static final String COOKIE_INDENT_TYPE = "sourceFormat.identType";

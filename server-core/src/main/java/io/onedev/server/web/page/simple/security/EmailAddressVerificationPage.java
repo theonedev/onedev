@@ -11,7 +11,6 @@ import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.web.page.simple.SimplePage;
 
-@SuppressWarnings("serial")
 public class EmailAddressVerificationPage extends SimplePage {
 
 	private final String PARAM_EMAIL_ADDRESS = "emailAddress";

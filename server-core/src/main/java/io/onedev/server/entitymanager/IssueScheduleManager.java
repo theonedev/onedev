@@ -1,7 +1,6 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
-import java.util.List;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;

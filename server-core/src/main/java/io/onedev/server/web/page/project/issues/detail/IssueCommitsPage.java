@@ -4,7 +4,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 
-@SuppressWarnings("serial")
 public class IssueCommitsPage extends IssueDetailPage {
 
 	public IssueCommitsPage(PageParameters params) {

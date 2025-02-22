@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.administration;
 
+import static io.onedev.server.search.entity.agent.AgentQueryLexer.Is;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +10,8 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.support.NamedAgentQuery;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.search.entity.agent.AgentQueryLexer;
 import io.onedev.server.search.entity.agent.NotUsedSinceCriteria;
 import io.onedev.server.search.entity.agent.OsCriteria;
-
-import static io.onedev.server.search.entity.agent.AgentQueryLexer.Is;
 
 public class AgentSetting implements Serializable {
 	

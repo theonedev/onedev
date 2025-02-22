@@ -13,7 +13,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.onedev.server.persistence.annotation.Sessional;
 
-@SuppressWarnings("serial")
 @Singleton
 public class DefaultServletContainer extends ServletContainer {
 	

@@ -1,5 +1,18 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.util.visit.IVisitor;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -16,21 +29,7 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.util.visit.IVisitor;
 
-import javax.annotation.Nullable;
-import java.util.HashSet;
-
-@SuppressWarnings("serial")
 abstract class AbstractColumnPanel extends Panel implements EditContext {
 
 	protected final IModel<Integer> countModel = new LoadableDetachableModel<>() {

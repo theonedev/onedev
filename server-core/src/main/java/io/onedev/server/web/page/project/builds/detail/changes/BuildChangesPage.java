@@ -24,7 +24,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 
-@SuppressWarnings("serial")
 public class BuildChangesPage extends BuildDetailPage {
 
 	private static final String PARAM_QUERY = "query";

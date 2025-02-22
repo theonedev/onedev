@@ -28,7 +28,6 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class AuthenticatorPage extends AdministrationPage {
 
 	private AuthenticationToken token = new AuthenticationToken();

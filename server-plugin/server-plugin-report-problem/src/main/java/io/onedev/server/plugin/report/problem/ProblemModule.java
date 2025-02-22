@@ -143,6 +143,7 @@ public class ProblemModule extends AbstractPluginModule {
 			this.reportName = reportName;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Map<String, Collection<CodeProblem>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {

@@ -14,7 +14,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.revwalk.RevObject;
 
-@SuppressWarnings("serial")
 public abstract class SignatureStatusPanel extends DropdownLink {
 
 	private IModel<VerificationResult> model = new LoadableDetachableModel<>() {

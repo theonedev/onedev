@@ -18,7 +18,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class IterationSingleChoiceEditor extends PropertyEditor<String> {
 
 	private IterationSingleChoice input;

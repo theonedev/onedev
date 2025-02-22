@@ -1,6 +1,20 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.Pack.PROP_PROJECT;
+import static io.onedev.server.model.PackBlobReference.PROP_PACK;
+import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
+import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.hibernate.criterion.Restrictions;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.entitymanager.PackBlobReferenceManager;
 import io.onedev.server.model.Pack;
@@ -9,20 +23,6 @@ import io.onedev.server.model.PackBlobReference;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import org.hibernate.criterion.Restrictions;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.Root;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-
-import static io.onedev.server.model.Pack.PROP_PROJECT;
-import static io.onedev.server.model.PackBlobReference.PROP_PACK;
-import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
-import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
 
 @Singleton
 public class DefaultPackBlobReferenceManager extends BaseEntityManager<PackBlobReference> 

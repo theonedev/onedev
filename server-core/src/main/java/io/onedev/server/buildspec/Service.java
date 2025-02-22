@@ -1,25 +1,28 @@
 package io.onedev.server.buildspec;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.ServiceFacade;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.DnsName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.step.RegistryLogin;
 import io.onedev.server.model.Build;
 
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
-
 @Editable
-public class Service implements NamedElement, Serializable {
+public class Service implements NamedElement {
 
 	private static final long serialVersionUID = 1L;
 

@@ -6,7 +6,6 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 
-@SuppressWarnings("serial")
 public class CallbackUrlPanel extends Panel {
 
 	private final String callbackUrl;

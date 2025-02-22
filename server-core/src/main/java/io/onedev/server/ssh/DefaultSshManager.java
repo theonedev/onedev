@@ -1,6 +1,29 @@
 package io.onedev.server.ssh;
 
-import com.google.crypto.tink.subtle.EngineWrapper;
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
+import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
+import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.shell.UnknownCommand;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.cluster.ClusterManager;
@@ -12,32 +35,6 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionManager;
-import org.apache.sshd.client.SshClient;
-import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
-import org.apache.sshd.client.session.ClientSession;
-import org.apache.sshd.common.PropertyResolver;
-import org.apache.sshd.common.PropertyResolverUtils;
-import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
-import org.apache.sshd.server.ServerBuilder;
-import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
-import org.apache.sshd.server.command.Command;
-import org.apache.sshd.server.config.SshServerConfigFileReader;
-import org.apache.sshd.server.shell.UnknownCommand;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.*;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 @Singleton
 public class DefaultSshManager implements SshManager, Serializable {

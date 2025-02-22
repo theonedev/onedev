@@ -16,7 +16,7 @@ public class PackQueryValidator implements ConstraintValidator<PackQuery, String
 	@Override
 	public void initialize(PackQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
-		this.withCurrentUserCriteria = withCurrentUserCriteria;
+		withCurrentUserCriteria = constaintAnnotation.withCurrentUserCriteria();
 	}
 
 	@Override

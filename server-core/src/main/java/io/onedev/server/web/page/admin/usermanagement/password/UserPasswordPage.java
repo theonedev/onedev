@@ -5,7 +5,6 @@ import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class UserPasswordPage extends UserPage {
 	
 	public UserPasswordPage(PageParameters params) {

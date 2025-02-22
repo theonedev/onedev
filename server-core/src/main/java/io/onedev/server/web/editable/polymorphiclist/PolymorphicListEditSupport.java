@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class PolymorphicListEditSupport implements EditSupport {
 
 	@Override

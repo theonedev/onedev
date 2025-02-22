@@ -10,7 +10,6 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public class BlobIcon extends WebComponent {
 
 	public BlobIcon(String id, IModel<BlobIdent> model) {

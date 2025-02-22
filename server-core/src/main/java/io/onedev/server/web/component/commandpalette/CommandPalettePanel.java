@@ -48,7 +48,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 import java.lang.reflect.Field;
 import java.util.*;
 
-@SuppressWarnings("serial")
+@SuppressWarnings("unchecked")
 public abstract class CommandPalettePanel extends Panel {
 
 	private static final int PAGE_SIZE = 100;

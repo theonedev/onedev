@@ -35,6 +35,7 @@ public class IterationFieldCriteria extends FieldCriteria {
 		return predicate;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean matches(Issue issue) {
 		List<String> fieldValue = (List<String>) issue.getFieldValue(getFieldName());

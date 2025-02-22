@@ -9,7 +9,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
 
-@SuppressWarnings("serial")
 public abstract class ActionablePageLink extends AbstractLink {
 
 	private final Class<? extends Page> pageClass;

@@ -77,7 +77,6 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.model.CodeComment.SORT_FIELDS;
 
-@SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
 	private static final int MAX_DESCRIPTION_LEN = 200;
@@ -419,7 +418,8 @@ public abstract class CodeCommentListPanel extends Panel {
 								
 								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
 									Collection<CodeComment> comments = new ArrayList<>();
-									for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+									for (@SuppressWarnings("unchecked")
+									Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
 										comments.add(it.next());
 									return comments;
 								}, true);
@@ -463,7 +463,8 @@ public abstract class CodeCommentListPanel extends Panel {
 								
 								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
 									Collection<CodeComment> comments = new ArrayList<>();
-									for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+									for (@SuppressWarnings("unchecked")
+									Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
 										comments.add(it.next());
 									return comments;
 								}, false);
@@ -587,7 +588,8 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
-								for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext(); )
+								for (@SuppressWarnings("unchecked")
+								Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext(); )
 									visitInfoManager.visitCodeComment(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}

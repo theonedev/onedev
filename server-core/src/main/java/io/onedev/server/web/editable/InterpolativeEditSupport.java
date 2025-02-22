@@ -21,7 +21,6 @@ import io.onedev.server.web.editable.markdown.MarkdownPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 
-@SuppressWarnings("serial")
 public class InterpolativeEditSupport implements EditSupport {
 
 	@Override

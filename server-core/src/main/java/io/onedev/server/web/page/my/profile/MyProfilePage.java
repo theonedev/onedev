@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class MyProfilePage extends MyPage {
 
 	public MyProfilePage(PageParameters params) {

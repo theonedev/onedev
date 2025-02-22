@@ -52,7 +52,6 @@ public class ScriptingValue implements ValueProvider {
 			.toHashCode();
 	}		
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getValue(Build build, ParamCombination paramCombination) {
 		Map<String, Object> variables = new HashMap<>();

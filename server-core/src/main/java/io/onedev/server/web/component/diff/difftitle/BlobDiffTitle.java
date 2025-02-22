@@ -11,7 +11,6 @@ import io.onedev.server.git.BlobChange;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public class BlobDiffTitle extends Panel {
 
 	private final BlobChange change;

@@ -8,7 +8,6 @@ import org.apache.wicket.model.IModel;
 
 import java.lang.reflect.AnnotatedElement;
 
-@SuppressWarnings("serial")
 public class PasswordEditSupport implements EditSupport {
 
 	@Override

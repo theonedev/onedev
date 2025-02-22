@@ -30,7 +30,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public abstract class JobListPanel extends Panel {
 
 	private final ObjectId commitId;

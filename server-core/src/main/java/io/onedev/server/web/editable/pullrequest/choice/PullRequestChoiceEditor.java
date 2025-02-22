@@ -2,7 +2,6 @@ package io.onedev.server.web.editable.pullrequest.choice;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -17,7 +16,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.ProjectAware;
 
-@SuppressWarnings("serial")
 public class PullRequestChoiceEditor extends PropertyEditor<Long> {
 
 	private PullRequestSingleChoice input;

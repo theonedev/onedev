@@ -1,7 +1,11 @@
 package io.onedev.server.git.command;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,15 +13,12 @@ import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
-
-import javax.annotation.Nullable;
 
 public abstract class LogCommand {
 

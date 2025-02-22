@@ -11,7 +11,6 @@ import org.apache.wicket.model.IModel;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
-@SuppressWarnings("serial")
 public class WorkingPeriodEditSupport implements EditSupport {
 
 	@Override

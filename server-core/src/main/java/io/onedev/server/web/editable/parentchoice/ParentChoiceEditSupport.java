@@ -15,7 +15,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.ParentChoice;
 
-@SuppressWarnings("serial")
 public class ParentChoiceEditSupport implements EditSupport {
 
 	@Override

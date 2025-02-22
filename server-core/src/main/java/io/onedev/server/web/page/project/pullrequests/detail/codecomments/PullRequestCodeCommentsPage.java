@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 
-@SuppressWarnings("serial")
 public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
 	private static final String PARAM_PAGE = "page";

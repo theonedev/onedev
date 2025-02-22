@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
 public class ActionTabHead extends Panel {
 
 	public ActionTabHead(String id, ActionTab tab) {

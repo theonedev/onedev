@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
 abstract class AccessTokenPanel extends Panel {
 	
 	public AccessTokenPanel(String id) {

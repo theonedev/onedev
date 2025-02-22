@@ -30,7 +30,6 @@ import java.util.Collection;
 
 import static io.onedev.server.model.Project.*;
 
-@SuppressWarnings("serial")
 public class NewProjectPage extends LayoutPage {
 
 	private static final String PARAM_PARENT = "parent";

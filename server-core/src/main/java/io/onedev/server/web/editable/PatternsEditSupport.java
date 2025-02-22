@@ -15,7 +15,6 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 
-@SuppressWarnings("serial")
 public class PatternsEditSupport implements EditSupport {
 
 	@Override

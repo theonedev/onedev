@@ -21,7 +21,6 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
-@SuppressWarnings("serial")
 public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 	private final String entityName;

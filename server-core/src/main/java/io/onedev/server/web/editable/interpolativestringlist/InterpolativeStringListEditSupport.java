@@ -1,20 +1,21 @@
 package io.onedev.server.web.editable.interpolativestringlist;
 
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.*;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
+import static io.onedev.server.util.ReflectionUtils.getCollectionElementClass;
 
-import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-import static io.onedev.server.util.ReflectionUtils.getCollectionElementClass;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.web.editable.EditSupport;
+import io.onedev.server.web.editable.EmptyValueLabel;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyViewer;
+
 public class InterpolativeStringListEditSupport implements EditSupport {
 
 	@Override

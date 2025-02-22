@@ -26,7 +26,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class GroupPage extends AdministrationPage {
 	
 	public static final String PARAM_GROUP = "group";

@@ -9,7 +9,6 @@ import io.onedev.server.web.util.UserAware;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public abstract class MyPage extends LayoutPage implements UserAware {
 	
 	public MyPage(PageParameters params) {

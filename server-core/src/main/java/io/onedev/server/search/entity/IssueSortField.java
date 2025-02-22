@@ -1,12 +1,11 @@
 package io.onedev.server.search.entity;
 
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+
 import java.util.Comparator;
 
-import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.search.entity.EntitySort.Direction;
-
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
 public class IssueSortField extends SortField<Issue> {
 

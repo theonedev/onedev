@@ -1,10 +1,10 @@
 package io.onedev.server.web.page.project.pullrequests;
 
+import static java.util.stream.Collectors.toList;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
 import javax.persistence.EntityNotFoundException;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -18,27 +18,23 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
-import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.html.HtmlEscape;
 
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
-
-@SuppressWarnings("serial")
 public class InvalidPullRequestPage extends ProjectPage {
 
 	public static final String PARAM_REQUEST = "request";

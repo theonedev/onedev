@@ -26,7 +26,6 @@ import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
 import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
 import static io.onedev.server.job.match.JobMatchLexer.*;
 
-@SuppressWarnings("serial")
 public class JobMatchBehavior extends ANTLRAssistBehavior {
 
 	private final boolean withProjectCriteria;

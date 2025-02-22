@@ -1,6 +1,14 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.hibernate.criterion.Restrictions;
+
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
@@ -10,13 +18,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import org.hibernate.criterion.Restrictions;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.List;
-
-import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> implements AgentTokenManager {
@@ -43,7 +44,6 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 		return find(criteria);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public List<AgentToken> queryUnused() {
@@ -53,7 +53,6 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 		return tokens;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
 	public void deleteUnused() {

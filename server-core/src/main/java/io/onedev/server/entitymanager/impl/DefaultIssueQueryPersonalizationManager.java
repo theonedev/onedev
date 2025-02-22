@@ -1,6 +1,18 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
+import static io.onedev.server.model.AbstractEntity.PROP_ID;
+import static io.onedev.server.model.IssueQueryPersonalization.PROP_PROJECT;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+
+import org.hibernate.criterion.Restrictions;
+
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.IssueQueryPersonalization;
@@ -13,17 +25,6 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.ProjectScope;
-import org.hibernate.criterion.Restrictions;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.AbstractEntity.PROP_ID;
-import static io.onedev.server.model.IssueQueryPersonalization.PROP_PROJECT;
 
 @Singleton
 public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<IssueQueryPersonalization> 

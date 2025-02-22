@@ -18,7 +18,6 @@ import java.util.List;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getChoices;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getDefault;
 
-@SuppressWarnings("serial")
 public class IterationBurndownPage extends IterationDetailPage {
 
 	private static final String PARAM_INDICATOR = "indicator";

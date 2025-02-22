@@ -17,7 +17,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.io.File;
 
-@SuppressWarnings("serial")
 public class BuildDashboardPage extends BuildDetailPage {
 
 	public BuildDashboardPage(PageParameters params) {

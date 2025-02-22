@@ -20,7 +20,6 @@ import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
-@SuppressWarnings("serial")
 public class DefaultDataTable<T, S> extends DataTable<T, S> {
 
 	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,

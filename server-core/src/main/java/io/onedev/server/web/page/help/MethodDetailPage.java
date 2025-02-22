@@ -45,7 +45,6 @@ import java.util.regex.Matcher;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
 
-@SuppressWarnings("serial")
 public class MethodDetailPage extends ApiHelpPage {
 
 	private static final String PARAM_RESOURCE = "resource";

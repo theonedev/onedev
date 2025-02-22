@@ -1,8 +1,65 @@
 package io.onedev.server.git;
 
+import static com.google.common.hash.Hashing.sha256;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
+import static io.onedev.server.util.CollectionUtils.newHashMap;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+import static org.apache.tika.mime.MimeTypes.OCTET_STREAM;
+import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.HashingInputStream;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
@@ -15,42 +72,8 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.facade.ProjectFacade;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
-
-import static com.google.common.hash.Hashing.sha256;
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
-import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
-import static io.onedev.server.util.CollectionUtils.newHashMap;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static javax.servlet.http.HttpServletResponse.*;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
-import static org.apache.tika.mime.MimeTypes.OCTET_STREAM;
-import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
 
 @Singleton
 public class GitLfsFilter implements Filter {

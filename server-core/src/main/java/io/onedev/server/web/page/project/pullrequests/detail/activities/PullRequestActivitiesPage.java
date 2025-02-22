@@ -61,7 +61,6 @@ import javax.servlet.http.Cookie;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	
 	private static final String COOKIE_SHOW_COMMENTS = "onedev.server.pullRequest.showComments";

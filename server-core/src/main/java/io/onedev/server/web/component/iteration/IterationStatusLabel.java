@@ -8,7 +8,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.Iteration;
 
-@SuppressWarnings("serial")
 public class IterationStatusLabel extends Label {
 
 	private final IModel<Iteration> iterationModel;

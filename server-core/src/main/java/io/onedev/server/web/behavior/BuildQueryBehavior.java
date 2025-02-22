@@ -30,7 +30,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";

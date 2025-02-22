@@ -23,7 +23,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class CodeContribsPage extends CodeStatsPage {
 
 	private static final String USER_CARD_ID = "userCard";

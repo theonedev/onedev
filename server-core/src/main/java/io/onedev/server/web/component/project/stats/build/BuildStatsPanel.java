@@ -22,7 +22,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
-@SuppressWarnings("serial")
 public class BuildStatsPanel extends Panel {
 
 	private final IModel<Project> projectModel;

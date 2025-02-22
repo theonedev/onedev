@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class JobInfoButton extends Panel {
 
 	public JobInfoButton(String id) {

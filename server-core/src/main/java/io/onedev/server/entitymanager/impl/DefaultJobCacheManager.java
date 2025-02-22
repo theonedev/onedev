@@ -167,6 +167,7 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 		});
 	}
 
+	@SuppressWarnings("resource")
 	@Nullable
 	private InputStream openCacheInputStream(Long projectId, Long cacheId, List<String> cachePaths) {
 		var cacheHome = projectManager.getCacheDir(projectId);

@@ -37,7 +37,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class ProjectBuildsPage extends ProjectPage {
 
 	private static final String PARAM_PAGE = "page";

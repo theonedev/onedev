@@ -38,7 +38,6 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@SuppressWarnings("serial")
 class ParamMapEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParamMapEditPanel.class);

@@ -1,15 +1,15 @@
 package io.onedev.server.web.component.polymorphiceditor;
 
-import com.google.common.base.Preconditions;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.ImplementationProvider;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.*;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -23,10 +23,21 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.server.annotation.ImplementationProvider;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.ValueEditor;
 
 public class PolymorphicEditor extends ValueEditor<Serializable> {
 
@@ -34,6 +45,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 	
 	private final List<Class<? extends Serializable>> implementations = new ArrayList<>();
 	
+	@SuppressWarnings("unchecked")
 	public PolymorphicEditor(String id, Class<? extends Serializable> baseClass, IModel<Serializable> model) {
 		super(id, model);
 

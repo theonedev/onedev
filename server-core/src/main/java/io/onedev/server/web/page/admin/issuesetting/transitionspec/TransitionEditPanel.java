@@ -1,15 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.transitionspec;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -19,9 +11,16 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class TransitionEditPanel extends Panel implements InputContext {
 
 	private final int transitionIndex;

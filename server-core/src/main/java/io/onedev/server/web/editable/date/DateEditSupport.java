@@ -16,7 +16,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.WithTime;
 
-@SuppressWarnings("serial")
 public class DateEditSupport implements EditSupport {
 
 	public static final String DATE_INPUT_FORMAT = "yyyy-MM-dd";

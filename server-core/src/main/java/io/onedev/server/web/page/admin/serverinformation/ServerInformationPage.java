@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class ServerInformationPage extends ServerDetailPage {
 	
 	private final IModel<ServerInformation> serverInformationModel = new LoadableDetachableModel<>() {

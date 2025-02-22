@@ -1,12 +1,17 @@
 package io.onedev.server.job;
 
+import java.util.Stack;
+
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jetbrains.annotations.Nullable;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
-import io.onedev.server.job.match.OnBranchCriteria;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -15,11 +20,6 @@ import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.ObjectId;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Stack;
 
 public class JobAuthorizationContext {
 	

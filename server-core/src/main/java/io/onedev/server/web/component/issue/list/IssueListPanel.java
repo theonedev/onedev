@@ -998,7 +998,8 @@ public abstract class IssueListPanel extends Panel {
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
 									Collection<Long> issueIds = new ArrayList<>();
-									for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+									for (@SuppressWarnings("unchecked")
+									Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 										issueIds.add(it.next().getId());
 									getTimeTrackingManager().requestToSyncTimes(issueIds);
 									Session.get().success("Requested to sync estimated/spent time");
@@ -1365,7 +1366,7 @@ public abstract class IssueListPanel extends Panel {
 										dropdown2.close();
 
 										Collection<Issue> issues = new ArrayList<>();
-										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+										for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 											issues.add(it.next());
 										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
 										Session.get().success("Watch status changed");
@@ -1425,7 +1426,7 @@ public abstract class IssueListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
-								for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+								for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 									visitInfoManager.visitIssue(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}

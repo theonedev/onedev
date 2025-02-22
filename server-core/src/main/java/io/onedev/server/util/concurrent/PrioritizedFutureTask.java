@@ -2,8 +2,7 @@ package io.onedev.server.util.concurrent;
 
 import java.util.concurrent.FutureTask;
 
-public class PrioritizedFutureTask<T> extends FutureTask<T> 
-		implements PriorityAware, Comparable<PriorityAware> {
+public class PrioritizedFutureTask<T> extends FutureTask<T> implements PriorityAware {
 
 	private final int priority;
 	

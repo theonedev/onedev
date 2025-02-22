@@ -20,7 +20,6 @@ import org.apache.wicket.request.resource.AbstractResource;
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings("serial")
 public class DatabaseBackupPage extends AdministrationPage {
 
 	public DatabaseBackupPage(PageParameters params) {

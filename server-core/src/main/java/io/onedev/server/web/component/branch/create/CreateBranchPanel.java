@@ -19,7 +19,6 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 public abstract class CreateBranchPanel extends Panel {
 
 	private final IModel<Project> projectModel;

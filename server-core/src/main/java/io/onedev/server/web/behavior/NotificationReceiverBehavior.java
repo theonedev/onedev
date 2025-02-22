@@ -17,7 +17,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@SuppressWarnings("serial")
 public class NotificationReceiverBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;

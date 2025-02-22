@@ -32,7 +32,6 @@ import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
-@SuppressWarnings("serial")
 public class ContributedProjectSettingPage extends ProjectSettingPage {
 
 	public static final String PARAM_SETTING = "projectSetting";

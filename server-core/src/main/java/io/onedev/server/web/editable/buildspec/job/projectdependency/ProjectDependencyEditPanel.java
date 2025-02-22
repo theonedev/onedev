@@ -1,11 +1,7 @@
 package io.onedev.server.web.editable.buildspec.job.projectdependency;
 
-import io.onedev.server.buildspec.BuildSpecAware;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -15,9 +11,13 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import java.util.List;
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<ProjectDependency> dependencies;
@@ -107,14 +107,6 @@ abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAwar
 		form.setOutputMarkupId(true);
 		
 		add(form);
-	}
-
-	private ProjectDependency getDependency(String projectName) {
-		for (ProjectDependency dependency: dependencies) {
-			if (projectName.equals(dependency.getProjectPath()))
-				return dependency;
-		}
-		return null;
 	}
 	
 	protected abstract void onSave(AjaxRequestTarget target);

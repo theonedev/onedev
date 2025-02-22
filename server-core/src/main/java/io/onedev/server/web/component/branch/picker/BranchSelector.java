@@ -31,7 +31,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.InputChangeBehavior;
 
-@SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {
 	
 	private final IModel<Project> projectModel;

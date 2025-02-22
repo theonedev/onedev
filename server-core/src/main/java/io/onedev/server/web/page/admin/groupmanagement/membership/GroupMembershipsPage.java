@@ -62,7 +62,6 @@ import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 
-@SuppressWarnings("serial")
 public class GroupMembershipsPage extends GroupPage {
 
 	private String query;

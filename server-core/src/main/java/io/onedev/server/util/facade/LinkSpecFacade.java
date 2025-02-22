@@ -2,8 +2,6 @@ package io.onedev.server.util.facade;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.LinkSpec;
-
 public class LinkSpecFacade extends EntityFacade {
 	
 	private static final long serialVersionUID = 1L;

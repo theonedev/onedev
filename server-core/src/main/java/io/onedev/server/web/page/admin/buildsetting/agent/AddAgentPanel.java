@@ -22,7 +22,6 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 
-@SuppressWarnings("serial")
 class AddAgentPanel extends Panel {
 
 	public AddAgentPanel(String id) {

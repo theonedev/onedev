@@ -22,7 +22,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class GroovyScriptEditPanel extends Panel {
 
 	private final int scriptIndex;

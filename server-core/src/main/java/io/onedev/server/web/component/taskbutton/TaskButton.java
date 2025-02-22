@@ -33,7 +33,6 @@ import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.*;
 
-@SuppressWarnings("serial")
 public abstract class TaskButton extends AjaxButton {
 
 	public TaskButton(String id) {

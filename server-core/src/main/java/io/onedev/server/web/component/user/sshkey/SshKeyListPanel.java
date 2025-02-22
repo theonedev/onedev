@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 
 	private DataTable<SshKey, Void> sshKeysTable;

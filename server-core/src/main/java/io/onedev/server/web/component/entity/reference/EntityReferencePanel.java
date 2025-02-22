@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public abstract class EntityReferencePanel extends Panel {
 	
 	public EntityReferencePanel(String id) {

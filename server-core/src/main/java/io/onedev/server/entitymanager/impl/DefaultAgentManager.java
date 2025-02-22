@@ -133,6 +133,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("agentCacheInited");
 		clusterManager.init(cacheInited, () -> {
+			@SuppressWarnings("unchecked")
 			Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent",
 					Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
 			for (Object[] row: query.list()) {

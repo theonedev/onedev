@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class ParamMapViewPanel extends Panel {
 
 	private final List<ParamInstance> params = new ArrayList<>();

@@ -15,7 +15,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class JobTriggerEditPanel extends Panel implements JobAware {
 
 	private final List<JobTrigger> triggers;

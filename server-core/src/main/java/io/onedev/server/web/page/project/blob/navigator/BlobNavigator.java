@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class BlobNavigator extends Panel {
 
 	private final static String LAST_SEGMENT_ID = "lastSegment";

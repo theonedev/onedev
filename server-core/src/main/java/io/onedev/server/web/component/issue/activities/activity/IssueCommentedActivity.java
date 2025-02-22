@@ -10,7 +10,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import java.util.Date;
 
-@SuppressWarnings("serial")
 public class IssueCommentedActivity implements IssueActivity {
 
 	private final Long commentId;

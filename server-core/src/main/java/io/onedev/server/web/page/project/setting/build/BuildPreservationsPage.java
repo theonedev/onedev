@@ -13,7 +13,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class BuildPreservationsPage extends ProjectBuildSettingPage {
 
 	public BuildPreservationsPage(PageParameters params) {

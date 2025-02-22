@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class CommitStatusLink extends DropdownLink {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitStatusLink.class);

@@ -36,7 +36,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
-@SuppressWarnings("serial")
 public class MailServicePage extends AdministrationPage {
 	
 	public MailServicePage(PageParameters params) {

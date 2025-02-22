@@ -1,19 +1,22 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.StorageManager;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.FilenameUtils;
-import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.upload.FileUpload;
-import io.onedev.server.web.upload.UploadManager;
-import org.apache.commons.compress.utils.IOUtils;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,16 +30,21 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.glassfish.jersey.client.ClientProperties;
 
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.StorageManager;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.util.IOUtils;
+import io.onedev.server.web.component.dropzonefield.DropzoneField;
+import io.onedev.server.web.upload.FileUpload;
+import io.onedev.server.web.upload.UploadManager;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-
-@SuppressWarnings("serial")
 public abstract class ArtifactUploadPanel extends Panel {
 
 	private String directory;

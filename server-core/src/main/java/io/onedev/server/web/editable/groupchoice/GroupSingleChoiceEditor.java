@@ -22,7 +22,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.GroupChoice;
 
-@SuppressWarnings("serial")
 public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	
 	private GroupSingleChoice input;

@@ -13,7 +13,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 
-@SuppressWarnings("serial")
 public abstract class WorkflowChangeAlertPanel extends Panel {
 
 	public WorkflowChangeAlertPanel(String id) {

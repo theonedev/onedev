@@ -69,7 +69,6 @@ import java.util.List;
 import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
 
 	public static final String PARAM_BOARD = "board";

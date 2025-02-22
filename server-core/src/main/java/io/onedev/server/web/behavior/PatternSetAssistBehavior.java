@@ -20,7 +20,6 @@ import io.onedev.server.util.patternset.PatternSetLexer;
 import io.onedev.server.util.patternset.PatternSetParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 
-@SuppressWarnings("serial")
 public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 
 	public PatternSetAssistBehavior() {

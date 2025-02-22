@@ -21,7 +21,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public abstract class AbstractTemplatePage extends AdministrationPage {
 
 	protected final String GROOVY_TEMPLATE_LINK = "<a href='https://docs.groovy-lang.org/latest/html/api/groovy/text/SimpleTemplateEngine.html' target='_blank'>Groovy simple template</a>";

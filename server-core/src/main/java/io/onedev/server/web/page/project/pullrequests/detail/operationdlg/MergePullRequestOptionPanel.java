@@ -14,7 +14,6 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 public abstract class MergePullRequestOptionPanel extends ObsoleteUpdateAwarePanel {
 
 	private CommitMessageBean bean = new CommitMessageBean();

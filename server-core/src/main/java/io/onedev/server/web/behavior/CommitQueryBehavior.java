@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";

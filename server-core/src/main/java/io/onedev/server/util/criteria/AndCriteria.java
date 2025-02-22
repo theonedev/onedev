@@ -29,7 +29,7 @@ public class AndCriteria<T> extends Criteria<T> {
 
 	protected final List<Criteria<T>> criterias;
 	
-	public AndCriteria(Criteria<T>...criterias) {
+	public AndCriteria(@SuppressWarnings("unchecked") Criteria<T>...criterias) {
 		this(Arrays.asList(criterias));	
 	}
 	

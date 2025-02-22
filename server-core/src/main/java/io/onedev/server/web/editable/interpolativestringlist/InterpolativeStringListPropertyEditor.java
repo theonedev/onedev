@@ -36,7 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<String>> {
 	
 	private RepeatingView rows;
@@ -62,6 +61,7 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -90,7 +90,6 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 
 		add(new AjaxButton("addElement") {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
@@ -135,7 +134,6 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 
 		add(new SortBehavior() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				markFormDirty(target);
@@ -268,6 +266,7 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 		return row;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		int index = ((PathNode.Indexed) propertyNode).getIndex();
@@ -284,6 +283,7 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 		List<String> newList = newList();
 
 		for (Component row: rows) {
+			@SuppressWarnings("unchecked")
 			TextField<String> elementEditor = (TextField<String>) row.get("elementEditor");
 			newList.add(elementEditor.getConvertedInput());			
 		}

@@ -10,7 +10,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
 
-@SuppressWarnings("serial")
 abstract class SimpleUserListPanel extends Panel {
 
 	public SimpleUserListPanel(String id) {

@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 
 public interface PathNode extends Serializable {
 
-	@SuppressWarnings("serial")
 	class Named implements PathNode {
 
 		private final String name;
@@ -48,7 +47,6 @@ public interface PathNode extends Serializable {
 		
 	}
 	
-	@SuppressWarnings("serial")
 	class Indexed implements PathNode {
 
 		private final int index;

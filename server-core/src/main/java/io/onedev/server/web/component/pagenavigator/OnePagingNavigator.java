@@ -24,7 +24,6 @@ import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public class OnePagingNavigator extends AjaxPagingNavigator {
 
 	private final PagingHistorySupport pagingHistorySupport;

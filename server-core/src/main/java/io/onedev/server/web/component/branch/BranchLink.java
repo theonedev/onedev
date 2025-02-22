@@ -13,7 +13,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
-@SuppressWarnings("serial")
 public class BranchLink extends ViewStateAwarePageLink<Void> {
 
 	private final ProjectAndBranch projectAndBranch;

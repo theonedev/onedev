@@ -21,7 +21,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class SsoConnectorEditPanel extends Panel {
 
 	private final int connectorIndex;

@@ -33,6 +33,7 @@ public class NeedActionOfCriteria extends Criteria<PullRequest> {
 		return getCriteria().matches(request);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Criteria<PullRequest> getCriteria() {
 		return new OrCriteria<>(
 				new ToBeReviewedByCriteria(user),

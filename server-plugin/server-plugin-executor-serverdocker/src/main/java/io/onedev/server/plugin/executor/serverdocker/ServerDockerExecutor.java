@@ -1,6 +1,47 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
+import static io.onedev.agent.DockerExecutorUtils.buildImage;
+import static io.onedev.agent.DockerExecutorUtils.callWithDockerConfig;
+import static io.onedev.agent.DockerExecutorUtils.changeOwner;
+import static io.onedev.agent.DockerExecutorUtils.createNetwork;
+import static io.onedev.agent.DockerExecutorUtils.deleteDir;
+import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
+import static io.onedev.agent.DockerExecutorUtils.getEntrypoint;
+import static io.onedev.agent.DockerExecutorUtils.getOwner;
+import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
+import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
+import static io.onedev.agent.DockerExecutorUtils.pruneBuilderCache;
+import static io.onedev.agent.DockerExecutorUtils.runImagetools;
+import static io.onedev.agent.DockerExecutorUtils.startService;
+import static io.onedev.agent.DockerExecutorUtils.useDockerSock;
+import static io.onedev.agent.ExecutorUtils.newErrorLogger;
+import static io.onedev.agent.ExecutorUtils.newInfoLogger;
+import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
+import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
+import static io.onedev.k8shelper.RegistryLoginFacade.merge;
+import static java.util.stream.Collectors.toList;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.commons.lang3.SystemUtils;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -11,14 +52,36 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.k8shelper.*;
+import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CheckoutFacade;
+import io.onedev.k8shelper.CloneInfo;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.LeafHandler;
+import io.onedev.k8shelper.OsInfo;
+import io.onedev.k8shelper.PruneBuilderCacheFacade;
+import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.RunImagetoolsFacade;
+import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.k8shelper.ServerStepResult;
+import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Numeric;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.location.GitLocation;
-import io.onedev.server.job.*;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobRunnable;
+import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.ServerCacheHelper;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
@@ -28,21 +91,6 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.Testable;
-import org.apache.commons.lang3.SystemUtils;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.onedev.agent.DockerExecutorUtils.changeOwner;
-import static io.onedev.agent.DockerExecutorUtils.*;
-import static io.onedev.k8shelper.KubernetesHelper.*;
-import static io.onedev.k8shelper.RegistryLoginFacade.merge;
-import static java.util.stream.Collectors.toList;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
 		description="This executor runs build jobs as docker containers on OneDev server")
@@ -226,11 +274,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	private ClusterManager getClusterManager() {
 		return OneDev.getInstance(ClusterManager.class);
 	}
-	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
-	}
-	
+		
 	private JobManager getJobManager() {
 		return OneDev.getInstance(JobManager.class);
 	}

@@ -37,7 +37,6 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
-@SuppressWarnings("serial")
 public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 
 	private DataTable<GpgKey, Void> gpgKeysTable;

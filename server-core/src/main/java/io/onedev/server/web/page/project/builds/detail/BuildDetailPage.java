@@ -86,7 +86,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class BuildDetailPage extends ProjectPage 
 		implements InputContext, BuildAware, JobAuthorizationContextAware {
 

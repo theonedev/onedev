@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
 public class ColorPicker extends HiddenField<String> {
 
 	private final boolean allowEmpty;

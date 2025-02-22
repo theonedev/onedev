@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class PackStatsPanel extends Panel {
 
 	private final IModel<Project> projectModel;

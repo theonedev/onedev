@@ -17,7 +17,6 @@ import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.user.UserAvatar;
 
-@SuppressWarnings("serial")
 public class AvatarEditPanel extends GenericPanel<User> {
 	
 	private String uploadedAvatarData;

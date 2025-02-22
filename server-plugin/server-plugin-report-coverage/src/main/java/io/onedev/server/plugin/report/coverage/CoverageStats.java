@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.coverage;
 
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -7,14 +9,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.server.model.Build;
 import org.apache.commons.lang3.SerializationUtils;
 
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import io.onedev.server.model.Build;
 
 public class CoverageStats implements Serializable {
 

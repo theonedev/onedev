@@ -11,7 +11,6 @@ import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-@SuppressWarnings("serial")
 public class SecuritySettingPage extends AdministrationPage {
 
 	public SecuritySettingPage(PageParameters params) {

@@ -48,7 +48,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class CommitOptionPanel extends Panel {
 
 	private final BlobRenderContext context;

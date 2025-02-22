@@ -15,7 +15,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.util.TextUtils;
 
-@SuppressWarnings("serial")
 public class BooleanEditSupport implements EditSupport {
 
 	@Override

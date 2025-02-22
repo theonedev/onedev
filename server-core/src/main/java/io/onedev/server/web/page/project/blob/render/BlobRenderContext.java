@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.blob.render;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;

@@ -16,7 +16,6 @@ import org.hibernate.proxy.HibernateProxy;
 import java.io.IOException;
 import java.util.Stack;
 
-@SuppressWarnings("serial")
 public class EntityDeserializer extends BeanDeserializer {
 
 	private static ThreadLocal<Stack<Object[]>> paramsStack = ThreadLocal.withInitial(() -> new Stack<Object[]>());

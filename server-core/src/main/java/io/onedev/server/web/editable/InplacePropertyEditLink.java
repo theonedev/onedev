@@ -14,7 +14,6 @@ import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
-@SuppressWarnings("serial")
 public abstract class InplacePropertyEditLink extends DropdownLink {
 
 	public InplacePropertyEditLink(String id) {

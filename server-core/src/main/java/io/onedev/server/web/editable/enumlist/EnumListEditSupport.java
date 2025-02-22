@@ -15,7 +15,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 
-@SuppressWarnings("serial")
 public class EnumListEditSupport implements EditSupport {
 
 	@Override

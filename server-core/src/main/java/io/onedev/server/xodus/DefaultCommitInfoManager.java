@@ -862,6 +862,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 					files = env.computeInReadonlyTransaction(txn -> {
 						byte[] bytes = readBytes(store, txn, FILES_KEY);
 						if (bytes != null) {
+							@SuppressWarnings("unchecked")
 							List<String> innerFiles = new ArrayList<>((Collection<String>) SerializationUtils.deserialize(bytes));
 							Map<String, List<String>> segmentsMap = new HashMap<>();
 							Splitter splitter = Splitter.on("/");

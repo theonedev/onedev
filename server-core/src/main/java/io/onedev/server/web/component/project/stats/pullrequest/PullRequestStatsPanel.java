@@ -3,9 +3,7 @@ package io.onedev.server.web.component.project.stats.pullrequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -20,9 +18,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 
-@SuppressWarnings("serial")
 public class PullRequestStatsPanel extends Panel {
 
 	private final IModel<Project> projectModel;

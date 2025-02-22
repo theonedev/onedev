@@ -22,7 +22,6 @@ import io.onedev.server.web.page.admin.groupmanagement.GroupCssResourceReference
 import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
 import io.onedev.server.web.page.admin.groupmanagement.membership.GroupMembershipsPage;
 
-@SuppressWarnings("serial")
 public class NewGroupPage extends AdministrationPage {
 
 	private Group group = new Group();

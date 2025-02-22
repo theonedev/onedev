@@ -1,20 +1,20 @@
 package io.onedev.server.model.support.build;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.server.annotation.RegEx;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.NamedElement;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.SuggestionProvider;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.SuggestionProvider;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.NamedElement;
+
 @Editable
-public class JobProperty implements NamedElement, Serializable {
+public class JobProperty implements NamedElement {
 
 	private static final long serialVersionUID = 1L;
 

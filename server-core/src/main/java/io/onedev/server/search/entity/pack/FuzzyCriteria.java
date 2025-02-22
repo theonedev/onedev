@@ -32,6 +32,7 @@ public class FuzzyCriteria extends Criteria<Pack> {
 		return parse(value).matches(build);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Criteria<Pack> parse(String value) {
 		return new OrCriteria<>(
 				new NameCriteria("*" + value + "*", PackQueryLexer.Is),

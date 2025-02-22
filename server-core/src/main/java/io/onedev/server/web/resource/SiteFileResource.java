@@ -1,31 +1,20 @@
 package io.onedev.server.web.resource;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Project;
-import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.util.LongRange;
-import io.onedev.server.util.artifact.ArtifactInfo;
-import io.onedev.server.util.artifact.DirectoryInfo;
-import io.onedev.server.util.artifact.FileInfo;
-import io.onedev.server.web.mapper.ProjectMapperUtils;
-import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jetty.io.EofException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.util.IOUtils.copyRange;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -33,14 +22,31 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.util.IOUtils.copyRange;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jetty.io.EofException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.LongRange;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
+import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
+import io.onedev.server.web.util.WicketUtils;
 
 public class SiteFileResource extends AbstractResource {
 

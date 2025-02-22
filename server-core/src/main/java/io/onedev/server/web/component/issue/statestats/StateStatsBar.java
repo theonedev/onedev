@@ -17,7 +17,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.StateSpec;
 
-@SuppressWarnings("serial")
 public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 
 	public StateStatsBar(String id, IModel<Map<String, Integer>> model) {

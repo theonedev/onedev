@@ -27,7 +27,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@SuppressWarnings("serial")
 public class RetryConditionBehavior extends ANTLRAssistBehavior {
 
 	public RetryConditionBehavior() {

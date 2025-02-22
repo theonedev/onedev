@@ -11,7 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class BeanDescriptor implements Serializable {
 
 	private final Class<?> beanClass;

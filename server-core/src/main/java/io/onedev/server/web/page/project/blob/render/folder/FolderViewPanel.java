@@ -52,7 +52,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.util.EditParamsAware;
 
-@SuppressWarnings("serial")
 public class FolderViewPanel extends Panel {
 
 	private static final String USER_CARD_ID = "userCard";

@@ -61,7 +61,6 @@ import java.util.Map;
 
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.*;
 
-@SuppressWarnings("serial")
 public class BuildSpecBlobViewPanel extends BlobViewPanel {
 
 	public BuildSpecBlobViewPanel(String id, BlobRenderContext context) {

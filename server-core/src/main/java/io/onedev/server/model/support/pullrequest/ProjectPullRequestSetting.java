@@ -38,6 +38,7 @@ public class ProjectPullRequestSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String getLfsDescription() {
 		if (!Bootstrap.isInDocker()) {
 			return "Whether or not to fetch LFS objects if pull request is opened from a different project. " +
@@ -69,6 +70,7 @@ public class ProjectPullRequestSetting implements Serializable {
 		this.defaultAssignees = defaultAssignees;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<User> getAssigneeChoices() {
 		var choices = new ArrayList<>(SecurityUtils.getAuthorizedUsers(Project.get(), new WriteCode()));
 		Collections.sort(choices, Comparator.comparing(User::getDisplayName));

@@ -32,7 +32,6 @@ import io.onedev.server.web.page.project.blob.BlobUploadPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
-@SuppressWarnings("serial")
 public class NoCommitsPanel extends Panel {
 
 	private final BlobRenderContext context;

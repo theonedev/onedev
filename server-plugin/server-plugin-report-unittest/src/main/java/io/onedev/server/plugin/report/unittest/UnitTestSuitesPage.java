@@ -48,7 +48,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.List.of;
 import static java.util.stream.Collectors.toSet;
 
-@SuppressWarnings("serial")
 public class UnitTestSuitesPage extends UnitTestReportPage {
 
 	private static final String PARAM_NAME = "name";

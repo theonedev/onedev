@@ -39,7 +39,6 @@ import static io.onedev.server.util.HtmlUtils.getText;
 import static io.onedev.server.web.editable.EditableUtils.getDescription;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
-@SuppressWarnings("serial")
 public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 
 	private final List<Class<? extends T>> types;

@@ -10,7 +10,6 @@ import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyViewer;
 
-@SuppressWarnings("serial")
 public class StringPropertyViewer extends PropertyViewer {
 
 	private final String value;

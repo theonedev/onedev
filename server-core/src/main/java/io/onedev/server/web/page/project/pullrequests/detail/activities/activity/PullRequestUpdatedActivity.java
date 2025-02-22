@@ -12,7 +12,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 public class PullRequestUpdatedActivity implements PullRequestActivity {
 
 	private final Long updateId;

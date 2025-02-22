@@ -45,7 +45,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.RefreshToken;
 import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
 
-@SuppressWarnings("serial")
 public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 
 	private PasswordTextField input;

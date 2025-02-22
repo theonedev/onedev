@@ -1,11 +1,12 @@
 package io.onedev.server.util;
 
-import io.onedev.server.exception.DataTooLargeException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import io.onedev.server.exception.DataTooLargeException;
+
+@SuppressWarnings("deprecation")
 public class IOUtils extends org.apache.commons.io.IOUtils {
 
 	public static final int BUFFER_SIZE = 64*1024;

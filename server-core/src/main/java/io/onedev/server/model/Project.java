@@ -1065,6 +1065,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.timeTracking = timeTracking;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String getTimeTrackingDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
 			return "<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. " +
@@ -1075,6 +1076,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isIssueManagementEnabled() {
 		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
 	}
@@ -1084,6 +1086,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return packManagement;
 	}
 
+	@SuppressWarnings("unused")
 	private static String getPackManagementDescription() {
 		return "Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project";
 	}

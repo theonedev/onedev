@@ -25,7 +25,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import java.util.*;
 
-@SuppressWarnings("serial")
 public abstract class AssignmentListPanel extends Panel {
 
 	private final IModel<List<PullRequestAssignment>> assignmentsModel;

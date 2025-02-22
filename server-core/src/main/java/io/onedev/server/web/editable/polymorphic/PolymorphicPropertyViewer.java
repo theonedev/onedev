@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public class PolymorphicPropertyViewer extends Panel {
 
 	private final Serializable propertyValue;

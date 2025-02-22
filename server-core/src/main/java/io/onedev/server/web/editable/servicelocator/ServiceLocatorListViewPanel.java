@@ -33,7 +33,6 @@ import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 class ServiceLocatorListViewPanel extends Panel {
 
 	private final List<ServiceLocator> locators = new ArrayList<>();

@@ -1,7 +1,62 @@
 package io.onedev.server.plugin.pack.nuget;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.plugin.pack.nuget.NugetPackSupport.TYPE;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.IOUtils.copyWithMaxSize;
+import static io.onedev.server.util.UrlUtils.decodePath;
+import static io.onedev.server.util.UrlUtils.decodeQuery;
+import static io.onedev.server.util.UrlUtils.encodePath;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+import static java.util.stream.Collectors.toList;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static javax.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
@@ -21,36 +76,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.SemanticVersion;
 import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.UrlManager;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.text.ParseException;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static io.onedev.server.plugin.pack.nuget.NugetPackSupport.TYPE;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static io.onedev.server.util.IOUtils.copyWithMaxSize;
-import static io.onedev.server.util.UrlUtils.*;
-import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-import static java.util.stream.Collectors.toList;
-import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
 public class NugetPackService implements PackService {

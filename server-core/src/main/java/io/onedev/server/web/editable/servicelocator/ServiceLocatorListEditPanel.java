@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class ServiceLocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<ServiceLocator> locators;

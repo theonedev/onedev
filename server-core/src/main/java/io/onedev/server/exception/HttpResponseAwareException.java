@@ -1,10 +1,10 @@
 package io.onedev.server.exception;
 
-import io.onedev.commons.utils.ExplicitException;
+import java.util.Map;
+
 import org.eclipse.jetty.http.HttpStatus;
 
-import javax.annotation.Nullable;
-import java.util.Map;
+import io.onedev.commons.utils.ExplicitException;
 
 public class HttpResponseAwareException extends ExplicitException {
 	

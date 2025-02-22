@@ -4,7 +4,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.navigation.paging.IPageableItems;
 
-@SuppressWarnings("serial")
 public class NoRecordsPlaceholder extends WebMarkupContainer {
 
 	private final IPageableItems pageable;

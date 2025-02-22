@@ -6,7 +6,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.model.Agent;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public class AgentIcon extends SpriteImage {
 
 	private final IModel<Agent> agentModel;

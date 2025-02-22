@@ -1,16 +1,10 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
-import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -18,12 +12,17 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class StateTransitionPanel extends Panel implements InputContext {
 
 	public StateTransitionPanel(String id) {

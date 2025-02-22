@@ -22,7 +22,6 @@ import javax.annotation.Nullable;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-@SuppressWarnings("serial")
 public abstract class IssueTitlePanel extends Panel {
 
 	public IssueTitlePanel(String id) {

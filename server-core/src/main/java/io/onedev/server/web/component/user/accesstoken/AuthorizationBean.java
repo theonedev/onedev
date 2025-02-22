@@ -37,6 +37,7 @@ public class AuthorizationBean implements Serializable {
 		this.projectPath = projectPath;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<Project> getManageableProjects() {
 		var user = WicketUtils.findInnermost(ComponentContext.get().getComponent(), UserAware.class).getUser();
 		var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(user.asSubject(), new ManageProject()));

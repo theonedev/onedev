@@ -130,6 +130,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 		this.buildWithPV = buildWithPV;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isBuildWithPVEnabled() {
 		return (boolean) EditContext.get().getInputValue("buildWithPV");
 	}

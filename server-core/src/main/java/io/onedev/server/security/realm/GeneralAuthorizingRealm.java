@@ -41,7 +41,6 @@ public class GeneralAuthorizingRealm extends AuthorizingRealm {
     
     protected final SettingManager settingManager;
     
-    @SuppressWarnings("serial")
 	private static final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
     
 	@Inject

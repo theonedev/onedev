@@ -1,9 +1,9 @@
 package io.onedev.server.web.component.user.accesstoken;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.model.AccessToken;
-import io.onedev.server.model.User;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,13 +13,12 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.checkerframework.checker.units.qual.A;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.model.AccessToken;
+import io.onedev.server.model.User;
 
-@SuppressWarnings("serial")
 public abstract class AccessTokenListPanel extends Panel {
 
 	private WebMarkupContainer container;

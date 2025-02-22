@@ -17,7 +17,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import java.lang.reflect.Method;
 
-@SuppressWarnings("serial")
 public class StringPropertyEditor extends PropertyEditor<String> {
 
 	private FormComponent<String> input;

@@ -12,7 +12,6 @@ import io.onedev.server.annotation.NotificationReceiver;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 
-@SuppressWarnings("serial")
 public class NotificationReceiverEditSupport implements EditSupport {
 
 	@Override

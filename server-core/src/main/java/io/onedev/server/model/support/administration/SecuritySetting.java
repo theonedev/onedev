@@ -67,6 +67,7 @@ public class SecuritySetting implements Serializable {
 		this.allowedSelfRegisterEmailDomain = allowedSelfRegisterEmailDomain;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isEnableSelfRegisterEnabled() {
 		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
 	}

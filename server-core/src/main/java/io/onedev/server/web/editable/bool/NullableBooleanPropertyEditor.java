@@ -14,7 +14,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 
 	private StringSingleChoice input;

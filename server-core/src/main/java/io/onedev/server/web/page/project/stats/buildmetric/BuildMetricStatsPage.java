@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 import static io.onedev.server.web.util.StatsGroup.BY_DAY;
 import static java.util.Comparator.comparingInt;
 
-@SuppressWarnings("serial")
 public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends ProjectPage {
 
 	private static final String PARAM_QUERY = "query";

@@ -1,9 +1,5 @@
 package io.onedev.server.web.page.project.setting.code.tagprotection;
 
-import io.onedev.server.model.support.code.TagProtection;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.editable.BeanContext;
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,7 +9,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
+import io.onedev.server.model.support.code.TagProtection;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.editable.BeanContext;
+
 abstract class TagProtectionPanel extends Panel {
 
 	private final TagProtection protection;

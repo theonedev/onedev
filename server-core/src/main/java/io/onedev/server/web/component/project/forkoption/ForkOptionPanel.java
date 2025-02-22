@@ -30,7 +30,6 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 
 import static io.onedev.server.model.Project.*;
 
-@SuppressWarnings("serial")
 public abstract class ForkOptionPanel extends Panel {
 
 	private final IModel<Project> projectModel;

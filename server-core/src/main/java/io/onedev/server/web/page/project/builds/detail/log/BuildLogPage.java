@@ -11,7 +11,6 @@ import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.resource.BuildLogResource;
 import io.onedev.server.web.resource.BuildLogResourceReference;
 
-@SuppressWarnings("serial")
 public class BuildLogPage extends BuildDetailPage {
 
 	public BuildLogPage(PageParameters params) {

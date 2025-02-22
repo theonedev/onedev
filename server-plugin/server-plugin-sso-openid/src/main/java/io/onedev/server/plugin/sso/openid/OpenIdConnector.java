@@ -236,7 +236,7 @@ public class OpenIdConnector extends SsoConnector {
 				var httpResponse = httpRequest.send();
 
 				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-					JSONObject json = httpResponse.getContentAsJSONObject();
+					JSONObject json = httpResponse.getBodyAsJSONObject();
 					if (!subject.equals(json.get("sub")))
 						throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
 

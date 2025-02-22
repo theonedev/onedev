@@ -32,7 +32,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-@SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	private final Class<? extends Serializable> baseClass;
@@ -43,6 +42,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	
 	private Set<String> excludedProperties = new HashSet<>();
 	
+	@SuppressWarnings("unchecked")
 	public PolymorphicListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, 
 										 IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
@@ -69,6 +69,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -97,7 +98,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 		add(new AjaxButton("addElement") {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
@@ -142,7 +142,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 		add(new SortBehavior() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				markFormDirty(target);
@@ -246,7 +245,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		return row;
 	}
 
-	@SuppressWarnings("unchecked")
 	private PolymorphicEditor getElementEditorAtRow(int index) {
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();
@@ -257,6 +255,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		return (PolymorphicEditor) row.get("elementEditor");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		int index = ((PathNode.Indexed) propertyNode).getIndex();

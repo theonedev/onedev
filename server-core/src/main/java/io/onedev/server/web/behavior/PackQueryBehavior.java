@@ -30,7 +30,6 @@ import java.util.List;
 
 import static io.onedev.server.model.Pack.*;
 
-@SuppressWarnings("serial")
 public class PackQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";

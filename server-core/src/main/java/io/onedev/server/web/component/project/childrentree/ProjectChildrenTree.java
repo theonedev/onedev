@@ -21,7 +21,6 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
-@SuppressWarnings("serial")
 public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 
 	private final Set<Long> expandedProjectIds = new HashSet<>();

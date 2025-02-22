@@ -35,7 +35,6 @@ import java.util.List;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asSubject;
 
-@SuppressWarnings("serial")
 @Singleton
 public class GitPostReceiveCallback extends HttpServlet {
 

@@ -11,7 +11,6 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 
-@SuppressWarnings("serial")
 public abstract class UserDeleteLink extends Link<Void> {
 
 	public UserDeleteLink(String id) {

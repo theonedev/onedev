@@ -18,7 +18,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.UserChoice;
 
-@SuppressWarnings("serial")
 public class UserChoiceEditSupport implements EditSupport {
 
 	@Override

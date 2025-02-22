@@ -1,5 +1,12 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
@@ -10,12 +17,12 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.*;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
-
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.*;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 @Editable
 public abstract class TransitionSpec implements Serializable {
@@ -60,7 +67,6 @@ public abstract class TransitionSpec implements Serializable {
 		this.removeFields = removeFields;
 	}
 	
-	@SuppressWarnings("unused")
 	protected static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
 		for (FieldSpec field: getIssueSetting().getFieldSpecs())
@@ -95,7 +101,6 @@ public abstract class TransitionSpec implements Serializable {
 		return getQueryUpdater().onDeleteProject(projectPath);
 	}
 	
-	@SuppressWarnings("unused")
 	protected static List<String> getStateChoices() {
 		List<String> stateNames = new ArrayList<>();
 		for (StateSpec state: getIssueSetting().getStateSpecs())

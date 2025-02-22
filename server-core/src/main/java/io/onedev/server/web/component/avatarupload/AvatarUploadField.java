@@ -26,7 +26,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
-@SuppressWarnings("serial")
 public class AvatarUploadField extends FormComponentPanel<String> {
 
 	private TextField<String> dataField;

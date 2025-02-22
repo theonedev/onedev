@@ -1,5 +1,11 @@
 package io.onedev.server.buildspec.step;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.server.annotation.Editable;
@@ -8,14 +14,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 @Editable
-public class StepTemplate implements NamedElement, Serializable {
+public class StepTemplate implements NamedElement {
 	
 	private static final long serialVersionUID = 1L;
 

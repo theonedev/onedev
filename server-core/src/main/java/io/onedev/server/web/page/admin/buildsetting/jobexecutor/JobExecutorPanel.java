@@ -16,7 +16,6 @@ import org.apache.wicket.model.Model;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class JobExecutorPanel extends Panel {
 
 	private final List<JobExecutor> executors;

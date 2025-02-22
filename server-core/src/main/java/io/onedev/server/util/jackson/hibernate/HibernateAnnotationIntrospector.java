@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 
 import io.onedev.server.model.AbstractEntity;
 
-@SuppressWarnings("serial")
 public class HibernateAnnotationIntrospector extends AnnotationIntrospector {
 
 	@Override

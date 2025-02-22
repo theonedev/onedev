@@ -1,18 +1,11 @@
 package io.onedev.server.web.page.admin.sshserverkey;
 
-import io.onedev.server.ssh.SshManager;
-import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -20,8 +13,8 @@ import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
-@SuppressWarnings("serial")
 public class SshServerKeyPage extends AdministrationPage {
 
     public SshServerKeyPage(PageParameters params) {

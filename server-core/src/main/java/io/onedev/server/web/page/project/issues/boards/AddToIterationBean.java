@@ -86,12 +86,14 @@ public class AddToIterationBean implements Serializable {
 		this.removeFromCurrentIteration = removeFromCurrentIteration;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isRemoveFromCurrentIterationVisible() {
 		var editContext = EditContext.get();
 		return !(Boolean)editContext.getInputValue("backlog") 
 				&& editContext.getInputValue("currentIteration") != null;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<String> getIterationChoices() {
 		var projectId = (Long) EditContext.get().getInputValue("projectId");
 		var iterationPrefix = (String) EditContext.get().getInputValue("iterationPrefix");

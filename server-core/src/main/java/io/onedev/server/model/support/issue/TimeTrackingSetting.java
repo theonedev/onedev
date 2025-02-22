@@ -1,23 +1,23 @@
 package io.onedev.server.model.support.issue;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.usage.Usage;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.ValidationException;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.validation.ValidationException;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.util.usage.Usage;
 
 @Editable
 public class TimeTrackingSetting implements Serializable {
@@ -69,6 +69,7 @@ public class TimeTrackingSetting implements Serializable {
 		this.aggregationLink = aggregationLink;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<String> getLinkChoices() {
 		var choices = new LinkedHashSet<String>();
 		for (var linkSpec: OneDev.getInstance(LinkSpecManager.class).query()) {
@@ -78,10 +79,6 @@ public class TimeTrackingSetting implements Serializable {
 			}
 		}
 		return new ArrayList<>(choices);
-	}
-
-	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 
 	public Usage onDeleteLink(String linkName) {

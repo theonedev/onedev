@@ -43,6 +43,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.parentOneDevProject = parentOneDevProject;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getParentOneDevProjectChoices() {
 		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
@@ -57,6 +58,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.all = all;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isAllDisabled() {
 		return !(Boolean) EditContext.get().getInputValue("all");
 	}
@@ -73,6 +75,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.jiraProjects = jiraProjects;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getJiraProjectChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportProjects projects = (ImportProjects) editor.getModelObject();

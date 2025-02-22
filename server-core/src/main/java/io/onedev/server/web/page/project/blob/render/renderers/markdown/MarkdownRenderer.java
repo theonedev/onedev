@@ -11,7 +11,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
-@SuppressWarnings("serial")
 public class MarkdownRenderer implements BlobRenderer {
 
 	private boolean isMarkdown(@Nullable String blobPath) {

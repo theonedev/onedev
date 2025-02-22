@@ -16,7 +16,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 abstract class MenuPanel extends Panel {
 	
 	public MenuPanel(String id) {

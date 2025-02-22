@@ -11,7 +11,6 @@ import io.onedev.server.util.watch.WatchStatus;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class WatchStatusPanel extends Panel {
 
 	public WatchStatusPanel(String id) {

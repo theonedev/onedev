@@ -22,7 +22,6 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
-@SuppressWarnings("serial")
 public class IssueQueryEditSupport implements EditSupport {
 
 	@Override

@@ -22,7 +22,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
-@SuppressWarnings("serial")
 abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 
 	private TextArea<String> input;

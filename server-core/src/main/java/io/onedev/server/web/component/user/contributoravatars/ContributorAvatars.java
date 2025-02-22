@@ -9,7 +9,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 
-@SuppressWarnings("serial")
 public class ContributorAvatars extends Panel {
 
 	private final PersonIdent author;

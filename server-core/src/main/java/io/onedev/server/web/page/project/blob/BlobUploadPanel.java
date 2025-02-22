@@ -21,7 +21,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.ObjectId;
 
-@SuppressWarnings("serial")
 public abstract class BlobUploadPanel extends Panel {
 
 	private final BlobRenderContext context;

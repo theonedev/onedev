@@ -24,7 +24,6 @@ import java.util.Map;
 
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
 
-@SuppressWarnings("serial")
 public class IterationIssuesPage extends IterationDetailPage {
 
 	private static final String PARAM_QUERY = "query";

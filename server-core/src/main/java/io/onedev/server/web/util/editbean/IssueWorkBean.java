@@ -33,6 +33,7 @@ public class IssueWorkBean implements Serializable {
 		this.spentTime = spentTime;
 	}
 
+	@SuppressWarnings("unused")
 	private static String getSpentTimeDescription() {
 		var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 		if (aggregationLink != null)

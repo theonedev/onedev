@@ -50,7 +50,6 @@ import java.util.List;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 
-@SuppressWarnings("serial")
 public abstract class PackSidePanel extends Panel {
 
 	public PackSidePanel(String id) {

@@ -20,7 +20,6 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.BuildQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
-@SuppressWarnings("serial")
 public class BuildQueryEditSupport implements EditSupport {
 
 	@Override

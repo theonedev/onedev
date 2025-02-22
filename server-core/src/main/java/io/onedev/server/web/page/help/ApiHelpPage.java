@@ -18,7 +18,6 @@ import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.web.page.layout.LayoutPage;
 
-@SuppressWarnings("serial")
 public abstract class ApiHelpPage extends LayoutPage {
 
 	public ApiHelpPage(PageParameters params) {

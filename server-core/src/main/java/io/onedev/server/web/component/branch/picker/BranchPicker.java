@@ -12,7 +12,6 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public abstract class BranchPicker extends DropdownLink {
 
 	private final IModel<Project> projectModel;

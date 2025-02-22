@@ -13,7 +13,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.RevisionChoice;
 
-@SuppressWarnings("serial")
 public class RevisionChoiceEditor extends PropertyEditor<String> {
 
 	private String revision;

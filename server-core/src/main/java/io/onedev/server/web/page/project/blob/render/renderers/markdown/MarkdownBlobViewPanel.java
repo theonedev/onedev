@@ -9,7 +9,6 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
-@SuppressWarnings("serial")
 public class MarkdownBlobViewPanel extends BlobViewPanel {
 
 	public MarkdownBlobViewPanel(String id, BlobRenderContext context) {

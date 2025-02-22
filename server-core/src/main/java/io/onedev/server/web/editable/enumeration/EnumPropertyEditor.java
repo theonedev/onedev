@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
+@SuppressWarnings({ "unchecked", "rawtypes"})
 public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 
 	private final Class<Enum> enumClass;

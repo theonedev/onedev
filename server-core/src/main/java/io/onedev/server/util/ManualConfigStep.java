@@ -12,7 +12,6 @@ import io.onedev.server.web.component.wizard.WizardStep;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {
 
 	private ManualConfig config;

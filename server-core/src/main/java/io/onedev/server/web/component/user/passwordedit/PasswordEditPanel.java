@@ -18,7 +18,6 @@ import org.apache.wicket.model.IModel;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public class PasswordEditPanel extends GenericPanel<User> {
 	
 	public PasswordEditPanel(String id, IModel<User> model) {

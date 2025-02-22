@@ -33,7 +33,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 	private final List<PropertyContext<Serializable>> propertyContexts;

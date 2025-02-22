@@ -27,6 +27,7 @@ public class ReadyToMergeCriteria extends Criteria<PullRequest> {
 		return getCriteria().matches(request);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Criteria<PullRequest> getCriteria() {
 		return new AndCriteria<>(
 				new OpenCriteria(),

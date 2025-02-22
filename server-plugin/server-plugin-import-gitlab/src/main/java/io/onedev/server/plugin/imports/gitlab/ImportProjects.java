@@ -49,6 +49,7 @@ public class ImportProjects extends ImportGroup {
 		return (Boolean)EditContext.get().getInputValue("all");
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isAllDisabled() {
 		return !isAllEnabled();
 	}
@@ -75,6 +76,7 @@ public class ImportProjects extends ImportGroup {
 		this.gitLabProjects = gitLabProjects;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getGitLabProjectChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportProjects projects = (ImportProjects) editor.getModelObject();

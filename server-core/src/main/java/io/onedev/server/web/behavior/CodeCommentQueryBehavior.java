@@ -28,7 +28,6 @@ import java.util.List;
 import static io.onedev.server.search.entity.codecomment.CodeCommentQuery.getRuleName;
 import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
 
-@SuppressWarnings("serial")
 public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";

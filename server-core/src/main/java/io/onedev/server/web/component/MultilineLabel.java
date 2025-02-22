@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.AppendingStringBuffer;
 
-@SuppressWarnings("serial")
 public class MultilineLabel extends MultiLineLabel {
 	public MultilineLabel(String id) {
 		super(id);

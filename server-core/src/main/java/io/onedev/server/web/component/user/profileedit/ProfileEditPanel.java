@@ -20,7 +20,6 @@ import org.apache.wicket.model.IModel;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class ProfileEditPanel extends GenericPanel<User> {
 
 	private BeanEditor editor;

@@ -40,6 +40,7 @@ public class IssueInStateTrigger extends JobTrigger {
 		this.state = state;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting()
 				.getStateSpecs().stream().map(StateSpec::getName).collect(toList());		

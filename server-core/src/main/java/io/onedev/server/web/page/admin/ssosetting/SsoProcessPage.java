@@ -23,7 +23,6 @@ import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
-@SuppressWarnings("serial")
 public class SsoProcessPage extends BasePage {
 
 	public static final String MOUNT_PATH = "~sso";

@@ -71,7 +71,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class ProjectIssueListPage extends ProjectIssuesPage {
 
 	private static final String PARAM_PAGE = "page";

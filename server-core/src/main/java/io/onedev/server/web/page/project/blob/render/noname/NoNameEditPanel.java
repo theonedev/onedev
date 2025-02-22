@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 
-@SuppressWarnings("serial")
 public class NoNameEditPanel extends BlobEditPanel {
 
 	public NoNameEditPanel(String id, BlobRenderContext context) {

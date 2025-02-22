@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_BUILD_NOTIFICATION;
 
-@SuppressWarnings("serial")
 public class BuildNotificationTemplatePage extends AbstractSimpleNotificationTemplatePage {
 
 	public BuildNotificationTemplatePage(PageParameters params) {

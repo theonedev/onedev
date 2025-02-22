@@ -10,7 +10,6 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class NumericPropertyEditor extends PropertyEditor<Number> {
 
 	private TextField<Number> input;

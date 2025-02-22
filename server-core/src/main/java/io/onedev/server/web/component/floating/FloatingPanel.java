@@ -16,7 +16,6 @@ import io.onedev.server.web.behavior.DisplayNoneBehavior;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.Animation;
 
-@SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";

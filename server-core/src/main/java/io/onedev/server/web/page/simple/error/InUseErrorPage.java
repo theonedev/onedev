@@ -15,7 +15,6 @@ import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.simple.SimplePage;
 
-@SuppressWarnings("serial")
 public class InUseErrorPage extends SimplePage {
 	
 	private final InUseException exception;

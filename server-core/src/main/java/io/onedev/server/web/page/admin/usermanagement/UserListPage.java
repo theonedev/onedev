@@ -56,7 +56,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
 
 	private static final String PARAM_PAGE = "page";
@@ -279,7 +278,7 @@ public class UserListPage extends AdministrationPage {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 
-								for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
+								for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 									var user = it.next();
 									if (user.isRoot()) {
 										Session.get().error("Can not delete root account");
@@ -295,7 +294,7 @@ public class UserListPage extends AdministrationPage {
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
 										Collection<User> users = new ArrayList<>();
-										for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+										for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
 											users.add(it.next());
 										getUserManager().delete(users);
 										target.add(usersTable);

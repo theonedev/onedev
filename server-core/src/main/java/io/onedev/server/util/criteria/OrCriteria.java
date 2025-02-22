@@ -29,7 +29,7 @@ public class OrCriteria<T> extends Criteria<T> {
 
 	protected final List<Criteria<T>> criterias;
 
-	public OrCriteria(Criteria<T>...criterias) {
+	public OrCriteria(@SuppressWarnings("unchecked") Criteria<T>...criterias) {
 		this(Arrays.asList(criterias));	
 	}
 	

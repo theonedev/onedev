@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class MarkdownReportPage extends BuildDetailPage {
 
 	private static final String PARAM_REPORT = "report";

@@ -42,6 +42,7 @@ public class SCPCommandStep extends CommandStep {
 		this.privateKeySecret = privateKeySecret;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getPrivateKeySecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());

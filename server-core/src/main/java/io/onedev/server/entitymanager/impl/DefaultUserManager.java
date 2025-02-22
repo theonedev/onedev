@@ -1,9 +1,29 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
+import org.hibernate.ReplicationMode;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
+
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -24,16 +44,6 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.hibernate.ReplicationMode;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.*;
-import java.util.Collection;
-import java.util.List;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
@@ -47,23 +57,18 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     private final IdManager idManager;
     
     private final EmailAddressManager emailAddressManager;
-    
-    private final GroupManager groupManager;
-    
+        
     private final TransactionManager transactionManager;
     
     private final ClusterManager clusterManager;
-	
-	private final PasswordService passwordService;
-    
+	   
 	private volatile UserCache cache;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
 							  IssueFieldManager issueFieldManager, IdManager idManager, 
-							  GroupManager groupManager, EmailAddressManager emailAddressManager, 
-							  TransactionManager transactionManager, ClusterManager clusterManager, 
-							  PasswordService passwordService) {
+							  EmailAddressManager emailAddressManager, TransactionManager transactionManager, 
+							  ClusterManager clusterManager) {
         super(dao);
         
         this.projectManager = projectManager;
@@ -72,9 +77,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
         this.idManager = idManager;
         this.emailAddressManager = emailAddressManager;
         this.transactionManager = transactionManager;
-        this.groupManager = groupManager;
         this.clusterManager = clusterManager;
-		this.passwordService = passwordService;
     }
 
 	@Transactional

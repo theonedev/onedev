@@ -1,17 +1,17 @@
 package io.onedev.server.search.entity.issue;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
+import org.junit.Test;
+
 import io.onedev.commons.codeassist.CodeAssist;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
 
 public class IssueQueryGrammarTest {
 

@@ -20,7 +20,6 @@ import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import io.onedev.server.web.util.editbean.ProjectAuthorizationBean;
 import io.onedev.server.web.util.editbean.ProjectAuthorizationsBean;
 
-@SuppressWarnings("serial")
 public class UserAuthorizationsPage extends UserPage {
 
 	public UserAuthorizationsPage(PageParameters params) {

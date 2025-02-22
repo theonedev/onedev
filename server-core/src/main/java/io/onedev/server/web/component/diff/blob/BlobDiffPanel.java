@@ -40,7 +40,6 @@ import javax.annotation.Nullable;
 
 import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
 
-@SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
 
 	private static final String BODY_ID = "body";

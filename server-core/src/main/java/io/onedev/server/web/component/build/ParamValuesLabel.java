@@ -8,7 +8,6 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.util.Input;
 
-@SuppressWarnings("serial")
 public class ParamValuesLabel extends Label {
 
 	public ParamValuesLabel(String id, Input param) {

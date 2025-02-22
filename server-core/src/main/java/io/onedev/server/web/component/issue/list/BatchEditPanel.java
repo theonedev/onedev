@@ -1,5 +1,12 @@
 package io.onedev.server.web.component.issue.list;
 
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_CONFIDENTIAL;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_ITERATION;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_STATE;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_CONFIDENTIAL;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_ITERATIONS;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_STATE;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -28,20 +35,19 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -53,9 +59,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.*;
 
-@SuppressWarnings("serial")
 abstract class BatchEditPanel extends Panel implements InputContext {
 
 	private Set<String> selectedFields = new HashSet<>();

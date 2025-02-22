@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
-@SuppressWarnings("serial")
 public class SortEditPanel<T extends AbstractEntity> extends GenericPanel<List<EntitySort>> {
 
 	private final Map<String, Direction> available;

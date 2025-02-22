@@ -59,6 +59,7 @@ public class BuildPacksPage extends BuildDetailPage {
 				return null;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected PackQuery getBaseQuery() {
 				return new PackQuery(new AndCriteria<>(

@@ -35,7 +35,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class ProjectSelector extends Panel {
 
 	private final IModel<List<Project>> projectsModel;

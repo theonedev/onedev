@@ -29,7 +29,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class UnitTestReportPage extends BuildReportPage {
 
 	private final IModel<UnitTestReport> reportModel = new LoadableDetachableModel<>() {

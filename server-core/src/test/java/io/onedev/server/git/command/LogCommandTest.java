@@ -9,8 +9,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.git.AbstractGitTest;
 
 public class LogCommandTest extends AbstractGitTest {

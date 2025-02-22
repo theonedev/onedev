@@ -1,12 +1,12 @@
 package io.onedev.server.plugin.imports.gitlab;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.BeanEditor;
-
-import java.io.Serializable;
-import java.util.Map;
 
 @Editable
 public class ImportGroup implements Serializable {
@@ -16,9 +16,7 @@ public class ImportGroup implements Serializable {
 	ImportServer server;
 	
 	private String groupId;
-	
-	private boolean includeForks;
-	
+		
 	@Editable(order=100, name="GitLab Group", description="Specify group to import from. "
 			+ "Leave empty to import from projects under current account")
 	@ChoiceProvider("getGroupChoices")

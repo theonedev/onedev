@@ -86,7 +86,6 @@ import java.util.*;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-@SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
 
 	private static final String PARAM_PAGE = "page";

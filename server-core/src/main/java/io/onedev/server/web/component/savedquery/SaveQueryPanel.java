@@ -15,7 +15,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 
-@SuppressWarnings("serial")
 public abstract class SaveQueryPanel extends Panel {
 
 	private final PersonalQuerySupport myQuerySupport;

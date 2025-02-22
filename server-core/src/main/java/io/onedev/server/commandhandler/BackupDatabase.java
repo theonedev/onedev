@@ -29,9 +29,7 @@ public class BackupDatabase extends CommandHandler {
 	private final DataManager dataManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
-	
-	private final HibernateConfig hibernateConfig;
-	
+		
 	private File backupFile;
 	
 	@Inject
@@ -40,7 +38,6 @@ public class BackupDatabase extends CommandHandler {
 		super(hibernateConfig);
 		this.dataManager = dataManager;
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.hibernateConfig = hibernateConfig;
 	}
 	
 	@Override

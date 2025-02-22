@@ -18,7 +18,6 @@ import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 
-@SuppressWarnings("serial")
 public class CodeStatsPanel extends GenericPanel<Project> {
 
 	private final IModel<Integer> commitCountModel = new LoadableDetachableModel<Integer>() {

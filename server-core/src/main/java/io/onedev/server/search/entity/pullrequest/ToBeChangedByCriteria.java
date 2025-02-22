@@ -32,6 +32,7 @@ public class ToBeChangedByCriteria extends Criteria<PullRequest> {
 		return getCriteria(user).matches(request);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Criteria<PullRequest> getCriteria(User user) {
 		return new AndCriteria<>(
 				new OpenCriteria(),

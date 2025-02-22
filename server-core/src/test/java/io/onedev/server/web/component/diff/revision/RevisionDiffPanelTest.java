@@ -1,11 +1,10 @@
 package io.onedev.server.web.component.diff.revision;
 
-import com.google.common.collect.Lists;
-import org.junit.Test;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.web.component.diff.revision.RevisionDiffPanel.getChildren;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class RevisionDiffPanelTest {
 

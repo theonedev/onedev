@@ -11,7 +11,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class AjaxActionTab extends ActionTab {
 
 	public AjaxActionTab(IModel<String> titleModel, @Nullable IModel<String> iconModel) {

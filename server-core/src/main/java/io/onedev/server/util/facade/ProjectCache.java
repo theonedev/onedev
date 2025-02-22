@@ -1,6 +1,22 @@
 package io.onedev.server.util.facade;
 
+import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -9,15 +25,7 @@ import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.patternset.PatternSet;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
-
-import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toSet;
-
-public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Serializable {
+public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 
 	public ProjectCache(Map<Long, ProjectFacade> delegate) {
 		super(delegate);

@@ -1,11 +1,12 @@
 package io.onedev.server.model.support.administration.sso;
 
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import org.apache.shiro.authc.AuthenticationToken;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
+
+import org.apache.shiro.authc.AuthenticationToken;
+
+import io.onedev.server.model.support.administration.authenticator.Authenticated;
 
 public class SsoAuthenticated extends Authenticated implements AuthenticationToken {
 	

@@ -11,7 +11,6 @@ import io.onedev.server.annotation.ReviewRequirement;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 
-@SuppressWarnings("serial")
 public class ReviewRequirementEditSupport implements EditSupport {
 
 	@Override

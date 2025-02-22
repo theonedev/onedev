@@ -15,7 +15,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.base.BasePage;
 
-@SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";

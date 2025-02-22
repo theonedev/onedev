@@ -19,7 +19,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 
-@SuppressWarnings("serial")
 public class SourceEditPanel extends BlobEditPanel implements Positionable {
 
 	private SourceFormatPanel sourceFormat;

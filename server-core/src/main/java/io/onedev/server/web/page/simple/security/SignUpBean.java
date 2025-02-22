@@ -29,6 +29,7 @@ public class SignUpBean extends User {
 		this.emailAddress = emailAddress;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String getEmailAddressDescription() {
 		var allowedSelfRegisterEmailDomain = OneDev.getInstance(SettingManager.class).getSecuritySetting().getAllowedSelfRegisterEmailDomain();	
 		if (allowedSelfRegisterEmailDomain != null) {

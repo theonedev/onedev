@@ -8,7 +8,6 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.util.ComponentContext;
 
-@SuppressWarnings("serial")
 public abstract class EmptyValueLabel extends Label {
 
 	public EmptyValueLabel(String id) {

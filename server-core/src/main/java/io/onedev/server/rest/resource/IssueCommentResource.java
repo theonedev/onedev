@@ -1,20 +1,29 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
+import static io.onedev.server.security.SecurityUtils.canAccessIssue;
+import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
+import static io.onedev.server.security.SecurityUtils.getUser;
+import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 
-import static io.onedev.server.security.SecurityUtils.*;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
 
 @Api(order=2300)
 @Path("/issue-comments")

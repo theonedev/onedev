@@ -4,7 +4,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
 public abstract class SelectToActChoice<T> extends Select2Choice<T> {
 
 	private transient T selection;

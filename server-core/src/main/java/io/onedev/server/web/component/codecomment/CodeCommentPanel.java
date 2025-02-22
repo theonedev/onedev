@@ -64,7 +64,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
 
 	private final Long commentId;

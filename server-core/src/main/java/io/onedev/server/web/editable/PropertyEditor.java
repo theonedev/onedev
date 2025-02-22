@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -17,16 +16,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.INullAcceptingValidator;
-import org.apache.wicket.validation.IValidatable;
 
 import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.util.WicketUtils;
 
-@SuppressWarnings("serial")
 public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
 	protected final PropertyDescriptor descriptor;

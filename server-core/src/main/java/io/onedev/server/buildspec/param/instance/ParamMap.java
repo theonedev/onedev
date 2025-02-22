@@ -41,6 +41,7 @@ public class ParamMap implements Serializable {
 		this.params = params;
 	}
 	
+	@SuppressWarnings("unused")
 	private static List<ParamSpec> getParamSpecs() {
 		Component component = ComponentContext.get().getComponent();
 		if (WicketUtils.findInnermost(component, JobTriggerEditPanel.class) != null)

@@ -28,7 +28,6 @@ import org.apache.wicket.model.Model;
 
 import static io.onedev.server.util.DateUtils.formatDateTime;
 
-@SuppressWarnings("serial")
 class IssueWorkPanel extends GenericPanel<IssueWork> {
 
 	private final DeleteCallback deleteCallback;

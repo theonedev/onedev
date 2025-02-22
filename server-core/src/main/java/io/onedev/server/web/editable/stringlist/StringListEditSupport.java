@@ -9,7 +9,6 @@ import java.util.List;
 
 import static io.onedev.server.util.ReflectionUtils.getCollectionElementClass;
 
-@SuppressWarnings("serial")
 public class StringListEditSupport implements EditSupport {
 
 	@Override

@@ -1,37 +1,30 @@
 package io.onedev.server.web.page.admin.brandingsetting;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.io.Resources;
+
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
-import io.onedev.server.web.component.fileupload.FileUploadField;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BrandingSettingPage extends AdministrationPage {
 

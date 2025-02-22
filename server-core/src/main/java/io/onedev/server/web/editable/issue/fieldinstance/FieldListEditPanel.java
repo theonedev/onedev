@@ -47,7 +47,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.FieldNamesProvider;
 import io.onedev.server.annotation.Password;
 
-@SuppressWarnings("serial")
 class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(FieldListEditPanel.class);

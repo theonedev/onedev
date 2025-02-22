@@ -29,7 +29,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
-@SuppressWarnings("serial")
 public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 	
 	public TokenListPanel(String id) {

@@ -13,7 +13,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
-@SuppressWarnings("serial")
 public class EntityDataProvider<T extends AbstractEntity> extends LoadableDetachableDataProvider<T, String> {
 	
 	private final Class<T> entityType;

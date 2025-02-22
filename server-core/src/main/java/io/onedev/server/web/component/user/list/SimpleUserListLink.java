@@ -10,7 +10,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
-@SuppressWarnings("serial")
 public abstract class SimpleUserListLink extends DropdownLink {
 
 	public SimpleUserListLink(String id) {

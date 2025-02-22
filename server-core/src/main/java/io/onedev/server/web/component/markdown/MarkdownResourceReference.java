@@ -20,7 +20,6 @@ import io.onedev.server.web.component.commit.status.CommitStatusCssResourceRefer
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-@SuppressWarnings("serial")
 public class MarkdownResourceReference extends BaseDependentResourceReference {
 
 	public MarkdownResourceReference() {

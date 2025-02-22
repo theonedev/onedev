@@ -1,7 +1,26 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
+import static io.onedev.server.buildspec.job.action.condition.ActionCondition.checkField;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.Is;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.OnBranch;
+import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.ruleNames;
+import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_LOG;
+import static io.onedev.server.model.Build.NAME_PROJECT;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.model.Build.NAME_TAG;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -20,20 +39,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
-import static io.onedev.server.buildspec.job.action.condition.ActionCondition.checkField;
-import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.*;
-import static io.onedev.server.model.Build.*;
-
-@SuppressWarnings("serial")
 public class ActionConditionBehavior extends ANTLRAssistBehavior {
 
 	public ActionConditionBehavior() {

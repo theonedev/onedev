@@ -35,7 +35,6 @@ import org.apache.wicket.util.lang.Generics;
  */
 public class SimpleWebSocketConnectionRegistry implements IWebSocketConnectionRegistry
 {
-	@SuppressWarnings("serial")
 	private static final MetaDataKey<ConcurrentMap<String, ConcurrentMap<IKey, IWebSocketConnection>>> KEY =
 			new MetaDataKey<ConcurrentMap<String, ConcurrentMap<IKey, IWebSocketConnection>>>()
 	{

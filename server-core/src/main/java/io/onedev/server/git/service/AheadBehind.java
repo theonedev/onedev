@@ -2,7 +2,6 @@ package io.onedev.server.git.service;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class AheadBehind implements Serializable {
 
 	private final int ahead;

@@ -41,6 +41,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 
 	private final Class<T> settingClass;
 
+	@SuppressWarnings("unchecked")
 	public ChannelNotificationManager() {
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ChannelNotificationManager.class, getClass());
 		if (typeArguments.size() == 1 && ChannelNotificationSetting.class.isAssignableFrom(typeArguments.get(0))) {

@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 
-@SuppressWarnings("serial")
 public class AgentQueryViewPanel extends Panel {
 
 	private final String queryString;

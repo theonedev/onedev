@@ -17,7 +17,6 @@ import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 
-@SuppressWarnings("serial")
 public class PersonIdentPanel extends Panel {
 
 	private final PersonIdent personIdent;

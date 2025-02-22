@@ -30,7 +30,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class IssueImportPage<Where extends Serializable, What extends Serializable, How extends Serializable> extends ProjectPage {
 
 	private static final String PARAM_IMPORTER = "importer";

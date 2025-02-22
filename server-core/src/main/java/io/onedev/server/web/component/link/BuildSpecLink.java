@@ -15,7 +15,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
-@SuppressWarnings("serial")
 public abstract class BuildSpecLink extends BookmarkablePageLink<Void> {
 
 	private final ObjectId commitId;

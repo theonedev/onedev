@@ -17,7 +17,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 public abstract class PostBuildActionEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<PostBuildAction> actions;

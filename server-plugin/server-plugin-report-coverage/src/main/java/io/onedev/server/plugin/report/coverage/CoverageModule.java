@@ -1,5 +1,29 @@
 package io.onedev.server.plugin.report.coverage;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.model.Build.getProjectRelativeDirPath;
+import static io.onedev.server.plugin.report.coverage.CoverageStats.CATEGORY;
+import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang.SerializationException;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
@@ -20,25 +44,6 @@ import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativeDirPath;
-import static io.onedev.server.plugin.report.coverage.CoverageStats.CATEGORY;
-import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -175,6 +180,7 @@ public class CoverageModule extends AbstractPluginModule {
 			this.reportName = reportName;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public Map<String, Map<Integer, CoverageStatus>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {

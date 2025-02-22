@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 	private static final String COOKIE_PREFIX = "savedQueries.closed.";

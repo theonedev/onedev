@@ -29,7 +29,6 @@ import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 
-@SuppressWarnings("serial")
 public abstract class BlobFolderSelector extends Panel {
 
 	private final ObjectId commitId;

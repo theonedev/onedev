@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 abstract class BranchProtectionEditPanel extends Panel {
 
 	private final BranchProtection protection;

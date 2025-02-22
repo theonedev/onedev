@@ -1,20 +1,20 @@
 package io.onedev.server.util.criteria;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.onedev.server.util.Pair;
-import org.junit.Test;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import io.onedev.server.util.Pair;
 
 public class CriteriaTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void forManyValues() {
         var ranges = new HashSet<Pair<Long, Long>>();

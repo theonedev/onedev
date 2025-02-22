@@ -1,24 +1,23 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import io.onedev.server.OneDev;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Size;
+
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
-
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Editable
 @ClassValidating
@@ -47,6 +46,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.parentOneDevProject = parentOneDevProject;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getParentOneDevProjectChoices() {
 		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
@@ -61,6 +61,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.all = all;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isAllDisabled() {
 		return !(Boolean) EditContext.get().getInputValue("all");
 	}
@@ -77,6 +78,7 @@ public class ImportProjects implements Serializable, Validatable {
 		this.youTrackProjects = youTrackProjects;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getYouTrackProjectChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportProjects projects = (ImportProjects) editor.getModelObject();

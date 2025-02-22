@@ -20,7 +20,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.base.BasePage;
 
-@SuppressWarnings("serial")
 public abstract class PieChartPanel extends GenericPanel<List<PieSlice>> {
 
 	private AbstractPostAjaxBehavior selectionBehavior;

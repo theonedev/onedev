@@ -1,6 +1,5 @@
 package io.onedev.server.util.facade;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +7,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.util.MapProxy;
 
-public class GroupCache extends MapProxy<Long, GroupFacade> implements Serializable {
+public class GroupCache extends MapProxy<Long, GroupFacade> {
 
 	private static final long serialVersionUID = 1L;
 	

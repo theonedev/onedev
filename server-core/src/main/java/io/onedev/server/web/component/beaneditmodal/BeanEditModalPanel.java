@@ -1,17 +1,17 @@
 package io.onedev.server.web.component.beaneditmodal;
 
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.BeanEditor;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-@SuppressWarnings("serial")
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+
+import io.onedev.server.web.component.modal.ModalPanel;
+
 public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPanel {
 
 	private final T bean;

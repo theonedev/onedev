@@ -33,7 +33,6 @@ import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
 	private final DeleteCallback deleteCallback;

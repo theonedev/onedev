@@ -1,12 +1,12 @@
 package io.onedev.server.git.service;
 
-import io.onedev.server.git.GitUtils;
-import org.eclipse.jgit.lib.ObjectId;
+import static io.onedev.server.git.GitUtils.abbreviateSHA;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
-import static io.onedev.server.git.GitUtils.abbreviateSHA;
+import javax.annotation.Nullable;
+
+import org.eclipse.jgit.lib.ObjectId;
 
 public class CommitMessageError implements Serializable {
 

@@ -29,7 +29,6 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.TransactionManager;
 
-@SuppressWarnings("serial")
 public abstract class WizardPanel extends Panel {
 
 	private List<? extends WizardStep> steps;

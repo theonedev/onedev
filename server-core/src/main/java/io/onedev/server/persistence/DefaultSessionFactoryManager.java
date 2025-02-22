@@ -1,7 +1,6 @@
 package io.onedev.server.persistence;
 
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;

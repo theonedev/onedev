@@ -18,7 +18,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
-@SuppressWarnings("serial")
 public class CodeAnalysisSettingPage extends ProjectSettingPage {
 
 	public CodeAnalysisSettingPage(PageParameters params) {

@@ -8,7 +8,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
-@SuppressWarnings("serial")
 public abstract class ValueEditor<T> extends FormComponentPanel<T> {
 
 	public ValueEditor(String id, IModel<T> model) {

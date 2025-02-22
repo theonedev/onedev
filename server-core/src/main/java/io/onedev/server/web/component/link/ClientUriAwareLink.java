@@ -19,7 +19,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
  *
  * @param <T>
  */
-@SuppressWarnings("serial")
 public abstract class ClientUriAwareLink<T> extends AjaxLink<T> {
 
 	public ClientUriAwareLink(String id) {

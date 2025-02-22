@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-@SuppressWarnings("serial")
 public class DropzoneField extends FormComponentPanel<String> {
 
 	private final int maxFiles;

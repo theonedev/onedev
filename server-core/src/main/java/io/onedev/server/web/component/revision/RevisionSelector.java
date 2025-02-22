@@ -50,7 +50,6 @@ import static io.onedev.server.git.GitUtils.branch2ref;
 import static io.onedev.server.git.GitUtils.tag2ref;
 import static org.eclipse.jgit.lib.Constants.R_REFS;
 
-@SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
 
 	private static final int PAGE_SIZE = 25;

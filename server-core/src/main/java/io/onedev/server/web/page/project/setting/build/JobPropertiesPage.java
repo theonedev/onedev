@@ -16,7 +16,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class JobPropertiesPage extends ProjectBuildSettingPage {
 	
 	private boolean showArchived;

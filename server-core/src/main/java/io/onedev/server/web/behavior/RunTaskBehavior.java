@@ -2,7 +2,6 @@ package io.onedev.server.web.behavior;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-@SuppressWarnings("serial")
 public abstract class RunTaskBehavior extends AbstractPostAjaxBehavior {
 
 	@Override

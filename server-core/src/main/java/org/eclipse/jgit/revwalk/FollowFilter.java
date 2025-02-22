@@ -98,7 +98,6 @@ public class FollowFilter extends TreeFilter {
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return "(FOLLOW(" + path.toString() + ")" //

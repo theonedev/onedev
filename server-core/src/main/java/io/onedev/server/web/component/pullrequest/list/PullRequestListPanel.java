@@ -95,7 +95,6 @@ import java.util.*;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;
@@ -469,7 +468,7 @@ public abstract class PullRequestListPanel extends Panel {
 										dropdown2.close();
 
 										Collection<PullRequest> requests = new ArrayList<>();
-										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+										for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 											requests.add(it.next());
 										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 										Session.get().success("Watch status changed");
@@ -672,7 +671,7 @@ public abstract class PullRequestListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
-								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+								for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 									visitInfoManager.visitPullRequest(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}

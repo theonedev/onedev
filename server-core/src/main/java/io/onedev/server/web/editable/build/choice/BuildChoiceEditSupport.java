@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class BuildChoiceEditSupport implements EditSupport {
 
 	@Override

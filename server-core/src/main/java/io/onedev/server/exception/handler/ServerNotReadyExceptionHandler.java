@@ -1,11 +1,9 @@
 package io.onedev.server.exception.handler;
 
-import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.ServerNotReadyException;
-
 import javax.servlet.http.HttpServletResponse;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.ServerNotReadyException;
 
 public class ServerNotReadyExceptionHandler extends AbstractExceptionHandler<ServerNotReadyException> {
 	

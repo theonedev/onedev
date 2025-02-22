@@ -36,7 +36,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 
-@SuppressWarnings("serial")
 public class LoginPage extends SimplePage {
 
 	private String userName;

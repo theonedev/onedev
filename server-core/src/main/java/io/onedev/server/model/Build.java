@@ -1,9 +1,70 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.Build.PROP_COMMIT_HASH;
+import static io.onedev.server.model.Build.PROP_FINISH_DATE;
+import static io.onedev.server.model.Build.PROP_FINISH_DAY;
+import static io.onedev.server.model.Build.PROP_FINISH_MONTH;
+import static io.onedev.server.model.Build.PROP_FINISH_WEEK;
+import static io.onedev.server.model.Build.PROP_JOB_NAME;
+import static io.onedev.server.model.Build.PROP_PENDING_DATE;
+import static io.onedev.server.model.Build.PROP_REF_NAME;
+import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
+import static io.onedev.server.model.Build.PROP_STATUS;
+import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.Build.PROP_VERSION;
+import static io.onedev.server.model.Project.BUILDS_DIR;
+import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
+import static io.onedev.server.model.support.TimeGroups.PROP_MONTH;
+import static io.onedev.server.model.support.TimeGroups.PROP_WEEK;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+
+import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -28,10 +89,8 @@ import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.Input;
@@ -43,26 +102,6 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-
-import javax.annotation.Nullable;
-import javax.persistence.*;
-import java.io.File;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.Build.*;
-import static io.onedev.server.model.Project.BUILDS_DIR;
-import static io.onedev.server.model.support.TimeGroups.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 @Entity
 @Table(

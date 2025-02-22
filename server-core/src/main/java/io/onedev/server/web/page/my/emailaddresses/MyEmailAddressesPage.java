@@ -9,7 +9,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.emailaddresses.EmailAddressesPanel;
 import io.onedev.server.web.page.my.MyPage;
 
-@SuppressWarnings("serial")
 public class MyEmailAddressesPage extends MyPage {
 
 	public MyEmailAddressesPage(PageParameters params) {

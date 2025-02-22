@@ -70,7 +70,7 @@ public class GitHubConnector extends OpenIdConnector {
 			HTTPResponse httpResponse = userInfoRequest.toHTTPRequest().send();
 
 			if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-				var jsonObject = httpResponse.getContentAsJSONObject();
+				var jsonObject = httpResponse.getBodyAsJSONObject();
 				var userName = jsonObject.getAsString("login");
 				var fullName = jsonObject.getAsString("name");
 				var email = jsonObject.getAsString("email");
@@ -79,7 +79,7 @@ public class GitHubConnector extends OpenIdConnector {
 							new URI("https://api.github.com/user/emails"), accessToken);
 					httpResponse = userInfoRequest.toHTTPRequest().send();
 					if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-						for (var element: httpResponse.getContentAsJSONArray()) {
+						for (var element: httpResponse.getBodyAsJSONArray()) {
 							JSONObject emailObject = (JSONObject) element;
 							if (emailObject.getAsString("verified").equals("true") 
 									&& emailObject.getAsString("primary").equals("true")) {

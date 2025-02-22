@@ -52,6 +52,7 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		dao.persist(work);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public List<IssueWork> query(ProjectScope projectScope, EntityQuery<Issue> issueQuery, long fromDay, long toDay) {

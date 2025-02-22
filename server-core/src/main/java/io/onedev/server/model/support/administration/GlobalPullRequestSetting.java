@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 
 public class GlobalPullRequestSetting implements Serializable {

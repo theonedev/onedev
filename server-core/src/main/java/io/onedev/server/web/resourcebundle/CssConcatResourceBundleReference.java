@@ -12,7 +12,6 @@ import org.apache.wicket.util.io.IOUtils;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 
-@SuppressWarnings("serial")
 public class CssConcatResourceBundleReference 
 		extends CachedDependenciesConcatResourceBundleReference<CssReferenceHeaderItem> {
 	

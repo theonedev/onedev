@@ -23,7 +23,6 @@ import javax.validation.Validator;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
-@SuppressWarnings("serial")
 public class ContributedAdministrationSettingPage extends AdministrationPage {
 
 	public static final String PARAM_SETTING = "administrationSetting";

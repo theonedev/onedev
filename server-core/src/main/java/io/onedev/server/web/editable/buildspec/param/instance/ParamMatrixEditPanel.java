@@ -42,7 +42,6 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@SuppressWarnings("serial")
 class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParamMatrixEditPanel.class);
@@ -223,6 +222,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 		super.onBeforeRender();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

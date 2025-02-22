@@ -32,7 +32,6 @@ import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 
-@SuppressWarnings("serial")
 public abstract class PipelinePanel extends Panel {
 
 	private final IModel<List<List<Job>>> pipelineModel = new LoadableDetachableModel<List<List<Job>>>() {

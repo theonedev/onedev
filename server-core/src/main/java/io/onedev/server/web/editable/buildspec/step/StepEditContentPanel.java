@@ -24,7 +24,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import static io.onedev.server.web.component.floating.AlignPlacement.bottom;
 
-@SuppressWarnings("serial")
 abstract class StepEditContentPanel extends Panel {
 
 	private final Step step;

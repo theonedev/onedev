@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class CodePropertyEditor extends PropertyEditor<Serializable> {
 
 	private TextArea<String> input;
@@ -121,6 +120,7 @@ public class CodePropertyEditor extends PropertyEditor<Serializable> {
 		return Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(Code.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
 		Serializable convertedInput;

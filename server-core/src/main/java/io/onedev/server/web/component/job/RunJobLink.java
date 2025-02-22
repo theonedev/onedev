@@ -32,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizationContextAware {
 
 	private final String refName;

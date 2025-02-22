@@ -1,13 +1,12 @@
 package io.onedev.server.util.facade;
 
-import io.onedev.server.model.User;
-import io.onedev.server.util.MapProxy;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.Map;
 
-public class AccessTokenCache extends MapProxy<Long, AccessTokenFacade> implements Serializable {
+import javax.annotation.Nullable;
+
+import io.onedev.server.util.MapProxy;
+
+public class AccessTokenCache extends MapProxy<Long, AccessTokenFacade> {
 
 	private static final long serialVersionUID = 1L;
 	

@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
-@SuppressWarnings("serial")
 public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 
 	public ReferencedFromCodeCommentPanel(String id, Long commentId) {

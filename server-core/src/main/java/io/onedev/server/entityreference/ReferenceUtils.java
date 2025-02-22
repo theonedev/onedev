@@ -1,6 +1,24 @@
 package io.onedev.server.entityreference;
 
+import static java.lang.String.format;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.compile;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
+import org.jsoup.nodes.Document;
+import org.jsoup.select.NodeTraversor;
+
 import com.google.common.collect.ImmutableSet;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -9,18 +27,6 @@ import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.validation.validator.ProjectKeyValidator;
 import io.onedev.server.validation.validator.ProjectPathValidator;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.select.NodeTraversor;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.regex.Pattern;
-
-import static java.lang.String.format;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.regex.Pattern.compile;
 
 public class ReferenceUtils {
 	

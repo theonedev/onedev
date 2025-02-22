@@ -7,7 +7,6 @@ import java.util.Stack;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.web.util.WicketUtils;
 
 public interface EditContext {

@@ -6,7 +6,6 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 
-@SuppressWarnings("serial")
 public class SideInfoLink extends AjaxLink<Void> {
 
 	public SideInfoLink(String id) {

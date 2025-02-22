@@ -7,7 +7,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.EmailAddress;
 
-@SuppressWarnings("serial")
 public class EmailAddressVerificationStatusBadge extends Label {
 
 	private final IModel<EmailAddress> emailAddressModel;

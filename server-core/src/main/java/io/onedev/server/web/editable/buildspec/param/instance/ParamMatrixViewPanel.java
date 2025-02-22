@@ -17,7 +17,6 @@ import io.onedev.server.buildspec.param.instance.ScriptingValues;
 import io.onedev.server.buildspec.param.instance.SpecifiedValues;
 import io.onedev.server.web.editable.PropertyContext;
 
-@SuppressWarnings("serial")
 class ParamMatrixViewPanel extends Panel {
 
 	private final List<ParamInstances> params = new ArrayList<>();

@@ -76,6 +76,7 @@ public class UseTemplateStep extends CompositeStep {
 		this.excludeParamMaps = excludeParamMaps;
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
 		var componentContext = ComponentContext.get();
 		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
@@ -86,7 +87,6 @@ public class UseTemplateStep extends CompositeStep {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	public static List<ParamSpec> getParamSpecs() {
 		String templateName = (String) EditContext.get().getInputValue(PROP_TEMPLATE_NAME);
 		if (templateName != null) {

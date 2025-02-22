@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class NewBoardPanel extends Panel {
 
 	private final List<BoardSpec> boards;

@@ -30,7 +30,6 @@ import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
-@SuppressWarnings("serial")
 public class IssueStatsPanel extends Panel {
 
 	private final IModel<Project> projectModel;

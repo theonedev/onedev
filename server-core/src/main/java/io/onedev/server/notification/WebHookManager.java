@@ -1,20 +1,19 @@
 package io.onedev.server.notification;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -27,9 +26,6 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.persistence.annotation.Sessional;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Singleton
 public class WebHookManager {

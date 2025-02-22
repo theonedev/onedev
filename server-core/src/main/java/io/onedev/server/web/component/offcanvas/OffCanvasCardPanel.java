@@ -6,7 +6,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 
-@SuppressWarnings("serial")
 public abstract class OffCanvasCardPanel extends OffCanvasPanel {
 
 	public OffCanvasCardPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {

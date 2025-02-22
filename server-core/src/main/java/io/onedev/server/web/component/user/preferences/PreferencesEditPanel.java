@@ -17,7 +17,6 @@ import java.io.Serializable;
 import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 
-@SuppressWarnings("serial")
 public class PreferencesEditPanel extends GenericPanel<User> {
 
 	private BeanEditor editor;

@@ -6,7 +6,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 
-@SuppressWarnings("serial")
 public class IssueActivitiesPage extends IssueDetailPage {
 
 	private IssueActivitiesPanel activities;

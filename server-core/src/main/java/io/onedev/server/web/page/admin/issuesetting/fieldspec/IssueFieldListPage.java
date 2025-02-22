@@ -39,7 +39,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class IssueFieldListPage extends IssueSettingPage {
 
 	public IssueFieldListPage(PageParameters params) {

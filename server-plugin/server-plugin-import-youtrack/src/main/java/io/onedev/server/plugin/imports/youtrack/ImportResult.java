@@ -1,11 +1,17 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.util.Pair;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.unbescape.html.HtmlEscape;
 
-import java.util.*;
+import io.onedev.server.util.Pair;
 
 public class ImportResult {
 

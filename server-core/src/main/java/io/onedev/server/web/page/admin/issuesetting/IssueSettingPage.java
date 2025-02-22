@@ -11,7 +11,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-@SuppressWarnings("serial")
 public abstract class IssueSettingPage extends AdministrationPage {
 
 	private final GlobalIssueSetting setting;

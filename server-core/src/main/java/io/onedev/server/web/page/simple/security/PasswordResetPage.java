@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class PasswordResetPage extends SimplePage {
 
 	private static final String PARAM_PASSWORD_RESET_CODE = "passwordResetCode";

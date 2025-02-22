@@ -149,6 +149,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.disableDashboard = disableDashboard;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isDisableDashboardEnabled() {
 		return WicketUtils.isSubscriptionActive();
 	}
@@ -173,6 +174,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.avatarServiceUrl = avatarServiceUrl;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isUseAvatarServiceEnabled() {
 		return (boolean) EditContext.get().getInputValue(PROP_USE_AVATAR_SERVICE); 
 	}	

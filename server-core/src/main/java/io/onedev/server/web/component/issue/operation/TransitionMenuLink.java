@@ -21,7 +21,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import java.util.*;
 
-@SuppressWarnings("serial")
 public abstract class TransitionMenuLink extends MenuLink {
 
 	private final IModel<List<ManualSpec>> manualTransitionsModel =

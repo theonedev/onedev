@@ -12,7 +12,6 @@ import io.onedev.server.search.entity.pullrequest.IncludesIssueCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 
-@SuppressWarnings("serial")
 public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 
 	public IssuePullRequestsPanel(String id, IModel<Issue> model) {

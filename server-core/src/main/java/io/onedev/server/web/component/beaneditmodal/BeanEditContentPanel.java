@@ -21,7 +21,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 
-@SuppressWarnings("serial")
 abstract class BeanEditContentPanel extends Panel {
 
 	public BeanEditContentPanel(String id) {

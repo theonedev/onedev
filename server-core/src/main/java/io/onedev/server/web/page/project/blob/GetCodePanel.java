@@ -18,7 +18,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@SuppressWarnings("serial")
 public abstract class GetCodePanel extends Panel {
 
 	private final DropdownLink dropdown;

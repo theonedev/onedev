@@ -28,7 +28,6 @@ import org.apache.wicket.model.Model;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-@SuppressWarnings("serial")
 public abstract class IssueEditableTitlePanel extends Panel {
 
 	private static final String CONTENT_ID = "content";

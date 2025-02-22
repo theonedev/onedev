@@ -12,7 +12,6 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
-@SuppressWarnings("serial")
 public class FileChange implements Serializable {
 	
 	private final String oldPath;

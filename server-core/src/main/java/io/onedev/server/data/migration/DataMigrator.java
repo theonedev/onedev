@@ -6754,7 +6754,7 @@ public class DataMigrator {
 					submitTimeGroupsElement.addElement("week").setText(String.valueOf(DateUtils.toLocalDate(submitDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
 					submitTimeGroupsElement.addElement("month").setText(String.valueOf(DateUtils.toLocalDate(submitDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
 
-					if (!element.element("status").equals("OPEN")) {
+					if (!element.elementTextTrim("status").equals("OPEN")) {
 						var closeDate = parseDate(element.element("lastActivity").elementText("date").trim());
 						element.addElement("closeDate").addAttribute("class", "sql-timestamp").setText(formatDate(closeDate));
 						element.addElement("duration").setText(String.valueOf(closeDate.getTime() - submitDate.getTime()));

@@ -5,7 +5,6 @@ import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class LogoutPage extends BasePage {
 
 	public LogoutPage(PageParameters params) {

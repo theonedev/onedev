@@ -32,7 +32,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import static io.onedev.server.model.User.*;
 import static io.onedev.server.web.page.simple.security.SignUpBean.PROP_EMAIL_ADDRESS;
 
-@SuppressWarnings("serial")
 public class SignUpPage extends SimplePage {
 	
 	public SignUpPage(PageParameters params) {

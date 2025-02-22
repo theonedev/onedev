@@ -19,7 +19,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 
-@SuppressWarnings("serial")
 public class ResourceListPage extends ApiHelpPage {
 
 	public ResourceListPage(PageParameters params) {

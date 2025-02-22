@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
 public abstract class PropertyViewer extends Panel {
 
 	private final PropertyDescriptor descriptor;

@@ -42,6 +42,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 		this.parentOneDevProject = parentOneDevProject;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getParentOneDevProjectChoices() {
 		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
@@ -60,6 +61,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 		return (Boolean)EditContext.get().getInputValue("all");
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isAllDisabled() {
 		return !isAllEnabled();
 	}
@@ -86,6 +88,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 		this.gitHubRepositories = gitHubRepositories;
 	}
 
+	@SuppressWarnings("unused")
 	private static List<String> getGitHubRepositoryChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportRepositories repositories = (ImportRepositories) editor.getModelObject();

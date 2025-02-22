@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.util.ColorUtils;
 
-@SuppressWarnings("serial")
 public class LabelBadge extends WebComponent {
 
 	public LabelBadge(String id, IModel<LabelSpec> model) {

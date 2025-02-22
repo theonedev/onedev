@@ -115,7 +115,7 @@ public class EntraIdConnector extends OpenIdConnector {
 			var httpResponse = httpRequest.send();
 			if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
 				var groupNames = new HashMap<String, String>();
-				JSONObject json = httpResponse.getContentAsJSONObject();
+				JSONObject json = httpResponse.getBodyAsJSONObject();
 				var jsonArray = (JSONArray) json.get("value");
 				for (var jsonArrayElement: jsonArray) {
 					var groupInfo = (JSONObject) jsonArrayElement;

@@ -5,7 +5,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.web.component.user.avataredit.AvatarEditPanel;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 
-@SuppressWarnings("serial")
 public class UserAvatarPage extends UserPage {
 	
 	public UserAvatarPage(PageParameters params) {

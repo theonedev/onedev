@@ -100,7 +100,6 @@ import java.util.*;
 
 import static io.onedev.server.model.Build.SORT_FIELDS;
 
-@SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
 	
 	public static final String REF_TOD = "refs/onedev/tod";

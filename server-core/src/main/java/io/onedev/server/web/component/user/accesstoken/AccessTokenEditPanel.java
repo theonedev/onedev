@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 abstract class AccessTokenEditPanel extends Panel {
 	
 	public AccessTokenEditPanel(String id) {

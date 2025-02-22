@@ -11,7 +11,6 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.commons.utils.StringUtils;
 
-@SuppressWarnings("serial")
 public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	
 	private final String fileName;

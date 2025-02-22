@@ -7,7 +7,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.web.page.project.stats.buildmetric.BuildMetricStatsPage;
 
-@SuppressWarnings("serial")
 public class CoverageStatsPage extends BuildMetricStatsPage<CoverageMetric> {
 
 	public CoverageStatsPage(PageParameters params) {

@@ -71,7 +71,6 @@ import java.util.List;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
 
-@SuppressWarnings("serial")
 public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements BuildSpecAware, EditCompleteAware {
 
 	private final BlobRenderContext context;

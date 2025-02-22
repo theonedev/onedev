@@ -13,7 +13,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.Password;
 
-@SuppressWarnings("serial")
 public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 	
 	private PasswordTextField input;

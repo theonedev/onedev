@@ -13,7 +13,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.page.base.BasePage;
 
-@SuppressWarnings("serial")
 public abstract class SimplePage extends BasePage {
 
 	public SimplePage(PageParameters params) {

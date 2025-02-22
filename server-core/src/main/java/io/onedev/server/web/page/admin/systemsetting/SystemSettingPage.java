@@ -19,7 +19,6 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-@SuppressWarnings("serial")
 public class SystemSettingPage extends AdministrationPage {
 
 	public SystemSettingPage(PageParameters params) {

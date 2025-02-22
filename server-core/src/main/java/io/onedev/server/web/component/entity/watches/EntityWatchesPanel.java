@@ -23,7 +23,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 
-@SuppressWarnings("serial")
 public abstract class EntityWatchesPanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;

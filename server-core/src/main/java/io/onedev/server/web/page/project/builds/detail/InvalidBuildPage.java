@@ -27,7 +27,6 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
-@SuppressWarnings("serial")
 public class InvalidBuildPage extends ProjectPage {
 
 	public static final String PARAM_BUILD = "build";

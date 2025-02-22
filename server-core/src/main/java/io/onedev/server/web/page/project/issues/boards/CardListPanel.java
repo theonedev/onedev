@@ -31,7 +31,6 @@ import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
-@SuppressWarnings("serial")
 abstract class CardListPanel extends Panel {
 
 	private RepeatingView cardsView;
@@ -130,6 +129,7 @@ abstract class CardListPanel extends Panel {
 	private BoardCardPanel newCard(Long issueId) {
 		return new BoardCardPanel(String.valueOf(issueId), issueId) {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			protected Cursor getCursor() {
 				IssueQuery query = getQuery();
@@ -218,6 +218,7 @@ abstract class CardListPanel extends Panel {
 	void onCardDropped(AjaxRequestTarget target, Long issueId, int cardIndex, boolean accepted) {
 		findParent(RepeatingView.class).visitChildren(CardListPanel.class, (IVisitor<CardListPanel, Void>) (cardListPanel, visit) -> {
 			for (int i=0; i<cardListPanel.cardsView.size(); i++) {
+				@SuppressWarnings("deprecation")
 				var card = (BoardCardPanel) cardListPanel.cardsView.get(i);
 				if (card.getIssueId().equals(issueId)) {
 					if (accepted) {
@@ -246,6 +247,7 @@ abstract class CardListPanel extends Panel {
 		});
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void moveCard(int fromIndex, int toIndex) {
 		if (fromIndex < toIndex) {
 			for (int i=0; i<toIndex-fromIndex; i++)
@@ -256,6 +258,7 @@ abstract class CardListPanel extends Panel {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private Issue getIssue(int cardIndex) {
 		return getIssueManager().load(((BoardCardPanel) cardsView.get(cardIndex)).getIssueId());
 	}

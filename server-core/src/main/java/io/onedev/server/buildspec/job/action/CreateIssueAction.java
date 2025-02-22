@@ -90,6 +90,7 @@ public class CreateIssueAction extends PostBuildAction {
 		this.accessTokenSecret = accessTokenSecret;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isProjectSpecified() {
 		return EditContext.get().getInputValue("projectPath") != null;
 	}

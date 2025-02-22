@@ -1,6 +1,14 @@
 package io.onedev.server.plugin.buildspec.cmake;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -15,19 +23,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.cppcheck.PublishCppcheckReportStep;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class CmakeJobSuggestion implements JobSuggestion {
 	
-	private static final Logger logger = LoggerFactory.getLogger(CmakeJobSuggestion.class);
-
 	private GenerateChecksumStep newChecksumGenerateStep(String files) {
 		var generateChecksum = new GenerateChecksumStep();
 		generateChecksum.setName("generate dependency checksum");

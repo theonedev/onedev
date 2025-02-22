@@ -21,7 +21,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 
-@SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
 
 	private FormComponent<String> input;

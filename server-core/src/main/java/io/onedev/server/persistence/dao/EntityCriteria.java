@@ -20,7 +20,6 @@ import org.hibernate.transform.ResultTransformer;
 
 import io.onedev.server.model.AbstractEntity;
 
-@SuppressWarnings("serial")
 public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecification, Serializable {
 	
 	private final CriteriaImpl impl;

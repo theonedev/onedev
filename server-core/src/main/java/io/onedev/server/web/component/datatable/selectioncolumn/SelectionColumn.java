@@ -21,7 +21,6 @@ import org.apache.wicket.model.IModel;
  * @param <T>
  * @param <S>
  */
-@SuppressWarnings("serial")
 public class SelectionColumn<T, S> implements IStyledColumn<T, S> {
 
 	private Set<IModel<T>> selections = new HashSet<IModel<T>>();

@@ -1,19 +1,7 @@
 package io.onedev.server.web.page.project.codecomments;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import static java.util.stream.Collectors.toList;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -29,11 +17,21 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
-import java.util.stream.Collectors;
+import com.google.common.base.Preconditions;
 
-import static java.util.stream.Collectors.*;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
-@SuppressWarnings("serial")
 public class InvalidCodeCommentPage extends ProjectPage {
 
 	public static final String PARAM_COEDE_COMMENT = "code-comment";

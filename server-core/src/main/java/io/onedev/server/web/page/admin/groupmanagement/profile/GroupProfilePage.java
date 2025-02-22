@@ -22,7 +22,6 @@ import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
-@SuppressWarnings("serial")
 public class GroupProfilePage extends GroupPage {
 
 	private BeanEditor editor;

@@ -61,7 +61,6 @@ import java.util.concurrent.Callable;
 
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class CoverageReportPage extends BuildReportPage {
 
 	private static final String PARAM_GROUP = "group";

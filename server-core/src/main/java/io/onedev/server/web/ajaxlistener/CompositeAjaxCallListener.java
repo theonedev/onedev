@@ -5,7 +5,6 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.IComponentAwareHeaderContributor;
 
-@SuppressWarnings("serial")
 public class CompositeAjaxCallListener implements IAjaxCallListener, IComponentAwareHeaderContributor {
 
 	private IAjaxCallListener[] listeners;

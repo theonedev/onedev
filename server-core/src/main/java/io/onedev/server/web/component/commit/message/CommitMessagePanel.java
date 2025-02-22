@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-@SuppressWarnings("serial")
 public abstract class CommitMessagePanel extends Panel {
 
 	private final IModel<RevCommit> commitModel;

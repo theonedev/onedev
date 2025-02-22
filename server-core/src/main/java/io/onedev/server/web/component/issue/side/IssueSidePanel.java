@@ -86,7 +86,6 @@ import static io.onedev.server.search.entity.issue.IssueQuery.parse;
 import static io.onedev.server.security.SecurityUtils.*;
 import static io.onedev.server.util.EmailAddressUtils.describe;
 
-@SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
@@ -152,7 +151,6 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
 		if (SecurityUtils.canManageIssues(getProject())) 
 			addOrReplace(newDeleteLink("delete"));		
 		else 

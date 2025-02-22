@@ -65,6 +65,7 @@ public class GroupChoiceField extends FieldSpec {
 		this.editEstimatedTime = editEstimatedTime;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
 		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}

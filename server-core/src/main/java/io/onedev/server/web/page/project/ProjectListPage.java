@@ -34,7 +34,6 @@ import io.onedev.server.web.util.NamedProjectQueriesBean;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
-@SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {
 
 	private static final String PARAM_PAGE = "page";

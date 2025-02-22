@@ -20,7 +20,6 @@ import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.util.editbean.ProjectAuthorizationBean;
 import io.onedev.server.web.util.editbean.ProjectAuthorizationsBean;
 
-@SuppressWarnings("serial")
 public class GroupAuthorizationsPage extends GroupPage {
 
 	public GroupAuthorizationsPage(PageParameters params) {

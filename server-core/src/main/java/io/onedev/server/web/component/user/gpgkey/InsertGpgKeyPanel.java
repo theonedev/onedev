@@ -23,7 +23,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.my.MyPage;
 
-@SuppressWarnings("serial")
 public abstract class InsertGpgKeyPanel extends Panel {
 
     public InsertGpgKeyPanel(String id) {

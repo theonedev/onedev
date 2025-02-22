@@ -1,39 +1,25 @@
 package io.onedev.server.web.page.base;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.OneDev;
-import io.onedev.server.commandhandler.Upgrade;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.web.asset.icon.IconScope;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
-import io.onedev.server.web.page.help.IncompatibilitiesPage;
-import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
-import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketMessages;
+import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -65,21 +51,35 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import java.io.File;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
+import io.onedev.server.web.page.help.IncompatibilitiesPage;
+import io.onedev.server.web.page.simple.SimplePage;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketMessages;
 
-@SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
 	private static final MetaDataKey<HashSet<String>> REMOVE_AUTOSAVE_KEYS = new MetaDataKey<>() {

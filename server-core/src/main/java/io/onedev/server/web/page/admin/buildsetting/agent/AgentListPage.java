@@ -30,7 +30,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class AgentListPage extends AdministrationPage {
 
 	private static final String PARAM_PAGE = "page";

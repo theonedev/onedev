@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Group;
 import io.onedev.server.web.component.select2.Select2Choice;
 
-@SuppressWarnings("serial")
 public class GroupSingleChoice extends Select2Choice<Group> {
 
 	public GroupSingleChoice(String id, IModel<Group> selectionModel, IModel<Collection<Group>> choicesModel) {

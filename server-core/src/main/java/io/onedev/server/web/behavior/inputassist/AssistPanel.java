@@ -14,7 +14,6 @@ import org.unbescape.html.HtmlEscape;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class AssistPanel extends Panel {
 
 	private static final int PAGE_SIZE = 25;

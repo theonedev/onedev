@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class FieldListViewPanel extends Panel {
 
 	private final List<FieldInstance> fields = new ArrayList<>();

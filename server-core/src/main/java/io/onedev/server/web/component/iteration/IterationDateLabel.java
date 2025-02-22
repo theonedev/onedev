@@ -11,7 +11,6 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public class IterationDateLabel extends Label {
 
 	private final IModel<Iteration> iterationIModel;

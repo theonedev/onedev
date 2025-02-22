@@ -26,6 +26,7 @@ public class BranchChoiceBean implements Serializable {
         this.branch = branch;
     }
 
+    @SuppressWarnings("unused")
     private static List<String> getBranchChoices() {
         CommitDetailPage page = (CommitDetailPage) WicketUtils.getPage();
         return page.getOperateBranches();

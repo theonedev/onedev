@@ -22,7 +22,6 @@ import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class ObsoleteUpdateAwarePanel extends Panel {
 
 	private final ModalPanel modal;

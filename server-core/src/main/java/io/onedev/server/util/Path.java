@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 
-@SuppressWarnings("serial")
 public class Path implements Serializable {
 
 	private List<PathNode> nodes = new ArrayList<>();

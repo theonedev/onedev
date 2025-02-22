@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 
-@SuppressWarnings("serial")
 public class BuildMultiChoice extends Select2MultiChoice<Build> {
 
 	public BuildMultiChoice(String id, IModel<Collection<Build>> model, BuildChoiceProvider choiceProvider) {

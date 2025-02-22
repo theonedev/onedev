@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-@SuppressWarnings("serial")
 public class SessionFeedbackPanel extends FeedbackPanel {
 
 	public SessionFeedbackPanel(String id) {

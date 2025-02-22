@@ -1,18 +1,20 @@
 package io.onedev.server.commandhandler;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.persistence.SessionFactoryManager;
-import io.onedev.server.security.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
+
+import java.sql.SQLException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.sql.SQLException;
 
-import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.data.DataManager;
+import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class CheckDataVersion extends CommandHandler {
@@ -24,16 +26,13 @@ public class CheckDataVersion extends CommandHandler {
 	private final SessionFactoryManager sessionFactoryManager;
 	
 	private final DataManager dataManager;
-	
-	private final HibernateConfig hibernateConfig;
-	
+		
 	@Inject
 	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
 							HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.dataManager = dataManager;
-		this.hibernateConfig = hibernateConfig;
 	}
 
 	@Override

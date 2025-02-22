@@ -9,7 +9,6 @@ import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 
-@SuppressWarnings("serial")
 public class ImageViewPanel extends BlobViewPanel {
 
 	public ImageViewPanel(String id, BlobRenderContext context) {

@@ -1,6 +1,5 @@
 package io.onedev.server.util.facade;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.server.model.User;
 import io.onedev.server.util.MapProxy;
 
-public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> implements Serializable {
+public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 
 	private static final long serialVersionUID = 1L;
 	

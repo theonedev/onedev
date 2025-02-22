@@ -132,7 +132,6 @@ import java.util.*;
 import static io.onedev.server.model.Alert.PROP_DATE;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;

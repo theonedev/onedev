@@ -1,24 +1,22 @@
 package io.onedev.server.web.behavior;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.validation.validator.ProjectKeyValidator;
-import io.onedev.server.validation.validator.ProjectPathValidator;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.util.SuggestionUtils;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.model.Project;
+import io.onedev.server.validation.validator.ProjectKeyValidator;
+import io.onedev.server.validation.validator.ProjectPathValidator;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.util.SuggestionUtils;
 
 public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 

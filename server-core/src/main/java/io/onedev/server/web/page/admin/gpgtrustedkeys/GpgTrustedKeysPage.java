@@ -45,7 +45,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
-@SuppressWarnings("serial")
 public class GpgTrustedKeysPage extends AdministrationPage {
 
 	public GpgTrustedKeysPage(PageParameters params) {

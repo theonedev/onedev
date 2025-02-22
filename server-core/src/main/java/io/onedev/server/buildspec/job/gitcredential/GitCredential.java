@@ -17,6 +17,7 @@ public interface GitCredential extends Serializable {
 	
 	CloneInfo newCloneInfo(Build build, String jobToken);
 	
+	@SuppressWarnings("unused")
 	private static Collection<Class<? extends GitCredential>> getImplementations() {
 		var implementations = Lists.newArrayList(DefaultCredential.class, HttpCredential.class);
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)

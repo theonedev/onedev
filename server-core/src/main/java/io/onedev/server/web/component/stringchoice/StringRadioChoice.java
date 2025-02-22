@@ -15,7 +15,6 @@ import org.apache.wicket.model.Model;
 
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class StringRadioChoice extends FormComponentPanel<String> {
 	
 	private final IModel<Map<String, String>> choicesModel;

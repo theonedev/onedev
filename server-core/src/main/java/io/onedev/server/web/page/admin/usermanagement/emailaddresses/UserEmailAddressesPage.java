@@ -7,7 +7,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.emailaddresses.EmailAddressesPanel;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 
-@SuppressWarnings("serial")
 public class UserEmailAddressesPage extends UserPage {
 
 	public UserEmailAddressesPage(PageParameters params) {

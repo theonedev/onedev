@@ -11,7 +11,6 @@ import org.apache.wicket.model.Model;
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class CodePropertyViewer extends Panel {
 
 	private final Serializable code;

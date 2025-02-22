@@ -55,7 +55,6 @@ import org.hibernate.criterion.Restrictions;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class IterationListPanel extends GenericPanel<Project> {
 
 	private boolean closed;

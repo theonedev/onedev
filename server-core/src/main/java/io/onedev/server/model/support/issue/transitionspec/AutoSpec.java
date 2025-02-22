@@ -1,16 +1,16 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-
-import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.constraints.NotEmpty;
+
+import com.google.common.collect.Lists;
+
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 @Editable
 public abstract class AutoSpec extends TransitionSpec {

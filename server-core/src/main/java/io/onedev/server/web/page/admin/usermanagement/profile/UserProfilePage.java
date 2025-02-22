@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public class UserProfilePage extends UserPage {
 
 	public UserProfilePage(PageParameters params) {

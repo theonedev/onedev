@@ -6,7 +6,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponent;
 
-@SuppressWarnings("serial")
 public abstract class InputChangeBehavior extends AjaxFormComponentUpdatingBehavior{
 
 	private String input;

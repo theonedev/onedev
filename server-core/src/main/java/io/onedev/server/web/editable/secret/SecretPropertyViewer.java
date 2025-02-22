@@ -5,7 +5,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public class SecretPropertyViewer extends Panel {
 
 	private final String secret;

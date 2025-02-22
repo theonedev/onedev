@@ -145,6 +145,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 				if (state != null) {
 					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 					byte[] bytes = Preconditions.checkNotNull(readBytes(stateHistoryStore, txn, issueKey));
+					@SuppressWarnings("unchecked")
 					Map<Long, String> stateHistory = (Map<Long, String>) SerializationUtils.deserialize(bytes);
 					stateHistory.put(toLocalDate(change.getDate()).toEpochDay(), state);
 					stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
@@ -155,6 +156,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 					int spentTime = changeData.getNewValue();
 					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
 					byte[] bytes = Preconditions.checkNotNull(readBytes(spentTimeHistoryStore, txn, issueKey));
+					@SuppressWarnings("unchecked")
 					Map<Long, Integer> spentTimeHistory = (Map<Long, Integer>) SerializationUtils.deserialize(bytes);
 					spentTimeHistory.put(toLocalDate(change.getDate()).toEpochDay(), spentTime);
 					spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
@@ -312,6 +314,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 					Map<Long, T> dailyMetrics = new LinkedHashMap<>();
 					byte[] bytes = readBytes(metricHistoryStore, txn, new LongByteIterable(issueId));
 					if (bytes != null) {
+						@SuppressWarnings("unchecked")
 						var metricHistory = (Map<Long, T>) SerializationUtils.deserialize(bytes);
 						T currentMetric = null;
 						for (var entry : metricHistory.entrySet()) {

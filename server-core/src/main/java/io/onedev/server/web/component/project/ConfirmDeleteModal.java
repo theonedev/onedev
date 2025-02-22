@@ -7,7 +7,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-@SuppressWarnings("serial")
 public abstract class ConfirmDeleteModal extends ConfirmModalPanel {
 
 	public ConfirmDeleteModal(AjaxRequestTarget target) {

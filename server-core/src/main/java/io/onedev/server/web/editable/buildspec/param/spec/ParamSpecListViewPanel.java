@@ -36,7 +36,6 @@ import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 
-@SuppressWarnings("serial")
 class ParamSpecListViewPanel extends Panel {
 
 	private final List<ParamSpec> paramSpecs = new ArrayList<>();

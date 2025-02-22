@@ -609,6 +609,7 @@ public abstract class BaseConstructor {
    * different hash after initialization compared to clean just created one. And map of course does
    * not observe key hashCode changes.
    */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
     maps2fill.add(0, new RecursiveTuple(mapping, new RecursiveTuple(key, value)));
   }

@@ -50,7 +50,6 @@ import java.util.regex.Pattern;
 import static io.onedev.server.web.page.help.ApiHelpUtils.getJsonMembers;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.*;
 
-@SuppressWarnings("serial")
 public class ExampleValuePanel extends Panel {
 
 	private static final Map<Class<?>, Class<?>> resourceMap = new HashMap<>();

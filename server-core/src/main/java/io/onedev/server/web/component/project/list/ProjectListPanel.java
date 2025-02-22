@@ -93,7 +93,6 @@ import java.util.*;
 
 import static io.onedev.server.model.Project.SORT_FIELDS;
 
-@SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 	
 	private static final int MAX_DESCRIPTION_LEN = 120;

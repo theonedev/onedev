@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 
-@SuppressWarnings("serial")
 public abstract class ModalLink extends AjaxLink<Void> {
 
 	private ModalPanel modal;

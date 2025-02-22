@@ -16,7 +16,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("serial")
 public abstract class DropdownLink extends AjaxLink<Void> {
 
 	private final Component alignTarget;

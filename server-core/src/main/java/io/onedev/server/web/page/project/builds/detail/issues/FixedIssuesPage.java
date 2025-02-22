@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class FixedIssuesPage extends BuildDetailPage {
 
 	private static final String PARAM_QUERY = "query";

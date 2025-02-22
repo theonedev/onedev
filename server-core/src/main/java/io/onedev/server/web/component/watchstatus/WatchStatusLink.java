@@ -13,7 +13,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public abstract class WatchStatusLink extends DropdownLink {
 
 	public WatchStatusLink(String id) {

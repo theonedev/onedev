@@ -1,12 +1,15 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.rest.annotation.Api;
+import java.io.Serializable;
 
 import javax.inject.Singleton;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.Serializable;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.rest.annotation.Api;
 
 @Api(order=100000, description = "Version info for server and various tools")
 @Path("/version")
@@ -38,21 +41,6 @@ public class VersionResource {
 		@Api(example = "2.0.0", description = "Maximum version. Null means no upper bound")
 		String maxVersion;
 
-		public String getMinVersion() {
-			return minVersion;
-		}
-
-		public void setMinVersion(String minVersion) {
-			this.minVersion = minVersion;
-		}
-
-		public String getMaxVersion() {
-			return maxVersion;
-		}
-
-		public void setMaxVersion(String maxVersion) {
-			this.maxVersion = maxVersion;
-		}
 	}
 	
 }

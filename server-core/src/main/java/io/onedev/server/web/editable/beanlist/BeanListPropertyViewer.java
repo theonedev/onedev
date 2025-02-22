@@ -24,7 +24,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.annotation.ExcludedProperties;
 
-@SuppressWarnings("serial")
 public class BeanListPropertyViewer extends Panel {
 
 	private final List<PropertyContext<Serializable>> propertyContexts;

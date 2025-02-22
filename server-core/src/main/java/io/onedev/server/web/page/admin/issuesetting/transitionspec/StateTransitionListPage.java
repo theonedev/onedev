@@ -34,7 +34,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class StateTransitionListPage extends IssueSettingPage {
 
 	private DataTable<TransitionSpec, Void> transitionsTable;

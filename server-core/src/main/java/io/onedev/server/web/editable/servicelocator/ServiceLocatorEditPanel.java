@@ -18,7 +18,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class ServiceLocatorEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<ServiceLocator> locators;

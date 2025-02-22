@@ -9,7 +9,6 @@ import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
-@SuppressWarnings("serial")
 public abstract class ReviewerAvatar extends Panel {
 
 	public ReviewerAvatar(String id) {

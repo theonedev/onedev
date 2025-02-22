@@ -112,7 +112,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
 		EditParamsAware, JobAuthorizationContextAware {
 

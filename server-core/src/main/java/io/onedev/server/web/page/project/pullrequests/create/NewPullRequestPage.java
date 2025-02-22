@@ -88,7 +88,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
 	private static final String TABS_ID = "tabs";

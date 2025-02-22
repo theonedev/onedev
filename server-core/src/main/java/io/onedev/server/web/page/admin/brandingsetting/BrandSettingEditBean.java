@@ -30,6 +30,7 @@ public class BrandSettingEditBean implements Serializable {
 		this.name = name;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isOEM() {
 		return BrandingSetting.isOEM((String) EditContext.get().getInputValue("name"));
 	}

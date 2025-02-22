@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class BuildOptionModalPanel extends ModalPanel implements InputContext {
 
 	private final List<String> refNames;

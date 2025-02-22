@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private final Set<String> excludedProperties = new HashSet<>();
@@ -37,6 +36,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			Collections.addAll(excludedProperties, excludedPropertiesAnnotation.value());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

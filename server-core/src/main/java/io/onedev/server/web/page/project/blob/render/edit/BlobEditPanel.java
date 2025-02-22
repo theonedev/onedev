@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
-import io.onedev.server.web.component.svg.SpriteImage;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
@@ -23,6 +25,7 @@ import io.onedev.server.util.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -30,11 +33,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
-@SuppressWarnings("serial")
 public abstract class BlobEditPanel extends Panel {
 
 	public static enum Tab {EDIT, EDIT_PLAIN, SAVE};

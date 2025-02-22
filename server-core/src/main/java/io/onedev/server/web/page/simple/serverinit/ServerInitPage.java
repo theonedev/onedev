@@ -22,7 +22,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class ServerInitPage extends SimplePage {
 
 	private final InitStage initStage;

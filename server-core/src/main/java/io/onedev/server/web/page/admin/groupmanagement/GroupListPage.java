@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class GroupListPage extends AdministrationPage {
 
 	private static final String PARAM_PAGE = "page";

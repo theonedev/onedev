@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
  class CoveragePanel<T extends Coverage> extends GenericPanel<T> {
 
 	public CoveragePanel(String id, IModel<T> model) {

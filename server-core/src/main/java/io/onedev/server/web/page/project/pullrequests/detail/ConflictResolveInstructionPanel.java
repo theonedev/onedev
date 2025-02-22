@@ -13,7 +13,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 
-@SuppressWarnings("serial")
 abstract class ConflictResolveInstructionPanel extends Panel {
 
 	public ConflictResolveInstructionPanel(String id) {

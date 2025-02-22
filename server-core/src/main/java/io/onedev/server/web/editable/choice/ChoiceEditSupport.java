@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class ChoiceEditSupport implements EditSupport {
 
 	@Override

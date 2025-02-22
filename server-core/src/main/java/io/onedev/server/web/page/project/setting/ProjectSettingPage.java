@@ -11,7 +11,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
-@SuppressWarnings("serial")
 public abstract class ProjectSettingPage extends ProjectPage {
 
 	public ProjectSettingPage(PageParameters params) {

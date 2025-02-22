@@ -16,7 +16,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class JobPrivilegeEditPanel extends Panel {
 
 	private final List<JobPrivilege> privileges;

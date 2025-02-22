@@ -74,7 +74,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("serial")
 public abstract class CommitListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitListPanel.class);

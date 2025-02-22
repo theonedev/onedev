@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class StringListEditor extends PropertyEditor<List<String>> {
 
 	private Select2MultiChoice<String> input;
@@ -24,7 +23,6 @@ public class StringListEditor extends PropertyEditor<List<String>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 	
-	@SuppressWarnings({"unchecked"})
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

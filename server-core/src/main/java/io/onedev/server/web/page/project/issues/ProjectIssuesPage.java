@@ -8,7 +8,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public abstract class ProjectIssuesPage extends ProjectPage {
 
 	public ProjectIssuesPage(PageParameters params) {

@@ -20,7 +20,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class JobExecutorsPage extends AdministrationPage {
 
 	private List<JobExecutor> executors;

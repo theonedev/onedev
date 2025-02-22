@@ -18,7 +18,6 @@ import io.onedev.server.annotation.IssueChoice;
 import io.onedev.server.annotation.PullRequestChoice;
 import io.onedev.server.annotation.WorkingPeriod;
 
-@SuppressWarnings("serial")
 public class NumericEditSupport implements EditSupport {
 
 	@Override

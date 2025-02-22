@@ -13,7 +13,6 @@ import java.util.List;
 import static io.onedev.server.util.usermatch.UserMatchLexer.GROUP;
 import static io.onedev.server.util.usermatch.UserMatchLexer.USER;
 
-@SuppressWarnings("serial")
 public class UserMatchBehavior extends ANTLRAssistBehavior {
 	
 	public UserMatchBehavior() {

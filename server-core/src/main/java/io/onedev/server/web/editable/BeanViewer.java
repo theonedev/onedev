@@ -24,7 +24,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.annotation.OmitName;
 
-@SuppressWarnings("serial")
 public class BeanViewer extends Panel {
 
 	private final BeanDescriptor descriptor;

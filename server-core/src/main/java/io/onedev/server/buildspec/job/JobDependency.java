@@ -1,7 +1,21 @@
 package io.onedev.server.buildspec.job;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.VariableOption;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.instance.ParamInstances;
 import io.onedev.server.buildspec.param.instance.ParamMap;
@@ -9,13 +23,6 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.util.WicketUtils;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Editable
 public class JobDependency implements Serializable {
@@ -78,6 +85,7 @@ public class JobDependency implements Serializable {
 		this.excludeParamMaps = excludeParamMaps;
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
 		var componentContext = ComponentContext.get();
 		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {

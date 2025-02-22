@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-@SuppressWarnings("serial")
 public class DiffStatBar extends Panel {
 
 	private static final int MAX_BLOCKS = 6;

@@ -18,7 +18,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.GroupChoice;
 
-@SuppressWarnings("serial")
 public class GroupChoiceEditSupport implements EditSupport {
 
 	@Override

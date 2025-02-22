@@ -115,7 +115,6 @@ import static java.util.stream.Collectors.toList;
  * @author robin
  *
  */
-@SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 
 	private static final String COOKIE_VIEW_MODE = "onedev.server.diff.viewmode";
@@ -1379,7 +1378,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 				@Override
 				public Iterator<? extends String> getRoots() {
-					return RevisionDiffPanel.this.getChildren(changes.keySet(), "").iterator();
+					return RevisionDiffPanel.getChildren(changes.keySet(), "").iterator();
 				}
 
 				@Override
@@ -1389,7 +1388,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 				@Override
 				public Iterator<? extends String> getChildren(String node) {
-					return RevisionDiffPanel.this.getChildren(changes.keySet(), node).iterator();
+					return RevisionDiffPanel.getChildren(changes.keySet(), node).iterator();
 				}
 
 				@Override

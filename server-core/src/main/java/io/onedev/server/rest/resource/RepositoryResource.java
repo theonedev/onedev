@@ -292,6 +292,7 @@ public class RepositoryResource {
 			throw new ObjectNotFoundException("Commit not found");
     }
 
+	@SuppressWarnings("unused")
 	private static List<String> getFieldsExample() {
 		return EnumSet.allOf(LogCommand.Field.class).stream().map(Enum::name).collect(toList());
 	}

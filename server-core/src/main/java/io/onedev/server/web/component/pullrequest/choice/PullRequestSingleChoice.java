@@ -7,7 +7,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.select2.Select2Choice;
 
-@SuppressWarnings("serial")
 public class PullRequestSingleChoice extends Select2Choice<PullRequest> {
 
 	public PullRequestSingleChoice(String id, IModel<PullRequest> model, PullRequestChoiceProvider choiceProvider) {

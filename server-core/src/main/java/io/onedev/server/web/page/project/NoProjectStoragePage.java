@@ -11,7 +11,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
-@SuppressWarnings("serial")
 public class NoProjectStoragePage extends ProjectPage {
 
 	public NoProjectStoragePage(PageParameters params) {

@@ -17,7 +17,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
-@SuppressWarnings("serial")
 public class ProjectDashboardPage extends ProjectPage {
 
 	public ProjectDashboardPage(PageParameters params) {

@@ -22,7 +22,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 
-@SuppressWarnings("serial")
 public class ResourceDetailPage extends ApiHelpPage {
 
 	private static final String PARAM_RESOURCE = "resource";

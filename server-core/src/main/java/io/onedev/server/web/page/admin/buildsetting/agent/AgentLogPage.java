@@ -15,7 +15,6 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.web.resource.AgentLogResource;
 import io.onedev.server.web.resource.AgentLogResourceReference;
 
-@SuppressWarnings("serial")
 public class AgentLogPage extends AgentDetailPage {
 
 	private static final int MAX_DISPLAY_LINES = 5000;

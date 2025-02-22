@@ -8,7 +8,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class InterpolativeStringListPropertyViewer extends Panel {
 	
 	private final List<String> elements;

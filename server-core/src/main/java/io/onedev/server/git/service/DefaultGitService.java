@@ -1,10 +1,78 @@
 package io.onedev.server.git.service;
 
+import static io.onedev.server.git.command.LogCommand.Field.BODY;
+import static io.onedev.server.git.command.LogCommand.Field.PARENTS;
+import static io.onedev.server.git.command.LogCommand.Field.SUBJECT;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.CommitBuilder;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectDatabase;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TagBuilder;
+import org.eclipse.jgit.lib.TreeFormatter;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.RevWalkUtils;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.*;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.cluster.ClusterManager;
@@ -14,43 +82,32 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.DefaultBranchChanged;
 import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.git.*;
-import io.onedev.server.git.command.*;
+import io.onedev.server.git.BlameBlock;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobContent;
+import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitTask;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.Submodule;
+import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.git.command.GetRawCommitCommand;
+import io.onedev.server.git.command.GetRawTagCommand;
+import io.onedev.server.git.command.ListChangedFilesCommand;
+import io.onedev.server.git.command.LogCommand;
+import io.onedev.server.git.command.LogCommit;
+import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import org.apache.commons.lang3.SerializationUtils;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.eclipse.jgit.api.CreateBranchCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.*;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReadWriteLock;
-
-import static io.onedev.server.git.command.LogCommand.Field.*;
 
 @Singleton
 public class DefaultGitService implements GitService, Serializable {
@@ -1166,6 +1223,7 @@ public class DefaultGitService implements GitService, Serializable {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public LastCommitsOfChildren getLastCommitsOfChildren(Project project, ObjectId revId, String path) {
 		Long projectId = project.getId();

@@ -5,7 +5,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
 public class SshVerificationDetailPanel extends Panel {
 
 	private final boolean successful;

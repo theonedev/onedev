@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 
-@SuppressWarnings("serial")
 public abstract class SideInfoPanel extends Panel {
 
 	public SideInfoPanel(String id) {

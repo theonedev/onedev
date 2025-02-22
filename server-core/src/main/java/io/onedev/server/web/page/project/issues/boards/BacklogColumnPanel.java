@@ -44,7 +44,6 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends AbstractColumnPanel {
 
 	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<>() {

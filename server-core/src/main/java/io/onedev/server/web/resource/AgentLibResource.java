@@ -2,18 +2,17 @@ package io.onedev.server.web.resource;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
-import io.onedev.commons.utils.TarUtils;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;

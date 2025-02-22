@@ -9,7 +9,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
 import io.onedev.server.web.avatar.AvatarManager;
 
-@SuppressWarnings("serial")
 public class UserAvatar extends WebComponent {
 
 	private String url;

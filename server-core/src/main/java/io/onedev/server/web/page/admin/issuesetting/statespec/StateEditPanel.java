@@ -21,7 +21,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class StateEditPanel extends Panel {
 
 	private final int stateIndex;

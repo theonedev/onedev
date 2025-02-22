@@ -143,6 +143,7 @@ public class Office365MailService implements MailService {
 		return String.format("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantId);
 	}
 
+	@SuppressWarnings("unused")
 	private static RefreshToken.Callback getRefreshTokenCallback() {
 		String tenantId = (String) EditContext.get().getInputValue("tenantId");
 		if (tenantId == null)

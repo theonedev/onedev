@@ -8,7 +8,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.PullRequest;
 
-@SuppressWarnings("serial")
 public class RequestStatusBadge extends Label {
 
 	private final IModel<PullRequest> requestModel;

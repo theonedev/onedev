@@ -23,7 +23,6 @@ import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 
-@SuppressWarnings("serial")
 public abstract class GitProtocolPanel extends Panel {
 
 	private static final String COOKIE_USE_SSH = "git.useSsh";

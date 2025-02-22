@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class JobDependencyListViewPanel extends Panel {
 
 	private final List<JobDependency> dependencies = new ArrayList<>();

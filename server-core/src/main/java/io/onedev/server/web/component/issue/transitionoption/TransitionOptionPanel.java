@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public abstract class TransitionOptionPanel extends Panel implements InputContext {
 
 	private String comment;

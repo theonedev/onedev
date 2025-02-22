@@ -23,6 +23,7 @@ public class CodeValidator implements ConstraintValidator<Code, Object> {
 		message = constaintAnnotation.message();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext constraintContext) {
 		if (value instanceof String && StringUtils.isNotBlank((String)value)

@@ -1,5 +1,15 @@
 package io.onedev.server.buildspec.step;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
@@ -11,16 +21,6 @@ import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> "
 		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. " +

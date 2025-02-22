@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
 
 	protected final ChangeType type;

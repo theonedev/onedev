@@ -14,7 +14,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.RefreshToken;
 
-@SuppressWarnings("serial")
 public class RefreshTokenEditSupport implements EditSupport {
 
 	@Override

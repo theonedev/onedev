@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class ServiceDeskSettingPage extends AdministrationPage {
 
 	public ServiceDeskSettingPage(PageParameters params) {

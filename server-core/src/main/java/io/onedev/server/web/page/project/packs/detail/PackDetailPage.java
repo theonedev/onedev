@@ -36,7 +36,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class PackDetailPage extends ProjectPage {
 	
 	public static final String PARAM_PACK = "pack";

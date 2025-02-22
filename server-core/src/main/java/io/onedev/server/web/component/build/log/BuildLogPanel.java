@@ -28,7 +28,6 @@ import java.util.List;
 import static io.onedev.server.model.Build.getDetailChangeObservable;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class BuildLogPanel extends GenericPanel<Build> {
 
 	private static final int MAX_LOG_ENTRIES = 1000;

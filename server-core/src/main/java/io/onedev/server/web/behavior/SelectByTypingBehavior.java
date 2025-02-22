@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 
-@SuppressWarnings("serial")
 public class SelectByTypingBehavior extends Behavior {
 
 	private final Component container;

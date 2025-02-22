@@ -13,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-@SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToActChoice<User> {
 
 	public ReviewerChoice(String id) {

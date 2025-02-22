@@ -15,7 +15,6 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.annotation.Editable;
 
-@SuppressWarnings("serial")
 public class BeanContext implements Serializable {
 	
 	private final BeanDescriptor descriptor;

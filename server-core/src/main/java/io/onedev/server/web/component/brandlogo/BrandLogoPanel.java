@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class BrandLogoPanel extends Panel {
 	
 	private final Boolean darkMode;

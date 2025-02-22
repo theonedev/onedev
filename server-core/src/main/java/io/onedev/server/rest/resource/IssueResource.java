@@ -225,6 +225,7 @@ public class IssueResource {
 		return issues;
     }
 	
+	@SuppressWarnings("unused")
 	private static List<Map<String, Object>> getIssuesExample() {
 		var issues = new ArrayList<Map<String, Object>>();
 		var issue = ApiHelpUtils.getExampleValue(Issue.class, ValueInfo.Origin.READ_BODY);
@@ -391,6 +392,7 @@ public class IssueResource {
     	return Response.ok().build();
     }
 
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> getFieldObjs(Issue issue, Map<String, Serializable> fields) {
 		var issueSetting = settingManager.getIssueSetting();
 		Map<String, Object> fieldObjs = new HashMap<>();
@@ -498,6 +500,7 @@ public class IssueResource {
 			this.fields = fields;
 		}
 		
+		@SuppressWarnings("unused")
 		private static Map<String, Serializable> getFieldsExample() {
 			return IssueResource.getFieldsExample();
 		}
@@ -554,6 +557,7 @@ public class IssueResource {
 			this.comment = comment;
 		}
 		
+		@SuppressWarnings("unused")
 		private static Map<String, Serializable> getFieldsExample() {
 			return IssueResource.getFieldsExample();
 		}

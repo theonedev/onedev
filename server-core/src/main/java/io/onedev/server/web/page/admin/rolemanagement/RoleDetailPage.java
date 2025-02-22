@@ -34,7 +34,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
-@SuppressWarnings("serial")
 public class RoleDetailPage extends AdministrationPage {
 	
 	public static final String PARAM_ROLE = "role";

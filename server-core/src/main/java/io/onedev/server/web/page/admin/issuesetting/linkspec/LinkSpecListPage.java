@@ -32,7 +32,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class LinkSpecListPage extends IssueSettingPage {
 
 	public LinkSpecListPage(PageParameters params) {

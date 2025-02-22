@@ -19,7 +19,6 @@ import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
-@SuppressWarnings("serial")
 public class ProjectChildrenPage extends ProjectPage {
 
 	private static final String PARAM_PAGE = "page";

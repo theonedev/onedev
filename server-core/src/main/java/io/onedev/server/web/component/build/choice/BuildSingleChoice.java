@@ -7,7 +7,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.component.select2.Select2Choice;
 
-@SuppressWarnings("serial")
 public class BuildSingleChoice extends Select2Choice<Build> {
 
 	public BuildSingleChoice(String id, IModel<Build> model, BuildChoiceProvider choiceProvider) {

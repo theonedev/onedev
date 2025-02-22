@@ -5,7 +5,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.issue.authorizations.IssueAuthorizationsPanel;
 
-@SuppressWarnings("serial")
 public class IssueAuthorizationsPage extends IssueDetailPage {
 
 	public IssueAuthorizationsPage(PageParameters params) {

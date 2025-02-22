@@ -380,6 +380,7 @@ public class Role extends AbstractEntity implements BasePermission {
 		return permissions;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
 		return WicketUtils.isSubscriptionActive();
 	}

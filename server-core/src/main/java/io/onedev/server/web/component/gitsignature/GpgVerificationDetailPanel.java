@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class GpgVerificationDetailPanel extends Panel {
 
 	private final boolean successful;

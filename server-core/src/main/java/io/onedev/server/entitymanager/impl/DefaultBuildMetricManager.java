@@ -74,7 +74,6 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		return dao.find(criteria);
 	}
 
-	@SuppressWarnings("resource")
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> Map<Integer, T> queryStats(Project project, Class<T> metricClass, BuildMetricQuery query) {

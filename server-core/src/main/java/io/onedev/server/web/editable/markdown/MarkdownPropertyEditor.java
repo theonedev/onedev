@@ -14,7 +14,6 @@ import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class MarkdownPropertyEditor extends PropertyEditor<String> {
 
 	private MarkdownEditor input;

@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-@SuppressWarnings("serial")
 public class SourceLinesPage extends CodeStatsPage {
 
 	public SourceLinesPage(PageParameters params) {

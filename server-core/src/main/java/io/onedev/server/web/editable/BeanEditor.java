@@ -30,7 +30,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public class BeanEditor extends ValueEditor<Serializable> {
 	
 	private final BeanDescriptor descriptor;

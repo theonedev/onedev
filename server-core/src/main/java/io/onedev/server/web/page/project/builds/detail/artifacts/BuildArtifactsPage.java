@@ -50,7 +50,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class BuildArtifactsPage extends BuildDetailPage {
 
 	public BuildArtifactsPage(PageParameters params) {

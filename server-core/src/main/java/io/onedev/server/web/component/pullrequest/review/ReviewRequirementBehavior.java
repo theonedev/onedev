@@ -20,7 +20,6 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirementParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@SuppressWarnings("serial")
 public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;

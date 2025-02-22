@@ -27,6 +27,7 @@ public class CommitMessageBean implements Serializable {
 		this.commitMessage = commitMessage;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String getDefaultCommitMessage() {
 		return ComponentContext.get().getComponent().findParent(CommitOptionPanel.class).getDefaultCommitMessage();
 	}

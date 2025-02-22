@@ -7,7 +7,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.UnitTestMetric;
 import io.onedev.server.web.page.project.stats.buildmetric.BuildMetricStatsPage;
 
-@SuppressWarnings("serial")
 public class UnitTestStatsPage extends BuildMetricStatsPage<UnitTestMetric> {
 
 	public UnitTestStatsPage(PageParameters params) {

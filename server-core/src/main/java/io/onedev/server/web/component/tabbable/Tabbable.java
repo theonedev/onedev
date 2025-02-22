@@ -17,7 +17,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public class Tabbable extends GenericPanel<List<? extends Tab>> {
 	
 	private static final String OPTIONS_ID = "options";

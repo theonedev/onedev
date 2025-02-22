@@ -1,42 +1,46 @@
 package io.onedev.server.data;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.*;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.commandhandler.Upgrade;
-import io.onedev.server.data.migration.DataMigrator;
-import io.onedev.server.data.migration.MigrationHelper;
-import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.mail.MailManager;
-import io.onedev.server.model.*;
-import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.*;
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.issue.LinkSpecOpposite;
-import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.PersistenceUtils;
-import io.onedev.server.persistence.SessionFactoryManager;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.web.util.editbean.NewUserBean;
+import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_CURL_LOCATION;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_DISABLE_AUTO_UPDATE_CHECK;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_GIT_LOCATION;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_SSH_ROOT_URL;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_USE_AVATAR_SERVICE;
+import static io.onedev.server.persistence.PersistenceUtils.tableExists;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.validation.Validator;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -57,35 +61,73 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
-import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
-import static io.onedev.server.model.support.administration.SystemSetting.*;
-import static io.onedev.server.persistence.PersistenceUtils.tableExists;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.ZipUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.data.migration.DataMigrator;
+import io.onedev.server.data.migration.MigrationHelper;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.ModelVersion;
+import io.onedev.server.model.Role;
+import io.onedev.server.model.Setting;
+import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.AgentSetting;
+import io.onedev.server.model.support.administration.AlertSetting;
+import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BrandingSetting;
+import io.onedev.server.model.support.administration.ClusterSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalPackSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GpgSetting;
+import io.onedev.server.model.support.administration.PerformanceSetting;
+import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
+import io.onedev.server.model.support.administration.SshSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceUtils;
+import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.init.ManualConfig;
+import io.onedev.server.web.util.editbean.NewUserBean;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -119,9 +161,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private final UserManager userManager;
 	
 	private final SettingManager settingManager;
-	
-	private final MailManager mailManager;
-	
+		
 	private final PasswordService passwordService;
 	
 	private final TaskScheduler taskScheduler;
@@ -143,7 +183,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Inject
 	public DefaultDataManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig,
 							  Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
-							  SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler,
+							  SettingManager settingManager, TaskScheduler taskScheduler,
 							  PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager,
 							  EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager,
 							  TransactionManager transactionManager, AlertManager alertManager) {
@@ -156,7 +196,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.taskScheduler = taskScheduler;
-		this.mailManager = mailManager;
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
@@ -468,13 +507,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			}
 		}
 	}
-	
-	private void reportError(AbstractEntity entity, ConstraintViolation<?> violation) {
-		String errorInfo = String.format("Error validating entity (entity class: %s, entity id: %d, entity property: %s, error message: %s)", 
-				entity.getClass(), entity.getId(), violation.getPropertyPath().toString(), violation.getMessage());
-		throw new RuntimeException(errorInfo);
-	}
-	
+		
 	@Override
 	public void applyConstraints(Connection conn) {
 		File tempFile = null;
@@ -606,7 +639,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 			emailAddressManager.update(primaryEmailAddress);
 	}	
 
-	@SuppressWarnings({"serial"})
 	@Transactional
 	@Override
 	public List<ManualConfig> checkData() {

@@ -1,7 +1,14 @@
 package io.onedev.server.plugin.buildspec.golang;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
-import io.onedev.commons.utils.TaskLogger;
+
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -20,12 +27,6 @@ import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class GolangJobSuggestion implements JobSuggestion {
 

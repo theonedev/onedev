@@ -13,7 +13,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.Collection;
 import java.util.Date;
 
-@SuppressWarnings("serial")
 public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 
 	private final IModel<PullRequest> requestModel;

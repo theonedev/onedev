@@ -42,7 +42,6 @@ import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
-@SuppressWarnings("serial")
 public class RoleListPage extends AdministrationPage {
 
 	private static final String PARAM_PAGE = "page";

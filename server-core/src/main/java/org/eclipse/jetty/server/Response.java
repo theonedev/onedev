@@ -68,6 +68,7 @@ import org.eclipse.jetty.util.log.Logger;
  */
 public class Response implements HttpServletResponse
 {
+	@SuppressWarnings("unused")
 	private static final Logger LOG = Log.getLogger(Response.class);
 	private static final int __MIN_BUFFER_SIZE = 1;
 	private static final HttpField __EXPIRES_01JAN1970 = new PreEncodedHttpField(HttpHeader.EXPIRES, DateGenerator.__01Jan1970);

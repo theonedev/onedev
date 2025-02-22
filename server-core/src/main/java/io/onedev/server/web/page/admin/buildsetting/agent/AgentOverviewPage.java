@@ -22,7 +22,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class AgentOverviewPage extends AgentDetailPage {
 
 	public AgentOverviewPage(PageParameters params) {

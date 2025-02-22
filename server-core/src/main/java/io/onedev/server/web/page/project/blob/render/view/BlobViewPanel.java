@@ -36,7 +36,6 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import org.apache.wicket.request.resource.ContentDisposition;
 
-@SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {
 
 	protected final BlobRenderContext context;

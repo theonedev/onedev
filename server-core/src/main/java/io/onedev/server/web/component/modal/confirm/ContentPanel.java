@@ -16,7 +16,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
-@SuppressWarnings("serial")
 abstract class ContentPanel extends Panel {
 	
 	public ContentPanel(String id) {

@@ -6,7 +6,6 @@ import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
 public class EmailLink extends WebMarkupContainer {
 
 	private final IModel<String> emailModel;

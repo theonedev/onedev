@@ -60,6 +60,7 @@ public class RegistryLogin implements Serializable {
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}

@@ -107,6 +107,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());

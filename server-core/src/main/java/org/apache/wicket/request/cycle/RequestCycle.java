@@ -70,6 +70,7 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	 * Could be disabled separately than the main logger if the application developer
 	 * does not want to see this extra information.
 	 */
+	@SuppressWarnings("unused")
 	private static final Logger logExtra = LoggerFactory.getLogger("RequestCycleExtra");
 	
 	/**

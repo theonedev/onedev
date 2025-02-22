@@ -21,7 +21,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-@SuppressWarnings("serial")
 public class MarkdownReportTab extends BuildTab {
 
 	public MarkdownReportTab(String reportName) {

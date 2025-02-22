@@ -8,7 +8,6 @@ import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 
-@SuppressWarnings("serial")
 public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSupport {
 
 	public BuildSpecBlobEditPanel(String id, BlobRenderContext context) {

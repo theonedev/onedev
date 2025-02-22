@@ -16,7 +16,6 @@ import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.web.component.LabelBadge;
 
-@SuppressWarnings("serial")
 public class EntityLabelsPanel<T extends EntityLabel> extends Panel {
 
 	private final IModel<? extends LabelSupport<T>> model;

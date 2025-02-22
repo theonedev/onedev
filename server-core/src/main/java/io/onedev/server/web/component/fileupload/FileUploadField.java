@@ -11,7 +11,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public class FileUploadField extends org.apache.wicket.markup.html.form.upload.FileUploadField {
 
 	public FileUploadField(String id) {

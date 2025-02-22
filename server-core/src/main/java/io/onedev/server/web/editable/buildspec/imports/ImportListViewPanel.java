@@ -12,7 +12,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import io.onedev.server.buildspec.Import;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 public class ImportListViewPanel extends Panel {
 
 	private final List<Import> imports = new ArrayList<>();

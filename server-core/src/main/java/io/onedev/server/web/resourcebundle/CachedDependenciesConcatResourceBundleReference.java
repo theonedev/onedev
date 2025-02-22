@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.IReferenceHeaderItem;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
-@SuppressWarnings("serial")
 public class CachedDependenciesConcatResourceBundleReference<T extends HeaderItem & IReferenceHeaderItem> 
 		extends ConcatResourceBundleReference<T> {
 

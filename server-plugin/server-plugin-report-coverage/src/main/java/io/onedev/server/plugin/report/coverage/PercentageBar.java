@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-@SuppressWarnings("serial")
 public class PercentageBar extends GenericPanel<Integer> {
 
 	public PercentageBar(String id, IModel<Integer> model) {

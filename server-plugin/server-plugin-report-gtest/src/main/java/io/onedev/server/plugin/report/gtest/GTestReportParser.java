@@ -1,14 +1,8 @@
 package io.onedev.server.plugin.report.gtest;
 
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,10 +14,15 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public class GTestReportParser {
 

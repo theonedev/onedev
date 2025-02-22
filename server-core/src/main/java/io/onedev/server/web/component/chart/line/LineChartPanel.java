@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.web.page.base.BasePage;
 
-@SuppressWarnings("serial")
 public class LineChartPanel extends GenericPanel<LineSeries> {
 
 	public LineChartPanel(String id, IModel<LineSeries> model) {

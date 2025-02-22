@@ -19,7 +19,6 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ExcludedProperties;
 
-@SuppressWarnings("serial")
 public class BeanEditSupport implements EditSupport {
 
 	@Override

@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-@SuppressWarnings("serial")
 public abstract class Tab implements Serializable {
 	
 	protected abstract Component render(String componentId);

@@ -113,7 +113,6 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
  * @author robin
  *
  */
-@SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);

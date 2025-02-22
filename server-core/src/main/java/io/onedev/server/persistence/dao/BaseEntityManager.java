@@ -98,6 +98,7 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 		return entityClass;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected void addOrderByIdIfNecessary(CriteriaBuilder builder, From<?, ?> from, List<Order> orders) {
 		boolean orderByIdFound = false;
 		for (var order: orders) {

@@ -36,7 +36,6 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValueResolution.FixType;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 public abstract class WorkflowReconcilePanel extends Panel {
 
 	private String CONTENT_ID = "content";

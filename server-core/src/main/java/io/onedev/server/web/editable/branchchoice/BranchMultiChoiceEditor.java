@@ -22,7 +22,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.annotation.BranchChoice;
 
-@SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private BranchMultiChoice input;

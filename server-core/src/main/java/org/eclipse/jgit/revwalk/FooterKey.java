@@ -52,7 +52,6 @@ public final class FooterKey {
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return "FooterKey[" + name + "]";

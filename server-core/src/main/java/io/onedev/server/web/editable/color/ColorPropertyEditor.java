@@ -10,7 +10,6 @@ import io.onedev.server.web.component.colorpicker.ColorPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class ColorPropertyEditor extends PropertyEditor<String> {
 
 	private ColorPicker input;

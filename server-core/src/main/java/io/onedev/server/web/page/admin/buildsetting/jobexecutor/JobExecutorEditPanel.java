@@ -32,7 +32,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class JobExecutorEditPanel extends Panel {
 
 	private final List<JobExecutor> executors;

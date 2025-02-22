@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_PULL_REQUEST_NOTIFICATION;
 
-@SuppressWarnings("serial")
 public class PullRequestNotificationTemplatePage extends AbstractNotificationTemplatePage {
 
 	public PullRequestNotificationTemplatePage(PageParameters params) {

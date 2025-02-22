@@ -1,9 +1,8 @@
 package io.onedev.server.codequality;
 
-import io.onedev.server.model.Group;
-import org.apache.wicket.Component;
-
 import java.io.Serializable;
+
+import org.apache.wicket.Component;
 
 public abstract class ProblemTarget implements Serializable {
 

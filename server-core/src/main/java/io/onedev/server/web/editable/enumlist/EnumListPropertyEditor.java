@@ -21,7 +21,7 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings({"serial", "unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 
 	private final Class<Enum> enumClass;

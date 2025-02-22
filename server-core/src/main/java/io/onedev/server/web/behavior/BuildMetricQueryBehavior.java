@@ -31,7 +31,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@SuppressWarnings("serial")
 public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;

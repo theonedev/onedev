@@ -36,7 +36,6 @@ import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.util.criteria.Criteria.quote;
 import static java.util.Comparator.*;
 
-@SuppressWarnings("serial")
 public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInfo>> {
 
 	public PullRequestJobsPanel(String id) {

@@ -17,7 +17,6 @@ import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
 
-@SuppressWarnings("serial")
 public class UserIdentPanel extends GenericPanel<User> {
 
 	private final Mode mode;

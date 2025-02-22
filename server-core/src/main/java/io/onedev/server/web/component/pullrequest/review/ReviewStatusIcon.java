@@ -12,7 +12,6 @@ import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-@SuppressWarnings("serial")
 public abstract class ReviewStatusIcon extends WebComponent {
 	
 	private final boolean opposite;

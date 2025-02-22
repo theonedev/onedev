@@ -14,7 +14,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public abstract class AffinalRevisionPicker extends Panel {
 
 	private Long projectId;

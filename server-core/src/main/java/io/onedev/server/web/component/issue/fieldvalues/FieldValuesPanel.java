@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext, ProjectAware {
 
 	private final Mode userFieldDisplayMode;

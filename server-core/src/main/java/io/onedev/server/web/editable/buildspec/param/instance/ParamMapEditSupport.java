@@ -11,7 +11,6 @@ import org.apache.wicket.model.IModel;
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class ParamMapEditSupport implements EditSupport {
 
 	@Override

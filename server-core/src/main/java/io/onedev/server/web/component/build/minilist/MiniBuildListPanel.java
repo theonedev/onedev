@@ -26,7 +26,6 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 
-@SuppressWarnings("serial")
 public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 
 	public MiniBuildListPanel(String id, IModel<List<Build>> model) {

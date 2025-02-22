@@ -31,7 +31,6 @@ import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
 import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 class ProjectDependencyListViewPanel extends Panel {
 
 	private final List<ProjectDependency> dependencies = new ArrayList<>();

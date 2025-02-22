@@ -12,7 +12,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.Comparator;
 
-@SuppressWarnings("serial")
 public class LabelManagementPage extends AdministrationPage {
 
 	public LabelManagementPage(PageParameters params) {

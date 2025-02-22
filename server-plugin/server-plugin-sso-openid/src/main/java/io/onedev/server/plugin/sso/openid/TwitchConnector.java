@@ -59,7 +59,7 @@ public class TwitchConnector extends OpenIdConnector {
 
 	@Override
 	protected TokenResponse parseOIDCTokenResponse(HTTPResponse response) throws ParseException {
-		JSONObject responseJson = response.getContentAsJSONObject();
+		JSONObject responseJson = response.getBodyAsJSONObject();
 		if (response.getStatusCode() == HTTPResponse.SC_OK) {
 			Object scopeValue = responseJson.remove("scope");
 			Scope scope;

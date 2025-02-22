@@ -5,7 +5,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-@SuppressWarnings("serial")
 public class ImageViewer extends GenericPanel<String> {
 	
 	private final int width;

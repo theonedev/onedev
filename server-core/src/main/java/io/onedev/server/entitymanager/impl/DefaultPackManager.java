@@ -322,6 +322,7 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		return query(criteria);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public List<Pack> queryLatests(Project project, String type, String nameQuery,

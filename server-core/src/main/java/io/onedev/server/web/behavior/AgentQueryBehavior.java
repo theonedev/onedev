@@ -28,7 +28,6 @@ import java.util.List;
 
 import static java.util.Collections.sort;
 
-@SuppressWarnings("serial")
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";

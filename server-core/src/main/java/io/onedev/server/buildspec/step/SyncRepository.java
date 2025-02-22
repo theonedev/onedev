@@ -74,7 +74,6 @@ public abstract class SyncRepository extends ServerSideStep {
 		this.passwordSecret = passwordSecret;
 	}
 	
-	@SuppressWarnings("unused")
 	static List<String> getSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());

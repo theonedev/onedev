@@ -10,7 +10,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 
-@SuppressWarnings("serial")
 public class ContributorPanel extends Panel {
 
 	private final PersonIdent author;

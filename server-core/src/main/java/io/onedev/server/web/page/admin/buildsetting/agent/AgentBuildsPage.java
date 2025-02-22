@@ -18,7 +18,6 @@ import io.onedev.server.search.entity.build.RanOnCriteria;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
-@SuppressWarnings("serial")
 public class AgentBuildsPage extends AgentDetailPage {
 
 	private static final String PARAM_QUERY = "query";

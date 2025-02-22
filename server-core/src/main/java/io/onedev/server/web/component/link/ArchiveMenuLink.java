@@ -14,7 +14,6 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.resource.ArchiveResource;
 import io.onedev.server.web.resource.ArchiveResourceReference;
 
-@SuppressWarnings("serial")
 public abstract class ArchiveMenuLink extends MenuLink {
 
 	private final IModel<Project> projectModel;

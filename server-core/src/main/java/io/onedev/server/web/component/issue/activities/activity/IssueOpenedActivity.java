@@ -11,7 +11,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 public class IssueOpenedActivity implements IssueActivity {
 
 	private final Long issueId;

@@ -65,7 +65,6 @@ import java.util.*;
 
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
-@SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
 
 	private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();

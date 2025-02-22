@@ -28,7 +28,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
-@SuppressWarnings("serial")
 class ImportListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<Import> imports;

@@ -28,6 +28,7 @@ public class EstimatedTimeEditBean implements Serializable {
 		this.estimatedTime = estimatedTime;
 	}
 	
+	@SuppressWarnings("unused")
 	private static String getEstimatedTimeDescription() {
 		var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 		if (aggregationLink != null)

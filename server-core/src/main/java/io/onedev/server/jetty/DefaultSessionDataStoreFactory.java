@@ -18,18 +18,17 @@
 
 package io.onedev.server.jetty;
 
-import io.onedev.server.cluster.ClusterManager;
-import org.eclipse.jetty.server.session.AbstractSessionDataStoreFactory;
-import org.eclipse.jetty.server.session.SessionDataStore;
-import org.eclipse.jetty.server.session.SessionDataStoreFactory;
-import org.eclipse.jetty.server.session.SessionHandler;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jetty.server.session.AbstractSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionDataStore;
+import org.eclipse.jetty.server.session.SessionHandler;
+
+import io.onedev.server.cluster.ClusterManager;
+
 @Singleton
-public class DefaultSessionDataStoreFactory extends AbstractSessionDataStoreFactory 
-		implements SessionDataStoreFactory {
+public class DefaultSessionDataStoreFactory extends AbstractSessionDataStoreFactory {
 
 	private final ClusterManager clusterManager;
 	

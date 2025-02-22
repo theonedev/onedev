@@ -1,28 +1,34 @@
 package io.onedev.server.search.commit;
 
+import static io.onedev.commons.codeassist.FenceAware.unfence;
+import static io.onedev.commons.utils.StringUtils.unescape;
+import static org.apache.commons.lang3.StringUtils.join;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entityreference.BuildReference;
-import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang.math.NumberUtils;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.commons.codeassist.FenceAware.unfence;
-import static io.onedev.commons.utils.StringUtils.join;
-import static io.onedev.commons.utils.StringUtils.unescape;
 
 public class CommitQuery implements Serializable {
 	

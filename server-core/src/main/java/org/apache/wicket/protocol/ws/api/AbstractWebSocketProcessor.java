@@ -406,7 +406,6 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 	 * A dummy page that is used to create a new WebSocketRequestHandler for
 	 * web socket connections to WebSocketResource
 	 */
-	@SuppressWarnings("serial")
 	private static class WebSocketResourcePage extends WebPage implements IMarkupResourceStreamProvider
 	{
 		private WebSocketResourcePage()

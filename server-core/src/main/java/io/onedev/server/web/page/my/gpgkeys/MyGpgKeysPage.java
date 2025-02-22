@@ -18,7 +18,6 @@ import io.onedev.server.web.component.user.gpgkey.GpgKeyListPanel;
 import io.onedev.server.web.component.user.gpgkey.InsertGpgKeyPanel;
 import io.onedev.server.web.page.my.MyPage;
 
-@SuppressWarnings("serial")
 public class MyGpgKeysPage extends MyPage {
 	
 	private GpgKeyListPanel keyList;

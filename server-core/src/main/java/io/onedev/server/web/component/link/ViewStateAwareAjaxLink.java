@@ -5,7 +5,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 
-@SuppressWarnings("serial")
 public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T> {
 
 	private final boolean carryOver;

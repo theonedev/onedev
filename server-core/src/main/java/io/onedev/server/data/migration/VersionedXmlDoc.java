@@ -577,6 +577,7 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> T cloneBean(T bean) {
 		return (T) VersionedXmlDoc.fromBean(bean).toBean();	
 	}

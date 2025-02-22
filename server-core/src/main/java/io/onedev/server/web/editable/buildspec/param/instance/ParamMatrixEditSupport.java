@@ -16,7 +16,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.annotation.ParamSpecProvider;
 
-@SuppressWarnings("serial")
 public class ParamMatrixEditSupport implements EditSupport {
 
 	@Override

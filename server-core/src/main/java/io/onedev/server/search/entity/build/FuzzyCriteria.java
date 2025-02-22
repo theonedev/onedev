@@ -32,6 +32,7 @@ public class FuzzyCriteria extends Criteria<Build> {
 		return parse(value).matches(build);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Criteria<Build> parse(String value) {
 		return new OrCriteria<>(
 				new VersionCriteria("*" + value + "*", BuildQueryLexer.Is), 

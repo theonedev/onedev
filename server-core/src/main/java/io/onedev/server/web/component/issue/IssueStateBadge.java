@@ -17,7 +17,6 @@ import org.unbescape.html.HtmlEscape;
 
 import java.util.Collection;
 
-@SuppressWarnings("serial")
 public class IssueStateBadge extends Label {
 
 	private final IModel<Issue> issueModel;

@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-@SuppressWarnings("serial")
 public class ImagePropertyEditor extends PropertyEditor<String> {
 
 	private ImageUploadField input;

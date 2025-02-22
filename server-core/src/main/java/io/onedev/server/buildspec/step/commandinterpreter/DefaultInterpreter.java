@@ -1,16 +1,16 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-
-import javax.validation.constraints.NotEmpty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Editable(order=100, name="Default (Shell on Linux, Batch on Windows)")
 public class DefaultInterpreter extends Interpreter {

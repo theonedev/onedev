@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public abstract class ReviewListPanel extends Panel {
 
 	private final IModel<List<PullRequestReview>> reviewsModel;

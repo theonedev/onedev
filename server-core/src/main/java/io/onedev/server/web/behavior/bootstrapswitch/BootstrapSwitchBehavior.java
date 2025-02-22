@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
-@SuppressWarnings("serial")
 public class BootstrapSwitchBehavior extends Behavior {
 
 	@Override

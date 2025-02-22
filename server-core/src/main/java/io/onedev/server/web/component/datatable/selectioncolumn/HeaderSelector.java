@@ -20,7 +20,6 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
-@SuppressWarnings("serial")
 abstract class HeaderSelector<T> extends Panel {
 
 	public HeaderSelector(String id) {

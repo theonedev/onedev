@@ -17,7 +17,6 @@ import java.util.Set;
 
 import static java.util.Arrays.asList;
 
-@SuppressWarnings("serial")
 public class VerticalBeanListPropertyViewer extends Panel {
 
 	private final List<Serializable> elements;

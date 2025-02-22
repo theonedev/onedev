@@ -97,7 +97,6 @@ public abstract class SubStringRevFilter extends RevFilter {
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return super.toString() + "(\"" + pattern.pattern() + "\")";

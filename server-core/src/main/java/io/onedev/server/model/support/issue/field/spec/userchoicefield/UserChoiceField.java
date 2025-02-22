@@ -74,6 +74,7 @@ public class UserChoiceField extends FieldSpec {
 		return EditContext.get().getInputValue("allowMultiple").equals(true);
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
 		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}

@@ -4,25 +4,22 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import javax.validation.constraints.NotEmpty;
-
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.annotation.ShowCondition;
 
 public class PropertyDescriptor implements Serializable {
 

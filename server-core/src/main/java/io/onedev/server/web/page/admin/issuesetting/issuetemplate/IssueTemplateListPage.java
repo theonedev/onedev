@@ -36,7 +36,6 @@ import org.unbescape.html.HtmlEscape;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class IssueTemplateListPage extends IssueSettingPage {
 
 	public IssueTemplateListPage(PageParameters params) {

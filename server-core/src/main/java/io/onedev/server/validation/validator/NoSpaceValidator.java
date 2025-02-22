@@ -1,11 +1,9 @@
 package io.onedev.server.validation.validator;
 
-import io.onedev.server.annotation.NoSpace;
-import io.onedev.server.annotation.SubPath;
-import org.apache.commons.io.FilenameUtils;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import io.onedev.server.annotation.NoSpace;
 
 public class NoSpaceValidator implements ConstraintValidator<NoSpace, String> {
 

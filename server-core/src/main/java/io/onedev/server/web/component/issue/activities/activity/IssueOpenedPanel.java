@@ -31,7 +31,6 @@ import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 
-@SuppressWarnings("serial")
 class IssueOpenedPanel extends GenericPanel<Issue> {
 
 	public IssueOpenedPanel(String id, IModel<Issue> model) {

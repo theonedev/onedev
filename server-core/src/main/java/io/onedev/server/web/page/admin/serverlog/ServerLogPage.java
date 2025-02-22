@@ -11,7 +11,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class ServerLogPage extends ServerDetailPage {
 
 	private static final int MAX_DISPLAY_LINES = 5000;

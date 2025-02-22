@@ -10,7 +10,6 @@ import io.onedev.server.persistence.dao.Dao;
 
 import java.io.IOException;
 
-@SuppressWarnings("serial")
 public final class ForeignKeyDeserializer extends StdDeserializer<AbstractEntity> {
 
 	public ForeignKeyDeserializer(Class<?> entityClass) {

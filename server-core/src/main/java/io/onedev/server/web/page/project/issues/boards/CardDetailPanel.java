@@ -49,7 +49,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {
 
 	private static final String TAB_CONTENT_ID = "tabContent";

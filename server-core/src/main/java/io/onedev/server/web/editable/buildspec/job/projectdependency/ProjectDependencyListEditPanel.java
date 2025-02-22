@@ -38,7 +38,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("serial")
 class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<ProjectDependency> dependencies;

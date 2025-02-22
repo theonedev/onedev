@@ -46,7 +46,6 @@ import java.util.List;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
 
 	private static final String TASK_CHECKED = "taskchecked";

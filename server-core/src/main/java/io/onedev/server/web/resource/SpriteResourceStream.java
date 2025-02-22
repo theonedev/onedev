@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.IResourceStream;
@@ -98,7 +98,7 @@ public class SpriteResourceStream implements IResourceStream {
 						if (entry.getName().startsWith(packagePath) && entry.getName().endsWith(".svg")) {
 							String relativeEntryName = entry.getName().substring(packagePath.length());
 							if (!relativeEntryName.contains("/")) {
-								try (InputStream is = jarFile.getInputStream(entry)) {
+								try (var is = jarFile.getInputStream(entry)) {
 									files.put(relativeEntryName, new String(IOUtils.toByteArray(is), StandardCharsets.UTF_8));
 								}
 							}

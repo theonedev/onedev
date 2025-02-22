@@ -14,7 +14,6 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
 
-@SuppressWarnings("serial")
 public class PersonCardPanel extends Panel {
 
 	private final PersonIdent personIdent;

@@ -17,7 +17,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer;
 
-@SuppressWarnings("serial")
 public abstract class JobDefLink extends BookmarkablePageLink<Void> {
 
 	private final ObjectId commitId;

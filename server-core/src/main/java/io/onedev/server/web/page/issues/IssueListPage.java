@@ -35,7 +35,6 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class IssueListPage extends LayoutPage {
 
 	private static final String PARAM_PAGE = "page";

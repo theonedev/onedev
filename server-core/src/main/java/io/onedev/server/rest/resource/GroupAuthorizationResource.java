@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.onedev.server.model.UserAuthorization;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.GroupAuthorizationManager;

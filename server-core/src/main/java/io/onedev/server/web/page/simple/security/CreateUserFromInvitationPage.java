@@ -24,7 +24,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-@SuppressWarnings("serial")
 public class CreateUserFromInvitationPage extends SimplePage {
 
 	private final String PARAM_INVITATION_CODE = "invitationCode";

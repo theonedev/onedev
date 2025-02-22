@@ -49,7 +49,6 @@ import java.util.List;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-@SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {
 
 	private static final int MAX_QUERY_ENTRIES = 15;

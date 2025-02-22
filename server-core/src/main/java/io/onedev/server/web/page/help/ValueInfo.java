@@ -1,10 +1,8 @@
 package io.onedev.server.web.page.help;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
+
+import javax.annotation.Nullable;
 
 public class ValueInfo {
 	

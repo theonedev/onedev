@@ -25,7 +25,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
-@SuppressWarnings("serial")
 abstract class TaskFeedbackPanel extends Panel {
 
 	private final String title;

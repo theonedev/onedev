@@ -1,16 +1,16 @@
 package io.onedev.server.web.page.admin.emailtemplates;
 
-import io.onedev.server.util.CollectionUtils;
+import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.DEFAULT_ISSUE_NOTIFICATION_UNSUBSCRIBED;
+import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_ISSUE_NOTIFICATION_UNSUBSCRIBED;
+
+import java.util.Map;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.List;
-import java.util.Map;
+import io.onedev.server.util.CollectionUtils;
 
-import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.*;
-
-@SuppressWarnings("serial")
 public class IssueNotificationUnsubscribedTemplatePage extends AbstractTemplatePage {
 
 	public IssueNotificationUnsubscribedTemplatePage(PageParameters params) {

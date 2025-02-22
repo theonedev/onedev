@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.web.component.select2.Select2Choice;
 
-@SuppressWarnings("serial")
 public class IterationSingleChoice extends Select2Choice<Iteration> {
 
 	public IterationSingleChoice(String id, IModel<Iteration> selectionModel, IModel<Collection<Iteration>> iterationsModel) {

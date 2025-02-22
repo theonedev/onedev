@@ -29,7 +29,6 @@ import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
-@SuppressWarnings("serial")
 public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<SuggestionApplyBean> {
 
 	public SuggestionApplyModalPanel(IPartialPageRequestHandler handler, SuggestionApplyBean bean) {

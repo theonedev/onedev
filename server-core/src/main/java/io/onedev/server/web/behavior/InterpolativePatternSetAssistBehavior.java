@@ -22,7 +22,6 @@ import io.onedev.server.util.patternset.InterpolativePatternSetLexer;
 import io.onedev.server.util.patternset.InterpolativePatternSetParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 
-@SuppressWarnings("serial")
 public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistBehavior {
 
 	public InterpolativePatternSetAssistBehavior() {

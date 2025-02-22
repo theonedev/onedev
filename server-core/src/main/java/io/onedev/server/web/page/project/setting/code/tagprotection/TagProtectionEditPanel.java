@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.web.editable.BeanContext;
 
-@SuppressWarnings("serial")
 abstract class TagProtectionEditPanel extends Panel {
 
 	private final TagProtection protection;

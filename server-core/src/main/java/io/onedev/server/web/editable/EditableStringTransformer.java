@@ -5,13 +5,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.BeanEditContext;
 import io.onedev.server.util.BeanUtils;
-import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.EditContext;
 
 public class EditableStringTransformer {

@@ -5,7 +5,6 @@ import io.onedev.server.web.component.select2.SelectToActChoice;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-@SuppressWarnings("serial")
 public abstract class SelectPackToActChoice extends SelectToActChoice<Pack> {
 
 	public SelectPackToActChoice(String id, PackChoiceProvider choiceProvider) {

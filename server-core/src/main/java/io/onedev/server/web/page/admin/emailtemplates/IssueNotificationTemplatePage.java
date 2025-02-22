@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_ISSUE_NOTIFICATION;
 
-@SuppressWarnings("serial")
 public class IssueNotificationTemplatePage extends AbstractNotificationTemplatePage {
 
 	public IssueNotificationTemplatePage(PageParameters params) {

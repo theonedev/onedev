@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.TransactionManager;
 
-@SuppressWarnings("serial")
 public abstract class DefaultEndActionsPanel extends Panel {
 
 	private final WizardPanel wizard;

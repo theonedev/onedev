@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-@SuppressWarnings("serial")
 public class ImageUploadField extends FormComponentPanel<String> {
 	
 	private final String accept;

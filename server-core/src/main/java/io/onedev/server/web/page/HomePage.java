@@ -11,7 +11,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 
-@SuppressWarnings("serial")
 public class HomePage extends LayoutPage {
 
 	public static final String PARAM_FAILSAFE = "failsafe";

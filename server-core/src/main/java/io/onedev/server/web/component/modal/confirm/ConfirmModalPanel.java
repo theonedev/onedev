@@ -8,7 +8,6 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 import io.onedev.server.web.component.modal.ModalPanel;
 
-@SuppressWarnings("serial")
 public abstract class ConfirmModalPanel extends ModalPanel {
 
 	public ConfirmModalPanel(IPartialPageRequestHandler handler) {

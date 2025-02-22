@@ -38,7 +38,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("serial")
 public class JobSecretsPage extends ProjectBuildSettingPage {
 	
 	private DataTable<JobSecret, Void> secretsTable;

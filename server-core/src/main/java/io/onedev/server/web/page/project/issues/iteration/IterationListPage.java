@@ -17,7 +17,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
-@SuppressWarnings("serial")
 public class IterationListPage extends ProjectPage {
 
 	private static final String PARAM_STATE = "state";

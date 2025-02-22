@@ -16,7 +16,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-@SuppressWarnings("serial")
 abstract class IssueCreationSettingEditPanel extends Panel {
 
 	private final List<IssueCreationSetting> settings;

@@ -1,24 +1,27 @@
 package io.onedev.server.plugin.buildspec.maven;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
-import io.onedev.server.buildspec.step.*;
-import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
+import io.onedev.server.buildspec.step.CheckoutStep;
+import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.GenerateChecksumStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.buildspec.step.SetupCacheStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class MavenJobSuggestion implements JobSuggestion {
 	

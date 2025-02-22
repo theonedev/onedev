@@ -1,7 +1,43 @@
 package io.onedev.server.cluster;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.model.Build.getArtifactsLockName;
+import static io.onedev.server.model.Project.SHARE_TEST_DIR;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static javax.ws.rs.core.Response.ok;
+import static javax.ws.rs.core.Response.status;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.server.OneDev;
@@ -22,34 +58,12 @@ import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.model.Build.getArtifactsLockName;
-import static io.onedev.server.model.Project.SHARE_TEST_DIR;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.ok;
-import static javax.ws.rs.core.Response.status;
 
 @Api(internal=true)
 @Path("/cluster")

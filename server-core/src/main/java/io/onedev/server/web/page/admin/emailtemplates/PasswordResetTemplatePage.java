@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.*;
 
-@SuppressWarnings("serial")
 public class PasswordResetTemplatePage extends AbstractTemplatePage {
 
 	public PasswordResetTemplatePage(PageParameters params) {

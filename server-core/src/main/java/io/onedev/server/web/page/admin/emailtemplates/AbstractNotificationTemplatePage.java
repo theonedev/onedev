@@ -1,14 +1,12 @@
 package io.onedev.server.web.page.admin.emailtemplates;
 
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.util.CollectionUtils;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("serial")
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.util.CollectionUtils;
+
 public abstract class AbstractNotificationTemplatePage extends AbstractTemplatePage {
 	
 	public AbstractNotificationTemplatePage(PageParameters params) {

@@ -8,7 +8,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.accesstoken.AccessTokenListPanel;
 import io.onedev.server.web.page.my.MyPage;
 
-@SuppressWarnings("serial")
 public class MyAccessTokensPage extends MyPage {
 
 	public MyAccessTokensPage(PageParameters params) {

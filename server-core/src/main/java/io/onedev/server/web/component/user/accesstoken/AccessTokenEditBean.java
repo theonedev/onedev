@@ -73,6 +73,7 @@ public class AccessTokenEditBean implements Serializable {
 		this.authorizations = authorizations;
 	}
 	
+	@SuppressWarnings("unused")
 	private static boolean isHasOwnerPermissionsDisabled() {
 		return !(boolean) EditContext.get().getInputValue("hasOwnerPermissions");
 	}

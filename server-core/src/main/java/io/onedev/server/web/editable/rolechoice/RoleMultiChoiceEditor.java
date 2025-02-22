@@ -19,7 +19,6 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-@SuppressWarnings("serial")
 public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private StringMultiChoice input;

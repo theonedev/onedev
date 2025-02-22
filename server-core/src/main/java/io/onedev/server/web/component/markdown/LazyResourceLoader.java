@@ -8,7 +8,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.web.asset.katex.KatexResourceReference;
 import io.onedev.server.web.asset.mermaid.MermaidResourceReference;
 
-@SuppressWarnings("serial")
 class LazyResourceLoader extends WebMarkupContainer {
 
 	private final IModel<String> renderedModel;

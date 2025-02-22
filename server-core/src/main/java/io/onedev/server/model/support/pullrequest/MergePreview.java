@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 @Embeddable
 public class MergePreview implements Serializable {
 	

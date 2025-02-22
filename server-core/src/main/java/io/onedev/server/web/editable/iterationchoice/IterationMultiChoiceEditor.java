@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("serial")
 public class IterationMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private IterationMultiChoice input;
