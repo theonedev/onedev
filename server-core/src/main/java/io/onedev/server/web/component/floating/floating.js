@@ -5,7 +5,9 @@ onedev.server.floating = {
 		$floating.data("animation", animation);
 		
 		$floating.data("mouseUpOrTouchStart", function(e) {
-			if ($(".flatpickr-calendar.open").length == 0 && $(".pcr-app.visible").length == 0) {
+			if ($(".flatpickr-calendar.open").length == 0 
+					&& $(".pcr-app.visible").length == 0 
+					&& $floating.find(".dropdown-open").length == 0) {
 				/*
 				 * Close the floating panel if mouse clicks outside of the floating. Also we 
 				 * do not close the panel if mouse clicks on the element triggering this 
@@ -24,6 +26,7 @@ onedev.server.floating = {
 			    	var $trigger = $floating.data("trigger");
 				    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) {
 						$floating.data("closeCallback")();
+						$floating.data("mouseUpOrTouchStartEvent", e);
 					}
 			    }
 			}
@@ -32,10 +35,12 @@ onedev.server.floating = {
 		
 		$floating.data("keydown", function(e) {
 			if (e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
+					&& $floating.find(".dropdown-open").length == 0
 					&& $(".select2-drop:visible").length == 0 
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $(".pcr-app.visible").length == 0) {
 				$floating.data("closeCallback")();
+				$floating.removeData("mouseUpOrTouchStartEvent");
 			}
 		});
 		
@@ -75,6 +80,15 @@ onedev.server.floating = {
 		var $floating = $("#" + floatingId);
 		
 		if ($floating.length != 0) {
+			var $trigger = $floating.data("trigger");
+			var mouseUpOrTouchStartEvent = $floating.data("mouseUpOrTouchStartEvent");
+			if ($trigger && mouseUpOrTouchStartEvent) {
+				setTimeout(function() {	
+					var $parentFloating = $trigger.closest(".floating");
+					if ($parentFloating.length != 0) 
+						$parentFloating.data("mouseUpOrTouchStart")(mouseUpOrTouchStartEvent);
+				}, 0);
+			}
 			var alignment = $floating.data("alignment");
 			
 			if (alignment && alignment.target.element)
