@@ -1,6 +1,39 @@
 package io.onedev.server.web.page.project;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -16,7 +49,6 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.project.DeleteStatusLabel;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
@@ -57,7 +89,11 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.build.*;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.CacheManagementPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
+import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
+import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
@@ -71,32 +107,6 @@ import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.util.ProjectAware;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
@@ -459,10 +469,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				if (SecurityUtils.canAccessProject(project)) {
 					WebMarkupContainer link = navToProject("link", project);
 					link.add(new Label("label", project.getName()));
-					if (project.equals(getProject()))
-						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
-					else
-						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					
 					List<ProjectFacade> children = getProjectManager().getChildren(project.getId());
@@ -499,10 +505,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						
 					};
 					link.add(new Label("label", project.getName()));
-					if (project.equals(getProject()))
-						link.add(new DeleteStatusLabel("deleteStatus", project.getId()));
-					else
-						link.add(new WebMarkupContainer("deleteStatus").setVisible(false));
 					item.add(link);
 					item.add(new WebMarkupContainer("children").setVisible(false));
 					item.add(new Label("dot").add(AttributeAppender.append("class", "dot")));

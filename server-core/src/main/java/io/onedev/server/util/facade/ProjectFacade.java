@@ -1,8 +1,8 @@
 package io.onedev.server.util.facade;
 
-import io.onedev.server.model.support.code.GitPackConfig;
-
 import javax.annotation.Nullable;
+
+import io.onedev.server.model.support.code.GitPackConfig;
 
 public class ProjectFacade extends EntityFacade {
 	
@@ -26,15 +26,13 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final Long defaultRoleId;
 	
-	private final boolean pendingDelete;
-	
 	private final Long parentId;
 	
 	public ProjectFacade(Long id, String name, @Nullable String key, String path,
 						 @Nullable String serviceDeskEmailAddress, boolean codeManagement,
 						 boolean issueManagement, GitPackConfig gitPackConfig,
 						 Long lastEventDateId, @Nullable Long defaultRoleId,
-						 boolean pendingDelete, @Nullable Long parentId) {
+						 @Nullable Long parentId) {
 		super(id);
 		this.name = name;
 		this.key = key;
@@ -45,7 +43,6 @@ public class ProjectFacade extends EntityFacade {
 		this.gitPackConfig = gitPackConfig;
 		this.lastEventDateId = lastEventDateId;
 		this.defaultRoleId = defaultRoleId;
-		this.pendingDelete = pendingDelete;
 		this.parentId = parentId;
 	}
 
@@ -68,10 +65,6 @@ public class ProjectFacade extends EntityFacade {
 
 	public boolean isIssueManagement() {
 		return issueManagement;
-	}
-
-	public boolean isPendingDelete() {
-		return pendingDelete;
 	}
 
 	@Nullable

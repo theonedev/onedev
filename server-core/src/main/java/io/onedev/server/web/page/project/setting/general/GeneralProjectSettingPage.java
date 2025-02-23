@@ -1,7 +1,30 @@
 package io.onedev.server.web.page.project.setting.general;
 
+import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_DESCRIPTION;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_KEY;
+import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+
+import java.io.Serializable;
+import java.util.Collection;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -17,21 +40,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.io.Serializable;
-import java.util.Collection;
-
-import static io.onedev.server.model.Project.*;
 
 public class GeneralProjectSettingPage extends ProjectSettingPage {
 
@@ -165,7 +173,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					@Override
 					protected void onConfirm(AjaxRequestTarget target) {
 						Project project = getProject();
-						OneDev.getInstance(ProjectManager.class).requestToDelete(Sets.newHashSet(project));
+						OneDev.getInstance(ProjectManager.class).delete(project);
 						getSession().success("Requested to delete project");
 						String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Project.class);
 						if (redirectUrlAfterDelete != null)

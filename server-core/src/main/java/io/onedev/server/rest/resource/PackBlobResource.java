@@ -1,18 +1,24 @@
 package io.onedev.server.rest.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
 import io.onedev.server.entitymanager.PackBlobManager;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.StreamingOutput;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 @Api(order=4400, name="Package Blob")
 @Path("/package-blobs")
@@ -28,11 +34,11 @@ public class PackBlobResource {
 		this.packBlobManager = packBlobManager;
 	}
 
-	@Api(order=100, description = "Find package blob by hash")
+	@Api(order=100, description = "Find package blob by project id and hash")
 	@GET
-	public PackBlob findByHash(@QueryParam("hash") String hash) {
-		var packBlob = packBlobManager.findBySha256Hash(hash);
-		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) 
+	public PackBlob findByHash(@QueryParam("projectId") Long projectId, @QueryParam("hash") String hash) {
+		var packBlob = packBlobManager.findBySha256Hash(projectId, hash);
+		if (packBlob != null) 
 			return packBlob;			
 		else 
 			return null;			
@@ -44,7 +50,7 @@ public class PackBlobResource {
 	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadBlob(@PathParam("packBlobId") Long packBlobId) {
 		var packBlob = packBlobManager.load(packBlobId);
-		if (!SecurityUtils.canReadPackBlob(packBlob))
+		if (!SecurityUtils.canReadPack(packBlob.getProject()))
 			throw new UnauthorizedException();
 		
 		var projectId = packBlob.getProject().getId();

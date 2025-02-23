@@ -301,7 +301,7 @@ public class NpmPackService implements PackService {
 								distTagsNode.put(distTag, pack.getVersion());
 							ObjectNode versionMetadata = readJson(packData.getMetadata());
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(packData.getFileSha256BlobHash())) != null) {
+							if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 								latestPackData = packData;
 								var distNode = versionMetadata.putObject("dist");
 								distNode.put("shasum", packBlobManager.getSha1Hash(packBlob));
@@ -380,7 +380,7 @@ public class NpmPackService implements PackService {
 										var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
 										if (pack != null) {
 											var packData = (NpmData) pack.getData();
-											if (packBlobManager.checkPackBlob(packData.getFileSha256BlobHash()) != null) {
+											if (packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash()) != null) {
 												var errorMessage = String.format("Package already exists (name: %s, version: %s)",
 														name, version);
 												throw new ClientException(SC_CONFLICT, errorMessage);
@@ -485,7 +485,7 @@ public class NpmPackService implements PackService {
 								if (pack != null) {
 									var packData = (NpmData) pack.getData();
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(packData.getFileSha256BlobHash())) != null) {
+									if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 										try {
 											response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 											packBlobManager.downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), response.getOutputStream());
@@ -513,7 +513,7 @@ public class NpmPackService implements PackService {
 									if (!packData.getFileName().equals(fileName)) 
 										throw new ClientException(SC_BAD_REQUEST, "Incorrect file name requested");
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(packData.getFileSha256BlobHash())) != null) {
+									if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 										try {
 											response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 											packBlobManager.downloadBlob(packBlob.getProject().getId(), packData.getFileSha256BlobHash(), response.getOutputStream());

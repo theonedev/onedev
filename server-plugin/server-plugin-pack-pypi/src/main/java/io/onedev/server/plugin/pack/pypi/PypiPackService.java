@@ -174,7 +174,7 @@ public class PypiPackService implements PackService {
 									data.getSha256BlobHashes().put(fileName, sha256Hash);
 									
 									var packBlobs = data.getSha256BlobHashes().values().stream()
-											.map(packBlobManager::findBySha256Hash)
+											.map(hash -> packBlobManager.findBySha256Hash(projectId, hash))
 											.filter(Objects::nonNull)
 											.collect(toList());
 									packManager.createOrUpdate(pack, packBlobs, data.getSha256BlobHashes().size() == 1);									
@@ -257,7 +257,7 @@ public class PypiPackService implements PackService {
 						var sha256BlobHash = data.getSha256BlobHashes().get(fileName);
 						if (sha256BlobHash != null) {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) {
+							if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) {
 								response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 								try {
 									packBlobManager.downloadBlob(packBlob.getProject().getId(),

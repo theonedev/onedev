@@ -1,35 +1,9 @@
 package io.onedev.server.data.migration;
 
-import com.google.common.base.Preconditions;
-import com.thoughtworks.xstream.core.JVM;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.TimeGroups;
-import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.ParsedEmailAddress;
-import io.onedev.server.util.patternset.PatternSet;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.common.digest.BuiltinDigests;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
 
-import javax.annotation.Nullable;
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,16 +14,63 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
+import javax.annotation.Nullable;
+import javax.inject.Singleton;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.digest.BuiltinDigests;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.thoughtworks.xstream.core.JVM;
+
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueStateHistory;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.support.TimeGroups;
+import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.DirectoryVersionUtils;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.ParsedEmailAddress;
+import io.onedev.server.util.patternset.PatternSet;
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
 
 
 @Singleton
@@ -7374,6 +7395,11 @@ public class DataMigrator {
 	private void migrate189(File dataDir, Stack<Integer> versions) {
 		Map<String, String> pullRequestIdToProjectId = new HashMap<>();
 		Map<String, String> codeCommentIdToProjectId = new HashMap<>();
+		Map<String, Set<String>> packBlobIdToAuthorizedProjectIds = new HashMap<>();
+		Map<String, Pair<String, String>> packBlobIdToProjectAndHash = new HashMap<>();
+		Map<String, String> packIdToProjectId = new HashMap<>();
+		int nextPackBlobId = 1;
+		String packStorePath = null;
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
@@ -7393,9 +7419,130 @@ public class DataMigrator {
 					element.element("noSpaceTitle").detach();
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var pendingDeleteElement = element.element("pendingDelete");
+					if (pendingDeleteElement != null)
+						pendingDeleteElement.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PackBlobAuthorizations.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var projectId = element.elementTextTrim("project");
+					var packBlobId = element.elementTextTrim("packBlob");
+					packBlobIdToAuthorizedProjectIds.computeIfAbsent(packBlobId, k -> new HashSet<>()).add(projectId);
+				}
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("PackBlobs.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var packBlobId = element.elementTextTrim("id");
+					nextPackBlobId = Math.max(nextPackBlobId, Integer.parseInt(packBlobId) + 1);
+					packBlobIdToProjectAndHash.put(packBlobId, new Pair<>(element.elementTextTrim("project"), element.elementTextTrim("sha256Hash")));
+				}
+			} else if (file.getName().startsWith("Packs.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					packIdToProjectId.put(element.elementTextTrim("id"), element.elementTextTrim("project"));
+				}
+			} else if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("CONTRIBUTED_SETTINGS")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var entryElement: valueElement.elements()) {
+								var storageSettingElement = entryElement.element("io.onedev.server.ee.storage.StorageSetting");
+								if (storageSettingElement != null) {
+									var packStoreElement = storageSettingElement.element("packStore");
+									if (packStoreElement != null)
+										packStorePath = packStoreElement.getText().trim();
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 
+		Map<String, Map<String, String>> projectIdToPackBlobIdMapping = new HashMap<>();
+		var packBlobsFile = new File(dataDir, "PackBlobs.xml");
+		var packBlobsDom = VersionedXmlDoc.fromFile(packBlobsFile);
+		var projectsDir = new File(dataDir.getParentFile().getParentFile().getParentFile(), "site/projects");
+		for (var entry: packBlobIdToAuthorizedProjectIds.entrySet()) {
+			var packBlobProjectAndHash = packBlobIdToProjectAndHash.get(entry.getKey());
+			var projectDir = new File(projectsDir, packBlobProjectAndHash.getLeft());
+			var hash = packBlobProjectAndHash.getRight();
+			var relativeBlobFilePath = hash.substring(0, 2) + "/" + hash.substring(2, 4) + "/" + hash;
+			var packBlobFile = new File(projectDir, "packages/" + relativeBlobFilePath);
+			if (!packBlobFile.exists()) {
+				var errorMessage = String.format(
+					"Unable to find pack blob file for migration (blob file: %s, target projects: %s)", 
+					packBlobFile.getAbsolutePath(), String.join(" ", entry.getValue()));
+				throw new ExplicitException(errorMessage);
+			}
+			for (var authorizedProjectId: entry.getValue()) {
+				if (authorizedProjectId.equals(packBlobProjectAndHash.getLeft()))
+					continue;
+				var targetProjectDir = new File(projectsDir, authorizedProjectId);
+				var targetPackagesDir = new File(targetProjectDir, "packages");
+				if (!targetPackagesDir.exists() && packStorePath != null) {
+					var symlinkTargetDir = new File(packStorePath, authorizedProjectId);
+					FileUtils.createDir(symlinkTargetDir);
+					try {
+						Files.createSymbolicLink(targetPackagesDir.toPath(), symlinkTargetDir.toPath());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				var targetPackBlobFile = new File(targetPackagesDir, relativeBlobFilePath);
+				FileUtils.createDir(targetPackBlobFile.getParentFile());
+				try {
+					FileUtils.copyFile(packBlobFile, targetPackBlobFile);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+
+				var targetProjectPath = targetProjectDir.toPath();	
+				var currentPath = targetPackBlobFile.getParentFile().toPath();
+				while (currentPath.startsWith(targetProjectPath)) {
+					var currentDir = currentPath.toFile();
+					DirectoryVersionUtils.increaseVersion(currentDir);
+					currentPath = currentPath.getParent();
+				}
+		
+				var targetPackBlobElement = packBlobsDom.getRootElement().addElement("io.onedev.server.model.PackBlob");
+				targetPackBlobElement.addAttribute("revision", "0.0");
+				var targetPackBlobId = String.valueOf(nextPackBlobId++);
+				targetPackBlobElement.addElement("id").setText(targetPackBlobId);
+				targetPackBlobElement.addElement("project").setText(authorizedProjectId);
+				targetPackBlobElement.addElement("sha256Hash").setText(hash);
+				targetPackBlobElement.addElement("size").setText(String.valueOf(packBlobFile.length()));
+				targetPackBlobElement.addElement("createDate").addAttribute("class", "sql-timestamp").setText(formatDate(new Date()));
+				projectIdToPackBlobIdMapping.computeIfAbsent(authorizedProjectId, k -> new HashMap<>()).put(entry.getKey(), targetPackBlobId);
+			}
+		}
+		packBlobsDom.writeToFile(packBlobsFile, false);
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("PackBlobReferences.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var packId = element.elementTextTrim("id");
+					var packBlobElement = element.element("packBlob");
+					var packBlobId = packBlobElement.elementTextTrim("id");
+					var projectId = packIdToProjectId.get(packId);
+					var packBlobIdMapping = projectIdToPackBlobIdMapping.get(projectId);
+					if (packBlobIdMapping != null && packBlobIdMapping.containsKey(packBlobId)) 
+						packBlobElement.setText(packBlobIdMapping.get(packBlobId));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		
 		VersionedXmlDoc pullRequestTouchsDom;
 		File pullRequestTouchsDomFile = new File(dataDir, "PullRequestTouchs.xml");
 		pullRequestTouchsDom = new VersionedXmlDoc();
@@ -7425,7 +7572,6 @@ public class DataMigrator {
 			codeCommentTouchElement.addElement("id").setText(String.valueOf(touchId++));
 		}
 		codeCommentTouchsDom.writeToFile(codeCommentTouchsDomFile, true);
-
 	}
 
 }

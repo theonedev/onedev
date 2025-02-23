@@ -1,15 +1,27 @@
 package io.onedev.server.model;
 
-import javax.annotation.Nullable;
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 @Entity
-@Table(indexes={
+@Table(
+	indexes={
 		@Index(columnList="o_project_id"), @Index(columnList= PackBlob.PROP_SHA256_HASH),
-		@Index(columnList= PackBlob.PROP_CREATE_DATE)})
+		@Index(columnList= PackBlob.PROP_CREATE_DATE)}, 
+	uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PackBlob.PROP_SHA256_HASH})})
 public class PackBlob extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -28,7 +40,7 @@ public class PackBlob extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Project project;
 	
-	@Column(nullable=false, unique = true)
+	@Column(nullable=false)
 	private String sha256Hash;
 	
 	private String sha512Hash;
@@ -44,9 +56,6 @@ public class PackBlob extends AbstractEntity {
 	
 	@OneToMany(mappedBy="packBlob", cascade=CascadeType.REMOVE)
 	private Collection<PackBlobReference> references = new ArrayList<>();
-
-	@OneToMany(mappedBy="packBlob", cascade=CascadeType.REMOVE)
-	private Collection<PackBlobAuthorization> authorizations = new ArrayList<>();
 	
 	public Project getProject() {
 		return project;
@@ -107,14 +116,6 @@ public class PackBlob extends AbstractEntity {
 		this.createDate = createDate;
 	}
 
-	public Collection<PackBlobAuthorization> getAuthorizations() {
-		return authorizations;
-	}
-
-	public void setAuthorizations(Collection<PackBlobAuthorization> authorizations) {
-		this.authorizations = authorizations;
-	}
-	
 	public static String getFileLockName(Long projectId, String sha256Hash) {
 		return "pack-blob:" + projectId + ":" + sha256Hash;
 	}

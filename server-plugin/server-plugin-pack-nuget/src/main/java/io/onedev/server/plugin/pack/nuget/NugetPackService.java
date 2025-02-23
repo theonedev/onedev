@@ -308,7 +308,7 @@ public class NugetPackService implements PackService {
 
 									List<PackBlob> packBlobs = Lists.newArrayList(snupkgBlob);
 									var data = (NugetData) pack.getData();
-									var nupkgBlob = packBlobManager.findBySha256Hash(data.getNupkgBlobSha256Hash());
+									var nupkgBlob = packBlobManager.findBySha256Hash(projectId, data.getNupkgBlobSha256Hash());
 									if (nupkgBlob != null)
 										packBlobs.add(nupkgBlob);
 
@@ -500,7 +500,7 @@ public class NugetPackService implements PackService {
 							}
 						} else {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(data.getNupkgBlobSha256Hash())) != null) {
+							if ((packBlob = packBlobManager.checkPackBlob(projectId, data.getNupkgBlobSha256Hash())) != null) {
 								try {
 									packBlobManager.downloadBlob(packBlob.getProject().getId(), 
 											packBlob.getSha256Hash(), response.getOutputStream());

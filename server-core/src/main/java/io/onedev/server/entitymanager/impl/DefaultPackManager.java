@@ -40,7 +40,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
 import io.onedev.server.entitymanager.PackBlobManager;
 import io.onedev.server.entitymanager.PackBlobReferenceManager;
 import io.onedev.server.entitymanager.PackLabelManager;
@@ -69,8 +68,6 @@ import io.onedev.server.util.criteria.Criteria;
 public class DefaultPackManager extends BaseEntityManager<Pack> 
 		implements PackManager, Serializable {
 	
-	private final PackBlobAuthorizationManager blobAuthorizationManager;
-	
 	private final PackBlobReferenceManager blobReferenceManager;
 	
 	private final PackBlobManager blobManager;
@@ -82,12 +79,10 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultPackManager(Dao dao, PackBlobAuthorizationManager blobAuthorizationManager,
-							  PackBlobReferenceManager blobReferenceManager,
+	public DefaultPackManager(Dao dao, PackBlobReferenceManager blobReferenceManager,
 							  PackBlobManager blobManager, ProjectManager projectManager, 
 							  PackLabelManager labelManager, ListenerRegistry listenerRegistry) {
 		super(dao);
-		this.blobAuthorizationManager = blobAuthorizationManager;
 		this.blobReferenceManager = blobReferenceManager;
 		this.blobManager = blobManager;
 		this.projectManager = projectManager;
@@ -444,7 +439,6 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 		if (packBlobs != null) {
 			packBlobs = new HashSet<>(packBlobs);
 			for (var packBlob: packBlobs) {
-				blobAuthorizationManager.authorize(pack.getProject(), packBlob);
 				if (pack.getBlobReferences().stream().noneMatch(it -> it.getPackBlob().equals(packBlob))) {
 					var blobReference = new PackBlobReference();
 					blobReference.setPack(pack);

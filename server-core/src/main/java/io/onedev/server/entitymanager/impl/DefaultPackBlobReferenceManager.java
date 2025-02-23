@@ -1,9 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
-import static io.onedev.server.model.Pack.PROP_PROJECT;
 import static io.onedev.server.model.PackBlobReference.PROP_PACK;
 import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
-import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -54,14 +52,6 @@ public class DefaultPackBlobReferenceManager extends BaseEntityManager<PackBlobR
 		}
 	}
 	
-	@Override
-	public PackBlobReference findNotPendingDelete(PackBlob packBlob) {
-		var criteria = newCriteria();
-		criteria.add(Restrictions.eq(PROP_PACK_BLOB, packBlob));
-		criteria.createCriteria(PROP_PACK).createCriteria(PROP_PROJECT).add(Restrictions.eq(PROP_PENDING_DELETE, false));
-		return find(criteria);
-	}
-
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(PackBlobReferenceManager.class);
 	}

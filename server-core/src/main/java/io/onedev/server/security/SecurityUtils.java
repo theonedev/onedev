@@ -1,17 +1,19 @@
 package io.onedev.server.security;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.model.*;
-import io.onedev.server.security.permission.*;
-import io.onedev.server.util.concurrent.PrioritizedCallable;
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.util.facade.UserFacade;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -19,13 +21,72 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import java.util.*;
+import com.google.common.collect.Sets;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.AccessToken;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueAuthorization;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.IssueWork;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.Role;
+import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.security.permission.AccessBuild;
+import io.onedev.server.security.permission.AccessBuildLog;
+import io.onedev.server.security.permission.AccessBuildPipeline;
+import io.onedev.server.security.permission.AccessBuildReports;
+import io.onedev.server.security.permission.AccessConfidentialIssues;
+import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.AccessTimeTracking;
+import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.security.permission.CreateRootProjects;
+import io.onedev.server.security.permission.EditIssueField;
+import io.onedev.server.security.permission.EditIssueLink;
+import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.ManageBuilds;
+import io.onedev.server.security.permission.ManageCodeComments;
+import io.onedev.server.security.permission.ManageIssues;
+import io.onedev.server.security.permission.ManageJob;
+import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.ManagePullRequests;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.security.permission.RunJob;
+import io.onedev.server.security.permission.ScheduleIssues;
+import io.onedev.server.security.permission.SystemAdministration;
+import io.onedev.server.security.permission.UploadCache;
+import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.security.permission.WritePack;
+import io.onedev.server.util.concurrent.PrioritizedCallable;
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
@@ -413,17 +474,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canReadPack(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ReadPack()));
 	}
-	
-	public static boolean canReadPackBlob(PackBlob packBlob) {
-		if (canReadPack(packBlob.getProject()))
-			return true;
-		for (var authorization: packBlob.getAuthorizations()) {
-			if (canReadPack(authorization.getProject()))
-				return true;
-		}
-		return false;
-	}
-	
+		
 	public static boolean canAccessReport(Build build, String reportName) {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new AccessBuildReports(reportName))));

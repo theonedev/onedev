@@ -1,12 +1,44 @@
 package io.onedev.server.rest.resource;
 
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.hibernate.criterion.Restrictions;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.model.*;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLabel;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.WebHook;
@@ -27,21 +59,6 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Restrictions;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.*;
 
 @Api(order=1000)
 @Path("/projects")
@@ -330,7 +347,7 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
-    	projectManager.requestToDelete(Sets.newHashSet(project));
+    	projectManager.delete(project);
     	return Response.ok().build();
     }
 	

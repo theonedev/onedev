@@ -544,6 +544,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 * @see #add(IValidator)
 	 * @return form component for chaining
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	public final FormComponent<T> remove(final IValidator<? super T> validator)
 	{
 		Args.notNull(validator, "validator");

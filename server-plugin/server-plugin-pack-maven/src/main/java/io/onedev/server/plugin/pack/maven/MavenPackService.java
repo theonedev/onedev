@@ -276,7 +276,7 @@ public class MavenPackService implements PackService {
 							} else {
 								blobHash = sessionManager.call(() -> {
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) 
+									if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) 
 										return getNonSha256Hash(packBlob, fileName);
 									else 
 										throw new HttpResponseAwareException(SC_NOT_FOUND);
@@ -288,7 +288,7 @@ public class MavenPackService implements PackService {
 						} else {
 							var packBlobInfo = sessionManager.call(() -> {
 								PackBlob packBlob;
-								if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) 
+								if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) 
 									return new Pair<>(packBlob.getProject().getId(), packBlob.getSize());
 								else
 									throw new HttpResponseAwareException(SC_NOT_FOUND);
@@ -344,7 +344,7 @@ public class MavenPackService implements PackService {
 						var sha256BlobHash = data.getSha256BlobHashes().get(blobName);
 						if (sha256BlobHash != null) {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(sha256BlobHash)) != null) {
+							if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) {
 								String blobHash;
 								if (fileName.endsWith(EXT_SHA256))
 									blobHash = sha256BlobHash;

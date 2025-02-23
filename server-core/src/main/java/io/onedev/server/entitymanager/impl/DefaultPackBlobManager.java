@@ -1,5 +1,58 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
+import static io.onedev.server.model.PackBlob.PACKS_DIR;
+import static io.onedev.server.model.PackBlob.PROP_CREATE_DATE;
+import static io.onedev.server.model.PackBlob.PROP_PROJECT;
+import static io.onedev.server.model.PackBlob.PROP_SHA256_HASH;
+import static io.onedev.server.model.PackBlob.getFileLockName;
+import static io.onedev.server.model.PackBlob.getPacksRelativeDirPath;
+import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
+import static io.onedev.server.util.Digest.SHA256;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static org.apache.commons.io.IOUtils.copy;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.glassfish.jersey.client.ClientProperties;
+import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -7,9 +60,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.StorageManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.PackBlobAuthorizationManager;
 import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackBlobReferenceManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
@@ -23,45 +74,10 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Digest;
 import io.onedev.server.util.Pair;
-import org.glassfish.jersey.client.ClientProperties;
-import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Root;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
-import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
-import static io.onedev.server.model.PackBlob.*;
-import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
-import static io.onedev.server.model.Project.PROP_PENDING_DELETE;
-import static io.onedev.server.util.Digest.SHA256;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static org.apache.commons.io.IOUtils.copy;
 
 @Singleton
 public class DefaultPackBlobManager extends BaseEntityManager<PackBlob> 
@@ -78,11 +94,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	private final ProjectManager projectManager;
 	
 	private final TransactionManager transactionManager;
-	
-	private final PackBlobAuthorizationManager authorizationManager;
-	
-	private final PackBlobReferenceManager referenceManager;
-	
+			
 	private final TaskScheduler taskScheduler;
 	
 	private final StorageManager storageManager;
@@ -92,15 +104,12 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	@Inject
 	public DefaultPackBlobManager(Dao dao, ClusterManager clusterManager, ProjectManager projectManager, 
 								  TransactionManager transactionManager, TaskScheduler taskScheduler,
-								  PackBlobAuthorizationManager authorizationManager, 
-								  PackBlobReferenceManager referenceManager, StorageManager storageManager) {
+								  StorageManager storageManager) {
 		super(dao);
 		this.clusterManager = clusterManager;
 		this.projectManager = projectManager;
 		this.taskScheduler = taskScheduler;
 		this.transactionManager = transactionManager;
-		this.authorizationManager = authorizationManager;
-		this.referenceManager = referenceManager;
 		this.storageManager = storageManager;
 	}
 
@@ -117,8 +126,9 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	
 	@Sessional
 	@Override
-	public PackBlob findBySha256Hash(String sha256Hash) {
+	public PackBlob findBySha256Hash(Long projectId, String sha256Hash) {
 		var criteria = newCriteria();
+		criteria.add(Restrictions.eq(PROP_PROJECT + "." + Project.PROP_ID, projectId));
 		criteria.add(Restrictions.eq(PROP_SHA256_HASH, sha256Hash));
 		return find(criteria);
 	}
@@ -184,10 +194,10 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	}
 
 	@Override
-	public PackBlob checkPackBlob(String sha256Hash) {
-		var packBlob = findBySha256Hash(sha256Hash);
-		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
-			if (checkPackBlobFile(packBlob.getProject().getId(), sha256Hash, packBlob.getSize())) {
+	public PackBlob checkPackBlob(Long projectId, String sha256Hash) {
+		var packBlob = findBySha256Hash(projectId, sha256Hash);
+		if (packBlob != null) {
+			if (checkPackBlobFile(projectId, sha256Hash, packBlob.getSize())) {
 				return packBlob;
 			} else {
 				delete(packBlob);
@@ -415,7 +425,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	private Pair<Long, Boolean> createBlob(Long projectId, String sha256Hash, long blobSize) {
 		return transactionManager.call(() -> {
 			var project = projectManager.load(projectId);
-			var packBlob = findBySha256Hash(sha256Hash);
+			var packBlob = findBySha256Hash(projectId, sha256Hash);
 			if (packBlob == null) {
 				packBlob = new PackBlob();
 				packBlob.setProject(project);
@@ -424,24 +434,20 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				packBlob.setCreateDate(new Date());
 				dao.persist(packBlob);
 				return new Pair<>(packBlob.getId(), true);
-			} else if (checkPackBlobFile(packBlob.getProject().getId(), sha256Hash, blobSize)) {
-				authorizationManager.authorize(project, packBlob);
+			} else if (checkPackBlobFile(projectId, sha256Hash, blobSize)) {
 				return new Pair<>(packBlob.getId(), false);
 			} else {
-				authorizationManager.authorize(packBlob.getProject(), packBlob);
-				packBlob.setProject(project);
-				dao.persist(packBlob);
 				return new Pair<>(packBlob.getId(), true);
 			}
 		});
 	}
 
 	@Override
-	public byte[] readBlob(String sha256Hash) {
-		var packBlob = findBySha256Hash(sha256Hash);
-		if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+	public byte[] readBlob(Long projectId, String sha256Hash) {
+		var packBlob = findBySha256Hash(projectId, sha256Hash);
+		if (packBlob != null) {
 			var baos = new ByteArrayOutputStream();
-			downloadBlob(packBlob.getProject().getId(), sha256Hash, baos);
+			downloadBlob(projectId, sha256Hash, baos);
 			var bytes = baos.toByteArray();
 			if (bytes.length != packBlob.getSize())
 				throw new ExplicitException("Invalid blob size: " + sha256Hash);
@@ -485,75 +491,6 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 		}
 	}
 	
-	@Transactional
-	@Override
-	public void onDeleteProject(Project project) {
-		var projectId = project.getId();
-		for (var packBlob: project.getPackBlobs()) {
-			var hash = packBlob.getSha256Hash();
-			if (!checkPackBlobFile(projectId, hash, packBlob.getSize())) {
-				delete(packBlob);
-				continue;
-			}
-			var reference = referenceManager.findNotPendingDelete(packBlob);
-			if (reference == null) {
-				delete(packBlob);
-				continue;
-			}
-			
-			packBlob.setProject(reference.getPack().getProject());
-			var newProjectId = reference.getPack().getProject().getId();
-			if (!projectManager.getActiveServer(projectId, true)
-					.equals(projectManager.getActiveServer(newProjectId, true))) {
-				projectManager.runOnActiveServer(newProjectId, () -> {
-					var newBlobFile = getPackBlobFile(newProjectId, hash);
-					FileUtils.createDir(newBlobFile.getParentFile());
-					var tempFile = new File(newBlobFile.getParentFile(), UUID.randomUUID().toString() + TEMP_BLOB_SUFFIX);
-					try {
-						try (var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
-							downloadBlob(projectId, hash, os);
-						}
-						write(getFileLockName(newProjectId, hash), () -> {
-							if (newBlobFile.exists())
-								FileUtils.deleteFile(newBlobFile);
-							FileUtils.moveFile(tempFile, newBlobFile);
-							return null;
-						});
-						projectManager.directoryModified(newProjectId, newBlobFile.getParentFile());
-					} finally {
-						if (tempFile.exists())
-							FileUtils.deleteFile(tempFile);
-					}
-					return null;
-				});
-			} else {
-				projectManager.runOnActiveServer(projectId, () -> {
-					var blobFile = getPackBlobFile(projectId, hash);
-					var newBlobFile = getPackBlobFile(newProjectId, hash);
-					FileUtils.createDir(newBlobFile.getParentFile());
-					var tempFile = new File(newBlobFile.getParentFile(), UUID.randomUUID().toString() + TEMP_BLOB_SUFFIX);
-					try {
-						read(getFileLockName(projectId, hash), () -> {
-							FileUtils.moveFile(blobFile, tempFile);
-							return null;
-						});
-						write(getFileLockName(newProjectId, hash), () -> {
-							if (newBlobFile.exists())
-								FileUtils.deleteFile(newBlobFile);
-							FileUtils.moveFile(tempFile, newBlobFile);
-							return null;
-						});
-						projectManager.directoryModified(newProjectId, newBlobFile.getParentFile());
-					} finally {
-						if (tempFile.exists())
-							FileUtils.deleteFile(tempFile);
-					}
-					return null;
-				});
-			}
-		}
-	}
-
 	@Override
 	public void syncPacks(Long projectId, String activeServer) {
 		if (clusterManager.runOnServer(activeServer, () -> projectManager.getSubDir(projectId, PACKS_DIR, false).exists())) {
@@ -581,7 +518,7 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 		var now = new Date();
 		for (var projectId: projectManager.getActiveIds()) {
 			var project = projectManager.findFacadeById(projectId);			
-			if (project != null && !project.isPendingDelete()) {
+			if (project != null) {
 				for (var uploadFile: projectManager.getSubDir(projectId, UPLOADS_DIR).listFiles()) {
 					if (now.getTime() - uploadFile.lastModified() > EXPIRE_MILLIS) 
 						FileUtils.deleteFile(uploadFile);
@@ -602,7 +539,6 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 				
 				var expireTime = new DateTime(now).minusMillis(EXPIRE_MILLIS).toDate();
 				criteriaQuery.where(
-						builder.equal(root.join(PROP_PROJECT).get(PROP_PENDING_DELETE),false), 
 						builder.not(builder.exists(referenceQuery)), 
 						builder.lessThan(root.get(PROP_CREATE_DATE), expireTime));
 				

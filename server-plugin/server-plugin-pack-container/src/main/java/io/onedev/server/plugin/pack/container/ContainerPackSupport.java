@@ -39,7 +39,7 @@ public class ContainerPackSupport implements PackSupport {
 	public Component renderContent(String componentId, Pack pack) {
 		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		var server = UrlUtils.getServer(serverUrl);
-		return new ContainerPackPanel(componentId, server + "/" + pack.getProject().getPath().toLowerCase() + "/" + pack.getName(), 
+		return new ContainerPackPanel(componentId, pack.getProject().getId(), server + "/" + pack.getProject().getPath().toLowerCase() + "/" + pack.getName(), 
 				pack.getVersion(), (String) pack.getData());
 	}
 

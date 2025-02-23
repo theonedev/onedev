@@ -1,20 +1,20 @@
 package io.onedev.server.entitymanager;
 
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.dao.EntityManager;
-
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.persistence.dao.EntityManager;
+
 public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	@Nullable
-    PackBlob findBySha256Hash(String sha256Hash);
+    PackBlob findBySha256Hash(Long projectId, String sha256Hash);
 	
 	String getSha512Hash(PackBlob packBlob);
 	
@@ -25,7 +25,7 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	boolean checkPackBlobFile(Long projectId, String sha256Hash, long size);
 	
 	@Nullable
-	PackBlob checkPackBlob(String sha256Hash);
+	PackBlob checkPackBlob(Long projectId, String sha256Hash);
 	
 	void initUpload(Long projectId, String uuid);
 	
@@ -48,10 +48,8 @@ public interface PackBlobManager extends EntityManager<PackBlob> {
 	
 	void downloadBlob(Long projectId, String sha256Hash, OutputStream os);
 	
-	byte[] readBlob(String sha256Hash);
+	byte[] readBlob(Long projectId, String sha256Hash);
 	
-	void onDeleteProject(Project project);
-
 	void syncPacks(Long projectId, String activeServer);
 
 	File getPackBlobFile(Long projectId, String sha256Hash);

@@ -77,9 +77,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	List<ProjectFacade> getChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
-	
-	void requestToDelete(Collection<Project> projects);
-	
+		
+	void delete(Collection<Project> projects);
+
 	Collection<Long> getIds();
 	
 	Collection<Long> getSubtreeIds(Long projectId);

@@ -32,6 +32,8 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 public class ContainerPackPanel extends Panel {
 	
+	private final Long projectId;
+	
 	private final String namespace;
 	
 	private final String tag;
@@ -41,13 +43,14 @@ public class ContainerPackPanel extends Panel {
 	private final IModel<ContainerManifest> manifestIModel = new LoadableDetachableModel<>() {
 		@Override
 		protected ContainerManifest load() {
-			return new ContainerManifest(getPackBlobManager().readBlob(manifestSha256Hash));
+			return new ContainerManifest(getPackBlobManager().readBlob(projectId, manifestSha256Hash));
 		}
 
 	};
 	
-	public ContainerPackPanel(String id, String namespace, String tag, String manifestSha256Hash) {
+	public ContainerPackPanel(String id, Long projectId, String namespace, String tag, String manifestSha256Hash) {
 		super(id);
+		this.projectId = projectId;
 		this.namespace = namespace;
 		this.tag = tag;
 		this.manifestSha256Hash = manifestSha256Hash;
@@ -117,7 +120,7 @@ public class ContainerPackPanel extends Panel {
 				add(fragment);
 			} else if (archDigests.size() == 1) {
 				var archHash = substringAfter(archDigests.values().iterator().next(), ":");
-				var archManifestBytes = getPackBlobManager().readBlob(archHash);
+				var archManifestBytes = getPackBlobManager().readBlob(projectId, archHash);
 				add(newImagePanel("content", readJson(archManifestBytes), null));
 			} else {
 				boolean cache = false;
@@ -152,7 +155,7 @@ public class ContainerPackPanel extends Panel {
 	
 	private Component newArchImagePanel(String componentId, String archDigest) {
 		var archHash = substringAfter(archDigest, ":");
-		var archManifestBytes = getPackBlobManager().readBlob(archHash);
+		var archManifestBytes = getPackBlobManager().readBlob(projectId, archHash);
 		return newImagePanel(componentId, readJson(archManifestBytes), archDigest);
 	}
 	
@@ -163,7 +166,7 @@ public class ContainerPackPanel extends Panel {
 		fragment.add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
 		
 		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
-		var config = readJson(getPackBlobManager().readBlob(configHash));
+		var config = readJson(getPackBlobManager().readBlob(projectId, configHash));
 		if (archDigest != null) {
 			fragment.add(new WebMarkupContainer("osArch").setVisible(false));
 			var pullArchCommand = "docker pull " + namespace + "@" + archDigest;

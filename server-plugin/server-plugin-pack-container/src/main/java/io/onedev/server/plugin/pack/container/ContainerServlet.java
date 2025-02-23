@@ -127,7 +127,7 @@ public class ContainerServlet extends HttpServlet {
 					var project = checkProject(projectPath, true);
 					if (digestString != null) {
 						var hash = parseDigest(digestString).getHash();
-						if (packBlobManager.checkPackBlob(hash) != null) {
+						if (packBlobManager.checkPackBlob(project.getId(), hash) != null) {
 							response.setStatus(SC_CREATED);
 							response.setHeader("Location", getBlobUrl(projectPath, repository, digestString));
 						}
@@ -229,12 +229,12 @@ public class ContainerServlet extends HttpServlet {
 				var digestString = matcher.group(3);
 				if (method.equals("GET") || method.equals("HEAD")) {
 					var packBlobInfo = sessionManager.call(() -> {
-						checkProject(projectPath, false);
+						var project = checkProject(projectPath, false);
 						var digest = parseDigest(digestString);
 						var hash = digest.getHash();
 						PackBlob packBlob;
-						if ((packBlob = packBlobManager.checkPackBlob(hash)) != null) {
-							response.setStatus(SC_OK);
+						if ((packBlob = packBlobManager.checkPackBlob(project.getId(), hash)) != null) {
+							response.setStatus(SC_OK);	
 							response.setHeader("Content-Length", String.valueOf(packBlob.getSize()));
 							response.setHeader("Docker-Content-Digest", digestString);
 							return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
@@ -269,7 +269,7 @@ public class ContainerServlet extends HttpServlet {
 						String hash;
 						if (isTag(reference)) {
 							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, null);
-							// DO not use lamda here as it may cause compilation error on terminal
+							// Do not use lamda here as it may cause compilation error on terminal
 							hash = LockUtils.call(getLockName(projectId, repository), new Callable<String>() {
 								@Override
 								public String call() {
@@ -278,8 +278,8 @@ public class ContainerServlet extends HttpServlet {
 										private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
 											var packBlob = packBlobs.get(hash);
 											if (packBlob == null) {
-												packBlob = packBlobManager.findBySha256Hash(hash);
-												if (packBlob != null && SecurityUtils.canReadPackBlob(packBlob)) {
+												packBlob = packBlobManager.findBySha256Hash(projectId, hash);
+												if (packBlob != null) {
 													if (packBlob.getSize() == size)
 														packBlobs.put(hash, packBlob);
 													else
@@ -372,14 +372,13 @@ public class ContainerServlet extends HttpServlet {
 							if (isTag(reference)) {
 								var pack = packManager.findByNameAndVersion(project, TYPE, repository, reference);
 								if (pack != null)
-									packBlob = packBlobManager.findBySha256Hash((String)pack.getData());
+									packBlob = packBlobManager.findBySha256Hash(project.getId(), (String)pack.getData());
 								else
 									packBlob = null;
 							} else {
-								packBlob = packBlobManager.findBySha256Hash(parseDigest(reference).getHash());
+								packBlob = packBlobManager.findBySha256Hash(project.getId(), parseDigest(reference).getHash());
 							}
 							if (packBlob != null && packBlob.getSize() < MAX_MANIFEST_SIZE 
-									&& SecurityUtils.canReadPackBlob(packBlob)
 									&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getSha256Hash(), packBlob.getSize())) {
 								response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getSha256Hash());
 								response.setContentLengthLong(packBlob.getSize());

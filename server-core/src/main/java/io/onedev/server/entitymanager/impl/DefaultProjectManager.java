@@ -1,13 +1,111 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.commons.utils.FileUtils.cleanDir;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
+import static io.onedev.server.git.GitUtils.getDefaultBranch;
+import static io.onedev.server.git.GitUtils.getLastCommit;
+import static io.onedev.server.git.GitUtils.getReachableCommits;
+import static io.onedev.server.git.GitUtils.isValid;
+import static io.onedev.server.git.GitUtils.setDefaultBranch;
+import static io.onedev.server.model.Project.ATTACHMENT_DIR;
+import static io.onedev.server.model.Project.SHARE_TEST_DIR;
+import static io.onedev.server.model.Project.SITE_DIR;
+import static io.onedev.server.model.Project.SORT_FIELDS;
+import static io.onedev.server.model.Project.getSiteLockName;
+import static io.onedev.server.replica.ProjectReplica.Type.BACKUP;
+import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
+import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.util.DirectoryVersionUtils.FILE_VERSION;
+import static io.onedev.server.util.DirectoryVersionUtils.increaseVersion;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.util.DirectoryVersionUtils.readVersion;
+import static io.onedev.server.util.DirectoryVersionUtils.writeVersion;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.criteria.Criteria.forManyValues;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Comparator.naturalOrder;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.*;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -15,13 +113,28 @@ import io.onedev.server.StorageManager;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.entitymanager.ProjectLabelManager;
+import io.onedev.server.entitymanager.ProjectLastEventDateManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionEvent;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.*;
+import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.DefaultBranchChanged;
+import io.onedev.server.event.project.ProjectCreated;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
@@ -34,7 +147,17 @@ import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLastEventDate;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
@@ -71,57 +194,6 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.*;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.*;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.Lock;
-import java.util.function.Consumer;
-
-import static io.onedev.commons.utils.FileUtils.cleanDir;
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
-import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
-import static io.onedev.server.git.GitUtils.*;
-import static io.onedev.server.model.Project.*;
-import static io.onedev.server.replica.ProjectReplica.Type.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.util.DirectoryVersionUtils.*;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static io.onedev.server.util.criteria.Criteria.forManyValues;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Comparator.naturalOrder;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
 public class DefaultProjectManager extends BaseEntityManager<Project>
@@ -175,6 +247,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final StorageManager storageManager;
 	
+	private final PackManager packManager;
+	
 	private final PackBlobManager packBlobManager;
 	
 	private final ProjectLabelManager labelManager;
@@ -203,8 +277,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 ProjectLastEventDateManager lastEventDateManager, PullRequestManager pullRequestManager,
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
 								 VisitInfoManager visitInfoManager, StorageManager storageManager,
-								 PackBlobManager packBlobManager, ProjectLabelManager labelManager, 
-								 Set<ProjectNameReservation> nameReservations) {
+								 PackManager packManager, PackBlobManager packBlobManager, 
+								 ProjectLabelManager labelManager, Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -227,6 +301,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.batchWorkManager = batchWorkManager;
 		this.visitInfoManager = visitInfoManager;
 		this.storageManager = storageManager;
+		this.packManager = packManager;
 		this.packBlobManager = packBlobManager;
 		this.labelManager = labelManager;
 
@@ -358,78 +433,97 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 	}
 
-	@Sessional
+	@Transactional
+	@Override
+	public void delete(Collection<Project> projects) {
+		Collection<Project> independents = new HashSet<>(projects);
+		for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
+			Project independent = it.next();
+			for (Project each : independents) {
+				if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
+					it.remove();
+					break;
+				}
+			}
+		}
+		for (Project independent : independents)
+			delete(independent);
+	}
+
+	@Transactional
 	@Override
 	public void delete(Project project) {
 		for (Project child : project.getChildren())
 			delete(child);
 
-		transactionManager.run(() -> {
-			Usage usage = new Usage();
-			usage.add(settingManager.onDeleteProject(project.getPath()));
-	
-			for (LinkSpec link : linkSpecManager.query()) {
-				for (IssueQueryUpdater updater : link.getQueryUpdaters())
-					usage.add(updater.onDeleteProject(project.getPath()).prefix("issue setting").prefix("administration"));
+		Usage usage = new Usage();
+		usage.add(settingManager.onDeleteProject(project.getPath()));
+
+		for (LinkSpec link : linkSpecManager.query()) {
+			for (IssueQueryUpdater updater : link.getQueryUpdaters())
+				usage.add(updater.onDeleteProject(project.getPath()).prefix("issue setting").prefix("administration"));
+		}
+
+		usage.checkInUse("Project '" + project.getPath() + "'");
+		
+		for (Project fork : project.getForks()) {
+			Collection<Project> forkChildren = fork.getForkDescendants();
+			forkChildren.add(fork);
+			for (Project forkChild : forkChildren) {
+				Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
+						Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
+				query.setParameter("fork", fork);
+				query.setParameter("descendant", forkChild);
+				query.executeUpdate();
+
+				query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
+						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
+				query.setParameter("fork", fork);
+				query.setParameter("descendant", forkChild);
+				query.executeUpdate();
+
+				query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
+						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
+				query.setParameter("fork", fork);
+				query.setParameter("descendant", forkChild);
+				query.executeUpdate();
 			}
-	
-			usage.checkInUse("Project '" + project.getPath() + "'");
-			
-			for (Project fork : project.getForks()) {
-				Collection<Project> forkChildren = fork.getForkDescendants();
-				forkChildren.add(fork);
-				for (Project forkChild : forkChildren) {
-					Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
-							Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
-					query.setParameter("fork", fork);
-					query.setParameter("descendant", forkChild);
-					query.executeUpdate();
+		}
 
-					query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
-							Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
-					query.setParameter("fork", fork);
-					query.setParameter("descendant", forkChild);
-					query.executeUpdate();
+		Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom",
+				Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
+		query.setParameter("forkedFrom", project);
+		query.executeUpdate();
 
-					query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
-							PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
-					query.setParameter("fork", fork);
-					query.setParameter("descendant", forkChild);
-					query.executeUpdate();
-				}
-			}
+		for (PullRequest request: project.getOutgoingRequests()) {
+			if (!request.getTargetProject().equals(project) && request.isOpen())
+				pullRequestManager.discard(request, "Source project is deleted.");
+		}
 
-			Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom",
-					Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
-			query.setParameter("forkedFrom", project);
-			query.executeUpdate();
+		query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
+				PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
+		query.setParameter("sourceProject", project);
+		query.executeUpdate();
 
-			for (PullRequest request: project.getOutgoingRequests()) {
-				if (!request.getTargetProject().equals(project) && request.isOpen())
-					pullRequestManager.discard(request, "Source project is deleted.");
-			}
+		for (Build build : project.getBuilds())
+			buildManager.delete(build);
 
-			query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
-					PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
-			query.setParameter("sourceProject", project);
-			query.executeUpdate();
+		for (Pack pack : project.getPacks())
+			packManager.delete(pack);
 
-			packBlobManager.onDeleteProject(project);
+		for (PackBlob packBlob : project.getPackBlobs())
+			packBlobManager.delete(packBlob);
 
-			for (Build build : project.getBuilds())
-				buildManager.delete(build);
+		dao.remove(project);
+		lastEventDateManager.delete(project.getLastEventDate());
 
-			dao.remove(project);
-			lastEventDateManager.delete(project.getLastEventDate());
+		synchronized (repositoryCache) {
+			Repository repository = repositoryCache.remove(project.getId());
+			if (repository != null)
+				repository.close();
+		}
 
-			synchronized (repositoryCache) {
-				Repository repository = repositoryCache.remove(project.getId());
-				if (repository != null)
-					repository.close();
-			}
-
-			listenerRegistry.post(new ProjectDeleted(project));
-		});
+		listenerRegistry.post(new ProjectDeleted(project));
 	}
 
 	@Override
@@ -1036,50 +1130,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			update(project);
 		}
 	}
-
-	@Transactional
-	@Override
-	public void requestToDelete(Collection<Project> projects) {
-		var pendingDeleteProjects = new HashSet<>(projects);
-		for (Project project: projects) {
-			pendingDeleteProjects.add(project);
-			pendingDeleteProjects.addAll(project.getDescendants());
-		}
-		for (var project: pendingDeleteProjects) {
-			project.setPendingDelete(true);
-			dao.persist(project);
-		}
-		transactionManager.runAfterCommit(() -> clusterManager.submitToServer(clusterManager.getLeaderServerAddress(), () -> {
-			processPendingDeletes();
-			return null;
-		}));
-		listenerRegistry.post(new ProjectsPendingDelete(pendingDeleteProjects));
-	}
 	
-	private synchronized void processPendingDeletes() {
-		try {
-			sessionManager.run(() -> {
-				var criteria = newCriteria();
-				criteria.add(Restrictions.eq(PROP_PENDING_DELETE, true));
-
-				Collection<Project> independents = new HashSet<>(query(criteria, 0, Integer.MAX_VALUE));
-				for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
-					Project independent = it.next();
-					for (Project each : independents) {
-						if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
-							it.remove();
-							break;
-						}
-					}
-				}
-				for (Project independent : independents)
-					delete(independent);
-			});
-		} catch(Exception e) {
-			logger.error("Error processing pending deletes", e);
-		}
-	}
-
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
 		return cache.getChildren(projectId);

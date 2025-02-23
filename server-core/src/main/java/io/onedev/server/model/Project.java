@@ -215,8 +215,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public static final String PROP_SERVICE_DESK_EMAIL_ADDRESS = "serviceDeskEmailAddress";
 	
-	public static final String PROP_PENDING_DELETE = "pendingDelete";
-	
 	private static final String FAKED_GITHUB_REPO_PATH_SEPARATOR = "-path.separator.of.onedev.project-";
 
 	private static final String FAKED_GITHUB_REPO_OWNER = "faked-owner-of-onedev-project";
@@ -298,10 +296,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Pack> packs = new ArrayList<>();
-	
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<PackBlobAuthorization> packBlobAuthorizations = new ArrayList<>();
-	
+		
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -401,9 +396,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private boolean issueManagement = true;
 
 	private boolean timeTracking = false;
-	
-	private boolean pendingDelete;
-	
+		
 	@Lob
 	@Column(length=65535)
 	private GitPackConfig gitPackConfig = new GitPackConfig();
@@ -787,7 +780,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
-				lastEventDate.getId(), idOf(getDefaultRole()), isPendingDelete(), idOf(getParent()));
+				lastEventDate.getId(), idOf(getDefaultRole()), idOf(getParent()));
 	}
 	
 	/**
@@ -1095,14 +1088,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.packManagement = packManagement;
 	}
 	
-	public boolean isPendingDelete() {
-		return pendingDelete;
-	}
-
-	public void setPendingDelete(boolean pendingDelete) {
-		this.pendingDelete = pendingDelete;
-	}
-
 	@Editable(order=500, placeholder="Default", description="Specify an email address sharing same inbox as " +
 			"the system email address in mail setting definition. Emails sent to this address will be " +
 			"created as issues in this project. The default value takes form of "
@@ -1332,14 +1317,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setPacks(Collection<Pack> packs) {
 		this.packs = packs;
-	}
-
-	public Collection<PackBlobAuthorization> getPackBlobAuthorizations() {
-		return packBlobAuthorizations;
-	}
-
-	public void setPackBlobAuthorizations(Collection<PackBlobAuthorization> packBlobAuthorizations) {
-		this.packBlobAuthorizations = packBlobAuthorizations;
 	}
 
 	public List<BlobIdent> getBlobChildren(BlobIdent blobIdent, BlobIdentFilter filter) {

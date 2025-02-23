@@ -1,11 +1,11 @@
 package io.onedev.server.web.component.project;
 
-import com.google.common.collect.Sets;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 
 public abstract class ConfirmDeleteModal extends ConfirmModalPanel {
 
@@ -17,7 +17,7 @@ public abstract class ConfirmDeleteModal extends ConfirmModalPanel {
 	protected void onConfirm(AjaxRequestTarget target) {
 		Project project = getProject();
 		
-		OneDev.getInstance(ProjectManager.class).requestToDelete(Sets.newHashSet(project));
+		OneDev.getInstance(ProjectManager.class).delete(project);
 		getSession().success("Project '" + project.getPath() + "' deleted");
 	}
 	

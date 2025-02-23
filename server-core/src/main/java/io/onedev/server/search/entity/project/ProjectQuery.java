@@ -98,8 +98,6 @@ public class ProjectQuery extends EntityQuery<Project> {
 								return new HasOutdatedReplicasCriteria();
 							case MissingStorage:
 								return new MissingStorageCriteria();
-							case PendingDelete:
-								return new PendingDeleteCriteria();
 							default:
 								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 						}

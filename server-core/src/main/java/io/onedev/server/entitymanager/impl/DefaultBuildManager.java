@@ -322,7 +322,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Map<Long, Long> queryUnfinished() {
 		Query<?> query = getSession().createQuery("select id, project.id from Build where "
-				+ "project.pendingDelete = false and (status=:waiting or status=:pending or status=:running)");
+				+ "status=:waiting or status=:pending or status=:running");
 		query.setParameter("waiting", Build.Status.WAITING);
 		query.setParameter("pending", Build.Status.PENDING);
 		query.setParameter("running", Build.Status.RUNNING);
