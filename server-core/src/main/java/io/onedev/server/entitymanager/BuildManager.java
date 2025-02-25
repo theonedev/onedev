@@ -1,6 +1,22 @@
 package io.onedev.server.entitymanager;
 
-import io.onedev.server.model.*;
+import java.io.File;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jgit.lib.ObjectId;
+
+import io.onedev.server.model.Agent;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectBuildStatusStat;
@@ -8,15 +24,6 @@ import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.util.StatsGroup;
-import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public interface BuildManager extends EntityManager<Build> {
 	
@@ -71,15 +78,11 @@ public interface BuildManager extends EntityManager<Build> {
 
 	List<String> queryVersions(Project project, String matchWith, int count);
 
-	Map<Integer, Pair<Integer, Integer>> queryDurationStats(Project project,
-															@Nullable
-															Criteria<Build> criteria, 
-															StatsGroup group);
+	Map<Integer, Pair<Integer, Integer>> queryDurationStats(Project project, @Nullable Criteria<Build> buildCriteria, 
+			@Nullable Date startDate, @Nullable Date endDate, StatsGroup group);
 
-	Map<Integer, Integer> queryFrequencyStats(Project project,
-															@Nullable
-															Criteria<Build> criteria,
-															StatsGroup group);
+	Map<Integer, Integer> queryFrequencyStats(Project project, @Nullable Criteria<Build> buildCriteria, 
+			@Nullable Date startDate, @Nullable Date endDate, StatsGroup group);
 	
 	Collection<String> getAccessibleJobNames(Project project);
 

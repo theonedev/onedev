@@ -5,6 +5,7 @@ import static edu.emory.mathcs.backport.java.util.Collections.sort;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.ARTIFACTS_DIR;
 import static io.onedev.server.model.Build.LOG_FILE;
+import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_FINISH_TIME_GROUPS;
 import static io.onedev.server.model.Build.PROP_PENDING_DURATION;
 import static io.onedev.server.model.Build.PROP_RUNNING_DURATION;
@@ -19,15 +20,16 @@ import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 import static java.lang.Long.valueOf;
+import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -465,17 +467,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Sessional
 	@Override
 	public Map<Integer, Pair<Integer, Integer>> queryDurationStats(Project project, 
-																   Criteria<Build> criteria, 
-																   StatsGroup group) {
+				@Nullable Criteria<Build> buildCriteria, @Nullable Date startDate, 
+				@Nullable Date endDate, StatsGroup group) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 		
 		var predicates = new ArrayList<Predicate>();
-		predicates.addAll(Arrays.asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		predicates.addAll(asList(getPredicates(project, buildCriteria, criteriaQuery, root, builder)));
 		predicates.add(builder.equal(root.get(PROP_STATUS), SUCCESSFUL));
 		predicates.add(builder.isNotNull(root.get(PROP_PENDING_DURATION)));
 		predicates.add(builder.isNotNull(root.get(PROP_RUNNING_DURATION)));
+		if (startDate != null)
+			predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_FINISH_DATE), startDate));
+		if (endDate != null)
+			predicates.add(builder.lessThanOrEqualTo(root.get(PROP_FINISH_DATE), endDate));
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
@@ -496,14 +502,20 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Sessional
 	@Override
-	public Map<Integer, Integer> queryFrequencyStats(Project project,
-																   Criteria<Build> criteria,
-																   StatsGroup group) {
+	public Map<Integer, Integer> queryFrequencyStats(Project project, 
+				@Nullable Criteria<Build> buildCriteria, @Nullable Date startDate, 
+				@Nullable Date endDate, StatsGroup group) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 
-		criteriaQuery.where(getPredicates(project, criteria, criteriaQuery, root, builder));
+		var predicates = new ArrayList<Predicate>(asList(getPredicates(project, buildCriteria, criteriaQuery, root, builder)));
+		predicates.add(builder.isNotNull(root.get(PROP_FINISH_DATE)));
+		if (startDate != null)
+			predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_FINISH_DATE), startDate));
+		if (endDate != null)
+			predicates.add(builder.lessThanOrEqualTo(root.get(PROP_FINISH_DATE), endDate));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 

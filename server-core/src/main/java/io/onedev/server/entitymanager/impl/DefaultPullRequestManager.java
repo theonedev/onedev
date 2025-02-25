@@ -2,12 +2,15 @@ package io.onedev.server.entitymanager.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.model.PullRequest.PROP_CLOSE_DATE;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_TIME_GROUPS;
 import static io.onedev.server.model.PullRequest.PROP_DURATION;
 import static io.onedev.server.model.PullRequest.PROP_STATUS;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.PullRequest.PROP_SUBMIT_TIME_GROUPS;
 import static io.onedev.server.model.PullRequest.getSerialLockName;
 import static io.onedev.server.model.PullRequest.Status.MERGED;
+import static io.onedev.server.model.PullRequest.Status.OPEN;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -287,7 +290,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Override
 	public void reopen(PullRequest request, String note) {
 		User user = SecurityUtils.getUser();
-		request.setStatus(Status.OPEN);
+		request.setStatus(OPEN);
 
 		PullRequestChange change = new PullRequestChange();
 		change.setData(new PullRequestReopenData());
@@ -1010,19 +1013,22 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Sessional
 	@Override
-	public Map<Integer, Integer> queryDurationStats(Project project,
-																   Criteria<PullRequest> criteria,
-																   StatsGroup group) {
+	public Map<Integer, Integer> queryDurationStats(Project project, 
+			@Nullable Criteria<PullRequest> pullRequestCriteria, 
+			@Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		var predicates = new ArrayList<Predicate>();
-		predicates.addAll(asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		var predicates = new ArrayList<Predicate>(asList(getPredicates(project, pullRequestCriteria, criteriaQuery, root, builder)));
 		predicates.add(builder.equal(root.get(PROP_STATUS), MERGED));
 		predicates.add(builder.isNotNull(root.get(PROP_DURATION)));
+		if (startDate != null)
+			predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_CLOSE_DATE), startDate));
+		if (endDate != null)
+			predicates.add(builder.lessThanOrEqualTo(root.get(PROP_CLOSE_DATE), endDate));
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
-		var groupPath = group.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
+		var groupPath = statsGroup.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
 		criteriaQuery.multiselect(newArrayList(
@@ -1039,15 +1045,23 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Sessional
 	@Override
-	public Map<Integer, Pair<Integer, Integer>> queryOpenAndMergeFrequencyStats(Project project,
-																				Criteria<PullRequest> criteria,
-																				StatsGroup group) {
+	public Map<Integer, Pair<Integer, Integer>> queryFrequencyStats(Project project, 
+				@Nullable Criteria<PullRequest> pullRequestCriteria, @Nullable Date startDate, 
+				@Nullable Date endDate, StatsGroup statsGroup) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		criteriaQuery.where(getPredicates(project, criteria, criteriaQuery, root, builder));
-		var groupPath = group.getPath(root.get(PROP_SUBMIT_TIME_GROUPS));
+		var pullRequestPredicates = asList(getPredicates(project, pullRequestCriteria, criteriaQuery, root, builder));
+
+		var predicates = new ArrayList<>(pullRequestPredicates);
+		predicates.add(builder.equal(root.get(PROP_STATUS), OPEN));
+		if (startDate != null)
+			predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_SUBMIT_DATE), startDate));
+		if (endDate != null)
+			predicates.add(builder.lessThanOrEqualTo(root.get(PROP_SUBMIT_DATE), endDate));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		var groupPath = statsGroup.getPath(root.get(PROP_SUBMIT_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
 		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
@@ -1056,10 +1070,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		for (var result: getSession().createQuery(criteriaQuery).getResultList())
 			openStats.put((int)result[0], ((Long)result[1]).intValue());
 
-		var predicates = new ArrayList<>(asList(getPredicates(project, criteria, criteriaQuery, root, builder)));
+		predicates = new ArrayList<>(pullRequestPredicates);
 		predicates.add(builder.equal(root.get(PROP_STATUS), MERGED));
+		if (startDate != null)
+			predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_CLOSE_DATE), startDate));
+		if (endDate != null)
+			predicates.add(builder.lessThanOrEqualTo(root.get(PROP_CLOSE_DATE), endDate));
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
-		groupPath = group.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
+		groupPath = statsGroup.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
 		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
@@ -1082,7 +1100,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	}
 
 	private Criterion ofOpen() {
-		return Restrictions.eq(PROP_STATUS, Status.OPEN);
+		return Restrictions.eq(PROP_STATUS, OPEN);
 	}
 
 	private Criterion ofTarget(ProjectAndBranch target) {

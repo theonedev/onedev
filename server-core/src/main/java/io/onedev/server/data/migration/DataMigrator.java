@@ -7576,4 +7576,63 @@ public class DataMigrator {
 		codeCommentTouchsDom.writeToFile(codeCommentTouchsDomFile, true);
 	}
 
+	private void migrate190(File dataDir, Stack<Integer> versions) {
+		List<Pair<File, VersionedXmlDoc>> doms = new ArrayList<>();
+		List<Pair<Element, Date>> histories = new ArrayList<>();
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueStateHistorys.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				doms.add(new Pair<>(file, dom));
+				for (Element element : dom.getRootElement().elements()) {
+					histories.add(new Pair<>(element, parseDate(element.elementText("date").trim())));
+				}
+			}
+		}
+		Collections.sort(histories, (h1, h2) -> h1.getRight().compareTo(h2.getRight()));
+		var index = 1;
+		for (var history: histories) {
+			history.getLeft().element("id").setText(String.valueOf(index++));
+		}
+		for (var entry: doms) {
+			entry.getRight().writeToFile(entry.getLeft(), false);
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Dashboards.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var widgetElement : element.element("widgets").elements()) {
+						for (var tabElement: widgetElement.element("tabs").elements()) {
+							if (tabElement.getName().endsWith("BuildDurationStatsWidget") 
+									|| tabElement.getName().endsWith("BuildFrequencyStatsWidget")) {
+								var buildQueryElement = tabElement.element("buildQuery");
+								if (buildQueryElement != null)
+									buildQueryElement.detach();
+								tabElement.addElement("displayMonths").setText("6");
+							} else if (tabElement.getName().endsWith("IssueStateDurationStatsWidget")) {
+								var issueQueryElement = tabElement.element("issueQuery");
+								if (issueQueryElement != null)
+									issueQueryElement.detach();
+								tabElement.addElement("displayMonths").setText("6");
+							} else if (tabElement.getName().endsWith("IssueStateFrequencyStatsWidget")) {
+								var issueQueryElement = tabElement.element("issueQuery");
+								if (issueQueryElement != null)
+									issueQueryElement.detach();
+								tabElement.addElement("displayMonths").setText("6");
+								tabElement.addElement("excludeStates");
+							} else if (tabElement.getName().endsWith("PullRequestDurationStatsWidget")
+									|| tabElement.getName().endsWith("PullRequestFrequencyStatsWidget")) {
+								var pullRequestQueryElement = tabElement.element("pullRequestQuery");
+								if (pullRequestQueryElement != null)
+									pullRequestQueryElement.detach();
+								tabElement.addElement("displayMonths").setText("6");
+							}							
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

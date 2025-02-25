@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -69,14 +70,11 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	List<ProjectPullRequestStatusStat> queryStatusStats(Collection<Project> projects);
 
-	Map<Integer, Integer> queryDurationStats(Project project,
-															@Nullable
-															Criteria<PullRequest> criteria,
-															StatsGroup group);
-	Map<Integer, Pair<Integer, Integer>> queryOpenAndMergeFrequencyStats(Project project,
-																		 @Nullable
-											 Criteria<PullRequest> criteria,
-																		 StatsGroup group);
+	Map<Integer, Integer> queryDurationStats(Project project, @Nullable Criteria<PullRequest> pullRequestCriteria, 
+            @Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup);
+	Map<Integer, Pair<Integer, Integer>> queryFrequencyStats(Project project,
+            @Nullable Criteria<PullRequest> pullRequestCriteria, 
+            @Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup);
 
 	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 
