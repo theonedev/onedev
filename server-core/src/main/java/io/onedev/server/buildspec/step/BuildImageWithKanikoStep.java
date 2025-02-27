@@ -46,7 +46,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	@Editable
 	@Override
 	public String getImage() {
-		return "1dev/kaniko:1.0.2";
+		return "1dev/kaniko:1.0.3";
 	}
 
 	@Override
