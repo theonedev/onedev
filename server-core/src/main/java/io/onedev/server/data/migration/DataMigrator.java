@@ -7395,11 +7395,6 @@ public class DataMigrator {
 	private void migrate189(File dataDir, Stack<Integer> versions) {
 		Map<String, String> pullRequestIdToProjectId = new HashMap<>();
 		Map<String, String> codeCommentIdToProjectId = new HashMap<>();
-		Map<String, Set<String>> packBlobIdToAuthorizedProjectIds = new HashMap<>();
-		Map<String, Pair<String, String>> packBlobIdToProjectAndHash = new HashMap<>();
-		Map<String, String> packIdToProjectId = new HashMap<>();
-		int nextPackBlobId = 1;
-		String packStorePath = null;
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("PullRequests.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
@@ -7427,124 +7422,9 @@ public class DataMigrator {
 						pendingDeleteElement.detach();
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("PackBlobAuthorizations.xml")) {
-				var dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					var projectId = element.elementTextTrim("project");
-					var packBlobId = element.elementTextTrim("packBlob");
-					packBlobIdToAuthorizedProjectIds.computeIfAbsent(packBlobId, k -> new HashSet<>()).add(projectId);
-				}
-				FileUtils.deleteFile(file);
-			} else if (file.getName().startsWith("PackBlobs.xml")) {
-				var dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					var packBlobId = element.elementTextTrim("id");
-					nextPackBlobId = Math.max(nextPackBlobId, Integer.parseInt(packBlobId) + 1);
-					packBlobIdToProjectAndHash.put(packBlobId, new Pair<>(element.elementTextTrim("project"), element.elementTextTrim("sha256Hash")));
-				}
-			} else if (file.getName().startsWith("Packs.xml")) {
-				var dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					packIdToProjectId.put(element.elementTextTrim("id"), element.elementTextTrim("project"));
-				}
-			} else if (file.getName().startsWith("Settings.xml")) {
-				var dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("CONTRIBUTED_SETTINGS")) {
-						var valueElement = element.element("value");
-						if (valueElement != null) {
-							for (var entryElement: valueElement.elements()) {
-								var storageSettingElement = entryElement.element("io.onedev.server.ee.storage.StorageSetting");
-								if (storageSettingElement != null) {
-									var packStoreElement = storageSettingElement.element("packStore");
-									if (packStoreElement != null)
-										packStorePath = packStoreElement.getText().trim();
-								}
-							}
-						}
-					}
-				}
-				dom.writeToFile(file, false);
 			}
 		}
 
-		Map<String, Map<String, String>> projectIdToPackBlobIdMapping = new HashMap<>();
-		var packBlobsFile = new File(dataDir, "PackBlobs.xml");
-		if (packBlobsFile.exists()) {
-			var packBlobsDom = VersionedXmlDoc.fromFile(packBlobsFile);
-			var projectsDir = new File(dataDir.getParentFile().getParentFile().getParentFile(), "site/projects");
-			for (var entry: packBlobIdToAuthorizedProjectIds.entrySet()) {
-				var packBlobProjectAndHash = packBlobIdToProjectAndHash.get(entry.getKey());
-				var projectDir = new File(projectsDir, packBlobProjectAndHash.getLeft());
-				var hash = packBlobProjectAndHash.getRight();
-				var relativeBlobFilePath = hash.substring(0, 2) + "/" + hash.substring(2, 4) + "/" + hash;
-				var packBlobFile = new File(projectDir, "packages/" + relativeBlobFilePath);
-				if (!packBlobFile.exists()) {
-					var errorMessage = String.format(
-						"Unable to find pack blob file for migration (blob file: %s, target projects: %s)", 
-						packBlobFile.getAbsolutePath(), String.join(" ", entry.getValue()));
-					throw new ExplicitException(errorMessage);
-				}
-				for (var authorizedProjectId: entry.getValue()) {
-					if (authorizedProjectId.equals(packBlobProjectAndHash.getLeft()))
-						continue;
-					var targetProjectDir = new File(projectsDir, authorizedProjectId);
-					var targetPackagesDir = new File(targetProjectDir, "packages");
-					if (!targetPackagesDir.exists() && packStorePath != null) {
-						var symlinkTargetDir = new File(packStorePath, authorizedProjectId);
-						FileUtils.createDir(symlinkTargetDir);
-						try {
-							Files.createSymbolicLink(targetPackagesDir.toPath(), symlinkTargetDir.toPath());
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-					var targetPackBlobFile = new File(targetPackagesDir, relativeBlobFilePath);
-					FileUtils.createDir(targetPackBlobFile.getParentFile());
-					try {
-						FileUtils.copyFile(packBlobFile, targetPackBlobFile);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-
-					var targetProjectPath = targetProjectDir.toPath();	
-					var currentPath = targetPackBlobFile.getParentFile().toPath();
-					while (currentPath.startsWith(targetProjectPath)) {
-						var currentDir = currentPath.toFile();
-						DirectoryVersionUtils.increaseVersion(currentDir);
-						currentPath = currentPath.getParent();
-					}
-			
-					var targetPackBlobElement = packBlobsDom.getRootElement().addElement("io.onedev.server.model.PackBlob");
-					targetPackBlobElement.addAttribute("revision", "0.0");
-					var targetPackBlobId = String.valueOf(nextPackBlobId++);
-					targetPackBlobElement.addElement("id").setText(targetPackBlobId);
-					targetPackBlobElement.addElement("project").setText(authorizedProjectId);
-					targetPackBlobElement.addElement("sha256Hash").setText(hash);
-					targetPackBlobElement.addElement("size").setText(String.valueOf(packBlobFile.length()));
-					targetPackBlobElement.addElement("createDate").addAttribute("class", "sql-timestamp").setText(formatDate(new Date()));
-					projectIdToPackBlobIdMapping.computeIfAbsent(authorizedProjectId, k -> new HashMap<>()).put(entry.getKey(), targetPackBlobId);
-				}
-			}
-			packBlobsDom.writeToFile(packBlobsFile, false);
-		}
-
-		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("PackBlobReferences.xml")) {
-				var dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					var packId = element.elementTextTrim("pack");
-					var packBlobElement = element.element("packBlob");
-					var packBlobId = packBlobElement.getTextTrim();
-					var projectId = packIdToProjectId.get(packId);
-					var packBlobIdMapping = projectIdToPackBlobIdMapping.get(projectId);
-					if (packBlobIdMapping != null && packBlobIdMapping.containsKey(packBlobId)) 
-						packBlobElement.setText(packBlobIdMapping.get(packBlobId));
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-		
 		VersionedXmlDoc pullRequestTouchsDom;
 		File pullRequestTouchsDomFile = new File(dataDir, "PullRequestTouchs.xml");
 		pullRequestTouchsDom = new VersionedXmlDoc();
@@ -7638,17 +7518,23 @@ public class DataMigrator {
 		if (packBlobsFile.exists()) {
 			var packBlobsDom = VersionedXmlDoc.fromFile(packBlobsFile);
 
+			Map<String, Map<String, String>> packBlobIds = new HashMap<>();		
 			Map<String, Pair<String, String>> packBlobIdToProjectIdAndHash = new HashMap<>();
 			Map<String, String> packIdToProjectId = new HashMap<>();
 			int nextPackBlobId = 1;
 			String packStorePath = null;
 			for (File file : dataDir.listFiles()) {
-				if (file.getName().startsWith("PackBlobs.xml")) {
+				if (file.getName().startsWith("PackBlobAuthorizations.xml")) {
+					FileUtils.deleteFile(file);
+				} else if (file.getName().startsWith("PackBlobs.xml")) {
 					var dom = VersionedXmlDoc.fromFile(file);
 					for (Element element : dom.getRootElement().elements()) {
 						var packBlobId = element.elementTextTrim("id");
+						var projectId = element.elementTextTrim("project");
+						var hash = element.elementTextTrim("sha256Hash");
 						nextPackBlobId = Math.max(nextPackBlobId, Integer.parseInt(packBlobId) + 1);
-						packBlobIdToProjectIdAndHash.put(packBlobId, new Pair<>(element.elementTextTrim("project"), element.elementTextTrim("sha256Hash")));
+						packBlobIdToProjectIdAndHash.put(packBlobId, new Pair<>(projectId, hash));
+						packBlobIds.computeIfAbsent(hash, k -> new HashMap<>()).put(projectId, packBlobId);
 					}
 				} else if (file.getName().startsWith("Packs.xml")) {
 					var dom = VersionedXmlDoc.fromFile(file);
@@ -7672,12 +7558,10 @@ public class DataMigrator {
 							}
 						}
 					}
-					dom.writeToFile(file, false);
 				}
 			}
 
 			var projectsDir = new File(dataDir.getParentFile().getParentFile().getParentFile(), "site/projects");
-			Map<String, Map<String, String>> packBlobCopies = new HashMap<>();		
 			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("PackBlobReferences.xml")) {
 					var dom = VersionedXmlDoc.fromFile(file);
@@ -7689,23 +7573,19 @@ public class DataMigrator {
 						var packBlobProjectIdAndHash = packBlobIdToProjectIdAndHash.get(packBlobId);
 						if (targetProjectId.equals(packBlobProjectIdAndHash.getLeft()))
 							continue;
-						var packBlobCopy = packBlobCopies.get(packBlobId);
-						if (packBlobCopy == null) {
-							packBlobCopy = new HashMap<>();
-							packBlobCopies.put(packBlobId, packBlobCopy);
-						}
-						var packBlobCopyId = packBlobCopy.get(targetProjectId);
+						var hash = packBlobProjectIdAndHash.getRight();
+						var projectIdToPackBlobId = packBlobIds.get(hash);
+						var packBlobCopyId = projectIdToPackBlobId.get(targetProjectId);
 						if (packBlobCopyId == null) {
 							packBlobCopyId = String.valueOf(nextPackBlobId++);							
-							packBlobCopy.put(targetProjectId, packBlobCopyId);
+							projectIdToPackBlobId.put(targetProjectId, packBlobCopyId);
 							var projectDir = new File(projectsDir, packBlobProjectIdAndHash.getLeft());
-							var hash = packBlobProjectIdAndHash.getRight();
 							var relativeBlobFilePath = hash.substring(0, 2) + "/" + hash.substring(2, 4) + "/" + hash;
 							var packBlobFile = new File(projectDir, "packages/" + relativeBlobFilePath);
 							if (!packBlobFile.exists()) {
 								var errorMessage = String.format(
-									"Unable to find pack blob file for migration (blob file: %s, target project: %s)", 
-									packBlobFile.getAbsolutePath(), targetProjectId);
+									"Unable to find pack blob file for migration (blob file: %s, referencing project: %s, referencing pack: %s)", 
+									packBlobFile.getAbsolutePath(), targetProjectId, packId);
 								throw new ExplicitException(errorMessage);
 							}
 							var targetProjectDir = new File(projectsDir, targetProjectId);
