@@ -7533,9 +7533,9 @@ public class DataMigrator {
 			if (file.getName().startsWith("PackBlobReferences.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					var packId = element.elementTextTrim("id");
+					var packId = element.elementTextTrim("pack");
 					var packBlobElement = element.element("packBlob");
-					var packBlobId = packBlobElement.elementTextTrim("id");
+					var packBlobId = packBlobElement.getTextTrim();
 					var projectId = packIdToProjectId.get(packId);
 					var packBlobIdMapping = projectIdToPackBlobIdMapping.get(projectId);
 					if (packBlobIdMapping != null && packBlobIdMapping.containsKey(packBlobId)) 
@@ -7632,6 +7632,123 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			}
+		}
+
+		var packBlobsFile = new File(dataDir, "PackBlobs.xml");
+		if (packBlobsFile.exists()) {
+			var packBlobsDom = VersionedXmlDoc.fromFile(packBlobsFile);
+
+			Map<String, Pair<String, String>> packBlobIdToProjectIdAndHash = new HashMap<>();
+			Map<String, String> packIdToProjectId = new HashMap<>();
+			int nextPackBlobId = 1;
+			String packStorePath = null;
+			for (File file : dataDir.listFiles()) {
+				if (file.getName().startsWith("PackBlobs.xml")) {
+					var dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						var packBlobId = element.elementTextTrim("id");
+						nextPackBlobId = Math.max(nextPackBlobId, Integer.parseInt(packBlobId) + 1);
+						packBlobIdToProjectIdAndHash.put(packBlobId, new Pair<>(element.elementTextTrim("project"), element.elementTextTrim("sha256Hash")));
+					}
+				} else if (file.getName().startsWith("Packs.xml")) {
+					var dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						packIdToProjectId.put(element.elementTextTrim("id"), element.elementTextTrim("project"));
+					}
+				} else if (file.getName().startsWith("Settings.xml")) {
+					var dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						if (element.elementTextTrim("key").equals("CONTRIBUTED_SETTINGS")) {
+							var valueElement = element.element("value");
+							if (valueElement != null) {
+								for (var entryElement: valueElement.elements()) {
+									var storageSettingElement = entryElement.element("io.onedev.server.ee.storage.StorageSetting");
+									if (storageSettingElement != null) {
+										var packStoreElement = storageSettingElement.element("packStore");
+										if (packStoreElement != null)
+											packStorePath = packStoreElement.getText().trim();
+									}
+								}
+							}
+						}
+					}
+					dom.writeToFile(file, false);
+				}
+			}
+
+			var projectsDir = new File(dataDir.getParentFile().getParentFile().getParentFile(), "site/projects");
+			Map<String, Map<String, String>> packBlobCopies = new HashMap<>();		
+			for (File file : dataDir.listFiles()) {
+				if (file.getName().startsWith("PackBlobReferences.xml")) {
+					var dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						var packId = element.elementTextTrim("pack");
+						var packBlobElement = element.element("packBlob");
+						var packBlobId = packBlobElement.getTextTrim();
+						var targetProjectId = packIdToProjectId.get(packId);
+						var packBlobProjectIdAndHash = packBlobIdToProjectIdAndHash.get(packBlobId);
+						if (targetProjectId.equals(packBlobProjectIdAndHash.getLeft()))
+							continue;
+						var packBlobCopy = packBlobCopies.get(packBlobId);
+						if (packBlobCopy == null) {
+							packBlobCopy = new HashMap<>();
+							packBlobCopies.put(packBlobId, packBlobCopy);
+						}
+						var packBlobCopyId = packBlobCopy.get(targetProjectId);
+						if (packBlobCopyId == null) {
+							packBlobCopyId = String.valueOf(nextPackBlobId++);							
+							packBlobCopy.put(targetProjectId, packBlobCopyId);
+							var projectDir = new File(projectsDir, packBlobProjectIdAndHash.getLeft());
+							var hash = packBlobProjectIdAndHash.getRight();
+							var relativeBlobFilePath = hash.substring(0, 2) + "/" + hash.substring(2, 4) + "/" + hash;
+							var packBlobFile = new File(projectDir, "packages/" + relativeBlobFilePath);
+							if (!packBlobFile.exists()) {
+								var errorMessage = String.format(
+									"Unable to find pack blob file for migration (blob file: %s, target project: %s)", 
+									packBlobFile.getAbsolutePath(), targetProjectId);
+								throw new ExplicitException(errorMessage);
+							}
+							var targetProjectDir = new File(projectsDir, targetProjectId);
+							var targetPackagesDir = new File(targetProjectDir, "packages");
+							if (!targetPackagesDir.exists() && packStorePath != null) {
+								var symlinkTargetDir = new File(packStorePath, targetProjectId);
+								FileUtils.createDir(symlinkTargetDir);
+								try {
+									Files.createSymbolicLink(targetPackagesDir.toPath(), symlinkTargetDir.toPath());
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+							var targetPackBlobFile = new File(targetPackagesDir, relativeBlobFilePath);
+							FileUtils.createDir(targetPackBlobFile.getParentFile());
+							try {
+								FileUtils.copyFile(packBlobFile, targetPackBlobFile);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+		
+							var targetProjectPath = targetProjectDir.toPath();	
+							var currentPath = targetPackBlobFile.getParentFile().toPath();
+							while (currentPath.startsWith(targetProjectPath)) {
+								var currentDir = currentPath.toFile();
+								DirectoryVersionUtils.increaseVersion(currentDir);
+								currentPath = currentPath.getParent();
+							}
+					
+							var targetPackBlobElement = packBlobsDom.getRootElement().addElement("io.onedev.server.model.PackBlob");
+							targetPackBlobElement.addAttribute("revision", "0.0");
+							targetPackBlobElement.addElement("id").setText(packBlobCopyId);
+							targetPackBlobElement.addElement("project").setText(targetProjectId);
+							targetPackBlobElement.addElement("sha256Hash").setText(hash);
+							targetPackBlobElement.addElement("size").setText(String.valueOf(packBlobFile.length()));
+							targetPackBlobElement.addElement("createDate").addAttribute("class", "sql-timestamp").setText(formatDate(new Date()));
+						}
+						packBlobElement.setText(packBlobCopyId);
+					}
+					dom.writeToFile(file, false);
+				}
+			}
+			packBlobsDom.writeToFile(packBlobsFile, false);
 		}
 	}
 
