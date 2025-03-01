@@ -105,7 +105,7 @@
 	<repositories>
 		<repository>
 			<id>onedev</id>
-			<url>https://artifact.onedev.io/artifactory/onedev</url>
+			<url>https://code.onedev.io/onedev/~maven</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
@@ -121,7 +121,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>onedev</id>
-			<url>https://artifact.onedev.io/artifactory/onedev</url>
+			<url>https://code.onedev.io/onedev/~maven</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
