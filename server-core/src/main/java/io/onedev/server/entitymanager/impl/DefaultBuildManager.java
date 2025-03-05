@@ -61,6 +61,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -628,6 +629,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return builds;		
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void applyOrders(From<Build, Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
 			EntityQuery<Build> buildQuery) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
@@ -637,7 +639,18 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			else
 				orders.add(builder.desc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
-		addOrderByIdIfNecessary(builder, root, orders);
+
+		boolean found = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath 
+					&& ((SingularAttributePath) order.getExpression()).getAttribute().getName().equals(Build.PROP_SUBMIT_DATE)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			orders.add(builder.desc(root.get(Build.PROP_SUBMIT_DATE)));
+
 		criteriaQuery.orderBy(orders);
 	}
 	

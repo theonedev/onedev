@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -267,6 +268,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		return predicates.toArray(new Predicate[0]);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<CodeComment> buildCriteriaQuery(Project project, Session session, 
 			PullRequest request, EntityQuery<CodeComment> commentQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -285,9 +287,21 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 				orders.add(builder.desc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
-		if (orders.isEmpty()) 
+		var found = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath) {
+				var expr = (SingularAttributePath) order.getExpression();
+				if (expr.getAttribute().getName().equals(LastActivity.PROP_DATE) 
+						&& expr.getPathSource() instanceof SingularAttributePath 
+						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(CodeComment.PROP_LAST_ACTIVITY)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if (!found)
 			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
-		addOrderByIdIfNecessary(builder, root, orders);
+
 		query.orderBy(orders);
 		
 		return query;

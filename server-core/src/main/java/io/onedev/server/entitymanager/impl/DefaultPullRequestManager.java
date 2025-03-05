@@ -50,6 +50,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -896,6 +897,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		return predicates.toArray(new Predicate[0]);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, @Nullable Project targetProject,
 			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -917,9 +919,21 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 			}
 		}
 
-		if (orders.isEmpty())
+		var found = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath) {
+				var expr = (SingularAttributePath) order.getExpression();
+				if (expr.getAttribute().getName().equals(LastActivity.PROP_DATE) 
+						&& expr.getPathSource() instanceof SingularAttributePath 
+						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(PullRequest.PROP_LAST_ACTIVITY)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if (!found)
 			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
-		addOrderByIdIfNecessary(builder, root, orders);
+		
 		query.orderBy(orders);
 
 		return query;

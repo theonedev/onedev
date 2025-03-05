@@ -33,6 +33,7 @@ import javax.persistence.criteria.Subquery;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -267,6 +268,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		dao.persist(issue);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
 															  From<Issue, Issue> issue, 
@@ -287,10 +289,21 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 					orders.add(builder.desc(join.get(IssueField.PROP_ORDINAL)));
 			}
 		}
-		if (orders.isEmpty())
+
+		var found = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath) {
+				var expr = (SingularAttributePath) order.getExpression();
+				if (expr.getAttribute().getName().equals(LastActivity.PROP_DATE) 
+						&& expr.getPathSource() instanceof SingularAttributePath 
+						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(Issue.PROP_LAST_ACTIVITY)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if (!found)
 			orders.add(builder.desc(IssueQuery.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
-		
-		addOrderByIdIfNecessary(builder, issue, orders);
 		
 		return orders;
 	}

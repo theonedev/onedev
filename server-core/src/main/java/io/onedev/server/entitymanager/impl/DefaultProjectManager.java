@@ -88,6 +88,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -1031,6 +1032,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return count(true);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Project> query = builder.createQuery(Project.class);
@@ -1047,9 +1049,20 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				orders.add(builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
-		if (orders.isEmpty())
-			orders.add(builder.asc(root.get(Project.PROP_PATH_LEN)));
-		addOrderByIdIfNecessary(builder, root, orders);
+		var found = false;
+		for (var order: orders) {
+			if (order.getExpression() instanceof SingularAttributePath) {
+				var expr = (SingularAttributePath) order.getExpression();
+				if (expr.getAttribute().getName().equals(ProjectLastEventDate.PROP_ACTIVITY) 
+						&& expr.getPathSource() instanceof SingularAttributePath 
+						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(Project.PROP_LAST_EVENT_DATE)) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if (!found)
+			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY)));	
 		
 		query.orderBy(orders);
 

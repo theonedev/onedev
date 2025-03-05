@@ -92,8 +92,7 @@ public class SecuritySetting implements Serializable {
 		this.enableSelfDeregister = enableSelfDeregister;
 	}
 
-	@Editable(order=400, name="Enable Two-factor Authentication", description="Check this to enable "
-			+ "two-factor authentication for all users in the system")
+	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce two-factor authentication for all users in the system")
 	public boolean isEnforce2FA() {
 		return enforce2FA;
 	}

@@ -732,15 +732,17 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			return true;
 	}
 
-	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {
+	public static IssueQuery merge(IssueQuery baseQuery, IssueQuery query) {
 		List<Criteria<Issue>> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
+		if (baseQuery.getCriteria() != null)
+			criterias.add(baseQuery.getCriteria());
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
 		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
+		
+		// query sorts should take precedence over base query sorts
+		sorts.addAll(query.getSorts());
+		sorts.addAll(baseQuery.getSorts());
 		return new IssueQuery(Criteria.andCriterias(criterias), sorts);
 	}
 
