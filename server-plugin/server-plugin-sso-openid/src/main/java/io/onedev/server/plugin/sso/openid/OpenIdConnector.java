@@ -15,9 +15,6 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +89,10 @@ public class OpenIdConnector extends SsoConnector {
 	
 	private String buttonImageUrl;
 	
+	public OpenIdConnector() {
+		buttonImageUrl = "/wicket/resource/" + OpenIdConnector.class.getName() + "/openid.png";
+	}
+
 	@Editable(order=100, description="Name of the provider will serve two purpose: "
 			+ "<ul>"
 			+ "<li>Display on login button"
@@ -345,10 +346,6 @@ public class OpenIdConnector extends SsoConnector {
 	@NotEmpty
 	@Override
 	public String getButtonImageUrl() {
-		if (buttonImageUrl == null) {
-			ResourceReference logo = new PackageResourceReference(OpenIdConnector.class, "openid.png");
-			buttonImageUrl = RequestCycle.get().urlFor(logo, new PageParameters()).toString();
-		}
 		return buttonImageUrl;
 	}
 

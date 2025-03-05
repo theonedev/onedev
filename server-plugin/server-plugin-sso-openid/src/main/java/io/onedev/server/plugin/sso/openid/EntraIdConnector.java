@@ -1,29 +1,28 @@
 package io.onedev.server.plugin.sso.openid;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.shiro.authc.AuthenticationException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
-
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 @Editable(name="Microsoft Entra ID", order=125)
 public class EntraIdConnector extends OpenIdConnector {
@@ -101,8 +100,7 @@ public class EntraIdConnector extends OpenIdConnector {
 	
 	@Override
 	public String getButtonImageUrl() {
-		ResourceReference logo = new PackageResourceReference(GitHubConnector.class, "entraid.png");
-		return RequestCycle.get().urlFor(logo, new PageParameters()).toString();
+		return "/wicket/resource/" + EntraIdConnector.class.getName() + "/entraid.png";
 	}
 
 	@Override

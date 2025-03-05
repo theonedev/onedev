@@ -1,5 +1,12 @@
 package io.onedev.server.plugin.sso.openid;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -7,19 +14,10 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Editable(name="GitHub", order=100, description="Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-github' target='_blank'>tutorial</a> for an example setup")
 public class GitHubConnector extends OpenIdConnector {
@@ -46,8 +44,7 @@ public class GitHubConnector extends OpenIdConnector {
 
 	@Override
 	public String getButtonImageUrl() {
-		ResourceReference logo = new PackageResourceReference(GitHubConnector.class, "octocat.png");
-		return RequestCycle.get().urlFor(logo, new PageParameters()).toString();
+		return "/wicket/resource/" + GitHubConnector.class.getName() + "/octocat.png";
 	}
 
 	@Override

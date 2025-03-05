@@ -1,5 +1,20 @@
 package io.onedev.server.plugin.sso.discord;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.wicket.Session;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
@@ -11,22 +26,6 @@ import io.onedev.server.plugin.sso.discord.oauth2.Request;
 import io.onedev.server.plugin.sso.discord.oauth2.UserGuildsResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.UserInfoResponse;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.wicket.Session;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotEmpty;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Editable(name="Discord", order=150, description="Single sign on via discord.com")
 public class DiscordConnector extends SsoConnector {
@@ -74,8 +73,7 @@ public class DiscordConnector extends SsoConnector {
 
 	@Override
 	public String getButtonImageUrl() {
-		ResourceReference logo = new PackageResourceReference(DiscordConnector.class, "discord.png");
-		return RequestCycle.get().urlFor(logo, new PageParameters()).toString();
+		return "/wicket/resource/" + DiscordConnector.class.getName() + "/discord.png";
 	}
 
 	@Override

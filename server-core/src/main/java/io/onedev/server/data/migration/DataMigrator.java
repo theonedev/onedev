@@ -7632,4 +7632,30 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate191(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SSO_CONNECTORS")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element connectorElement : valueElement.elements()) {
+								var buttonImageUrlElement = connectorElement.element("buttonImageUrl");
+								if (buttonImageUrlElement != null) {
+									var buttonImageUrl = buttonImageUrlElement.getText().trim();
+									if (buttonImageUrl.startsWith("/wicket/resource/io.onedev.server.plugin.sso.openid.openidconnector")) {
+										buttonImageUrl = "/wicket/resource/io.onedev.server.plugin.sso.openid.OpenIdConnector/openid.png";
+										buttonImageUrlElement.setText(buttonImageUrl);
+									}
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

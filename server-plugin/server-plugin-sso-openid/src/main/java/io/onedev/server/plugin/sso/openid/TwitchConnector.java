@@ -43,6 +43,11 @@ public class TwitchConnector extends OpenIdConnector {
 	}
 
 	@Override
+	public String getButtonImageUrl() {
+		return "/wicket/resource/" + TwitchConnector.class.getName() + "/twitch.png";
+	}
+
+	@Override
 	public String getGroupsClaim() {
 		return super.getGroupsClaim();
 	}
