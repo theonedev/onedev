@@ -25,7 +25,13 @@
 					<a wicket:id="clone" title="Check out to local workspace" class="btn btn-primary btn-icon mr-3"><wicket:svg href="download2" class="icon"></wicket:svg></a>
 					<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-auto" title="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
 				</div>
-				<div wicket:id="requestSummary" class="summary mb-4 font-size-h6 border-primary border border-dashed rounded">
+				<div wicket:id="description" class="description border border-dashed border-primary rounded p-4 mb-5">
+					<div class="mb-3">
+						<span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span>
+					</div>
+					<div wicket:id="content"></div>
+				</div>        			
+				<div wicket:id="requestSummary" class="summary p-4 mb-4 font-size-h6 border border-dashed border-primary rounded">
 					<wicket:enclosure>
 	                <div class="text-warning">
 	                	<wicket:svg href="exclamation-circle" class="icon"></wicket:svg>  <span wicket:id="checkError"></span>

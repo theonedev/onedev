@@ -1,32 +1,15 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entityreference.ReferencedFromAware;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestOpenedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.util.DeleteCallback;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.Cookie;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -38,11 +21,9 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -57,9 +38,32 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
-import javax.servlet.http.Cookie;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdateActivity;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	
@@ -68,16 +72,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	private static final String COOKIE_SHOW_COMMITS = "onedev.server.pullRequest.showCommits";
 	
 	private static final String COOKIE_SHOW_CHANGE_HISTORY = "onedev.server.pullRequest.showChangeHistory";
-
-	private static final String COOKIE_SHOW_REFERENCES = "onedev.server.pullRequest.showReferences";
 	
 	private boolean showComments = true;
 	
 	private boolean showCommits = true;
 	
 	private boolean showChangeHistory = true;
-
-	private boolean showReferences = true;
 	
 	private WebMarkupContainer container;
 	
@@ -100,92 +100,46 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		cookie = request.getCookie(COOKIE_SHOW_CHANGE_HISTORY);
 		if (cookie != null)
 			showChangeHistory = Boolean.valueOf(cookie.getValue());
-
-		cookie = request.getCookie(COOKIE_SHOW_REFERENCES);
-		if (cookie != null)
-			showReferences = Boolean.valueOf(cookie.getValue());
 	}
 	
 	private Component newActivityRow(String id, PullRequestActivity activity) {
-		WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity));
-		row.setOutputMarkupId(true);
-		
-		String anchor = activity.getAnchor();
-		if (anchor != null)
-			row.setMarkupId(anchor);
-		
-		if (activity.getUser() != null) 
-			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
-		else 
-			row.add(new WebMarkupContainer("avatar"));
-		
-		row.add(activity.render("content", new DeleteCallback() {
-
-			@Override
-			public void onDelete(AjaxRequestTarget target) {
-				row.remove();
-				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
-			}
-			
-		}));
-		
+		var row = activity.render(id);		
 		row.add(AttributeAppender.append("class", activity.getClass().getSimpleName()));
-		
+		if (activity instanceof PullRequestCommentActivity) 
+			row.add(AttributeAppender.append("class", "comment"));
+		else 
+			row.add(AttributeAppender.append("class", "non-comment"));
+		row.setDefaultModel(Model.of(activity));
+		row.setOutputMarkupId(true);		
 		return row;
 	}
 	
 	private List<PullRequestActivity> getActivities() {
 		PullRequest request = getPullRequest();
 		List<PullRequestActivity> activities = new ArrayList<>();
-
-		activities.add(new PullRequestOpenedActivity(request));
 		
 		List<PullRequestActivity> otherActivities = new ArrayList<>();
 		
 		if (showComments) {
 			for (PullRequestComment comment: request.getComments()) 
-				otherActivities.add(new PullRequestCommentedActivity(comment));
+				otherActivities.add(new PullRequestCommentActivity(comment));
 		}
 
 		if (showCommits) {
 			for (PullRequestUpdate update: request.getUpdates())
-				otherActivities.add(new PullRequestUpdatedActivity(update));
+				otherActivities.add(new PullRequestUpdateActivity(update));
 		}
 
 		if (showChangeHistory) {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
 				if (!(change.getData() instanceof ReferencedFromAware) 
-						&& !(change.getData() instanceof PullRequestReferencedFromCommitData) 
 						&& !(change.getData() instanceof PullRequestDescriptionChangeData)) {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}
 			}
 		}
-
-		if (showReferences) {
-			for (PullRequestChange change: getPullRequest().getChanges()) {
-				if (change.getData() instanceof ReferencedFromAware) {
-					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
-					if (ReferencedFromAware.canDisplay(referencedFromAware))
-						otherActivities.add(new PullRequestChangeActivity(change));
-				} else if (change.getData() instanceof PullRequestReferencedFromCommitData) {
-					ProjectScopedCommit commit = ((PullRequestReferencedFromCommitData) change.getData()).getCommit();
-					if (commit.canDisplay())
-						otherActivities.add(new PullRequestChangeActivity(change));
-				}
-			}
-		}
 		
-		otherActivities.sort((o1, o2) -> {
-			if (o1.getDate().getTime()<o2.getDate().getTime())
-				return -1;
-			else if (o1.getDate().getTime()>o2.getDate().getTime())
-				return 1;
-			else if (o1 instanceof PullRequestOpenedActivity)
-				return -1;
-			else
-				return 1;
-		});
+		otherActivities.sort(Comparator.comparingLong(o -> o.getDate().getTime()));
 		
 		activities.addAll(otherActivities);
 		
@@ -193,26 +147,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	}
 
 	private Component newSinceChangesRow(String id, Date sinceDate) {
-		WebMarkupContainer row = new WebMarkupContainer(id);
-		row.setOutputMarkupId(true);
-		
-		String avatarHtml = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", SpriteImage.getVersionedHref("diff"));
-		row.add(new Label("avatar", avatarHtml) {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				tag.setName("div");
-			}
-			
-		}.setEscapeModelStrings(false));
-		
-		WebMarkupContainer contentColumn = new Fragment("content", "sinceChangesRowContentFrag", this);
-		contentColumn.add(new SinceChangesLink("sinceChanges", requestModel, sinceDate));
-		row.add(contentColumn);
-		
+		var row = new Fragment(id, "sinceChangesRowFrag", this);
+		row.add(new SinceChangesLink("sinceChanges", requestModel, sinceDate));		
 		row.add(AttributeAppender.append("class", "since-changes"));
-		
+		row.setOutputMarkupId(true);					
 		return row;
 	}
 
@@ -234,8 +172,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				Collection<ObjectId> commitIds = new HashSet<>();
 				for (PullRequestActivity activity: activities) {
-					if (activity instanceof PullRequestUpdatedActivity) {
-						PullRequestUpdatedActivity updatedActivity = (PullRequestUpdatedActivity) activity;
+					if (activity instanceof PullRequestUpdateActivity) {
+						PullRequestUpdateActivity updatedActivity = (PullRequestUpdateActivity) activity;
 						commitIds.addAll(updatedActivity.getUpdate().getCommits()
 								.stream().map(it->it.copy()).collect(Collectors.toSet()));
 					}
@@ -261,15 +199,13 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 				if (!oldActivities.isEmpty() && !newActivities.isEmpty()) {
 					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
-					if (newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdatedActivity))
+					if (newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdateActivity))
 						activitiesView.add(newSinceChangesRow(activitiesView.newChildId(), sinceDate));
 				}
 				
-				var user = SecurityUtils.getAuthUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component row = newActivityRow(activitiesView.newChildId(), activity);
-					if (user == null || !user.equals(activity.getUser()))
-						row.add(AttributeAppender.append("class", "new"));
+					row.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(row);
 				}
 				
@@ -380,14 +316,19 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				@SuppressWarnings("deprecation")
-				Component prevActivityRow = activitiesView.get(activitiesView.size()-1);
-				PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
+				Component prevActivityRow = null;
+				PullRequestActivity lastActivity = null;
+				if (activitiesView.size() > 0) {
+					prevActivityRow = activitiesView.get(activitiesView.size()-1);
+					lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
+				}
+				
 				List<PullRequestActivity> newActivities = new ArrayList<>();
 				for (PullRequestActivity activity: getActivities()) {
-					if (activity.getDate().after(lastActivity.getDate()))
+					if (lastActivity == null || activity.getDate().after(lastActivity.getDate()))
 						newActivities.add(activity);
 				}
 
@@ -400,12 +341,18 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 
 				if (sinceChangesRow == null && !newActivities.isEmpty() 
-						&& newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdatedActivity)) {
+						&& newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdateActivity)) {
 					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
 					sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
 					activitiesView.add(sinceChangesRow);
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
+					String script;
+					if (prevActivityRow != null) {
+						script = String.format("$(\"<li id='%s'></li>\").insertAfter('#%s');", 
+								sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
+					} else {
+						script = String.format("$(\"<tr id='%s'></tr>\").prependTo($('#%s'));", 
+								sinceChangesRow.getMarkupId(), container.getMarkupId());
+					}
 					handler.prependJavaScript(script);
 					handler.add(sinceChangesRow);
 					prevActivityRow = sinceChangesRow;
@@ -413,21 +360,25 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 							
 				Collection<ObjectId> commitIds = new HashSet<>();
 
-				var user = SecurityUtils.getAuthUser();
 				for (PullRequestActivity activity: newActivities) {
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
-					if (user == null || !user.equals(activity.getUser()))
-						newActivityRow.add(AttributeAppender.append("class", "new"));
+					newActivityRow.add(AttributeAppender.append("class", "new"));
 					activitiesView.add(newActivityRow);
 					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityRow.getMarkupId(), prevActivityRow.getMarkupId());
+					String script;
+					if (prevActivityRow != null) {
+						script = String.format("$(\"<li id='%s'></li>\").insertAfter('#%s');", 
+								newActivityRow.getMarkupId(), prevActivityRow.getMarkupId());
+					} else {
+						script = String.format("$(\"<tr id='%s'></tr>\").prependTo($('#%s'));", 
+								newActivityRow.getMarkupId(), container.getMarkupId());
+					}
 					handler.prependJavaScript(script);
 					handler.add(newActivityRow);
 					
-					if (activity instanceof PullRequestUpdatedActivity) {
-						handler.appendJavaScript("$('tr.since-changes').addClass('visible');");
-						PullRequestUpdatedActivity updatedActivity = (PullRequestUpdatedActivity) activity;
+					if (activity instanceof PullRequestUpdateActivity) {
+						handler.appendJavaScript("$('li.since-changes').addClass('visible');");
+						PullRequestUpdateActivity updatedActivity = (PullRequestUpdateActivity) activity;
 						commitIds.addAll(updatedActivity.getUpdate().getCommits()
 								.stream().map(it->it.copy()).collect(Collectors.toSet()));
 					}
@@ -529,36 +480,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				showChangeHistory = !showChangeHistory;
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
-				cookie.setPath("/");
-				cookie.setMaxAge(Integer.MAX_VALUE);
-				response.addCookie(cookie);
-				target.add(container);
-				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
-			}
-
-		});
-
-		fragment.add(new AjaxLink<Void>("showReferences") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				if (showReferences)
-					add(AttributeAppender.append("class", "active"));
-				setOutputMarkupId(true);
-			}
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				showReferences = !showReferences;
-				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				Cookie cookie = new Cookie(COOKIE_SHOW_REFERENCES, String.valueOf(showReferences));
 				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);

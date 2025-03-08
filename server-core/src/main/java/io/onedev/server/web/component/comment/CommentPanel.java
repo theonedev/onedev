@@ -14,6 +14,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -247,6 +248,8 @@ public abstract class CommentPanel extends Panel {
 			
 		});
 		
+		viewer.add(newMoreActions("moreActions"));
+		
 		viewer.setOutputMarkupId(true);
 		return viewer;
 	}
@@ -288,6 +291,10 @@ public abstract class CommentPanel extends Panel {
 	@Nullable
 	protected String getAutosaveKey() {
 		return null;
+	}
+	
+	protected Component newMoreActions(String componentId) {
+		return new WebMarkupContainer("moreActions").setVisible(false);
 	}
 	
 	protected abstract Collection<? extends EntityReaction> getReactions();

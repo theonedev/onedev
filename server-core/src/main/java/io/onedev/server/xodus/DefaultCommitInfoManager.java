@@ -1,47 +1,40 @@
 package io.onedev.server.xodus;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.*;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.ReferenceChangeManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.ActiveServerChanged;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.event.project.issue.IssueCommitsAttached;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.git.GitContribution;
-import io.onedev.server.git.GitContributor;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.*;
-import io.onedev.server.git.command.RevListCommand.Order;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.*;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.concurrent.BatchWorker;
-import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.facade.EmailAddressFacade;
-import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.patternset.PatternSet;
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
@@ -54,22 +47,63 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
+
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.issue.IssueCommitsAttached;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.git.GitContributor;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.command.FileChange;
+import io.onedev.server.git.command.ListFileChangesCommand;
+import io.onedev.server.git.command.ListFilesCommand;
+import io.onedev.server.git.command.ListNumStatsCommand;
+import io.onedev.server.git.command.LogCommand;
+import io.onedev.server.git.command.LogCommit;
+import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListCommand.Order;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ElementPumper;
+import io.onedev.server.util.NameAndEmail;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.ProgrammingLanguageDetector;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.facade.EmailAddressFacade;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.patternset.PatternSet;
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
 
 @Singleton
 public class DefaultCommitInfoManager extends AbstractEnvironmentManager
@@ -155,8 +189,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private final IssueManager issueManager;
 	
-	private final ReferenceChangeManager entityReferenceManager;
-
 	private final ListenerRegistry listenerRegistry;
 
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
@@ -172,7 +204,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 									BatchWorkManager batchWorkManager, SessionManager sessionManager,
 									EmailAddressManager emailAddressManager, UserManager userManager,
 									ClusterManager clusterManager, ListenerRegistry listenerRegistry,
-									IssueManager issueManager, ReferenceChangeManager entityReferenceManager) {
+									IssueManager issueManager) {
 		this.projectManager = projectManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
@@ -181,7 +213,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		this.clusterManager = clusterManager;
 		this.listenerRegistry = listenerRegistry;
 		this.issueManager = issueManager;
-		this.entityReferenceManager = entityReferenceManager;
 	}
 
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -335,9 +366,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 								listenerRegistry.post(new IssueCommitsAttached(issueManager.load(issueId)));
 							}
 							
-							entityReferenceManager.addReferenceChange(
-									new ProjectScopedCommit(project, project.getRevCommit(currentCommitId, true)));
-
 							if (currentCommit.getCommitter() != null)
 								users.add(new NameAndEmail(currentCommit.getCommitter()));
 

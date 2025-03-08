@@ -1,13 +1,8 @@
 <wicket:panel>
-	<div class="issue-activities">
-		<table class="w-100">
-			<tr wicket:id="activities" class="activity">
-				<td class="avatar"><a wicket:id="avatar"></a></td>
-				<td wicket:id="content" class="content"></td>
-			</tr>
-		</table>
-		<div wicket:id="addComment" class="mt-4"></div>
-	</div>
+	<ul class="issue-activities list-unstyled mb-0">
+		<li wicket:id="activities" class="activity"></li>
+		<li wicket:id="addComment" class="mt-4"></li>
+	</ul>
 	<wicket:fragment wicket:id="loginToCommentFrag">
 		<div class="login-to-comment alert alert-light text-center font-size-h6">
 			<a wicket:id="login" class="link-primary">Login to comment</a>
@@ -26,7 +21,6 @@
 		<div class="issue-activity-options">
 			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
 			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
-			<a wicket:id="showReferences" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle references"><wicket:svg href="reference" class="icon"></wicket:svg></a>
 			<a wicket:id="showWorkLog" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle work log"><wicket:svg href="work-log" class="icon"></wicket:svg></a>
 		</div>
 	</wicket:fragment>

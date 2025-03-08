@@ -65,10 +65,13 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestLabelManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReactionManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -87,6 +90,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
@@ -97,6 +101,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -106,6 +111,7 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
@@ -114,6 +120,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -147,6 +154,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.Operat
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
@@ -359,6 +367,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		add(newRequestHead());
 		add(newStatusBarContainer());
+		add(newDescriptionContainer());
+
 		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
 
 			@Override
@@ -1599,6 +1609,101 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return statusBarContainer;
 	}
 
+	private WebMarkupContainer newDescriptionContainer() {
+		PullRequest request = getPullRequest();
+
+		var descriptionContainer = new WebMarkupContainer("description");
+		descriptionContainer.add(new UserIdentPanel("submitterAvatar", request.getSubmitter(), Mode.AVATAR));
+		descriptionContainer.add(new Label("submitterName", request.getSubmitter().getDisplayName()));
+		descriptionContainer.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
+		
+		descriptionContainer.add(new CommentPanel("content") {
+
+			@Override
+			protected String getComment() {
+				return getPullRequest().getDescription();
+			}
+
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
+				((BasePage)getPage()).notifyObservableChange(target,
+						PullRequest.getChangeObservable(getPullRequest().getId()));
+			}
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "pull-request:" + getPullRequest().getId() + ":description"; 
+			}
+
+			@Override
+			protected Project getProject() {
+				return getPullRequest().getTargetProject();
+			}
+
+			@Override
+			protected List<User> getParticipants() {
+				return getPullRequest().getParticipants();
+			}
+			
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(getProject()));
+			}
+
+			@Override
+			protected boolean canManageComment() {
+				return SecurityUtils.canModifyPullRequest(getPullRequest());
+			}
+
+			@Override
+			protected String getRequiredLabel() {
+				return null;
+			}
+
+			@Override
+			protected String getEmptyDescription() {
+				return "No description";
+			}
+			
+			@Override
+			protected ContentVersionSupport getContentVersionSupport() {
+				return new ContentVersionSupport() {
+
+					@Override
+					public long getVersion() {
+						return 0;
+					}
+					
+				};
+			}
+
+			@Override
+			protected DeleteCallback getDeleteCallback() {
+				return null;
+			}
+
+			@Override
+			protected Collection<? extends EntityReaction> getReactions() {
+				return getPullRequest().getReactions();
+			}
+
+			@Override
+			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+				OneDev.getInstance(PullRequestReactionManager.class).toggleEmoji(
+						SecurityUtils.getUser(), 
+						getPullRequest(), 
+						emoji);
+			}
+			
+		});
+
+		return descriptionContainer;
+	}
+	
 	private WebMarkupContainer newSummaryContributions() {
 		return new ListView<PullRequestSummaryPart>("contributions",
 				new LoadableDetachableModel<List<PullRequestSummaryPart>>() {

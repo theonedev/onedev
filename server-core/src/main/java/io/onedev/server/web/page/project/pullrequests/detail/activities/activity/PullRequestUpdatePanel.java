@@ -8,8 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -33,18 +32,16 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
-class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
+class PullRequestUpdatePanel extends Panel {
 
-	public PullRequestUpdatedPanel(String id, IModel<PullRequestUpdate> model) {
-		super(id, model);
+	public PullRequestUpdatePanel(String id) {
+		super(id);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("age", DateUtils.formatAge(getUpdate().getDate()))
-				.add(new AttributeAppender("title", DateUtils.formatDateTime(getUpdate().getDate()))));
 		String tooManyMessage = "Too many commits, displaying recent " + WebConstants.MAX_DISPLAY_COMMITS;
 		add(new Label("tooManyCommits", tooManyMessage) {
 
@@ -130,7 +127,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 	}
 
 	private PullRequestUpdate getUpdate() {
-		return getModelObject();
+		return ((PullRequestUpdateActivity) getDefaultModelObject()).getUpdate();
 	}
 	
 }

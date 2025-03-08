@@ -5,9 +5,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
@@ -56,7 +56,8 @@ public abstract class SideInfoPanel extends Panel {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
-		response.render(CssHeaderItem.forReference(new SideInfoCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new SideInfoResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.sideInfo.onDomReady('" + getMarkupId() + "');"));
 	}
 
 	protected abstract Component newTitle(String componentId);

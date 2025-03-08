@@ -2266,6 +2266,9 @@ input[type="radio"], input[type="checkbox"] {
 .border-bottom-0 {
 	border-bottom: 0 !important;
 }
+.border-2 {
+    border-width: 2px !important;
+}
 .rounded {
 	border-radius: 0.42rem !important;
 }

@@ -1,50 +1,47 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
-class IssueChangePanel extends GenericPanel<IssueChange> {
+class IssueChangePanel extends Panel {
 
-	public IssueChangePanel(String id, IModel<IssueChange> model) {
-		super(id, model);
+	public IssueChangePanel(String id) {
+		super(id);
 	}
-	
-	private IssueChange getChange() {
-		return getModelObject();
-	}
-	
+		
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String activity = getChange().getData().getActivity();
-		if (getChange().getUser() != null) {
-			add(new Label("user", getChange().getUser().getDisplayName()));
-		} else {
-			add(new WebMarkupContainer("user").setVisible(false));
-			activity = StringUtils.capitalize(activity);
-		}
+		IssueChange change = getChange();
 
-		add(new Label("description", activity));
+		add(new UserIdentPanel("avatar", change.getUser(), Mode.AVATAR));
+		add(new Label("name", change.getUser().getDisplayName()));	
+		add(new Label("description", change.getData().getActivity()));
 		
-		add(new Label("age", DateUtils.formatAge(getChange().getDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
+		add(new Label("age", DateUtils.formatAge(change.getDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
 		
 		ActivityDetail detail = getChange().getData().getActivityDetail();
-		if (detail != null) {
-			add(detail.render("detail"));
-		} else {
-			add(new WebMarkupContainer("detail").setVisible(false));
-			add(AttributeAppender.append("class", "no-body"));
-		}
+		if (detail != null) 
+			add(detail.render("body"));
+		else 
+			add(new WebMarkupContainer("body").setVisible(false));		
+
+		setMarkupId(getChange().getAnchor());
+		setOutputMarkupId(true);	
+	}
+
+	private IssueChange getChange() {
+		return ((IssueChangeActivity) getDefaultModelObject()).getChange();
 	}
 
 }

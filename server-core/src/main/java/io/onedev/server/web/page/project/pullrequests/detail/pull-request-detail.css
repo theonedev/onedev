@@ -4,8 +4,13 @@
 .pull-request-detail>.card-body>.main>.status-bar>.status {
 	font-size: 1rem;
 }
+.pull-request-detail>.card-body>.main>.description {
+	border-bottom: none !important;
+	margin-bottom: 0 !important;
+	border-radius: 0.42rem 0.42rem 0 0 !important;
+}
 .pull-request-detail>.card-body>.main>.summary {
-	padding: 1.2rem 1.5rem;
+	border-radius: 0 0 0.42rem 0.42rem !important;
 }
 .pull-request-detail>.card-body>.main>.summary>div {
 	margin-bottom: 1rem;
@@ -68,9 +73,9 @@ ul>li>a.code-comments.new .icon {
 }
 
 @media(min-width: 992px) {
-	.pull-request-detail>.card-body>.main>.summary .more-info,
-	.pull-request-detail>.card-body>.main>.summary .more-info:hover,
-	.pull-request-detail>.card-body>.main>.summary .more-info:focus {
+	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.summary .more-info,
+	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.summary .more-info:hover,
+	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.summary .more-info:focus {
 		color: inherit !important;
 		cursor: inherit !important;
 	}

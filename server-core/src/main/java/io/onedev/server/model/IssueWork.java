@@ -102,4 +102,9 @@ public class IssueWork extends AbstractEntity {
 	public void setNote(String note) {
 		this.note = StringUtils.abbreviate(note, MAX_CONTENT_LEN);		
 	}
+
+	public String getAnchor() {
+		return getClass().getSimpleName() + "-" + getId();
+	}
+
 }

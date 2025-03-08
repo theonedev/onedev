@@ -1,3 +1,7 @@
+.issue-detail .submitter-avatar img {
+	width: 40px;
+	height: 40px;
+}
 .issue-detail .transition-option .modal-header {
 	display: none;
 }

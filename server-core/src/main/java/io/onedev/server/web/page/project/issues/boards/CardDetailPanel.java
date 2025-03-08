@@ -1,11 +1,28 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.RequestCycle;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.xodus.VisitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -22,6 +39,7 @@ import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.authorizations.IssueAuthorizationsPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
+import io.onedev.server.web.component.issue.description.IssueDescriptionPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
@@ -32,22 +50,7 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.CursorSupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
-import org.apache.wicket.request.cycle.RequestCycle;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.xodus.VisitInfoManager;
 
 abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {
 
@@ -97,6 +100,15 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		add(new SideInfoLink("moreInfoTrigger"));
 		
 		add(new IssueOperationsPanel("operations") {
+
+			@Override
+			protected Issue getIssue() {
+				return CardDetailPanel.this.getIssue();
+			}
+
+		});
+		
+		add(new IssueDescriptionPanel("description") {
 
 			@Override
 			protected Issue getIssue() {

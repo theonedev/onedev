@@ -1,14 +1,12 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import java.util.Date;
+
+import org.apache.wicket.markup.html.panel.Panel;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
-import io.onedev.server.model.User;
-import io.onedev.server.web.util.DeleteCallback;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
-import java.util.Date;
 
 public class IssueWorkActivity implements IssueActivity {
 
@@ -19,18 +17,8 @@ public class IssueWorkActivity implements IssueActivity {
 	}
 	
 	@Override
-	public Panel render(String panelId, DeleteCallback deleteCallback) {
-		return new IssueWorkPanel(panelId, new LoadableDetachableModel<IssueWork>() {
-
-			@Override
-			protected IssueWork load() {
-				return getWork();
-			}
-			
-		}, target -> {
-			OneDev.getInstance(IssueWorkManager.class).delete(getWork());
-			deleteCallback.onDelete(target);
-		});
+	public Panel render(String panelId) {
+		return new IssueWorkPanel(panelId);
 	}
 	
 	public Long getWorkId() {
@@ -40,20 +28,10 @@ public class IssueWorkActivity implements IssueActivity {
 	public IssueWork getWork() {
 		return OneDev.getInstance(IssueWorkManager.class).load(workId);
 	}
-
+	
 	@Override
 	public Date getDate() {
 		return getWork().getDate();
-	}
-
-	@Override
-	public String getAnchor() {
-		return null;
-	}
-
-	@Override
-	public User getUser() {
-		return getWork().getUser();
 	}
 	
 }

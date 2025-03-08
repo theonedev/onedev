@@ -1,11 +1,25 @@
 package io.onedev.server.entityreference;
 
+import static io.onedev.server.entityreference.ReferenceUtils.extractReferences;
+
+import java.util.Date;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.codecomment.*;
+import io.onedev.server.event.project.codecomment.CodeCommentCreated;
+import io.onedev.server.event.project.codecomment.CodeCommentEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyCreated;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyEdited;
+import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
 import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueCommentEdited;
@@ -15,25 +29,19 @@ import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.*;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCommitData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.util.ProjectScopedCommit;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Date;
-
-import static io.onedev.server.entityreference.ReferenceUtils.extractReferences;
 
 @Singleton
 public class DefaultReferenceChangeManager implements ReferenceChangeManager {
@@ -49,7 +57,7 @@ public class DefaultReferenceChangeManager implements ReferenceChangeManager {
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultReferenceChangeManager(IssueManager issueManager,
+	public DefaultReferenceChangeManager(IssueManager issueManager, 
 										 PullRequestManager pullRequestManager, IssueChangeManager issueChangeManager,
 										 PullRequestChangeManager pullRequestChangeManager, MarkdownManager markdownManager) {
 		this.issueManager = issueManager;
@@ -117,58 +125,6 @@ public class DefaultReferenceChangeManager implements ReferenceChangeManager {
 		}
 	}
 
-	public void addReferenceChange(ProjectScopedCommit commit) {
-		String commitMessage = commit.getRevCommit().getFullMessage();
-		for (var reference: extractReferences(commitMessage, commit.getProject())) {
-			if (reference instanceof IssueReference) {
-				var referencedIssue = issueManager.find(reference.getProject(), reference.getNumber());
-				if (referencedIssue != null) {
-					boolean found = false;
-					for (var change : referencedIssue.getChanges()) {
-						if (change.getData() instanceof IssueReferencedFromCommitData) {
-							var referencedFromCommitData = (IssueReferencedFromCommitData) change.getData();
-							if (referencedFromCommitData.getCommit().getCommitId().equals(commit.getCommitId())) {
-								found = true;
-								break;
-							}
-						}
-					}
-					if (!found) {
-						var referencedFromCommitData = new IssueReferencedFromCommitData(commit);
-						var change = new IssueChange();
-						change.setData(referencedFromCommitData);
-						change.setDate(new Date());
-						change.setIssue(referencedIssue);
-						referencedIssue.getChanges().add(change);
-						issueChangeManager.create(change, null);
-					}
-				}
-			} else if (reference instanceof PullRequestReference) {
-				var referencedPullRequest  = pullRequestManager.find(reference.getProject(), reference.getNumber());
-				if (referencedPullRequest != null) {
-					boolean found = false;
-					for (var change: referencedPullRequest.getChanges()) {
-						if (change.getData() instanceof PullRequestReferencedFromCommitData) {
-							var referencedFromCommitData = (PullRequestReferencedFromCommitData) change.getData();
-							if (referencedFromCommitData.getCommit().getCommitId().equals(commit.getCommitId())) {
-								found = true;
-								break;
-							}
-						}
-					}
-					if (!found) {
-						var referencedFromCommitData = new PullRequestReferencedFromCommitData(commit);
-						var change = new PullRequestChange();
-						change.setData(referencedFromCommitData);
-						change.setDate(new Date());
-						change.setRequest(referencedPullRequest);
-						referencedPullRequest.getChanges().add(change);
-						pullRequestChangeManager.create(change, null);
-					}
-				}
-			}
-		}
-	}
 	
 	@Override 
 	public void addReferenceChange(User user, PullRequest request, String markdown) {

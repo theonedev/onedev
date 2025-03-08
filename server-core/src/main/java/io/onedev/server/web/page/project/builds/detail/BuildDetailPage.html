@@ -10,7 +10,7 @@
 				<div wicket:id="actions" class="mr-2">
 	                <a wicket:id="rebuild" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" title="Re-run this build"><wicket:svg href="re-run" class="icon"/></a>
 	                <a wicket:id="cancel" class="btn btn-icon btn-light btn-hover-danger btn-xs mr-2" title="Cancel this build"><wicket:svg href="cancel" class="icon"/></a>
-					<a wicket:id="edit" title="Edit build description" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2"><wicket:svg href="edit" class="icon"/></a>
+					<a wicket:id="edit" title="Edit build description" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2"><wicket:svg href="edit-file" class="icon"/></a>
 					<a wicket:id="terminal" title="Open terminal of current running step" class="ee-feature btn btn-icon btn-light btn-hover-primary btn-xs mr-2"><wicket:svg href="terminal" class="icon"/></a>
 		            <a wicket:id="promotions" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" title="Promotions"><wicket:svg href="next" class="icon"/></a>
 				</div>
@@ -24,7 +24,7 @@
 				<div wicket:id="buildSpecNotFound" class="alert alert-notice alert-light-warning">Build spec not found in commit of this build</div>
 				<div wicket:id="jobNotFound" class="alert alert-notice alert-light-warning">Job '<span wicket:id="jobName"></span>' associated with the build not found. 
 				Most probably there are import errors in the <a wicket:id="buildSpec">build spec</a></div>
-				<div wicket:id="description" class="mb-2"></div>
+				<div wicket:id="description" class="border border-dashed border-primary rounded p-3 mb-3"></div>
 				<ul wicket:id="buildTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5 flex-shrink-0"></ul>
 				<wicket:child></wicket:child>
 			</div>

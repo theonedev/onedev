@@ -1,39 +1,12 @@
 package io.onedev.server.web.page.project.issues.detail;
 
-import com.google.common.collect.Lists;
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.entity.nav.EntityNavPanel;
-import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
-import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
-import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.sideinfo.SideInfoLink;
-import io.onedev.server.web.component.sideinfo.SideInfoPanel;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ValidationException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -55,11 +28,42 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.collect.Lists;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.issue.description.IssueDescriptionPanel;
+import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
+import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.side.IssueSidePanel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
+import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.xodus.VisitInfoManager;
 
 public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
@@ -139,8 +143,15 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 		});
 		
-		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
+		add(new IssueDescriptionPanel("description") {
 
+			@Override
+			protected Issue getIssue() {
+				return IssueDetailPage.this.getIssue();
+			}
+		});
+		
+		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
 			@Override
 			protected List<? extends Tab> load() {
 				List<Tab> tabs = new ArrayList<>();

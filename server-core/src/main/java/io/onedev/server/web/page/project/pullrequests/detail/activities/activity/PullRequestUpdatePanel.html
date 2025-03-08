@@ -1,0 +1,14 @@
+<wicket:panel>	
+	<div wicket:id="tooManyCommits" class="alert alert-notice alert-light-warning"></div>
+	<div wicket:id="commits" class="commit d-flex align-items-start">
+		<wicket:svg href="commit" class="icon flex-shrink-0 text-gray"></wicket:svg>
+		<div class="author flex-shrink-0 mr-2"><span wicket:id="author"></span></div> 
+		<div wicket:id="message" class="message mr-2"></div>
+		<div wicket:id="date" class="font-size-sm text-muted d-none d-xxl-block mr-2"></div>
+		<div class="actions flex-shrink-0 ml-auto d-none d-lg-block font-size-sm">
+			<a wicket:id="signature" class="mr-2"></a>
+			<a wicket:id="hashLink" class="hash"><span wicket:id="hash"></span></a>
+			<a wicket:id="copyHash" class="mr-2"><wicket:svg href="copy" class="icon icon-sm"></wicket:svg></a>
+		</div>
+	</div>
+</wicket:panel>

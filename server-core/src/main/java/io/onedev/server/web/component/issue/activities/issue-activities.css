@@ -1,58 +1,55 @@
-.issue-activities>table {
-	table-layout: fixed;
+.issue-activities>.activity {
+	border-left: 4px solid white;
 }
-.issue-activities tr.activity.new>.avatar {
+.dark-mode .issue-activities>.activity {
+	border-left-color: var(--dark-mode-dark);
+}
+.issue-activities>.activity.new {
 	border-left-color: var(--primary) !important;
 }
 
-.issue-activities>table>tbody>tr>td {
+.issue-activities>.activity {
 	border-top: 1px solid var(--light-gray);
-	padding: 1.25rem 0;
-	vertical-align: top;
 }
-.dark-mode .issue-activities>table>tbody>tr>td {
-	border-top-color: var(--dark-mode-lighter-dark);
+.dark-mode .issue-activities>.activity {
+	border-top-color: var(--dark-mode-light-dark);
 }
-.issue-activities>table>tbody>tr:first-child>td {
-	border-top: none;
+.issue-activities>.activity:first-child {
+	border-top-width: 2px;
+	border-top-style: dashed;
 }
-.issue-activities>table>tbody>tr>td.avatar {
-	width: 48px;
-	border-left: 4px solid white;
-	padding-left: 8px;
+.issue-activities>.activity>div {
+	padding: 16px 0 16px 8px;
 }
-.dark-mode .issue-activities>table>tbody>tr>td.avatar {
-	border-left-color: var(--dark-mode-dark);
-}
-.issue-activities>table>tbody>tr>td.avatar .avatar {
+.issue-activities>.comment.activity img.avatar {
 	width: 40px;
 	height: 40px;
 }
-.issue-activities>table>tbody>tr>td.avatar .avatar.system-avatar {
-	width: 44px;
-	height: 44px;
-	margin-left: -2px;
-	opacity: 75%;
+.issue-activities>.activity .activity-anchor {
+	display: none;
 }
-.issue-activities>table>tbody>tr>td.content {
-	padding-left: 1.25rem;
+.issue-activities>.activity:hover .activity-anchor {
+	display: inline;
 }
-.issue-activities>table>tbody>tr>td.content>.body {
-    margin-top: 1rem;
-}
-.issue-activities>table>tbody>tr>td.content>.body>.detail+.comment {
-    margin-top: 1rem;
+.issue-activities>.non-comment+.non-comment {
+	border-top: none !important;
 }
 
-.issue-activities>table>tbody>tr>td.content.no-body {
-	vertical-align: middle;
+.issue-activities>.activity.non-comment>div {
+    border-left: 1px solid var(--light-gray) !important;
+	margin-left: 4.6rem;
+	position: relative;
+	padding-left: 1.3rem;
 }
-.issue-activities>table>tbody>tr>td.content.no-body>.body {
-	display: none;
+.dark-mode .issue-activities>.activity.non-comment>div {
+	border-color: var(--dark-mode-light-dark) !important;
 }
-.issue-activities>table>tbody>tr .activity-anchor {
-	display: none;
+.issue-activities>.activity.non-comment>div>.icon {
+	position: absolute;
+	left: -0.6rem;
+	top: 1.4rem;
+	background: white;
 }
-.issue-activities>table>tbody>tr:hover .activity-anchor {
-	display: inline;
+.dark-mode .issue-activities>.activity.non-comment>div>.icon {
+	background: var(--dark-mode-dark);
 }

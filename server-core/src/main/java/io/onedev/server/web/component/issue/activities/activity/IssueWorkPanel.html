@@ -1,12 +1,13 @@
 <wicket:panel>
-	<div class="head">
-		<span wicket:id="user" class="user"></span> <span wicket:id="description"></span> <span wicket:id="age"></span>
-	</div>
-	<div class="body">
-		<div wicket:id="detail"></div>
+	<div>
+		<wicket:svg href="work-log" class="icon text-gray"></wicket:svg>
+		<div class="head">
+			<span wicket:id="avatar" class="mr-1"></span>
+			<span wicket:id="name"></span> logged work (<span wicket:id="workingPeriod"></span>) <span wicket:id="age"></span>
+		</div>
+		<div wicket:id="body" class="body mt-3"></div>		
 	</div>
 	<wicket:fragment wicket:id="detailViewFrag">
-		<div>Worked on this issue for <span wicket:id="workingPeriod"></span></div>
 		<div wicket:id="note" class="note mt-3"></div>
 		<div class="d-flex align-items-center d-empty-none mt-3"><wicket:enclosure child="edit"><a wicket:id="edit" class="text-muted text-hover-primary font-size-sm mr-2">Edit</a><span class="d-last-child-none dot mr-2"></span></wicket:enclosure><wicket:enclosure child="delete"><a wicket:id="delete" class="text-muted text-hover-primary font-size-sm">Delete</a><span class="d-last-child-none dot mr-2"></span></wicket:enclosure></div>
 	</wicket:fragment>

@@ -1,0 +1,12 @@
+<wicket:panel>
+    <div class="border border-dashed border-primary rounded p-4">
+        <div class="mb-3">
+            <span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span> <span wicket:id="submitOnBehalfOf"></span>
+        </div>
+        <div wicket:id="description"></div>
+    </div>        
+	<wicket:fragment wicket:id="linkIssuesFrag">
+		<span class="d-first-child-none dot mr-2"></span>
+		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2">Link Issues</a>
+	</wicket:fragment>
+</wicket:panel>

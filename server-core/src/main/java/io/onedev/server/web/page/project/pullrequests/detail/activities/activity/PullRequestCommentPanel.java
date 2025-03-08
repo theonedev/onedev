@@ -8,9 +8,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.jetbrains.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -28,24 +27,24 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
 import io.onedev.server.web.util.DeleteCallback;
 
-class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
-
-	private final DeleteCallback deleteCallback;
+class PullRequestCommentPanel extends Panel {
 	
-	public PullRequestCommentedPanel(String id, IModel<PullRequestComment> model, DeleteCallback deleteCallback) {
-		super(id, model);
-		this.deleteCallback = deleteCallback;
+	public PullRequestCommentPanel(String id) {
+		super(id);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("user", getComment().getUser().getDisplayName()));
+		add(new UserIdentPanel("avatar", getComment().getUser(), Mode.AVATAR));
+		add(new Label("name", getComment().getUser().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		
@@ -72,45 +71,46 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 
 			@Override
 			protected String getComment() {
-				return PullRequestCommentedPanel.this.getComment().getContent();
+				return PullRequestCommentPanel.this.getComment().getContent();
 			}
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				if (comment.length() > PullRequestComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
-				var entity = PullRequestCommentedPanel.this.getComment();
+				var entity = PullRequestCommentPanel.this.getComment();
 				entity.setContent(comment);
-				OneDev.getInstance(PullRequestCommentManager.class).update(entity);
-				notifyPullRequestChange(target);
+				getPullRequestCommentManager().update(entity);
+				var page = (BasePage) getPage();
+				page.notifyObservableChange(target, PullRequest.getChangeObservable(entity.getRequest().getId()));				
 			}
 
 			@Override
 			protected Project getProject() {
-				return PullRequestCommentedPanel.this.getComment().getProject();
+				return PullRequestCommentPanel.this.getComment().getProject();
 			}
 
 			@Nullable
 			@Override
 			protected String getAutosaveKey() {
-				return "pull-request-comment:" + PullRequestCommentedPanel.this.getComment().getId();
+				return "pull-request-comment:" + PullRequestCommentPanel.this.getComment().getId();
 			}
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
 				return new ProjectAttachmentSupport(getProject(), 
-						PullRequestCommentedPanel.this.getComment().getRequest().getUUID(), 
+						PullRequestCommentPanel.this.getComment().getRequest().getUUID(), 
 						SecurityUtils.canManagePullRequests(getProject()));
 			}
 
 			@Override
 			protected List<User> getParticipants() {
-				return PullRequestCommentedPanel.this.getComment().getRequest().getParticipants();
+				return PullRequestCommentPanel.this.getComment().getRequest().getParticipants();
 			}
 			
 			@Override
 			protected boolean canManageComment() {
-				return SecurityUtils.canModifyOrDelete(PullRequestCommentedPanel.this.getComment());
+				return SecurityUtils.canModifyOrDelete(PullRequestCommentPanel.this.getComment());
 			}
 
 			@Override
@@ -126,35 +126,40 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 			@Override
 			protected DeleteCallback getDeleteCallback() {
 				return target -> {
-					notifyPullRequestChange(target);
-					deleteCallback.onDelete(target);
+					var page = (BasePage) getPage();
+					var pullRequest = PullRequestCommentPanel.this.getComment().getRequest();
+					target.appendJavaScript(String.format("$('#%s').remove();", PullRequestCommentPanel.this.getMarkupId()));
+					PullRequestCommentPanel.this.remove();
+					getPullRequestCommentManager().delete(PullRequestCommentPanel.this.getComment());
+					page.notifyObservableChange(target, PullRequest.getChangeObservable(pullRequest.getId()));
 				};
 			}
 
 			@Override
 			protected Collection<? extends EntityReaction> getReactions() {
-				return PullRequestCommentedPanel.this.getComment().getReactions();
+				return PullRequestCommentPanel.this.getComment().getReactions();
 			}
 
 			@Override
 			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
 				OneDev.getInstance(PullRequestCommentReactionManager.class).toggleEmoji(
 						SecurityUtils.getUser(), 
-						PullRequestCommentedPanel.this.getComment(), 
+						PullRequestCommentPanel.this.getComment(), 
 						emoji);
 			}
 			
 		});
-		
+
+		setMarkupId(getComment().getAnchor());
 		setOutputMarkupId(true);
 	}
-	
+
+	private PullRequestCommentManager getPullRequestCommentManager() {
+		return OneDev.getInstance(PullRequestCommentManager.class);
+	}
+
 	private PullRequestComment getComment() {
-		return getModelObject();
+		return ((PullRequestCommentActivity) getDefaultModelObject()).getComment();
 	}
-	
-	private void notifyPullRequestChange(AjaxRequestTarget target) {
-		((BasePage)getPage()).notifyObservableChange(target,
-				PullRequest.getChangeObservable(getComment().getRequest().getId()));
-	}
+
 }

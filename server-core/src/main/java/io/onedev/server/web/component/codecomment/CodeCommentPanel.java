@@ -1,30 +1,13 @@
 package io.onedev.server.web.component.codecomment;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.UrlUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.markdown.ContentQuoted;
-import io.onedev.server.web.component.markdown.MarkdownEditor;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.xodus.VisitInfoManager;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -57,12 +40,36 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.markdown.ContentQuoted;
+import io.onedev.server.web.component.markdown.MarkdownEditor;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.xodus.VisitInfoManager;
 
 public abstract class CodeCommentPanel extends Panel {
 
@@ -282,32 +289,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 		});
 		
-		viewFragment.add(new AjaxLink<Void>("delete") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				String confirmMessage;
-				if (getComment().getReplies().isEmpty()) {
-					confirmMessage = "Do you really want to delete this comment?";
-				} else {
-					confirmMessage = "Deleting this comment will also delete all replies, do you really "
-							+ "want to continue?";
-				}
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onDeleteComment(target, getComment());
-				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
-			}
-
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModifyOrDelete(getComment()));
-			}
-		});
+		viewFragment.add(new WebMarkupContainer("delete").setVisible(false));
 		
 		return viewFragment;
 	}
@@ -359,6 +341,32 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 			
 		});
+		actionsContainer.add(new AjaxLink<Void>("delete") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				String confirmMessage;
+				if (getComment().getReplies().isEmpty()) {
+					confirmMessage = "Do you really want to delete this code comment?";
+				} else {
+					confirmMessage = "Do you really want to delete this code comment and all its replies?";
+				}
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onDeleteComment(target, getComment());
+				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
+			}
+
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canModifyOrDelete(getComment()));
+			}
+		});
+
 		return actionsContainer;
 	}
 	

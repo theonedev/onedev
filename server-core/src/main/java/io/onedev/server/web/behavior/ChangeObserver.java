@@ -1,11 +1,11 @@
 package io.onedev.server.web.behavior;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 public abstract class ChangeObserver extends Behavior {
 	
@@ -37,8 +37,11 @@ public abstract class ChangeObserver extends Behavior {
 	
 	public void onObservableChanged(IPartialPageRequestHandler handler, 
 									Collection<String> changedObservables) {
-		if (component.isVisibleInHierarchy())
+		var parent = component.getParent();
+		if ((parent == null || parent.isVisibleInHierarchy()) 
+				&& (component.determineVisibility() || component.getOutputMarkupPlaceholderTag())) {						
 			handler.add(component);
+		}
 	}
 
 	public static Collection<String> filterObservables(Collection<String> observingObservables,

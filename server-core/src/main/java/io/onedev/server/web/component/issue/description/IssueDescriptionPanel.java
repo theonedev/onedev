@@ -1,19 +1,17 @@
-package io.onedev.server.web.component.issue.activities.activity;
-
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.util.EmailAddressUtils.describe;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
+package io.onedev.server.web.component.issue.description;
 
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
-import org.jetbrains.annotations.Nullable;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -26,32 +24,36 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 
-class IssueOpenedPanel extends GenericPanel<Issue> {
+public abstract class IssueDescriptionPanel extends Panel {
 
-	public IssueOpenedPanel(String id, IModel<Issue> model) {
-		super(id, model);
+	public IssueDescriptionPanel(String id) {
+		super(id);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+	
 		Issue issue = getIssue();
-		add(new Label("user", issue.getSubmitter().getDisplayName()));
-		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate()))
+		add(new UserIdentPanel("submitterAvatar", issue.getSubmitter(), Mode.AVATAR));
+		add(new Label("submitterName", issue.getSubmitter().getDisplayName()));
+		add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 
 		if (issue.getOnBehalfOf() != null)
-			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(issue.getOnBehalfOf(), canManageIssues(getIssue().getProject()))) + "</b>").setEscapeModelStrings(false));
+			add(new Label("submitOnBehalfOf", " on behalf of <b>" + HtmlEscape.escapeHtml5(EmailAddressUtils.describe(issue.getOnBehalfOf(), SecurityUtils.canManageIssues(getIssue().getProject()))) + "</b>").setEscapeModelStrings(false));
 		else 
-			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
-		
-		add(new CommentPanel("body") {
+			add(new WebMarkupContainer("submitOnBehalfOf").setVisible(false));
+
+		add(new CommentPanel("description") {
 			
 			@Override
 			protected String getComment() {
@@ -105,7 +107,6 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 				return null;
 			}
 
-			@Nullable
 			@Override
 			protected String getAutosaveKey() {
 				return "issue:" + getIssue().getId() + ":description";
@@ -124,11 +125,22 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 					emoji);
 			}
 
-		});
-	}
+			@Override
+			protected Component newMoreActions(String componentId) {
+				var fragment = new Fragment(componentId, "linkIssuesFrag", IssueDescriptionPanel.this);
+				fragment.add(new AjaxLink<Void>("linkIssues") {
 
-	private Issue getIssue() {
-		return getModelObject();
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						
+					}
+				});
+				return fragment;
+			}
+
+		});
+        
 	}
 	
+    protected abstract Issue getIssue();
 }

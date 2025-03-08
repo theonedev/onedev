@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="d-flex">
+		<div class="avatar mr-3">
+			<span wicket:id="avatar"></span>
+		</div>
+		<div class="detail">
+			<div class="head mb-3">
+				<span wicket:id="name"></span> commented <span wicket:id="age"></span>
+				<a wicket:id="changes" title="Changes since this comment" class="since-changes ml-2"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+				<a wicket:id="anchor" class="activity-anchor ml-2"><wicket:svg href="link" class="icon rotate-45"/></a>
+			</div>
+			<div wicket:id="body" class="body"></div>		
+		</div>		
+	</div>
+</wicket:panel>

@@ -1,17 +1,7 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.IssueWork;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.web.util.editbean.IssueWorkBean;
+import static io.onedev.server.util.DateUtils.formatDateTime;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -22,42 +12,48 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import static io.onedev.server.util.DateUtils.formatDateTime;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueWorkManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.IssueWork;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.editbean.IssueWorkBean;
 
-class IssueWorkPanel extends GenericPanel<IssueWork> {
-
-	private final DeleteCallback deleteCallback;
-	
-	public IssueWorkPanel(String id, IModel<IssueWork> model, DeleteCallback deleteCallback) {
-		super(id, model);
-		this.deleteCallback = deleteCallback;
-	}
-	
-	private IssueWork getWork() {
-		return getModelObject();
+class IssueWorkPanel extends Panel {
+		
+	public IssueWorkPanel(String id) {
+		super(id);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("user", getWork().getUser().getDisplayName()));
-		
-		add(new Label("description", "logged work"));
+		add(new UserIdentPanel("avatar", getWork().getUser(), Mode.AVATAR));
+		add(new Label("name", getWork().getUser().getDisplayName()));	
+		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes())));	
 		add(new Label("age", DateUtils.formatAge(getWork().getDate()))
 			.add(new AttributeAppender("title", formatDateTime(getWork().getDate()))));
 		
-		add(newDetailViewer("detail"));
+		add(newDetailViewer("body"));
+
+		setMarkupId(getWork().getAnchor());
+		setOutputMarkupId(true);
 	}
 	
 	private Component newDetailViewer(String componentId) {
 		var fragment = new Fragment(componentId, "detailViewFrag", this);
-		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
-		fragment.add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes())));
 		if (getWork().getNote() != null)
 			fragment.add(new MarkdownViewer("note", Model.of(getWork().getNote()), null));
 		else 
@@ -67,7 +63,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				var detailEditor = newDetailEditor("detail");
+				var detailEditor = newDetailEditor("body");
 				fragment.replaceWith(detailEditor);
 				target.add(detailEditor);
 			}
@@ -89,7 +85,9 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				notifyIssueChange(target);
-				deleteCallback.onDelete(target);
+				getWorkManager().delete(getWork());
+				IssueWorkPanel.this.remove();
+				target.appendJavaScript(String.format("$('#%s').remove();", IssueWorkPanel.this.getMarkupId()));
 			}
 
 			@Override
@@ -100,7 +98,6 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 		});
 
 		fragment.setOutputMarkupId(true);
-		
 		return fragment;
 	}
 	
@@ -122,7 +119,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 				work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 				work.setMinutes(bean.getSpentTime());
 				getWorkManager().createOrUpdate(work);
-				var detailViewer = newDetailViewer("detail");
+				var detailViewer = newDetailViewer("body");
 				fragment.replaceWith(detailViewer);
 				target.add(detailViewer);
 			}
@@ -137,7 +134,7 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				var detailViewer = newDetailViewer("detail");
+				var detailViewer = newDetailViewer("body");
 				fragment.replaceWith(detailViewer);
 				target.add(detailViewer);
 			}
@@ -149,6 +146,10 @@ class IssueWorkPanel extends GenericPanel<IssueWork> {
 	
 	private IssueWorkManager getWorkManager() {
 		return OneDev.getInstance(IssueWorkManager.class);
+	}
+
+	private IssueWork getWork() {
+		return ((IssueWorkActivity) getDefaultModelObject()).getWork();
 	}
 	
 	private void notifyIssueChange(AjaxRequestTarget target) {

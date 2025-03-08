@@ -1,18 +1,15 @@
-.issue-operations>div {
-	margin-bottom: 1.5rem;
-}
-.issue-operations>.state-and-actions>.state {
+.issue-operations>.state {
 	margin-right: 1.2rem;
 	padding-right: 1.2rem;
 }
-.issue-operations>.state-and-actions>.state.with-separator {
+.issue-operations>.state.with-separator {
 	border-right: 1px solid var(--light-gray);
 }
-.dark-mode .issue-operations>.state-and-actions>.state.with-separator {
+.dark-mode .issue-operations>.state.with-separator {
 	border-right-color: var(--dark-mode-lighter-dark);
 }
 
-.issue-operations>.state-and-actions>.state>.issue-state {
+.issue-operations>.state>.issue-state {
     padding: 0.55rem 0.75rem;
     font-size: 0.925rem;
 	border: 1px solid transparent;

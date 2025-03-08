@@ -26,7 +26,7 @@ public class SideInfoLink extends AjaxLink<Void> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new SideInfoCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new SideInfoResourceReference()));
 	}
 
 }

@@ -1,9 +1,5 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.util.EmailAddressUtils.describe;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -12,8 +8,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.jetbrains.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -30,29 +25,25 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 
-class IssueCommentedPanel extends GenericPanel<IssueComment> {
+class IssueCommentPanel extends Panel {
 
-	private final DeleteCallback deleteCallback;
-	
-	public IssueCommentedPanel(String id, IModel<IssueComment> model, DeleteCallback deleteCallback) {
-		super(id, model);
-		this.deleteCallback = deleteCallback;
+	public IssueCommentPanel(String id) {
+		super(id);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("user", getComment().getUser().getDisplayName()));
+		add(new UserIdentPanel("avatar", getComment().getUser(), Mode.AVATAR));
+		add(new Label("name", getComment().getUser().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
-		if (getComment().getOnBehalfOf() != null)
-			add(new Label("onBehalfOf", " on behalf of <b>" + escapeHtml5(describe(getComment().getOnBehalfOf(), canManageIssues(getComment().getIssue().getProject()))) + "</b>").setEscapeModelStrings(false));
-		else
-			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		
 		add(new WebMarkupContainer("anchor") {
 
@@ -68,39 +59,46 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
 			@Override
 			protected String getComment() {
-				return IssueCommentedPanel.this.getComment().getContent();
+				return IssueCommentPanel.this.getComment().getContent();
 			}
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
-				var entity = IssueCommentedPanel.this.getComment();
+				var entity = IssueCommentPanel.this.getComment();
 				entity.setContent(comment);
 				OneDev.getInstance(IssueCommentManager.class).update(entity);
-				notifyIssueChange(target);
+				var page = (BasePage) getPage();
+				page.notifyObservablesChange(target, entity.getIssue().getChangeObservables(false));				
 			}
 
 			@Override
 			protected Project getProject() {
-				return IssueCommentedPanel.this.getComment().getIssue().getProject();
+				return IssueCommentPanel.this.getComment().getIssue().getProject();
+			}
+
+			@Nullable
+			@Override
+			protected String getAutosaveKey() {
+				return "issue-comment:" + IssueCommentPanel.this.getComment().getId();
+			}
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new ProjectAttachmentSupport(getProject(), 
+						IssueCommentPanel.this.getComment().getIssue().getUUID(), 
+						SecurityUtils.canManageIssues(getProject()));
 			}
 
 			@Override
 			protected List<User> getParticipants() {
-				return IssueCommentedPanel.this.getComment().getIssue().getParticipants();
+				return IssueCommentPanel.this.getComment().getIssue().getParticipants();
 			}
 			
 			@Override
-			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), 
-						IssueCommentedPanel.this.getComment().getIssue().getUUID(), 
-						canManageIssues(getProject()));
-			}
-
-			@Override
 			protected boolean canManageComment() {
-				return SecurityUtils.canModifyOrDelete(IssueCommentedPanel.this.getComment());
+				return SecurityUtils.canModifyOrDelete(IssueCommentPanel.this.getComment());
 			}
 
 			@Override
@@ -116,39 +114,36 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			@Override
 			protected DeleteCallback getDeleteCallback() {
 				return target -> {
-					notifyIssueChange(target);
-					deleteCallback.onDelete(target);
+					var page = (BasePage) getPage();
+					var issue = IssueCommentPanel.this.getComment().getIssue();
+					target.appendJavaScript(String.format("$('#%s').remove();", IssueCommentPanel.this.getMarkupId()));	
+					IssueCommentPanel.this.remove();
+					OneDev.getInstance(IssueCommentManager.class).delete(IssueCommentPanel.this.getComment());
+					page.notifyObservablesChange(target, issue.getChangeObservables(false));					
 				};
-			}
-
-			@Nullable
-			@Override
-			protected String getAutosaveKey() {
-				return "issue-comment:" + IssueCommentedPanel.this.getComment().getId();
 			}
 
 			@Override
 			protected Collection<? extends EntityReaction> getReactions() {
-				return IssueCommentedPanel.this.getComment().getReactions();
+				return IssueCommentPanel.this.getComment().getReactions();
 			}
 
 			@Override
 			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				var user = SecurityUtils.getUser();
-				var comment = IssueCommentedPanel.this.getComment();
-				OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(user, comment, emoji);
+				OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(
+						SecurityUtils.getUser(), 
+						IssueCommentPanel.this.getComment(), 
+						emoji);
 			}
-
+			
 		});
 
+		setMarkupId(getComment().getAnchor());
 		setOutputMarkupId(true);
 	}
 	
 	private IssueComment getComment() {
-		return getModelObject();
+		return ((IssueCommentActivity) getDefaultModelObject()).getComment();
 	}
 	
-	private void notifyIssueChange(AjaxRequestTarget target) {
-		((BasePage)getPage()).notifyObservablesChange(target, getComment().getIssue().getChangeObservables(false));
-	}	
 }
