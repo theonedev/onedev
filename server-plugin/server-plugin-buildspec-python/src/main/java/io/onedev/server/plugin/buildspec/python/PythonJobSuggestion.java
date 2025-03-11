@@ -235,7 +235,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				
 				CommandStep buildAndTest = new CommandStep();
 				buildAndTest.setName("build and test");
-				buildAndTest.setImage("1dev/poetry:1.0.1");
+				buildAndTest.setImage("1dev/poetry:1.0.2");
 				String commands = "" +
 						"set -e\n" +
 						"poetry config virtualenvs.create false\n" +
