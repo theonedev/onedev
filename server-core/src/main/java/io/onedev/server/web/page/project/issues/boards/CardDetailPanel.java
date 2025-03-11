@@ -39,9 +39,9 @@ import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.authorizations.IssueAuthorizationsPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
-import io.onedev.server.web.component.issue.description.IssueDescriptionPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.primary.IssuePrimaryPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
@@ -108,7 +108,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 		});
 		
-		add(new IssueDescriptionPanel("description") {
+		add(new IssuePrimaryPanel("primary") {
 
 			@Override
 			protected Issue getIssue() {

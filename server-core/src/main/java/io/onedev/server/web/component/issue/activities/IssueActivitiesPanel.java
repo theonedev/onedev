@@ -197,10 +197,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 					
 					String script;
 					if (prevActivityRow != null) {
-						script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+						script = String.format("$(\"<li id='%s'></li>\").insertAfter('#%s');", 
 								newActivityRow.getMarkupId(), prevActivityRow.getMarkupId());
 					} else {
-						script = String.format("$(\"<tr id='%s'></tr>\").prependTo($('#%s').find('tbody'));", 
+						script = String.format("$(\"<li id='%s'></li>\").prependTo($('#%s>ul'));", 
 								newActivityRow.getMarkupId(), IssueActivitiesPanel.this.getMarkupId());
 					}
 					handler.prependJavaScript(script);

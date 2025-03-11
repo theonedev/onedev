@@ -30,6 +30,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	private static final Pattern INSIDE_QUOTE = Pattern.compile("\"([^\"\\\\]|\\\\.)*");
 
+	@Nullable
 	public abstract Criteria<T> getCriteria();
 
 	public abstract List<EntitySort> getSorts();

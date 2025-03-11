@@ -253,7 +253,7 @@ onedev.server = {
 								$this[0].CodeMirror.focus();					
 							} else if ($this.attr("readonly") != "readonly" && $this.attr("disabled") != "disabled") {
 								if ($this.closest(".select2-container").length != 0) {
-									if ($this.closest(".inplace-property-edit").length != 0) {
+									if ($this.closest(".inplace-edit").length != 0) {
 										$this.focus();
 										$this.closest(".select2-container").next("input").select2("open");
 									} 

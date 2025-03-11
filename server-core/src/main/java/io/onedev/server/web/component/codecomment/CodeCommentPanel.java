@@ -157,7 +157,7 @@ public abstract class CodeCommentPanel extends Panel {
 			protected SuggestionSupport getSuggestionSupport() {
 				return CodeCommentPanel.this.getSuggestionSupport();
 			}
-			
+
 		});
 		
 		viewFragment.add(new WebMarkupContainer("anchor").setVisible(false));

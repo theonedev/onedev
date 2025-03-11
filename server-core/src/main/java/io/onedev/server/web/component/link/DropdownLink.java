@@ -98,8 +98,11 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 
 					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					if (target != null) {
-						String script = String.format("$('#%s').removeClass('dropdown-open');", 
-								DropdownLink.this.getMarkupId(true));
+						var markupId = DropdownLink.this.getMarkupId(true);
+						String script = String.format(""
+								+ "$('#%s').removeClass('dropdown-open');"
+								+ "$('#%s').closest('.dropdown-aware').removeClass('dropdown-aware-open');", 
+								markupId, markupId);
 						target.appendJavaScript(script);
 					}
 					
@@ -109,8 +112,9 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 			};
 			String script = String.format(""
 					+ "$('#%s').addClass('dropdown-open');"
+					+ "$('#%s').closest('.dropdown-aware').addClass('dropdown-aware-open');"
 					+ "$('#%s').data('trigger', $('#%s'));", 
-					getMarkupId(), dropdown.getMarkupId(), getMarkupId());
+					getMarkupId(), getMarkupId(), dropdown.getMarkupId(), getMarkupId());
 			target.appendJavaScript(script);
 		} else {
 			dropdown.close();

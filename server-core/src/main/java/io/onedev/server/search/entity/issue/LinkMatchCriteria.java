@@ -26,7 +26,7 @@ import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -44,7 +44,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 	
 	private final boolean allMatch;
 	
-	private transient LinkSide linkSide;
+	private transient LinkDescriptor linkSide;
 	
 	public LinkMatchCriteria(String linkName, Criteria<Issue> criteria, boolean allMatch) {
 		this.linkName = linkName;
@@ -115,9 +115,9 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 		}
 	}
 	
-	private LinkSide getLinkSide() {
+	private LinkDescriptor getLinkSide() {
 		if (linkSide == null)
-			linkSide = new LinkSide(linkName);
+			linkSide = new LinkDescriptor(linkName);
 		return linkSide;
 	}
 

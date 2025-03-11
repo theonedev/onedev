@@ -10,7 +10,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.choice.IssueChoice;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -53,7 +53,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 			}
 
 			@Override
-			protected EntityQuery<Issue> getScope() {
+			protected IssueQuery getBaseQuery() {
 				IssueQueryAware issueScopeAware = findParent(IssueQueryAware.class);
 				if (issueScopeAware != null) 
 					return issueScopeAware.getIssueQuery();

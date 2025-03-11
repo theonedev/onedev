@@ -7682,6 +7682,11 @@ public class DataMigrator {
 						element.addElement("user").setText(String.valueOf(User.SYSTEM_ID));
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("LinkSpecs.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.element("showAlways").detach();
+				dom.writeToFile(file, false);
 			}
 		}
 	}

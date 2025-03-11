@@ -157,6 +157,12 @@ public class OrCriteria<T> extends Criteria<T> {
 	}	
 	
 	@Override
+	public void fill(T object) {
+		if (criterias.size() == 1) 
+			criterias.iterator().next().fill(object);
+	}
+	
+	@Override
 	public String toString(boolean addParensIfNecessary) {
 		if (!withParens() && criterias.size() > 1)
 			return "(" + toString() + ")";

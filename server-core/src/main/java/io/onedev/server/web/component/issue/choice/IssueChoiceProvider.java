@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.choice;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,11 +17,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.FuzzyCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedQuery;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.select2.ChoiceProvider;
@@ -55,7 +58,7 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 	}
 	
 	@Nullable
-	protected EntityQuery<Issue> getScope() {
+	protected IssueQuery getBaseQuery() {
 		return null;
 	}
 	
@@ -65,7 +68,14 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 		var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
 		if (scopedQuery != null) {
 			var projectScope = new ProjectScope(scopedQuery.getProject(), false, false);
-			var issueQuery = new IssueQuery(new FuzzyCriteria(scopedQuery.getQuery()));
+			List<Criteria<Issue>> criterias = Lists.newArrayList(new FuzzyCriteria(scopedQuery.getQuery()));
+			var sorts = new ArrayList<EntitySort>();
+			if (getBaseQuery() != null) {
+				if (getBaseQuery().getCriteria() != null)				
+					criterias.add(getBaseQuery().getCriteria());
+				sorts.addAll(getBaseQuery().getSorts());
+			}
+			var issueQuery = new IssueQuery(new AndCriteria<>(criterias), sorts);
 			var issues = OneDev.getInstance(IssueManager.class)
 					.query(projectScope, issueQuery, false, 0, count);
 			new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);

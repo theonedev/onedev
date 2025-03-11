@@ -5,18 +5,18 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 
-public class LinkSide {
+public class LinkDescriptor {
 	
 	private final LinkSpec spec;
 	
 	private final boolean opposite;
 	
-	public LinkSide(LinkSpec spec, boolean opposite) {
+	public LinkDescriptor(LinkSpec spec, boolean opposite) {
 		this.spec = spec;
 		this.opposite = opposite;
 	}
 	
-	public LinkSide(String linkName) {
+	public LinkDescriptor(String linkName) {
 		spec = OneDev.getInstance(LinkSpecManager.class).find(linkName);
 		if (spec == null)
 			throw new ExplicitException("Link spec not found: " + linkName);

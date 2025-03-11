@@ -1,31 +1,11 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.link.IssueLinksPanel;
-import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
-import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
-import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.security.SecurityUtils.getAuthUser;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -45,10 +25,33 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
-import java.util.List;
-
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.security.SecurityUtils.getAuthUser;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.LinkDescriptor;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
+import io.onedev.server.web.component.issue.link.IssueLinksPanel;
+import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
+import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 
 public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	
@@ -284,8 +287,8 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			protected List<Issue> load() {
 				Issue issue = issueModel.getObject();
 				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-				LinkSide side = new LinkSide(linksPanel.getExpandedLink());
-				return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite());
+				LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
+				return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite()).stream().filter(it->SecurityUtils.canAccessIssue(it)).collect(toList());
 			}
 
 		}) {

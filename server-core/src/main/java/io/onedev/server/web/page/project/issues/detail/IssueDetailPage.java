@@ -46,9 +46,9 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
-import io.onedev.server.web.component.issue.description.IssueDescriptionPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.primary.IssuePrimaryPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
@@ -143,7 +143,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 		});
 		
-		add(new IssueDescriptionPanel("description") {
+		add(new IssuePrimaryPanel("primary") {
 
 			@Override
 			protected Issue getIssue() {

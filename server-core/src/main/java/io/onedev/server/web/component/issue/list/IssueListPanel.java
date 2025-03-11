@@ -26,7 +26,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.timetracking.TimeTrackingManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
@@ -1757,7 +1757,7 @@ public abstract class IssueListPanel extends Panel {
 					protected List<Issue> load() {
 						Issue issue = (Issue) fragment.getDefaultModelObject();
 						getIssueLinkManager().loadDeepLinks(issue);
-						LinkSide side = new LinkSide(linksPanel.getExpandedLink());
+						LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
 						return issue.findLinkedIssues(side.getSpec(), side.isOpposite()).stream().filter(SecurityUtils::canAccessIssue).collect(toList());
 					}
 

@@ -9,18 +9,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.facade.LinkSpecFacade;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
 
 @Editable
 @Entity
@@ -41,9 +41,7 @@ public class LinkSpec extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private LinkSpecOpposite opposite;
-	
-	private boolean showAlways;
-	
+		
 	private int order;
 	
 	@OneToMany(mappedBy=IssueLink.PROP_SPEC, cascade=CascadeType.REMOVE)
@@ -96,15 +94,6 @@ public class LinkSpec extends AbstractEntity {
 	
 	public String getName(boolean opposite) {
 		return opposite?getOpposite().getName():getName();
-	}
-
-	@Editable(order=200, description = "Whether or not to show this link always even if no issues are linked")
-	public boolean isShowAlways() {
-		return showAlways;
-	}
-
-	public void setShowAlways(boolean showAlways) {
-		this.showAlways = showAlways;
 	}
 
 	public int getOrder() {

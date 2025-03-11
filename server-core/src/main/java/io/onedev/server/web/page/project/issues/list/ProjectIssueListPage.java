@@ -16,7 +16,7 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -263,7 +263,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 							protected List<Issue> load() {
 								Issue issue = getIssueManager().load(issueId);
 								OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-								LinkSide side = new LinkSide(linksPanel.getExpandedLink());
+								LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
 								return issue.findLinkedIssues(side.getSpec(), side.isOpposite());
 							}
 

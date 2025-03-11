@@ -350,7 +350,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						script = String.format("$(\"<li id='%s'></li>\").insertAfter('#%s');", 
 								sinceChangesRow.getMarkupId(), prevActivityRow.getMarkupId());
 					} else {
-						script = String.format("$(\"<tr id='%s'></tr>\").prependTo($('#%s'));", 
+						script = String.format("$(\"<li id='%s'></li>\").prependTo($('#%s'));", 
 								sinceChangesRow.getMarkupId(), container.getMarkupId());
 					}
 					handler.prependJavaScript(script);
@@ -370,7 +370,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						script = String.format("$(\"<li id='%s'></li>\").insertAfter('#%s');", 
 								newActivityRow.getMarkupId(), prevActivityRow.getMarkupId());
 					} else {
-						script = String.format("$(\"<tr id='%s'></tr>\").prependTo($('#%s'));", 
+						script = String.format("$(\"<li id='%s'></li>\").prependTo($('#%s'));", 
 								newActivityRow.getMarkupId(), container.getMarkupId());
 					}
 					handler.prependJavaScript(script);

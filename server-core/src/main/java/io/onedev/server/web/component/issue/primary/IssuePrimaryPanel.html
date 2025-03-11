@@ -1,0 +1,36 @@
+<wicket:panel>
+	<div class="issue-primary">
+		<div class="border border-dashed border-primary rounded p-4">
+			<div class="mb-3">
+				<span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span> <span wicket:id="submitOnBehalfOf"></span>
+			</div>
+			<div wicket:id="description"></div>        
+		</div>        
+		<ul wicket:id="links" class="links list-unstyled mb-0">
+			<li wicket:id="links" class="mt-4">
+				<div class="head d-flex align-items-center h6 dropdown-aware">
+					<span wicket:id="name" class="flex-shrink-0 mr-2"></span>
+					<a wicket:id="createNew" title="Create new issue" class="mr-1"><wicket:svg href="plus" class="icon icon-sm"/></a>
+					<a wicket:id="linkExisting" title="Link existing issue" class="mr-1"><wicket:svg href="link" class="icon icon-sm"/></a>
+				</div>
+				<ul class="body linked-issues list-unstyled mb-0">
+					<li wicket:id="linkedIssues" class="py-2 border-top d-flex align-items-center"></li>
+				</ul>	
+			</li>
+		</ul>	
+	</div>
+	<wicket:fragment wicket:id="linkIssuesActionFrag">
+		<span class="d-first-child-none dot mr-2"></span>
+		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2">Link Issues</a>
+	</wicket:fragment>
+    <wicket:fragment wicket:id="selectIssueFrag">
+        <form wicket:id="form"> 
+            <input wicket:id="choice" type="hidden" class="form-control"/>
+        </form>
+    </wicket:fragment>
+	<wicket:fragment wicket:id="linkedIssueFrag">
+		<a wicket:id="title"><span wicket:id="label"></span></a>
+		<a wicket:id="unlink" class="action ml-2" title="Unlink this issue"><wicket:svg href="unlink" class="icon icon-sm"/></a>
+		<a wicket:id="state" class="state ml-auto"><span wicket:id="badge"></span></a>
+	</wicket:fragment>
+</wicket:panel>

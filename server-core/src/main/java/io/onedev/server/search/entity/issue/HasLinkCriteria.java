@@ -14,7 +14,7 @@ import javax.persistence.criteria.Subquery;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -24,13 +24,13 @@ public class HasLinkCriteria extends Criteria<Issue> {
 	
 	private String linkName;
 	
-	private transient LinkSide linkSide;
+	private transient LinkDescriptor linkSide;
 	
 	public HasLinkCriteria(String linkName) {
 		this.linkName = linkName;
 	}
 	
-	public HasLinkCriteria(LinkSide linkSide) {
+	public HasLinkCriteria(LinkDescriptor linkSide) {
 		linkName = linkSide.getName();
 		this.linkSide = linkSide;
 	}
@@ -58,9 +58,9 @@ public class HasLinkCriteria extends Criteria<Issue> {
 		return builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 	
-	private LinkSide getLinkSide() {
+	private LinkDescriptor getLinkSide() {
 		if (linkSide == null) 
-			linkSide = new LinkSide(linkName);
+			linkSide = new LinkDescriptor(linkName);
 		return linkSide;
 	}
 	

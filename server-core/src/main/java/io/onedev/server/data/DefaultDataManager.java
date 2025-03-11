@@ -778,9 +778,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 			link.setName("Blocked By");
 			link.setMultiple(true);
 			link.setOpposite(new LinkSpecOpposite());
-			link.getOpposite().setName("Blocking");
+			link.getOpposite().setName("Blocks");
 			link.getOpposite().setMultiple(true);
 			link.setOrder(2);
+			linkSpecManager.create(link);
+
+			link = new LinkSpec();
+			link.setName("Related");
+			link.setMultiple(true);
+			link.setOrder(3);
 			linkSpecManager.create(link);
 			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());

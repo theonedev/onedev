@@ -1,53 +1,20 @@
 package io.onedev.server.web.component.issue.side;
 
-import com.google.common.collect.Lists;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.EntityReference;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
-import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.choice.IssueAddChoice;
-import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
-import io.onedev.server.web.component.issue.create.CreateIssuePanel;
-import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.issue.statestats.StateStatsBar;
-import io.onedev.server.web.component.iteration.IterationStatusLabel;
-import io.onedev.server.web.component.iteration.choice.AbstractIterationChoiceProvider;
-import io.onedev.server.web.component.iteration.choice.IterationChoiceResourceReference;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.select2.Response;
-import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToActChoice;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.list.SimpleUserListLink;
-import io.onedev.server.web.editable.InplacePropertyEditLink;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import static io.onedev.server.security.SecurityUtils.canAccessIssue;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.util.EmailAddressUtils.describe;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.mail.internet.InternetAddress;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -67,42 +34,64 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
-import javax.mail.internet.InternetAddress;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 
-import static io.onedev.server.search.entity.issue.IssueQuery.parse;
-import static io.onedev.server.security.SecurityUtils.*;
-import static io.onedev.server.util.EmailAddressUtils.describe;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueVoteManager;
+import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
+import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
+import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.iteration.IterationStatusLabel;
+import io.onedev.server.web.component.iteration.choice.AbstractIterationChoiceProvider;
+import io.onedev.server.web.component.iteration.choice.IterationChoiceResourceReference;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
+import io.onedev.server.web.component.select2.SelectToActChoice;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.list.SimpleUserListLink;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 public abstract class IssueSidePanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
-	
-	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
-		@Override
-		protected List<LinkSpec> load() {
-			return getLinkSpecManager().queryAndSort();
-		}
-
-	};
-	
+		
 	private boolean confidential;
 	
 	private Component watchesContainer;
-	
-	private boolean showAllLinks;
 	
 	public IssueSidePanel(String id) {
 		super(id);
@@ -114,7 +103,6 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newFieldsContainer());
 		addOrReplace(newConfidentialContainer());
 		addOrReplace(newIterationsContainer());
-		addOrReplace(newLinksContainer());
 		addOrReplace(newVotesContainer());
 		
 		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
@@ -163,56 +151,6 @@ public abstract class IssueSidePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showAllLinks") {
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("label", new LoadableDetachableModel<String>() {
-
-					@Override
-					protected String load() {
-						var hasVisibleLinks = false;
-						for (LinkSpec spec : linkSpecsModel.getObject()) {
-							if (canEditIssueLink(getProject(), spec) && spec.isShowAlways()
-									|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec))) {
-								hasVisibleLinks = true;
-								break;
-							}
-						}
-						if (hasVisibleLinks)
-							return "More Links";
-						else
-							return "Show Links";
-					}
-					
-				}));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				showAllLinks = true;
-				target.add(IssueSidePanel.this);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				if (showAllLinks) {
-					setVisible(false);
-				} else {
-					var hasLinksToShow = false;
-					for (LinkSpec spec : linkSpecsModel.getObject()) {
-						if (canEditIssueLink(getProject(), spec) && !spec.isShowAlways()
-								&& getIssue().getLinks().stream().noneMatch(it -> it.getSpec().equals(spec))) {
-							hasLinksToShow = true;
-							break;
-						}
-					}
-					setVisible(hasLinksToShow);
-				}
-			}
-		});
-
 		add(new ChangeObserver() {
 			
 			@Override
@@ -223,12 +161,6 @@ public abstract class IssueSidePanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
-	}
-
-	@Override
-	protected void onDetach() {
-		linkSpecsModel.detach();
-		super.onDetach();
 	}
 
 	private Component newFieldsContainer() {
@@ -307,287 +239,7 @@ public abstract class IssueSidePanel extends Panel {
 		
 		return confidentialInput;
 	}
-	
-	private Component newLinksContainer() {
-		return new ListView<LinkSide>("links", new LoadableDetachableModel<>() {
-
-			@Override
-			protected List<LinkSide> load() {
-				List<LinkSide> links = new ArrayList<>();
-				for (LinkSpec spec : linkSpecsModel.getObject()) {
-					if (canEditIssueLink(getProject(), spec) && (spec.isShowAlways() || showAllLinks)
-							|| getIssue().getLinks().stream().anyMatch(it -> it.getSpec().equals(spec) && (it.getSource().equals(getIssue()) || canAccessIssue(it.getSource())) && (it.getTarget().equals(getIssue()) || canAccessIssue(it.getTarget())))) {
-						if (spec.getOpposite() != null) {
-							IssueQuery query = spec.getOpposite().getParsedIssueQuery(getProject());
-							if (query.matches(getIssue()))
-								links.add(new LinkSide(spec, false));
-							query = spec.getParsedIssueQuery(getProject());
-							if (query.matches(getIssue()))
-								links.add(new LinkSide(spec, true));
-						} else {
-							IssueQuery query = spec.getParsedIssueQuery(getProject());
-							if (query.matches(getIssue()))
-								links.add(new LinkSide(spec, false));
-						}
-					}
-				}
-				return links;
-			}
-
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<LinkSide> item) {
-				LinkSide side = item.getModelObject();
-				
-				if (side.isOpposite() && side.getSpec().getOpposite().isMultiple() 
-						|| !side.isOpposite() && side.getSpec().isMultiple()) {
-					item.add(newMultipleLinks(item.getModel()));
-				} else {
-					item.add(newSingleLink(item.getModel()));
-				}
-			}
-			
-			private Fragment newMultipleLinks(IModel<LinkSide> model) {
-				Fragment fragment = new Fragment("content", "multipleLinksFrag", IssueSidePanel.this);
-				LinkSide side = model.getObject();
-				LinkSpec spec = side.getSpec();
-				boolean opposite = side.isOpposite();
-				
-				boolean canEditIssueLink = canEditIssueLink(getProject(), spec);
-				
-				String name = spec.getName(opposite);
-				fragment.add(new Label("name", name));
-				
-				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
-				for (Issue linkedIssue: getIssue().findLinkedIssues(spec, opposite)) {
-					LinkDeleteListener deleteListener;
-					if (canEditIssueLink) { 
-						deleteListener = new LinkDeleteListener() {
-	
-							@Override
-							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
-								getIssueChangeManager().removeLink(model.getObject().getSpec(), getIssue(), 
-										linkedIssue, opposite);
-								notifyIssueChange(target, getIssue());
-							}
-							
-						};
-					} else {
-						deleteListener = null;
-					}
-					linkedIssuesView.add(newLinkedIssueContainer(linkedIssuesView.newChildId(), 
-							linkedIssue, deleteListener));
-				}
-				fragment.add(linkedIssuesView);
-
-				fragment.add(new IssueAddChoice("linkNew", new IssueChoiceProvider() {
-
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject();
-					}
-					
-					@Override
-					protected EntityQuery<Issue> getScope() {
-						LinkSpec spec = model.getObject().getSpec();
-						if (opposite) 
-							return spec.getOpposite().getParsedIssueQuery(getProject());
-						else 
-							return spec.getParsedIssueQuery(getProject());
-					}
-					
-				}) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Issue selection) {
-						LinkSpec spec = model.getObject().getSpec();
-						if (getIssue().equals(selection)) {
-							getSession().warn("Can not link to self");
-						} else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) { 
-							getSession().warn("Issue already added");
-						} else {
-							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
-							notifyIssueChange(target, getIssue());
-						}
-					}
-					
-				}.setVisible(canEditIssueLink));
-
-				fragment.add(new ModalLink("createNew") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new CreateIssuePanel(id) {
-
-							@Nullable
-							@Override
-							protected Criteria<Issue> getTemplate() {
-								String query;
-								var spec = model.getObject().getSpec();
-								if (opposite)
-									query = spec.getOpposite().getIssueQuery();
-								else
-									query = spec.getIssueQuery();
-								return parse(getProject(), query, new IssueQueryParseOption(), false).getCriteria();
-							}
-
-							@Override
-							protected void onSave(AjaxRequestTarget target, Issue issue) {
-								getIssueManager().open(issue);
-								notifyIssueChange(target, issue);
-								getIssueChangeManager().addLink(model.getObject().getSpec(), 
-										getIssue(), issue, opposite);
-								notifyIssueChange(target, getIssue());
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected Project getProject() {
-								return getIssue().getProject();
-							}
-
-						};
-					}
-					
-				}.setVisible(canEditIssueLink));
-				
-				return fragment;
-			}
-			
-			private Fragment newSingleLink(IModel<LinkSide> model) {
-				Fragment fragment = new Fragment("content", "singleLinkFrag", IssueSidePanel.this);
-				LinkSide side = model.getObject();
-				fragment.add(new Label("name", side.getSpec().getName(side.isOpposite())));
-				
-				SingleLinkBean bean = new SingleLinkBean();
-				
-				Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());
-				if (prevLinkedIssue != null)
-					bean.setIssueId(prevLinkedIssue.getId());
-				
-				Long prevLinkedIssueId = bean.getIssueId();
-				
-				boolean authorized = canEditIssueLink(getProject(), side.getSpec());
-				fragment.add(new InplacePropertyEditLink("edit", new AlignPlacement(100, 0, 100, 0)) {
-
-					@Override
-					protected Serializable getBean() {
-						return bean;
-					}
-
-					@Override
-					protected String getPropertyName() {
-						return "issueId";
-					}
-
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject();
-					}
-
-					@Override
-					protected IssueQuery getIssueQuery() {
-						LinkSide side = model.getObject();
-						if (side.isOpposite()) 
-							return side.getSpec().getOpposite().getParsedIssueQuery(getProject());
-						else 
-							return side.getSpec().getParsedIssueQuery(getProject());
-					}
-
-					@Override
-					protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean,
-							String propertyName) {
-						LinkSide side = model.getObject();
-						SingleLinkBean singleLinkBean = (SingleLinkBean) bean;
-						Issue linkedIssue = null;
-						if (singleLinkBean.getIssueId() != null) 
-							linkedIssue = getIssueManager().load(singleLinkBean.getIssueId());
-						if (getIssue().equals(linkedIssue)) {
-							getSession().warn("Can not link to self");
-							singleLinkBean.setIssueId(prevLinkedIssueId);
-						} else {
-							Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());
-							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), prevLinkedIssue, linkedIssue, side.isOpposite());
-							notifyIssueChange(handler, getIssue());
-						}
-					}
-
-				}.setVisible(authorized));
-				
-				if (prevLinkedIssue != null) 
-					fragment.add(newLinkedIssueContainer("body", prevLinkedIssue, null));
-				else 
-					fragment.add(new WebMarkupContainer("body").setVisible(false));
-				
-				return fragment;
-			}
-			
-		};
-	}
-	
-	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
-			@Nullable LinkDeleteListener deleteListener) {
-		if (canAccessIssue(linkedIssue)) {
-			Long linkedIssueId = linkedIssue.getId();
-			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
-			Link<Void> link = new BookmarkablePageLink<Void>("reference", IssueActivitiesPage.class, 
-					IssueActivitiesPage.paramsOf(linkedIssue));
-			link.add(new Label("label", linkedIssue.getReference().toString(getProject())));
-			fragment.add(link);
-			
-			fragment.add(new AjaxLink<Void>("delete") {
-
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-							"Do you really want to remove this link?"));
-				}
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					Issue linkedIssue = getIssueManager().load(linkedIssueId);
-					deleteListener.onDelete(target, linkedIssue);
-					notifyIssueChange(target, getIssue());
-				}
-				
-			}.setVisible(deleteListener != null));
-
-			AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
-
-				@Override
-				protected Issue getIssue() {
-					return getIssueManager().load(linkedIssueId);
-				}
-
-			};
-
-			stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<>() {
-				@Override
-				protected Issue load() {
-					return getIssueManager().load(linkedIssueId);
-				}
-			}, true).add(AttributeAppender.append("class", "badge-sm")));
-			
-			fragment.add(stateLink);
-
-			link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
-					IssueActivitiesPage.paramsOf(linkedIssue));
-			link.add(new Label("label", linkedIssue.getTitle()));
-			fragment.add(link);
-			
-			return fragment;
-		} else {
-			return new WebMarkupContainer(componentId).setVisible(false);
-		}
-	}
-	
+		
 	private Component newIterationsContainer() {
 		WebMarkupContainer container = new WebMarkupContainer("iterations") {
 
@@ -919,14 +571,6 @@ public abstract class IssueSidePanel extends Panel {
 		return OneDev.getInstance(IssueChangeManager.class);
 	}
 	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
-	}
-	
-	private LinkSpecManager getLinkSpecManager() {
-		return OneDev.getInstance(LinkSpecManager.class);
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -941,9 +585,4 @@ public abstract class IssueSidePanel extends Panel {
 		((BasePage)getPage()).notifyObservablesChange(handler, issue.getChangeObservables(true));
 	}
 	
-	private static abstract class LinkDeleteListener implements Serializable {
-		
-		abstract void onDelete(AjaxRequestTarget target, Issue linkedIssue);
-		
-	}
 }
