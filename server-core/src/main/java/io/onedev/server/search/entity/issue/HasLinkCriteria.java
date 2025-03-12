@@ -24,15 +24,15 @@ public class HasLinkCriteria extends Criteria<Issue> {
 	
 	private String linkName;
 	
-	private transient LinkDescriptor linkSide;
+	private transient LinkDescriptor linkDescriptor;
 	
 	public HasLinkCriteria(String linkName) {
 		this.linkName = linkName;
 	}
 	
-	public HasLinkCriteria(LinkDescriptor linkSide) {
-		linkName = linkSide.getName();
-		this.linkSide = linkSide;
+	public HasLinkCriteria(LinkDescriptor linkDescriptor) {
+		linkName = linkDescriptor.getName();
+		this.linkDescriptor = linkDescriptor;
 	}
 	
 	@Override
@@ -42,11 +42,11 @@ public class HasLinkCriteria extends Criteria<Issue> {
 		linkQuery.select(linkRoot);
 		
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), getLinkSide().getSpec()));
+		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), getLinkDescriptor().getSpec()));
 		
-		if (getLinkSide().isOpposite()) {
+		if (getLinkDescriptor().isOpposite()) {
 			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
-		} else if (getLinkSide().getSpec().getOpposite() != null) {
+		} else if (getLinkDescriptor().getSpec().getOpposite() != null) {
 			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 		} else {
 			predicates.add(builder.or(
@@ -58,16 +58,16 @@ public class HasLinkCriteria extends Criteria<Issue> {
 		return builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 	
-	private LinkDescriptor getLinkSide() {
-		if (linkSide == null) 
-			linkSide = new LinkDescriptor(linkName);
-		return linkSide;
+	private LinkDescriptor getLinkDescriptor() {
+		if (linkDescriptor == null) 
+			linkDescriptor = new LinkDescriptor(linkName);
+		return linkDescriptor;
 	}
 	
 	@Override
 	public boolean matches(Issue issue) {
-		LinkSpec spec = getLinkSide().getSpec();
-		if (getLinkSide().isOpposite()) 
+		LinkSpec spec = getLinkDescriptor().getSpec();
+		if (getLinkDescriptor().isOpposite()) 
 			return issue.getSourceLinks().stream().anyMatch(it->it.getSpec().equals(spec));
 		else if (spec.getOpposite() != null) 
 			return issue.getTargetLinks().stream().anyMatch(it->it.getSpec().equals(spec));
@@ -79,7 +79,7 @@ public class HasLinkCriteria extends Criteria<Issue> {
 	public void onRenameLink(String oldName, String newName) {
 		if (linkName.equals(oldName)) {
 			linkName = newName;
-			linkSide = null;
+			linkDescriptor = null;
 		}
 	}
 

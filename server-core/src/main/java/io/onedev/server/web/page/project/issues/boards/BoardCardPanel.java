@@ -1,10 +1,14 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -35,7 +39,6 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -80,7 +83,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		return getModelObject();
 	}
 	
-	private Component newContent(String componentId, IModel<Issue> issueModel) {
+	private Component newContent(String componentId, IModel<Issue> issueModel, Set<Long> displayedIssueIds) {
 		Issue issue = issueModel.getObject();
 		
 		Fragment fragment = new Fragment(componentId, "contentFrag", this);
@@ -264,18 +267,21 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		});
 		
 		fragment.add(new CopyToClipboardLink("copy", 
-				Model.of(getIssue().getTitle() + " (" + getIssue().getReference().toString(getProject()) + ")")));
+				Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
 
 		var linksPanel = new IssueLinksPanel("links") {
 
 			@Override
 			protected Issue getIssue() {
-				return BoardCardPanel.this.getIssue();
+				return issueModel.getObject();
 			}
 
 			@Override
 			protected List<String> getDisplayLinks() {
-				return board.getDisplayLinks();
+				if (displayedIssueIds.contains(getIssue().getId()))
+					return Collections.emptyList();
+				else
+					return board.getDisplayLinks();
 			}
 
 			@Override
@@ -292,15 +298,17 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			protected List<Issue> load() {
 				Issue issue = issueModel.getObject();
 				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-				LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
-				return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite()).stream().filter(it->SecurityUtils.canAccessIssue(it)).collect(toList());
+				LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
+				return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite()).stream().filter(it->canAccessIssue(it)).collect(toList());
 			}
 
 		}) {
 
 			@Override
 			protected void populateItem(ListItem<Issue> item) {
-				item.add(newContent("content", item.getModel()));
+				var copyOfDisplayedIssueIds = new HashSet<>(displayedIssueIds);
+				copyOfDisplayedIssueIds.add(issueModel.getObject().getId());
+				item.add(newContent("content", item.getModel(), copyOfDisplayedIssueIds));
 			}
 
 			@Override
@@ -320,7 +328,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newContent("content", getModel()));
+		add(newContent("content", getModel(), new HashSet<>()));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		
@@ -362,7 +370,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 	@Override
 	protected void onBeforeRender() {
-		replace(newContent("content", getModel()));
+		replace(newContent("content", getModel(), new HashSet<>()));
 		super.onBeforeRender();
 	}
 

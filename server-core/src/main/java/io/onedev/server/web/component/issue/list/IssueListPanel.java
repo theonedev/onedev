@@ -1587,11 +1587,11 @@ public abstract class IssueListPanel extends Panel {
 				Item<?> row = cellItem.findParent(Item.class);
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int) issuesTable.getItemCount(),
 						(int) issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProjectScope());
-				cellItem.add(newIssueDetail(componentId, rowModel.getObject().getId(), cursor));
+				cellItem.add(newIssueDetail(componentId, rowModel.getObject().getId(), cursor, new HashSet<>()));
 			}
 
 			@SuppressWarnings("unchecked")
-			private Component newIssueDetail(String componentId, Long issueId, @Nullable Cursor cursor) {
+			private Component newIssueDetail(String componentId, Long issueId, @Nullable Cursor cursor, Set<Long> displayedIssueIds) {
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				fragment.setDefaultModel(new LoadableDetachableModel<Issue>() {
 
@@ -1675,7 +1675,10 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected List<String> getDisplayLinks() {
-						return getListLinks();
+						if (displayedIssueIds.contains(issueId))
+							return Collections.emptyList();
+						else
+							return getListLinks();
 					}
 
 					@Override
@@ -1757,8 +1760,8 @@ public abstract class IssueListPanel extends Panel {
 					protected List<Issue> load() {
 						Issue issue = (Issue) fragment.getDefaultModelObject();
 						getIssueLinkManager().loadDeepLinks(issue);
-						LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
-						return issue.findLinkedIssues(side.getSpec(), side.isOpposite()).stream().filter(SecurityUtils::canAccessIssue).collect(toList());
+						LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
+						return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite()).stream().filter(SecurityUtils::canAccessIssue).collect(toList());
 					}
 
 				}) {
@@ -1766,7 +1769,9 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<Issue> item) {
 						Issue issue = item.getModelObject();
-						item.add(newIssueDetail("content", issue.getId(), null));
+						var copyOfDisplayedIssueIds = new HashSet<>(displayedIssueIds);
+						copyOfDisplayedIssueIds.add(issueId);
+						item.add(newIssueDetail("content", issue.getId(), null, copyOfDisplayedIssueIds));
 					}
 
 					@Override
@@ -1781,7 +1786,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-						Component detail = newIssueDetail(componentId, issueId, cursor);
+						Component detail = newIssueDetail(componentId, issueId, cursor, new HashSet<>());
 						fragment.replaceWith(detail);
 						handler.add(detail);
 					}

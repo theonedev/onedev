@@ -206,7 +206,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
 		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignee", IssueSchedule.NAME_ITERATION));
-		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
+		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Parent Issue", "Blocked By", "Blocks", "Related"));
 		boardSpecs.add(board);
 		
 		listFields.add(Issue.NAME_STATE);
@@ -216,7 +216,10 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add(IssueSchedule.NAME_ITERATION);
 		
 		listLinks.add("Child Issue");
+		listLinks.add("Parent Issue");
 		listLinks.add("Blocked By");
+		listLinks.add("Blocks");
+		listLinks.add("Related");
 		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignee\" is me and \"State\" is \"Open\""));

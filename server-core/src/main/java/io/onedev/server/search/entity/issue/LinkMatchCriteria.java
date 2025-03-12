@@ -44,7 +44,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 	
 	private final boolean allMatch;
 	
-	private transient LinkDescriptor linkSide;
+	private transient LinkDescriptor linkDescriptor;
 	
 	public LinkMatchCriteria(String linkName, Criteria<Issue> criteria, boolean allMatch) {
 		this.linkName = linkName;
@@ -58,8 +58,8 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
 		linkQuery.select(linkRoot);
 		
-		LinkSpec spec = getLinkSide().getSpec();
-		boolean opposite = getLinkSide().isOpposite();
+		LinkSpec spec = getLinkDescriptor().getSpec();
+		boolean opposite = getLinkDescriptor().isOpposite();
 		
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), spec));
@@ -88,7 +88,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 
 			return builder.and(
 					builder.not(builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))))),
-					new HasLinkCriteria(getLinkSide()).getPredicate(projectScope, query, from, builder));
+					new HasLinkCriteria(getLinkDescriptor()).getPredicate(projectScope, query, from, builder));
 		} else {
 			if (opposite) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
@@ -115,18 +115,18 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 		}
 	}
 	
-	private LinkDescriptor getLinkSide() {
-		if (linkSide == null)
-			linkSide = new LinkDescriptor(linkName);
-		return linkSide;
+	private LinkDescriptor getLinkDescriptor() {
+		if (linkDescriptor == null)
+			linkDescriptor = new LinkDescriptor(linkName);
+		return linkDescriptor;
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		if (!Hibernate.isInitialized(issue.getSourceLinks()) || !Hibernate.isInitialized(issue.getTargetLinks()))
 			OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-		LinkSpec spec = getLinkSide().getSpec();
-		boolean opposite = getLinkSide().isOpposite();
+		LinkSpec spec = getLinkDescriptor().getSpec();
+		boolean opposite = getLinkDescriptor().isOpposite();
 		if (allMatch) {
 			if (opposite) {
 				boolean hasLink = false;
@@ -186,7 +186,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 	public void onRenameLink(String oldName, String newName) {
 		if (linkName.equals(oldName)) {
 			linkName = newName;
-			linkSide = null;
+			linkDescriptor = null;
 		}
 		criteria.onRenameLink(oldName, newName);
 	}

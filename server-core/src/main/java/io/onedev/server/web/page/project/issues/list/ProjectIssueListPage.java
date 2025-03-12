@@ -1,6 +1,39 @@
 package io.onedev.server.web.page.project.issues.list;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -43,33 +76,6 @@ import io.onedev.server.web.util.NamedIssueQueriesBean;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class ProjectIssueListPage extends ProjectIssuesPage {
 
@@ -119,10 +125,10 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 					@Override
 					protected void populateItem(ListItem<Issue> item) {
-						item.add(newContent("content", item.getModel().getObject().getId()));
+						item.add(newContent("content", item.getModel().getObject().getId(), new HashSet<>()));
 					}
 					
-					private Component newContent(String componentId, Long issueId) {
+					private Component newContent(String componentId, Long issueId, Set<Long> displayedIssueIds) {
 						Issue issue = getIssueManager().load(issueId);
 
 						Fragment fragment = new Fragment(componentId, "pinnedIssueFrag", ProjectIssueListPage.this);
@@ -231,7 +237,10 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected List<String> getDisplayLinks() {
-								return issueList.getListLinks();
+								if (displayedIssueIds.contains(issueId))
+									return Collections.emptyList();
+								else
+									return issueList.getListLinks();
 							}
 
 							@Override
@@ -263,15 +272,17 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 							protected List<Issue> load() {
 								Issue issue = getIssueManager().load(issueId);
 								OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-								LinkDescriptor side = new LinkDescriptor(linksPanel.getExpandedLink());
-								return issue.findLinkedIssues(side.getSpec(), side.isOpposite());
+								LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
+								return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite());
 							}
 
 						}) {
 
 							@Override
 							protected void populateItem(ListItem<Issue> item) {
-								item.add(newContent("content", item.getModel().getObject().getId()));
+								var copyOfDisplayedIssueIds = new HashSet<>(displayedIssueIds);
+								copyOfDisplayedIssueIds.add(issueId);
+								item.add(newContent("content", item.getModel().getObject().getId(), copyOfDisplayedIssueIds));
 							}
 
 							@Override
@@ -286,7 +297,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-								Component content = newContent(componentId, issueId);
+								Component content = newContent(componentId, issueId, new HashSet<>());
 								fragment.replaceWith(content);
 								handler.add(content);
 							}
