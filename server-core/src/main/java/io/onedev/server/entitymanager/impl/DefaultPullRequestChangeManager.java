@@ -1,6 +1,16 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Date;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.joda.time.DateTime;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entityreference.ReferenceChangeManager;
@@ -11,17 +21,15 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.*;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestAutoMergeChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Date;
-import java.util.Objects;
 
 @Singleton
 public class DefaultPullRequestChangeManager extends BaseEntityManager<PullRequestChange> 
@@ -50,7 +58,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			comment.setContent(note);
 			comment.setUser(change.getUser());
 			comment.setRequest(change.getRequest());
-			comment.setDate(change.getDate());
+			comment.setDate(new DateTime(change.getDate()).minusSeconds(1).toDate());
 			dao.persist(comment);
 			comment.getRequest().setCommentCount(comment.getRequest().getCommentCount()+1);
 		}
