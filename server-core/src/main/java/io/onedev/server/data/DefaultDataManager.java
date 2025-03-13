@@ -767,7 +767,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.findSetting(Key.ISSUE);
 		if (setting == null) {
 			LinkSpec link = new LinkSpec();
-			link.setName("Child Issue");
+			link.setName("Sub Issues");
 			link.setMultiple(true);
 			link.setOpposite(new LinkSpecOpposite());
 			link.getOpposite().setName("Parent Issue");

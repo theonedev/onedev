@@ -677,11 +677,11 @@ public class ImportServer implements Serializable, Validatable {
 							for (JsonNode subtaskNode: fieldsNode.get("subtasks")) 
 								subtasks.add(subtaskNode.get("key").asText());
 							if (!subtasks.isEmpty())
-								extraIssueInfo.put("Sub Tasks", StringUtils.join(subtasks, "<br>"));
+								extraIssueInfo.put("Sub Issues", StringUtils.join(subtasks, "<br>"));
 						}
 
 						if (fieldsNode.hasNonNull("parent")) 
-							extraIssueInfo.put("Parent Task", fieldsNode.get("parent").get("key").asText());
+							extraIssueInfo.put("Parent Issue", fieldsNode.get("parent").get("key").asText());
 						
 						if (fieldsNode.hasNonNull("issuelinks")) {
 							Map<String, List<String>> issueLinks = new LinkedHashMap<>();

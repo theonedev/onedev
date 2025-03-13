@@ -441,6 +441,14 @@
 	text-decoration: none;
 }
 
+/*
+ * Use fixed table layout to force rendered code pre to show horizontal scroll bar
+ */
+.markdown-editor, .markdown-viewer {
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
 .markdown-rendered a {
 	color: var(--primary);
 }

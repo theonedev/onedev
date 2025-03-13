@@ -775,7 +775,7 @@ onedev.server.blobTextDiff = {
 			var $content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> Permanent link of this selection</a>`);
 			$content.children("a.permanent").attr("href", markUrl);
 			$content.append(`<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg> Copy selected text to clipboard</a>`);
-			var clipboard = new Clipboard(".copy-marked", {
+			var clipboard = new ClipboardJS(".copy-marked", {
 			    text: function(trigger) {
 			        return markedText;
 			    }

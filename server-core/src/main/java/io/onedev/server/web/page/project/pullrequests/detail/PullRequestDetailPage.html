@@ -25,87 +25,89 @@
 					<a wicket:id="clone" title="Check out to local workspace" class="btn btn-primary btn-icon mr-3"><wicket:svg href="download2" class="icon"></wicket:svg></a>
 					<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-auto" title="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
 				</div>
-				<div wicket:id="description" class="description border border-dashed border-primary rounded p-4 mb-5">
-					<div class="mb-3">
-						<span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span>
-					</div>
-					<div wicket:id="content"></div>
-				</div>        			
-				<div wicket:id="requestSummary" class="summary p-4 mb-4 font-size-h6 border border-dashed border-primary rounded">
-					<wicket:enclosure>
-	                <div class="text-warning">
-	                	<wicket:svg href="exclamation-circle" class="icon"></wicket:svg>  <span wicket:id="checkError"></span>
-	                </div>
-					</wicket:enclosure>
-					<div wicket:id="discarded" class="discarded text-info">
-						<wicket:svg href="info-circle" class="icon"></wicket:svg> This pull request has been discarded
-					</div>
-					<div wicket:id="fastForwarded" class="fast-forwarded text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Target branch was fast-forwarded to source branch
-					</div>
-					<div wicket:id="merged" class="merged text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch
-					</div>
-					<div wicket:id="mergedOutside" class="merged-outside text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch outside of this pull request
-					</div>
-					<div wicket:id="squashed" class="squashed text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were squashed into a single commit on target branch
-					</div>
-					<div wicket:id="rebased" class="rebased text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were rebased onto target branch
-					</div>
-					<div wicket:id="sourceBranchOutdated" class="source-branch-outdated text-primary">
-						<wicket:svg href="info-circle" class="icon"></wicket:svg> Source branch is outdated <a wicket:id="detail" class="link-primary" title="Show changes"><wicket:svg href="diff2" class="icon"/></a>
-					</div>
-					<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-warning d-flex align-items-center">
-						<wicket:svg href="loading" class="icon spin mr-2"></wicket:svg> Calculating merge preview...
-					</div>
-					<div wicket:id="calculatedMergePreview" class="calculated-merge-preview text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Able to merge without conflicts
-					</div>
-					<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
-						<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> There are merge conflicts.
-						<wicket:enclosure child="resolveInstructions">
-							Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts
+				<div class="primary border border-dashed border-primary rounded p-4 mb-4">
+					<div wicket:id="description" class="description">
+						<div class="mb-3">
+							<span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span>
+						</div>
+						<div wicket:id="content"></div>
+					</div>        			
+					<div wicket:id="requestSummary" class="summary font-size-h6 border-top pt-4 mt-4">
+						<wicket:enclosure>
+						<div class="text-warning">
+							<wicket:svg href="exclamation-circle" class="icon"></wicket:svg>  <span wicket:id="checkError"></span>
+						</div>
 						</wicket:enclosure>
-					</div>
-					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit
-					</div>
-					<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
-						<wicket:svg href="diff" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a>
-					</div>
-					<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
-						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
-					</div>
-					<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-warning">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not successful
-					</div>
-					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
-						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not finished yet
-					</div>
-					<wicket:enclosure child="commitMessageCheckError">
-					<div class="invalid-commit-messages text-warning">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> <span wicket:id="commitMessageCheckError"></span>
-					</div>
-					</wicket:enclosure>
-					<wicket:enclosure child="requiredJobs">
-					<div class="required-jobs text-warning">
-						<wicket:svg href="warning" class="icon"></wicket:svg>
-						<span wicket:id="requiredJobsMessage"></span>
-						<span wicket:id="requiredJobs" class="d-inline-block mr-2">
-							<span wicket:id="jobName"></span>
-							<a wicket:id="runJob" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
-						</span>
-					</div>
-					</wicket:enclosure>
-					<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers text-info">
-						<wicket:svg href="info-circle" class="icon"></wicket:svg> Pull request can only be merged by users with code write permission
-					</div>
-					<div wicket:id="contributions" class="contribution">
-						<div wicket:id="head" class="head font-weight-bold mb-2 "></div>
-						<div wicket:id="body" class="body"></div>
+						<div wicket:id="discarded" class="discarded text-info">
+							<wicket:svg href="info-circle" class="icon"></wicket:svg> This pull request has been discarded
+						</div>
+						<div wicket:id="fastForwarded" class="fast-forwarded text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Target branch was fast-forwarded to source branch
+						</div>
+						<div wicket:id="merged" class="merged text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch
+						</div>
+						<div wicket:id="mergedOutside" class="merged-outside text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch outside of this pull request
+						</div>
+						<div wicket:id="squashed" class="squashed text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were squashed into a single commit on target branch
+						</div>
+						<div wicket:id="rebased" class="rebased text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were rebased onto target branch
+						</div>
+						<div wicket:id="sourceBranchOutdated" class="source-branch-outdated text-primary">
+							<wicket:svg href="info-circle" class="icon"></wicket:svg> Source branch is outdated <a wicket:id="detail" class="link-primary" title="Show changes"><wicket:svg href="diff2" class="icon"/></a>
+						</div>
+						<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-warning d-flex align-items-center">
+							<wicket:svg href="loading" class="icon spin mr-2"></wicket:svg> Calculating merge preview...
+						</div>
+						<div wicket:id="calculatedMergePreview" class="calculated-merge-preview text-success">
+							<wicket:svg href="tick-circle" class="icon"></wicket:svg> Able to merge without conflicts
+						</div>
+						<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
+							<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> There are merge conflicts.
+							<wicket:enclosure child="resolveInstructions">
+								Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts
+							</wicket:enclosure>
+						</div>
+						<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
+							<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit
+						</div>
+						<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
+							<wicket:svg href="diff" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a>
+						</div>
+						<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
+							<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
+						</div>
+						<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-warning">
+							<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not successful
+						</div>
+						<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
+							<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not finished yet
+						</div>
+						<wicket:enclosure child="commitMessageCheckError">
+						<div class="invalid-commit-messages text-warning">
+							<wicket:svg href="times-circle" class="icon"></wicket:svg> <span wicket:id="commitMessageCheckError"></span>
+						</div>
+						</wicket:enclosure>
+						<wicket:enclosure child="requiredJobs">
+						<div class="required-jobs text-warning">
+							<wicket:svg href="warning" class="icon"></wicket:svg>
+							<span wicket:id="requiredJobsMessage"></span>
+							<span wicket:id="requiredJobs" class="d-inline-block mr-2">
+								<span wicket:id="jobName"></span>
+								<a wicket:id="runJob" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+							</span>
+						</div>
+						</wicket:enclosure>
+						<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers text-info">
+							<wicket:svg href="info-circle" class="icon"></wicket:svg> Pull request can only be merged by users with code write permission
+						</div>
+						<div wicket:id="contributions" class="contribution">
+							<div wicket:id="head" class="head font-weight-bold mb-2 "></div>
+							<div wicket:id="body" class="body"></div>
+						</div>
 					</div>
 				</div>
 				<div wicket:id="requestOperations" class="operations">

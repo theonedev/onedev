@@ -1094,11 +1094,15 @@ onedev.server.markdown = {
 				var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
 				var $copy = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
 				$actions.append($copy);
-				new Clipboard($copy[0], {
+				var options = {
 					text: function() {
 						return $this.text();
 					}
-				});			
+				};
+				var $modal = $copy.closest(".modal-dialog");
+				if ($modal.length != 0) 
+					options.container = $modal[0];		
+				new ClipboardJS($copy[0], options);			
 			}
 			
 			var suggestionCallback = $container.data("suggestionCallback");

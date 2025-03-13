@@ -23,7 +23,7 @@ public class LinkSpecOpposite implements Serializable {
 	private String issueQuery;
 	
 	@Editable(order=100, name="Name On the Other Side", description="Name of the link on the other side. "
-			+ "For instance if name is <tt>child issues</tt>, name on the other side can be <tt>parent issue</tt>")
+			+ "For instance if name is <tt>sub issues</tt>, name on the other side can be <tt>parent issue</tt>")
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -34,7 +34,7 @@ public class LinkSpecOpposite implements Serializable {
 	}
 
 	@Editable(order=200, name="Multiple On the Other Side", description="Whether or not multiple issues can be linked "
-			+ "on the other side. For instance child issues on the other side means parent issue, and multiple should "
+			+ "on the other side. For instance sub issues on the other side means parent issue, and multiple should "
 			+ "be false on that side if only one parent is allowed")
 	public boolean isMultiple() {
 		return multiple;

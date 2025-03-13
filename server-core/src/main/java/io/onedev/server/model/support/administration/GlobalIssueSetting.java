@@ -162,7 +162,7 @@ public class GlobalIssueSetting implements Serializable {
 		manualSpec.setFromStates(Lists.newArrayList("Open"));
 		manualSpec.setToStates(Lists.newArrayList("Closed"));
 		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", ManualSpec.ROLE_SUBMITTER, "{Assignee}"));
-		manualSpec.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
+		manualSpec.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Sub Issues\" matching(\"State\" is \"Open\"))");
 		
 		transitionSpecs.add(manualSpec);
 		
@@ -177,7 +177,7 @@ public class GlobalIssueSetting implements Serializable {
 		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Open"));
 		issueStateTransitedSpec.setToState("Closed");
 		issueStateTransitedSpec.setStates(Lists.newArrayList("Closed"));
-		issueStateTransitedSpec.setIssueQuery("any \"Child Issue\" matching(current issue) and all \"Child Issue\" matching(\"State\" is \"Closed\")");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and all \"Sub Issues\" matching(\"State\" is \"Closed\")");
 		
 		transitionSpecs.add(issueStateTransitedSpec);
 		
@@ -192,7 +192,7 @@ public class GlobalIssueSetting implements Serializable {
 		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Closed"));
 		issueStateTransitedSpec.setToState("Open");
 		issueStateTransitedSpec.setStates(Lists.newArrayList("Open"));
-		issueStateTransitedSpec.setIssueQuery("any \"Child Issue\" matching(current issue) or any \"Blocked By\" matching(current issue)");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) or any \"Blocked By\" matching(current issue)");
 		
 		transitionSpecs.add(issueStateTransitedSpec);
 
@@ -206,7 +206,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
 		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignee", IssueSchedule.NAME_ITERATION));
-		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Parent Issue", "Blocked By", "Blocks", "Related"));
+		board.setDisplayLinks(Lists.newArrayList("Sub Issues", "Parent Issue", "Blocked By", "Blocks", "Related"));
 		boardSpecs.add(board);
 		
 		listFields.add(Issue.NAME_STATE);
@@ -215,7 +215,7 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add("Assignee");
 		listFields.add(IssueSchedule.NAME_ITERATION);
 		
-		listLinks.add("Child Issue");
+		listLinks.add("Sub Issues");
 		listLinks.add("Parent Issue");
 		listLinks.add("Blocked By");
 		listLinks.add("Blocks");
@@ -228,7 +228,7 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
-		namedQueries.add(new NamedIssueQuery("Blocked issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
+		namedQueries.add(new NamedIssueQuery("Blocked issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Sub Issues\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignee\" is empty"));
@@ -246,7 +246,7 @@ public class GlobalIssueSetting implements Serializable {
 		entry.setSuffix("\\s*\\)\\s*$");
 		commitMessageFixPatterns.getEntries().add(entry);
 		
-		timeTrackingSetting.setAggregationLink("Child Issue");
+		timeTrackingSetting.setAggregationLink("Sub Issues");
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
